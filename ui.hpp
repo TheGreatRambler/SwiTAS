@@ -3,35 +3,44 @@
 #include <string.h>
 #include <switch.h>
 #include <stdlib.h>
-#include <NvPipe.h>
-// This is needed for image resizing
-#define STB_IMAGE_RESIZE_IMPLEMENTATION
-#include "ThirdParty/stb_image_resize.h"
+
+#include "decodeAndResize.hpp"
 
 class UI() {
 	private:
 	// 0x32000 is the size of the video buffer
 	// I'm not quite sure why it is that, but it is
-	constexpr u8* Vbuf = aligned_alloc(0x1000, 0x32000);
+	u8* Vbuf
 	Service grcdVideo;
-	// NVidia H264 decoder
-	NvPipe* nvidiaDecoder;
 	// Dimensions of the screen
 	constexpr int width = 1280;
 	constexpr int height = 720;
 	// Dimensions of the game window in the corner
 	constexpr int gameWidth = 960;
 	constexpr int gameHeight = 540;
+	// Current display instance
+	ViDisplay disp;
+	// VSync event of display
+	Event vsyncEvent;
+	// Decoding and resizing instance
+	DecodeAndResize decodeAndResize;
 	// RGBA buffers
-	u8* inputRgbaBuffer = malloc(width * height * 4);
-	u8* outputRgbaBuffer = malloc(gameWidth * gameHeight * 4);
+	u8* inputRgbaBuffer;
+	// This is returned by the other class
+	//u8* outputRgbaBuffer = malloc(gameWidth * gameHeight * 4);
+	// Debug handle (for pausing)
+	Handle debugHandle;
+	// Wether the game is currently disableGameRendering
+	constexpr bool gameIsRendering = true;
+	// Global result variable for all functions
+	Result rc;
 
 // Borrowed from sysDVR
 Result grcdServiceOpen(Service* out) {
     if (serviceIsActive(out))
         return 0;
 
-    Result rc = smGetService(out, "grc:d");
+    rc = smGetService(out, "grc:d");
 
     if (R_FAILED(rc)) grcdExit();
 
@@ -67,7 +76,7 @@ Result grcdServiceRead(Service* svc, GrcStream stream, void* buffer, size_t size
     raw->cmd_id = 2;
     raw->stream = stream;
 
-    Result rc = serviceIpcDispatch(svc);
+    rc = serviceIpcDispatch(svc);
 
     if (R_SUCCEEDED(rc)) {
         IpcParsedCommand r;
@@ -109,7 +118,7 @@ Result _grcCmdNoIO(Service* srv, u64 cmd_id) {
 	raw->magic = SFCI_MAGIC;
 	raw->cmd_id = cmd_id;
 
-	Result rc = serviceIpcDispatch(srv);
+	rc = serviceIpcDispatch(srv);
 
 	if (R_SUCCEEDED(rc)) {
 		IpcParsedCommand r;
@@ -129,17 +138,45 @@ Result _grcCmdNoIO(Service* srv, u64 cmd_id) {
 
 	public:
 	NxTASUI() {
+		// Create buffers
+		inputRgbaBuffer = malloc(width * height * 4);
+		Vbuf = aligned_alloc(0x1000, 0x32000);
 		// Open video service if it is not already open
-		Result rc;
 		rc = grcdServiceOpen(&grcdVideo);
 		if (R_FAILED(rc)) fatalSimple(rc);
 		rc = grcdServiceBegin(&grcdVideo);
 		if (R_FAILED(rc)) fatalSimple(rc);
-		// Create Nvenc decoder
-		nvidiaDecoder = NvPipe_CreateDecoder(NVPIPE_RGBA32, NVPIPE_H264, width, height);
+		// Create decoding and resizing instance
+		decodeAndResize = new DecodeAndResize(width, heght, gameWidth, gameHeight);
+		// Create display and vsync instances
+    	rc = viOpenDefaultDisplay(&disp);
+    	if(R_FAILED(rc)) fatalSimple(rc);
+    	rc = viGetDisplayVsyncEvent(&disp, &vsyncEvent);
+    	if(R_FAILED(rc)) fatalSimple(rc);
 	}
 
-	void getCurrentFrame() {
+	void enableGameRendering() {
+		// I believe it closes the debug process
+		if (!gameIsRendering) {
+			svcCloseHandle(debugHandle);
+			gameIsRendering = true;
+		}
+	}
+
+	void disableGameRendering() {
+		if (gameIsRendering) {
+			u64 pid = 0;
+			// Get the PID of the currently running game, I believe...
+        	pmdmntGetApplicationPid(&pid);
+			// Pauses the game through debugging
+    		svcDebugActiveProcess(&debugHandle, pid);
+			gameIsRendering = false;
+		}
+	}
+
+	void drawGameWindowInCorner() {
+		// Make sure game is rendering
+		enableGameRendering();
 		// This function produces H264 frames in Vbuf with a size of 1280 x 720
 		// I'm not exactly sure what this is, but it's always 0
 		u32 unk = 0;
@@ -150,18 +187,23 @@ Result _grcCmdNoIO(Service* srv, u64 cmd_id) {
 		int fails = 0;
 		// Runs multiple times to make sure it works
 		// From sysDVR
+		/*
 		while (true) {
 			Result res = grcdServiceRead(&grcdVideo, GrcStream_Video, Vbuf, 0x32000, &unk, &VOutSz, &timestamp)
 			if (R_SUCCEEDED(res) && VOutSz > 0) break;
 			VOutSz = 0;
 			if (fails++ > 8 && !IsThreadRunning) break;
 		}
-		// Decode the H264 frame with Nvenc, hardware decoding
-		NvPipe_Decode(nvidiaDecoder, Vbuf, sizeof(Vbuf), inputRgbaBuffer, width, height);
-		// Put the RGBA data into the buffer
-		// Assuming it's 4 bytes per pixel
-		stbir_resize_uint8_srgb(inputRgbaBuffer, width, height, 0, outputRgbaBuffer, gameWidth, gameHeight, 0, 4, STBIR_FLAG_ALPHA_PREMULTIPLIED, 0);
-		// At this point, an RGBA buffer of the resized game window is in `outputRgbaBuffer`
+		*/
+		// Wait for this vsync to get a single frame
+		rc = eventWait(&vsync_event, 0xFFFFFFFFFFF);
+        if(R_FAILED(rc)) fatalSimple(rc);
+		rc = grcdServiceRead(&grcdVideo, GrcStream_Video, Vbuf, 0x32000, &unk, &VOutSz, &timestamp);
+		if(R_FAILED(rc)) fatalSimple(rc);
+		// Stop rendering now, before another frame is written
+		disableGameRendering();
+		// Decode and resizing the H264 frame with the other function
+		u8* gameImage = decodeAndResize.decodeAndResize(Vbuf, 0x32000);
 	}
 
 	~NxTASUI() {
@@ -171,7 +213,6 @@ Result _grcCmdNoIO(Service* srv, u64 cmd_id) {
 		free(Vbuf);
 		free(inputRgbaBuffer);
 		free(outputRgbaBuffer);
-		// Close the Nvidia decoder
-		NvPipe_Destroy(decoder);
+		// The decoding and resizing instance will automatically be deleted
 	}
 }
