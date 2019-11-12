@@ -1,6 +1,8 @@
 // Include the main libnx system header, for Switch development
 #include <switch.h>
 
+#include "main.hpp"
+
 extern "C"
 {
     // Sysmodules should not use applet*.
@@ -90,5 +92,7 @@ void __attribute__((weak)) __appExit(void)
 
 // Main program entrypoint
 int main(int argc, char* argv[]) {
-	
+	// Simply start the UI
+	UI* uiInstance = new UI();
+	uiInstance->openUI();
 }

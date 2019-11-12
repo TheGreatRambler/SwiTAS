@@ -1,10 +1,16 @@
 #pragma once
 
+extern "C" {
 #include <string.h>
 #include <switch.h>
 #include <stdlib.h>
+}
+
+#include "lvgl/lvgl.h"
 
 #include "decodeAndResize.hpp"
+#include "ui.hpp"
+#include "writeToScreen.hpp"
 
 class UI() {
 	private:
@@ -26,7 +32,7 @@ class UI() {
 	DecodeAndResize decodeAndResize;
 	// RGBA buffers
 	u8* inputRgbaBuffer;
-	// RGBA buffer of game window in corner, malloced by decoder but freed by this class
+	// RGBA buffer of game window in corner
 	u8* gameImage;
 	// This is returned by the other class
 	//u8* outputRgbaBuffer = malloc(gameWidth * gameHeight * 4);
@@ -36,6 +42,13 @@ class UI() {
 	constexpr bool gameIsRendering = true;
 	// Global result variable for all functions
 	Result rc;
+	// UI overlay instance
+	AppUI* appUI;
+	// WriteToScreen instance
+	WriteToScreen* writeToScreen;
+	// wether the UI is open
+	constexpr bool UIOpen = false;
+
 
 // Borrowed from sysDVR
 Result grcdServiceOpen(Service* out) {
@@ -140,6 +153,11 @@ Result _grcCmdNoIO(Service* srv, u64 cmd_id) {
 
 	public:
 	NxTASUI() {
+		// Create neccessary instances
+		writeToScreen = new WriteToScreen(width, height);
+		// All the code neccessary to make sure the L UI is right
+		appUI = new AppUI(width - gameWidth, height,
+			gameWidth, height - gameHeight, writeToScreen);
 		// Create buffers
 		inputRgbaBuffer = malloc(width * height * 4);
 		Vbuf = aligned_alloc(0x1000, 0x32000);
@@ -177,7 +195,7 @@ Result _grcCmdNoIO(Service* srv, u64 cmd_id) {
 		}
 	}
 
-	void drawGameWindowInCorner() {
+	void drawGameWindowAndUi() {
 		// Make sure game is rendering
 		enableGameRendering();
 		// This function produces H264 frames in Vbuf with a size of 1280 x 720
@@ -207,8 +225,65 @@ Result _grcCmdNoIO(Service* srv, u64 cmd_id) {
 		disableGameRendering();
 		// Decode and resizing the H264 frame with the other function
 		gameImage = decodeAndResize.decodeAndResize(Vbuf, 0x32000);
-		// Done using this game image, free it
-		free(gameImage);
+		// gameImage is an RGBA array
+		writeToScreen->startFrame();
+		for (int x = 0; x < gameWidth; x++) {
+			for (int y = 0; y < gameHeight; y++) {
+				// Assign the pixel now
+				int pixelOffset = y * gameWidth * 4 + x * 4;
+				writeToScreen->setPixel(x + AppUI->getLeftWidth(), y,
+					gameImage[pixelOffset],     // R
+					gameImage[pixelOffset + 1], // G
+					gameImage[pixelOffset + 2]);// B
+			}
+		}
+		// Deal with LVGL UI
+		for (int x = 0; x < AppUI->getLeftWidth(); X++) {
+			for (int y = 0; y < appUI->getLeftHeight(); y++) {
+				int pixelOffset = y * AppUI->getLeftWidth() + x;
+				lv_color_t pixelColor = AppUI->getLeftBuf()[pixelOffset];
+				writeToScreen->setPixel(x, y,
+					pixelColor.red,
+					pixelColor.green,
+					pixelColor.blue);
+			}
+		}
+		for (int x = 0; x < AppUI->getBottomWidth(); X++) {
+			for (int y = 0; y < appUI->getBottomHeight(); y++) {
+				int pixelOffset = y * AppUI->getBottomWidth() + x;
+				lv_color_t pixelColor = AppUI->getBottomBuf()[pixelOffset];
+				writeToScreen->setPixel(x + AppUI->getLeftWidth(),
+					y + gameHeight,
+					pixelColor.red,
+					pixelColor.green,
+					pixelColor.blue);
+			}
+		}
+		// Finally, write to framebuffer
+		writeToScreen->endFrame();
+		// UI and game window are now successfully written to screen
+	}
+
+	void openUI() {
+		// The good stuff where everything happens
+		UIOpen = true
+		disableGameRendering();
+		appUI->enableDrawing();
+		// Do the UI thing as much as you can
+		while (UIOpen) {
+			// Draw the game window in the corner and leave rendering open for the other UI
+			drawGameWindowAndUi();
+			// Some condition to close the UI by setting UIOpen to false
+			if (!UIOpen) {
+				closeUI();
+			}
+		}
+	}
+
+	void closeUI() {
+		// Called from openUI in the while loop
+		appUI->enableDrawing();
+		enableGameRendering();
 	}
 
 	~NxTASUI() {

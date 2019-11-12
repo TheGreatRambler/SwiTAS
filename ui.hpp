@@ -1,8 +1,14 @@
+#pragma once
+
+extern "C" {
 #include <pthread.h>
 #include <time.h>
 #include <switch.h>
+}
 
 #include "lvgl/lvgl.h"
+
+#include "writeToScreen.hpp"
 
 class AppUI {
 	private:
@@ -27,6 +33,19 @@ class AppUI {
 	lv_disp_buf_t rightDispBuf;
 	lv_disp_t* rightDisp;
 	lv_color_t* rightBuf;
+	// Some various variables
+	int leftDisplayWidth;
+	int leftDisplayHeight;
+	int rightDisplayWidth;
+	int rightDisplayHeight;
+	int leftDisplayX;
+	int leftDisplayY;
+	int rightDisplayX;
+	int rightDisplayY;
+	// WriteToScreen instance
+	WriteToScreen* writeToScreen;
+	// Wether to Draw
+	bool shouldWrite = false;
 
 	void sleepMs(int milliseconds) {
 		struct timespec ts;
@@ -37,7 +56,7 @@ class AppUI {
 
 	void* lvglUpdateLoop() {
 		while (shouldUpdate) {
-			// Update all lvgl uis
+			// Update all lvgl uis with time
 			lv_tick_inc(sleepMilliseconds);
 			// Update actual UI
 			lv_task_handler();
@@ -49,7 +68,11 @@ class AppUI {
 	}
 
 	void bufFlush(lv_disp_t* disp, const lv_area_t* area, lv_color_t * color_p) {
+		/*
+		if (shouldWrite) {
 		int32_t x, y;
+		// Start writing
+		writeToScreen->startFrame();
     	for(y = area->y1; y <= area->y2; y++) {
     	    for(x = area->x1; x <= area->x2; x++) {
 				// Draw pixel to display
@@ -60,22 +83,43 @@ class AppUI {
 					// color_p->red
 					// color_p->green
 					// color_p->blue
-					//set_pixel(x, y, *color_p);
+					// Have to account for offsets
+					int xLoc = leftDisplayX + x;
+					int yLoc = leftDisplayY + y;
+					writeToScreen->setPixel(xLoc, yLoc, color_p->red, color_p->green, color_p->blue);
 				} else if (disp == rightDisp) {
 					// This is the right display
 					// Draw pixel
-					//set_pixel(x, y, *color_p);
+					int xLoc = rightDisplayX + x;
+					int yLoc = rightDisplayY + y;
+					writeToScreen->setPixel(xLoc, yLoc, color_p->red, color_p->green, color_p->blue);
 				}
     	        color_p++;
     	    }
     	}
-
+		// Flush to framebuffer
+		writeToScreen->endFrame();
+		*/
+		// This function actually does nothing right now because the main code does the rendering
 		// Done with flushing
     	lv_disp_flush_ready(disp);
+		}
 	}
 
 	public:
-	AppUI(int leftWidth, int leftHeight, int bottomWidth, int bottomHeight) {
+	AppUI(int leftWidth, int leftHeight, 
+		int bottomWidth, int bottomHeight,
+		int leftX, int leftY, int bottomX,
+		int bottomY, WriteToScreen* writeToScreenInstance) {
+		leftDisplayWidth = leftWidth;
+		leftDisplayHeight = leftHeight;
+		rightDisplayWidth = bottomWidth;
+		rightDisplayHeight = bottomHeight;
+		leftDisplayX = leftX;
+		leftDisplayY = leftY;
+		rightDisplayX = bottomX;
+		rightDisplayY = bottomY;
+		writeToScreen = writeToScreenInstance;
 		// Create buffers
 		leftBuf = new lv_color_t[leftWidth * leftHeight];
 		rightBuf = new lv_color_t[bottomWidth * bottomHeight];
@@ -104,6 +148,30 @@ class AppUI {
 		pthread_create(&updateLvgl, NULL, lvglUpdateLoop);
 	}
 
+	lv_color_t* getLeftBuf() {
+		return leftBuf;
+	}
+
+	lv_color_t* getBottomBuf() {
+		return rightBuf;
+	}
+
+	int getLeftWidth() {
+		return leftDisplayWidth;
+	}
+
+	int getLeftHeight() {
+		return leftDisplayHeight;
+	}
+
+	int getBottomWidth() {
+		return rightDisplayWidth;
+	}
+
+	int getBottomHeight() {
+		return rightDisplayHeight;
+	}
+
 	void createUI() {
 		// Create the left and right (bottom) UIs
 		lv_disp_set_default(leftDisp);
@@ -113,10 +181,19 @@ class AppUI {
 		// Add UIs
 		// Left UI selected
 		lv_scr_load(leftScr);
-		// ... code ...
+		// Pause, Play and Frame advance 1 buttons
+
 		// Right UI selected
 		lv_scr_load(rightScr);
 		// ... code ...
+	}
+
+	void enableDrawing() {
+		shouldWrite = true;
+	}
+
+	void disableDrawing() {
+		shouldWrite = false;
 	}
 
 	~AppUI() {
