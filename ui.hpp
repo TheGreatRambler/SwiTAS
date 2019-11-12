@@ -1,5 +1,6 @@
 #include <pthread.h>
 #include <time.h>
+#include <switch.h>
 
 #include "lvgl/lvgl.h"
 
@@ -55,6 +56,10 @@ class AppUI {
 				if (disp == leftDisp) {
 					// This is the left display
 					// Draw pixel
+					// Each is uint8_t, or u8
+					// color_p->red
+					// color_p->green
+					// color_p->blue
 					//set_pixel(x, y, *color_p);
 				} else if (disp == rightDisp) {
 					// This is the right display
