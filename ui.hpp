@@ -1,218 +1,126 @@
-#pragma once
+#include <pthread.h>
+#include <time.h>
 
-#include <string.h>
-#include <switch.h>
-#include <stdlib.h>
+#include "lvgl/lvgl.h"
 
-#include "decodeAndResize.hpp"
-
-class UI() {
+class AppUI {
 	private:
-	// 0x32000 is the size of the video buffer
-	// I'm not quite sure why it is that, but it is
-	u8* Vbuf
-	Service grcdVideo;
-	// Dimensions of the screen
-	constexpr int width = 1280;
-	constexpr int height = 720;
-	// Dimensions of the game window in the corner
-	constexpr int gameWidth = 960;
-	constexpr int gameHeight = 540;
-	// Current display instance
-	ViDisplay disp;
-	// VSync event of display
-	Event vsyncEvent;
-	// Decoding and resizing instance
-	DecodeAndResize decodeAndResize;
-	// RGBA buffers
-	u8* inputRgbaBuffer;
-	// This is returned by the other class
-	//u8* outputRgbaBuffer = malloc(gameWidth * gameHeight * 4);
-	// Debug handle (for pausing)
-	Handle debugHandle;
-	// Wether the game is currently disableGameRendering
-	constexpr bool gameIsRendering = true;
-	// Global result variable for all functions
-	Result rc;
+	// Pthread that deals with updating Lvgl
+	pthread_t updateLvgl
+	// Wether to keep looping
+	constexpr bool shouldUpdate = true;
+	// Milliseconds between updates
+	constexpr int sleepMilliseconds = 5;
+	// UI Stuff
+	// Left side screen
+	lv_obj_t* leftScr;
+	// Right (actually bottom) screen
+	lv_obj_t* rightScr;
+	// left size buffer
+	lv_disp_drv_t leftDspDrv;
+	lv_disp_buf_t leftDispBuf;
+	lv_disp_t* leftDisp;
+	lv_color_t* leftBuf;
+	// Right (Or bottom, made a mistake) size buffer
+	lv_disp_drv_t rightDspDrv;
+	lv_disp_buf_t rightDispBuf;
+	lv_disp_t* rightDisp;
+	lv_color_t* rightBuf;
 
-// Borrowed from sysDVR
-Result grcdServiceOpen(Service* out) {
-    if (serviceIsActive(out))
-        return 0;
-
-    rc = smGetService(out, "grc:d");
-
-    if (R_FAILED(rc)) grcdExit();
-
-    return rc;
-}
-
-// Borrowed from sysDVR
-void grcdServiceClose(Service* svc){
-	serviceClose(svc);
-}
-
-// Borrowed from sysDVR
-Result grcdServiceBegin(Service* svc){
-    return _grcCmdNoIO(svc, 1);
-}
-
-// Borrowed from sysDVR
-Result grcdServiceRead(Service* svc, GrcStream stream, void* buffer, size_t size, u32 *unk, u32 *data_size, u64 *timestamp) {
-    IpcCommand c;
-    ipcInitialize(&c);
-
-    ipcAddRecvBuffer(&c, buffer, size, BufferType_Normal);
-
-    struct {
-        u64 magic;
-        u64 cmd_id;
-        u32 stream;
-    } *raw;
-
-    raw = serviceIpcPrepareHeader(svc, &c, sizeof(*raw));
-
-    raw->magic = SFCI_MAGIC;
-    raw->cmd_id = 2;
-    raw->stream = stream;
-
-    rc = serviceIpcDispatch(svc);
-
-    if (R_SUCCEEDED(rc)) {
-        IpcParsedCommand r;
-        struct {
-            u64 magic;
-            u64 result;
-            u32 unk;
-            u32 data_size;
-            u64 timestamp;
-        } *resp;
-
-        serviceIpcParse(svc, &r, sizeof(*resp));
-        resp = r.Raw;
-
-        rc = resp->result;
-
-        if (R_SUCCEEDED(rc)) {
-            if (unk) *unk = resp->unk;
-            if (data_size) *data_size = resp->data_size;
-            if (timestamp) *timestamp = resp->timestamp;
-        }
-    }
-
-    return rc;
-}
-
-// Borrowed from sysDVR
-Result _grcCmdNoIO(Service* srv, u64 cmd_id) {
-	IpcCommand c;
-	ipcInitialize(&c);
-
-	struct {
-		u64 magic;
-		u64 cmd_id;
-	} *raw;
-
-	raw = serviceIpcPrepareHeader(srv, &c, sizeof(*raw));
-
-	raw->magic = SFCI_MAGIC;
-	raw->cmd_id = cmd_id;
-
-	rc = serviceIpcDispatch(srv);
-
-	if (R_SUCCEEDED(rc)) {
-		IpcParsedCommand r;
-		struct {
-			u64 magic;
-			u64 result;
-		} *resp;
-
-		serviceIpcParse(srv, &r, sizeof(*resp));
-		resp = r.Raw;
-
-		rc = resp->result;
+	void sleepMs(int milliseconds) {
+		struct timespec ts;
+    	ts.tv_sec = milliseconds / 1000;
+    	ts.tv_nsec = (milliseconds % 1000) * 1000000;
+    	nanosleep(&ts, NULL);
 	}
 
-	return rc;
-}
+	void* lvglUpdateLoop() {
+		while (shouldUpdate) {
+			// Update all lvgl uis
+			lv_tick_inc(sleepMilliseconds);
+			// Update actual UI
+			lv_task_handler();
+			// Sleep for 5 
+			sleepMs(sleepMilliseconds);
+			// Will now loop around and do it again
+		}
+		// This while loop will break when shouldUpdate is false
+	}
+
+	void bufFlush(lv_disp_t* disp, const lv_area_t* area, lv_color_t * color_p) {
+		int32_t x, y;
+    	for(y = area->y1; y <= area->y2; y++) {
+    	    for(x = area->x1; x <= area->x2; x++) {
+				// Draw pixel to display
+				if (disp == leftDisp) {
+					// This is the left display
+					// Draw pixel
+					//set_pixel(x, y, *color_p);
+				} else if (disp == rightDisp) {
+					// This is the right display
+					// Draw pixel
+					//set_pixel(x, y, *color_p);
+				}
+    	        color_p++;
+    	    }
+    	}
+
+		// Done with flushing
+    	lv_disp_flush_ready(disp);
+	}
 
 	public:
-	NxTASUI() {
+	AppUI(int leftWidth, int leftHeight, int bottomWidth, int bottomHeight) {
 		// Create buffers
-		inputRgbaBuffer = malloc(width * height * 4);
-		Vbuf = aligned_alloc(0x1000, 0x32000);
-		// Open video service if it is not already open
-		rc = grcdServiceOpen(&grcdVideo);
-		if (R_FAILED(rc)) fatalSimple(rc);
-		rc = grcdServiceBegin(&grcdVideo);
-		if (R_FAILED(rc)) fatalSimple(rc);
-		// Create decoding and resizing instance
-		decodeAndResize = new DecodeAndResize(width, heght, gameWidth, gameHeight);
-		// Create display and vsync instances
-    	rc = viOpenDefaultDisplay(&disp);
-    	if(R_FAILED(rc)) fatalSimple(rc);
-    	rc = viGetDisplayVsyncEvent(&disp, &vsyncEvent);
-    	if(R_FAILED(rc)) fatalSimple(rc);
+		leftBuf = new lv_color_t[leftWidth * leftHeight];
+		rightBuf = new lv_color_t[bottomWidth * bottomHeight];
+		lv_disp_buf_init(&leftDispBuf, leftBuf, NULL, leftWidth * leftHeight);  
+		lv_disp_buf_init(&rightDispBuf, rightBuf, NULL, bottomWidth * bottomHeight);
+		// Specify some details
+		// Left
+		lv_disp_drv_init(&leftDspDrv);
+		leftDspDrv.flush_cb = my_disp_flush;
+		leftDspDrv.buffer = &leftDispBuf;
+		leftDspDrv.hor_res = leftWidth;
+		leftDspDvr.ver_res = leftHeight;
+		leftDisp = lv_disp_drv_register(&leftDspDrv);
+		// Right
+		lv_disp_drv_init(&rightDspDrv);
+		rightDspDrv.flush_cb = my_disp_flush;
+		rightDspDrv.buffer = &rightDispBuf;
+		leftDspDrv.hor_res = bottomWidth;
+		leftDspDvr.ver_res = bottomHeight;
+		rightDisp = lv_disp_drv_register(&rightDspDrv);
+		// Create LVGL instance
+		lv_init();
+		// Create UI before starting update
+		createUI();
+		// Create updating thread and it will start automatically
+		pthread_create(&updateLvgl, NULL, lvglUpdateLoop);
 	}
 
-	void enableGameRendering() {
-		// I believe it closes the debug process
-		if (!gameIsRendering) {
-			svcCloseHandle(debugHandle);
-			gameIsRendering = true;
-		}
+	void createUI() {
+		// Create the left and right (bottom) UIs
+		lv_disp_set_default(leftDisp);
+		leftScr = lv_obj_create(NULL, NULL);
+		lv_disp_set_default(rightDisp);
+		rightScr = lv_obj_create(NULL, NULL);
+		// Add UIs
+		// Left UI selected
+		lv_scr_load(leftScr);
+		// ... code ...
+		// Right UI selected
+		lv_scr_load(rightScr);
+		// ... code ...
 	}
 
-	void disableGameRendering() {
-		if (gameIsRendering) {
-			u64 pid = 0;
-			// Get the PID of the currently running game, I believe...
-        	pmdmntGetApplicationPid(&pid);
-			// Pauses the game through debugging
-    		svcDebugActiveProcess(&debugHandle, pid);
-			gameIsRendering = false;
-		}
-	}
-
-	void drawGameWindowInCorner() {
-		// Make sure game is rendering
-		enableGameRendering();
-		// This function produces H264 frames in Vbuf with a size of 1280 x 720
-		// I'm not exactly sure what this is, but it's always 0
-		u32 unk = 0;
-		u32 VOutSz = 0;
-		u64 timestamp = 0;
-		// GrcStream_Video is a constant from LibNX
-		// 0x32000 is VBufZ, size of the video buffer
-		int fails = 0;
-		// Runs multiple times to make sure it works
-		// From sysDVR
-		/*
-		while (true) {
-			Result res = grcdServiceRead(&grcdVideo, GrcStream_Video, Vbuf, 0x32000, &unk, &VOutSz, &timestamp)
-			if (R_SUCCEEDED(res) && VOutSz > 0) break;
-			VOutSz = 0;
-			if (fails++ > 8 && !IsThreadRunning) break;
-		}
-		*/
-		// Wait for this vsync to get a single frame
-		rc = eventWait(&vsync_event, 0xFFFFFFFFFFF);
-        if(R_FAILED(rc)) fatalSimple(rc);
-		rc = grcdServiceRead(&grcdVideo, GrcStream_Video, Vbuf, 0x32000, &unk, &VOutSz, &timestamp);
-		if(R_FAILED(rc)) fatalSimple(rc);
-		// Stop rendering now, before another frame is written
-		disableGameRendering();
-		// Decode and resizing the H264 frame with the other function
-		u8* gameImage = decodeAndResize.decodeAndResize(Vbuf, 0x32000);
-	}
-
-	~NxTASUI() {
-		// Stop service
-		grcdServiceClose(&grcdVideo);
-		// Free the video buffers, both H264 and raw RGBA
-		free(Vbuf);
-		free(inputRgbaBuffer);
-		free(outputRgbaBuffer);
-		// The decoding and resizing instance will automatically be deleted
+	~AppUI() {
+		delete [] leftBuf;
+		leftBuf = NULL; 
+		delete [] rightBuf;
+		rightBuf = NULL; 
+		shouldUpdate = false;
+		// Wait for the thread to end, shouldn't take long
+		pthread_join(updateLvgl, NULL);
 	}
 }
