@@ -1,6 +1,7 @@
 // Include the main libnx system header, for Switch development
 #include <switch.h>
 
+#include "utils.hpp"
 #include "main.hpp"
 
 // This program requests 7 megabytes by default

@@ -8,8 +8,6 @@ extern "C" {
 
 #include "lvgl/lvgl.h"
 
-#include "writeToScreen.hpp"
-
 class AppUI {
 	private:
 	// Pthread that deals with updating Lvgl
@@ -42,8 +40,6 @@ class AppUI {
 	int leftDisplayY;
 	int rightDisplayX;
 	int rightDisplayY;
-	// WriteToScreen instance
-	WriteToScreen* writeToScreen;
 	// Wether to Draw
 	bool shouldWrite = false;
 
@@ -59,7 +55,9 @@ class AppUI {
 			// Update all lvgl uis with time
 			lv_tick_inc(sleepMilliseconds);
 			// Update actual UI
-			lv_task_handler();
+            if (shouldUpdate) {
+			    lv_task_handler();
+            }
 			// Sleep for 5 
 			sleepMs(sleepMilliseconds);
 			// Will now loop around and do it again
@@ -108,18 +106,11 @@ class AppUI {
 
 	public:
 	AppUI(int leftWidth, int leftHeight, 
-		int bottomWidth, int bottomHeight,
-		int leftX, int leftY, int bottomX,
-		int bottomY, WriteToScreen* writeToScreenInstance) {
+		int bottomWidth, int bottomHeight) {
 		leftDisplayWidth = leftWidth;
 		leftDisplayHeight = leftHeight;
 		rightDisplayWidth = bottomWidth;
 		rightDisplayHeight = bottomHeight;
-		leftDisplayX = leftX;
-		leftDisplayY = leftY;
-		rightDisplayX = bottomX;
-		rightDisplayY = bottomY;
-		writeToScreen = writeToScreenInstance;
 		// Create buffers
 		leftBuf = new lv_color_t[leftWidth * leftHeight];
 		rightBuf = new lv_color_t[bottomWidth * bottomHeight];
