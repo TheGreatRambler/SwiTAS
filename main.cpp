@@ -3,13 +3,16 @@
 
 #include "main.hpp"
 
+// This program requests 7 megabytes by default
+
 extern "C"
 {
     // Sysmodules should not use applet*.
     u32 __nx_applet_type = AppletType_None;
 
     // Adjust size as needed.
-    #define INNER_HEAP_SIZE 0x8000
+	// This is 7 megabytes, probably much too large
+    #define INNER_HEAP_SIZE 0x006ACFC0
     size_t nx_inner_heap_size = INNER_HEAP_SIZE;
     char   nx_inner_heap[INNER_HEAP_SIZE];
 
