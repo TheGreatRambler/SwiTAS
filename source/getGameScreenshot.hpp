@@ -1,3 +1,9 @@
+#pragma once
+
+extern "C" {
+#include <switch.h>
+}
+
 class GetGameScreenshot {
     private:
     // Global result variable for all functions
@@ -144,6 +150,7 @@ Result _grcCmdNoIO(Service* srv, u64 cmd_id) {
     }
 
     ~GetGameScreenshot() {
+        grcdServiceClose(&grcdVideo);
         free(Vbuf);
     }
 }

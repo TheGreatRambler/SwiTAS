@@ -28,10 +28,6 @@ class UI() {
 	ViDisplay disp;
 	// VSync event of display
 	Event vsyncEvent;
-	// Decoding and resizing instance
-	DecodeAndResize decodeAndResize;
-	// RGBA buffers
-	u8* inputRgbaBuffer;
 	// RGBA buffer of game window in corner
 	u8* gameImage;
 	// This is returned by the other class
@@ -42,15 +38,35 @@ class UI() {
 	constexpr bool gameIsRendering = true;
 	// Global result variable for all functions
 	Result rc;
+    // The function instances that do most of the work
 	// UI overlay instance
 	AppUI* appUI;
 	// WriteToScreen instance
 	WriteToScreen* writeToScreen;
     // GetGameScreenshot instance
     GetGameScreenshot* getGameScreenshot;
-	// wether the UI is open
+    // Decoding and resizing instance
+	DecodeAndResize* decodeAndResize;
+	// whether the UI is open
 	constexpr bool UIOpen = false;
+    // Whether to render the game window with the overlay ui
+    constexpr bool gameShouldBeRunning = true;
+    // Whether to render the game for this one frame
+    // Used for frame-by-frame editing
+    constexpr bool runGameThisFrame = false;
+    // Whether the app should be running
+    constexpr bool appShouldRun = true;
 
+    void waitForVsync() {
+        // Wait for this vsync to get a single frame
+		rc = eventWait(&vsync_event, 0xFFFFFFFFFFF);
+        if(R_FAILED(rc)) fatalSimple(rc);
+    }
+
+    void openUIToggle() {
+        // If all triggers have been pressed at the same time, return true
+        return allTriggersKeybind();
+    }
 
 	public:
 	NxTASUI() {
@@ -62,8 +78,6 @@ class UI() {
         getGameScreenshot = new GetGameScreenshot();
         // Create decoding and resizing instance
 		decodeAndResize = new DecodeAndResize(width, heght, gameWidth, gameHeight);
-		// Create buffers
-		inputRgbaBuffer = malloc(width * height * 4);
 		// Create display and vsync instances
     	rc = viOpenDefaultDisplay(&disp);
     	if(R_FAILED(rc)) fatalSimple(rc);
@@ -91,20 +105,17 @@ class UI() {
 		}
 	}
 
-	void drawGameWindowAndUi() {
-		// Make sure game is rendering
+    void drawGameWindow() {
+        // Make sure game is rendering
 		enableGameRendering();
 		
-		// Wait for this vsync to get a single frame
-		rc = eventWait(&vsync_event, 0xFFFFFFFFFFF);
-        if(R_FAILED(rc)) fatalSimple(rc);
-		
-		if(R_FAILED(rc)) fatalSimple(rc);
+		waitForVsync();
+        // Read the frame right now, quickly
+		gameBuffer = getGameScreenshot->readFrame();
 		// Stop rendering now, before another frame is written
 		disableGameRendering();
 		// Decode and resizing the H264 frame with the other function
-        gameBuffer = 
-		gameImage = decodeAndResize.decodeAndResize(gameBuffer, 0x32000);
+		gameImage = decodeAndResize->decodeAndResize(gameBuffer, 0x32000);
 		// gameImage is an RGBA array
 		writeToScreen->startFrame();
 		for (int x = 0; x < gameWidth; x++) {
@@ -117,7 +128,12 @@ class UI() {
 					gameImage[pixelOffset + 2]);// B
 			}
 		}
-		// Deal with LVGL UI
+        writeToScreen->endFrame();
+    }
+
+    void drawUI() {
+        writeToScreen->startFrame();
+        // Deal with LVGL UI
 		for (int x = 0; x < AppUI->getLeftWidth(); X++) {
 			for (int y = 0; y < appUI->getLeftHeight(); y++) {
 				int pixelOffset = y * AppUI->getLeftWidth() + x;
@@ -142,19 +158,43 @@ class UI() {
 		// Finally, write to framebuffer
 		writeToScreen->endFrame();
 		// UI and game window are now successfully written to screen
+    }
+
+	void drawGameWindowAndUi() {
+        // Draw both in succession
+		drawGameWindow();
+        drawUI();
 	}
 
 	void openUI() {
 		// The good stuff where everything happens
 		UIOpen = true
+        // Open framebuffer
+        writeToScreen->makeOpaque();
 		disableGameRendering();
 		appUI->enableDrawing();
 		// Do the UI thing as much as you can
 		while (UIOpen) {
 			// Draw the game window in the corner and leave rendering open for the other UI
-			drawGameWindowAndUi();
+            if (gameShouldBeRunning || runGameThisFrame) {
+                drawGameWindow();
+                // Draw the UI right after
+                drawUI();
+                // Dont increment another frame
+                runGameThisFrame = false;
+            } else {
+                drawUI();
+                // Wait for vsync so that the UI is not drawn too quickly
+                waitForVsync();
+            }
+            if (openUIToggle()) {
+                // Close UI because all triggers have been used
+                UIOpen = false;
+            }
 			// Some condition to close the UI by setting UIOpen to false
 			if (!UIOpen) {
+                // Make sure loop doesn't go again
+                UIOpen = false;
 				closeUI();
 			}
 		}
@@ -164,14 +204,25 @@ class UI() {
 		// Called from openUI in the while loop
 		appUI->enableDrawing();
 		enableGameRendering();
+        // Clear framebuffer
+        writeToScreen->makeClear();
 	}
 
+    // The main loop where the UI is either opened or closed
+    void mainUILoop() {
+        while(appShouldRun) {
+            // Check if the UI open toggle has been used
+            if (openUIToggle()) {
+                // This function will return when the UI has been closed
+                openUI();
+            }
+
+            // Sleep for a little bit to not overwhelm the system
+            sleepMs(1);
+        }
+    }
+
 	~NxTASUI() {
-		// Stop service
-		grcdServiceClose(&grcdVideo);
-		// Free the video buffers, both H264 and raw RGBA
-		free(inputRgbaBuffer);
-		free(outputRgbaBuffer);
-		// The decoding and resizing instance will automatically be deleted
+		// All instances will automatically be deleted
 	}
 }

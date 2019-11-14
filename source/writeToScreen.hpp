@@ -122,6 +122,24 @@ class WriteToScreen() {
 		currentBuffer[pixelOffset + 2] = blue;
 	}
 
+    void makeOpaque() {
+        // Make entire framebuffer opaque
+        u8 size = width * height;
+        for (int i = 3; i < size; i += 4) {
+            // Set the opacity byte to opaque
+            currentBuffer[i] = 0xFF;
+        }
+    }
+
+    void makeClear() {
+        // Make entire framebuffer opaque
+        u8 size = width * height;
+        for (int i = 3; i < size; i += 4) {
+            // Set the opacity byte to opaque
+            currentBuffer[i] = 0x00;
+        }
+    }
+
 	~WriteToScreen() {
 		// Close everything
 		framebufferClose(&framebuf);
