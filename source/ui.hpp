@@ -8,6 +8,8 @@ extern "C" {
 
 #include "lvgl/lvgl.h"
 
+#include "uiWidgets.hpp"
+
 class AppUI {
 	private:
 	// Pthread that deals with updating Lvgl
@@ -42,6 +44,8 @@ class AppUI {
 	int rightDisplayY;
 	// Wether to Draw
 	bool shouldWrite = false;
+    // The high level widget stuff
+    UIWidgets* uiWidgets;
 
 	void sleepMs(int milliseconds) {
 		struct timespec ts;
@@ -111,6 +115,8 @@ class AppUI {
 		leftDisplayHeight = leftHeight;
 		rightDisplayWidth = bottomWidth;
 		rightDisplayHeight = bottomHeight;
+        // Create widget object
+        uiWidgets = new UIWidgets();
 		// Create buffers
 		leftBuf = new lv_color_t[leftWidth * leftHeight];
 		rightBuf = new lv_color_t[bottomWidth * bottomHeight];
@@ -171,12 +177,11 @@ class AppUI {
 		rightScr = lv_obj_create(NULL, NULL);
 		// Add UIs
 		// Left UI selected
-		lv_scr_load(leftScr);
-		// Pause, Play and Frame advance 1 buttons
-
+        lv_disp_load_scr(leftScr);
+		uiWidgets->createLeftWidgets(leftScr);
 		// Right UI selected
-		lv_scr_load(rightScr);
-		// ... code ...
+        lv_disp_load_scr(rightScr);
+		uiWidgets->createBottomWidgets(rightScr);
 	}
 
 	void enableDrawing() {
