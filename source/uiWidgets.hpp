@@ -13,6 +13,7 @@ union Loc {
 }
 
 // Maps loosely to this https://cdn.discordapp.com/attachments/404722395845361668/554318002645106700/NintendoExt003_R.png
+// Use this http://www.ltg.ed.ac.uk/~richard/utf-8.cgi?input=e0e3&mode=hex
 namespace KeyLetters {
     char A_OFF[] = "\xEE\x80\x80";
     char A_ON[] = "\xEE\x83\xA0";
@@ -46,6 +47,8 @@ class UIWidgets {
     lv_obj_t* inputDisplayTable;
     // Joysticks
     constexpr int joystickRadius = 70;
+    static lv_style_t joyStyle;
+    static lv_style_t joyStyleBall;
     lv_color_t* leftJoystickBuffer;
     lv_color_t* rightJoystickBuffer;
     lv_obj_t* leftJoystick;
@@ -76,7 +79,31 @@ class UIWidgets {
         //lv_table_set_col_width(table, 2, LV_DPI / 2);
     }
 
+    void drawStick(lv_obj_t* joystick, int x, int y) {
+        // This can both update and create the joystick
+        // x and y are -joystickRadius to joystickRadius
+        // Draws the joystick onto it's canvas
+        // Clear screen
+        int centerX = joystickRadius - 1;
+        int centerY = joystickRadius - 1;
+        lv_canvas_fill_bg(joystick, LV_COLOR_ORANGE);
+        // Draw the circle
+        lv_canvas_draw_arc(joystick, centerX, centerY, joystickRadius - 1, 0, 360, &joyStyle);
+        // Draw the line from the center to the "ball"
+        static lv_point_t linePoints[] = {{centerX, centerY}, {x + centerX, y + centerY}};
+        lv_canvas_draw_line(joystick, linePoints, 2, &joyStyle);
+        // Draw the "ball"
+        // It is filled with black
+        lv_canvas_draw_arc(joystick, x + centerX, y + centerY, 15, 0, 360, &joyStyleBall);
+    }
+
     void addJoysticks(lv_obj_t* container) {
+        // Style for joysticks
+        lv_style_copy(&joyStyle, &lv_style_plain);
+        joyStyle.line.width = 5;
+        joyStyle.line.color = LV_COLOR_BLACK;
+        joyStyleBall.line.color = LV_COLOR_BLACK;
+        joyStyleBall.body.main_color = LV_COLOR_BLACK;
         // Rendering part TODO
         leftJoystick = lv_canvas_create(container, NULL);
         rightJoystick = lv_canvas_create(container, NULL);
@@ -90,6 +117,9 @@ class UIWidgets {
         // Align them to the correct things
         lv_obj_align(leftJoystick, container, LV_ALIGN_IN_LEFT_MID, 10, 0);
         lv_obj_align(rightJoystick, leftJoystick, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
+        // Add the joysticks
+        drawStick(leftJoystick, 0, 0);
+        drawStick(rightJoystick, 0, 0);
     }
 
     void setInputDisplayStatus(char* character, Loc location) {
@@ -99,8 +129,8 @@ class UIWidgets {
 
     void addInputDisplayToTable(char* character, Loc location) {
         // Row THEN Column so reversed
-        lv_table_set_cell_value(inputDisplayTable, location.y, location.x, character);
-        // Set alignment
+        setInputDisplayStatus(character, location);
+        // Set alignment so all the text is centered within the grid
         lv_table_set_cell_align(inputDisplayTable, location.y, location.x, LV_LABEL_ALIGN_CENTER);
     }
 
