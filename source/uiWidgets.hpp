@@ -216,25 +216,27 @@ class UIWidgets {
         addInputDisplayToTable(KeyLetters::R_OFF, KeyLocs::R);
         addInputDisplayToTable(KeyLetters::ZL_OFF, KeyLocs::ZL);
         addInputDisplayToTable(KeyLetters::ZR_OFF, KeyLocs::ZR);
-        addInputDisplayToTable(KeyLetters::A_OFF, KeyLocs::A);
+        addInputDisplayToTable(KeyLetters::DUP_OFF, KeyLocs::DUP);
+        addInputDisplayToTable(KeyLetters::DDOWN_OFF, KeyLocs::DDOWN);
+        addInputDisplayToTable(KeyLetters::DLEFT_OFF, KeyLocs::DLEFT);
+        addInputDisplayToTable(KeyLetters::DRIGHT_OFF, KeyLocs::DRIGHT);
+        addInputDisplayToTable(KeyLetters::PLUS_OFF, KeyLocs::PLUS);
+        addInputDisplayToTable(KeyLetters::MINUS_OFF, KeyLocs::MINUS);
+        addInputDisplayToTable(KeyLetters::HOME_OFF, KeyLocs::HOME);
+        addInputDisplayToTable(KeyLetters::CAPT_OFF, KeyLocs::CAPT);
+        addInputDisplayToTable(KeyLetters::LS_OFF, KeyLocs::LS);
+        addInputDisplayToTable(KeyLetters::RS_OFF, KeyLocs::RS);
     }
-
-
-
-
-
-
-
-
-SRSRR
     
+    void addInputDisplayTable(lv_obj_t* container) {
         inputDisplayTable = lv_table_create(container, NULL);
         lv_table_set_col_cnt(inputDisplayTable, numColsInput);
         lv_table_set_row_cnt(inputDisplayTable, numRowsInput);
         // Set the location of ALL THE INPUTS
         // All are off
         addDefaultInputs();
-        addDefaultInputs   putDisplayTable, rightJoystick, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
+        // Align with joystick view
+        lv_obj_align(inputDisplayTable, rightJoystick, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
     }
 
     public:
