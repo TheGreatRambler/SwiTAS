@@ -15,22 +15,93 @@ union Loc {
 // Maps loosely to this https://cdn.discordapp.com/attachments/404722395845361668/554318002645106700/NintendoExt003_R.png
 // Use this http://www.ltg.ed.ac.uk/~richard/utf-8.cgi?input=e0e3&mode=hex
 namespace KeyLetters {
-    char A_OFF[] = "\xEE\x80\x80";
+    char A_OFF[] = "\xEE\x82\xA0";
     char A_ON[] = "\xEE\x83\xA0";
-    char B_OFF[] = "\xEE\x80\x81";
+
+    char B_OFF[] = "\xEE\x82\xA1";
     char B_ON[] = "\xEE\x83\xA1";
-    char X_OFF[] = "\xEE\x80\x82";
+
+    char X_OFF[] = "\xEE\x82\xA2";
     char X_ON[] = "\xEE\x83\xA2";
-    char Y_OFF[] = "\xEE\x80\x83";
+
+    char Y_OFF[] = "\xEE\x82\xA3";
     char Y_ON[] = "\xEE\x83\xA3";
-    char L_OFF[] = "\xEE\x80\x84";
+
+    char L_OFF[] = "\xEE\x82\xA4";
     char L_ON[] = "\xEE\x83\xA4";
-    char R_OFF[] = "\xEE\x80\x85";
+
+    char R_OFF[] = "\xEE\x82\xA5";
     char R_ON[] = "\xEE\x83\xA5";
+
+    char ZL_OFF[] = "\xEE\x82\xA6";
+    char ZL_ON[] = "\xEE\x83\xA6";
+
+    char ZR_OFF[] = "\xEE\x82\xA7";
+    char ZR_ON[] = "\xEE\x83\xA7";
+
+    char DUP_OFF[] = "\xEE\x82\xAF";
+    char DUP_ON[] = "\xEE\x83\xAB";
+
+    char DDOWN_OFF[] = "\xEE\x82\xB0";
+    char DDOWN_ON[] = "\xEE\x83\xAC";
+
+    char DLEFT_OFF[] = "\xEE\x82\xB1";
+    char DLEFT_ON[] = "\xEE\x83\xAD";
+
+    char DRIGHT_OFF[] = "\xEE\x82\xB2";
+    char DRIGHT_ON[] = "\xEE\x83\xAE";
+
+    char PLUS_OFF[] = "\xEE\x82\xB3";
+    char PLUS_ON[] = "\xEE\x83\xAF";
+
+    char MINUS_OFF[] = "\xEE\x82\xB4";
+    char MINUS_ON[] = "\xEE\x83\xB0";
+
+    char HOME_OFF[] = "\xEE\x82\xB9";
+    char HOME_ON[] = "\xEE\x83\xB4";
+    
+    char CAPT_OFF[] = "\xEE\x82\xBA";
+    char CAPT_ON[] = "\xEE\x83\xB5";
+
+    // Press in Left Stick
+    char LS_OFF[] = "\xEE\x83\x84";
+    char LS_ON[] = "\xEE\x84\x84";
+
+    // Press in Right Stick
+    char RS_OFF[] "\xEE\x83\x85";
+    char RS_ON[] = "\xEE\x84\x85";
 };
 
+// https://www.tablesgenerator.com/text_tables
+//      0   1    2    3   4  5   6   7   8    9  10
+//   +----+---+----+----+---+--+---+---+----+---+---+
+// 0 | LS |   | ZL | L  |   |  |   | R | ZR |   |   |
+//   +----+---+----+----+---+--+---+---+----+---+---+
+// 1 |    | ^ |    | -  |   |  |   | + |    | X |   |
+//   +----+---+----+----+---+--+---+---+----+---+---+
+// 2 | <  |   | >  |    | C |  | H |   | Y  |   | A |
+//   +----+---+----+----+---+--+---+---+----+---+---+
+// 3 |    | v |    | RS |   |  |   |   |    | B |   |
+//   +----+---+----+----+---+--+---+---+----+---+---+
 namespace KeyLocs {
-    Loc A = {2, 6};
+    Loc A = {10, 2};
+    Loc B = {9, 3};
+    Loc X = {9, 1};
+    Loc Y = {8, 2};
+    Loc L = {3, 0};
+    Loc R = {7, 0};
+    Loc ZL = {2, 0};
+    Loc ZR = {8, 0};
+    Loc DUP = {1, 1};
+    Loc DDOWN = {1, 3};
+    Loc DLEFT = {0, 2};
+    Loc DRIGHT = {2, 2};
+    Loc PLUS = {7, 1};
+    Loc MINUS = {3, 1};
+    Loc HOME = {6, 2};
+    Loc CAPT = {4, 2};
+    Loc LS = {0, 0};
+    Loc RS = {3, 3};
 };
 
 class UIWidgets {
@@ -97,6 +168,7 @@ class UIWidgets {
         lv_canvas_draw_arc(joystick, x + centerX, y + centerY, 15, 0, 360, &joyStyleBall);
     }
 
+    // TODO add manual degree setter underneath
     void addJoysticks(lv_obj_t* container) {
         // Style for joysticks
         lv_style_copy(&joyStyle, &lv_style_plain);
@@ -134,17 +206,35 @@ class UIWidgets {
         lv_table_set_cell_align(inputDisplayTable, location.y, location.x, LV_LABEL_ALIGN_CENTER);
     }
 
+    void addDefaultInputs() {
+        // Add all the inputs
+        addInputDisplayToTable(KeyLetters::A_OFF, KeyLocs::A);
+        addInputDisplayToTable(KeyLetters::B_OFF, KeyLocs::B);
+        addInputDisplayToTable(KeyLetters::X_OFF, KeyLocs::X);
+        addInputDisplayToTable(KeyLetters::Y_OFF, KeyLocs::Y);
+        addInputDisplayToTable(KeyLetters::L_OFF, KeyLocs::R);
+        addInputDisplayToTable(KeyLetters::R_OFF, KeyLocs::R);
+        addInputDisplayToTable(KeyLetters::ZL_OFF, KeyLocs::ZL);
+        addInputDisplayToTable(KeyLetters::ZR_OFF, KeyLocs::ZR);
+        addInputDisplayToTable(KeyLetters::A_OFF, KeyLocs::A);
+    }
+
+
+
+
+
+
+
+
+SRSRR\\addInputDisplayToTable(KeyLetters::A_OFF, KeyLocs::A);        SLSLaddInputDisplayToTable(KeyLetters::A_OFF, KeyLocs::A);        TPACTPACaddInputDisplayToTable(KeyLetters::A_OFF, KeyLocs::A);        EMOHEMOHaddInputDisplayToTable(KeyLetters::A_OFF, KeyLocs::A);        MINUSSUNIMSUNIMaddInputDisplayToTable(KeyLetters::A_OFF, KeyLocs::A);        SULPSULPaddInputDisplayToTable(KeyLetters::A_OFF, KeyLocs::A);        THGIRDTHGIRDaddInputDisplayToTable(KeyLetters::A_OFF, KeyLocs::A);        TFELDTFELDaddInputDisplayToTable(KeyLetters::A_OFF, KeyLocs::A);        NWODD
     void addInputDisplayTable(lv_obj_t* container) {
         inputDisplayTable = lv_table_create(container, NULL);
         lv_table_set_col_cnt(inputDisplayTable, numColsInput);
         lv_table_set_row_cnt(inputDisplayTable, numRowsInput);
         // Set the location of ALL THE INPUTS
         // All are off
-        // TODO repeat for all
-        addInputDisplayToTable(KeyLetters::A_OFF, KeyLocs::A);
-        // ... code ...
-        // Align with joystick view
-        lv_obj_align(inputDisplayTable, rightJoystick, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
+        addDefaultInputs();
+        addDefaultInputs   putDisplayTable, rightJoystick, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
     }
 
     public:

@@ -160,12 +160,6 @@ class UI() {
 		// UI and game window are now successfully written to screen
     }
 
-	void drawGameWindowAndUi() {
-        // Draw both in succession
-		drawGameWindow();
-        drawUI();
-	}
-
 	void openUI() {
 		// The good stuff where everything happens
 		UIOpen = true
@@ -194,7 +188,6 @@ class UI() {
 			// Some condition to close the UI by setting UIOpen to false
 			if (!UIOpen) {
                 // Make sure loop doesn't go again
-                UIOpen = false;
 				closeUI();
 			}
 		}
