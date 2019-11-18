@@ -226,8 +226,8 @@ class UIWidgets {
 
 
 
-SRSRR\\addInputDisplayToTable(KeyLetters::A_OFF, KeyLocs::A);        SLSLaddInputDisplayToTable(KeyLetters::A_OFF, KeyLocs::A);        TPACTPACaddInputDisplayToTable(KeyLetters::A_OFF, KeyLocs::A);        EMOHEMOHaddInputDisplayToTable(KeyLetters::A_OFF, KeyLocs::A);        MINUSSUNIMSUNIMaddInputDisplayToTable(KeyLetters::A_OFF, KeyLocs::A);        SULPSULPaddInputDisplayToTable(KeyLetters::A_OFF, KeyLocs::A);        THGIRDTHGIRDaddInputDisplayToTable(KeyLetters::A_OFF, KeyLocs::A);        TFELDTFELDaddInputDisplayToTable(KeyLetters::A_OFF, KeyLocs::A);        NWODD
-    void addInputDisplayTable(lv_obj_t* container) {
+SRSRR
+    
         inputDisplayTable = lv_table_create(container, NULL);
         lv_table_set_col_cnt(inputDisplayTable, numColsInput);
         lv_table_set_row_cnt(inputDisplayTable, numRowsInput);
