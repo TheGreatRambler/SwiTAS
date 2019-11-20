@@ -6,6 +6,8 @@ extern "C" {
 
 #include "lvgl/lvgl.h"
 
+#include "utils.hpp"
+
 // Location union
 union Loc {
     int x;
@@ -110,12 +112,18 @@ class UIWidgets {
     constexpr int numRows = 12;
     constexpr int numCols = 7;
     // Stuff for the input display table
-    constexpr int numRowsInput = 5;
-    constexpr int numColsInput = 7;
+    constexpr int numRowsInput = 4;
+    constexpr int numColsInput = 11;
     // Various UI elements
     lv_obj_t* playButtons;
     lv_obj_t* inputTable;
     lv_obj_t* inputDisplayTable;
+    // Set inputs button stuff
+    lv_obj_t* inputsSetButton;
+    lv_obj_t* inputsSetButtonText;
+    constexpr char defaultInputsSetButtonText[] = "Set\nInputs";
+    // This is in seconds
+    constexpr int defaultSetInputsDelay = 3;
     // Joysticks
     constexpr int joystickRadius = 70;
     static lv_style_t joyStyle;
@@ -148,6 +156,27 @@ class UIWidgets {
         //lv_table_set_col_width(table, 0, LV_DPI / 3);
         //lv_table_set_col_width(table, 1, LV_DPI / 2);
         //lv_table_set_col_width(table, 2, LV_DPI / 2);
+    }
+
+    void addInputsSetButton(lv_obj_t* container) {
+        inputsSetButton = lv_btn_create(container, NULL);
+        // Create the label for the button
+        inputsSetButtonText = lv_label_create(inputsSetButton, NULL);
+        lv_label_set_text(inputsSetButtonText, defaultInputsSetButtonText);
+    }
+
+    void clickSetInputsButton(int numOfSeconds) {
+        // Count down
+        if (numOfSeconds == 0) {
+            // Have reached the end, set the current inputs
+        } else {
+            // Loop around
+            setTimeout([numOfSeconds]() {
+                numOfSeconds--;
+                // Loop around with the incremented value
+                clickSetInputsButton(numOfSeconds);
+            }, 1000);
+        }
     }
 
     void drawStick(lv_obj_t* joystick, int x, int y) {
@@ -248,6 +277,9 @@ class UIWidgets {
         addInputTable(leftScr);
         // Puts the table right below the buttons
         lv_obj_align(inputTable, playButtons, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
+        addInputsSetButton(leftScr);
+        // Put input set button right below the table
+        lv_obj_align(inputsSetButton, inputTable, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
     }
 
     void createBottomWidgets(lv_obj_t* bottomScr) {

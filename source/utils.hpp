@@ -1,9 +1,11 @@
 #pragma once
 
 #include <ctime>
+#include <thread>
+#include <chrono>
 
 extern "C" {
-    #include <switch.h>
+#include <switch.h>
 }
 
 float millisecondsSinceEpoch() {
@@ -108,4 +110,13 @@ void sleepMs(int milliseconds) {
 	ts.tv_sec = milliseconds / 1000;
 	ts.tv_nsec = (milliseconds % 1000) * 1000000;
 	nanosleep(&ts, NULL);
+}
+
+// Call a function after a specified amount of time
+void setTimeout(auto function, int delay) {
+    std::thread t([=]() {
+        std::this_thread::sleep_for(std::chrono::milliseconds(delay));
+        function();
+    });
+    t.detach();
 }
