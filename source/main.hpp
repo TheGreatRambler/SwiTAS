@@ -6,7 +6,7 @@ extern "C" {
 #include <stdlib.h>
 }
 
-#include "lvgl/lvgl.h"
+#include "thirdParty/lvgl/lvgl.h"
 
 #include "decodeAndResize.hpp"
 #include "ui.hpp"

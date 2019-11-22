@@ -10,9 +10,9 @@ extern "C" u64 __nx_vi_layer_id;
 class WriteToScreen() {
 	private:
 	ViDisplay display;
-    ViLayer layer;
-    NWindow window;
-    Framebuffer framebuf;
+	ViLayer layer;
+	NWindow window;
+	Framebuffer framebuf;
 	// Error handling for everything
 	Result rc;
 	// Current pointer to the graphics data
@@ -109,7 +109,7 @@ class WriteToScreen() {
 		currentBuffer = framebufferBegin(&framebuf, NULL);
 	}
 
-    void endFrame() {
+	void endFrame() {
 		// Flush
 		framebufferEnd(&framebuf);
 	}
@@ -122,30 +122,30 @@ class WriteToScreen() {
 		currentBuffer[pixelOffset + 2] = blue;
 	}
 
-    void makeOpaque() {
-        // Make entire framebuffer opaque
-        u8 size = width * height;
-        for (int i = 3; i < size; i += 4) {
-            // Set the opacity byte to opaque
-            currentBuffer[i] = 0xFF;
-        }
-    }
+	void makeOpaque() {
+		// Make entire framebuffer opaque
+		u8 size = width * height;
+		for (int i = 3; i < size; i += 4) {
+			// Set the opacity byte to opaque
+			currentBuffer[i] = 0xFF;
+		}
+	}
 
-    void makeClear() {
-        // Make entire framebuffer opaque
-        u8 size = width * height;
-        for (int i = 3; i < size; i += 4) {
-            // Set the opacity byte to opaque
-            currentBuffer[i] = 0x00;
-        }
-    }
+	void makeClear() {
+		// Make entire framebuffer opaque
+		u8 size = width * height;
+		for (int i = 3; i < size; i += 4) {
+			// Set the opacity byte to opaque
+			currentBuffer[i] = 0x00;
+		}
+	}
 
 	~WriteToScreen() {
 		// Close everything
 		framebufferClose(&framebuf);
-    	nwindowClose(&window);
-    	viDestroyManagedLayer(&layer);
-    	viCloseDisplay(&display);
-    	viExit();
+		nwindowClose(&window);
+		viDestroyManagedLayer(&layer);
+		viCloseDisplay(&display);
+		viExit();
 	}
 }

@@ -6,7 +6,7 @@ extern "C" {
 #include <switch.h>
 }
 
-#include "lvgl/lvgl.h"
+#include "thirdParty/lvgl/lvgl.h"
 
 #include "uiWidgets.hpp"
 
