@@ -1,8 +1,6 @@
 #pragma once
 
-extern "C" {
 #include <cstdio>
-}
 
 #include "thirdParty/lvgl/lvgl.h"
 

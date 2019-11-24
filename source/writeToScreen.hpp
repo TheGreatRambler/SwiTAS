@@ -1,8 +1,6 @@
 #pragma once
 
-extern "C" {
 #include <switch.h>
-}
 
 // I dunno what this is
 extern "C" u64 __nx_vi_layer_id;

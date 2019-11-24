@@ -1,14 +1,13 @@
 #pragma once
 
-extern "C" {
 #include <pthread.h>
 #include <time.h>
 #include <switch.h>
-}
 
 #include "thirdParty/lvgl/lvgl.h"
 
 #include "uiWidgets.hpp"
+#include "utils.hpp"
 
 class AppUI {
 	private:
