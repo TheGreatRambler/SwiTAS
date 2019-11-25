@@ -6,7 +6,7 @@
 class MainApplication {
     private:
     Glib::RefPtr<Gtk::Application> app;
-    Gtk::Window* mainWindow;
+    Glib::RefPtr<Gtk::Window> mainWindow;
 
     public:
     MainApplication(int argc, char* argv[]) {

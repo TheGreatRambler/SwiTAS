@@ -1,9 +1,12 @@
 #include <gtkmm.h> 
 
+#include "main.hpp"
+
 // https://www.lucidarme.me/gtkmm/
 int main(int argc, char* argv[]) {
     // Initialize gtkmm
-    Gtk::Main app(argc, argv);
+    MainApplication* main = new MainApplication(argc, argv);
     
-    return 0;
+    // Finish
+    return main->run();
 }
