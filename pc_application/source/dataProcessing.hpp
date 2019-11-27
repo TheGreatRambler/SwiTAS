@@ -5,6 +5,10 @@
 // C: Value of bit
 #define BIT_SET(a,b,c) (a ^= (-(unsigned long)c ^ a) & (1UL << b))
 
+// A: Char itself
+// B: Index
+#define BIT_GET(a,b) ((a >> b) & 1U)
+
 #include <cstdint>
 #include <cstdlib>
 #include <vector>
@@ -55,16 +59,57 @@ struct ControllerData {
     int16_t GYRO_3 = 0;
 } __attribute__((__packed__));
 
+class InputColumns : public Gtk::TreeModelColumnRecord {
+    public:
+    Gtk::TreeModelColumn<uint32_t> frameNum;
+    // Repeat them buttons
+    // https://developer.gnome.org/gtkmm-tutorial/stable/sec-treeview-examples.html.en
+    Gtk::TreeModelColumn<Gdk::Pixbuf> button1;
+
+    InputColumns() {
+        add(frameNum);
+        add(button1);
+    }
+}
+
 class DataProcessing {
     private:
     // Vector storing ALL inputs
-    std::vector<ControllerData*> inputsList;
+    // Shared pointer so everything is nice
+    std::vector<std::shared_ptr<ControllerData>> inputsList;
     // Current input
-    ControllerData* currentData;
+    std::shared_ptr<ControllerData> currentData;
+    // Current frame
+    uint32_t currentFrame;
+    // Tree data storing the controller stuffs
+    Glib::RefPtr<Gtk::ListStore> controllerListStore;
+    // Stores the columns for the above list store
+    InputColumns inputColumns;
 
     public:
     DataProcessing() {
-        currentData = new ControllerData();
+        // Add columns
+        controllerListStoreColumns->add(frameNum);
+        controllerListStoreColumns->add(button1);
+        //Add the list store from the columns
+        controllerListStore = Gtk::ListStore::create(inputColumns);
+        // Add this first frame
+        addNewFrame(true);
+    }
+
+    bool getButtonState(Btn button) {
+        if (button < 8) {
+            // First group
+            return BIT_GET(currentData->firstBlock, button);
+        } else if (button < 16) {
+            // Second group
+            uint8_t temp = button - 8;
+            return BIT_GET(currentData->secondBlock, temp);
+        } else {
+            // Last group
+            uint8_t temp = button - 16;
+            return BIT_GET(currentData->thirdBlock, temp);
+        }
     }
 
     void setButtonState(Btn button, bool state) {
@@ -83,11 +128,20 @@ class DataProcessing {
         }
     }
 
-    ~DataProcessing() {
-        // Dereference all the pointers in the vector
-        for(ControllerData* thisFrame : inputsList) {
-            // Remember, the input struct must ALWAYS BE DESTROYED
-            delete thisFrame;
-        }
+    void setCurrentFrame(uint32_t frameNum) {
+        
     }
+
+    void addNewFrame(bool isFirstFrame = false) {
+        if (!isFirstFrame) {
+            // On the first frame, it is already set right
+            currentFrame++;
+        }
+        // Will overwrite previous frame if need be
+        currentData = std::make_shared<ControllerData>();
+        // Add this to the vector
+        inputsList.push_back(currentData);
+    }
+
+    ~DataProcessing() {}
 }
