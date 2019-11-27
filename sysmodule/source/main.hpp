@@ -1,10 +1,8 @@
 #pragma once
 
-extern "C" {
 #include <string.h>
 #include <switch.h>
 #include <stdlib.h>
-}
 
 #include "thirdParty/lvgl/lvgl.h"
 
@@ -13,8 +11,9 @@ extern "C" {
 #include "writeToScreen.hpp"
 #include "utils.hpp"
 #include "getGameScreenshot.hpp"
+#include "menuKeybinds.hpp"
 
-class UI() {
+class UI {
 	private:
 	// Game buffer recieved from the screenshot service
 	u8* gameBuffer;
@@ -181,8 +180,8 @@ class UI() {
                 // Wait for vsync so that the UI is not drawn too quickly
                 waitForVsync();
             }
-            if (openUIToggle()) {
-                // Close UI because all triggers have been used
+            if (KB::closeMenu()) {
+                // Close UI because close UI keybind has been used
                 UIOpen = false;
             }
 			// Some condition to close the UI by setting UIOpen to false
@@ -205,7 +204,7 @@ class UI() {
     void mainUILoop() {
         while(appShouldRun) {
             // Check if the UI open toggle has been used
-            if (openUIToggle()) {
+            if (KB::openMenu()) {
                 // This function will return when the UI has been closed
                 openUI();
             }
