@@ -11,10 +11,12 @@
 
 #include <cstdint>
 #include <cstdlib>
+#include <utility>
 #include <vector>
+#include <map>
 
 // Buttons enum (coencides with the index of the bit in the input struct)
-enum Btn {
+enum class Btn {
     A,
     B,
     X,
@@ -34,7 +36,7 @@ enum Btn {
     HOME,
     CAPT,
     LS,
-    RS,
+    RS,    
 };
 
 // Controller data that will be packed into the array and will be recieved from the switch
@@ -59,16 +61,50 @@ struct ControllerData {
     int16_t GYRO_3 = 0;
 } __attribute__((__packed__));
 
+// Array including all the buttons mapped to their names
+std::map<Btn, Glib::ustring> buttonMapping;
+buttonMapping.insert(std::pair<Btn, Glib::ustring>(Btn::A, "BUTTON_A"));
+buttonMapping.insert(std::pair<Btn, Glib::ustring>(Btn::B, "BUTTON_B"));
+buttonMapping.insert(std::pair<Btn, Glib::ustring>(Btn::X, "BUTTON_X"));
+buttonMapping.insert(std::pair<Btn, Glib::ustring>(Btn::Y, "BUTTON_Y"));
+buttonMapping.insert(std::pair<Btn, Glib::ustring>(Btn::L, "BUTTON_L"));
+buttonMapping.insert(std::pair<Btn, Glib::ustring>(Btn::R, "BUTTON_R"));
+buttonMapping.insert(std::pair<Btn, Glib::ustring>(Btn::ZL, "BUTTON_ZL"));
+buttonMapping.insert(std::pair<Btn, Glib::ustring>(Btn::ZR, "BUTTON_ZR"));
+buttonMapping.insert(std::pair<Btn, Glib::ustring>(Btn::SL, "BUTTON_SL"));
+buttonMapping.insert(std::pair<Btn, Glib::ustring>(Btn::SR, "BUTTON_SR"));
+buttonMapping.insert(std::pair<Btn, Glib::ustring>(Btn::DUP, "BUTTON_DUP"));
+buttonMapping.insert(std::pair<Btn, Glib::ustring>(Btn::DDOWN, "BUTTON_DDOWN"));
+buttonMapping.insert(std::pair<Btn, Glib::ustring>(Btn::DLEFT, "BUTTON_DLEFT"));
+buttonMapping.insert(std::pair<Btn, Glib::ustring>(Btn::DRIGHT, "BUTTON_DRIGHT"));
+buttonMapping.insert(std::pair<Btn, Glib::ustring>(Btn::PLUS, "BUTTON_PLUS"));
+buttonMapping.insert(std::pair<Btn, Glib::ustring>(Btn::MINUS, "BUTTON_MINUS"));
+buttonMapping.insert(std::pair<Btn, Glib::ustring>(Btn::HOME, "BUTTON_HOME"));
+buttonMapping.insert(std::pair<Btn, Glib::ustring>(Btn::CAPT, "BUTTON_CAPT"));
+buttonMapping.insert(std::pair<Btn, Glib::ustring>(Btn::LS, "BUTTON_LS"));
+buttonMapping.insert(std::pair<Btn, Glib::ustring>(Btn::RS, "BUTTON_RS"));
+
+
+
 class InputColumns : public Gtk::TreeModelColumnRecord {
     public:
     Gtk::TreeModelColumn<uint32_t> frameNum;
-    // Repeat them buttons
+    // All the buttons (inside a map)
     // https://developer.gnome.org/gtkmm-tutorial/stable/sec-treeview-examples.html.en
-    Gtk::TreeModelColumn<Gdk::Pixbuf> button1;
+    // Stores the pointers
+    std::map<Btn, Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>>*> buttons;
 
     InputColumns() {
         add(frameNum);
-        add(button1);
+        // Loop through the buttons and add them
+        for (auto const& button : buttonMapping) {
+            Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>>* thisIcon = new Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>>();
+            // Add to the map
+            buttons.insert(std::pair<button.first, thisIcon);
+            // Add to the columns themselves (gives value, not pointer)
+            add(*thisIcon);
+        }
+
     }
 }
 
@@ -85,14 +121,22 @@ class DataProcessing {
     Glib::RefPtr<Gtk::ListStore> controllerListStore;
     // Stores the columns for the above list store
     InputColumns inputColumns;
+    // Tree view viewed in the UI
+    Gtk::TreeView treeView;
 
     public:
     DataProcessing() {
-        // Add columns
-        controllerListStoreColumns->add(frameNum);
-        controllerListStoreColumns->add(button1);
         //Add the list store from the columns
         controllerListStore = Gtk::ListStore::create(inputColumns);
+        // Set this tree view to this model
+        treeView.set_model(controllerListStore);
+        // Add all the columns, this somehow wasn't done already
+        treeView.append_column("Frame", inputColumns.frameNum);
+        // Loop through buttons and add all of them
+        for (auto const& thisButton : inputColumns.buttons) {
+            // Append with the string specified by Button Mapping
+            treeView.append_column(buttonMapping[thisButton.first], *thisButton.second);
+        }
         // Add this first frame
         addNewFrame(true);
     }
@@ -129,7 +173,12 @@ class DataProcessing {
     }
 
     void setCurrentFrame(uint32_t frameNum) {
-        
+        // Must be a frame that has already been written, else, raise error
+        if (frameNum < inputsList.size() && frameNum > -1) {
+            // Set the current frame to this frame
+            // Shared pointer so this can be done
+            currentData = inputsList[frameNum];
+        }
     }
 
     void addNewFrame(bool isFirstFrame = false) {
