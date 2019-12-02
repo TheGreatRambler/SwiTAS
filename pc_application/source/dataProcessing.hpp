@@ -63,6 +63,14 @@ struct ControllerData {
     int16_t GYRO_3 = 0;
 } __attribute__((__packed__));
 
+// Struct containing button info
+struct ButtonInfo {
+    Glib::ustring scriptName;
+    Glib::ustring viewName;
+    Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>>* columnIcon;
+    Glib::RefPtr<Gdk::Pixbuf> bottomInputViewIcon;
+}
+
 auto getNewColumn() {
     return new Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>>();
 }
@@ -72,31 +80,39 @@ auto getNewIcon(std::string name) {
     return Gdk::Pixbuf::create_from_file("/usr/share/icons/gnome/22x22/apps/" + name + ".png");
 }
 
+ButtonInfo* getButtonInfo(Glib::ustring scriptName, Glib::ustring viewName, Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>>* columnIcon, Glib::RefPtr<Gdk::Pixbuf> viewIcon) {
+    ButtonInfo* thisButtonInfo = new ButtonInfo();
+    thisButtonInfo->scriptName = scriptName;
+    thisButtonInfo->viewName = viewName;
+    thisButtonInfo->columnIcon = columnIcon;
+    thisButtonInfo->bottomInputViewIcon = viewIcon;
+}
+
 // Array including all button information
 // Index is button Id, returns Button script name, Button print name, Button listview object and button printing pixbuf
+// This info is contained in a struct
 // TODO finish these
-typedef std::tuple<Glib::ustring, Glib::ustring, Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>>*, Glib::RefPtr<Gdk::Pixbuf>> ButtonInfoType;
-std::map<Btn, ButtonInfoType> buttonMapping;
-buttonMapping.insert(std::pair<Btn, ButtonInfoType>(Btn::A, ButtonInfoType("BUTTON_A", "A Button", getNewColumn(), getNewIcon(""))));
-buttonMapping.insert(std::pair<Btn, ButtonInfoType>(Btn::B, "BUTTON_B"));
-buttonMapping.insert(std::pair<Btn, ButtonInfoType>(Btn::X, "BUTTON_X"));
-buttonMapping.insert(std::pair<Btn, ButtonInfoType>(Btn::Y, "BUTTON_Y"));
-buttonMapping.insert(std::pair<Btn, ButtonInfoType>(Btn::L, "BUTTON_L"));
-buttonMapping.insert(std::pair<Btn, ButtonInfoType>(Btn::R, "BUTTON_R"));
-buttonMapping.insert(std::pair<Btn, ButtonInfoType>(Btn::ZL, "BUTTON_ZL"));
-buttonMapping.insert(std::pair<Btn, ButtonInfoType>(Btn::ZR, "BUTTON_ZR"));
-buttonMapping.insert(std::pair<Btn, ButtonInfoType>(Btn::SL, "BUTTON_SL"));
-buttonMapping.insert(std::pair<Btn, ButtonInfoType>(Btn::SR, "BUTTON_SR"));
-buttonMapping.insert(std::pair<Btn, ButtonInfoType>(Btn::DUP, "BUTTON_DUP"));
-buttonMapping.insert(std::pair<Btn, ButtonInfoType>(Btn::DDOWN, "BUTTON_DDOWN"));
-buttonMapping.insert(std::pair<Btn, ButtonInfoType>(Btn::DLEFT, "BUTTON_DLEFT"));
-buttonMapping.insert(std::pair<Btn, ButtonInfoType>(Btn::DRIGHT, "BUTTON_DRIGHT"));
-buttonMapping.insert(std::pair<Btn, ButtonInfoType>(Btn::PLUS, "BUTTON_PLUS"));
-buttonMapping.insert(std::pair<Btn, ButtonInfoType>(Btn::MINUS, "BUTTON_MINUS"));
-buttonMapping.insert(std::pair<Btn, ButtonInfoType>(Btn::HOME, "BUTTON_HOME"));
-buttonMapping.insert(std::pair<Btn, ButtonInfoType>(Btn::CAPT, "BUTTON_CAPT"));
-buttonMapping.insert(std::pair<Btn, ButtonInfoType>(Btn::LS, "BUTTON_LS"));
-buttonMapping.insert(std::pair<Btn, ButtonInfoType>(Btn::RS, "BUTTON_RS"));
+std::map<Btn, ButtonInfo*> buttonMapping;
+buttonMapping.insert(std::pair<Btn, ButtonInfo*>(Btn::A, getButtonInfo("BUTTON_A", "A Button", getNewColumn(), getNewIcon(""))));
+buttonMapping.insert(std::pair<Btn, ButtonInfo*>(Btn::B, "BUTTON_B"));
+buttonMapping.insert(std::pair<Btn, ButtonInfo*>(Btn::X, "BUTTON_X"));
+buttonMapping.insert(std::pair<Btn, ButtonInfo*>(Btn::Y, "BUTTON_Y"));
+buttonMapping.insert(std::pair<Btn, ButtonInfo*>(Btn::L, "BUTTON_L"));
+buttonMapping.insert(std::pair<Btn, ButtonInfo*>(Btn::R, "BUTTON_R"));
+buttonMapping.insert(std::pair<Btn, ButtonInfo*>(Btn::ZL, "BUTTON_ZL"));
+buttonMapping.insert(std::pair<Btn, ButtonInfo*>(Btn::ZR, "BUTTON_ZR"));
+buttonMapping.insert(std::pair<Btn, ButtonInfo*>(Btn::SL, "BUTTON_SL"));
+buttonMapping.insert(std::pair<Btn, ButtonInfo*>(Btn::SR, "BUTTON_SR"));
+buttonMapping.insert(std::pair<Btn, ButtonInfo*>(Btn::DUP, "BUTTON_DUP"));
+buttonMapping.insert(std::pair<Btn, ButtonInfo*>(Btn::DDOWN, "BUTTON_DDOWN"));
+buttonMapping.insert(std::pair<Btn, ButtonInfo*>(Btn::DLEFT, "BUTTON_DLEFT"));
+buttonMapping.insert(std::pair<Btn, ButtonInfo*>(Btn::DRIGHT, "BUTTON_DRIGHT"));
+buttonMapping.insert(std::pair<Btn, ButtonInfo*>(Btn::PLUS, "BUTTON_PLUS"));
+buttonMapping.insert(std::pair<Btn, ButtonInfo*>(Btn::MINUS, "BUTTON_MINUS"));
+buttonMapping.insert(std::pair<Btn, ButtonInfo*>(Btn::HOME, "BUTTON_HOME"));
+buttonMapping.insert(std::pair<Btn, ButtonInfo*>(Btn::CAPT, "BUTTON_CAPT"));
+buttonMapping.insert(std::pair<Btn, ButtonInfo*>(Btn::LS, "BUTTON_LS"));
+buttonMapping.insert(std::pair<Btn, ButtonInfo*>(Btn::RS, "BUTTON_RS"));
 
 
 
@@ -111,7 +127,7 @@ class InputColumns : public Gtk::TreeModelColumnRecord {
         // Loop through the buttons and add them
         for (auto const& button : buttonMapping) {
             // Gets pointer from tuple
-            Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>>* thisIcon = std::get<2>(button.second);
+            Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>>* thisIcon = button.second->columnIcon;
             // Add to the columns themselves (gives value, not pointer)
             add(*thisIcon);
         }
@@ -144,9 +160,10 @@ class DataProcessing {
         // Add all the columns, this somehow wasn't done already
         treeView.append_column("Frame", inputColumns.frameNum);
         // Loop through buttons and add all of them
-        for (auto const& thisButton : inputColumns.buttons) {
+        for (auto const& thisButton : buttonMapping) {
             // Append with the string specified by Button Mapping
-            treeView.append_column(buttonMapping[thisButton.first], *thisButton.second);
+            // Get value of columnIcon, not pointer
+            treeView.append_column(thisButton.second->viewName, *thisButton.second->columnIcon);
         }
         // Add this first frame
         addNewFrame(true);
