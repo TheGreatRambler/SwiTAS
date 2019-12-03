@@ -39,6 +39,7 @@ struct ControllerData {
     uint8_t index;
     // Button data (stored as a bitset because it will be serialized better later)
     // 20 buttons
+    // This storage can be sacrificed for the simple reason that the other data already takes up so much space
     std::bitset<20> buttons;
     // Joystick values
     int16_t LS_X = 0;
