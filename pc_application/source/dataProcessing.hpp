@@ -1,16 +1,8 @@
 #pragma once
 
-// A: Char itself
-// B: Index
-// C: Value of bit
-#define BIT_SET(a,b,c) (a ^= (-(unsigned long)c ^ a) & (1UL << b))
-
-// A: Char itself
-// B: Index
-#define BIT_GET(a,b) ((a >> b) & 1U)
-
 #include <cstdint>
 #include <cstdlib>
+#include <bitset>
 #include <utility>
 #include <vector>
 #include <map>
@@ -45,10 +37,9 @@ enum class Btn {
 struct ControllerData {
     // This controller's index
     uint8_t index;
-    // Button data (they are bits stored inside of chars to save space)
-    uint8_t firstBlock;
-    uint8_t secondBlock;
-    uint8_t thirdBlock;
+    // Button data (stored as a bitset because it will be serialized better later)
+    // 20 buttons
+    std::bitset<20> buttons;
     // Joystick values
     int16_t LS_X = 0;
     int16_t LS_Y = 0;
@@ -61,7 +52,7 @@ struct ControllerData {
     int16_t GYRO_1 = 0;
     int16_t GYRO_2 = 0;
     int16_t GYRO_3 = 0;
-} __attribute__((__packed__));
+}
 
 // Struct containing button info
 struct ButtonInfo {
@@ -170,34 +161,13 @@ class DataProcessing {
     }
 
     bool getButtonState(Btn button) {
-        if (button < 8) {
-            // First group
-            return BIT_GET(currentData->firstBlock, button);
-        } else if (button < 16) {
-            // Second group
-            uint8_t temp = button - 8;
-            return BIT_GET(currentData->secondBlock, temp);
-        } else {
-            // Last group
-            uint8_t temp = button - 16;
-            return BIT_GET(currentData->thirdBlock, temp);
-        }
+        // Get value from the bitset
+        return currentData->buttons.test(button);
     }
 
     void setButtonState(Btn button, bool state) {
         // If state is true, on, else off
-        if (button < 8) {
-            // First group
-            BIT_SET(currentData->firstBlock, button, state);
-        } else if (button < 16) {
-            // Second group
-            uint8_t temp = button - 8;
-            BIT_SET(currentData->secondBlock, temp, state);
-        } else {
-            // Last group
-            uint8_t temp = button - 16;
-            BIT_SET(currentData->thirdBlock, temp, state);
-        }
+        return currentData->buttons.set(button, state);
     }
 
     void setCurrentFrame(uint32_t frameNum) {
