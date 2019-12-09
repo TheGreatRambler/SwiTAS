@@ -2,6 +2,9 @@
 
 #include <gtkmm.h>
 
+#include "sideUI.hpp"
+#include "bottomUI.hpp"
+
 class MainWindow : public Gtk::Window {
     private:
     // Layout that contains all items, including the menubar
@@ -15,16 +18,15 @@ class MainWindow : public Gtk::Window {
     // Menu bar containing "open file", etc...
     Gtk::MenuBar menuBar;
 
-    // Left UI
-    // Button group for play, pause, etc...
-    Gtk::ButtonBox playButtons;
-    // Buttons themselves
-    Gtk::Button playPauseButton;
-    Gtk::Button frameAdvanceButton;
-
+    // The pointers to the classes containing the uis
+    SideUI* sideUI;
+    BottomUI* bottomUI;
     
     public:
     MainWindow() {
+        // UI instances
+        sideUI = new SideUI();
+        bottomUI = new BottomUI();
         // Add mainLayout to window
         add(mainLayout);
         // Add the top menubar
@@ -39,9 +41,9 @@ class MainWindow : public Gtk::Window {
 	
     void addGrids() {
         // Add left grid spanning the whole left side
-        mainGrid.attach(leftGrid, 0, 0, 1, 2);
+        mainGrid.attach(&leftGrid, 0, 0, 1, 2);
         // Add bottom grid spanning the rest of the bottom
-        mainGrid.attach(bottomGrid, 1, 1, 1, 1);
+        mainGrid.attach(&bottomGrid, 1, 1, 1, 1);
         // Shows all the items in this container
         mainGrid.show_all();
         // Add all of them to the current layout
@@ -55,23 +57,10 @@ class MainWindow : public Gtk::Window {
     }
 
     void addLeftUI() {
-        // Some buttons for the left UI
-        // https://developer.gnome.org/gtkmm-tutorial/stable/sec-multi-item-containers.html.en#buttonbox-example
-        // https://www.lucidarme.me/gtkmm-example-2/
-        playButtons.set_orientation(Gtk::ORIENTATION_HORIZONTAL);
-        playButtons.set_layout(Gtk::BUTTONBOX_SPREAD);
-
-        // Set images for buttons (instead of add_label)
-        playPauseButton.set_image_from_icon_name("pauseButton");
-        frameAdvanceButton.set_image_from_icon_name("frameAdvanceButton");
-
-        playButtons.add(playPauseButton);
-        playButtons.add(frameAdvanceButton);
+        sideUI->addToGrid(leftGrid);
     }
 
     void addBottomUI() {
-
+        bottomUI->addToGrid(bottomGrid);
     }
-
-    ~mainwindow() {};
 }
