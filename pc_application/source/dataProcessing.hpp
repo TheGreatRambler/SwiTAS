@@ -126,10 +126,5 @@ public:
 		return &treeView;
 	}
 
-<<<<<<< HEAD
 	~DataProcessing () { }
 }
-=======
-	~DataProcessing () { }
-}
->>>>>>> 544fbe60f1eb621084e0084903e972c9476b38e3
