@@ -46,6 +46,8 @@ private:
 	Glib::RefPtr<Gtk::ListStore> controllerListStore;
 	// Stores the columns for the above list store
 	InputColumns inputColumns;
+	// Rows displayed in the treeview
+	std::vector<Gtk::TreeModel::Row> treeviewRows;
 	// Tree view viewed in the UI
 	Gtk::TreeView treeView;
 
@@ -64,6 +66,12 @@ public:
 			treeView.append_column (thisButton.second->viewName,
 				*thisButton.second->columnIcon);
 		}
+		// Once all columns are added, do some stuff on them
+		for (auto& column : treeView.get_columns ()) {
+			// Set to fixed size mode to speed things up
+			column->set_sizing (Gtk::TREE_VIEW_COLUMN_FIXED);
+		}
+		treeView.set_fixed_height_mode (true);
 		// Add this first frame
 		addNewFrame (true);
 	}
@@ -108,6 +116,7 @@ public:
 			// Dereference pointer to get to it
 			row[*pixbufData.second] = buttonMapping[pixbufData.first].offIcon;
 		}
+		treeviewRows.push_back (row);
 	}
 
 	Gtk::TreeView* getTreeview () {
@@ -117,5 +126,10 @@ public:
 		return &treeView;
 	}
 
+<<<<<<< HEAD
 	~DataProcessing () { }
 }
+=======
+	~DataProcessing () { }
+}
+>>>>>>> 544fbe60f1eb621084e0084903e972c9476b38e3
