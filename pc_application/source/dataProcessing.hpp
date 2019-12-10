@@ -44,6 +44,8 @@ private:
   Glib::RefPtr<Gtk::ListStore> controllerListStore;
   // Stores the columns for the above list store
   InputColumns inputColumns;
+  // Rows displayed in the treeview
+  std::vector<Gtk::TreeModel::Row> treeviewRows;
   // Tree view viewed in the UI
   Gtk::TreeView treeView;
 
@@ -62,6 +64,12 @@ public:
       treeView.append_column(thisButton.second->viewName,
                              *thisButton.second->columnIcon);
     }
+    // Once all columns are added, do some stuff on them
+    for (auto &column : treeView.get_columns()) {
+      // Set to fixed size mode to speed things up
+      column->set_sizing(Gtk::TREE_VIEW_COLUMN_FIXED);
+    }
+    treeView.set_fixed_height_mode(true);
     // Add this first frame
     addNewFrame(true);
   }
@@ -96,10 +104,13 @@ public:
     inputsList.push_back(currentData);
     // Add to the table
     Gtk::TreeModel::Row row = *(controllerListStore->append());
-    row[inputColumns.m_col_id] = 1;
+    row[inputColumns.frameNum] = currentFrame;
     row[m_Columns.m_col_name] = "Billy Bob";
     row[m_Columns.m_col_number] = 10;
     row[m_Columns.m_col_percentage] = 15;
+    // Have to add to vector because for some
+    // reason liststore doesn't have indexing capabilities
+    treeviewRows.push_back(row);
   }
 
   Gtk::TreeView *getTreeview() {
