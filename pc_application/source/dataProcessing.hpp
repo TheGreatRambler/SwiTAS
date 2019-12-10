@@ -16,7 +16,7 @@ class InputColumns : public Gtk::TreeModelColumnRecord {
 public:
   Gtk::TreeModelColumn<uint32_t> frameNum;
   // All the buttons are stored inside of buttonMapping
-  // https://developer.gnome.org/gtkmm-tutorial/stable/sec-treeview-examples.html.en
+  // https://developer.gnome.org/gtkmm-tutorial/stable/sec-treeview-examples.html.en\
 
   InputColumns() {
     add(frameNum);
@@ -94,6 +94,19 @@ public:
     currentData = std::make_shared<ControllerData>();
     // Add this to the vector
     inputsList.push_back(currentData);
+    // Add to the table
+    Gtk::TreeModel::Row row = *(controllerListStore->append());
+    row[inputColumns.m_col_id] = 1;
+    row[m_Columns.m_col_name] = "Billy Bob";
+    row[m_Columns.m_col_number] = 10;
+    row[m_Columns.m_col_percentage] = 15;
+  }
+
+  Gtk::TreeView *getTreeview() {
+    // Get pointer of the treeview
+    // The value should be saftely dereferenced once the
+    // Class dies, but I dunno
+    return &treeView;
   }
 
   ~DataProcessing() {}
