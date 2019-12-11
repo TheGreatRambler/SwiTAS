@@ -46,10 +46,27 @@ private:
 	Glib::RefPtr<Gtk::ListStore> controllerListStore;
 	// Stores the columns for the above list store
 	InputColumns inputColumns;
-	// Rows displayed in the treeview
-	std::vector<Gtk::TreeModel::Row> treeviewRows;
 	// Tree view viewed in the UI
 	Gtk::TreeView treeView;
+	// Scrollable data window
+	Gtk::ScrolledWindow scrolledWindow;
+	// Current path and current iterator to save on CPU
+	Gtk::TreePath currentPath;
+	// Has to be a pointer, sadly
+	Gtk::TreeModel::iterator* currentIterator;
+
+	void getCurrentIndex () {
+		// Delete the first iterator now because it will be replaced
+		delete currentIterator;
+		// returns a treepath to the current index
+		// Also returns an iterator because apparently that's needed
+		// Clear the variable so it can be reassigned
+		currentPath.clear ();
+		// Add the current frame
+		currentPath.push_back (currentFrame);
+		// Simply returns the iterator
+		currentIterator controllerListStore->get_iter (*path);
+	}
 
 public:
 	DataProcessing () {
@@ -63,8 +80,7 @@ public:
 		for (auto const& thisButton : buttonMapping) {
 			// Append with the string specified by Button Mapping
 			// Get value of columnIcon, not pointer
-			treeView.append_column (thisButton.second->viewName,
-				*thisButton.second->columnIcon);
+			treeView.append_column (thisButton.second->viewName, *thisButton.second->columnIcon);
 		}
 		// Once all columns are added, do some stuff on them
 		for (auto& column : treeView.get_columns ()) {
@@ -72,6 +88,10 @@ public:
 			column->set_sizing (Gtk::TREE_VIEW_COLUMN_FIXED);
 		}
 		treeView.set_fixed_height_mode (true);
+		// Add the treeview to the scrolled window
+		scrolledWindow.add (treeView);
+		// Only show the scrollbars when they are necessary:
+		scrolledWindow.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 		// Add this first frame
 		addNewFrame (true);
 	}
@@ -84,6 +104,21 @@ public:
 	void setButtonState (Btn button, bool state) {
 		// If state is true, on, else off
 		return currentData->buttons.set (button, state);
+		// Get the index of the treeview
+		// The state is being changed, so so does the UI
+		// Two pointers have to be deconstructed
+		Gtk::TreeModel::Row row = *(*currentIterator);
+		// Set the image based on the state
+		row[*inputColumns.buttonPixbufs[button]] = state ? buttonMapping[button]->onIcon : buttonMapping[button]->offIcon;
+		// Send the update signal
+		controllerListStore->row_changed (currentPath, *currentIterator);
+		// Focus to this specific row
+		treeView.scroll_to_row (currentPath);
+	}
+
+	void toggleButtonState (Btn button) {
+		// Send the `not` of the current state
+		setButtonState (button, !getButtonState (button));
 	}
 
 	void setCurrentFrame (uint32_t frameNum) {
@@ -94,6 +129,11 @@ public:
 			currentData = inputsList[frameNum];
 			// Set the current frame to this number
 			currentFrame = frameNum;
+			// Kinda a misnomer, but this will set the current
+			// index for those functions That need it
+			getCurrentIndex ();
+			// Focus to this specific row now
+			treeView.scroll_to_row (currentPath);
 		}
 	}
 
@@ -116,15 +156,30 @@ public:
 			// Dereference pointer to get to it
 			row[*pixbufData.second] = buttonMapping[pixbufData.first].offIcon;
 		}
-		treeviewRows.push_back (row);
+		// Now, set the index to here so that some stuff can be ran
+		setCurrentFrame (currentFrame);
 	}
 
-	Gtk::TreeView* getTreeview () {
-		// Get pointer of the treeview
+	void handleKeyboardInput (guint key) {
+		for (auto const& thisButton : buttonMapping) {
+			// See if it corresponds to the toggle keybind
+			// TODO handle set and clear commands (shift and ctrl)
+			if (key == thisButton.second->toggleKeybind) {
+				// Toggle this key and end the loop
+				toggleButtonState (thisButton.first);
+				break;
+			}
+		}
+	}
+
+	Gtk::ScrolledWindow* getWindow () {
+		// Get pointer of the scrolled window (not the treeview)
 		// The value should be saftely dereferenced once the
 		// Class dies, but I dunno
-		return &treeView;
+		return &scrolledWindow;
 	}
 
-	~DataProcessing () { }
+	~DataProcessing () {
+		delete currentIterator;
+	}
 }
