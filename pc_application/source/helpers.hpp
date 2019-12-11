@@ -1,0 +1,20 @@
+#pragma once
+
+#include <fstream>
+#include <rapidjson/document.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
+#include <string>
+
+namespace Helpers {
+	std::string getFilePath (std::string path) {
+		// Just go back one folder :)
+		return "../" + path;
+	}
+
+	void getGlobalSettings (rapidjson::Document d) {
+		std::ifstream settingsFile (getFilePath (mainSettings.json));
+		std::string content ((std::istreambuf_iterator<char> (mainSettings)), (std::istreambuf_iterator<char> ()));
+		d.Parse (content.c_str ());
+	}
+}

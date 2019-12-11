@@ -1,9 +1,13 @@
 #pragma once
 
 #include <gtkmm.h>
+#include <rapidjson/document.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 #include "bottomUI.hpp"
 #include "dataProcessing.hpp"
+#include "helpers.hpp"
 #include "sideUI.hpp"
 
 class MainWindow : public Gtk::Window {
@@ -18,6 +22,9 @@ private:
 	Gtk::Grid bottomGrid;
 	// Menu bar containing "open file", etc...
 	Gtk::MenuBar menuBar;
+
+	// Main settings variable
+	rapidjson::Document mainSettings;
 
 	// The pointers to the classes containing the uis
 	SideUI* sideUI;
@@ -34,6 +41,11 @@ private:
 		dataProcessingInstance->handleKeyboardInput (key);
 	}
 
+	void handlePreviousWindowTransform () {
+		// Resize and maximize as needed
+		// TODO
+	}
+
 public:
 	MainWindow () {
 		// UI instances
@@ -43,6 +55,8 @@ public:
 		dataProcessingInstance = new DataProcessing ();
 		sideUI->setInputInstance (dataProcessingInstance);
 		bottomUI->setInputInstance (dataProcessingInstance);
+		// Make dataProcessing aware of the bottomUI for various reasons
+		dataProcessingInstance->setBottomUI (bottomUI);
 		// Add mainLayout to window
 		add (mainLayout);
 		// Add the top menubar
@@ -55,6 +69,9 @@ public:
 		addGrids ();
 		// Override the keypress handler
 		add_events (Gdk::KEY_PRESS_MASK);
+		// Get the main settings
+		Helpers::getGlobalSettings (mainSettings);
+		handlePreviousWindowTransform ();
 	};
 
 	void addGrids () {

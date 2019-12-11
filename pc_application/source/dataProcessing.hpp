@@ -10,6 +10,7 @@
 #include <utility>
 #include <vector>
 
+#include "bottomUI.hpp"
 #include "buttonData.hpp"
 
 class InputColumns : public Gtk::TreeModelColumnRecord {
@@ -54,6 +55,9 @@ private:
 	Gtk::TreePath currentPath;
 	// Has to be a pointer, sadly
 	Gtk::TreeModel::iterator* currentIterator;
+	// The instance of bottomUI, this class has a reference to it
+	// This is so it can make bottomUI aware of various changes
+	BottomUI* bottomUI;
 
 	void getCurrentIndex () {
 		// Delete the first iterator now because it will be replaced
@@ -96,6 +100,10 @@ public:
 		addNewFrame (true);
 	}
 
+	void setBottomUI (BottomUI* bUI) {
+		bottomUI = bUI;
+	}
+
 	bool getButtonState (Btn button) {
 		// Get value from the bitset
 		return currentData->buttons.test (button);
@@ -103,7 +111,7 @@ public:
 
 	void setButtonState (Btn button, bool state) {
 		// If state is true, on, else off
-		return currentData->buttons.set (button, state);
+		currentData->buttons.set (button, state);
 		// Get the index of the treeview
 		// The state is being changed, so so does the UI
 		// Two pointers have to be deconstructed
@@ -114,6 +122,9 @@ public:
 		controllerListStore->row_changed (currentPath, *currentIterator);
 		// Focus to this specific row
 		treeView.scroll_to_row (currentPath);
+		// BottomUI needs to know the state changed, even if it
+		// Was the one to make us aware in the first place
+		bottomUI->setIconState (button, state);
 	}
 
 	void toggleButtonState (Btn button) {

@@ -98,24 +98,32 @@ private:
 	// Grid containing the button viewer
 	Gtk::Grid buttonViewer;
 
-	// The images displayed (just here to keep a reference)
-	std::map<Btn, Gtk::image*> onImages;
-	std::map<Btn, Gtk::image*> offImages;
+	// The images displayed and their eventboxes (just here to keep a reference)
+	std::map<Btn, std::pair<Gtk::image*, Gtk::EventBox*>> images;
+
+protected:
+	void onButtonPress (Btn button) {
+		// This button has just been clicked, notify the dataProcessor
+		inputInstance->toggleButtonState (button);
+	}
 
 public:
 	BottomUI () {
 		// TODO set up joysticks
 		// Add grid of buttons
 		for (auto const& button : KeyLocs) {
-			// Create on images and add them
-			Gtk::Image* onImage = new Gtk::image (buttonMapping[button.first]->bottomInputViewIcon);
-			onImages.insert (std::pair<Btn, Gtk::image*> (button.first, onImage));
-			// Create off images and add them
-			Gtk::Image* offImage = new Gtk::image (buttonMapping[button.first]->offIcon);
-			offImages.insert (std::pair<Btn, Gtk::image*> (button.first, offImage));
+			// Add the images (the pixbuf can and will be changed later)
+			Gtk::Image* image = new Gtk::image (buttonMapping[button.first]->offIcon);
+			// Add the eventbox
+			Gtk::EventBox* eventBox = new Gtk::EventBox ();
+			eventBox->add (image);
+			eventBox->set_events (Gdk::BUTTON_PRESS_MASK);
+			eventBox->signal_button_press_event ().connect (sigc::bind<Btn> (sigc::mem_fun (*this, &BottomUI::onButtonPress), button.first));
+
+			images.insert (std::pair<Btn, std::pair<Gtk::image*, Gtk::EventBox*>> (button.first, std::make_pair (image, eventBox)));
 
 			// Designate the off image as the default
-			buttonViewer.attach (*offImage, button.second.x, button.second.y);
+			buttonViewer.attach (*eventBox, button.second.x, button.second.y);
 		}
 	}
 
@@ -124,20 +132,16 @@ public:
 	}
 
 	void setIconState (Btn button, bool state) {
-		bool currentState = inputInstance->getButtonState (button);
-		// Only update if there is a need to update
-		if (currentState != state) {
-			if (currentState) {
-				buttonViewer.remove (*onImages[button]);
-				buttonViewer.attach (*offImages[button], KeyLocs[button].x, KeyLocs[button].y);
-			} else {
-				buttonViewer.remove (*offImages[button]);
-				buttonViewer.attach (*onImages[button], KeyLocs[button].x, KeyLocs[button].y);
-			}
-
-			// Set value in input instance
-			inputInstance->setButtonState (button, state);
+		if (state) {
+			// Set the image to the on image
+			images[button]->set (buttonMapping[button]->onIcon);
+		} else {
+			// Set the image to the off image
+			images[button]->set (buttonMapping[button]->offIcon);
 		}
+
+		// Don't set value in input instance because it
+		// Was the one that sent us here
 	}
 
 	void addToGrid (Gtk::Grid* theGrid) {
@@ -148,11 +152,10 @@ public:
 
 	~BottomUI () {
 		// Deallocate all the images
-		for (auto const& image : onImages) {
-			free (image.second);
-		}
-		for (auto const& image : offImages) {
-			free (image.second);
+		for (auto const& image : images) {
+			// Free images and eventbox
+			free (image.second.first);
+			free (image.second.second);
 		}
 	}
 }

@@ -11,7 +11,8 @@ CFLAGS := -std=gnu11
 # C++ flags
 # Single precision sets all defined floating point numbers to floats, saves on memory
 # Includes some neccessary flags for Gtkmm
-CXXFLAGS := -std=c++11 -fsingle-precision-constant $(pkg-config --cflags gtk+-3.0)
+# Also, import third party headers in `include`
+CXXFLAGS := -std=c++11 -fsingle-precision-constant $(pkg-config --cflags gtk+-3.0) -I./include
 # C/C++ flags (no -pendantic)
 CPPFLAGS := -g -Wall -Wextra
 # Linker flags (-lpthread needed for threads)
