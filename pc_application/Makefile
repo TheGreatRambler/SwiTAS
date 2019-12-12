@@ -6,6 +6,10 @@ TARGET_EXEC ?= nxtas.exe
 BUILD_DIR ?= ./bin
 SRC_DIRS ?= ./source
 
+# Set compilers to MinGW64 compilers
+CC := x86_64-w64-mingw32-gcc
+CXX := x86_64-w64-mingw32-g++
+
 # C flags
 CFLAGS := -std=gnu11
 # C++ flags
