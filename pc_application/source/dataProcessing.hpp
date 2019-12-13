@@ -3,7 +3,9 @@
 #include <bitset>
 #include <cstdint>
 #include <cstdlib>
-#include <gtkmm.h>
+#include <gdkmm/pixbuf.h>
+#include <glibmm/refptr.h>
+#include <gtkmm/treemodelcolumn.h>
 #include <map>
 #include <string>
 #include <tuple>

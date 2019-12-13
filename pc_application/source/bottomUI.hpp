@@ -1,8 +1,12 @@
 #pragma once
 
 #include <cairomm/context.h>
+#include <gdkmm/rectangle.h>
 #include <glibmm/main.h>
-#include <gtkmm.h>
+#include <gtkmm/drawingarea.h>
+#include <gtkmm/eventbox.h>
+#include <gtkmm/grid.h>
+#include <gtkmm/image.h>
 #include <map>
 #include <utility>
 
