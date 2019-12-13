@@ -1,5 +1,6 @@
 #include <glibmm/refptr.h>
-#include <gtkmm.h>
+#include <gtkmm/application.h>
+#include <gtkmm/window.h>
 
 #include "mainWindow.hpp"
 

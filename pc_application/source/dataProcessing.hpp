@@ -5,7 +5,12 @@
 #include <cstdlib>
 #include <gdkmm/pixbuf.h>
 #include <glibmm/refptr.h>
+#include <gtkmm/liststore.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/treemodel.h>
 #include <gtkmm/treemodelcolumn.h>
+#include <gtkmm/treepath.h>
+#include <gtkmm/treeview.h>
 #include <map>
 #include <string>
 #include <tuple>

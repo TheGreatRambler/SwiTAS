@@ -1,6 +1,9 @@
 #pragma once
 
-#include <gtkmm.h>
+#include <gtkmm/grid.h>
+#include <gtkmm/hvbox.h>
+#include <gtkmm/menubar.h>
+#include <gtkmm/window.h>
 #include <rapidjson/document.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>

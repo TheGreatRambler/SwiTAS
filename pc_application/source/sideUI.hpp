@@ -1,6 +1,8 @@
 #pragma once
 
-#include <gtkmm.h>
+#include <gtkmm/button.h>
+#include <gtkmm/buttonbox.h>
+#include <gtkmm/grid.h>
 
 #include "dataProcessing.hpp"
 
