@@ -1,5 +1,3 @@
-#include <gtkmm.h>
-
 #include "main.hpp"
 
 // Note to self for later: https://stackoverflow.com/questions/49092784/how-to-distribute-a-gtk-application-on-windows

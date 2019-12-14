@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <yas/serialize.hpp>
 #include <yas/std_types.hpp>
+#include <zed_net.h>
 
 #include "dataProcessing.hpp"
 
@@ -14,7 +15,10 @@ class InterfaceWithSwitch {
 private:
 	std::shared_ptr<DataProcessing> dataProcessing;
 
-	constexpr std::size_t yasFlags = yas::mem | yas::binary;
+	constexpr static std::size_t yasFlags = yas::mem | yas::binary;
+
+	zed_net_socket_t communicationSocket;
+	constexpr static unsigned short port = 4466;
 
 	// Get the buffer to be sent to the switch, the full one
 	yas::shared_buffer getMainBuffer (SEND_FLAGS flagType) {
@@ -32,7 +36,16 @@ private:
 
 public:
 	InterfaceWithSwitch (std::shared_ptr<DataProcessing> dataProcessingInstance) {
+		// Start up socket
+		zed_net_init ();
+		// Open up one
+		zed_net_udp_socket_open (&communicationSocket, port, 0);
 		// Use the given class instance
 		dataProcessing = dataProcessingInstance;
+	}
+
+	~InterfaceWithSwitch () {
+		// Shutdown socket
+		zed_net_shutdown ()
 	}
 }
