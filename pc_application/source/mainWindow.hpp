@@ -36,7 +36,7 @@ private:
 	bool on_key_press_event (GdkEventKey* event) override {
 		// Handle keyboard input
 		// A GDK int holding the pressed buttons
-		guint key = key_event->keyval;
+		guint key = event->keyval;
 		// Send to the dataProcessing instance
 		dataProcessingInstance->handleKeyboardInput (key);
 	}
@@ -70,15 +70,15 @@ public:
 		// Override the keypress handler
 		add_events (Gdk::KEY_PRESS_MASK);
 		// Get the main settings
-		Helpers::getGlobalSettings (mainSettings);
+		Helpers::getGlobalSettings (&mainSettings);
 		handlePreviousWindowTransform ();
 	};
 
 	void addGrids () {
 		// Add left grid spanning the whole left side
-		mainGrid.attach (&leftGrid, 0, 0, 1, 2);
+		mainGrid.attach (leftGrid, 0, 0, 1, 2);
 		// Add bottom grid spanning the rest of the bottom
-		mainGrid.attach (&bottomGrid, 1, 1, 1, 1);
+		mainGrid.attach (bottomGrid, 1, 1, 1, 1);
 		// Shows all the items in this container
 		mainGrid.show_all ();
 		// Add all of them to the current layout
@@ -92,11 +92,11 @@ public:
 	}
 
 	void addLeftUI () {
-		sideUI->addToGrid (leftGrid);
+		sideUI->addToGrid (&leftGrid);
 	}
 
 	void addBottomUI () {
-		bottomUI->addToGrid (bottomGrid);
+		bottomUI->addToGrid (&bottomGrid);
 	}
 
 	~MainWindow () {
@@ -104,4 +104,4 @@ public:
 		delete bottomUI;
 		delete dataProcessingInstance;
 	}
-}
+};

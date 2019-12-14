@@ -32,7 +32,7 @@ public:
 			add (*thisIcon);
 		}
 	}
-}
+};
 
 class DataProcessing {
 private:
@@ -69,7 +69,7 @@ private:
 		// Add the current frame
 		currentPath.push_back (currentFrame);
 		// Simply returns the iterator
-		currentIterator controllerListStore->get_iter (*path);
+		currentIterator = &(controllerListStore->get_iter (*currentPath));
 	}
 
 public:

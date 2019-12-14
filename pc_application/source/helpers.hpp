@@ -12,9 +12,9 @@ namespace Helpers {
 		return "../" + path;
 	}
 
-	void getGlobalSettings (rapidjson::Document d) {
-		std::ifstream settingsFile (getFilePath (mainSettings.json));
-		std::string content ((std::istreambuf_iterator<char> (mainSettings)), (std::istreambuf_iterator<char> ()));
-		d.Parse (content.c_str ());
+	void getGlobalSettings (rapidjson::Document* d) {
+		std::ifstream settingsFile (getFilePath ("mainSettings.json"));
+		std::string content ((std::istreambuf_iterator<char> (settingsFile)), (std::istreambuf_iterator<char> ()));
+		d->Parse (content.c_str ());
 	}
 }

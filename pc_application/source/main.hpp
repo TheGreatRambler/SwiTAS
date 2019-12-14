@@ -18,4 +18,4 @@ public:
 		// Run now
 		return app->run (mainWindow);
 	}
-}
+};

@@ -40,4 +40,4 @@ public:
 		// Use the scrolled window obtained from inputsInstance
 		theGrid->attach (*inputInstance->getWindow (), 0, 1);
 	}
-}
+};
