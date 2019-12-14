@@ -1,13 +1,13 @@
 # Plans for this program
 ## Setting inputs
 1. Set inputs via a large TreeView backed by a ListView, like this:
-![ListView example](inputSelection.png)
+![ListView example](http://zetcode.com/img/gui/sharpgtk/listview.png)
 2. Inputs, when clicked inside of the listview, will toggle
 3. A dashboard on the bottom of the program will contain inputs (arranged similarly to how they are arranged on a Pro Controller), and pressing these will also toggle the *current* inputs
 4. All operations are done by editing the current frame, which can be edited if you select the frame in the ListView or you load a savestate at that frame or you frameadvance to that frame
 ## Savestates
 1. Soooooo... these are very limited savestates, let's just say that
-2. Two different methods exist for savestates, the first is not game specific but is harder to set up and generally harder to use, the second is game specific but it maynot work with the game you are trying to TAS
+2. Two different methods exist for savestates, the first is not game specific but is harder to set up and generally harder to use, the second is game specific but it may not work with the game you are trying to TAS
 ### Generic savestate method
 1. This method only saves three things within the savestate, the frame of the savestate, the *hash* of the screenshot of that frame and some other miscellaneous data such as the current time
 2. There is a mode called the *savestate searching* mode. When this is activated, each frame is checked to see if the *hash* of its screenshot matches that of the savestate
