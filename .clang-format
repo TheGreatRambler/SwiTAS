@@ -18,8 +18,9 @@ IncludeBlocks: Preserve
 NamespaceIndentation: All
 PointerAlignment: Left
 SortIncludes: "true"
+AlwaysBreakAfterDefinitionReturnType: None
 SpaceBeforeAssignmentOperators: "true"
-SpaceBeforeParens: Always
+SpaceBeforeParens: Never
 SpaceInEmptyParentheses: "false"
 SpacesInContainerLiterals: "false"
 SpacesInParentheses: "false"
@@ -27,4 +28,4 @@ SpacesInSquareBrackets: "false"
 Standard: Cpp11
 TabWidth: "4"
 UseTab: ForContinuationAndIndentation
-ColumnLimit: "145"
+ColumnLimit: "400"

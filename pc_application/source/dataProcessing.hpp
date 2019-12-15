@@ -27,16 +27,16 @@ public:
 	// https://developer.gnome.org/gtkmm-tutorial/stable/sec-treeview-examples.html.en
 	std::map<Btn, Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>>*> buttonPixbufs;
 
-	InputColumns () {
-		add (frameNum);
+	InputColumns() {
+		add(frameNum);
 		// Loop through the buttons and add them
-		for (auto const& button : buttonMapping) {
+		for(auto const& button : buttonMapping) {
 			// Gets pointer from tuple
 			Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>>* thisIcon = button.second->columnIcon;
 			// Add to map for later
 			buttonPixbufs[button.first] = thisIcon;
 			// Add to the columns themselves (gives value, not pointer)
-			add (*thisIcon);
+			add(*thisIcon);
 		}
 	}
 };
@@ -66,59 +66,59 @@ private:
 	// This is so it can make bottomUI aware of various changes
 	BottomUI* bottomUI;
 
-	void getCurrentIndex () {
+	void getCurrentIndex() {
 		// Delete the first iterator now because it will be replaced
 		delete currentIterator;
 		// returns a treepath to the current index
 		// Also returns an iterator because apparently that's needed
 		// Clear the variable so it can be reassigned
-		currentPath.clear ();
+		currentPath.clear();
 		// Add the current frame
-		currentPath.push_back (currentFrame);
+		currentPath.push_back(currentFrame);
 		// Simply returns the iterator
-		currentIterator = &(controllerListStore->get_iter (*currentPath));
+		currentIterator = &(controllerListStore->get_iter(currentPath));
 	}
 
 public:
-	DataProcessing () {
+	DataProcessing() {
 		// Add the list store from the columns
-		controllerListStore = Gtk::ListStore::create (inputColumns);
+		controllerListStore = Gtk::ListStore::create(inputColumns);
 		// Set this tree view to this model
-		treeView.set_model (controllerListStore);
+		treeView.set_model(controllerListStore);
 		// Add all the columns, this somehow wasn't done already
-		treeView.append_column ("Frame", inputColumns.frameNum);
+		treeView.append_column("Frame", inputColumns.frameNum);
 		// Loop through buttons and add all of them
-		for (auto const& thisButton : buttonMapping) {
+		for(auto const& thisButton : buttonMapping) {
 			// Append with the string specified by Button Mapping
 			// Get value of columnIcon, not pointer
-			treeView.append_column (thisButton.second->viewName, *thisButton.second->columnIcon);
+			treeView.append_column(thisButton.second->viewName, *thisButton.second->columnIcon);
 		}
 		// Once all columns are added, do some stuff on them
-		for (auto& column : treeView.get_columns ()) {
+		for(auto& column : treeView.get_columns()) {
 			// Set to fixed size mode to speed things up
-			column->set_sizing (Gtk::TREE_VIEW_COLUMN_FIXED);
+			column->set_sizing(Gtk::TREE_VIEW_COLUMN_FIXED);
 		}
-		treeView.set_fixed_height_mode (true);
+		treeView.set_fixed_height_mode(true);
 		// Add the treeview to the scrolled window
-		scrolledWindow.add (treeView);
+		scrolledWindow.add(treeView);
 		// Only show the scrollbars when they are necessary:
-		scrolledWindow.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+		scrolledWindow.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 		// Add this first frame
-		addNewFrame (true);
+		addNewFrame(true);
 	}
 
-	void setBottomUI (BottomUI* bUI) {
+	void setBottomUI(BottomUI* bUI) {
 		bottomUI = bUI;
 	}
 
-	bool getButtonState (Btn button) {
+	bool getButtonState(Btn button) {
 		// Get value from the bitset
-		return currentData->buttons.test (button);
+		return currentData->buttons.test(button);
 	}
 
-	void setButtonState (Btn button, bool state) {
+	void setButtonState(Btn button, bool state) {
 		// If state is true, on, else off
-		currentData->buttons.set (button, state);
+		currentData->buttons.set(button, state);
 		// Get the index of the treeview
 		// The state is being changed, so so does the UI
 		// Two pointers have to be deconstructed
@@ -126,22 +126,22 @@ public:
 		// Set the image based on the state
 		row[*inputColumns.buttonPixbufs[button]] = state ? buttonMapping[button]->onIcon : buttonMapping[button]->offIcon;
 		// Send the update signal
-		controllerListStore->row_changed (currentPath, *currentIterator);
+		controllerListStore->row_changed(currentPath, *currentIterator);
 		// Focus to this specific row
-		treeView.scroll_to_row (currentPath);
+		treeView.scroll_to_row(currentPath);
 		// BottomUI needs to know the state changed, even if it
 		// Was the one to make us aware in the first place
-		bottomUI->setIconState (button, state);
+		bottomUI->setIconState(button, state);
 	}
 
-	void toggleButtonState (Btn button) {
+	void toggleButtonState(Btn button) {
 		// Send the `not` of the current state
-		setButtonState (button, !getButtonState (button));
+		setButtonState(button, !getButtonState(button));
 	}
 
-	void setCurrentFrame (uint32_t frameNum) {
+	void setCurrentFrame(uint32_t frameNum) {
 		// Must be a frame that has already been written, else, raise error
-		if (frameNum < inputsList.size () && frameNum > -1) {
+		if(frameNum < inputsList.size() && frameNum > -1) {
 			// Set the current frame to this frame
 			// Shared pointer so this can be done
 			currentData = inputsList[frameNum];
@@ -149,55 +149,55 @@ public:
 			currentFrame = frameNum;
 			// Kinda a misnomer, but this will set the current
 			// index for those functions That need it
-			getCurrentIndex ();
+			getCurrentIndex();
 			// Focus to this specific row now
-			treeView.scroll_to_row (currentPath);
+			treeView.scroll_to_row(currentPath);
 		}
 	}
 
-	void addNewFrame (bool isFirstFrame = false) {
-		if (!isFirstFrame) {
+	void addNewFrame(bool isFirstFrame = false) {
+		if(!isFirstFrame) {
 			// On the first frame, it is already set right
 			// This will automatically add at the end even when the
 			// Current frame is not the most recent
-			currentFrame = inputsList.size ();
+			currentFrame = inputsList.size();
 		}
 		// Will overwrite previous frame if need be
-		currentData = std::make_shared<ControllerData> ();
+		currentData = std::make_shared<ControllerData>();
 		// Add this to the vector
-		inputsList.push_back (currentData);
+		inputsList.push_back(currentData);
 		// Add to the table
-		Gtk::TreeModel::Row row    = *(controllerListStore->append ());
+		Gtk::TreeModel::Row row    = *(controllerListStore->append());
 		row[inputColumns.frameNum] = currentFrame;
-		for (auto const& pixbufData : inputColumns.buttonPixbufs) {
+		for(auto const& pixbufData : inputColumns.buttonPixbufs) {
 			// Turn all buttons automatically to off
 			// Dereference pointer to get to it
 			row[*pixbufData.second] = buttonMapping[pixbufData.first].offIcon;
 		}
 		// Now, set the index to here so that some stuff can be ran
-		setCurrentFrame (currentFrame);
+		setCurrentFrame(currentFrame);
 	}
 
-	void handleKeyboardInput (guint key) {
-		for (auto const& thisButton : buttonMapping) {
+	void handleKeyboardInput(guint key) {
+		for(auto const& thisButton : buttonMapping) {
 			// See if it corresponds to the toggle keybind
 			// TODO handle set and clear commands (shift and ctrl)
-			if (key == thisButton.second->toggleKeybind) {
+			if(key == thisButton.second->toggleKeybind) {
 				// Toggle this key and end the loop
-				toggleButtonState (thisButton.first);
+				toggleButtonState(thisButton.first);
 				break;
 			}
 		}
 	}
 
-	Gtk::ScrolledWindow* getWindow () {
+	Gtk::ScrolledWindow* getWindow() {
 		// Get pointer of the scrolled window (not the treeview)
 		// The value should be saftely dereferenced once the
 		// Class dies, but I dunno
 		return &scrolledWindow;
 	}
 
-	~DataProcessing () {
+	~DataProcessing() {
 		delete currentIterator;
 	}
-}
+};
