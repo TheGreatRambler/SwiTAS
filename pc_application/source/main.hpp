@@ -7,16 +7,15 @@
 class MainApplication {
 private:
 	Glib::RefPtr<Gtk::Application> app;
-	Glib::RefPtr<Gtk::Window> mainWindow;
+	Gtk::Window mainWindow;
 
 public:
-	MainApplication (int argc, char* argv[]) {
-		app        = Gtk::Application::create (argc, argv, "org.tgr.nxtas");
-		mainWindow = new MainWindow ();
+	MainApplication(int argc, char* argv[]) {
+		app = Gtk::Application::create(argc, argv, "org.tgr.nxtas");
 	}
 
-	int run () {
+	int run() {
 		// Run now
-		return app->run (mainWindow);
+		return app->run(mainWindow);
 	}
 };
