@@ -3,6 +3,7 @@
 #include <bitset>
 #include <cstdint>
 #include <cstdlib>
+#include <functional>
 #include <gdkmm/pixbuf.h>
 #include <glibmm/refptr.h>
 #include <gtkmm/liststore.h>
@@ -17,7 +18,6 @@
 #include <utility>
 #include <vector>
 
-#include "bottomUI.hpp"
 #include "buttonData.hpp"
 
 class InputColumns : public Gtk::TreeModelColumnRecord {
@@ -60,23 +60,16 @@ private:
 	Gtk::ScrolledWindow scrolledWindow;
 	// Current path and current iterator to save on CPU
 	Gtk::TreePath currentPath;
-	// Has to be a pointer, sadly
-	Gtk::TreeModel::iterator* currentIterator;
-	// The instance of bottomUI, this class has a reference to it
-	// This is so it can make bottomUI aware of various changes
-	BottomUI* bottomUI;
+	// Using callbacks for inputs
+	std::function<void(Btn, bool)> inputCallback;
 
 	void getCurrentIndex() {
-		// Delete the first iterator now because it will be replaced
-		delete currentIterator;
 		// returns a treepath to the current index
 		// Also returns an iterator because apparently that's needed
 		// Clear the variable so it can be reassigned
 		currentPath.clear();
 		// Add the current frame
 		currentPath.push_back(currentFrame);
-		// Simply returns the iterator
-		currentIterator = &(controllerListStore->get_iter(currentPath));
 	}
 
 public:
@@ -107,8 +100,8 @@ public:
 		addNewFrame(true);
 	}
 
-	void setBottomUI(BottomUI* bUI) {
-		bottomUI = bUI;
+	void setInputCallback(std::function<void(Btn, bool)> callback) {
+		inputCallback = callback;
 	}
 
 	bool getButtonState(Btn button) {
@@ -122,16 +115,16 @@ public:
 		// Get the index of the treeview
 		// The state is being changed, so so does the UI
 		// Two pointers have to be deconstructed
-		Gtk::TreeModel::Row row = *(*currentIterator);
+		Gtk::TreeModel::Row row = *controllerListStore->get_iter(currentPath);
 		// Set the image based on the state
 		row[*inputColumns.buttonPixbufs[button]] = state ? buttonMapping[button]->onIcon : buttonMapping[button]->offIcon;
 		// Send the update signal
-		controllerListStore->row_changed(currentPath, *currentIterator);
+		controllerListStore->row_changed(currentPath, row);
 		// Focus to this specific row
 		treeView.scroll_to_row(currentPath);
 		// BottomUI needs to know the state changed, even if it
 		// Was the one to make us aware in the first place
-		bottomUI->setIconState(button, state);
+		inputCallback(button, state);
 	}
 
 	void toggleButtonState(Btn button) {
@@ -141,7 +134,7 @@ public:
 
 	void setCurrentFrame(uint32_t frameNum) {
 		// Must be a frame that has already been written, else, raise error
-		if(frameNum < inputsList.size() && frameNum > -1) {
+		if(frameNum < inputsList.size()) {
 			// Set the current frame to this frame
 			// Shared pointer so this can be done
 			currentData = inputsList[frameNum];
@@ -172,7 +165,7 @@ public:
 		for(auto const& pixbufData : inputColumns.buttonPixbufs) {
 			// Turn all buttons automatically to off
 			// Dereference pointer to get to it
-			row[*pixbufData.second] = buttonMapping[pixbufData.first].offIcon;
+			row[*pixbufData.second] = buttonMapping[pixbufData.first]->offIcon;
 		}
 		// Now, set the index to here so that some stuff can be ran
 		setCurrentFrame(currentFrame);
@@ -195,9 +188,5 @@ public:
 		// The value should be saftely dereferenced once the
 		// Class dies, but I dunno
 		return &scrolledWindow;
-	}
-
-	~DataProcessing() {
-		delete currentIterator;
 	}
 };

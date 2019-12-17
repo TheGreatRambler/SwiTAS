@@ -36,73 +36,72 @@ private:
 	DataProcessing* dataProcessingInstance;
 
 	// Override default signal handler:
-	bool on_key_press_event (GdkEventKey* event) override {
+	bool on_key_press_event(GdkEventKey* event) override {
 		// Handle keyboard input
 		// A GDK int holding the pressed buttons
 		guint key = event->keyval;
 		// Send to the dataProcessing instance
-		dataProcessingInstance->handleKeyboardInput (key);
+		dataProcessingInstance->handleKeyboardInput(key);
+		return Gtk::Window::on_key_press_event(event);
 	}
 
-	void handlePreviousWindowTransform () {
+	void handlePreviousWindowTransform() {
 		// Resize and maximize as needed
 		// TODO
 	}
 
 public:
-	MainWindow () {
+	MainWindow() {
 		// UI instances
-		sideUI   = new SideUI ();
-		bottomUI = new BottomUI ();
+		sideUI   = new SideUI();
+		bottomUI = new BottomUI();
 		// Both UIs need this
-		dataProcessingInstance = new DataProcessing ();
-		sideUI->setInputInstance (dataProcessingInstance);
-		bottomUI->setInputInstance (dataProcessingInstance);
-		// Make dataProcessing aware of the bottomUI for various reasons
-		dataProcessingInstance->setBottomUI (bottomUI);
+		dataProcessingInstance = new DataProcessing();
+		sideUI->setInputInstance(dataProcessingInstance);
+		bottomUI->setInputInstance(dataProcessingInstance);
 		// Add mainLayout to window
-		add (mainLayout);
+		add(mainLayout);
 		// Add the top menubar
-		addMenuBar ();
+		addMenuBar();
 		// Add left UI
-		addLeftUI ();
+		addLeftUI();
 		// Add bottom UI
-		addBottomUI ();
+		addBottomUI();
 		// Adding all the grids
-		addGrids ();
+		addGrids();
 		// Override the keypress handler
-		add_events (Gdk::KEY_PRESS_MASK);
+		add_events(Gdk::KEY_PRESS_MASK);
 		// Get the main settings
-		Helpers::getGlobalSettings (&mainSettings);
-		handlePreviousWindowTransform ();
+		Helpers::getGlobalSettings(&mainSettings);
+		handlePreviousWindowTransform();
 	};
 
-	void addGrids () {
+	void addGrids() {
 		// Add left grid spanning the whole left side
-		mainGrid.attach (leftGrid, 0, 0, 1, 2);
+		mainGrid.attach(leftGrid, 0, 0, 1, 2);
 		// Add bottom grid spanning the rest of the bottom
-		mainGrid.attach (bottomGrid, 1, 1, 1, 1);
+		mainGrid.attach(bottomGrid, 1, 1, 1, 1);
 		// Shows all the items in this container
-		mainGrid.show_all ();
+		mainGrid.show_all();
 		// Add all of them to the current layout
-		mainLayout.pack_start (mainGrid, Gtk::PACK_SHRINK);
+		mainLayout.pack_start(mainGrid, Gtk::PACK_SHRINK);
 	}
 
-	void addMenuBar () {
+	void addMenuBar() {
 		// https://www.lucidarme.me/gtkmm-example-13/
 		// Add menubar to layout
-		mainLayout.pack_start (menuBar, Gtk::PACK_SHRINK);
+		mainLayout.pack_start(menuBar, Gtk::PACK_SHRINK);
 	}
 
-	void addLeftUI () {
-		sideUI->addToGrid (&leftGrid);
+	void addLeftUI() {
+		sideUI->addToGrid(&leftGrid);
 	}
 
-	void addBottomUI () {
-		bottomUI->addToGrid (&bottomGrid);
+	void addBottomUI() {
+		bottomUI->addToGrid(&bottomGrid);
 	}
 
-	~MainWindow () {
+	~MainWindow() {
 		delete sideUI;
 		delete bottomUI;
 		delete dataProcessingInstance;

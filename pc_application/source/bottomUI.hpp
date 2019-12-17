@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cairomm/context.h>
+#include <functional>
 #include <gdkmm/rectangle.h>
 #include <glibmm/main.h>
 #include <gtkmm/drawingarea.h>
@@ -30,27 +31,26 @@ struct Location {
 //   +----+---+----+----+---+--+---+---+----+---+---+
 // 3 |    | v |    | RS |   |  |   |   |    | B |   |
 //   +----+---+----+----+---+--+---+---+----+---+---+
-std::map<Btn, Location>
-	KeyLocs {
-		{ Btn::A, { 10, 2 } },
-		{ Btn::B, { 9, 3 } },
-		{ Btn::X, { 9, 1 } },
-		{ Btn::Y, { 8, 2 } },
-		{ Btn::L, { 3, 0 } },
-		{ Btn::R, { 7, 0 } },
-		{ Btn::ZL, { 2, 0 } },
-		{ Btn::ZR, { 8, 0 } },
-		{ Btn::DUP, { 1, 1 } },
-		{ Btn::DDOWN, { 1, 3 } },
-		{ Btn::DLEFT, { 0, 2 } },
-		{ Btn::DRIGHT, { 2, 2 } },
-		{ Btn::PLUS, { 7, 1 } },
-		{ Btn::MINUS, { 3, 1 } },
-		{ Btn::HOME, { 6, 2 } },
-		{ Btn::CAPT, { 4, 2 } },
-		{ Btn::LS, { 0, 0 } },
-		{ Btn::RS, { 3, 3 } },
-	};
+std::map<Btn, Location> KeyLocs {
+	{ Btn::A, { 10, 2 } },
+	{ Btn::B, { 9, 3 } },
+	{ Btn::X, { 9, 1 } },
+	{ Btn::Y, { 8, 2 } },
+	{ Btn::L, { 3, 0 } },
+	{ Btn::R, { 7, 0 } },
+	{ Btn::ZL, { 2, 0 } },
+	{ Btn::ZR, { 8, 0 } },
+	{ Btn::DUP, { 1, 1 } },
+	{ Btn::DDOWN, { 1, 3 } },
+	{ Btn::DLEFT, { 0, 2 } },
+	{ Btn::DRIGHT, { 2, 2 } },
+	{ Btn::PLUS, { 7, 1 } },
+	{ Btn::MINUS, { 3, 1 } },
+	{ Btn::HOME, { 6, 2 } },
+	{ Btn::CAPT, { 4, 2 } },
+	{ Btn::LS, { 0, 0 } },
+	{ Btn::RS, { 3, 3 } },
+};
 
 // Canvas that the joystick viewer is drawn to
 // https://developer.gnome.org/gtkmm-tutorial/stable/sec-drawing-clock-example.html.en
@@ -75,6 +75,9 @@ protected:
 		cr->translate(0.5, 0.5);
 
 		// TODO do the drawing
+
+		// Sure
+		return true;
 	}
 
 	bool on_timeout() {
@@ -103,12 +106,13 @@ private:
 	Gtk::Grid buttonViewer;
 
 	// The images displayed and their eventboxes (just here to keep a reference)
-	std::map<Btn, std::pair<Gtk::image*, Gtk::EventBox*>> images;
+	std::map<Btn, std::pair<Gtk::Image*, Gtk::EventBox*>> images;
 
 protected:
-	void onButtonPress(Btn button) {
-		// This button has just been clicked, notify the dataProcessor
+	bool onButtonPress(GdkEventButton* event, Btn button) {
+		// This button has just been clicked, notify the dataProcess
 		inputInstance->toggleButtonState(button);
+		return true;
 	}
 
 public:
@@ -117,14 +121,14 @@ public:
 		// Add grid of buttons
 		for(auto const& button : KeyLocs) {
 			// Add the images (the pixbuf can and will be changed later)
-			Gtk::Image* image = new Gtk::image(buttonMapping[button.first]->offIcon);
+			Gtk::Image* image = new Gtk::Image(buttonMapping[button.first]->offIcon);
 			// Add the eventbox
 			Gtk::EventBox* eventBox = new Gtk::EventBox();
 			eventBox->add(*image);
 			eventBox->set_events(Gdk::BUTTON_PRESS_MASK);
 			eventBox->signal_button_press_event().connect(sigc::bind<Btn>(sigc::mem_fun(*this, &BottomUI::onButtonPress), button.first));
 
-			images.insert(std::pair<Btn, std::pair<Gtk::image*, Gtk::EventBox*>>(button.first, std::make_pair(image, eventBox)));
+			images.insert(std::pair<Btn, std::pair<Gtk::Image*, Gtk::EventBox*>>(button.first, std::make_pair(image, eventBox)));
 
 			// Designate the off image as the default
 			buttonViewer.attach(*eventBox, button.second.x, button.second.y);
@@ -133,15 +137,16 @@ public:
 
 	void setInputInstance(DataProcessing* input) {
 		inputInstance = input;
+		inputInstance->setInputCallback(std::bind(&BottomUI::setIconState, this, std::placeholders::_1, std::placeholders::_2));
 	}
 
 	void setIconState(Btn button, bool state) {
 		if(state) {
 			// Set the image to the on image
-			images[button]->set(buttonMapping[button]->onIcon);
+			images[button].first->set(buttonMapping[button]->onIcon);
 		} else {
 			// Set the image to the off image
-			images[button]->set(buttonMapping[button]->offIcon);
+			images[button].first->set(buttonMapping[button]->offIcon);
 		}
 
 		// Don't set value in input instance because it

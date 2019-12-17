@@ -7,14 +7,14 @@
 #include <string>
 
 namespace Helpers {
-	std::string getFilePath (std::string path) {
+	std::string getFilePath(std::string path) {
 		// Just go back one folder :)
 		return "../" + path;
 	}
 
-	void getGlobalSettings (rapidjson::Document* d) {
-		std::ifstream settingsFile (getFilePath ("mainSettings.json"));
-		std::string content ((std::istreambuf_iterator<char> (settingsFile)), (std::istreambuf_iterator<char> ()));
-		d->Parse (content.c_str ());
+	void getGlobalSettings(rapidjson::Document* d) {
+		std::ifstream settingsFile(getFilePath("mainSettings.json"));
+		std::string content((std::istreambuf_iterator<char>(settingsFile)), (std::istreambuf_iterator<char>()));
+		d->Parse(content.c_str());
 	}
 }
