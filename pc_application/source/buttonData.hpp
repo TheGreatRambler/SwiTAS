@@ -61,7 +61,6 @@ struct ControllerData {
 struct ButtonInfo {
 	Glib::ustring scriptName;
 	Glib::ustring viewName;
-	Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>>* columnIcon;
 	Glib::RefPtr<Gdk::Pixbuf> onIcon;
 	Glib::RefPtr<Gdk::Pixbuf> offIcon;
 	guint toggleKeybind;
@@ -76,11 +75,10 @@ Glib::RefPtr<Gdk::Pixbuf> getNewIcon(std::string name) {
 	return Gdk::Pixbuf::create_from_file("/usr/share/icons/gnome/22x22/apps/" + name + ".png");
 }
 
-ButtonInfo* gBI(Glib::ustring scriptName, Glib::ustring viewName, Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>>* columnIcon, Glib::RefPtr<Gdk::Pixbuf> viewIcon, Glib::RefPtr<Gdk::Pixbuf> offIcon, uint8_t toggleKeybind) {
+ButtonInfo* gBI(Glib::ustring scriptName, Glib::ustring viewName, Glib::RefPtr<Gdk::Pixbuf> viewIcon, Glib::RefPtr<Gdk::Pixbuf> offIcon, uint8_t toggleKeybind) {
 	ButtonInfo* thisButtonInfo    = new ButtonInfo();
 	thisButtonInfo->scriptName    = scriptName;
 	thisButtonInfo->viewName      = viewName;
-	thisButtonInfo->columnIcon    = columnIcon;
 	thisButtonInfo->onIcon        = viewIcon;
 	thisButtonInfo->offIcon       = offIcon;
 	thisButtonInfo->toggleKeybind = toggleKeybind;
@@ -94,24 +92,24 @@ ButtonInfo* gBI(Glib::ustring scriptName, Glib::ustring viewName, Gtk::TreeModel
 // TODO finish these
 // https://gitlab.gnome.org/GNOME/gtk/blob/master/gdk/gdkkeysyms.h
 std::map<Btn, ButtonInfo*> buttonMapping {
-	{ Btn::A, gBI("KEY_A", "A Button", getNewColumn(), getNewIcon(""), getNewIcon(""), GDK_KEY_a) },
-	{ Btn::B, gBI("KEY_B", "B Button", getNewColumn(), getNewIcon(""), getNewIcon(""), GDK_KEY_b) },
-	{ Btn::X, gBI("KEY_X", "X Button", getNewColumn(), getNewIcon(""), getNewIcon(""), GDK_KEY_x) },
-	{ Btn::Y, gBI("KEY_Y", "Y Button", getNewColumn(), getNewIcon(""), getNewIcon(""), GDK_KEY_y) },
-	{ Btn::L, gBI("KEY_L", "L Button", getNewColumn(), getNewIcon(""), getNewIcon(""), GDK_KEY_l) },
-	{ Btn::R, gBI("KEY_R", "R Button", getNewColumn(), getNewIcon(""), getNewIcon(""), GDK_KEY_r) },
-	{ Btn::ZL, gBI("KEY_ZL", "ZL Button", getNewColumn(), getNewIcon(""), getNewIcon(""), GDK_KEY_o) },
-	{ Btn::ZR, gBI("KEY_ZR", "ZR Button", getNewColumn(), getNewIcon(""), getNewIcon(""), GDK_KEY_p) },
-	{ Btn::SL, gBI("KEY_SL", "SL Button", getNewColumn(), getNewIcon(""), getNewIcon(""), GDK_KEY_q) },
-	{ Btn::SR, gBI("KEY_SR", "SR Button", getNewColumn(), getNewIcon(""), getNewIcon(""), GDK_KEY_e) },
-	{ Btn::DUP, gBI("KEY_DUP", "Up Dpad", getNewColumn(), getNewIcon(""), getNewIcon(""), GDK_KEY_i) },
-	{ Btn::DDOWN, gBI("KEY_DDOWN", "Down Dpad", getNewColumn(), getNewIcon(""), getNewIcon(""), GDK_KEY_k) },
-	{ Btn::DLEFT, gBI("KEY_DLEFT", "Left Dpad", getNewColumn(), getNewIcon(""), getNewIcon(""), GDK_KEY_j) },
-	{ Btn::DRIGHT, gBI("KEY_DRIGHT", "Right Dpad", getNewColumn(), getNewIcon(""), getNewIcon(""), GDK_KEY_l) },
-	{ Btn::PLUS, gBI("KEY_PLUS", "Plus Button", getNewColumn(), getNewIcon(""), getNewIcon(""), GDK_KEY_equal) }, // Where the plus key is
-	{ Btn::MINUS, gBI("KEY_MINUS", "Minus Button", getNewColumn(), getNewIcon(""), getNewIcon(""), GDK_KEY_minus) },
-	{ Btn::HOME, gBI("KEY_HOME", "Home Button", getNewColumn(), getNewIcon(""), getNewIcon(""), GDK_KEY_h) },
-	{ Btn::CAPT, gBI("KEY_CAPT", "Capture Button", getNewColumn(), getNewIcon(""), getNewIcon(""), GDK_KEY_g) },
-	{ Btn::LS, gBI("KEY_LS", "Left Stick", getNewColumn(), getNewIcon(""), getNewIcon(""), GDK_KEY_t) },
-	{ Btn::RS, gBI("KEY_RS", "Right Stick", getNewColumn(), getNewIcon(""), getNewIcon(""), GDK_KEY_y) },
+	{ Btn::A, gBI("KEY_A", "A Button", getNewIcon(""), getNewIcon(""), GDK_KEY_a) },
+	{ Btn::B, gBI("KEY_B", "B Button", getNewIcon(""), getNewIcon(""), GDK_KEY_b) },
+	{ Btn::X, gBI("KEY_X", "X Button", getNewIcon(""), getNewIcon(""), GDK_KEY_x) },
+	{ Btn::Y, gBI("KEY_Y", "Y Button", getNewIcon(""), getNewIcon(""), GDK_KEY_y) },
+	{ Btn::L, gBI("KEY_L", "L Button", getNewIcon(""), getNewIcon(""), GDK_KEY_l) },
+	{ Btn::R, gBI("KEY_R", "R Button", getNewIcon(""), getNewIcon(""), GDK_KEY_r) },
+	{ Btn::ZL, gBI("KEY_ZL", "ZL Button", getNewIcon(""), getNewIcon(""), GDK_KEY_o) },
+	{ Btn::ZR, gBI("KEY_ZR", "ZR Button", getNewIcon(""), getNewIcon(""), GDK_KEY_p) },
+	{ Btn::SL, gBI("KEY_SL", "SL Button", getNewIcon(""), getNewIcon(""), GDK_KEY_q) },
+	{ Btn::SR, gBI("KEY_SR", "SR Button", getNewIcon(""), getNewIcon(""), GDK_KEY_e) },
+	{ Btn::DUP, gBI("KEY_DUP", "Up Dpad", getNewIcon(""), getNewIcon(""), GDK_KEY_i) },
+	{ Btn::DDOWN, gBI("KEY_DDOWN", "Down Dpad", getNewIcon(""), getNewIcon(""), GDK_KEY_k) },
+	{ Btn::DLEFT, gBI("KEY_DLEFT", "Left Dpad", getNewIcon(""), getNewIcon(""), GDK_KEY_j) },
+	{ Btn::DRIGHT, gBI("KEY_DRIGHT", "Right Dpad", getNewIcon(""), getNewIcon(""), GDK_KEY_l) },
+	{ Btn::PLUS, gBI("KEY_PLUS", "Plus Button", getNewIcon(""), getNewIcon(""), GDK_KEY_equal) }, // Where the plus key is
+	{ Btn::MINUS, gBI("KEY_MINUS", "Minus Button", getNewIcon(""), getNewIcon(""), GDK_KEY_minus) },
+	{ Btn::HOME, gBI("KEY_HOME", "Home Button", getNewIcon(""), getNewIcon(""), GDK_KEY_h) },
+	{ Btn::CAPT, gBI("KEY_CAPT", "Capture Button", getNewIcon(""), getNewIcon(""), GDK_KEY_g) },
+	{ Btn::LS, gBI("KEY_LS", "Left Stick", getNewIcon(""), getNewIcon(""), GDK_KEY_t) },
+	{ Btn::RS, gBI("KEY_RS", "Right Stick", getNewIcon(""), getNewIcon(""), GDK_KEY_y) },
 };

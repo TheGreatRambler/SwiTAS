@@ -32,7 +32,7 @@ public:
 		// Loop through the buttons and add them
 		for(auto const& button : buttonMapping) {
 			// Gets pointer from tuple
-			Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>>* thisIcon = button.second->columnIcon;
+			Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>>* thisIcon = new Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>>();
 			// Add to map for later
 			buttonPixbufs[button.first] = thisIcon;
 			// Add to the columns themselves (gives value, not pointer)
