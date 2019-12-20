@@ -1,0 +1,44 @@
+{
+	"version": "2.0.0",
+	"tasks": [{
+			"label": "Build Make Application",
+			"type": "shell",
+			"command": "C:\\msys2\\usr\\bin\\make.exe -j 4",
+			"options": {
+				"cwd": "${fileDirname}"
+			},
+			"problemMatcher": [{
+				"base": "$gcc",
+				"fileLocation": ["autoDetect", "${fileDirname}"]
+			}],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			}
+		},
+		{
+			"label": "Force build Make Application",
+			"type": "shell",
+			"command": "C:\\msys2\\usr\\bin\\make.exe -B -j 4",
+			"options": {
+				"cwd": "${fileDirname}"
+			},
+			"problemMatcher": [{
+				"base": "$gcc",
+				"fileLocation": ["autoDetect", "${fileDirname}"]
+			}],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			}
+		}
+	]
+}
