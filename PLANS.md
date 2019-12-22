@@ -23,7 +23,7 @@
 1. This method allows you to use the native save-storing method of the chosen game
 2. This allows you to choose a savestate at essentially any location where the game allows you to save
 3. This method simply abstracts away the generic savestate method but builds in a macro to save and load the savefile
-4. It is important to note that both require getting the screenshot of the game in a perfect, repeatable way, which, as of now, is not possible
+4. It is important to note that both require getting the screenshot of the game in a perfect, repeatable way, which, as of now, *may be possible*, follow up to come
 ## Communication with switch (or other targets)
 1. The communication of this program to the target will be a simple WebSocket protocol, transfering things such as the frame changing, inputs changing, obtaining the savestate, etc...
 2. This is intentionally generic enough to allow usage with a Switch but also with an emulator, another TAS system...
