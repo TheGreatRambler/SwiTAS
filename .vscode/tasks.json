@@ -9,7 +9,7 @@
 			},
 			"problemMatcher": [{
 				"base": "$gcc",
-				"fileLocation": ["autoDetect", "${fileDirname}"]
+				"fileLocation": ["autoDetect", "${workspaceFolder}/pc_application"]
 			}],
 			"group": {
 				"kind": "build",
@@ -29,7 +29,7 @@
 			},
 			"problemMatcher": [{
 				"base": "$gcc",
-				"fileLocation": ["autoDetect", "${fileDirname}"]
+				"fileLocation": ["autoDetect", "${workspaceFolder}/pc_application"]
 			}],
 			"group": {
 				"kind": "build",
