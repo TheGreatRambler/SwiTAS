@@ -19,7 +19,7 @@ CFLAGS := -std=gnu11
 # Includes some neccessary flags for Gtkmm
 # Also, import third party headers in `include`
 # Libpath needs to be set right
-CXXFLAGS := -std=c++11 $(shell pkg-config --cflags gtkmm-3.0) -I./include /libpath:.
+CXXFLAGS := -std=c++11 $(shell pkg-config --cflags gtkmm-3.0) -I./include
 # C/C++ flags (no -pendantic)
 # -fpermissive needed for some misbehaving GTK code
 CPPFLAGS := -g -Wall
