@@ -22,7 +22,7 @@ CFLAGS := -std=gnu11
 CXXFLAGS := -std=c++11 $(shell pkg-config --cflags gtkmm-3.0) -I./include
 # C/C++ flags (no -pendantic)
 # -fpermissive needed for some misbehaving GTK code
-CPPFLAGS := -g -Wall
+CPPFLAGS := -g -Wall -fpermissive
 # Linker flags (-lpthread needed for threads)
 # Includes some neccessary linker flags for Gtkmm
 LDFLAGS := -lpthread $(shell pkg-config --libs gtkmm-3.0)

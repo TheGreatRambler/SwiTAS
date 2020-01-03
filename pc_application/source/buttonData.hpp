@@ -66,10 +66,6 @@ struct ButtonInfo {
 	guint toggleKeybind;
 };
 
-Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>>* getNewColumn() {
-	return new Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>>();
-}
-
 Glib::RefPtr<Gdk::Pixbuf> getNewIcon(std::string name) {
 	// https://stackoverflow.com/questions/5894344/gtkmm-how-to-put-a-pixbuf-in-a-treeview
 	return Gdk::Pixbuf::create_from_file("/usr/share/icons/gnome/22x22/apps/" + name + ".png");
