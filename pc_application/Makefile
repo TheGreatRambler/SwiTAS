@@ -25,7 +25,7 @@ CXXFLAGS := -std=c++11 $(shell pkg-config --cflags gtkmm-3.0) -I./include
 CPPFLAGS := -g -Wall -fpermissive
 # Linker flags (-lpthread needed for threads)
 # Includes some neccessary linker flags for Gtkmm
-LDFLAGS := -lpthread $(shell pkg-config --libs gtkmm-3.0)
+LDFLAGS := -lpthread $(shell pkg-config --libs gtkmm-3.0) -DRAPIDJSON_HAS_STDSTRING
 
 SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)

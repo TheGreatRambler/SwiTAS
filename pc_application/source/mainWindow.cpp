@@ -15,6 +15,22 @@ void MainWindow::handlePreviousWindowTransform() {
 	// TODO
 }
 
+void MainWindow::loadButtonData() {
+	// Load button data into global var
+	for(auto& b : mainSettings["buttons"].GetObject()) {
+		Btn chosenButton = stringToButton[b.name.GetString()];
+
+		std::string scriptName   = b.value["scriptName"].GetString();
+		std::string viewName     = b.value["viewName"].GetString();
+		std::string onIconImage  = b.value["onIconImage"].GetString();
+		std::string offIconImage = b.value["offIconImage"].GetString();
+		std::string keybindName  = b.value["triggerKeybind"].GetString();
+		// Get the gtk keyvalue from a gtk function
+		// https://developer.gnome.org/gdk3/stable/gdk3-Keyboard-Handling.html#gdk-keyval-from-name
+		buttonMapping[chosenButton] = gBI(scriptName, viewName, getNewIcon(onIconImage), getNewIcon(offIconImage), gdk_keyval_from_name(keybindName.c_str()));
+	}
+}
+
 MainWindow::MainWindow() {
 	// UI instances
 	sideUI   = new SideUI();
@@ -37,6 +53,8 @@ MainWindow::MainWindow() {
 	add_events(Gdk::KEY_PRESS_MASK);
 	// Get the main settings
 	Helpers::getGlobalSettings(&mainSettings);
+	// Load button data here
+	loadButtonData();
 	handlePreviousWindowTransform();
 }
 

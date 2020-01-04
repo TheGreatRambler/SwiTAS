@@ -15,6 +15,7 @@ namespace Helpers {
 	void getGlobalSettings(rapidjson::Document* d) {
 		std::ifstream settingsFile(getFilePath("mainSettings.json"));
 		std::string content((std::istreambuf_iterator<char>(settingsFile)), (std::istreambuf_iterator<char>()));
-		d->Parse(content.c_str());
+		// Allow comments in JSON
+		d->Parse<rapidjson::kParseCommentsFlag>(content.c_str());
 	}
 }

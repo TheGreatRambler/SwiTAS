@@ -34,7 +34,7 @@ DataProcessing::DataProcessing() {
 		// Append with the string specified by Button Mapping
 		// Get value of columnIcon, not pointer
 		// Default to off
-		treeView.append_column(thisButton.second->viewName, *inputColumns.buttonPixbufs[thisButton.first]);
+		treeView.append_column(thisButton.second.viewName, *inputColumns.buttonPixbufs[thisButton.first]);
 	}
 	// Once all columns are added, do some stuff on them
 	for(auto& column : treeView.get_columns()) {
@@ -67,7 +67,7 @@ void DataProcessing::setButtonState(Btn button, bool state) {
 	// Two pointers have to be deconstructed
 	Gtk::TreeModel::Row row = *controllerListStore->get_iter(currentPath);
 	// Set the image based on the state
-	row[*inputColumns.buttonPixbufs[button]] = state ? buttonMapping[button]->onIcon : buttonMapping[button]->offIcon;
+	row[*inputColumns.buttonPixbufs[button]] = state ? buttonMapping[button].onIcon : buttonMapping[button].offIcon;
 	// Send the update signal
 	controllerListStore->row_changed(currentPath, row);
 	// Focus to this specific row
@@ -115,7 +115,7 @@ void DataProcessing::addNewFrame(bool isFirstFrame = false) {
 	for(auto const& pixbufData : inputColumns.buttonPixbufs) {
 		// Turn all buttons automatically to off
 		// Dereference pointer to get to it
-		row[*pixbufData.second] = buttonMapping[pixbufData.first]->offIcon;
+		row[*pixbufData.second] = buttonMapping[pixbufData.first].offIcon;
 	}
 	// Now, set the index to here so that some stuff can be ran
 	setCurrentFrame(currentFrame);
@@ -125,7 +125,7 @@ void DataProcessing::handleKeyboardInput(guint key) {
 	for(auto const& thisButton : buttonMapping) {
 		// See if it corresponds to the toggle keybind
 		// TODO handle set and clear commands (shift and ctrl)
-		if(key == thisButton.second->toggleKeybind) {
+		if(key == thisButton.second.toggleKeybind) {
 			// Toggle this key and end the loop
 			toggleButtonState(thisButton.first);
 			break;

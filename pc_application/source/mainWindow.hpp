@@ -1,5 +1,6 @@
 #pragma once
 
+#include <gdk/gdkkeys.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/hvbox.h>
 #include <gtkmm/menubar.h>
@@ -39,6 +40,8 @@ private:
 	bool on_key_press_event(GdkEventKey* event) override;
 
 	void handlePreviousWindowTransform();
+
+	void loadButtonData();
 
 public:
 	MainWindow();

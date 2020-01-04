@@ -1,0 +1,144 @@
+{
+	"buttons": {
+		"A": {
+			"scriptName": "KEY_A",
+			"viewName": "",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"triggerKeybind": "a"
+		},
+		"B": {
+			"scriptName": "KEY_B",
+			"viewName": "",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"triggerKeybind": "b"
+		},
+		"X": {
+			"scriptName": "KEY_X",
+			"viewName": "",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"triggerKeybind": "x"
+		},
+		"Y": {
+			"scriptName": "KEY_Y",
+			"viewName": "",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"triggerKeybind": "y"
+		},
+		"L": {
+			"scriptName": "",
+			"viewName": "",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"triggerKeybind": "t"
+		},
+		"R": {
+			"scriptName": "",
+			"viewName": "",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"triggerKeybind": "r"
+		},
+		"ZL": {
+			"scriptName": "",
+			"viewName": "",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"triggerKeybind": "o"
+		},
+		"ZR": {
+			"scriptName": "",
+			"viewName": "",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"triggerKeybind": "p"
+		},
+		"SL": {
+			"scriptName": "",
+			"viewName": "",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"triggerKeybind": "q"
+		},
+		"SR": {
+			"scriptName": "",
+			"viewName": "",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"triggerKeybind": "e"
+		},
+		"DUP": {
+			"scriptName": "",
+			"viewName": "",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"triggerKeybind": "i"
+		},
+		"DDOWN": {
+			"scriptName": "",
+			"viewName": "",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"triggerKeybind": "k"
+		},
+		"DLEFT": {
+			"scriptName": "",
+			"viewName": "",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"triggerKeybind": "j"
+		},
+		"DRIGHT": {
+			"scriptName": "",
+			"viewName": "",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"triggerKeybind": "l"
+		},
+		"PLUS": {
+			"scriptName": "",
+			"viewName": "",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"triggerKeybind": "equal"
+		},
+		"MINUS": {
+			"scriptName": "",
+			"viewName": "",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"triggerKeybind": "minus"
+		},
+		"HOME": {
+			"scriptName": "",
+			"viewName": "",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"triggerKeybind": "h"
+		},
+		"CAPT": {
+			"scriptName": "",
+			"viewName": "",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"triggerKeybind": "g"
+		},
+		"LS": {
+			"scriptName": "",
+			"viewName": "",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"triggerKeybind": "y"
+		},
+		"RS,   ": {
+			"scriptName": "",
+			"viewName": "",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"triggerKeybind": "u"
+		}
+	}
+}
