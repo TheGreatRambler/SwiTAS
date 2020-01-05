@@ -2,24 +2,6 @@
 
 InputColumns::InputColumns() {
 	add(frameNum);
-	// Loop through the buttons and add them
-	for(auto const& button : buttonMapping) {
-		// Gets pointer from tuple
-		Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>>* thisIcon = new Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>>();
-		// Add to map for later
-		buttonPixbufs[button.first] = thisIcon;
-		// Add to the columns themselves (gives value, not pointer)
-		add(*thisIcon);
-	}
-}
-
-void DataProcessing::getCurrentIndex() {
-	// returns a treepath to the current index
-	// Also returns an iterator because apparently that's needed
-	// Clear the variable so it can be reassigned
-	currentPath.clear();
-	// Add the current frame
-	currentPath.push_back(currentFrame);
 }
 
 DataProcessing::DataProcessing() {
@@ -30,7 +12,7 @@ DataProcessing::DataProcessing() {
 	// Add all the columns, this somehow wasn't done already
 	treeView.append_column("Frame", inputColumns.frameNum);
 	// Loop through buttons and add all of them
-	for(auto const& thisButton : buttonMapping) {
+	for(auto const& thisButton : buttonData->buttonMapping) {
 		// Append with the string specified by Button Mapping
 		// Get value of columnIcon, not pointer
 		// Default to off
@@ -50,6 +32,29 @@ DataProcessing::DataProcessing() {
 	addNewFrame(true);
 }
 
+void DataProcessing::getCurrentIndex() {
+	// returns a treepath to the current index
+	// Also returns an iterator because apparently that's needed
+	// Clear the variable so it can be reassigned
+	currentPath.clear();
+	// Add the current frame
+	currentPath.push_back(currentFrame);
+}
+
+void DataProcessing::setButtonData(ButtonData* buttons) {
+	buttonData = buttons;
+	// Set this now that it is recieved
+	// Loop through the buttons and add them
+	for(auto const& button : buttonData->buttonMapping) {
+		// Gets pointer from tuple
+		Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>>* thisIcon = new Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>>();
+		// Add to map for later
+		inputColumns.buttonPixbufs[button.first] = thisIcon;
+		// Add to the columns themselves (gives value, not pointer)
+		add(*thisIcon);
+	}
+}
+
 void DataProcessing::setInputCallback(std::function<void(Btn, bool)> callback) {
 	inputCallback = callback;
 }
@@ -67,7 +72,7 @@ void DataProcessing::setButtonState(Btn button, bool state) {
 	// Two pointers have to be deconstructed
 	Gtk::TreeModel::Row row = *controllerListStore->get_iter(currentPath);
 	// Set the image based on the state
-	row[*inputColumns.buttonPixbufs[button]] = state ? buttonMapping[button].onIcon : buttonMapping[button].offIcon;
+	row[*inputColumns.buttonPixbufs[button]] = state ? buttonData->buttonMapping[button].onIcon : buttonData->buttonMapping[button].offIcon;
 	// Send the update signal
 	controllerListStore->row_changed(currentPath, row);
 	// Focus to this specific row
@@ -115,14 +120,14 @@ void DataProcessing::addNewFrame(bool isFirstFrame = false) {
 	for(auto const& pixbufData : inputColumns.buttonPixbufs) {
 		// Turn all buttons automatically to off
 		// Dereference pointer to get to it
-		row[*pixbufData.second] = buttonMapping[pixbufData.first].offIcon;
+		row[*pixbufData.second] = buttonData->buttonMapping[pixbufData.first].offIcon;
 	}
 	// Now, set the index to here so that some stuff can be ran
 	setCurrentFrame(currentFrame);
 }
 
 void DataProcessing::handleKeyboardInput(guint key) {
-	for(auto const& thisButton : buttonMapping) {
+	for(auto const& thisButton : buttonData->buttonMapping) {
 		// See if it corresponds to the toggle keybind
 		// TODO handle set and clear commands (shift and ctrl)
 		if(key == thisButton.second.toggleKeybind) {

@@ -2,142 +2,142 @@
 	"buttons": {
 		"A": {
 			"scriptName": "KEY_A",
-			"viewName": "",
-			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
-			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"viewName": "A Button",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/Aon.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/Aoff.svg",
 			"triggerKeybind": "a"
 		},
 		"B": {
 			"scriptName": "KEY_B",
-			"viewName": "",
-			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
-			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"viewName": "B Button",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/Bon.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/Boff.svg",
 			"triggerKeybind": "b"
 		},
 		"X": {
 			"scriptName": "KEY_X",
-			"viewName": "",
-			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
-			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"viewName": "X Button",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/Xon.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/Xoff.svg",
 			"triggerKeybind": "x"
 		},
 		"Y": {
 			"scriptName": "KEY_Y",
-			"viewName": "",
-			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
-			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"viewName": "Y Button",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/Yon.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/Yoff.svg",
 			"triggerKeybind": "y"
 		},
 		"L": {
-			"scriptName": "",
-			"viewName": "",
-			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
-			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"scriptName": "KEY_L",
+			"viewName": "L Button",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/Lon.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/Loff.svg",
 			"triggerKeybind": "t"
 		},
 		"R": {
-			"scriptName": "",
-			"viewName": "",
-			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
-			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"scriptName": "KEY_R",
+			"viewName": "R Button",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/Ron.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/Roff.svg",
 			"triggerKeybind": "r"
 		},
 		"ZL": {
-			"scriptName": "",
-			"viewName": "",
-			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
-			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"scriptName": "KEY_ZL",
+			"viewName": "ZL Trigger",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/ZLon.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/ZLoff.svg",
 			"triggerKeybind": "o"
 		},
 		"ZR": {
-			"scriptName": "",
-			"viewName": "",
-			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
-			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"scriptName": "KEY_ZR",
+			"viewName": "ZR Trigger",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/ZRon.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/ZRoff.svg",
 			"triggerKeybind": "p"
 		},
 		"SL": {
-			"scriptName": "",
-			"viewName": "",
-			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
-			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"scriptName": "KEY_SL",
+			"viewName": "SL Trigger",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/SLon.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/SLoff.svg",
 			"triggerKeybind": "q"
 		},
 		"SR": {
-			"scriptName": "",
-			"viewName": "",
-			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
-			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"scriptName": "KEY_SR",
+			"viewName": "SR Trigger",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/SRon.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/SRoff.svg",
 			"triggerKeybind": "e"
 		},
 		"DUP": {
-			"scriptName": "",
-			"viewName": "",
-			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
-			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"scriptName": "KEY_DUP",
+			"viewName": "Up on Dpad",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/UPon.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/UPoff.svg",
 			"triggerKeybind": "i"
 		},
 		"DDOWN": {
-			"scriptName": "",
-			"viewName": "",
-			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
-			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"scriptName": "KEY_DDOWN",
+			"viewName": "Down on Dpad",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/DOWNon.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/DOWNoff.svg",
 			"triggerKeybind": "k"
 		},
 		"DLEFT": {
-			"scriptName": "",
-			"viewName": "",
-			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
-			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"scriptName": "KEY_DLEFT",
+			"viewName": "Left on Dpad",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/LEFTon.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/LEFToff.svg",
 			"triggerKeybind": "j"
 		},
 		"DRIGHT": {
-			"scriptName": "",
-			"viewName": "",
-			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
-			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"scriptName": "KEY_DRIGHT",
+			"viewName": "Right on Dpad",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/RIGHTon.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/RIGHToff.svg",
 			"triggerKeybind": "l"
 		},
 		"PLUS": {
-			"scriptName": "",
-			"viewName": "",
-			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
-			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"scriptName": "KEY_PLUS",
+			"viewName": "Plus Button",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/PLUSon.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/PLUSoff.svg",
 			"triggerKeybind": "equal"
 		},
 		"MINUS": {
-			"scriptName": "",
-			"viewName": "",
-			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
-			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"scriptName": "KEY_MINUS",
+			"viewName": "Minus Button",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/MINUSon.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/MINUSoff.svg",
 			"triggerKeybind": "minus"
 		},
 		"HOME": {
-			"scriptName": "",
-			"viewName": "",
-			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
-			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"scriptName": "KEY_HOME",
+			"viewName": "Home Button",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/HOMEon.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/HOME0ff.svg",
 			"triggerKeybind": "h"
 		},
 		"CAPT": {
-			"scriptName": "",
-			"viewName": "",
-			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
-			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"scriptName": "KEY_CAPT",
+			"viewName": "Capture Button",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/CAPTon.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/CAPToff.svg",
 			"triggerKeybind": "g"
 		},
 		"LS": {
-			"scriptName": "",
-			"viewName": "",
-			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
-			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+			"scriptName": "KEY_LS",
+			"viewName": "LS Trigger",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/LSTICKon.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/LSTICKoff.svg",
 			"triggerKeybind": "y"
 		},
-		"RS,   ": {
-			"scriptName": "",
-			"viewName": "",
-			"onIconImage": "/usr/share/icons/nxtas/scalable/.svg",
-			"offIconImage": "/usr/share/icons/nxtas/scalable/.svg",
+		"RS": {
+			"scriptName": "KEY_RS",
+			"viewName": "RS Trigger",
+			"onIconImage": "/usr/share/icons/nxtas/scalable/RSoff.svg",
+			"offIconImage": "/usr/share/icons/nxtas/scalable/RSon.svg",
 			"triggerKeybind": "u"
 		}
 	}

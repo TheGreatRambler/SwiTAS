@@ -37,6 +37,8 @@ private:
 	std::vector<std::shared_ptr<ControllerData>> inputsList;
 	// Current input
 	std::shared_ptr<ControllerData> currentData;
+	// Button data
+	ButtonData* buttonData;
 	// Current frame
 	uint32_t currentFrame;
 	// Tree data storing the controller stuffs
@@ -56,6 +58,8 @@ private:
 
 public:
 	DataProcessing();
+
+	void setButtonData(ButtonData* buttons);
 
 	void setInputCallback(std::function<void(Btn, bool)> callback);
 

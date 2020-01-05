@@ -77,6 +77,9 @@ private:
 	// Grid containing the button viewer
 	Gtk::Grid buttonViewer;
 
+	// The button mapping instance
+	ButtonData* buttonData;
+
 	// The images displayed and their eventboxes (just here to keep a reference)
 	std::map<Btn, std::pair<Gtk::Image*, Gtk::EventBox*>> images;
 
@@ -85,6 +88,8 @@ protected:
 
 public:
 	BottomUI();
+
+	void setButtonData(ButtonData* buttons);
 
 	void setInputInstance(DataProcessing* input);
 

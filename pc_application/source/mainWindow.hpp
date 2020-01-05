@@ -1,6 +1,7 @@
 #pragma once
 
-#include <gdk/gdkkeys.h>
+#include <fstream>
+#include <gdk/gdk.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/hvbox.h>
 #include <gtkmm/menubar.h>
@@ -8,10 +9,11 @@
 #include <rapidjson/document.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
+#include <string>
 
 #include "bottomUI.hpp"
+#include "buttonData.hpp"
 #include "dataProcessing.hpp"
-#include "helpers.hpp"
 #include "sideUI.hpp"
 
 class MainWindow : public Gtk::Window {
@@ -30,6 +32,9 @@ private:
 	// Main settings variable
 	rapidjson::Document mainSettings;
 
+	// Button data variable
+	ButtonData buttonData;
+
 	// The pointers to the classes containing the uis
 	SideUI* sideUI;
 	BottomUI* bottomUI;
@@ -41,7 +46,9 @@ private:
 
 	void handlePreviousWindowTransform();
 
-	void loadButtonData();
+	std::string getFilePath(std::string path);
+
+	void getGlobalSettings(rapidjson::Document* d);
 
 public:
 	MainWindow();

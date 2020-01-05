@@ -15,20 +15,16 @@ void MainWindow::handlePreviousWindowTransform() {
 	// TODO
 }
 
-void MainWindow::loadButtonData() {
-	// Load button data into global var
-	for(auto& b : mainSettings["buttons"].GetObject()) {
-		Btn chosenButton = stringToButton[b.name.GetString()];
+std::string MainWindow::getFilePath(std::string path) {
+	// Just go back one folder :)
+	return "../" + path;
+}
 
-		std::string scriptName   = b.value["scriptName"].GetString();
-		std::string viewName     = b.value["viewName"].GetString();
-		std::string onIconImage  = b.value["onIconImage"].GetString();
-		std::string offIconImage = b.value["offIconImage"].GetString();
-		std::string keybindName  = b.value["triggerKeybind"].GetString();
-		// Get the gtk keyvalue from a gtk function
-		// https://developer.gnome.org/gdk3/stable/gdk3-Keyboard-Handling.html#gdk-keyval-from-name
-		buttonMapping[chosenButton] = gBI(scriptName, viewName, getNewIcon(onIconImage), getNewIcon(offIconImage), gdk_keyval_from_name(keybindName.c_str()));
-	}
+void MainWindow::getGlobalSettings(rapidjson::Document* d) {
+	std::ifstream settingsFile(getFilePath("mainSettings.json"));
+	std::string content((std::istreambuf_iterator<char>(settingsFile)), (std::istreambuf_iterator<char>()));
+	// Allow comments in JSON
+	d->Parse<rapidjson::kParseCommentsFlag>(content.c_str());
 }
 
 MainWindow::MainWindow() {
@@ -47,14 +43,17 @@ MainWindow::MainWindow() {
 	addLeftUI();
 	// Add bottom UI
 	addBottomUI();
+	// Set button datas
+	bottomUI->setButtonData(&buttonData);
+	dataProcessingInstance->setButtonData(&buttonData);
 	// Adding all the grids
 	addGrids();
 	// Override the keypress handler
 	add_events(Gdk::KEY_PRESS_MASK);
 	// Get the main settings
-	Helpers::getGlobalSettings(&mainSettings);
+	getGlobalSettings(&mainSettings);
 	// Load button data here
-	loadButtonData();
+	buttonData.setupButtonMapping(&mainSettings);
 	handlePreviousWindowTransform();
 }
 

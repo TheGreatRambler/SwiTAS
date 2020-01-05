@@ -46,7 +46,7 @@ BottomUI::BottomUI() {
 	// Add grid of buttons
 	for(auto const& button : KeyLocs) {
 		// Add the images (the pixbuf can and will be changed later)
-		Gtk::Image* image = new Gtk::Image(buttonMapping[button.first]->offIcon);
+		Gtk::Image* image = new Gtk::Image(buttonData->buttonMapping[button.first].offIcon);
 		// Add the eventbox
 		Gtk::EventBox* eventBox = new Gtk::EventBox();
 		eventBox->add(*image);
@@ -60,6 +60,10 @@ BottomUI::BottomUI() {
 	}
 }
 
+void BottomUI::setButtonData(ButtonData* buttons) {
+	buttonData = buttons;
+}
+
 void BottomUI::setInputInstance(DataProcessing* input) {
 	inputInstance = input;
 	inputInstance->setInputCallback(std::bind(&BottomUI::setIconState, this, std::placeholders::_1, std::placeholders::_2));
@@ -68,10 +72,10 @@ void BottomUI::setInputInstance(DataProcessing* input) {
 void BottomUI::setIconState(Btn button, bool state) {
 	if(state) {
 		// Set the image to the on image
-		images[button].first->set(buttonMapping[button]->onIcon);
+		images[button].first->set(buttonData->buttonMapping[button].onIcon);
 	} else {
 		// Set the image to the off image
-		images[button].first->set(buttonMapping[button]->offIcon);
+		images[button].first->set(buttonData->buttonMapping[button].offIcon);
 	}
 
 	// Don't set value in input instance because it
