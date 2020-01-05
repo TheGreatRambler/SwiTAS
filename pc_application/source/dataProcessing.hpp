@@ -57,9 +57,7 @@ private:
 	void getCurrentIndex();
 
 public:
-	DataProcessing();
-
-	void setButtonData(ButtonData* buttons);
+	DataProcessing(ButtonData* buttons);
 
 	void setInputCallback(std::function<void(Btn, bool)> callback);
 

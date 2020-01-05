@@ -7,9 +7,7 @@
 
 #include "dataProcessing.hpp"
 
-enum SEND_FLAGS : uint8_t {
-	INPUTS
-};
+enum SEND_FLAGS : uint8_t { INPUTS };
 
 class InterfaceWithSwitch {
 private:

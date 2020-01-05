@@ -2,7 +2,11 @@
 
 Glib::RefPtr<Gdk::Pixbuf> ButtonData::getNewIcon(std::string path) {
 	// https://stackoverflow.com/questions/5894344/gtkmm-how-to-put-a-pixbuf-in-a-treeview
-	return Gdk::Pixbuf::create_from_file("/usr/share/icons/gnome/22x22/apps/" + path + ".png");
+	try {
+		return Gdk::Pixbuf::create_from_file(path);
+	} catch(const Glib::FileError& fileNotFoundError) {
+		puts(fileNotFoundError.what().c_str());
+	}
 }
 
 void ButtonData::setupButtonMapping(rapidjson::Document* mainSettings) {

@@ -1,3 +1,5 @@
+#define RAPIDJSON_HAS_STDSTRING 1
+
 #include "mainWindow.hpp"
 
 // Override default signal handler:
@@ -28,11 +30,15 @@ void MainWindow::getGlobalSettings(rapidjson::Document* d) {
 }
 
 MainWindow::MainWindow() {
+	// Get the main settings
+	getGlobalSettings(&mainSettings);
+	// Load button data here
+	buttonData.setupButtonMapping(&mainSettings);
 	// UI instances
 	sideUI   = new SideUI();
-	bottomUI = new BottomUI();
+	bottomUI = new BottomUI(&buttonData);
 	// Both UIs need this
-	dataProcessingInstance = new DataProcessing();
+	dataProcessingInstance = new DataProcessing(&buttonData);
 	sideUI->setInputInstance(dataProcessingInstance);
 	bottomUI->setInputInstance(dataProcessingInstance);
 	// Add mainLayout to window
@@ -44,16 +50,10 @@ MainWindow::MainWindow() {
 	// Add bottom UI
 	addBottomUI();
 	// Set button datas
-	bottomUI->setButtonData(&buttonData);
-	dataProcessingInstance->setButtonData(&buttonData);
 	// Adding all the grids
 	addGrids();
 	// Override the keypress handler
 	add_events(Gdk::KEY_PRESS_MASK);
-	// Get the main settings
-	getGlobalSettings(&mainSettings);
-	// Load button data here
-	buttonData.setupButtonMapping(&mainSettings);
 	handlePreviousWindowTransform();
 }
 

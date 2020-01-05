@@ -4,7 +4,8 @@ InputColumns::InputColumns() {
 	add(frameNum);
 }
 
-DataProcessing::DataProcessing() {
+DataProcessing::DataProcessing(ButtonData* buttons) {
+	buttonData = buttons;
 	// Add the list store from the columns
 	controllerListStore = Gtk::ListStore::create(inputColumns);
 	// Set this tree view to this model
@@ -17,6 +18,16 @@ DataProcessing::DataProcessing() {
 		// Get value of columnIcon, not pointer
 		// Default to off
 		treeView.append_column(thisButton.second.viewName, *inputColumns.buttonPixbufs[thisButton.first]);
+	}
+	// Set this now that it is recieved
+	// Loop through the buttons and add them
+	for(auto const& button : buttonData->buttonMapping) {
+		// Gets pointer from tuple
+		Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>>* thisIcon = new Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>>();
+		// Add to map for later
+		inputColumns.buttonPixbufs[button.first] = thisIcon;
+		// Add to the columns themselves (gives value, not pointer)
+		inputColumns.add(*thisIcon);
 	}
 	// Once all columns are added, do some stuff on them
 	for(auto& column : treeView.get_columns()) {
@@ -39,20 +50,6 @@ void DataProcessing::getCurrentIndex() {
 	currentPath.clear();
 	// Add the current frame
 	currentPath.push_back(currentFrame);
-}
-
-void DataProcessing::setButtonData(ButtonData* buttons) {
-	buttonData = buttons;
-	// Set this now that it is recieved
-	// Loop through the buttons and add them
-	for(auto const& button : buttonData->buttonMapping) {
-		// Gets pointer from tuple
-		Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>>* thisIcon = new Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>>();
-		// Add to map for later
-		inputColumns.buttonPixbufs[button.first] = thisIcon;
-		// Add to the columns themselves (gives value, not pointer)
-		add(*thisIcon);
-	}
 }
 
 void DataProcessing::setInputCallback(std::function<void(Btn, bool)> callback) {

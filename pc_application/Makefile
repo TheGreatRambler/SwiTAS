@@ -19,13 +19,13 @@ CFLAGS := -std=gnu11
 # Includes some neccessary flags for Gtkmm
 # Also, import third party headers in `include`
 # Libpath needs to be set right
-CXXFLAGS := -std=c++11 $(shell pkg-config --cflags gtkmm-3.0) -I./include
+CXXFLAGS := -std=c++11 $(shell pkg-config --cflags gtkmm-3.0) $(shell pkg-config --cflags glib-2.0) -I./include
 # C/C++ flags (no -pendantic)
 # -fpermissive needed for some misbehaving GTK code
-CPPFLAGS := -g -Wall -fpermissive
+CPPFLAGS := -Wall -fpermissive -ggdb
 # Linker flags (-lpthread needed for threads)
 # Includes some neccessary linker flags for Gtkmm
-LDFLAGS := -lpthread $(shell pkg-config --libs gtkmm-3.0) -DRAPIDJSON_HAS_STDSTRING
+LDFLAGS := -lpthread $(shell pkg-config --libs gtkmm-3.0) $(shell pkg-config --libs glib-2.0) -lws2_32
 
 SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)

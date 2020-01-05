@@ -41,8 +41,9 @@ bool BottomUI::onButtonPress(GdkEventButton* event, Btn button) {
 	return true;
 }
 
-BottomUI::BottomUI() {
+BottomUI::BottomUI(ButtonData* buttons) {
 	// TODO set up joysticks
+	buttonData = buttons;
 	// Add grid of buttons
 	for(auto const& button : KeyLocs) {
 		// Add the images (the pixbuf can and will be changed later)
@@ -58,10 +59,6 @@ BottomUI::BottomUI() {
 		// Designate the off image as the default
 		buttonViewer.attach(*eventBox, button.second.x, button.second.y);
 	}
-}
-
-void BottomUI::setButtonData(ButtonData* buttons) {
-	buttonData = buttons;
 }
 
 void BottomUI::setInputInstance(DataProcessing* input) {

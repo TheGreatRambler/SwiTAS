@@ -1,3 +1,5 @@
+#define ZED_NET_IMPLEMENTATION 1
+
 #include "interfaceWithSwitch.hpp"
 
 yas::shared_buffer InterfaceWithSwitch::getMainBuffer(SEND_FLAGS flagType) {
