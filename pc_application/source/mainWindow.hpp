@@ -6,6 +6,7 @@
 #include <gtkmm/hvbox.h>
 #include <gtkmm/menubar.h>
 #include <gtkmm/window.h>
+#include <memory>
 #include <rapidjson/document.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
@@ -33,13 +34,13 @@ private:
 	rapidjson::Document mainSettings;
 
 	// Button data variable
-	ButtonData buttonData;
+	std::shared_ptr<ButtonData> buttonData;
 
 	// The pointers to the classes containing the uis
-	SideUI* sideUI;
-	BottomUI* bottomUI;
+	std::shared_ptr<SideUI> sideUI;
+	std::shared_ptr<BottomUI> bottomUI;
 	// Pointer to the class containing important input stuff
-	DataProcessing* dataProcessingInstance;
+	std::shared_ptr<DataProcessing> dataProcessingInstance;
 
 	// Override default signal handler:
 	bool on_key_press_event(GdkEventKey* event) override;

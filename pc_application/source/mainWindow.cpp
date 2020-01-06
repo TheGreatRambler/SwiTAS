@@ -32,13 +32,15 @@ void MainWindow::getGlobalSettings(rapidjson::Document* d) {
 MainWindow::MainWindow() {
 	// Get the main settings
 	getGlobalSettings(&mainSettings);
+	// Set button data instance
+	buttonData = std::make_shared<ButtonData>();
 	// Load button data here
-	buttonData.setupButtonMapping(&mainSettings);
+	buttonData->setupButtonMapping(&mainSettings);
 	// UI instances
-	sideUI   = new SideUI();
-	bottomUI = new BottomUI(&buttonData);
+	sideUI   = std::make_shared<SideUI>();
+	bottomUI = std::make_shared<BottomUI>(buttonData);
 	// Both UIs need this
-	dataProcessingInstance = new DataProcessing(&buttonData);
+	dataProcessingInstance = std::make_shared<DataProcessing>(buttonData);
 	sideUI->setInputInstance(dataProcessingInstance);
 	bottomUI->setInputInstance(dataProcessingInstance);
 	// Add mainLayout to window
@@ -82,8 +84,4 @@ void MainWindow::addBottomUI() {
 	bottomUI->addToGrid(&bottomGrid);
 }
 
-MainWindow::~MainWindow() {
-	delete sideUI;
-	delete bottomUI;
-	delete dataProcessingInstance;
-}
+MainWindow::~MainWindow() {}

@@ -9,6 +9,7 @@
 #include <gtkmm/grid.h>
 #include <gtkmm/image.h>
 #include <map>
+#include <memory>
 #include <utility>
 
 #include "buttonData.hpp"
@@ -72,24 +73,24 @@ private:
 	JoystickCanvas rightJoystick;
 
 	// Input instance to get inputs and such
-	DataProcessing* inputInstance;
+	std::shared_ptr<DataProcessing> inputInstance;
 
 	// Grid containing the button viewer
 	Gtk::Grid buttonViewer;
 
 	// The button mapping instance
-	ButtonData* buttonData;
+	std::shared_ptr<ButtonData> buttonData;
 
 	// The images displayed and their eventboxes (just here to keep a reference)
-	std::map<Btn, std::pair<Gtk::Image*, Gtk::EventBox*>> images;
+	std::map<Btn, std::pair<std::shared_ptr<Gtk::Image>, std::shared_ptr<Gtk::EventBox>>> images;
 
 protected:
 	bool onButtonPress(GdkEventButton* event, Btn button);
 
 public:
-	BottomUI(ButtonData* buttons);
+	BottomUI(std::shared_ptr<ButtonData> buttons);
 
-	void setInputInstance(DataProcessing* input);
+	void setInputInstance(std::shared_ptr<DataProcessing> input);
 
 	void setIconState(Btn button, bool state);
 

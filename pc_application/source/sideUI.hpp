@@ -15,12 +15,12 @@ private:
 	Gtk::Button frameAdvanceButton;
 
 	// Input instance to get inputs and such
-	DataProcessing* inputInstance;
+	std::shared_ptr<DataProcessing> inputInstance;
 
 public:
 	SideUI();
 
-	void setInputInstance(DataProcessing* input);
+	void setInputInstance(std::shared_ptr<DataProcessing> input);
 
 	void addToGrid(Gtk::Grid* theGrid);
 };

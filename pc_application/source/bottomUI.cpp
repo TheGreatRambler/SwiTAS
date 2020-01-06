@@ -41,27 +41,27 @@ bool BottomUI::onButtonPress(GdkEventButton* event, Btn button) {
 	return true;
 }
 
-BottomUI::BottomUI(ButtonData* buttons) {
+BottomUI::BottomUI(std::shared_ptr<ButtonData> buttons) {
 	// TODO set up joysticks
 	buttonData = buttons;
 	// Add grid of buttons
 	for(auto const& button : KeyLocs) {
 		// Add the images (the pixbuf can and will be changed later)
-		Gtk::Image* image = new Gtk::Image(buttonData->buttonMapping[button.first].offIcon);
+		std::shared_ptr<Gtk::Image> image = std::make_shared<Gtk::Image>(buttonData->buttonMapping[button.first].offIcon);
 		// Add the eventbox
-		Gtk::EventBox* eventBox = new Gtk::EventBox();
+		std::shared_ptr<Gtk::EventBox> eventBox = std::make_shared<Gtk::EventBox>();
 		eventBox->add(*image);
 		eventBox->set_events(Gdk::BUTTON_PRESS_MASK);
 		eventBox->signal_button_press_event().connect(sigc::bind<Btn>(sigc::mem_fun(*this, &BottomUI::onButtonPress), button.first));
 
-		images.insert(std::pair<Btn, std::pair<Gtk::Image*, Gtk::EventBox*>>(button.first, std::make_pair(image, eventBox)));
+		images.insert(std::pair<Btn, std::pair<std::shared_ptr<Gtk::Image>, std::shared_ptr<Gtk::EventBox>>>(button.first, { image, eventBox }));
 
 		// Designate the off image as the default
 		buttonViewer.attach(*eventBox, button.second.x, button.second.y);
 	}
 }
 
-void BottomUI::setInputInstance(DataProcessing* input) {
+void BottomUI::setInputInstance(std::shared_ptr<DataProcessing> input) {
 	inputInstance = input;
 	inputInstance->setInputCallback(std::bind(&BottomUI::setIconState, this, std::placeholders::_1, std::placeholders::_2));
 }
@@ -87,9 +87,9 @@ void BottomUI::addToGrid(Gtk::Grid* theGrid) {
 
 BottomUI::~BottomUI() {
 	// Deallocate all the images
-	for(auto const& image : images) {
-		// Free images and eventbox
-		free(image.second.first);
-		free(image.second.second);
-	}
+	// for(auto const& image : images) {
+	// Free images and eventbox
+	// free(image.second.first);
+	// free(image.second.second);
+	//}
 }

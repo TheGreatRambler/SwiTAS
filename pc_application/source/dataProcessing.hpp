@@ -13,6 +13,7 @@
 #include <gtkmm/treepath.h>
 #include <gtkmm/treeview.h>
 #include <map>
+#include <memory>
 #include <string>
 #include <tuple>
 #include <utility>
@@ -25,7 +26,7 @@ public:
 	Gtk::TreeModelColumn<uint32_t> frameNum;
 	// All the buttons are stored inside of buttonMapping
 	// https://developer.gnome.org/gtkmm-tutorial/stable/sec-treeview-examples.html.en
-	std::map<Btn, Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>>*> buttonPixbufs;
+	std::map<Btn, Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>>> buttonPixbufs;
 
 	InputColumns();
 };
@@ -38,7 +39,7 @@ private:
 	// Current input
 	std::shared_ptr<ControllerData> currentData;
 	// Button data
-	ButtonData* buttonData;
+	std::shared_ptr<ButtonData> buttonData;
 	// Current frame
 	uint32_t currentFrame;
 	// Tree data storing the controller stuffs
@@ -48,7 +49,7 @@ private:
 	// Tree view viewed in the UI
 	Gtk::TreeView treeView;
 	// Scrollable data window
-	Gtk::ScrolledWindow scrolledWindow;
+	std::shared_ptr<Gtk::ScrolledWindow> scrolledWindow;
 	// Current path and current iterator to save on CPU
 	Gtk::TreePath currentPath;
 	// Using callbacks for inputs
@@ -57,7 +58,7 @@ private:
 	void getCurrentIndex();
 
 public:
-	DataProcessing(ButtonData* buttons);
+	DataProcessing(std::shared_ptr<ButtonData> buttons);
 
 	void setInputCallback(std::function<void(Btn, bool)> callback);
 
@@ -73,5 +74,5 @@ public:
 
 	void handleKeyboardInput(guint key);
 
-	Gtk::ScrolledWindow* getWindow();
+	std::shared_ptr<Gtk::ScrolledWindow> getWindow();
 };

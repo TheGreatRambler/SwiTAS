@@ -3,6 +3,7 @@
 #include <bitset>
 #include <cstdio>
 #include <gdkmm/pixbuf.h>
+#include <glibmm/fileutils.h>
 #include <glibmm/refptr.h>
 #include <glibmm/ustring.h>
 #include <gtkmm/treemodelcolumn.h>
@@ -11,7 +12,6 @@
 #include <rapidjson/writer.h>
 #include <unordered_map>
 #include <utility>
-#include <glibmm/fileutils.h>
 
 // Array including all button information
 // Index is button Id, returns Button script name, Button print name, Button

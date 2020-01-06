@@ -15,7 +15,7 @@ SideUI::SideUI() {
 	playButtons.add(frameAdvanceButton);
 }
 
-void SideUI::setInputInstance(DataProcessing* input) {
+void SideUI::setInputInstance(std::shared_ptr<DataProcessing> input) {
 	inputInstance = input;
 }
 
