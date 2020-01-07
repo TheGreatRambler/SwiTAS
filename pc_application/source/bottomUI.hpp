@@ -7,6 +7,7 @@
 #include <gtkmm/drawingarea.h>
 #include <gtkmm/eventbox.h>
 #include <gtkmm/grid.h>
+#include <gtkmm/hvbox.h>
 #include <gtkmm/image.h>
 #include <map>
 #include <memory>
@@ -94,7 +95,7 @@ public:
 
 	void setIconState(Btn button, bool state);
 
-	void addToGrid(Gtk::Grid* theGrid);
+	void addToGrid(Gtk::HBox* theGrid);
 
 	~BottomUI();
 };

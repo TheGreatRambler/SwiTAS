@@ -38,7 +38,7 @@ DataProcessing::DataProcessing(std::shared_ptr<ButtonData> buttons) {
 	// Only show the scrollbars when they are necessary:
 	scrolledWindow->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	// Add this first frame
-	addNewFrame(true);
+	addNewFrame();
 }
 
 void DataProcessing::getCurrentIndex() {
@@ -98,13 +98,11 @@ void DataProcessing::setCurrentFrame(uint32_t frameNum) {
 	}
 }
 
-void DataProcessing::addNewFrame(bool isFirstFrame = false) {
-	if(!isFirstFrame) {
-		// On the first frame, it is already set right
-		// This will automatically add at the end even when the
-		// Current frame is not the most recent
-		currentFrame = inputsList.size();
-	}
+void DataProcessing::addNewFrame() {
+	// On the first frame, it is already set right (because the size is zero)
+	// This will automatically add at the end even when the
+	// Current frame is not the most recent
+	currentFrame = inputsList.size();
 	// Will overwrite previous frame if need be
 	currentData = std::make_shared<ControllerData>();
 	// Add this to the vector

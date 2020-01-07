@@ -70,7 +70,7 @@ public:
 
 	void setCurrentFrame(uint32_t frameNum);
 
-	void addNewFrame(bool isFirstFrame = false);
+	void addNewFrame();
 
 	void handleKeyboardInput(guint key);
 

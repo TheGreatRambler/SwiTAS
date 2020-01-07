@@ -79,10 +79,10 @@ void BottomUI::setIconState(Btn button, bool state) {
 	// Was the one that sent us here
 }
 
-void BottomUI::addToGrid(Gtk::Grid* theGrid) {
-	theGrid->attach(leftJoystick, 0, 0);
-	theGrid->attach(rightJoystick, 1, 0);
-	theGrid->attach(buttonViewer, 2, 0);
+void BottomUI::addToGrid(Gtk::HBox* theGrid) {
+	theGrid->pack_start(leftJoystick);
+	theGrid->pack_start(rightJoystick);
+	theGrid->pack_start(buttonViewer);
 }
 
 BottomUI::~BottomUI() {

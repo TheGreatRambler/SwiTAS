@@ -21,12 +21,14 @@ class MainWindow : public Gtk::Window {
 private:
 	// Layout that contains all items, including the menubar
 	Gtk::VBox mainLayout;
-	// Grid where all the layout stuff is dealt with
-	Gtk::Grid mainGrid;
+	// Layout that contains all the app content
+	Gtk::HBox mainContent;
+	// Layout that contains things on the right
+	Gtk::VBox rightSideBox;
 	// Grid containing the left hand side widgets
-	Gtk::Grid leftGrid;
+	Gtk::VBox leftGrid;
 	// Grid containing the bottom widgets
-	Gtk::Grid bottomGrid;
+	Gtk::HBox bottomGrid;
 	// Menu bar containing "open file", etc...
 	Gtk::MenuBar menuBar;
 
@@ -46,8 +48,6 @@ private:
 	bool on_key_press_event(GdkEventKey* event) override;
 
 	void handlePreviousWindowTransform();
-
-	std::string getFilePath(std::string path);
 
 	void getGlobalSettings(rapidjson::Document* d);
 

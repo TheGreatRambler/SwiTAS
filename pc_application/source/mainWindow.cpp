@@ -17,13 +17,8 @@ void MainWindow::handlePreviousWindowTransform() {
 	// TODO
 }
 
-std::string MainWindow::getFilePath(std::string path) {
-	// Just go back one folder :)
-	return "../" + path;
-}
-
 void MainWindow::getGlobalSettings(rapidjson::Document* d) {
-	std::ifstream settingsFile(getFilePath("mainSettings.json"));
+	std::ifstream settingsFile("../mainSettings.json");
 	std::string content((std::istreambuf_iterator<char>(settingsFile)), (std::istreambuf_iterator<char>()));
 	// Allow comments in JSON
 	d->Parse<rapidjson::kParseCommentsFlag>(content.c_str());
@@ -32,6 +27,8 @@ void MainWindow::getGlobalSettings(rapidjson::Document* d) {
 MainWindow::MainWindow() {
 	// Get the main settings
 	getGlobalSettings(&mainSettings);
+	// Set icon to value in program settings
+	set_icon_from_file(mainSettings["programIcon"].GetString());
 	// Set button data instance
 	buttonData = std::make_shared<ButtonData>();
 	// Load button data here
@@ -54,20 +51,24 @@ MainWindow::MainWindow() {
 	// Set button datas
 	// Adding all the grids
 	addGrids();
+	// Show every item currently present
+	show_all();
 	// Override the keypress handler
 	add_events(Gdk::KEY_PRESS_MASK);
 	handlePreviousWindowTransform();
 }
 
 void MainWindow::addGrids() {
-	// Add left grid spanning the whole left side
-	mainGrid.attach(leftGrid, 0, 0, 1, 2);
-	// Add bottom grid spanning the rest of the bottom
-	mainGrid.attach(bottomGrid, 1, 1, 1, 1);
-	// Shows all the items in this container
-	mainGrid.show_all();
+	mainContent.pack_start(leftGrid, Gtk::PACK_EXPAND_WIDGET);
+	leftGrid.set_halign(Gtk::ALIGN_FILL);
+	leftGrid.set_valign(Gtk::ALIGN_FILL);
+	// Will have game viewer eventually
+	rightSideBox.pack_start(bottomGrid, Gtk::PACK_SHRINK);
+	rightSideBox.set_valign(Gtk::ALIGN_END);
+	bottomGrid.set_halign(Gtk::ALIGN_FILL);
+	mainContent.pack_start(rightSideBox);
 	// Add all of them to the current layout
-	mainLayout.pack_start(mainGrid, Gtk::PACK_SHRINK);
+	mainLayout.pack_start(mainContent);
 }
 
 void MainWindow::addMenuBar() {
