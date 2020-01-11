@@ -2,6 +2,7 @@
 # Might be important https://stackoverflow.com/questions/26738025/gtk-icon-missing-when-running-in-ms-windows/34673860#34673860
 # Same with this http://www.tarnyko.net/repo/gtk3_build_system/tutorial/gtk3_tutorial.htm
 # https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer
+# This needs to be set on run TODO GTK_EXE_PREFIX=[root of project with trailing /]
 # No extension for the executable
 TARGET_EXEC ?= nxtas.exe
 
