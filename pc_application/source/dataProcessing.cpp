@@ -13,6 +13,8 @@ DataProcessing::DataProcessing(std::shared_ptr<ButtonData> buttons) {
 	treeView.set_model(controllerListStore);
 	// Add all the columns, this somehow wasn't done already
 	treeView.append_column("Frame", inputColumns.frameNum);
+	// Disable searching because it breaks stuff
+	treeView.set_enable_search(false);
 	// Loop through buttons and add all of them
 	// Set this now that it is recieved
 	// Loop through the buttons and add them
@@ -23,7 +25,7 @@ DataProcessing::DataProcessing(std::shared_ptr<ButtonData> buttons) {
 		// Add to map for later
 		inputColumns.buttonPixbufs[button.first] = thisIcon;
 		// Append now
-		treeView.append_column(button.second.viewName, thisIcon);
+		treeView.append_column(button.second.scriptName, thisIcon);
 		// Add to the columns themselves (gives value, not pointer)
 		inputColumns.add(thisIcon);
 	}
@@ -56,12 +58,12 @@ void DataProcessing::setInputCallback(std::function<void(Btn, bool)> callback) {
 
 bool DataProcessing::getButtonState(Btn button) {
 	// Get value from the bitset
-	return currentData->buttons.test(button);
+	return currentData->buttons[button];
 }
 
 void DataProcessing::setButtonState(Btn button, bool state) {
 	// If state is true, on, else off
-	currentData->buttons.set(button, state);
+	currentData->buttons[button] = state;
 	// Get the index of the treeview
 	// The state is being changed, so so does the UI
 	// Two pointers have to be deconstructed
@@ -113,7 +115,8 @@ void DataProcessing::addNewFrame() {
 	for(auto const& pixbufData : inputColumns.buttonPixbufs) {
 		// Turn all buttons automatically to off
 		// Dereference pointer to get to it
-		row[pixbufData.second] = buttonData->buttonMapping[pixbufData.first].offIcon;
+		// Set all to off
+		setButtonState(pixbufData.first, false);
 	}
 	// Now, set the index to here so that some stuff can be ran
 	setCurrentFrame(currentFrame);

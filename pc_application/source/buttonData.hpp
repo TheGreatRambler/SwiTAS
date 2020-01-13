@@ -83,7 +83,7 @@ public:
 		// 20 buttons
 		// This storage can be sacrificed for the simple reason that the other data
 		// already takes up so much space
-		std::bitset<20> buttons;
+		uint8_t buttons[20];
 		// Joystick values
 		int16_t LS_X = 0;
 		int16_t LS_Y = 0;
