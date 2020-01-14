@@ -1,28 +1,43 @@
 #pragma once
 
-#include <cstdint>
-#include <yas/serialize.hpp>
-#include <yas/std_types.hpp>
-#include <zed_net.h>
+#include <arpa/inet.h>
+#include <errno.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <zpp.hpp>
 
-#include "dataProcessing.hpp"
+#include "serializeData.hpp"
 
-enum SEND_FLAGS : uint8_t { INPUTS };
+#define SERVER_PORT 6978
 
-class InterfaceWithSwitch {
+class CommunicateWithSwitch {
 private:
-	std::shared_ptr<DataProcessing> dataProcessing;
+	struct sockaddr_in serv_addr;
 
-	constexpr static std::size_t yasFlags = yas::mem | yas::binary;
+	int sockfd = 0;
 
-	zed_net_socket_t communicationSocket;
-	constexpr static unsigned short port = 4466;
+	uint8_t connectedToServer;
 
-	// Get the buffer to be sent to the switch, the full one
-	yas::shared_buffer getMainBuffer(SEND_FLAGS flagType);
+	bool sendSocketHelper(void* data, uint16_t size);
+
+	bool readSocketHelper(void* data, uint16_t size);
+
+	bool blockUntilReady();
+
+	void unserializeData(uint8_t* buf, uint16_t bufSize, DataFlag flag);
+
+	void handleSocketError();
 
 public:
-	InterfaceWithSwitch(std::shared_ptr<DataProcessing> dataProcessingInstance);
+	CommunicateWithSwitch();
 
-	~InterfaceWithSwitch();
-};
+	void setIpAddress(char* ip);
+
+	~CommunicateWithSwitch();
+}
