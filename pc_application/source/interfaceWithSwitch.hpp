@@ -12,18 +12,23 @@
 #include <unistd.h>
 #include <zpp.hpp>
 
-#include "serializeData.hpp"
+#include "serializeUnserializeData.hpp"
 
 #define SERVER_PORT 6978
 
 class CommunicateWithSwitch {
 private:
+	enum DataFlag : uint8_t {
+		SET_GAME_INFO,
+	};
+
 	struct sockaddr_in serv_addr;
 
 	int sockfd = 0;
 
 	uint8_t connectedToServer;
 
+	// Important to note, messages can be sent at ANY time
 	bool sendSocketHelper(void* data, uint16_t size);
 
 	bool readSocketHelper(void* data, uint16_t size);
@@ -38,6 +43,9 @@ public:
 	CommunicateWithSwitch();
 
 	void setIpAddress(char* ip);
+
+	// Called in the main loop
+	void listenForSwitchCommands();
 
 	~CommunicateWithSwitch();
 }

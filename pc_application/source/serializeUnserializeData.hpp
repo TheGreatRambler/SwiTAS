@@ -7,7 +7,7 @@
 
 // Structs for the
 struct Protocol_SetProjectName {
-	uint8_t flag;
+	std::string name;
 }
 
 namespace SerializeProtocol {

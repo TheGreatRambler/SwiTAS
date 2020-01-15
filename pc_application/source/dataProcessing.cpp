@@ -43,13 +43,9 @@ DataProcessing::DataProcessing(std::shared_ptr<ButtonData> buttons) {
 	addNewFrame();
 }
 
-void DataProcessing::getCurrentIndex() {
-	// returns a treepath to the current index
-	// Also returns an iterator because apparently that's needed
-	// Clear the variable so it can be reassigned
-	currentPath.clear();
-	// Add the current frame
-	currentPath.push_back(currentFrame);
+Gtk::TreeModel::Row DataProcessing::getRowAtIndex(std::size_t index) {
+	// https://developer.gnome.org/gtkmm-tutorial/stable/sec-iterating-over-model-rows.html.en
+	return *(controllerListStore->children()[index]);
 }
 
 void DataProcessing::setInputCallback(std::function<void(Btn, bool)> callback) {
@@ -67,13 +63,13 @@ void DataProcessing::setButtonState(Btn button, bool state) {
 	// Get the index of the treeview
 	// The state is being changed, so so does the UI
 	// Two pointers have to be deconstructed
-	Gtk::TreeModel::Row row = *controllerListStore->get_iter(currentPath);
+	Gtk::TreeModel::Row row = getRowAtIndex(currentFrame);
 	// Set the image based on the state
 	row[inputColumns.buttonPixbufs[button]] = state ? buttonData->buttonMapping[button].onIcon : buttonData->buttonMapping[button].offIcon;
-	// Send the update signal
-	controllerListStore->row_changed(currentPath, row);
+	// Send the update signal TODO
+	// controllerListStore->row_changed(currentPath, row);
 	// Focus to this specific row
-	treeView.scroll_to_row(currentPath);
+	// treeView.scroll_to_row(currentPath);
 	// BottomUI needs to know the state changed, even if it
 	// Was the one to make us aware in the first place
 	inputCallback(button, state);
@@ -92,9 +88,6 @@ void DataProcessing::setCurrentFrame(uint32_t frameNum) {
 		currentData = inputsList[frameNum];
 		// Set the current frame to this number
 		currentFrame = frameNum;
-		// Kinda a misnomer, but this will set the current
-		// index for those functions That need it
-		getCurrentIndex();
 		// Focus to this specific row now
 		treeView.scroll_to_row(currentPath);
 	}

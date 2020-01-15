@@ -8,6 +8,7 @@
 #include <glibmm/refptr.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/scrolledwindow.h>
+#include <gtkmm/treeiter.h>
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treemodelcolumn.h>
 #include <gtkmm/treepath.h>
@@ -50,12 +51,10 @@ private:
 	Gtk::TreeView treeView;
 	// Scrollable data window
 	std::shared_ptr<Gtk::ScrolledWindow> scrolledWindow;
-	// Current path and current iterator to save on CPU
-	Gtk::TreePath currentPath;
 	// Using callbacks for inputs
 	std::function<void(Btn, bool)> inputCallback;
 
-	void getCurrentIndex();
+	Gtk::TreeModel::Row getRowAtIndex(std::size_t index);
 
 public:
 	DataProcessing(std::shared_ptr<ButtonData> buttons);
