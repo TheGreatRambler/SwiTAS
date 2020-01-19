@@ -28,14 +28,11 @@ MainWindow::MainWindow() {
 	wxFrame((wxFrame*)NULL, -1, "NX TAS UI", wxDefaultPosition, wxSize(300, 200));
 	// Get the main settings
 	getGlobalSettings(&mainSettings);
+
 	wxIcon mainicon;
 	mainicon.LoadFile(mainSettings["programIcon"].GetString());
 	SetIcon(mainicon);
 
-	
-
-	// Set icon to value in program settings
-	set_icon_from_file(mainSettings["programIcon"].GetString());
 	// Set button data instance
 	buttonData = std::make_shared<ButtonData>();
 	// Load button data here
@@ -47,6 +44,7 @@ MainWindow::MainWindow() {
 	dataProcessingInstance = std::make_shared<DataProcessing>(buttonData);
 	sideUI->setInputInstance(dataProcessingInstance);
 	bottomUI->setInputInstance(dataProcessingInstance);
+
 	// Add mainLayout to window
 	add(mainLayout);
 	// Add the top menubar
@@ -60,6 +58,11 @@ MainWindow::MainWindow() {
 	addGrids();
 	// Show every item currently present
 	show_all();
+
+	SetSizer(&mainSizer);
+	SetMinSize(wxSize(270, 220));
+	Center();
+
 	// Override the keypress handler
 	add_events(Gdk::KEY_PRESS_MASK);
 	handlePreviousWindowTransform();
@@ -85,11 +88,11 @@ void MainWindow::addMenuBar() {
 }
 
 void MainWindow::addLeftUI() {
-	sideUI->addToGrid(&leftGrid);
+	sideUI->addToGrid(&mainSizer);
 }
 
 void MainWindow::addBottomUI() {
-	bottomUI->addToGrid(&bottomGrid);
+	bottomUI->addToGrid(&mainSizer);
 }
 
-MainWindow::~MainWindow() {}
+MainWindow::~MainWindow() { }

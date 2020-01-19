@@ -1,11 +1,6 @@
 #pragma once
 
-#include <gdkmm/screen.h>
-#include <gtkmm/button.h>
-#include <gtkmm/buttonbox.h>
-#include <gtkmm/grid.h>
-#include <gtkmm/hvbox.h>
-#include <gtkmm/image.h>
+#include <wx/sizer.h>
 
 #include "dataProcessing.hpp"
 
@@ -30,5 +25,5 @@ public:
 
 	void setInputInstance(std::shared_ptr<DataProcessing> input);
 
-	void addToGrid(Gtk::VBox* theGrid);
+	void addToGrid(wxFlexGridSizer* theGrid);
 };

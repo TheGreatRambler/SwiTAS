@@ -1,23 +1,26 @@
 #pragma once
 
-#include <cairomm/context.h>
 #include <functional>
-#include <gdkmm/rectangle.h>
-#include <glibmm/main.h>
-#include <gtkmm/drawingarea.h>
-#include <gtkmm/eventbox.h>
-#include <gtkmm/grid.h>
-#include <gtkmm/hvbox.h>
-#include <gtkmm/image.h>
 #include <map>
 #include <memory>
 #include <utility>
+#include <wx/glcanvas.h>
+#include <wx/sizer.h>
+#ifdef __WXMAC__
+#include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
+#endif
+#ifndef WIN32
+#include <unistd.h>
 
 #include "buttonData.hpp"
 #include "dataProcessing.hpp"
 
 // Canvas that the joystick viewer is drawn to
 // https://developer.gnome.org/gtkmm-tutorial/stable/sec-drawing-clock-example.html.en
+
+// https://wiki.wxwidgets.org/WxGLCanvas
 class JoystickCanvas : public Gtk::DrawingArea {
 public:
 	JoystickCanvas();
@@ -77,7 +80,7 @@ private:
 	std::shared_ptr<DataProcessing> inputInstance;
 
 	// Grid containing the button viewer
-	Gtk::Grid buttonViewer;
+	wxGridSizer buttonGrid;
 
 	// The button mapping instance
 	std::shared_ptr<ButtonData> buttonData;
@@ -95,7 +98,7 @@ public:
 
 	void setIconState(Btn button, bool state);
 
-	void addToGrid(Gtk::HBox* theGrid);
+	void addToGrid(wxFlexGridSizer* theGrid);
 
 	~BottomUI();
 };

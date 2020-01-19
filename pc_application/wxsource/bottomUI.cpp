@@ -79,7 +79,8 @@ void BottomUI::setIconState(Btn button, bool state) {
 	// Was the one that sent us here
 }
 
-void BottomUI::addToGrid(Gtk::HBox* theGrid) {
+void BottomUI::addToGrid(wxFlexGridSizer* theGrid) {
+    theGrid->Add();
 	theGrid->pack_start(leftJoystick);
 	theGrid->pack_start(rightJoystick);
 	theGrid->pack_start(buttonViewer);
