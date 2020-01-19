@@ -1,39 +1,15 @@
 #include "bottomUI.hpp"
 
 JoystickCanvas::JoystickCanvas() {
-	// Don't know why this is needed
-	// Force a redraw every 30 milliseconds
-	Glib::signal_timeout().connect(sigc::mem_fun(*this, &JoystickCanvas::on_timeout), 30);
+	wxGLCanvas();
 }
 
 // Override default signal handler:
-bool JoystickCanvas::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
-	Gtk::Allocation allocation = get_allocation();
-	const int width            = allocation.get_width();
-	const int height           = allocation.get_height();
-
-	// scale to unit square and translate (0, 0) to be (0.5, 0.5), i.e.
-	// the center of the window
-	cr->scale(width, height);
-	cr->translate(0.5, 0.5);
-
-	// TODO do the drawing
-
-	// Sure
-	return true;
+bool JoystickCanvas::draw() {
+	// Use nanovg to draw a circle
 }
 
-bool JoystickCanvas::on_timeout() {
-	// Apparently this is needed
-	// force our program to redraw the entire clock.
-	auto win = get_window();
-	if(win) {
-		Gdk::Rectangle r(0, 0, get_allocation().get_width(), get_allocation().get_height());
-		// Invalidate the canvas so it is drawn again
-		win->invalidate_rect(r, false);
-	}
-	return true;
-}
+bool JoystickCanvas::OnIdle() { }
 
 bool BottomUI::onButtonPress(GdkEventButton* event, Btn button) {
 	// This button has just been clicked, notify the dataProcess
@@ -80,7 +56,7 @@ void BottomUI::setIconState(Btn button, bool state) {
 }
 
 void BottomUI::addToGrid(wxFlexGridSizer* theGrid) {
-    theGrid->Add();
+	theGrid->Add();
 	theGrid->pack_start(leftJoystick);
 	theGrid->pack_start(rightJoystick);
 	theGrid->pack_start(buttonViewer);

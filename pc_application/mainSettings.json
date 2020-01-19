@@ -1,145 +1,145 @@
 {
-	"buttons": {
-		"A": {
-			"scriptName": "KEY_A",
-			"viewName": "A Button",
-			"onIconImage": "../share/icons/nxtas/inputs/Aon.svg",
-			"offIconImage": "../share/icons/nxtas/inputs/Aoff.svg",
-			"triggerKeybind": "a"
-		},
-		"B": {
-			"scriptName": "KEY_B",
-			"viewName": "B Button",
-			"onIconImage": "../share/icons/nxtas/inputs/Bon.svg",
-			"offIconImage": "../share/icons/nxtas/inputs/Boff.svg",
-			"triggerKeybind": "b"
-		},
-		"X": {
-			"scriptName": "KEY_X",
-			"viewName": "X Button",
-			"onIconImage": "../share/icons/nxtas/inputs/Xon.svg",
-			"offIconImage": "../share/icons/nxtas/inputs/Xoff.svg",
-			"triggerKeybind": "x"
-		},
-		"Y": {
-			"scriptName": "KEY_Y",
-			"viewName": "Y Button",
-			"onIconImage": "../share/icons/nxtas/inputs/Yon.svg",
-			"offIconImage": "../share/icons/nxtas/inputs/Yoff.svg",
-			"triggerKeybind": "y"
-		},
-		"L": {
-			"scriptName": "KEY_L",
-			"viewName": "L Button",
-			"onIconImage": "../share/icons/nxtas/inputs/Lon.svg",
-			"offIconImage": "../share/icons/nxtas/inputs/Loff.svg",
-			"triggerKeybind": "t"
-		},
-		"R": {
-			"scriptName": "KEY_R",
-			"viewName": "R Button",
-			"onIconImage": "../share/icons/nxtas/inputs/Ron.svg",
-			"offIconImage": "../share/icons/nxtas/inputs/Roff.svg",
-			"triggerKeybind": "r"
-		},
-		"ZL": {
-			"scriptName": "KEY_ZL",
-			"viewName": "ZL Trigger",
-			"onIconImage": "../share/icons/nxtas/inputs/ZLon.svg",
-			"offIconImage": "../share/icons/nxtas/inputs/ZLoff.svg",
-			"triggerKeybind": "o"
-		},
-		"ZR": {
-			"scriptName": "KEY_ZR",
-			"viewName": "ZR Trigger",
-			"onIconImage": "../share/icons/nxtas/inputs/ZRon.svg",
-			"offIconImage": "../share/icons/nxtas/inputs/ZRoff.svg",
-			"triggerKeybind": "p"
-		},
-		"SL": {
-			"scriptName": "KEY_SL",
-			"viewName": "SL Trigger",
-			"onIconImage": "../share/icons/nxtas/inputs/SLon.svg",
-			"offIconImage": "../share/icons/nxtas/inputs/SLoff.svg",
-			"triggerKeybind": "q"
-		},
-		"SR": {
-			"scriptName": "KEY_SR",
-			"viewName": "SR Trigger",
-			"onIconImage": "../share/icons/nxtas/inputs/SRon.svg",
-			"offIconImage": "../share/icons/nxtas/inputs/SRoff.svg",
-			"triggerKeybind": "e"
-		},
-		"DUP": {
-			"scriptName": "KEY_DUP",
-			"viewName": "Up on Dpad",
-			"onIconImage": "../share/icons/nxtas/inputs/UPon.svg",
-			"offIconImage": "../share/icons/nxtas/inputs/UPoff.svg",
-			"triggerKeybind": "i"
-		},
-		"DDOWN": {
-			"scriptName": "KEY_DDOWN",
-			"viewName": "Down on Dpad",
-			"onIconImage": "../share/icons/nxtas/inputs/DOWNon.svg",
-			"offIconImage": "../share/icons/nxtas/inputs/DOWNoff.svg",
-			"triggerKeybind": "k"
-		},
-		"DLEFT": {
-			"scriptName": "KEY_DLEFT",
-			"viewName": "Left on Dpad",
-			"onIconImage": "../share/icons/nxtas/inputs/LEFTon.svg",
-			"offIconImage": "../share/icons/nxtas/inputs/LEFToff.svg",
-			"triggerKeybind": "j"
-		},
-		"DRIGHT": {
-			"scriptName": "KEY_DRIGHT",
-			"viewName": "Right on Dpad",
-			"onIconImage": "../share/icons/nxtas/inputs/RIGHTon.svg",
-			"offIconImage": "../share/icons/nxtas/inputs/RIGHToff.svg",
-			"triggerKeybind": "l"
-		},
-		"PLUS": {
-			"scriptName": "KEY_PLUS",
-			"viewName": "Plus Button",
-			"onIconImage": "../share/icons/nxtas/inputs/PLUSon.svg",
-			"offIconImage": "../share/icons/nxtas/inputs/PLUSoff.svg",
-			"triggerKeybind": "equal"
-		},
-		"MINUS": {
-			"scriptName": "KEY_MINUS",
-			"viewName": "Minus Button",
-			"onIconImage": "../share/icons/nxtas/inputs/MINUSon.svg",
-			"offIconImage": "../share/icons/nxtas/inputs/MINUSoff.svg",
-			"triggerKeybind": "minus"
-		},
-		"HOME": {
-			"scriptName": "KEY_HOME",
-			"viewName": "Home Button",
-			"onIconImage": "../share/icons/nxtas/inputs/HOMEon.svg",
-			"offIconImage": "../share/icons/nxtas/inputs/HOMEoff.svg",
-			"triggerKeybind": "h"
-		},
-		"CAPT": {
-			"scriptName": "KEY_CAPT",
-			"viewName": "Capture Button",
-			"onIconImage": "../share/icons/nxtas/inputs/CAPTon.svg",
-			"offIconImage": "../share/icons/nxtas/inputs/CAPToff.svg",
-			"triggerKeybind": "g"
-		},
-		"LS": {
-			"scriptName": "KEY_LS",
-			"viewName": "Left Stick Press",
-			"onIconImage": "../share/icons/nxtas/inputs/LSTICKon.svg",
-			"offIconImage": "../share/icons/nxtas/inputs/LSTICKoff.svg",
-			"triggerKeybind": "n"
-		},
-		"RS": {
-			"scriptName": "KEY_RS",
-			"viewName": "Right Stick Press",
-			"onIconImage": "../share/icons/nxtas/inputs/RSTICKoff.svg",
-			"offIconImage": "../share/icons/nxtas/inputs/RSTICKon.svg",
-			"triggerKeybind": "u"
-		}
-	},
-	"programIcon": "../share/icons/nxtas/logo/main.png"
+    "buttons": {
+        "A": {
+            "scriptName": "KEY_A",
+            "viewName": "A Button",
+            "onIconImage": "../share/icons/nxtas/inputs/Aon.svg",
+            "offIconImage": "../share/icons/nxtas/inputs/Aoff.svg",
+            "triggerKeybind": "a"
+        },
+        "B": {
+            "scriptName": "KEY_B",
+            "viewName": "B Button",
+            "onIconImage": "../share/icons/nxtas/inputs/Bon.svg",
+            "offIconImage": "../share/icons/nxtas/inputs/Boff.svg",
+            "triggerKeybind": "b"
+        },
+        "X": {
+            "scriptName": "KEY_X",
+            "viewName": "X Button",
+            "onIconImage": "../share/icons/nxtas/inputs/Xon.svg",
+            "offIconImage": "../share/icons/nxtas/inputs/Xoff.svg",
+            "triggerKeybind": "x"
+        },
+        "Y": {
+            "scriptName": "KEY_Y",
+            "viewName": "Y Button",
+            "onIconImage": "../share/icons/nxtas/inputs/Yon.svg",
+            "offIconImage": "../share/icons/nxtas/inputs/Yoff.svg",
+            "triggerKeybind": "y"
+        },
+        "L": {
+            "scriptName": "KEY_L",
+            "viewName": "L Button",
+            "onIconImage": "../share/icons/nxtas/inputs/Lon.svg",
+            "offIconImage": "../share/icons/nxtas/inputs/Loff.svg",
+            "triggerKeybind": "t"
+        },
+        "R": {
+            "scriptName": "KEY_R",
+            "viewName": "R Button",
+            "onIconImage": "../share/icons/nxtas/inputs/Ron.svg",
+            "offIconImage": "../share/icons/nxtas/inputs/Roff.svg",
+            "triggerKeybind": "r"
+        },
+        "ZL": {
+            "scriptName": "KEY_ZL",
+            "viewName": "ZL Trigger",
+            "onIconImage": "../share/icons/nxtas/inputs/ZLon.svg",
+            "offIconImage": "../share/icons/nxtas/inputs/ZLoff.svg",
+            "triggerKeybind": "o"
+        },
+        "ZR": {
+            "scriptName": "KEY_ZR",
+            "viewName": "ZR Trigger",
+            "onIconImage": "../share/icons/nxtas/inputs/ZRon.svg",
+            "offIconImage": "../share/icons/nxtas/inputs/ZRoff.svg",
+            "triggerKeybind": "p"
+        },
+        "SL": {
+            "scriptName": "KEY_SL",
+            "viewName": "SL Trigger",
+            "onIconImage": "../share/icons/nxtas/inputs/SLon.svg",
+            "offIconImage": "../share/icons/nxtas/inputs/SLoff.svg",
+            "triggerKeybind": "q"
+        },
+        "SR": {
+            "scriptName": "KEY_SR",
+            "viewName": "SR Trigger",
+            "onIconImage": "../share/icons/nxtas/inputs/SRon.svg",
+            "offIconImage": "../share/icons/nxtas/inputs/SRoff.svg",
+            "triggerKeybind": "e"
+        },
+        "DUP": {
+            "scriptName": "KEY_DUP",
+            "viewName": "Up on Dpad",
+            "onIconImage": "../share/icons/nxtas/inputs/UPon.svg",
+            "offIconImage": "../share/icons/nxtas/inputs/UPoff.svg",
+            "triggerKeybind": "i"
+        },
+        "DDOWN": {
+            "scriptName": "KEY_DDOWN",
+            "viewName": "Down on Dpad",
+            "onIconImage": "../share/icons/nxtas/inputs/DOWNon.svg",
+            "offIconImage": "../share/icons/nxtas/inputs/DOWNoff.svg",
+            "triggerKeybind": "k"
+        },
+        "DLEFT": {
+            "scriptName": "KEY_DLEFT",
+            "viewName": "Left on Dpad",
+            "onIconImage": "../share/icons/nxtas/inputs/LEFTon.svg",
+            "offIconImage": "../share/icons/nxtas/inputs/LEFToff.svg",
+            "triggerKeybind": "j"
+        },
+        "DRIGHT": {
+            "scriptName": "KEY_DRIGHT",
+            "viewName": "Right on Dpad",
+            "onIconImage": "../share/icons/nxtas/inputs/RIGHTon.svg",
+            "offIconImage": "../share/icons/nxtas/inputs/RIGHToff.svg",
+            "triggerKeybind": "l"
+        },
+        "PLUS": {
+            "scriptName": "KEY_PLUS",
+            "viewName": "Plus Button",
+            "onIconImage": "../share/icons/nxtas/inputs/PLUSon.svg",
+            "offIconImage": "../share/icons/nxtas/inputs/PLUSoff.svg",
+            "triggerKeybind": "="
+        },
+        "MINUS": {
+            "scriptName": "KEY_MINUS",
+            "viewName": "Minus Button",
+            "onIconImage": "../share/icons/nxtas/inputs/MINUSon.svg",
+            "offIconImage": "../share/icons/nxtas/inputs/MINUSoff.svg",
+            "triggerKeybind": "-"
+        },
+        "HOME": {
+            "scriptName": "KEY_HOME",
+            "viewName": "Home Button",
+            "onIconImage": "../share/icons/nxtas/inputs/HOMEon.svg",
+            "offIconImage": "../share/icons/nxtas/inputs/HOMEoff.svg",
+            "triggerKeybind": "h"
+        },
+        "CAPT": {
+            "scriptName": "KEY_CAPT",
+            "viewName": "Capture Button",
+            "onIconImage": "../share/icons/nxtas/inputs/CAPTon.svg",
+            "offIconImage": "../share/icons/nxtas/inputs/CAPToff.svg",
+            "triggerKeybind": "g"
+        },
+        "LS": {
+            "scriptName": "KEY_LS",
+            "viewName": "Left Stick Press",
+            "onIconImage": "../share/icons/nxtas/inputs/LSTICKon.svg",
+            "offIconImage": "../share/icons/nxtas/inputs/LSTICKoff.svg",
+            "triggerKeybind": "n"
+        },
+        "RS": {
+            "scriptName": "KEY_RS",
+            "viewName": "Right Stick Press",
+            "onIconImage": "../share/icons/nxtas/inputs/RSTICKoff.svg",
+            "offIconImage": "../share/icons/nxtas/inputs/RSTICKon.svg",
+            "triggerKeybind": "u"
+        }
+    },
+    "programIcon": "../share/icons/nxtas/logo/main.png"
 }

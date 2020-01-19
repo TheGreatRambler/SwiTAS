@@ -21,6 +21,7 @@
 // https://developer.gnome.org/gtkmm-tutorial/stable/sec-drawing-clock-example.html.en
 
 // https://wiki.wxwidgets.org/WxGLCanvas
+/*
 class JoystickCanvas : public Gtk::DrawingArea {
 public:
 	JoystickCanvas();
@@ -102,3 +103,21 @@ public:
 
 	~BottomUI();
 };
+*/
+
+class JoystickCanvas : public wxGLCanvas {
+private:
+public:
+	// https://wiki.wxwidgets.org/WxGLCanvas#Multiple_Canvases
+	JoystickCanvas();
+
+	void draw();
+
+	void OnIdle(wxIdleEvent& event);
+}
+
+// clang-format off
+BEGIN_EVENT_TABLE(JoystickCanvas, wxGLCanvas)
+    EVT_IDLE(JoystickCanvas::OnIdle)
+END_EVENT_TABLE()
+	// clang-format on

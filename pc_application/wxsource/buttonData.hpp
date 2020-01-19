@@ -2,16 +2,12 @@
 
 #include <bitset>
 #include <cstdio>
-#include <gdkmm/pixbuf.h>
-#include <glibmm/fileutils.h>
-#include <glibmm/refptr.h>
-#include <glibmm/ustring.h>
-#include <gtkmm/treemodelcolumn.h>
 #include <map>
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>
 #include <unordered_map>
 #include <utility>
+#include <wx/image.h>
 
 // Array including all button information
 // Index is button Id, returns Button script name, Button print name, Button
@@ -22,8 +18,6 @@
 
 class ButtonData {
 private:
-	Glib::RefPtr<Gdk::Pixbuf> getNewIcon(std::string path);
-
 public:
 	// Buttons enum (coencides with the index of the bit in the input struct)
 	// Also used to identify the button everywhere else in the program
@@ -100,11 +94,13 @@ public:
 
 	// Struct containing button info
 	struct ButtonInfo {
-		Glib::ustring scriptName;
-		Glib::ustring viewName;
-		Glib::RefPtr<Gdk::Pixbuf> onIcon;
-		Glib::RefPtr<Gdk::Pixbuf> offIcon;
-		guint toggleKeybind;
+		std::string scriptName;
+		std::string viewName;
+		std::shared_ptr<wxImage> onIcon;
+		std::shared_ptr<wxImage> offIcon;
+		std::shared_ptr<wxBitmap> onBitmapIcon;
+		std::shared_ptr<wxBitmap> offBitmapIcon;
+		wxChar toggleKeybind;
 	};
 
 	// TODO finish these
