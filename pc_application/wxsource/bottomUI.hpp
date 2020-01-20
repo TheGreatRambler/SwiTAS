@@ -109,7 +109,7 @@ class JoystickCanvas : public wxGLCanvas {
 private:
 public:
 	// https://wiki.wxwidgets.org/WxGLCanvas#Multiple_Canvases
-	JoystickCanvas();
+	JoystickCanvas(wxFrame *parent);
 
 	void draw();
 

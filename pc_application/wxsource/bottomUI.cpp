@@ -1,15 +1,39 @@
 #include "bottomUI.hpp"
 
-JoystickCanvas::JoystickCanvas() {
-	wxGLCanvas();
+JoystickCanvas::JoystickCanvas(wxFrame* parent) {
+	// Initialize base class
+	wxGLCanvas(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, wxT("GLCanvas"));
 }
 
 // Override default signal handler:
-bool JoystickCanvas::draw() {
+void JoystickCanvas::draw() {
 	// Use nanovg to draw a circle
+	// SetCurrent sets the GL context
+	// Now can use nanovg
+	SetCurrent();
+	/*
+	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glViewport(0, 0, (GLint)200, (GLint)200);
+	glColor3f(1.0, c_, c_);
+
+	glBegin(GL_POLYGON);
+	glVertex3f(-0.5, -0.5, 5 * cos(rotate_));
+	glVertex3f(-0.5, 0.5, 5 * cos(rotate_));
+	glVertex3f(0.5, 0.5, -5 * cos(rotate_));
+	glVertex3f(0.5, -0.5, -5 * cos(rotate_));
+	glEnd();
+	*/
+	// Render
+	SwapBuffers();
 }
 
-bool JoystickCanvas::OnIdle() { }
+void JoystickCanvas::OnIdle(wxIdleEvent& event) {
+	// Draw
+	draw();
+	// Dunno what this does
+	event.RequestMore();
+}
 
 bool BottomUI::onButtonPress(GdkEventButton* event, Btn button) {
 	// This button has just been clicked, notify the dataProcess
