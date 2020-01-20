@@ -1,8 +1,11 @@
 #include "bottomUI.hpp"
+#include <memory>
 
 JoystickCanvas::JoystickCanvas(wxFrame* parent) {
 	// Initialize base class
 	wxGLCanvas(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, wxT("GLCanvas"));
+	co   = new wxGLContext((wxGLCanvas*)this);
+	init = false;
 }
 
 // Override default signal handler:
@@ -10,7 +13,7 @@ void JoystickCanvas::draw() {
 	// Use nanovg to draw a circle
 	// SetCurrent sets the GL context
 	// Now can use nanovg
-	SetCurrent();
+	SetCurrent(*co);
 	/*
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -29,10 +32,45 @@ void JoystickCanvas::draw() {
 }
 
 void JoystickCanvas::OnIdle(wxIdleEvent& event) {
+	if(!init) {
+		SetupViewport();
+		init = true;
+	}
 	// Draw
 	draw();
 	// Dunno what this does
 	event.RequestMore();
+}
+
+void JoystickCanvas::OnResize(wxIdleEvent& event) {
+	SetupViewport();
+	wxGLCanvas::OnSize(event);
+	Refresh();
+}
+
+void JoystickCanvas::SetupViewport() {
+	int x, y;
+	GetSize(&x, &y);
+	glViewport(0, 0, x, y);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(45, (float)x / y, 0.1, 100);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+}
+
+renderImageInGrid::renderImageInGrid(std::shared_ptr<wxBitmap> bitmap) {
+	theBitmap = bitmap;
+}
+
+void renderImageInGrid::Draw(wxGrid& grid, wxGridCellAttr& attr, wxDC& dc, const wxRect& rect, int row, int col, bool isSelected) {
+	wxGridCellStringRenderer::Draw(grid, attr, dc, rect, row, col, isSelected);
+
+	dc.DrawBitmap(*theBitmap, rect.x, rect.y);
+}
+
+void renderImageInGrid::setBitmap(std::shared_ptr<wxBitmap> bitmap) {
+	theBitmap = bitmap;
 }
 
 bool BottomUI::onButtonPress(GdkEventButton* event, Btn button) {
@@ -41,11 +79,30 @@ bool BottomUI::onButtonPress(GdkEventButton* event, Btn button) {
 	return true;
 }
 
-BottomUI::BottomUI(std::shared_ptr<ButtonData> buttons) {
+BottomUI::BottomUI(std::shared_ptr<ButtonData> buttons, wxFlexGridSizer* theGrid, std::shared_ptr<DataProcessing> input) {
 	// TODO set up joysticks
 	buttonData = buttons;
+
+	inputInstance = input;
+	inputInstance->setInputCallback(std::bind(&BottomUI::setIconState, this, std::placeholders::_1, std::placeholders::_2));
+
+	horizontalBoxSizer = std::make_shared<wxBoxSizer>(wxHORIZONTAL);
+
+	leftJoystick  = std::make_shared<JoystickCanvas>(horizontalBoxSizer.get());
+	rightJoystick = std::make_shared<JoystickCanvas>(horizontalBoxSizer.get());
+
+	horizontalBoxSizer->Add(leftJoystick.get(), wxEXPAND | wxALL);
+
+	horizontalBoxSizer->Add(rightJoystick.get(), wxEXPAND | wxALL);
+
+	buttonGrid = std::make_shared<wxGrid>();
+
+	// theGrid->
+
 	// Add grid of buttons
 	for(auto const& button : KeyLocs) {
+		buttonGrid->SetCellRenderer(button.second.y, button.second.x, new renderImageInGrid(buttonData->buttonMapping[button.first].offBitmapIcon));
+		/*
 		// Add the images (the pixbuf can and will be changed later)
 		std::shared_ptr<Gtk::Image> image = std::make_shared<Gtk::Image>(buttonData->buttonMapping[button.first].offIcon);
 		// Add the eventbox
@@ -58,39 +115,23 @@ BottomUI::BottomUI(std::shared_ptr<ButtonData> buttons) {
 
 		// Designate the off image as the default
 		buttonViewer.attach(*eventBox, button.second.x, button.second.y);
+		*/
 	}
-}
 
-void BottomUI::setInputInstance(std::shared_ptr<DataProcessing> input) {
-	inputInstance = input;
-	inputInstance->setInputCallback(std::bind(&BottomUI::setIconState, this, std::placeholders::_1, std::placeholders::_2));
+	horizontalBoxSizer->Add(buttonGrid.get(), wxEXPAND | wxALL);
 }
 
 void BottomUI::setIconState(Btn button, bool state) {
+	Location location = KeyLocs[button];
 	if(state) {
 		// Set the image to the on image
-		images[button].first->set(buttonData->buttonMapping[button].onIcon);
+		buttonGrid->GetCellRenderer(location.y, location.x)->setBitmap(buttonData->buttonMapping[button].onBitmapIcon);
 	} else {
 		// Set the image to the off image
-		images[button].first->set(buttonData->buttonMapping[button].offIcon);
+		buttonGrid->GetCellRenderer(location.y, location.x)->setBitmap(buttonData->buttonMapping[button].offBitmapIcon);
 	}
+	buttonGrid->RefreshRect(buttonGrid->CellToRect(location.x, location.x));
 
 	// Don't set value in input instance because it
 	// Was the one that sent us here
-}
-
-void BottomUI::addToGrid(wxFlexGridSizer* theGrid) {
-	theGrid->Add();
-	theGrid->pack_start(leftJoystick);
-	theGrid->pack_start(rightJoystick);
-	theGrid->pack_start(buttonViewer);
-}
-
-BottomUI::~BottomUI() {
-	// Deallocate all the images
-	// for(auto const& image : images) {
-	// Free images and eventbox
-	// free(image.second.first);
-	// free(image.second.second);
-	//}
 }

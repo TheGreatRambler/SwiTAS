@@ -33,8 +33,8 @@ private:
 	// Tree data storing the controller stuffs
 	// Use generic because it reports scroll events
 	wxImageList imageList;
-	// Stores the columns for the above list store
-	// InputColumns inputColumns;
+	// Using callbacks for inputs
+	std::function<void(Btn, bool)> inputCallback;
 	// Tree view viewed in the UI
 	// Gtk::TreeView treeView;
 	// Scrollable data window
@@ -46,6 +46,8 @@ private:
 
 public:
 	DataProcessing(std::shared_ptr<ButtonData> buttons);
+
+	void setInputCallback(std::function<void(Btn, bool)> callback);
 
 	bool getButtonState(Btn button);
 

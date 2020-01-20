@@ -141,5 +141,9 @@
             "triggerKeybind": "u"
         }
     },
-    "programIcon": "../share/icons/nxtas/logo/main.png"
+    "programIcon": "../share/icons/nxtas/logo/main.png",
+    "ui": {
+        "playButton": "../share/icons/nxtas/buttons/playButton.png",
+        "frameAdvanceButton": "../share/icons/nxtas/buttons/frameAdvanceButton.png"
+    }
 }

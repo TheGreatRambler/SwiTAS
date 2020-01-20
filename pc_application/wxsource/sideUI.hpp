@@ -1,18 +1,19 @@
 #pragma once
 
+#include <memory>
+#include <rapidjson/document.h>
 #include <wx/sizer.h>
 
 #include "dataProcessing.hpp"
 
 class SideUI {
 private:
-	// Button group for play, pause, etc...
-	Gtk::ButtonBox playButtons;
-	// Buttons themselves
-	Gtk::Button playPauseButton;
-	Gtk::Button frameAdvanceButton;
-	// The box holding everything
-	Gtk::VBox everythingBox;
+	rapidjson::Document mainSettings;
+
+	std::shared_ptr<wxBoxSizer> verticalBoxSizer;
+
+	std::shared_ptr<wxBitmapButton> playButton;
+	std::shared_ptr<wxBitmapButton> frameAdvanceButton;
 
 	// Minimum size of this widget (it just gets too small normally)
 	static constexpr float minimumSize = 1 / 4;
@@ -21,9 +22,5 @@ private:
 	std::shared_ptr<DataProcessing> inputInstance;
 
 public:
-	SideUI();
-
-	void setInputInstance(std::shared_ptr<DataProcessing> input);
-
-	void addToGrid(wxFlexGridSizer* theGrid);
+	SideUI(rapidjson::Document settings, wxFlexGridSizer* sizer, std::shared_ptr<DataProcessing> input);
 };

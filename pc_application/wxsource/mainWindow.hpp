@@ -28,7 +28,7 @@ private:
 	// Menu bar containing "open file", etc...
 	// Gtk::MenuBar menuBar;
 
-	wxFlexGridSizer mainSizer(4, 4, 3, 3);
+	std::shared_ptr<wxFlexGridSizer> mainSizer;
 
 	// Main settings variable
 	rapidjson::Document mainSettings;
@@ -43,7 +43,7 @@ private:
 	std::shared_ptr<DataProcessing> dataProcessingInstance;
 
 	// Override default signal handler:
-	bool on_key_press_event(GdkEventKey* event) override;
+	void keyDownHandler(wxKeyEvent& event);
 
 	void handlePreviousWindowTransform();
 
@@ -52,13 +52,13 @@ private:
 public:
 	MainWindow();
 
-	void addGrids();
-
 	void addMenuBar();
-
-	void addLeftUI();
-
-	void addBottomUI();
 
 	~MainWindow();
 };
+
+// clang-format off
+BEGIN_EVENT_TABLE(MainWindow, wxFrame)
+    EVT_CHAR_HOOK(MainWindow::keyDownHandler)
+END_EVENT_TABLE()
+// clang-format on

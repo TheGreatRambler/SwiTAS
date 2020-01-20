@@ -19,11 +19,9 @@ void ButtonData::setupButtonMapping(rapidjson::Document* mainSettings) {
 		thisButtonInfo.viewName   = viewName;
 
 		thisButtonInfo.onIcon = std::make_shared<wxImage>();
-		thisButtonInfo.onIcon->AddHandler(new wxPNGHandler());
 		thisButtonInfo.onIcon->LoadFile(wxT(onIconImage), wxBITMAP_TYPE_PNG);
 
 		thisButtonInfo.offIcon = std::make_shared<wxImage>();
-		thisButtonInfo.offIcon->AddHandler(new wxPNGHandler());
 		thisButtonInfo.offIcon->LoadFile(wxT(offIconImage), wxBITMAP_TYPE_PNG);
 
 		thisButtonInfo.onBitmapIcon = std::make_shared<wxBitmap>(thisButtonInfo.onIcon.get());

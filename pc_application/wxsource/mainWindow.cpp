@@ -1,15 +1,11 @@
+#include <memory>
 #define RAPIDJSON_HAS_STDSTRING 1
 
 #include "mainWindow.hpp"
 
 // Override default signal handler:
-bool MainWindow::on_key_press_event(GdkEventKey* event) {
-	// Handle keyboard input
-	// A GDK int holding the pressed buttons
-	guint key = event->keyval;
-	// Send to the dataProcessing instance
-	dataProcessingInstance->handleKeyboardInput(key);
-	return Gtk::Window::on_key_press_event(event);
+void MainWindow::keyDownHandler(wxKeyEvent& event) {
+	dataProcessingInstance->handleKeyboardInput(event.GetUnicodeKey());
 }
 
 void MainWindow::handlePreviousWindowTransform() {
@@ -26,6 +22,9 @@ void MainWindow::getGlobalSettings(rapidjson::Document* d) {
 
 MainWindow::MainWindow() {
 	wxFrame((wxFrame*)NULL, -1, "NX TAS UI", wxDefaultPosition, wxSize(300, 200));
+	// Init PNGs
+	wxImage::AddHandler(new wxPNGHandler());
+
 	// Get the main settings
 	getGlobalSettings(&mainSettings);
 
@@ -33,66 +32,35 @@ MainWindow::MainWindow() {
 	mainicon.LoadFile(mainSettings["programIcon"].GetString());
 	SetIcon(mainicon);
 
+	mainSizer = std::make_shared<wxFlexGridSizer>(4, 4, 3, 3);
+
 	// Set button data instance
 	buttonData = std::make_shared<ButtonData>();
 	// Load button data here
 	buttonData->setupButtonMapping(&mainSettings);
-	// UI instances
-	sideUI   = std::make_shared<SideUI>();
-	bottomUI = std::make_shared<BottomUI>(buttonData);
-	// Both UIs need this
-	dataProcessingInstance = std::make_shared<DataProcessing>(buttonData);
-	sideUI->setInputInstance(dataProcessingInstance);
-	bottomUI->setInputInstance(dataProcessingInstance);
 
-	// Add mainLayout to window
-	add(mainLayout);
+	dataProcessingInstance = std::make_shared<DataProcessing>(buttonData);
+
+	// UI instances
+	sideUI   = std::make_shared<SideUI>(mainSettings, mainSizer.get(), dataProcessingInstance);
+	bottomUI = std::make_shared<BottomUI>(buttonData, mainSizer.get(), dataProcessingInstance);
+
 	// Add the top menubar
 	addMenuBar();
-	// Add left UI
-	addLeftUI();
-	// Add bottom UI
-	addBottomUI();
-	// Set button datas
-	// Adding all the grids
-	addGrids();
-	// Show every item currently present
-	show_all();
 
 	SetSizer(&mainSizer);
 	SetMinSize(wxSize(270, 220));
 	Center();
 
 	// Override the keypress handler
-	add_events(Gdk::KEY_PRESS_MASK);
+	// add_events(Gdk::KEY_PRESS_MASK);
 	handlePreviousWindowTransform();
-}
-
-void MainWindow::addGrids() {
-	mainContent.pack_start(leftGrid, Gtk::PACK_EXPAND_WIDGET);
-	leftGrid.set_halign(Gtk::ALIGN_FILL);
-	leftGrid.set_valign(Gtk::ALIGN_FILL);
-	// Will have game viewer eventually
-	rightSideBox.pack_start(bottomGrid, Gtk::PACK_SHRINK);
-	rightSideBox.set_valign(Gtk::ALIGN_END);
-	bottomGrid.set_halign(Gtk::ALIGN_FILL);
-	mainContent.pack_start(rightSideBox);
-	// Add all of them to the current layout
-	mainLayout.pack_start(mainContent);
 }
 
 void MainWindow::addMenuBar() {
 	// https://www.lucidarme.me/gtkmm-example-13/
 	// Add menubar to layout
-	mainLayout.pack_start(menuBar, Gtk::PACK_SHRINK);
-}
-
-void MainWindow::addLeftUI() {
-	sideUI->addToGrid(&mainSizer);
-}
-
-void MainWindow::addBottomUI() {
-	bottomUI->addToGrid(&mainSizer);
+	// mainLayout.pack_start(menuBar, Gtk::PACK_SHRINK);
 }
 
 MainWindow::~MainWindow() { }

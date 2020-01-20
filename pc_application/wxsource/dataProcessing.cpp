@@ -53,7 +53,11 @@ DataProcessing::DataProcessing(std::shared_ptr<ButtonData> buttons, wxWindow* pa
 	// Only show the scrollbars when they are necessary:
 	// scrolledWindow->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	// Add this first frame
-	// addNewFrame();
+	addNewFrame();
+}
+
+void DataProcessing::setInputCallback(std::function<void(Btn, bool)> callback) {
+	inputCallback = callback;
 }
 
 int OnGetItemColumnImage(long row, long column) const {
@@ -106,7 +110,7 @@ void DataProcessing::setButtonState(Btn button, bool state) {
 	// treeView.scroll_to_row(currentPath);
 	// BottomUI needs to know the state changed, even if it
 	// Was the one to make us aware in the first place
-	// inputCallback(button, state);
+	inputCallback(button, state);
 }
 
 void DataProcessing::toggleButtonState(Btn button) {
