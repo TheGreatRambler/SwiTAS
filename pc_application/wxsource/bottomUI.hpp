@@ -4,6 +4,7 @@
 #include <map>
 #include <memory>
 #include <utility>
+#include <wx/frame.h>
 #include <wx/glcanvas.h>
 #include <wx/sizer.h>
 #ifdef __WXMAC__
@@ -181,6 +182,9 @@ private:
 
 	std::shared_ptr<JoystickCanvas> leftJoystick;
 	std::shared_ptr<JoystickCanvas> rightJoystick;
+
+    std::shared_ptr<wxFrame> leftJoystickFrame;
+    std::shared_ptr<wxFrame> rightJoystickFrame;
 
 	// Grid containing the button viewer
 	std::shared_ptr<wxGrid> buttonGrid;

@@ -51,7 +51,7 @@ void JoystickCanvas::OnResize(wxIdleEvent& event) {
 void JoystickCanvas::SetupViewport() {
 	int x, y;
 	GetSize(&x, &y);
-	glViewport(0, 0, x, y);
+	glViewport(0, 0, (GLint)x, (GLint)y);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(45, (float)x / y, 0.1, 100);
@@ -88,12 +88,17 @@ BottomUI::BottomUI(std::shared_ptr<ButtonData> buttons, wxFlexGridSizer* theGrid
 
 	horizontalBoxSizer = std::make_shared<wxBoxSizer>(wxHORIZONTAL);
 
-	leftJoystick  = std::make_shared<JoystickCanvas>(horizontalBoxSizer.get());
-	rightJoystick = std::make_shared<JoystickCanvas>(horizontalBoxSizer.get());
+	leftJoystickFrame  = std::make_shared<wxFrame>(horizontalBoxSizer.get(), wxID_ANY, wxT("LeftCanvas"));
+	rightJoystickFrame = std::make_shared<wxFrame>(horizontalBoxSizer.get(), wxID_ANY, wxT("RightCanvas"));
 
-	horizontalBoxSizer->Add(leftJoystick.get(), wxEXPAND | wxALL);
+	leftJoystick  = std::make_shared<JoystickCanvas>(leftJoystickFrame.get());
+	rightJoystick = std::make_shared<JoystickCanvas>(rightJoystickFrame.get());
 
-	horizontalBoxSizer->Add(rightJoystick.get(), wxEXPAND | wxALL);
+	leftJoystickFrame->AddChild(leftJoystick.get());
+	rightJoystickFrame->AddChild(rightJoystick.get());
+
+	horizontalBoxSizer->Add(leftJoystickFrame.get(), wxEXPAND | wxALL);
+	horizontalBoxSizer->Add(rightJoystickFrame.get(), wxEXPAND | wxALL);
 
 	buttonGrid = std::make_shared<wxGrid>();
 
