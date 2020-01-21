@@ -4,52 +4,87 @@ InputColumns::InputColumns() {
 	add(frameNum);
 }
 
-DataProcessing::DataProcessing(std::shared_ptr<ButtonData> buttons) {
-	buttonData     = buttons;
-	scrolledWindow = std::make_shared<Gtk::ScrolledWindow>();
+DataProcessing::DataProcessing(std::shared_ptr<ButtonData> buttons, wxWindow* parent) {
+	// Inherit from list control
+	wxGenericListCtrl(parent, -1, "", wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_VIRTUAL | wxLC_HRULES);
+	buttonData = buttons;
+	// scrolledWindow = std::make_shared<Gtk::ScrolledWindow>();
+	// This is cool, so set it
+	EnableAlternateRowColours(true);
+	imageList.Create(50, 50);
 	// Add the list store from the columns
-	controllerListStore = Gtk::ListStore::create(inputColumns);
+	// controllerListStore = Gtk::ListStore::create(inputColumns);
 	// Set this tree view to this model
-	treeView.set_model(controllerListStore);
+	SetImageList(&imageList, wxIMAGE_LIST_NORMAL);
+	// treeView.set_model(controllerListStore);
 	// Add all the columns, this somehow wasn't done already
-	treeView.append_column("Frame", inputColumns.frameNum);
+	// treeView.append_column("Frame", inputColumns.frameNum);
+	AppendColumn("Frame");
 	// Disable searching because it breaks stuff
-	treeView.set_enable_search(false);
+	// treeView.set_enable_search(false);
 	// Loop through buttons and add all of them
 	// Set this now that it is recieved
 	// Loop through the buttons and add them
 	for(auto const& button : buttonData->buttonMapping) {
 		// Gets pointer from tuple
 		// This better not be deleted when it goes out of scope
-		Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>> thisIcon;
+		// Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>> thisIcon;
 		// Add to map for later
-		inputColumns.buttonPixbufs[button.first] = thisIcon;
+		// inputColumns.buttonPixbufs[button.first] = thisIcon;
 		// Append now
-		treeView.append_column(button.second.scriptName, thisIcon);
+		AppendColumn(button.second.scriptName);
+		// Have to create a bitmap manually
+		// Bitmaps are interleaved between on and off
+		imageList.Add(button.offBitmapIcon.get());
+		imageList.Add(button.onBitmapIcon.get());
+		// treeView.append_column(button.second.scriptName, thisIcon);
 		// Add to the columns themselves (gives value, not pointer)
-		inputColumns.add(thisIcon);
+		// inputColumns.add(thisIcon);
 	}
 	// Once all columns are added, do some stuff on them
-	for(auto& column : treeView.get_columns()) {
-		// Set to fixed size mode to speed things up
-		column->set_sizing(Gtk::TREE_VIEW_COLUMN_FIXED);
-	}
-	treeView.set_fixed_height_mode(true);
+	// for(auto& column : treeView.get_columns()) {
+	// Set to fixed size mode to speed things up
+	// column->set_sizing(Gtk::TREE_VIEW_COLUMN_FIXED);
+	//}
+	// treeView.set_fixed_height_mode(true);
 	// Add the treeview to the scrolled window
-	scrolledWindow->add(treeView);
+	// scrolledWindow->add(treeView);
 	// Only show the scrollbars when they are necessary:
-	scrolledWindow->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+	// scrolledWindow->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	// Add this first frame
 	addNewFrame();
 }
 
-Gtk::TreeModel::Row DataProcessing::getRowAtIndex(std::size_t index) {
-	// https://developer.gnome.org/gtkmm-tutorial/stable/sec-iterating-over-model-rows.html.en
-	return *(controllerListStore->children()[index]);
-}
-
 void DataProcessing::setInputCallback(std::function<void(Btn, bool)> callback) {
 	inputCallback = callback;
+}
+
+int OnGetItemColumnImage(long row, long column) const {
+	if(column == 0) {
+		// This is the frame
+		return -1;
+	} else {
+		// Returns index in the imagelist
+		// Need to account for the frame being first
+		uint8_t button = column - 1;
+		uint8_t on     = inputsList[row]->buttons[button];
+		if(on) {
+			// Return index of on image
+			// Interleaved means it looks like this
+			return button * 2 + 1;
+		} else {
+			return button * 2;
+		}
+	}
+}
+
+wxString OnGetItemText(long row, long column) const {
+	// Returns when text is needed
+	if(column == 0) {
+		// This is the frame, which is just the row number
+		return std::to_string(row);
+	}
+	// This function shouldn't recieve any other column
 }
 
 bool DataProcessing::getButtonState(Btn button) {
@@ -60,12 +95,14 @@ bool DataProcessing::getButtonState(Btn button) {
 void DataProcessing::setButtonState(Btn button, bool state) {
 	// If state is true, on, else off
 	currentData->buttons[button] = state;
+	// Because of virtual, just trigger an update of the row
+	RefreshItem(currentFrame);
 	// Get the index of the treeview
 	// The state is being changed, so so does the UI
 	// Two pointers have to be deconstructed
-	Gtk::TreeModel::Row row = getRowAtIndex(currentFrame);
+	// Gtk::TreeModel::Row row = getRowAtIndex(currentFrame);
 	// Set the image based on the state
-	row[inputColumns.buttonPixbufs[button]] = state ? buttonData->buttonMapping[button].onIcon : buttonData->buttonMapping[button].offIcon;
+	// row[inputColumns.buttonPixbufs[button]] = state ? buttonData->buttonMapping[button].onIcon : buttonData->buttonMapping[button].offIcon;
 	// Send the update signal TODO
 	// controllerListStore->row_changed(currentPath, row);
 	// Focus to this specific row
@@ -89,7 +126,8 @@ void DataProcessing::setCurrentFrame(uint32_t frameNum) {
 		// Set the current frame to this number
 		currentFrame = frameNum;
 		// Focus to this specific row now
-		treeView.scroll_to_row(currentPath);
+		// This essentially scrolls to it
+		EnsureVisible(frameNum);
 	}
 }
 
@@ -103,19 +141,21 @@ void DataProcessing::addNewFrame() {
 	// Add this to the vector
 	inputsList.push_back(currentData);
 	// Add to the table
-	Gtk::TreeModel::Row row    = *(controllerListStore->append());
-	row[inputColumns.frameNum] = currentFrame;
-	for(auto const& pixbufData : inputColumns.buttonPixbufs) {
-		// Turn all buttons automatically to off
-		// Dereference pointer to get to it
-		// Set all to off
-		setButtonState(pixbufData.first, false);
-	}
+	// Gtk::TreeModel::Row row    = *(controllerListStore->append());
+	// row[inputColumns.frameNum] = currentFrame;
+	// for(auto const& pixbufData : inputColumns.buttonPixbufs) {
+	// Turn all buttons automatically to off
+	// Dereference pointer to get to it
+	// Set all to off
+	// setButtonState(pixbufData.first, false);
+	//}
+	// Because of the usuability of virtual list controls, just update the length
+	SetItemCount(inputsList.size());
 	// Now, set the index to here so that some stuff can be ran
 	setCurrentFrame(currentFrame);
 }
 
-void DataProcessing::handleKeyboardInput(guint key) {
+void DataProcessing::handleKeyboardInput(wxChar key) {
 	for(auto const& thisButton : buttonData->buttonMapping) {
 		// See if it corresponds to the toggle keybind
 		// TODO handle set and clear commands (shift and ctrl)
@@ -127,9 +167,6 @@ void DataProcessing::handleKeyboardInput(guint key) {
 	}
 }
 
-std::shared_ptr<Gtk::ScrolledWindow> DataProcessing::getWindow() {
-	// Get pointer of the scrolled window (not the treeview)
-	// The value should be saftely dereferenced once the
-	// Class dies, but I dunno
-	return scrolledWindow;
-}
+// std::shared_ptr<wxGenericListCtrl> DataProcessing::getWidget() {
+//	return controllerListStore;
+//}

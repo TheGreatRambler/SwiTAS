@@ -1,36 +1,20 @@
 #include "sideUI.hpp"
+#include <memory>
 
-SideUI::SideUI() {
-	// Some buttons for the left UI
-	// https://developer.gnome.org/gtkmm-tutorial/stable/sec-multi-item-containers.html.en#buttonbox-example
-	// https://www.lucidarme.me/gtkmm-example-2/
-	playButtons.set_orientation(Gtk::ORIENTATION_HORIZONTAL);
-	playButtons.set_layout(Gtk::BUTTONBOX_SPREAD);
+SideUI::SideUI(rapidjson::Document settings, wxFlexGridSizer* sizer, std::shared_ptr<DataProcessing> input) {
+	mainSettings = settings;
 
-	// Set images for buttons (instead of add_label)
-	// Starts paused
-	playPauseButton.set_image_from_icon_name("media-playback-start");
-	frameAdvanceButton.set_image_from_icon_name("go-last");
+	verticalBoxSizer = std::make_shared<wxBoxSizer>();
 
-	playButtons.add(playPauseButton);
-	playButtons.add(frameAdvanceButton);
+	wxBitmap play(mainSettings["ui"]["playButton"].GetString(), wxBITMAP_TYPE_PNG);
+	wxBitmap frameAdvance(mainSettings["ui"]["frameAdvanceButton"].GetString(), wxBITMAP_TYPE_PNG);
 
-	playButtons.set_layout(Gtk::BUTTONBOX_EXPAND);
+	playButton         = std::make_shared<wxBitmapButton>(verticalBoxSizer.get(), -1, play, wxDefaultPosition, wxDefaultSize, 0);
+	frameAdvanceButton = std::make_shared<wxBitmapButton>(verticalBoxSizer.get(), -1, frameAdvance, wxDefaultPosition, wxDefaultSize, 0);
 
-	// Add everything to the box
-	everythingBox.pack_start(playButtons, Gtk::PACK_SHRINK);
-}
+	verticalBoxSizer->Add(playButton.get(), wxEXPAND | wxALL);
+	verticalBoxSizer->Add(frameAdvanceButton.get(), wxEXPAND | wxALL);
 
-void SideUI::setInputInstance(std::shared_ptr<DataProcessing> input) {
-	inputInstance = input;
-	everythingBox.pack_start(*inputInstance->getWindow(), Gtk::PACK_EXPAND_WIDGET);
-}
-
-void SideUI::addToGrid(Gtk::VBox* theGrid) {
-	// Set minimum width to a quarter of the screen size
-	// Doesn't work for some reason right now
-	int widgetWidth = (int)(minimumSize * Gdk::Screen::get_default()->get_width());
-	everythingBox.set_size_request(widgetWidth, -1);
-	// Now a misnomer :)
-	theGrid->pack_start(everythingBox);
+	// DataProcessing is itself a list control, so add it
+	verticalBoxSizer->Add(input.get(), wxEXPAND | wxALL);
 }

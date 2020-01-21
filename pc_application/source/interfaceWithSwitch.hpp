@@ -1,14 +1,20 @@
 #pragma once
 
+// For sockets
+#ifdef _WIN32
+#include <winsock2.h>
+#else
 #include <arpa/inet.h>
-#include <errno.h>
 #include <netdb.h>
 #include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#endif
+
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/socket.h>
-#include <sys/types.h>
 #include <unistd.h>
 #include <zpp.hpp>
 
@@ -48,4 +54,4 @@ public:
 	void listenForSwitchCommands();
 
 	~CommunicateWithSwitch();
-}
+};

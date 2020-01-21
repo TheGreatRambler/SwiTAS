@@ -50,13 +50,13 @@ bool CommunicateWithSwitch::readSocketHelper(void* data, uint16_t size) {
 		return 1;
 	} else if(count == -1) {
 		// There was an error
-		handleZedNetError();
+		handleSocketError();
 		return 1;
 	}
 	int res = recv(sockfd, data, size, MSG_WAITALL);
 	if(res == -1) {
 		// An error occured
-		handleZedNetError();
+		handleSocketError();
 		return 1;
 	} else {
 		// Data was recieved
@@ -65,7 +65,7 @@ bool CommunicateWithSwitch::readSocketHelper(void* data, uint16_t size) {
 			return 0;
 		} else {
 			// Data was the wrong size
-			handleZedNetError();
+			handleSocketError();
 			return 1;
 		}
 	}
