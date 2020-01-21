@@ -20,13 +20,20 @@ CFLAGS := -std=gnu17
 # Includes some neccessary flags for Gtkmm
 # Also, import third party headers in `include`
 # Libpath needs to be set rightcom
-CXXFLAGS := -std=gnu++17 $(shell pkg-config --cflags glew) $(shell wx-config --cxxflags) -I./include
+
+# To fix compiling errors, check out these links:
+# http://wxwidgets.10942.n7.nabble.com/wxWidgets-and-VSCode-td93506.html
+# https://www.wxwidgets.org/blog/2019/01/wxwidgets-and-vcpkg/
+# http://manpages.ubuntu.com/manpages/trusty/man1/wx-config.1.html
+# https://wiki.wxwidgets.org/Makefile
+
+CXXFLAGS := -std=gnu++17 $(shell pkg-config --cflags glew) $(shell wx-config --cxxflags std) -I./include
 # C/C++ flags (no -pendantic)
 # -fpermissive needed for some misbehaving GTK code
 CPPFLAGS := -Wall -fpermissive -ggdb
 # Linker flags (-lpthread needed for threads)
 # Includes some neccessary linker flags for Gtkmm
-LDFLAGS := -lpthread $(shell pkg-config --libs glew) $(shell wx-config --libs --gl-libs) -lws2_32
+LDFLAGS := -lpthread $(shell pkg-config --libs glew) $(shell wx-config --libs std) -lws2_32
 
 SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
