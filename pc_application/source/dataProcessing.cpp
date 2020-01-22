@@ -1,12 +1,8 @@
 #include "dataProcessing.hpp"
 
-InputColumns::InputColumns() {
-	add(frameNum);
-}
-
 DataProcessing::DataProcessing(std::shared_ptr<ButtonData> buttons, wxWindow* parent) {
 	// Inherit from list control
-	wxGenericListCtrl(parent, -1, "", wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_VIRTUAL | wxLC_HRULES);
+	wxListCtrl(parent, -1, "", wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_VIRTUAL | wxLC_HRULES);
 	buttonData = buttons;
 	// scrolledWindow = std::make_shared<Gtk::ScrolledWindow>();
 	// This is cool, so set it
@@ -35,8 +31,8 @@ DataProcessing::DataProcessing(std::shared_ptr<ButtonData> buttons, wxWindow* pa
 		AppendColumn(button.second.scriptName);
 		// Have to create a bitmap manually
 		// Bitmaps are interleaved between on and off
-		imageList.Add(button.offBitmapIcon.get());
-		imageList.Add(button.onBitmapIcon.get());
+		imageList.Add(button.second.offBitmapIcon.get());
+		imageList.Add(button.second.onBitmapIcon.get());
 		// treeView.append_column(button.second.scriptName, thisIcon);
 		// Add to the columns themselves (gives value, not pointer)
 		// inputColumns.add(thisIcon);

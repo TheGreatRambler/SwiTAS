@@ -119,7 +119,7 @@ public:
 	void OnResize(wxIdleEvent& event);
 
 	void SetupViewport();
-}
+};
 
 class renderImageInGrid : public wxGridCellRenderer {
 private:
@@ -203,7 +203,7 @@ public:
 
 // clang-format off
 BEGIN_EVENT_TABLE(JoystickCanvas, wxGLCanvas)
-    EVT_IDLE(JoystickCanvas::OnIdle)
-    EVT_SIZE(JoystickCanvas::OnResize)
+	EVT_IDLE(JoystickCanvas::OnIdle)
+	EVT_SIZE(JoystickCanvas::OnResize)
 END_EVENT_TABLE()
 // clang-format on

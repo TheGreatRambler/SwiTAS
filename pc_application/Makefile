@@ -30,7 +30,7 @@ CFLAGS := -std=gnu17
 CXXFLAGS := -std=gnu++17 $(shell pkg-config --cflags glew) $(shell wx-config --cxxflags std) -I./include
 # C/C++ flags (no -pendantic)
 # -fpermissive needed for some misbehaving GTK code
-CPPFLAGS := -Wall -fpermissive -ggdb
+CPPFLAGS := -Wall -ggdb
 # Linker flags (-lpthread needed for threads)
 # Includes some neccessary linker flags for Gtkmm
 LDFLAGS := -lpthread $(shell pkg-config --libs glew) $(shell wx-config --libs std) -lws2_32
@@ -49,7 +49,7 @@ $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
 	# set GTK_EXE_PREFIX = .
 	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
 	# Copy required DLLs to folder
-	ldd $(BUILD_DIR)/$(TARGET_EXEC) | grep '\/mingw.*\.dll' -o | xargs -I{} cp "{}" $(BUILD_DIR)
+	# ldd $(BUILD_DIR)/$(TARGET_EXEC) | grep '\/mingw.*\.dll' -o | xargs -I{} cp "{}" $(BUILD_DIR)
 	# Compile GTK schema
 	# glib-compile-schemas ./share/glib-2.0/schemas
 

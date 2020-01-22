@@ -49,7 +49,7 @@ MainWindow::MainWindow() {
 	// Add the top menubar
 	addMenuBar();
 
-	SetSizer(&mainSizer);
+	SetSizer(mainSizer.get());
 	SetMinSize(wxSize(270, 220));
 	Center();
 
