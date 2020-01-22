@@ -41,7 +41,7 @@ private:
 	virtual wxString OnGetItemText(long item, long column) const;
 
 public:
-	DataProcessing(std::shared_ptr<ButtonData> buttons);
+	DataProcessing(std::shared_ptr<ButtonData> buttons, wxWindow* parent);
 
 	void setInputCallback(std::function<void(Btn, bool)> callback);
 

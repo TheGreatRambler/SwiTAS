@@ -55,7 +55,7 @@ void DataProcessing::setInputCallback(std::function<void(Btn, bool)> callback) {
 	inputCallback = callback;
 }
 
-int OnGetItemColumnImage(long row, long column) const {
+int DataProcessing::OnGetItemColumnImage(long row, long column) {
 	if(column == 0) {
 		// This is the frame
 		return -1;
@@ -74,7 +74,7 @@ int OnGetItemColumnImage(long row, long column) const {
 	}
 }
 
-wxString OnGetItemText(long row, long column) const {
+wxString DataProcessing::OnGetItemText(long row, long column) {
 	// Returns when text is needed
 	if(column == 0) {
 		// This is the frame, which is just the row number
