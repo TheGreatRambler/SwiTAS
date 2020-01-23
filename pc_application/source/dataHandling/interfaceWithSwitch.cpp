@@ -1,10 +1,6 @@
 #include "interfaceWithSwitch.hpp"
 
-// Might try https://github.com/saprykin/plibsys for this
-// The long list of changes https://stackoverflow.com/questions/28027937/cross-platform-sockets
-// Whatever this is https://github.com/ia/connect
-// Another https://github.com/DFHack/clsocket
-// Oh no https://beej.us/guide/bgnet/html//index.html
+// Decided upon using https://github.com/DFHack/clsocket
 
 void CommunicateWithSwitch::unserializeData(uint8_t* buf, uint16_t bufSize, DataFlag flag) {
 	// The buffer itself
