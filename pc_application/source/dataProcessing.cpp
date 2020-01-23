@@ -1,9 +1,13 @@
 #include "dataProcessing.hpp"
 
-DataProcessing::DataProcessing(std::shared_ptr<ButtonData> buttons, wxWindow* parent) {
+DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxWindow* parent) {
 	// Inherit from list control
-	wxListCtrl(parent, -1, "", wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_VIRTUAL | wxLC_HRULES);
-	buttonData = buttons;
+	wxListCtrl(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_VIRTUAL | wxLC_HRULES);
+	buttonData   = buttons;
+	mainSettings = settings;
+	// Set the mask color via a css string
+	// https://docs.wxwidgets.org/3.0/classwx_colour.html#a08e9f56265647b8b5e1349b76eb728e3
+	maskColor.Set((*mainSettings)["iconTransparent"].GetString());
 	// scrolledWindow = std::make_shared<Gtk::ScrolledWindow>();
 	// This is cool, so set it
 	EnableAlternateRowColours(true);
@@ -31,8 +35,9 @@ DataProcessing::DataProcessing(std::shared_ptr<ButtonData> buttons, wxWindow* pa
 		AppendColumn(button.second.scriptName);
 		// Have to create a bitmap manually
 		// Bitmaps are interleaved between on and off
-		imageList.Add(button.second.offBitmapIcon.get());
-		imageList.Add(button.second.onBitmapIcon.get());
+		// Have to pass raw value, not pointer
+		imageList.Add(*button.second.offBitmapIcon, maskColor);
+		imageList.Add(*button.second.onBitmapIcon, maskColor);
 		// treeView.append_column(button.second.scriptName, thisIcon);
 		// Add to the columns themselves (gives value, not pointer)
 		// inputColumns.add(thisIcon);
@@ -55,7 +60,7 @@ void DataProcessing::setInputCallback(std::function<void(Btn, bool)> callback) {
 	inputCallback = callback;
 }
 
-int DataProcessing::OnGetItemColumnImage(long row, long column) {
+int DataProcessing::OnGetItemColumnImage(long row, long column) const {
 	if(column == 0) {
 		// This is the frame
 		return -1;
@@ -74,7 +79,7 @@ int DataProcessing::OnGetItemColumnImage(long row, long column) {
 	}
 }
 
-wxString DataProcessing::OnGetItemText(long row, long column) {
+wxString DataProcessing::OnGetItemText(long row, long column) const {
 	// Returns when text is needed
 	if(column == 0) {
 		// This is the frame, which is just the row number

@@ -33,7 +33,11 @@ CXXFLAGS := -std=gnu++17 $(shell pkg-config --cflags glew) $(shell wx-config --c
 CPPFLAGS := -Wall -ggdb
 # Linker flags (-lpthread needed for threads)
 # Includes some neccessary linker flags for Gtkmm
-LDFLAGS := -lpthread $(shell pkg-config --libs glew) $(shell wx-config --libs std) -lws2_32
+LDFLAGS := -lpthread $(shell pkg-config --libs glew) $(shell wx-config --libs std)
+ifeq ($(OS),Windows_NT)
+    # Needed for sockets on windows
+	LDFLAGS := -lws2_32
+endif
 
 SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)

@@ -8,7 +8,7 @@
 
 class SideUI {
 private:
-	rapidjson::Document mainSettings;
+	rapidjson::Document* mainSettings;
 
 	std::shared_ptr<wxBoxSizer> verticalBoxSizer;
 
@@ -22,5 +22,5 @@ private:
 	std::shared_ptr<DataProcessing> inputInstance;
 
 public:
-	SideUI(rapidjson::Document settings, wxFlexGridSizer* sizer, std::shared_ptr<DataProcessing> input);
+	SideUI(rapidjson::Document* settings, wxFlexGridSizer* sizer, std::shared_ptr<DataProcessing> input);
 };

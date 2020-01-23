@@ -40,10 +40,10 @@ MainWindow::MainWindow() {
 	// Load button data here
 	buttonData->setupButtonMapping(&mainSettings);
 
-	dataProcessingInstance = std::make_shared<DataProcessing>(buttonData);
+	dataProcessingInstance = std::make_shared<DataProcessing>(&mainSettings, buttonData, this);
 
 	// UI instances
-	sideUI   = std::make_shared<SideUI>(mainSettings, mainSizer.get(), dataProcessingInstance);
+	sideUI   = std::make_shared<SideUI>(&mainSettings, mainSizer.get(), dataProcessingInstance);
 	bottomUI = std::make_shared<BottomUI>(buttonData, mainSizer.get(), dataProcessingInstance);
 
 	// Add the top menubar

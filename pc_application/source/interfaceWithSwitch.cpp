@@ -1,5 +1,11 @@
 #include "interfaceWithSwitch.hpp"
 
+// Might try https://github.com/saprykin/plibsys for this
+// The long list of changes https://stackoverflow.com/questions/28027937/cross-platform-sockets
+// Whatever this is https://github.com/ia/connect
+// Another https://github.com/DFHack/clsocket
+// Oh no https://beej.us/guide/bgnet/html//index.html
+
 void CommunicateWithSwitch::unserializeData(uint8_t* buf, uint16_t bufSize, DataFlag flag) {
 	// The buffer itself
 	// https://github.com/niXman/yas/blob/master/include/yas/buffers.hpp#L67
@@ -10,6 +16,12 @@ void CommunicateWithSwitch::unserializeData(uint8_t* buf, uint16_t bufSize, Data
 }
 
 CommunicateWithSwitch::CommunicateWithSwitch() {
+#ifdef __WIN32__
+	WORD versionWanted = MAKEWORD(1, 1);
+	WSADATA wsaData;
+	WSAStartup(versionWanted, &wsaData);
+#endif
+
 	connectedToServer = false;
 	// https://gist.github.com/browny/5211329
 	// THIS IS THE CLIENT
@@ -20,9 +32,11 @@ CommunicateWithSwitch::CommunicateWithSwitch() {
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_port   = htons(SERVER_PORT);
 
-	// Set socket to be non blocking when accepting connections
+// Set socket to be non blocking when accepting connections
+#ifdef __WIN32__
 	fcntl(sockfd, F_SETFL, fcntl(sockfd, F_GETFL) | O_NONBLOCK);
-
+#else
+#endif
 	// This puts the options of serv_addr on the socket itself
 	if(bind(sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr))) {
 		// Binding failed
@@ -128,5 +142,8 @@ void CommunicateWithSwitch::listenForSwitchCommands() {
 }
 
 CommunicateWithSwitch::~CommunicateWithSwitch() {
+#ifdef __WIN32__
+	WSACleanup();
+#endif
 	close(sockfd);
 }

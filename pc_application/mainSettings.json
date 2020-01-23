@@ -141,11 +141,7 @@
 			"triggerKeybind": "u"
 		}
 	},
-	"iconTransparent": {
-		"r": 48,
-		"g": 0,
-		"b": 77
-	},
+	"iconTransparent": "rgb(48,0,77)",
 	"programIcon": "../share/icons/nxtas/logo/main.png",
 	"ui": {
 		"playButton": "../share/icons/nxtas/buttons/playButton.png",

@@ -6,6 +6,7 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <rapidjson/document.h>
 #include <string>
 #include <tuple>
 #include <utility>
@@ -31,6 +32,11 @@ private:
 	wxImageList imageList;
 	// Using callbacks for inputs
 	std::function<void(Btn, bool)> inputCallback;
+	// Main settings
+	rapidjson::Document* mainSettings;
+	// Mask color for transparency
+	wxColour maskColor;
+	// Reference to the main settings
 	// Tree view viewed in the UI
 	// Gtk::TreeView treeView;
 	// Scrollable data window
@@ -41,7 +47,7 @@ private:
 	virtual wxString OnGetItemText(long item, long column) const;
 
 public:
-	DataProcessing(std::shared_ptr<ButtonData> buttons, wxWindow* parent);
+	DataProcessing(rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxWindow* parent);
 
 	void setInputCallback(std::function<void(Btn, bool)> callback);
 

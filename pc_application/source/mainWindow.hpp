@@ -58,7 +58,7 @@ public:
 };
 
 // clang-format off
-BEGIN_EVENT_TABLE(MainWindow, wxFrame)
+wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
     EVT_CHAR_HOOK(MainWindow::keyDownHandler)
-END_EVENT_TABLE()
+wxEND_EVENT_TABLE()
 // clang-format on
