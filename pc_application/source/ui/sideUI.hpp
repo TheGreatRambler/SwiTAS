@@ -4,7 +4,7 @@
 #include <rapidjson/document.h>
 #include <wx/wx.h>
 
-#include "dataProcessing.hpp"
+#include "../dataHandling/dataProcessing.hpp"
 
 class SideUI {
 private:

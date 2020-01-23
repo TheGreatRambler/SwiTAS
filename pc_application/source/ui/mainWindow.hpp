@@ -8,9 +8,9 @@
 #include <string>
 #include <wx/wx.h>
 
+#include "../dataHandling/buttonData.hpp"
+#include "../dataHandling/dataProcessing.hpp"
 #include "bottomUI.hpp"
-#include "buttonData.hpp"
-#include "dataProcessing.hpp"
 #include "sideUI.hpp"
 
 class MainWindow : public wxFrame {
@@ -61,4 +61,4 @@ public:
 wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
     EVT_CHAR_HOOK(MainWindow::keyDownHandler)
 wxEND_EVENT_TABLE()
-// clang-format on
+	// clang-format on

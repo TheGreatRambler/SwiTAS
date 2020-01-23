@@ -14,8 +14,8 @@
 #endif
 #include <unistd.h>
 
-#include "buttonData.hpp"
-#include "dataProcessing.hpp"
+#include "../dataHandling/buttonData.hpp"
+#include "../dataHandling/dataProcessing.hpp"
 
 class JoystickCanvas : public wxGLCanvas {
 private:
@@ -34,7 +34,14 @@ public:
 	void SetupViewport();
 };
 
-class renderImageInGrid : public wxGridCellRenderer {
+// clang-format off
+wxBEGIN_EVENT_TABLE(JoystickCanvas, wxGLCanvas)
+	EVT_IDLE(JoystickCanvas::OnIdle)
+	EVT_SIZE(JoystickCanvas::OnResize)
+wxEND_EVENT_TABLE()
+	// clang-format on
+
+	class renderImageInGrid : public wxGridCellRenderer {
 private:
 	std::shared_ptr<wxBitmap> theBitmap;
 
@@ -114,10 +121,3 @@ public:
 
 	~BottomUI();
 };
-
-// clang-format off
-wxBEGIN_EVENT_TABLE(JoystickCanvas, wxGLCanvas)
-	EVT_IDLE(JoystickCanvas::OnIdle)
-	EVT_SIZE(JoystickCanvas::OnResize)
-wxEND_EVENT_TABLE()
-	// clang-format on
