@@ -34,6 +34,8 @@ public:
 	void OnResize(wxIdleEvent& event);
 
 	void SetupViewport();
+
+	wxDECLARE_EVENT_TABLE();
 };
 
 // clang-format off

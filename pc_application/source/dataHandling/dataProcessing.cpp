@@ -1,5 +1,63 @@
 #include "dataProcessing.hpp"
 
+FrameCanvas::FrameCanvas(wxFrame* parent) {
+	// Initialize base class
+	wxGLCanvas(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, "GLCanvas");
+	co   = new wxGLContext((wxGLCanvas*)this);
+	init = false;
+}
+
+// Override default signal handler:
+void FrameCanvas::draw() {
+	// Use nanovg to draw a circle
+	// SetCurrent sets the GL context
+	// Now can use nanovg
+	SetCurrent(*co);
+	/*
+	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glViewport(0, 0, (GLint)200, (GLint)200);
+	glColor3f(1.0, c_, c_);
+
+	glBegin(GL_POLYGON);
+	glVertex3f(-0.5, -0.5, 5 * cos(rotate_));
+	glVertex3f(-0.5, 0.5, 5 * cos(rotate_));
+	glVertex3f(0.5, 0.5, -5 * cos(rotate_));
+	glVertex3f(0.5, -0.5, -5 * cos(rotate_));
+	glEnd();
+	*/
+	// Render
+	SwapBuffers();
+}
+
+void FrameCanvas::OnIdle(wxIdleEvent& event) {
+	if(!init) {
+		SetupViewport();
+		init = true;
+	}
+	// Draw
+	draw();
+	// Dunno what this does
+	event.RequestMore();
+}
+
+void FrameCanvas::SetupViewport() {
+	int x, y;
+	GetSize(&x, &y);
+	glViewport(0, 0, (GLint)x, (GLint)y);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(45, (float)x / y, 0.1, 100);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+}
+
+void FrameCanvas::setPixelsScrolled(uint64_t pixelOffset, uint32_t firstItem, uint32_t lastItem) {
+	currentFirstItem   = firstItem;
+	currentLastItem    = lastItem;
+	currentPixelOffset = pixelOffset;
+}
+
 DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxWindow* parent) {
 	// Inherit from list control
 	wxListCtrl(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_VIRTUAL | wxLC_HRULES);

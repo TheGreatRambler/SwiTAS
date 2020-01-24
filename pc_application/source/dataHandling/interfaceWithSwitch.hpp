@@ -1,16 +1,5 @@
 #pragma once
 
-// For sockets
-#ifdef _WIN32
-#include <winsock2.h>
-#else
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#endif
-
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
