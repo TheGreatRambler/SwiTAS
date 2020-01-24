@@ -56,16 +56,12 @@ void CommunicateWithSwitch::listenForSwitchCommands() {
 		while(true) {
 			uint16_t dataSize;
 
-			// Set non blocking just for this
-			serverConnection.SetNonblocking();
+			// Block for all this because it's in a main loop anyway
 
 			if(handleSocketError(serverConnection.Receive(sizeof(dataSize), (uint8_t*)&dataSize))) {
 				// This breaks the while loop
 				break;
 			}
-
-			// Back to blocking for upcoming data
-			serverConnection.SetBlocking();
 
 			// Get the number back to the correct representation
 			// https://linux.die.net/man/3/ntohl
