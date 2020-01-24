@@ -49,6 +49,8 @@ private:
 
 	void getGlobalSettings(rapidjson::Document* d);
 
+	wxDECLARE_EVENT_TABLE();
+
 public:
 	MainWindow();
 

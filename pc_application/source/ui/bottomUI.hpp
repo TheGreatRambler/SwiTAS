@@ -22,6 +22,8 @@ private:
 	wxGLContext* co;
 	bool init;
 
+	wxDECLARE_EVENT_TABLE();
+
 public:
 	// https://wiki.wxwidgets.org/WxGLCanvas#Multiple_Canvases
 	JoystickCanvas(wxFrame* parent);
@@ -37,11 +39,11 @@ public:
 // clang-format off
 wxBEGIN_EVENT_TABLE(JoystickCanvas, wxGLCanvas)
 	EVT_IDLE(JoystickCanvas::OnIdle)
-	EVT_SIZE(JoystickCanvas::OnResize)
+	//EVT_SIZE(JoystickCanvas::OnResize)
 wxEND_EVENT_TABLE()
-	// clang-format on
 
-	class renderImageInGrid : public wxGridCellRenderer {
+class renderImageInGrid : public wxGridCellRenderer {
+	// clang-format on
 private:
 	std::shared_ptr<wxBitmap> theBitmap;
 

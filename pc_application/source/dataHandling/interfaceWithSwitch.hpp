@@ -18,6 +18,8 @@
 #include <unistd.h>
 #include <zpp.hpp>
 
+// Active sockets are the client
+#include "../thirdParty/clsocket/ActiveSocket.h"
 #include "serializeUnserializeData.hpp"
 
 #define SERVER_PORT 6978
@@ -28,27 +30,18 @@ private:
 		SET_GAME_INFO,
 	};
 
-	struct sockaddr_in serv_addr;
-
-	int sockfd = 0;
+	CActiveSocket serverConnection;
 
 	uint8_t connectedToServer;
 
-	// Important to note, messages can be sent at ANY time
-	bool sendSocketHelper(void* data, uint16_t size);
-
-	bool readSocketHelper(void* data, uint16_t size);
-
-	bool blockUntilReady();
-
 	void unserializeData(uint8_t* buf, uint16_t bufSize, DataFlag flag);
 
-	void handleSocketError();
+	bool handleSocketError(int res);
 
 public:
 	CommunicateWithSwitch();
 
-	void setIpAddress(char* ip);
+	void attemptConnectionToServer(char* ip);
 
 	// Called in the main loop
 	void listenForSwitchCommands();

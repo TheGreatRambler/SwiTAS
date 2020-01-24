@@ -30,12 +30,12 @@ CFLAGS := -std=gnu17
 CXXFLAGS := -std=gnu++17 $(shell pkg-config --cflags glew) $(shell wx-config --cxxflags std) -I./include
 # C/C++ flags (no -pendantic)
 # -fpermissive needed for some misbehaving GTK code
-CPPFLAGS := -Wall -ggdb
+CPPFLAGS := -Wall -Wno-maybe-uninitialized -ggdb
 # Linker flags (-lpthread needed for threads)
 # Includes some neccessary linker flags for Gtkmm
 LDFLAGS := -lpthread $(shell pkg-config --libs glew) $(shell wx-config --libs std)
 ifeq ($(OS),Windows_NT)
-    # Needed for sockets on windows
+	# Needed for sockets on windows
 	LDFLAGS := -lws2_32
 endif
 

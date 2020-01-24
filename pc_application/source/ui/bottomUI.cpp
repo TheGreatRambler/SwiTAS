@@ -43,11 +43,12 @@ void JoystickCanvas::OnIdle(wxIdleEvent& event) {
 	event.RequestMore();
 }
 
+/*
 void JoystickCanvas::OnResize(wxIdleEvent& event) {
 	SetupViewport();
-	wxGLCanvas::OnSize(event);
 	Refresh();
 }
+*/
 
 void JoystickCanvas::SetupViewport() {
 	int x, y;
@@ -74,11 +75,13 @@ void renderImageInGrid::setBitmap(std::shared_ptr<wxBitmap> bitmap) {
 	theBitmap = bitmap;
 }
 
+/*
 bool BottomUI::onButtonPress(GdkEventButton* event, Btn button) {
 	// This button has just been clicked, notify the dataProcess
 	inputInstance->toggleButtonState(button);
 	return true;
 }
+*/
 
 BottomUI::BottomUI(std::shared_ptr<ButtonData> buttons, wxFlexGridSizer* theGrid, std::shared_ptr<DataProcessing> input) {
 	// TODO set up joysticks
@@ -103,9 +106,6 @@ BottomUI::BottomUI(std::shared_ptr<ButtonData> buttons, wxFlexGridSizer* theGrid
 
 	buttonGrid = std::make_shared<wxGrid>();
 
-	// theGrid->
-
-	// Add grid of buttons
 	for(auto const& button : KeyLocs) {
 		buttonGrid->SetCellRenderer(button.second.y, button.second.x, new renderImageInGrid(buttonData->buttonMapping[button.first].offBitmapIcon));
 		/*
@@ -131,10 +131,10 @@ void BottomUI::setIconState(Btn button, bool state) {
 	Location location = KeyLocs[button];
 	if(state) {
 		// Set the image to the on image
-		buttonGrid->GetCellRenderer(location.y, location.x)->setBitmap(buttonData->buttonMapping[button].onBitmapIcon);
+		((renderImageInGrid*)buttonGrid->GetCellRenderer(location.y, location.x))->setBitmap(buttonData->buttonMapping[button].onBitmapIcon);
 	} else {
 		// Set the image to the off image
-		buttonGrid->GetCellRenderer(location.y, location.x)->setBitmap(buttonData->buttonMapping[button].offBitmapIcon);
+		((renderImageInGrid*)buttonGrid->GetCellRenderer(location.y, location.x))->setBitmap(buttonData->buttonMapping[button].offBitmapIcon);
 	}
 	buttonGrid->RefreshRect(buttonGrid->CellToRect(location.x, location.x));
 
