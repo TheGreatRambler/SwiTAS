@@ -21,6 +21,7 @@ private:
 		// Simply run network handling
 		if(networkRun) {
 			// Ask for data
+			networkInstance->listenForSwitchCommands();
 		}
 	}
 
@@ -39,11 +40,12 @@ public:
 		return true;
 	}
 
-	virtual bool OnExit() {
+	virtual int OnExit() {
 		// Wait for the network thread to end
 		networkRun = false;
 		networkThread->join();
-		return true;
+		// No errors, return 0
+		return 0;
 	}
 };
 

@@ -44,6 +44,8 @@ wxBEGIN_EVENT_TABLE(JoystickCanvas, wxGLCanvas)
 	//EVT_SIZE(JoystickCanvas::OnResize)
 wxEND_EVENT_TABLE()
 
+
+// Simple way to render images in grid
 class renderImageInGrid : public wxGridCellRenderer {
 	// clang-format on
 private:
@@ -51,6 +53,11 @@ private:
 
 public:
 	renderImageInGrid(std::shared_ptr<wxBitmap> bitmap);
+
+	// Has to be implemented for some reason
+	virtual wxGridCellRenderer* Clone() const {
+		return (wxGridCellRenderer*)this;
+	}
 
 	virtual void Draw(wxGrid& grid, wxGridCellAttr& attr, wxDC& dc, const wxRect& rect, int row, int col, bool isSelected);
 

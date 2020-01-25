@@ -14,6 +14,7 @@
 #include <wx/glcanvas.h>
 #include <wx/grid.h>
 #include <wx/listctrl.h>
+
 #include <wx/wx.h>
 #ifdef __WXMAC__
 #include <GLUT/glut.h>
@@ -32,16 +33,14 @@ private:
 	uint32_t currentFirstItem;
 	uint32_t currentLastItem;
 
-	wxDECLARE_EVENT_TABLE();
-
 public:
 	// https://wiki.wxwidgets.org/WxGLCanvas#Multiple_Canvases
 	FrameCanvas(wxFrame* parent);
 
-	void draw();
+	void SetupGL();
 
-	void OnIdle(wxIdleEvent& event);
-	void OnResize(wxIdleEvent& event);
+	void Render(wxIdleEvent& event);
+	void Resize(wxSizeEvent& event);
 
 	void SetupViewport();
 
@@ -59,11 +58,12 @@ public:
 
 // clang-format off
 wxBEGIN_EVENT_TABLE(FrameCanvas, wxGLCanvas)
-	EVT_IDLE(FrameCanvas::OnIdle)
-	//EVT_SIZE(JoystickCanvas::OnResize)
+	EVT_IDLE(FrameCanvas::Render)
+	//EVT_SIZE(FrameCanvas::Resize)
 wxEND_EVENT_TABLE()
 
 class DataProcessing : public wxListCtrl {
+	// clang-format on
 private:
 	// Vector storing ALL inputs
 	// Shared pointer so everything is nice

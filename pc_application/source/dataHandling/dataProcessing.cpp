@@ -2,13 +2,31 @@
 
 FrameCanvas::FrameCanvas(wxFrame* parent) {
 	// Initialize base class
-	wxGLCanvas(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, "GLCanvas");
+	int args[] = { WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 16 };
+	wxGLCanvas(parent, wxID_ANY, args, wxDefaultPosition, wxDefaultSize, 0, "GLCanvas");
 	co   = new wxGLContext((wxGLCanvas*)this);
 	init = false;
 }
 
-// Override default signal handler:
-void FrameCanvas::draw() {
+void FrameCanvas::SetupGL() {
+	glShadeModel(GL_SMOOTH);
+	glClearColor(0, 0, 0, 0);
+	glClearDepth(1);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+}
+
+void FrameCanvas::Render(wxIdleEvent& event) {
+	SetCurrent(*co);
+
+	if(!init) {
+		SetupGL();
+		SetupViewport();
+		init = true;
+	}
+	// Draw
+
 	// Use nanovg to draw a circle
 	// SetCurrent sets the GL context
 	// Now can use nanovg
@@ -28,23 +46,22 @@ void FrameCanvas::draw() {
 	*/
 	// Render
 	SwapBuffers();
-}
 
-void FrameCanvas::OnIdle(wxIdleEvent& event) {
-	if(!init) {
-		SetupViewport();
-		init = true;
-	}
-	// Draw
-	draw();
 	// Dunno what this does
 	event.RequestMore();
+}
+
+void FrameCanvas::Resize(wxSizeEvent& event) {
+	SetCurrent(*co);
+	SetupViewport();
+	wxGLCanvas::OnSize(e);
+	Refresh();
 }
 
 void FrameCanvas::SetupViewport() {
 	int x, y;
 	GetSize(&x, &y);
-	glViewport(0, 0, (GLint)x, (GLint)y);
+	glViewport(0, 0, x, y);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(45, (float)x / y, 0.1, 100);
