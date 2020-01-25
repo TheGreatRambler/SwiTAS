@@ -1,7 +1,7 @@
 {
 	"configurations": [{
 		"name": "Win32",
-		"compileCommands": "${workspaceRoot}/compile_commands.json",
+		"compileCommands": "${workspaceRoot}/pc_application/compile_commands.json",
 		"defines": [
 			"_DEBUG",
 			"UNICODE",
