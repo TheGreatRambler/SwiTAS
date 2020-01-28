@@ -106,7 +106,7 @@ public:
 
 	// TODO finish these
 	// https://gitlab.gnome.org/GNOME/gtk/blob/master/gdk/gdkkeysyms.h
-	std::map<Btn, ButtonInfo> buttonMapping;
+	std::map<Btn, std::shared_ptr<ButtonInfo>> buttonMapping;
 
 	void setupButtonMapping(rapidjson::Document* mainSettings);
 };

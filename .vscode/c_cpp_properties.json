@@ -1,16 +1,26 @@
 {
 	"configurations": [{
-		"name": "Win32",
-		"compileCommands": "${workspaceRoot}/pc_application/compile_commands.json",
+		"name": "Main",
+		"includePath": [
+			"${workspaceFolder}/**"
+		],
 		"defines": [
 			"_DEBUG",
 			"UNICODE",
 			"_UNICODE"
 		],
+		"compilerPath": "C:\\msys2\\mingw64\\bin\\gcc.exe",
 		"cStandard": "c11",
 		"cppStandard": "c++11",
 		"intelliSenseMode": "gcc-x64",
-		"compilerPath": "C:\\msys2\\mingw64\\bin\\gcc.exe"
+		"compilerArgs": [],
+		"browse": {
+			"path": [
+				"${workspaceFolder}/**"
+			],
+			"limitSymbolsToIncludedHeaders": true
+		},
+		"compileCommands": "${workspaceFolder}/pc_application/compile_commands.json"
 	}],
 	"version": 4
 }

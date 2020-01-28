@@ -54,14 +54,18 @@ private:
 public:
 	renderImageInGrid(std::shared_ptr<wxBitmap> bitmap);
 
-	// Has to be implemented for some reason
-	virtual wxGridCellRenderer* Clone() const {
-		return (wxGridCellRenderer*)this;
-	}
-
 	virtual void Draw(wxGrid& grid, wxGridCellAttr& attr, wxDC& dc, const wxRect& rect, int row, int col, bool isSelected);
 
 	void setBitmap(std::shared_ptr<wxBitmap> bitmap);
+
+	// Need to override
+	wxSize GetBestSize(wxGrid& grid, wxGridCellAttr& attr, wxDC& dc, int row, int col) {
+		return wxSize(theBitmap->GetWidth(), theBitmap->GetHeight());
+	}
+
+	wxGridCellRenderer* Clone() const {
+		return new renderImageInGrid(*theBitmap);
+	}
 };
 
 class BottomUI {

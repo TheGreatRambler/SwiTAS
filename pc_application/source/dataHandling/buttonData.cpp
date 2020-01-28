@@ -13,25 +13,25 @@ void ButtonData::setupButtonMapping(rapidjson::Document* mainSettings) {
 		std::string keybindName  = b.value["triggerKeybind"].GetString();
 		// Get the gtk keyvalue from a gtk function
 
-		ButtonInfo thisButtonInfo;
+		std::shared_ptr<ButtonInfo> thisButtonInfo = std::make_shared<ButtonInfo>();
 
-		thisButtonInfo.scriptName = scriptName;
-		thisButtonInfo.viewName   = viewName;
+		thisButtonInfo->scriptName = scriptName;
+		thisButtonInfo->viewName   = viewName;
 
-		thisButtonInfo.onIcon = std::make_shared<wxImage>();
-		thisButtonInfo.onIcon->LoadFile(onIconImage, wxBITMAP_TYPE_PNG);
+		thisButtonInfo->onIcon = std::make_shared<wxImage>();
+		thisButtonInfo->onIcon->LoadFile(onIconImage, wxBITMAP_TYPE_PNG);
 
-		thisButtonInfo.offIcon = std::make_shared<wxImage>();
-		thisButtonInfo.offIcon->LoadFile(offIconImage, wxBITMAP_TYPE_PNG);
+		thisButtonInfo->offIcon = std::make_shared<wxImage>();
+		thisButtonInfo->offIcon->LoadFile(offIconImage, wxBITMAP_TYPE_PNG);
 
-		thisButtonInfo.onBitmapIcon = std::make_shared<wxBitmap>(thisButtonInfo.onIcon.get());
+		thisButtonInfo->onBitmapIcon = std::make_shared<wxBitmap>(thisButtonInfo->onIcon.get(), wxBITMAP_SCREEN_DEPTH);
 
-		thisButtonInfo.offBitmapIcon = std::make_shared<wxBitmap>(thisButtonInfo.offIcon.get());
+		thisButtonInfo->offBitmapIcon = std::make_shared<wxBitmap>(thisButtonInfo->offIcon.get(), wxBITMAP_SCREEN_DEPTH);
 
 		// Only one char
 		// This is because functions listen for a single char
 		// WxWidgets returns the raw char, so this can be used
-		thisButtonInfo.toggleKeybind = keybindName.at(0);
+		thisButtonInfo->toggleKeybind = keybindName.at(0);
 
 		buttonMapping[chosenButton] = thisButtonInfo;
 	}

@@ -66,13 +66,10 @@ renderImageInGrid::renderImageInGrid(std::shared_ptr<wxBitmap> bitmap) {
 }
 
 void renderImageInGrid::Draw(wxGrid& grid, wxGridCellAttr& attr, wxDC& dc, const wxRect& rect, int row, int col, bool isSelected) {
-	Draw(grid, attr, dc, rect, row, col, isSelected);
-
-	dc.DrawBitmap(*theBitmap, rect.x, rect.y);
-}
-
-void renderImageInGrid::setBitmap(std::shared_ptr<wxBitmap> bitmap) {
-	theBitmap = bitmap;
+	// Call base class ::Draw to clear the cell and draw the borders etc.
+	wxGridCellRenderer::Draw(grid, attr, dc, rect, row, col, isSelected);
+	// Draw rect in the right place
+	dc.DrawBitmap(*theBitmap, rect.GetTopLeft());
 }
 
 /*
