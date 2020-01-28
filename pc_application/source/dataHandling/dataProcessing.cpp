@@ -1,80 +1,5 @@
 #include "dataProcessing.hpp"
 
-FrameCanvas::FrameCanvas(wxFrame* parent) {
-	// Initialize base class
-	int args[] = { WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 16 };
-	wxGLCanvas(parent, wxID_ANY, args, wxDefaultPosition, wxDefaultSize, 0, "GLCanvas");
-	co   = new wxGLContext((wxGLCanvas*)this);
-	init = false;
-}
-
-void FrameCanvas::SetupGL() {
-	glShadeModel(GL_SMOOTH);
-	glClearColor(0, 0, 0, 0);
-	glClearDepth(1);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
-	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-}
-
-void FrameCanvas::Render(wxIdleEvent& event) {
-	SetCurrent(*co);
-
-	if(!init) {
-		SetupGL();
-		SetupViewport();
-		init = true;
-	}
-	// Draw
-
-	// Use nanovg to draw a circle
-	// SetCurrent sets the GL context
-	// Now can use nanovg
-	SetCurrent(*co);
-	/*
-	glClearColor(0.0, 0.0, 0.0, 0.0);
-	glClear(GL_COLOR_BUFFER_BIT);
-	glViewport(0, 0, (GLint)200, (GLint)200);
-	glColor3f(1.0, c_, c_);
-
-	glBegin(GL_POLYGON);
-	glVertex3f(-0.5, -0.5, 5 * cos(rotate_));
-	glVertex3f(-0.5, 0.5, 5 * cos(rotate_));
-	glVertex3f(0.5, 0.5, -5 * cos(rotate_));
-	glVertex3f(0.5, -0.5, -5 * cos(rotate_));
-	glEnd();
-	*/
-	// Render
-	SwapBuffers();
-
-	// Dunno what this does
-	event.RequestMore();
-}
-
-void FrameCanvas::Resize(wxSizeEvent& event) {
-	SetCurrent(*co);
-	SetupViewport();
-	wxGLCanvas::OnSize(e);
-	Refresh();
-}
-
-void FrameCanvas::SetupViewport() {
-	int x, y;
-	GetSize(&x, &y);
-	glViewport(0, 0, x, y);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(45, (float)x / y, 0.1, 100);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-}
-
-void FrameCanvas::setPixelsScrolled(uint64_t pixelOffset, uint32_t firstItem, uint32_t lastItem) {
-	currentFirstItem   = firstItem;
-	currentLastItem    = lastItem;
-	currentPixelOffset = pixelOffset;
-}
-
 DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxWindow* parent) {
 	// Inherit from list control
 	wxListCtrl(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_VIRTUAL | wxLC_HRULES);
@@ -86,7 +11,10 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	// scrolledWindow = std::make_shared<Gtk::ScrolledWindow>();
 	// This is cool, so set it
 	EnableAlternateRowColours(true);
-	imageList.Create(50, 50);
+	// Resize images based on the settings file
+	int imageIconWidth  = (*mainSettings)["inputsList"]["imageWidth"].GetInt();
+	int imageIconHeight = (*mainSettings)["inputsList"]["imageHeight"].GetInt();
+	imageList.Create(imageIconWidth, imageIconHeight);
 	// Add the list store from the columns
 	// controllerListStore = Gtk::ListStore::create(inputColumns);
 	// Set this tree view to this model
@@ -107,12 +35,13 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 		// Add to map for later
 		// inputColumns.buttonPixbufs[button.first] = thisIcon;
 		// Append now
-		AppendColumn(button.second.scriptName);
+		AppendColumn(button.second->scriptName);
 		// Have to create a bitmap manually
 		// Bitmaps are interleaved between on and off
 		// Have to pass raw value, not pointer
-		imageList.Add(*button.second.offBitmapIcon, maskColor);
-		imageList.Add(*button.second.onBitmapIcon, maskColor);
+		// Have to resize also, no reference needed
+		imageList.Add(*(new wxBitmap(button.second->onIcon.Rescale(imageIconWidth, imageIconHeight))), maskColor);
+		imageList.Add(*(new wxBitmap(button.second->offIcon.Rescale(imageIconWidth, imageIconHeight))), maskColor);
 		// treeView.append_column(button.second.scriptName, thisIcon);
 		// Add to the columns themselves (gives value, not pointer)
 		// inputColumns.add(thisIcon);
@@ -235,7 +164,7 @@ void DataProcessing::handleKeyboardInput(wxChar key) {
 	for(auto const& thisButton : buttonData->buttonMapping) {
 		// See if it corresponds to the toggle keybind
 		// TODO handle set and clear commands (shift and ctrl)
-		if(key == thisButton.second.toggleKeybind) {
+		if(key == thisButton.second->toggleKeybind) {
 			// Toggle this key and end the loop
 			toggleButtonState(thisButton.first);
 			break;

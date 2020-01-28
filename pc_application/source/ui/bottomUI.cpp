@@ -104,7 +104,7 @@ BottomUI::BottomUI(std::shared_ptr<ButtonData> buttons, wxFlexGridSizer* theGrid
 	buttonGrid = std::make_shared<wxGrid>();
 
 	for(auto const& button : KeyLocs) {
-		buttonGrid->SetCellRenderer(button.second.y, button.second.x, new renderImageInGrid(buttonData->buttonMapping[button.first].offBitmapIcon));
+		buttonGrid->SetCellRenderer(button.second.y, button.second.x, new renderImageInGrid(buttonData->buttonMapping[button.first]->offBitmapIcon));
 		/*
 		// Add the images (the pixbuf can and will be changed later)
 		std::shared_ptr<Gtk::Image> image = std::make_shared<Gtk::Image>(buttonData->buttonMapping[button.first].offIcon);
@@ -122,16 +122,19 @@ BottomUI::BottomUI(std::shared_ptr<ButtonData> buttons, wxFlexGridSizer* theGrid
 	}
 
 	horizontalBoxSizer->Add(buttonGrid.get(), wxEXPAND | wxALL);
+
+    // Just add it
+    theGrid->Add(horizontalBoxSizer.get(), wxEXPAND | wxALL);
 }
 
 void BottomUI::setIconState(Btn button, bool state) {
 	Location location = KeyLocs[button];
 	if(state) {
 		// Set the image to the on image
-		((renderImageInGrid*)buttonGrid->GetCellRenderer(location.y, location.x))->setBitmap(buttonData->buttonMapping[button].onBitmapIcon);
+		((renderImageInGrid*)buttonGrid->GetCellRenderer(location.y, location.x))->setBitmap(buttonData->buttonMapping[button]->onBitmapIcon);
 	} else {
 		// Set the image to the off image
-		((renderImageInGrid*)buttonGrid->GetCellRenderer(location.y, location.x))->setBitmap(buttonData->buttonMapping[button].offBitmapIcon);
+		((renderImageInGrid*)buttonGrid->GetCellRenderer(location.y, location.x))->setBitmap(buttonData->buttonMapping[button]->offBitmapIcon);
 	}
 	buttonGrid->RefreshRect(buttonGrid->CellToRect(location.x, location.x));
 
