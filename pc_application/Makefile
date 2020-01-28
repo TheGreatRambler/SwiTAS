@@ -33,7 +33,7 @@ CXXFLAGS := -std=gnu++17 $(shell pkg-config --cflags glew) $(shell wx-config --c
 CPPFLAGS := -Wall -Wno-maybe-uninitialized -ggdb
 # Linker flags (-lpthread needed for threads)
 # Includes some neccessary linker flags for Gtkmm
-LDFLAGS := -lpthread $(shell pkg-config --libs glew) $(shell wx-config --libs std)
+LDFLAGS := -lpthread $(shell pkg-config --libs glew) $(shell wx-config --libs std,gl)
 ifeq ($(OS),Windows_NT)
 	# Needed for sockets on windows
 	LDFLAGS := -lws2_32

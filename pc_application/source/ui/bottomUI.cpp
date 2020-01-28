@@ -4,7 +4,8 @@
 
 JoystickCanvas::JoystickCanvas(wxFrame* parent) {
 	// Initialize base class
-	wxGLCanvas(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, "GLCanvas");
+	const int args[] = { WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 16 };
+	wxGLCanvas(parent, wxID_ANY, args, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE);
 	co   = new wxGLContext((wxGLCanvas*)this);
 	init = false;
 }
@@ -123,8 +124,8 @@ BottomUI::BottomUI(std::shared_ptr<ButtonData> buttons, wxFlexGridSizer* theGrid
 
 	horizontalBoxSizer->Add(buttonGrid.get(), wxEXPAND | wxALL);
 
-    // Just add it
-    theGrid->Add(horizontalBoxSizer.get(), wxEXPAND | wxALL);
+	// Just add it
+	theGrid->Add(horizontalBoxSizer.get(), wxEXPAND | wxALL);
 }
 
 void BottomUI::setIconState(Btn button, bool state) {

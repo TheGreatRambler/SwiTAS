@@ -22,8 +22,6 @@ private:
 	wxGLContext* co;
 	bool init;
 
-	wxDECLARE_EVENT_TABLE();
-
 public:
 	// https://wiki.wxwidgets.org/WxGLCanvas#Multiple_Canvases
 	JoystickCanvas(wxFrame* parent);
@@ -64,7 +62,7 @@ public:
 	}
 
 	wxGridCellRenderer* Clone() const {
-		return new renderImageInGrid(*theBitmap);
+		return new renderImageInGrid(theBitmap);
 	}
 };
 

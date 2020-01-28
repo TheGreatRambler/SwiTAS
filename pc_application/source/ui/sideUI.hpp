@@ -24,7 +24,7 @@ private:
 public:
 	// https://wiki.wxwidgets.org/WxGLCanvas#Multiple_Canvases
 	// Used to be wxFrame*
-	FrameCanvas(wxBoxSizer* parent);
+	FrameCanvas(wxFrame* parent);
 
 	void SetupGL();
 
@@ -64,6 +64,8 @@ private:
     std::shared_ptr<wxBoxSizer> inputsViewSizer;
 
     std::shared_ptr<FrameCanvas> frameCanvas;
+
+	std::shared_ptr<wxFrame> frameCanvasFrame;
 
     std::shared_ptr<DataProcessing> inputData;
 

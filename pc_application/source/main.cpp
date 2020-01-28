@@ -47,6 +47,6 @@ public:
 		// No errors, return 0
 		return 0;
 	}
-};
+}
 
 wxIMPLEMENT_APP(MainApp)

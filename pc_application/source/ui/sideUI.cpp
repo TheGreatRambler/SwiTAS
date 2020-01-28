@@ -1,9 +1,9 @@
 #include "sideUI.hpp"
 #include <memory>
 
-FrameCanvas::FrameCanvas(wxBoxSizer* parent) {
+FrameCanvas::FrameCanvas(wxFrame* parent) {
 	// Initialize base class
-	int args[] = { WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 16 };
+	const int args[] = { WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 16 };
 	wxGLCanvas(parent, wxID_ANY, args, wxDefaultPosition, wxDefaultSize, 0, "GLCanvas");
 	co   = new wxGLContext((wxGLCanvas*)this);
 	init = false;
@@ -55,7 +55,7 @@ void FrameCanvas::Render(wxIdleEvent& event) {
 void FrameCanvas::Resize(wxSizeEvent& event) {
 	SetCurrent(*co);
 	SetupViewport();
-	wxGLCanvas::OnSize(e);
+	wxGLCanvas::OnSize(event);
 	Refresh();
 }
 
@@ -80,12 +80,14 @@ SideUI::SideUI(rapidjson::Document* settings, wxFlexGridSizer* sizer, std::share
 	mainSettings = settings;
 	inputData    = input;
 
-	verticalBoxSizer = std::make_shared<wxBoxSizer>();
+	verticalBoxSizer = std::make_shared<wxBoxSizer>(wxVERTICAL);
 
 	// Holds input stuff
 	inputsViewSizer = std::make_shared<wxBoxSizer>(wxHORIZONTAL);
 
-	frameCanvas = std::make_shared<FrameCanvas>(inputsViewSizer.get());
+	frameCanvasFrame = std::make_shared<wxFrame>(inputsViewSizer.get(), wxID_ANY, "InputCanvas");
+	frameCanvas      = std::make_shared<FrameCanvas>(frameCanvasFrame.get());
+	frameCanvasFrame->AddChild(frameCanvas.get());
 
 	wxBitmap play((*mainSettings)["ui"]["playButton"].GetString(), wxBITMAP_TYPE_PNG);
 	wxBitmap frameAdvance((*mainSettings)["ui"]["frameAdvanceButton"].GetString(), wxBITMAP_TYPE_PNG);
@@ -96,7 +98,7 @@ SideUI::SideUI(rapidjson::Document* settings, wxFlexGridSizer* sizer, std::share
 	verticalBoxSizer->Add(playButton.get(), wxEXPAND | wxALL);
 	verticalBoxSizer->Add(frameAdvanceButton.get(), wxEXPAND | wxALL);
 
-	inputsViewSizer->Add(frameCanvas.get(), wxEXPAND | wxALL);
+	inputsViewSizer->Add(frameCanvasFrame.get(), wxEXPAND | wxALL);
 	inputsViewSizer->Add(inputData.get(), wxEXPAND | wxALL);
 
 	verticalBoxSizer->Add(inputsViewSizer.get(), wxEXPAND | wxALL);

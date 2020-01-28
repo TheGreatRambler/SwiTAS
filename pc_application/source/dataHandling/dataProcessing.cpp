@@ -40,8 +40,8 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 		// Bitmaps are interleaved between on and off
 		// Have to pass raw value, not pointer
 		// Have to resize also, no reference needed
-		imageList.Add(*(new wxBitmap(button.second->onIcon.Rescale(imageIconWidth, imageIconHeight))), maskColor);
-		imageList.Add(*(new wxBitmap(button.second->offIcon.Rescale(imageIconWidth, imageIconHeight))), maskColor);
+		imageList.Add(*(new wxBitmap(button.second->onIcon->Rescale(imageIconWidth, imageIconHeight))), maskColor);
+		imageList.Add(*(new wxBitmap(button.second->offIcon->Rescale(imageIconWidth, imageIconHeight))), maskColor);
 		// treeView.append_column(button.second.scriptName, thisIcon);
 		// Add to the columns themselves (gives value, not pointer)
 		// inputColumns.add(thisIcon);
