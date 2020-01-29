@@ -48,13 +48,19 @@ class renderImageInGrid : public wxGridCellRenderer {
 	// clang-format on
 private:
 	std::shared_ptr<wxBitmap> theBitmap;
+	Btn button;
 
 public:
 	renderImageInGrid(std::shared_ptr<wxBitmap> bitmap);
 
 	virtual void Draw(wxGrid& grid, wxGridCellAttr& attr, wxDC& dc, const wxRect& rect, int row, int col, bool isSelected);
 
-	void setBitmap(std::shared_ptr<wxBitmap> bitmap);
+	void setBitmap(std::shared_ptr<wxBitmap> bitmap, Btn btn);
+
+	// Used by click handlers
+	Btn getButton() {
+		return button;
+	}
 
 	// Need to override
 	wxSize GetBestSize(wxGrid& grid, wxGridCellAttr& attr, wxDC& dc, int row, int col) {
@@ -122,6 +128,9 @@ private:
 
 	// The button mapping instance
 	std::shared_ptr<ButtonData> buttonData;
+
+	// Listen for grid onclick
+	void onGridClick(wxGridEvent& event);
 
 protected:
 	// Need to fix

@@ -96,6 +96,10 @@ SideUI::SideUI(rapidjson::Document* settings, wxFlexGridSizer* sizer, std::share
 	frameAdvanceButton = std::make_shared<wxBitmapButton>();
 	frameAdvanceButton->SetBitmapCurrent(*frameAdvanceBitmap);
 
+	// Button handlers
+	playButton->Bind(wxEVT_LEFT_DOWN, &SideUI::onPlayPressed);
+	frameAdvanceButton->Bind(wxEVT_LEFT_DOWN, &SideUI::onFrameAdvancePressed);
+
 	verticalBoxSizer->Add(playButton.get(), wxEXPAND | wxALL);
 	verticalBoxSizer->Add(frameAdvanceButton.get(), wxEXPAND | wxALL);
 
@@ -109,4 +113,12 @@ SideUI::SideUI(rapidjson::Document* settings, wxFlexGridSizer* sizer, std::share
 
 	// Just add it
 	sizer->Add(verticalBoxSizer.get(), wxEXPAND | wxALL);
+}
+
+void SideUI::onPlayPressed(wxMouseEvent& event) {
+	// Clicked
+}
+
+void SideUI::onFrameAdvancePressed(wxMouseEvent& event) {
+	// Clicked
 }

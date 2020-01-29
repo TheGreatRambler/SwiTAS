@@ -61,8 +61,11 @@ void JoystickCanvas::SetupViewport() {
 	glLoadIdentity();
 }
 
-renderImageInGrid::renderImageInGrid(std::shared_ptr<wxBitmap> bitmap) {
+renderImageInGrid::renderImageInGrid(std::shared_ptr<wxBitmap> bitmap, Btn btn) {
+	// Need users to know this is custom
+	SetClientData("cus");
 	theBitmap = bitmap;
+	button    = btn;
 }
 
 void renderImageInGrid::Draw(wxGrid& grid, wxGridCellAttr& attr, wxDC& dc, const wxRect& rect, int row, int col, bool isSelected) {
@@ -85,6 +88,7 @@ BottomUI::BottomUI(std::shared_ptr<ButtonData> buttons, wxFlexGridSizer* theGrid
 	buttonData = buttons;
 
 	inputInstance = input;
+	// Callback stuff
 	inputInstance->setInputCallback(std::bind(&BottomUI::setIconState, this, std::placeholders::_1, std::placeholders::_2));
 
 	horizontalBoxSizer = std::make_shared<wxBoxSizer>(wxHORIZONTAL);
@@ -104,7 +108,7 @@ BottomUI::BottomUI(std::shared_ptr<ButtonData> buttons, wxFlexGridSizer* theGrid
 	buttonGrid = std::make_shared<wxGrid>();
 
 	for(auto const& button : KeyLocs) {
-		buttonGrid->SetCellRenderer(button.second.y, button.second.x, new renderImageInGrid(buttonData->buttonMapping[button.first]->offBitmapIcon));
+		buttonGrid->SetCellRenderer(button.second.y, button.second.x, new renderImageInGrid(buttonData->buttonMapping[button.first]->offBitmapIcon, button.first));
 		/*
 		// Add the images (the pixbuf can and will be changed later)
 		std::shared_ptr<Gtk::Image> image = std::make_shared<Gtk::Image>(buttonData->buttonMapping[button.first].offIcon);
@@ -125,6 +129,22 @@ BottomUI::BottomUI(std::shared_ptr<ButtonData> buttons, wxFlexGridSizer* theGrid
 
 	// Just add it
 	theGrid->Add(horizontalBoxSizer.get(), wxEXPAND | wxALL);
+}
+
+void BottomUI::onGridClick(wxGridEvent& event) {
+	// https://forums.wxwidgets.org/viewtopic.php?t=21585
+	long col = event.GetCol();
+	long row = event.GetRow();
+
+	wxGridCellRenderer* cellRenderer = buttonGrid->GetCellRenderer(row, col);
+
+	if(strcmp((char*)cellRenderer->GetClientData(), "cus") == 0) {
+		// This is a custom cell renderer
+		// Toggle the button state via the cell renderer hopefully
+		inputInstance->toggleButtonState(((renderImageInGrid*)cellRenderer)->getButton());
+	}
+
+	event.Skip();
 }
 
 void BottomUI::setIconState(Btn button, bool state) {
