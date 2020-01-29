@@ -51,11 +51,11 @@ private:
 	Btn button;
 
 public:
-	renderImageInGrid(std::shared_ptr<wxBitmap> bitmap);
+	renderImageInGrid(std::shared_ptr<wxBitmap> bitmap, Btn btn);
 
 	virtual void Draw(wxGrid& grid, wxGridCellAttr& attr, wxDC& dc, const wxRect& rect, int row, int col, bool isSelected);
 
-	void setBitmap(std::shared_ptr<wxBitmap> bitmap, Btn btn);
+	void setBitmap(std::shared_ptr<wxBitmap> bitmap);
 
 	// Used by click handlers
 	Btn getButton() {
@@ -68,7 +68,7 @@ public:
 	}
 
 	wxGridCellRenderer* Clone() const {
-		return new renderImageInGrid(theBitmap);
+		return new renderImageInGrid(theBitmap, button);
 	}
 };
 
@@ -137,7 +137,7 @@ protected:
 	// bool onButtonPress(GdkEventButton* event, Btn button);
 
 public:
-	BottomUI(std::shared_ptr<ButtonData> buttons, wxFlexGridSizer* theGrid, std::shared_ptr<DataProcessing> input);
+	BottomUI(wxFrame* parentFrame, std::shared_ptr<ButtonData> buttons, wxFlexGridSizer* theGrid, std::shared_ptr<DataProcessing> input);
 
 	void setIconState(Btn button, bool state);
 

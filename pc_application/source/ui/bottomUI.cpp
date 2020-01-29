@@ -63,7 +63,7 @@ void JoystickCanvas::SetupViewport() {
 
 renderImageInGrid::renderImageInGrid(std::shared_ptr<wxBitmap> bitmap, Btn btn) {
 	// Need users to know this is custom
-	SetClientData("cus");
+	SetClientData((char*)"cus");
 	theBitmap = bitmap;
 	button    = btn;
 }
@@ -83,7 +83,7 @@ bool BottomUI::onButtonPress(GdkEventButton* event, Btn button) {
 }
 */
 
-BottomUI::BottomUI(std::shared_ptr<ButtonData> buttons, wxFlexGridSizer* theGrid, std::shared_ptr<DataProcessing> input) {
+BottomUI::BottomUI(wxFrame* parentFrame, std::shared_ptr<ButtonData> buttons, wxFlexGridSizer* theGrid, std::shared_ptr<DataProcessing> input) {
 	// TODO set up joysticks
 	buttonData = buttons;
 
@@ -106,6 +106,9 @@ BottomUI::BottomUI(std::shared_ptr<ButtonData> buttons, wxFlexGridSizer* theGrid
 	horizontalBoxSizer->Add(rightJoystickFrame.get(), wxEXPAND | wxALL);
 
 	buttonGrid = std::make_shared<wxGrid>();
+
+	// Handle grid clicking
+	buttonGrid->Bind(wxEVT_GRID_CELL_LEFT_CLICK, &BottomUI::onGridClick, this);
 
 	for(auto const& button : KeyLocs) {
 		buttonGrid->SetCellRenderer(button.second.y, button.second.x, new renderImageInGrid(buttonData->buttonMapping[button.first]->offBitmapIcon, button.first));

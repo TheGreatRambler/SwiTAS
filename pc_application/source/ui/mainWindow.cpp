@@ -43,8 +43,8 @@ MainWindow::MainWindow() {
 	dataProcessingInstance = std::make_shared<DataProcessing>(&mainSettings, buttonData, this);
 
 	// UI instances
-	sideUI   = std::make_shared<SideUI>(&mainSettings, mainSizer.get(), dataProcessingInstance);
-	bottomUI = std::make_shared<BottomUI>(buttonData, mainSizer.get(), dataProcessingInstance);
+	sideUI   = std::make_shared<SideUI>(this, &mainSettings, mainSizer.get(), dataProcessingInstance);
+	bottomUI = std::make_shared<BottomUI>(this, buttonData, mainSizer.get(), dataProcessingInstance);
 
 	// Add the top menubar
 	addMenuBar();

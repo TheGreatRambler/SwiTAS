@@ -82,5 +82,5 @@ private:
     void onFrameAdvancePressed(wxMouseEvent& event);
 
 public:
-	SideUI(rapidjson::Document* settings, wxFlexGridSizer* sizer, std::shared_ptr<DataProcessing> input);
+	SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxFlexGridSizer* sizer, std::shared_ptr<DataProcessing> input);
 };

@@ -75,7 +75,7 @@ void FrameCanvas::setPixelsScrolled(uint64_t pixelOffset, uint32_t firstItem, ui
 	currentPixelOffset = pixelOffset;
 }
 
-SideUI::SideUI(rapidjson::Document* settings, wxFlexGridSizer* sizer, std::shared_ptr<DataProcessing> input) {
+SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxFlexGridSizer* sizer, std::shared_ptr<DataProcessing> input) {
 	mainSettings = settings;
 	inputData    = input;
 
@@ -97,8 +97,8 @@ SideUI::SideUI(rapidjson::Document* settings, wxFlexGridSizer* sizer, std::share
 	frameAdvanceButton->SetBitmapCurrent(*frameAdvanceBitmap);
 
 	// Button handlers
-	playButton->Bind(wxEVT_LEFT_DOWN, &SideUI::onPlayPressed);
-	frameAdvanceButton->Bind(wxEVT_LEFT_DOWN, &SideUI::onFrameAdvancePressed);
+	playButton->Bind(wxEVT_BUTTON, &SideUI::onPlayPressed, this);
+	frameAdvanceButton->Bind(wxEVT_BUTTON, &SideUI::onFrameAdvancePressed, this);
 
 	verticalBoxSizer->Add(playButton.get(), wxEXPAND | wxALL);
 	verticalBoxSizer->Add(frameAdvanceButton.get(), wxEXPAND | wxALL);
