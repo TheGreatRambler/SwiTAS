@@ -1,10 +1,9 @@
 #include "sideUI.hpp"
 #include <memory>
 
-FrameCanvas::FrameCanvas(wxFrame* parent) {
+FrameCanvas::FrameCanvas(wxFrame* parent)
+	: wxGLCanvas(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, "GLCanvasFrame") {
 	// Initialize base class
-	const int args[] = { WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 16 };
-	wxGLCanvas(parent, wxID_ANY, args, wxDefaultPosition, wxDefaultSize, 0, "GLCanvas");
 	co   = new wxGLContext((wxGLCanvas*)this);
 	init = false;
 }
@@ -85,15 +84,17 @@ SideUI::SideUI(rapidjson::Document* settings, wxFlexGridSizer* sizer, std::share
 	// Holds input stuff
 	inputsViewSizer = std::make_shared<wxBoxSizer>(wxHORIZONTAL);
 
-	frameCanvasFrame = std::make_shared<wxFrame>(inputsViewSizer.get(), wxID_ANY, "InputCanvas");
+	frameCanvasFrame = std::make_shared<wxFrame>();
 	frameCanvas      = std::make_shared<FrameCanvas>(frameCanvasFrame.get());
 	frameCanvasFrame->AddChild(frameCanvas.get());
 
-	wxBitmap play((*mainSettings)["ui"]["playButton"].GetString(), wxBITMAP_TYPE_PNG);
-	wxBitmap frameAdvance((*mainSettings)["ui"]["frameAdvanceButton"].GetString(), wxBITMAP_TYPE_PNG);
+	playBitmap         = std::make_shared<wxBitmap>((*mainSettings)["ui"]["playButton"].GetString(), wxBITMAP_TYPE_PNG);
+	frameAdvanceBitmap = std::make_shared<wxBitmap>((*mainSettings)["ui"]["frameAdvanceButton"].GetString(), wxBITMAP_TYPE_PNG);
 
-	playButton         = std::make_shared<wxBitmapButton>(verticalBoxSizer.get(), -1, play, wxDefaultPosition, wxDefaultSize, 0);
-	frameAdvanceButton = std::make_shared<wxBitmapButton>(verticalBoxSizer.get(), -1, frameAdvance, wxDefaultPosition, wxDefaultSize, 0);
+	playButton = std::make_shared<wxBitmapButton>();
+	playButton->SetBitmapCurrent(*playBitmap);
+	frameAdvanceButton = std::make_shared<wxBitmapButton>();
+	frameAdvanceButton->SetBitmapCurrent(*frameAdvanceBitmap);
 
 	verticalBoxSizer->Add(playButton.get(), wxEXPAND | wxALL);
 	verticalBoxSizer->Add(frameAdvanceButton.get(), wxEXPAND | wxALL);

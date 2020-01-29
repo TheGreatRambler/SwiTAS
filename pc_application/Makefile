@@ -27,13 +27,13 @@ CFLAGS := -std=gnu17
 # http://manpages.ubuntu.com/manpages/trusty/man1/wx-config.1.html
 # https://wiki.wxwidgets.org/Makefile
 
-CXXFLAGS := -std=gnu++17 $(shell pkg-config --cflags glew) $(shell wx-config --cxxflags std) -I./include
+CXXFLAGS := -std=gnu++17 $(shell pkg-config --cflags glew) $(shell wx-config --cxxflags base,core,gl) -I./include
 # C/C++ flags (no -pendantic)
 # -fpermissive needed for some misbehaving GTK code
 CPPFLAGS := -Wall -Wno-maybe-uninitialized -ggdb
 # Linker flags (-lpthread needed for threads)
 # Includes some neccessary linker flags for Gtkmm
-LDFLAGS := -lpthread $(shell pkg-config --libs glew) $(shell wx-config --libs std,gl)
+LDFLAGS := -lpthread $(shell pkg-config --libs glew) $(shell wx-config --libs base,core,gl)
 ifeq ($(OS),Windows_NT)
 	# Needed for sockets on windows
 	LDFLAGS := -lws2_32

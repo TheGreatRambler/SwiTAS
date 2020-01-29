@@ -2,10 +2,9 @@
 
 #include <memory>
 
-JoystickCanvas::JoystickCanvas(wxFrame* parent) {
+JoystickCanvas::JoystickCanvas(wxFrame* parent)
+	: wxGLCanvas(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE) {
 	// Initialize base class
-	const int args[] = { WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 16 };
-	wxGLCanvas(parent, wxID_ANY, args, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE);
 	co   = new wxGLContext((wxGLCanvas*)this);
 	init = false;
 }
@@ -90,8 +89,8 @@ BottomUI::BottomUI(std::shared_ptr<ButtonData> buttons, wxFlexGridSizer* theGrid
 
 	horizontalBoxSizer = std::make_shared<wxBoxSizer>(wxHORIZONTAL);
 
-	leftJoystickFrame  = std::make_shared<wxFrame>(horizontalBoxSizer.get(), wxID_ANY, "LeftCanvas");
-	rightJoystickFrame = std::make_shared<wxFrame>(horizontalBoxSizer.get(), wxID_ANY, "RightCanvas");
+	leftJoystickFrame  = std::make_shared<wxFrame>();
+	rightJoystickFrame = std::make_shared<wxFrame>();
 
 	leftJoystick  = std::make_shared<JoystickCanvas>(leftJoystickFrame.get());
 	rightJoystick = std::make_shared<JoystickCanvas>(rightJoystickFrame.get());

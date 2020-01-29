@@ -42,4 +42,4 @@ namespace SerializeProtocol {
 		memcpy(data, serializingData.data(), *size);
 		serializingData.clear();
 	}
-}
+};

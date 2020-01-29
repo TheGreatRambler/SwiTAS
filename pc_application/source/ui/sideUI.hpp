@@ -57,6 +57,9 @@ private:
 
 	std::shared_ptr<wxBoxSizer> verticalBoxSizer;
 
+	std::shared_ptr<wxBitmap> playBitmap;
+	std::shared_ptr<wxBitmap> frameAdvanceBitmap;
+
 	std::shared_ptr<wxBitmapButton> playButton;
 	std::shared_ptr<wxBitmapButton> frameAdvanceButton;
 
