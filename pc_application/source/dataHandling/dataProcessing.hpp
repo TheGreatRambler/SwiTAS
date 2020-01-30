@@ -50,6 +50,8 @@ private:
 	virtual wxString OnGetItemText(long item, long column) const;
 
 public:
+	static const int LIST_CTRL_ID = 1000;
+
 	DataProcessing(rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxWindow* parent);
 
 	void setInputCallback(std::function<void(Btn, bool)> callback);
@@ -67,6 +69,18 @@ public:
 	void handleKeyboardInput(wxChar key);
 	// The class itself is the list control
 	// std::shared_ptr<wxGenericListCtrl> getWidget();
+
+	void onCacheHint(wxListEvent& event) {
+		// This gets the first and last element in the array
+		// Will be used to set the elements to draw in the canvas thing
+		printf("OnCacheHint: cache items %ld..%ld", event.GetCacheFrom(), event.GetCacheTo());
+	}
+
+	wxDECLARE_EVENT_TABLE();
 };
 
-// wxBEGIN_EVENT_TABLE(DataProcessing, wxGenericListCtrl) EVT_MENU(wxID_EXIT, MyFrame::OnExit) EVT_MENU(DO_TEST, MyFrame::DoTest) EVT_SIZE(MyFrame::OnSize) EVT_BUTTON(BUTTON1, MyFrame::OnButton1) wxEND_EVENT_TABLE()
+// clang-format off
+wxBEGIN_EVENT_TABLE(DataProcessing, wxListCtrl)
+	EVT_LIST_CACHE_HINT(DataProcessing::LIST_CTRL_ID, DataProcessing::onCacheHint)
+wxEND_EVENT_TABLE()
+	// clang-format on

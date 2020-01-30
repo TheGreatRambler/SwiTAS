@@ -54,7 +54,7 @@ void FrameCanvas::Render(wxIdleEvent& event) {
 void FrameCanvas::Resize(wxSizeEvent& event) {
 	SetCurrent(*co);
 	SetupViewport();
-	wxGLCanvas::OnSize(event);
+	// wxGLCanvas::OnSize(event);
 	Refresh();
 }
 

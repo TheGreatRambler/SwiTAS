@@ -2,7 +2,8 @@
 
 DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxWindow* parent) {
 	// Inherit from list control
-	wxListCtrl(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_VIRTUAL | wxLC_HRULES);
+	// Use this specific ID in order to do things
+	wxListCtrl(parent, DataProcessing::LIST_CTRL_ID, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_VIRTUAL | wxLC_HRULES);
 	buttonData   = buttons;
 	mainSettings = settings;
 	// Set the mask color via a css string
