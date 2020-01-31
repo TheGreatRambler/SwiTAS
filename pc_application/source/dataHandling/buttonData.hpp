@@ -115,3 +115,4 @@ public:
 
 typedef ButtonData::Btn Btn;
 typedef ButtonData::ControllerData ControllerData;
+typedef ButtonData::ButtonInfo ButtonInfo;

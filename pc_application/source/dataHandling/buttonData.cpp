@@ -1,5 +1,4 @@
 #include "buttonData.hpp"
-#include <memory>
 
 void ButtonData::setupButtonMapping(rapidjson::Document* mainSettings) {
 	// Set up button mapping with the data obtained via JSON
@@ -24,9 +23,9 @@ void ButtonData::setupButtonMapping(rapidjson::Document* mainSettings) {
 		thisButtonInfo->offIcon = std::make_shared<wxImage>();
 		thisButtonInfo->offIcon->LoadFile(offIconImage, wxBITMAP_TYPE_PNG);
 
-		thisButtonInfo->onBitmapIcon = std::make_shared<wxBitmap>(thisButtonInfo->onIcon.get(), wxBITMAP_SCREEN_DEPTH);
+		thisButtonInfo->onBitmapIcon = std::make_shared<wxBitmap>(*thisButtonInfo->onIcon, wxBITMAP_SCREEN_DEPTH);
 
-		thisButtonInfo->offBitmapIcon = std::make_shared<wxBitmap>(thisButtonInfo->offIcon.get(), wxBITMAP_SCREEN_DEPTH);
+		thisButtonInfo->offBitmapIcon = std::make_shared<wxBitmap>(*thisButtonInfo->offIcon, wxBITMAP_SCREEN_DEPTH);
 
 		// Only one char
 		// This is because functions listen for a single char

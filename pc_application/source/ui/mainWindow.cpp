@@ -23,7 +23,7 @@ void MainWindow::getGlobalSettings(rapidjson::Document* d) {
 
 MainWindow::MainWindow() {
 	wxFrame((wxFrame*)NULL, -1, "NX TAS UI", wxDefaultPosition, wxSize(300, 200));
-	// Init PNGs
+	// Load PNGs
 	wxImage::AddHandler(new wxPNGHandler());
 
 	// Get the main settings
