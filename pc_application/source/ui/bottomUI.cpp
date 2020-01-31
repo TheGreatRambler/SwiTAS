@@ -1,9 +1,7 @@
 #include "bottomUI.hpp"
 
-#include <memory>
-
 JoystickCanvas::JoystickCanvas(wxFrame* parent)
-	: wxGLCanvas(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE) {
+	: wxGLCanvas(parent, wxID_ANY, NULL, wxDefaultPosition, wxDefaultSize, 0) {
 	// Initialize base class
 	co   = new wxGLContext((wxGLCanvas*)this);
 	init = false;

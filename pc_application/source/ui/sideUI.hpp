@@ -78,8 +78,8 @@ private:
 	// Input instance to get inputs and such
 	std::shared_ptr<DataProcessing> inputInstance;
 
-    void onPlayPressed(wxMouseEvent& event);
-    void onFrameAdvancePressed(wxMouseEvent& event);
+    void onPlayPressed(wxCommandEvent& event);
+    void onFrameAdvancePressed(wxCommandEvent& event);
 
 public:
 	SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxFlexGridSizer* sizer, std::shared_ptr<DataProcessing> input);

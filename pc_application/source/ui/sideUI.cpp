@@ -2,7 +2,7 @@
 #include <memory>
 
 FrameCanvas::FrameCanvas(wxFrame* parent)
-	: wxGLCanvas(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, "GLCanvasFrame") {
+	: wxGLCanvas(parent, wxID_ANY, NULL, wxDefaultPosition, wxDefaultSize, 0) {
 	// Initialize base class
 	co   = new wxGLContext((wxGLCanvas*)this);
 	init = false;
@@ -115,10 +115,10 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxFlexGridSi
 	sizer->Add(verticalBoxSizer.get(), wxEXPAND | wxALL);
 }
 
-void SideUI::onPlayPressed(wxMouseEvent& event) {
+void SideUI::onPlayPressed(wxCommandEvent& event) {
 	// Clicked
 }
 
-void SideUI::onFrameAdvancePressed(wxMouseEvent& event) {
+void SideUI::onFrameAdvancePressed(wxCommandEvent& event) {
 	// Clicked
 }
