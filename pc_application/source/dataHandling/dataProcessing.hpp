@@ -76,11 +76,5 @@ public:
 		printf("OnCacheHint: cache items %ld..%ld", event.GetCacheFrom(), event.GetCacheTo());
 	}
 
-	wxDECLARE_EVENT_TABLE();
+	DECLARE_EVENT_TABLE();
 };
-
-// clang-format off
-wxBEGIN_EVENT_TABLE(DataProcessing, wxListCtrl)
-	EVT_LIST_CACHE_HINT(DataProcessing::LIST_CTRL_ID, DataProcessing::onCacheHint)
-wxEND_EVENT_TABLE()
-	// clang-format on

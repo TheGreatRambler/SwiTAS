@@ -7,11 +7,17 @@
 #include <wx/glcanvas.h>
 #include <wx/grid.h>
 #include <wx/wx.h>
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #ifdef __WXMAC__
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
 #endif
+
 #include <unistd.h>
 
 #include "../dataHandling/buttonData.hpp"
@@ -33,15 +39,8 @@ public:
 
 	void SetupViewport();
 
-	wxDECLARE_EVENT_TABLE();
+	DECLARE_EVENT_TABLE();
 };
-
-// clang-format off
-wxBEGIN_EVENT_TABLE(JoystickCanvas, wxGLCanvas)
-	EVT_IDLE(JoystickCanvas::OnIdle)
-	//EVT_SIZE(JoystickCanvas::OnResize)
-wxEND_EVENT_TABLE()
-
 
 // Simple way to render images in grid
 class renderImageInGrid : public wxGridCellRenderer {
@@ -141,5 +140,5 @@ public:
 
 	void setIconState(Btn button, bool state);
 
-	~BottomUI();
+	//~BottomUI();
 };

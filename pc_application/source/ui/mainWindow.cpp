@@ -2,29 +2,8 @@
 
 #include "mainWindow.hpp"
 
-#include <memory>
-
-// Override default signal handler:
-void MainWindow::keyDownHandler(wxKeyEvent& event) {
-	dataProcessingInstance->handleKeyboardInput(event.GetUnicodeKey());
-}
-
-void MainWindow::handlePreviousWindowTransform() {
-	// Resize and maximize as needed
-	// TODO
-}
-
-void MainWindow::getGlobalSettings(rapidjson::Document* d) {
-	std::ifstream settingsFile("../mainSettings.json");
-	std::string content((std::istreambuf_iterator<char>(settingsFile)), (std::istreambuf_iterator<char>()));
-	// Allow comments in JSON
-	d->Parse<rapidjson::kParseCommentsFlag>(content.c_str());
-}
-
 MainWindow::MainWindow() {
 	wxFrame((wxFrame*)NULL, -1, "NX TAS UI", wxDefaultPosition, wxSize(300, 200));
-	// Load PNGs
-	wxImage::AddHandler(new wxPNGHandler());
 
 	// Get the main settings
 	getGlobalSettings(&mainSettings);
@@ -56,6 +35,29 @@ MainWindow::MainWindow() {
 	// Override the keypress handler
 	// add_events(Gdk::KEY_PRESS_MASK);
 	handlePreviousWindowTransform();
+}
+
+// clang-format off
+BEGIN_EVENT_TABLE(MainWindow, wxFrame)
+	EVT_CHAR_HOOK(MainWindow::keyDownHandler)
+END_EVENT_TABLE()
+// clang-format on
+
+// Override default signal handler:
+void MainWindow::keyDownHandler(wxKeyEvent& event) {
+	dataProcessingInstance->handleKeyboardInput(event.GetUnicodeKey());
+}
+
+void MainWindow::handlePreviousWindowTransform() {
+	// Resize and maximize as needed
+	// TODO
+}
+
+void MainWindow::getGlobalSettings(rapidjson::Document* d) {
+	std::ifstream settingsFile("../mainSettings.json");
+	std::string content((std::istreambuf_iterator<char>(settingsFile)), (std::istreambuf_iterator<char>()));
+	// Allow comments in JSON
+	d->Parse<rapidjson::kParseCommentsFlag>(content.c_str());
 }
 
 void MainWindow::addMenuBar() {

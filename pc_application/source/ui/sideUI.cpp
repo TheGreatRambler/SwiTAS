@@ -8,6 +8,13 @@ FrameCanvas::FrameCanvas(wxFrame* parent)
 	init = false;
 }
 
+// clang-format off
+BEGIN_EVENT_TABLE(FrameCanvas, wxGLCanvas)
+	EVT_IDLE(FrameCanvas::Render)
+	//EVT_SIZE(FrameCanvas::Resize)
+END_EVENT_TABLE()
+// clang-format on
+
 void FrameCanvas::SetupGL() {
 	glShadeModel(GL_SMOOTH);
 	glClearColor(0, 0, 0, 0);

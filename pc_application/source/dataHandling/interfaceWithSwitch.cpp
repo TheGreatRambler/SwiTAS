@@ -9,6 +9,8 @@ void CommunicateWithSwitch::unserializeData(uint8_t* buf, uint16_t bufSize, Data
 	if(flag == DataFlag::SET_GAME_INFO) {
 		// Game info has been recieved
 	}
+	// Use serializingProtocol
+	// serializingProtocol.binaryToFrame();
 }
 
 CommunicateWithSwitch::CommunicateWithSwitch() {

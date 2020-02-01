@@ -7,6 +7,13 @@ JoystickCanvas::JoystickCanvas(wxFrame* parent)
 	init = false;
 }
 
+// clang-format off
+BEGIN_EVENT_TABLE(JoystickCanvas, wxGLCanvas)
+	EVT_IDLE(JoystickCanvas::OnIdle)
+	//EVT_SIZE(JoystickCanvas::OnResize)
+END_EVENT_TABLE()
+// clang-format on
+
 // Override default signal handler:
 void JoystickCanvas::draw() {
 	// Use nanovg to draw a circle
@@ -64,6 +71,10 @@ renderImageInGrid::renderImageInGrid(std::shared_ptr<wxBitmap> bitmap, Btn btn) 
 	SetClientData((char*)"cus");
 	theBitmap = bitmap;
 	button    = btn;
+}
+
+void renderImageInGrid::setBitmap(std::shared_ptr<wxBitmap> bitmap) {
+	theBitmap = bitmap;
 }
 
 void renderImageInGrid::Draw(wxGrid& grid, wxGridCellAttr& attr, wxDC& dc, const wxRect& rect, int row, int col, bool isSelected) {

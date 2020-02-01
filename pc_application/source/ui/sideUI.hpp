@@ -42,14 +42,8 @@ public:
 	//   should actually return pixels scrolled *within* the list control, http://wxpython-users.1045709.n5.nabble.com/listCtrl-virtual-how-to-possition-item-in-middle-or-top-of-screen-tp2307363p2307366.html
 	void setPixelsScrolled(uint64_t pixelOffset, uint32_t firstItem, uint32_t lastItem);
 
-	wxDECLARE_EVENT_TABLE();
+	DECLARE_EVENT_TABLE();
 };
-
-// clang-format off
-wxBEGIN_EVENT_TABLE(FrameCanvas, wxGLCanvas)
-	EVT_IDLE(FrameCanvas::Render)
-	//EVT_SIZE(FrameCanvas::Resize)
-wxEND_EVENT_TABLE()
 
 class SideUI {
 private:
@@ -63,14 +57,14 @@ private:
 	std::shared_ptr<wxBitmapButton> playButton;
 	std::shared_ptr<wxBitmapButton> frameAdvanceButton;
 
-    // Sizer holding the inputs and the fancy viewer next to them
-    std::shared_ptr<wxBoxSizer> inputsViewSizer;
+	// Sizer holding the inputs and the fancy viewer next to them
+	std::shared_ptr<wxBoxSizer> inputsViewSizer;
 
-    std::shared_ptr<FrameCanvas> frameCanvas;
+	std::shared_ptr<FrameCanvas> frameCanvas;
 
 	std::shared_ptr<wxFrame> frameCanvasFrame;
 
-    std::shared_ptr<DataProcessing> inputData;
+	std::shared_ptr<DataProcessing> inputData;
 
 	// Minimum size of this widget (it just gets too small normally)
 	static constexpr float minimumSize = 1 / 4;
@@ -78,8 +72,8 @@ private:
 	// Input instance to get inputs and such
 	std::shared_ptr<DataProcessing> inputInstance;
 
-    void onPlayPressed(wxCommandEvent& event);
-    void onFrameAdvancePressed(wxCommandEvent& event);
+	void onPlayPressed(wxCommandEvent& event);
+	void onFrameAdvancePressed(wxCommandEvent& event);
 
 public:
 	SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxFlexGridSizer* sizer, std::shared_ptr<DataProcessing> input);

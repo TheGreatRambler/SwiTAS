@@ -61,6 +61,12 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	addNewFrame();
 }
 
+// clang-format off
+BEGIN_EVENT_TABLE(DataProcessing, wxListCtrl)
+	EVT_LIST_CACHE_HINT(DataProcessing::LIST_CTRL_ID, DataProcessing::onCacheHint)
+END_EVENT_TABLE()
+// clang-format on
+
 void DataProcessing::setInputCallback(std::function<void(Btn, bool)> callback) {
 	inputCallback = callback;
 }
@@ -172,7 +178,3 @@ void DataProcessing::handleKeyboardInput(wxChar key) {
 		}
 	}
 }
-
-// std::shared_ptr<wxGenericListCtrl> DataProcessing::getWidget() {
-//	return controllerListStore;
-//}
