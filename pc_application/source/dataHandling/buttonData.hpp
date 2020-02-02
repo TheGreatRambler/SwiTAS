@@ -10,6 +10,8 @@
 #include <utility>
 #include <wx/wx.h>
 
+#include "../helpers.hpp"
+
 // Array including all button information
 // Index is button Id, returns Button script name, Button print name, Button
 // listview object, Button printing pixbuf when on and when off This info is

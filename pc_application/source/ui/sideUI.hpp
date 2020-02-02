@@ -11,6 +11,7 @@
 #endif
 
 #include "../dataHandling/dataProcessing.hpp"
+#include "../helpers.hpp"
 
 class FrameCanvas : public wxGLCanvas {
 private:

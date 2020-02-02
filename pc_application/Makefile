@@ -30,7 +30,8 @@ CFLAGS := -std=gnu17
 CXXFLAGS := -std=gnu++17 $(shell wx-config --cxxflags base,core,gl) $(shell pkg-config --cflags freeglut) -I./include
 # C/C++ flags (no -pendantic)
 # -fpermissive needed for some misbehaving GTK code
-CPPFLAGS := -Wall -Wno-maybe-uninitialized -ggdb
+# Just for 64 bit for the memes
+CPPFLAGS := -Wall -Wno-maybe-uninitialized -ggdb -m64
 # Linker flags (-lpthread needed for threads)
 # Includes some neccessary linker flags for Gtkmm
 LDFLAGS := $(shell pkg-config --libs freeglut) $(shell wx-config --libs base,core,gl) -lpthread

@@ -7,8 +7,8 @@ void ButtonData::setupButtonMapping(rapidjson::Document* mainSettings) {
 
 		std::string scriptName   = b.value["scriptName"].GetString();
 		std::string viewName     = b.value["viewName"].GetString();
-		std::string onIconImage  = b.value["onIconImage"].GetString();
-		std::string offIconImage = b.value["offIconImage"].GetString();
+		std::string onIconImage  = HELPERS::resolvePath(b.value["onIconImage"].GetString());
+		std::string offIconImage = HELPERS::resolvePath(b.value["offIconImage"].GetString());
 		std::string keybindName  = b.value["triggerKeybind"].GetString();
 		// Get the gtk keyvalue from a gtk function
 

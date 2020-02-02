@@ -95,8 +95,8 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxFlexGridSi
 	frameCanvas      = std::make_shared<FrameCanvas>(frameCanvasFrame.get());
 	frameCanvasFrame->AddChild(frameCanvas.get());
 
-	playBitmap         = std::make_shared<wxBitmap>((*mainSettings)["ui"]["playButton"].GetString(), wxBITMAP_TYPE_PNG);
-	frameAdvanceBitmap = std::make_shared<wxBitmap>((*mainSettings)["ui"]["frameAdvanceButton"].GetString(), wxBITMAP_TYPE_PNG);
+	playBitmap         = std::make_shared<wxBitmap>(HELPERS::resolvePath((*mainSettings)["ui"]["playButton"].GetString()), wxBITMAP_TYPE_PNG);
+	frameAdvanceBitmap = std::make_shared<wxBitmap>(HELPERS::resolvePath((*mainSettings)["ui"]["frameAdvanceButton"].GetString()), wxBITMAP_TYPE_PNG);
 
 	playButton = std::make_shared<wxBitmapButton>();
 	playButton->SetBitmapCurrent(*playBitmap);

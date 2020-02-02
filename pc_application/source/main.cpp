@@ -26,12 +26,6 @@ private:
 	}
 
 public:
-	// This needs to run before the window is created
-	MainApp() {
-		// Load PNGs
-		wxImage::AddHandler(new wxPNGHandler());
-	}
-
 	virtual bool OnInit() {
 		window.Show(true);
 		SetTopWindow(&window);

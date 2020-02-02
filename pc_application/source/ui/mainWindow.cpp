@@ -5,11 +5,13 @@
 MainWindow::MainWindow() {
 	wxFrame((wxFrame*)NULL, -1, "NX TAS UI", wxDefaultPosition, wxSize(300, 200));
 
+	wxImage::AddHandler(new wxPNGHandler());
+
 	// Get the main settings
 	getGlobalSettings(&mainSettings);
 
 	wxIcon mainicon;
-	mainicon.LoadFile(mainSettings["programIcon"].GetString());
+	mainicon.LoadFile(HELPERS::resolvePath(mainSettings["programIcon"].GetString()));
 	SetIcon(mainicon);
 
 	mainSizer = std::make_shared<wxFlexGridSizer>(4, 4, 3, 3);

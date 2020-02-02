@@ -10,6 +10,7 @@
 
 #include "../dataHandling/buttonData.hpp"
 #include "../dataHandling/dataProcessing.hpp"
+#include "../helpers.hpp"
 #include "bottomUI.hpp"
 #include "sideUI.hpp"
 
