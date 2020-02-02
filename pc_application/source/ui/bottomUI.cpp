@@ -1,64 +1,7 @@
 #include "bottomUI.hpp"
 
-#include <memory>
-
-JoystickCanvas::JoystickCanvas(wxFrame* parent)
-	: wxGLCanvas(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE) {
-	// Initialize base class
-	co   = new wxGLContext((wxGLCanvas*)this);
-	init = false;
-}
-
-// Override default signal handler:
-void JoystickCanvas::draw() {
-	// Use nanovg to draw a circle
-	// SetCurrent sets the GL context
-	// Now can use nanovg
-	SetCurrent(*co);
-	/*
-	glClearColor(0.0, 0.0, 0.0, 0.0);
-	glClear(GL_COLOR_BUFFER_BIT);
-	glViewport(0, 0, (GLint)200, (GLint)200);
-	glColor3f(1.0, c_, c_);
-
-	glBegin(GL_POLYGON);
-	glVertex3f(-0.5, -0.5, 5 * cos(rotate_));
-	glVertex3f(-0.5, 0.5, 5 * cos(rotate_));
-	glVertex3f(0.5, 0.5, -5 * cos(rotate_));
-	glVertex3f(0.5, -0.5, -5 * cos(rotate_));
-	glEnd();
-	*/
-	// Render
-	SwapBuffers();
-}
-
-void JoystickCanvas::OnIdle(wxIdleEvent& event) {
-	if(!init) {
-		SetupViewport();
-		init = true;
-	}
-	// Draw
-	draw();
-	// Dunno what this does
-	event.RequestMore();
-}
-
-/*
-void JoystickCanvas::OnResize(wxIdleEvent& event) {
-	SetupViewport();
-	Refresh();
-}
-*/
-
-void JoystickCanvas::SetupViewport() {
-	int x, y;
-	GetSize(&x, &y);
-	glViewport(0, 0, (GLint)x, (GLint)y);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(45, (float)x / y, 0.1, 100);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+void JoystickCanvas::draw(wxDC* dc) {
+	// Do thing
 }
 
 renderImageInGrid::renderImageInGrid(std::shared_ptr<wxBitmap> bitmap, Btn btn) {
@@ -93,17 +36,13 @@ BottomUI::BottomUI(std::shared_ptr<ButtonData> buttons, wxFlexGridSizer* theGrid
 
 	horizontalBoxSizer = std::make_shared<wxBoxSizer>(wxHORIZONTAL);
 
-	leftJoystickFrame  = std::make_shared<wxFrame>();
-	rightJoystickFrame = std::make_shared<wxFrame>();
+	leftJoystickDrawer = std::make_shared<JoystickCanvas>();
+	leftJoystickDrawer->setBackgroundColor(*wxWHITE);
+	rightJoystickDrawer = std::make_shared<JoystickCanvas>();
+	rightJoystickDrawer->setBackgroundColor(*wxWHITE);
 
-	leftJoystick  = std::make_shared<JoystickCanvas>(leftJoystickFrame.get());
-	rightJoystick = std::make_shared<JoystickCanvas>(rightJoystickFrame.get());
-
-	leftJoystickFrame->AddChild(leftJoystick.get());
-	rightJoystickFrame->AddChild(rightJoystick.get());
-
-	horizontalBoxSizer->Add(leftJoystickFrame.get(), wxEXPAND | wxALL);
-	horizontalBoxSizer->Add(rightJoystickFrame.get(), wxEXPAND | wxALL);
+	horizontalBoxSizer->Add(leftJoystickDrawer.get(), wxEXPAND | wxALL);
+	horizontalBoxSizer->Add(rightJoystickDrawer.get(), wxEXPAND | wxALL);
 
 	buttonGrid = std::make_shared<wxGrid>();
 

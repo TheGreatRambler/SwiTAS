@@ -16,7 +16,7 @@ namespace SerializeProtocol {
 	std::vector<unsigned char> serializingData;
 
 	// Both of these functions are deliberately designed to deal with any kind of struct
-	template <typename T> std::shared_ptr<T> binaryToFrame(uint8_t* data, uint16_t size) {
+	template <typename T> std::shared_ptr<T> binaryToData(uint8_t* data, uint16_t size) {
 		// Load with YAS
 		std::shared_ptr<T> inputData = std::make_shared<T>();
 
@@ -30,7 +30,7 @@ namespace SerializeProtocol {
 		return inputData;
 	}
 
-	template <typename T> void frameToBinary(std::shared_ptr<T> inputData, uint8_t* data, uint16_t* size) {
+	template <typename T> void dataToBinary(std::shared_ptr<T> inputData, uint8_t* data, uint16_t* size) {
 		// Create the archive
 		zpp::serializer::memory_output_archive out(serializingData);
 

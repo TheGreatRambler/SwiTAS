@@ -3,45 +3,19 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <unistd.h>
 #include <utility>
-#include <wx/glcanvas.h>
+#include <wx/dcbuffer.h>
 #include <wx/grid.h>
 #include <wx/wx.h>
-#ifdef __WXMAC__
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
-#include <unistd.h>
 
 #include "../dataHandling/buttonData.hpp"
 #include "../dataHandling/dataProcessing.hpp"
+#include "drawingCanvas.hpp"
 
-class JoystickCanvas : public wxGLCanvas {
-private:
-	wxGLContext* co;
-	bool init;
-
-public:
-	// https://wiki.wxwidgets.org/WxGLCanvas#Multiple_Canvases
-	JoystickCanvas(wxFrame* parent);
-
-	void draw();
-
-	void OnIdle(wxIdleEvent& event);
-	void OnResize(wxIdleEvent& event);
-
-	void SetupViewport();
-
-	wxDECLARE_EVENT_TABLE();
-};
-
-// clang-format off
-wxBEGIN_EVENT_TABLE(JoystickCanvas, wxGLCanvas)
-	EVT_IDLE(JoystickCanvas::OnIdle)
-	//EVT_SIZE(JoystickCanvas::OnResize)
-wxEND_EVENT_TABLE()
-
+class JoystickCanvas : public DrawingCanvas {
+	void draw(wxDC* dc);
+}
 
 // Simple way to render images in grid
 class renderImageInGrid : public wxGridCellRenderer {
@@ -117,11 +91,8 @@ private:
 
 	std::shared_ptr<wxBoxSizer> horizontalBoxSizer;
 
-	std::shared_ptr<JoystickCanvas> leftJoystick;
-	std::shared_ptr<JoystickCanvas> rightJoystick;
-
-	std::shared_ptr<wxFrame> leftJoystickFrame;
-	std::shared_ptr<wxFrame> rightJoystickFrame;
+	std::shared_ptr<JoystickCanvas> leftJoystickDrawer;
+	std::shared_ptr<JoystickCanvas> rightJoystickDrawer;
 
 	// Grid containing the button viewer
 	std::shared_ptr<wxGrid> buttonGrid;
