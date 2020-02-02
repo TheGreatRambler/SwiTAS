@@ -1,4 +1,5 @@
 #include <atomic>
+#include <cstdio>
 #include <memory>
 #include <thread>
 #include <wx/wx.h>
@@ -26,12 +27,14 @@ private:
 	}
 
 public:
-	virtual bool OnInit() {
+	virtual bool OnInit() wxOVERRIDE {
+		puts("App starting");
 		window.Show(true);
 		SetTopWindow(&window);
-
+		puts("Window opened");
 		// Create network thread
 		networkThread = std::make_shared<std::thread>(&MainApp::runNetwork, this);
+		puts("Network thread opened");
 
 		networkInstance = std::make_shared<CommunicateWithSwitch>();
 

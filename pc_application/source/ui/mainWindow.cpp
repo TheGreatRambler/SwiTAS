@@ -11,7 +11,7 @@ MainWindow::MainWindow() {
 	getGlobalSettings(&mainSettings);
 
 	wxIcon mainicon;
-	mainicon.LoadFile(HELPERS::resolvePath(mainSettings["programIcon"].GetString()));
+	mainicon.LoadFile(HELPERS::resolvePath(mainSettings["programIcon"].GetString()), wxBITMAP_TYPE_PNG);
 	SetIcon(mainicon);
 
 	mainSizer = std::make_shared<wxFlexGridSizer>(4, 4, 3, 3);
