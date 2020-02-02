@@ -10,6 +10,7 @@
 
 #include "../dataHandling/buttonData.hpp"
 #include "../dataHandling/dataProcessing.hpp"
+#include "../helpers.hpp"
 #include "bottomUI.hpp"
 #include "sideUI.hpp"
 
@@ -42,14 +43,9 @@ private:
 	// Pointer to the class containing important input stuff
 	std::shared_ptr<DataProcessing> dataProcessingInstance;
 
-	// Override default signal handler:
-	void keyDownHandler(wxKeyEvent& event);
-
 	void handlePreviousWindowTransform();
 
 	void getGlobalSettings(rapidjson::Document* d);
-
-	wxDECLARE_EVENT_TABLE();
 
 public:
 	MainWindow();
@@ -57,10 +53,9 @@ public:
 	void addMenuBar();
 
 	~MainWindow();
-};
 
-// clang-format off
-wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
-    EVT_CHAR_HOOK(MainWindow::keyDownHandler)
-wxEND_EVENT_TABLE()
-	// clang-format on
+	// Override default signal handler:
+	void keyDownHandler(wxKeyEvent& event);
+
+	DECLARE_EVENT_TABLE();
+};

@@ -27,16 +27,17 @@ CFLAGS := -std=gnu17
 # http://manpages.ubuntu.com/manpages/trusty/man1/wx-config.1.html
 # https://wiki.wxwidgets.org/Makefile
 
-CXXFLAGS := -std=gnu++17 $(shell pkg-config --cflags glew) $(shell wx-config --cxxflags base,core,gl) -I./include
+CXXFLAGS := -std=gnu++17 $(shell wx-config --cxxflags base,core,gl) $(shell pkg-config --cflags freeglut) -I./include
 # C/C++ flags (no -pendantic)
 # -fpermissive needed for some misbehaving GTK code
-CPPFLAGS := -Wall -Wno-maybe-uninitialized -ggdb
+# Just for 64 bit for the memes
+CPPFLAGS := -Wall -Wno-maybe-uninitialized -ggdb -m64
 # Linker flags (-lpthread needed for threads)
 # Includes some neccessary linker flags for Gtkmm
-LDFLAGS := -lpthread $(shell pkg-config --libs glew) $(shell wx-config --libs base,core,gl)
+LDFLAGS := $(shell pkg-config --libs freeglut) $(shell wx-config --libs base,core,gl) -lpthread
 ifeq ($(OS),Windows_NT)
 	# Needed for sockets on windows
-	LDFLAGS := -lws2_32
+	LDFLAGS += -lws2_32
 endif
 
 SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
@@ -49,8 +50,6 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
-	# Put here so files are read from the right location
-	# set GTK_EXE_PREFIX = .
 	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
 	# Copy required DLLs to folder
 	# ldd $(BUILD_DIR)/$(TARGET_EXEC) | grep '\/mingw.*\.dll' -o | xargs -I{} cp "{}" $(BUILD_DIR)

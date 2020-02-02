@@ -1,11 +1,93 @@
 #include "sideUI.hpp"
 #include <memory>
 
+<<<<<<< HEAD
 void FrameCanvas::draw(wxDC* dc) {
 	// Do thing
+=======
+FrameCanvas::FrameCanvas(wxFrame* parent)
+	: wxGLCanvas(parent, wxID_ANY, NULL, wxDefaultPosition, wxDefaultSize, 0) {
+	// Initialize base class
+	co   = new wxGLContext((wxGLCanvas*)this);
+	init = false;
 }
 
-SideUI::SideUI(rapidjson::Document* settings, wxFlexGridSizer* sizer, std::shared_ptr<DataProcessing> input) {
+// clang-format off
+BEGIN_EVENT_TABLE(FrameCanvas, wxGLCanvas)
+	EVT_IDLE(FrameCanvas::Render)
+	//EVT_SIZE(FrameCanvas::Resize)
+END_EVENT_TABLE()
+// clang-format on
+
+void FrameCanvas::SetupGL() {
+	glShadeModel(GL_SMOOTH);
+	glClearColor(0, 0, 0, 0);
+	glClearDepth(1);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+}
+
+void FrameCanvas::Render(wxIdleEvent& event) {
+	SetCurrent(*co);
+
+	if(!init) {
+		SetupGL();
+		SetupViewport();
+		init = true;
+	}
+	// Draw
+
+	// Use nanovg to draw a circle
+	// SetCurrent sets the GL context
+	// Now can use nanovg
+	SetCurrent(*co);
+	/*
+	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glViewport(0, 0, (GLint)200, (GLint)200);
+	glColor3f(1.0, c_, c_);
+
+	glBegin(GL_POLYGON);
+	glVertex3f(-0.5, -0.5, 5 * cos(rotate_));
+	glVertex3f(-0.5, 0.5, 5 * cos(rotate_));
+	glVertex3f(0.5, 0.5, -5 * cos(rotate_));
+	glVertex3f(0.5, -0.5, -5 * cos(rotate_));
+	glEnd();
+	*/
+	// Render
+	SwapBuffers();
+
+	// Dunno what this does
+	event.RequestMore();
+}
+
+void FrameCanvas::Resize(wxSizeEvent& event) {
+	SetCurrent(*co);
+	SetupViewport();
+	// wxGLCanvas::OnSize(event);
+	Refresh();
+}
+
+void FrameCanvas::SetupViewport() {
+	int x, y;
+	GetSize(&x, &y);
+	glViewport(0, 0, x, y);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(45, (float)x / y, 0.1, 100);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+}
+
+void FrameCanvas::setPixelsScrolled(uint64_t pixelOffset, uint32_t firstItem, uint32_t lastItem) {
+	currentFirstItem   = firstItem;
+	currentLastItem    = lastItem;
+	currentPixelOffset = pixelOffset;
+>>>>>>> bf27387cf34d6d321956bfe23f51b7cccf5ad259
+}
+
+SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxFlexGridSizer* sizer, std::shared_ptr<DataProcessing> input) {
 	mainSettings = settings;
 	inputData    = input;
 
@@ -17,8 +99,8 @@ SideUI::SideUI(rapidjson::Document* settings, wxFlexGridSizer* sizer, std::share
 	frameDrawer = std::make_shared<FrameCanvas>();
 	frameDrawer->setBackgroundColor(*wxWHITE);
 
-	playBitmap         = std::make_shared<wxBitmap>((*mainSettings)["ui"]["playButton"].GetString(), wxBITMAP_TYPE_PNG);
-	frameAdvanceBitmap = std::make_shared<wxBitmap>((*mainSettings)["ui"]["frameAdvanceButton"].GetString(), wxBITMAP_TYPE_PNG);
+	playBitmap         = std::make_shared<wxBitmap>(HELPERS::resolvePath((*mainSettings)["ui"]["playButton"].GetString()), wxBITMAP_TYPE_PNG);
+	frameAdvanceBitmap = std::make_shared<wxBitmap>(HELPERS::resolvePath((*mainSettings)["ui"]["frameAdvanceButton"].GetString()), wxBITMAP_TYPE_PNG);
 
 	playButton = std::make_shared<wxBitmapButton>();
 	playButton->SetBitmapCurrent(*playBitmap);
@@ -26,8 +108,8 @@ SideUI::SideUI(rapidjson::Document* settings, wxFlexGridSizer* sizer, std::share
 	frameAdvanceButton->SetBitmapCurrent(*frameAdvanceBitmap);
 
 	// Button handlers
-	playButton->Bind(wxEVT_LEFT_DOWN, &SideUI::onPlayPressed);
-	frameAdvanceButton->Bind(wxEVT_LEFT_DOWN, &SideUI::onFrameAdvancePressed);
+	playButton->Bind(wxEVT_BUTTON, &SideUI::onPlayPressed, this);
+	frameAdvanceButton->Bind(wxEVT_BUTTON, &SideUI::onFrameAdvancePressed, this);
 
 	verticalBoxSizer->Add(playButton.get(), wxEXPAND | wxALL);
 	verticalBoxSizer->Add(frameAdvanceButton.get(), wxEXPAND | wxALL);
@@ -44,10 +126,10 @@ SideUI::SideUI(rapidjson::Document* settings, wxFlexGridSizer* sizer, std::share
 	sizer->Add(verticalBoxSizer.get(), wxEXPAND | wxALL);
 }
 
-void SideUI::onPlayPressed(wxMouseEvent& event) {
+void SideUI::onPlayPressed(wxCommandEvent& event) {
 	// Clicked
 }
 
-void SideUI::onFrameAdvancePressed(wxMouseEvent& event) {
+void SideUI::onFrameAdvancePressed(wxCommandEvent& event) {
 	// Clicked
 }

@@ -2,7 +2,8 @@
 
 DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxWindow* parent) {
 	// Inherit from list control
-	wxListCtrl(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_VIRTUAL | wxLC_HRULES);
+	// Use this specific ID in order to do things
+	wxListCtrl(parent, DataProcessing::LIST_CTRL_ID, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_VIRTUAL | wxLC_HRULES);
 	buttonData   = buttons;
 	mainSettings = settings;
 	// Set the mask color via a css string
@@ -59,6 +60,12 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	// Add this first frame
 	addNewFrame();
 }
+
+// clang-format off
+BEGIN_EVENT_TABLE(DataProcessing, wxListCtrl)
+	EVT_LIST_CACHE_HINT(DataProcessing::LIST_CTRL_ID, DataProcessing::onCacheHint)
+END_EVENT_TABLE()
+// clang-format on
 
 void DataProcessing::setInputCallback(std::function<void(Btn, bool)> callback) {
 	inputCallback = callback;
@@ -171,7 +178,3 @@ void DataProcessing::handleKeyboardInput(wxChar key) {
 		}
 	}
 }
-
-// std::shared_ptr<wxGenericListCtrl> DataProcessing::getWidget() {
-//	return controllerListStore;
-//}

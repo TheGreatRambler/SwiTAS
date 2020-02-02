@@ -23,6 +23,9 @@ private:
 
 	uint8_t connectedToServer;
 
+	// Protcol for serializing
+	SerializeProtocol serializingProtocol;
+
 	void unserializeData(uint8_t* buf, uint16_t bufSize, DataFlag flag);
 
 	bool handleSocketError(int res);

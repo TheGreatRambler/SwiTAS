@@ -8,14 +8,50 @@
 #include <wx/dcbuffer.h>
 #include <wx/grid.h>
 #include <wx/wx.h>
+<<<<<<< HEAD
+=======
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
+#ifdef __WXMAC__
+#include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
+#endif
+
+#include <unistd.h>
+>>>>>>> bf27387cf34d6d321956bfe23f51b7cccf5ad259
 
 #include "../dataHandling/buttonData.hpp"
 #include "../dataHandling/dataProcessing.hpp"
 #include "drawingCanvas.hpp"
 
+<<<<<<< HEAD
 class JoystickCanvas : public DrawingCanvas {
 	void draw(wxDC* dc);
 }
+=======
+class JoystickCanvas : public wxGLCanvas {
+private:
+	wxGLContext* co;
+	bool init;
+
+public:
+	// https://wiki.wxwidgets.org/WxGLCanvas#Multiple_Canvases
+	JoystickCanvas(wxFrame* parent);
+
+	void draw();
+
+	void OnIdle(wxIdleEvent& event);
+	void OnResize(wxIdleEvent& event);
+
+	void SetupViewport();
+
+	DECLARE_EVENT_TABLE();
+};
+>>>>>>> bf27387cf34d6d321956bfe23f51b7cccf5ad259
 
 // Simple way to render images in grid
 class renderImageInGrid : public wxGridCellRenderer {
@@ -25,11 +61,11 @@ private:
 	Btn button;
 
 public:
-	renderImageInGrid(std::shared_ptr<wxBitmap> bitmap);
+	renderImageInGrid(std::shared_ptr<wxBitmap> bitmap, Btn btn);
 
 	virtual void Draw(wxGrid& grid, wxGridCellAttr& attr, wxDC& dc, const wxRect& rect, int row, int col, bool isSelected);
 
-	void setBitmap(std::shared_ptr<wxBitmap> bitmap, Btn btn);
+	void setBitmap(std::shared_ptr<wxBitmap> bitmap);
 
 	// Used by click handlers
 	Btn getButton() {
@@ -42,7 +78,7 @@ public:
 	}
 
 	wxGridCellRenderer* Clone() const {
-		return new renderImageInGrid(theBitmap);
+		return new renderImageInGrid(theBitmap, button);
 	}
 };
 
@@ -108,9 +144,9 @@ protected:
 	// bool onButtonPress(GdkEventButton* event, Btn button);
 
 public:
-	BottomUI(std::shared_ptr<ButtonData> buttons, wxFlexGridSizer* theGrid, std::shared_ptr<DataProcessing> input);
+	BottomUI(wxFrame* parentFrame, std::shared_ptr<ButtonData> buttons, wxFlexGridSizer* theGrid, std::shared_ptr<DataProcessing> input);
 
 	void setIconState(Btn button, bool state);
 
-	~BottomUI();
+	//~BottomUI();
 };
