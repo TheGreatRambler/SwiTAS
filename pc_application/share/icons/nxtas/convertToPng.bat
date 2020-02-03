@@ -2,7 +2,7 @@
 :: Have to use ugly purple for background
 :: Full solid color for background
 :: Just the height
-for %%f in (*) do if not "%%~f" == inputicons.svg (
+for /R %%f in (*.svg) do if not "%%~f" == inputicons.svg (
     echo %%~f
     "C:\Program Files\Inkscape\inkscape.exe" ^
       -z ^

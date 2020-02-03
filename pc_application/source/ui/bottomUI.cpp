@@ -1,74 +1,7 @@
 #include "bottomUI.hpp"
 
-<<<<<<< HEAD
 void JoystickCanvas::draw(wxDC* dc) {
 	// Do thing
-=======
-JoystickCanvas::JoystickCanvas(wxFrame* parent)
-	: wxGLCanvas(parent, wxID_ANY, NULL, wxDefaultPosition, wxDefaultSize, 0) {
-	// Initialize base class
-	co   = new wxGLContext((wxGLCanvas*)this);
-	init = false;
-}
-
-// clang-format off
-BEGIN_EVENT_TABLE(JoystickCanvas, wxGLCanvas)
-	EVT_IDLE(JoystickCanvas::OnIdle)
-	//EVT_SIZE(JoystickCanvas::OnResize)
-END_EVENT_TABLE()
-// clang-format on
-
-// Override default signal handler:
-void JoystickCanvas::draw() {
-	// Use nanovg to draw a circle
-	// SetCurrent sets the GL context
-	// Now can use nanovg
-	SetCurrent(*co);
-	/*
-	glClearColor(0.0, 0.0, 0.0, 0.0);
-	glClear(GL_COLOR_BUFFER_BIT);
-	glViewport(0, 0, (GLint)200, (GLint)200);
-	glColor3f(1.0, c_, c_);
-
-	glBegin(GL_POLYGON);
-	glVertex3f(-0.5, -0.5, 5 * cos(rotate_));
-	glVertex3f(-0.5, 0.5, 5 * cos(rotate_));
-	glVertex3f(0.5, 0.5, -5 * cos(rotate_));
-	glVertex3f(0.5, -0.5, -5 * cos(rotate_));
-	glEnd();
-	*/
-	// Render
-	SwapBuffers();
-}
-
-void JoystickCanvas::OnIdle(wxIdleEvent& event) {
-	if(!init) {
-		SetupViewport();
-		init = true;
-	}
-	// Draw
-	draw();
-	// Dunno what this does
-	event.RequestMore();
-}
-
-/*
-void JoystickCanvas::OnResize(wxIdleEvent& event) {
-	SetupViewport();
-	Refresh();
-}
-*/
-
-void JoystickCanvas::SetupViewport() {
-	int x, y;
-	GetSize(&x, &y);
-	glViewport(0, 0, (GLint)x, (GLint)y);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(45, (float)x / y, 0.1, 100);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
->>>>>>> bf27387cf34d6d321956bfe23f51b7cccf5ad259
 }
 
 renderImageInGrid::renderImageInGrid(std::shared_ptr<wxBitmap> bitmap, Btn btn) {

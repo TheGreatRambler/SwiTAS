@@ -3,7 +3,7 @@
 #include "mainWindow.hpp"
 
 MainWindow::MainWindow() {
-	wxFrame((wxFrame*)NULL, -1, "NX TAS UI", wxDefaultPosition, wxSize(300, 200));
+	wxFrame(NULL, wxID_ANY, "NX TAS UI", wxDefaultPosition, wxDefaultSize);
 
 	wxImage::AddHandler(new wxPNGHandler());
 

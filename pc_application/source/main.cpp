@@ -22,12 +22,13 @@ private:
 		// Simply run network handling
 		if(networkRun) {
 			// Ask for data
-			networkInstance->listenForSwitchCommands();
+			// For now, no
+			// networkInstance->listenForSwitchCommands();
 		}
 	}
 
 public:
-	virtual bool OnInit() wxOVERRIDE {
+	virtual bool OnInit() {
 		puts("App starting");
 		window.Show(true);
 		SetTopWindow(&window);
@@ -43,7 +44,7 @@ public:
 		return true;
 	}
 
-	virtual int OnExit() {
+	int OnExit() {
 		// Wait for the network thread to end
 		networkRun = false;
 		networkThread->join();
@@ -52,4 +53,4 @@ public:
 	}
 };
 
-wxIMPLEMENT_APP(MainApp);
+IMPLEMENT_APP(MainApp);

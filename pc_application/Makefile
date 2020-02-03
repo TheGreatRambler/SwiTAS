@@ -27,14 +27,14 @@ CFLAGS := -std=gnu17
 # http://manpages.ubuntu.com/manpages/trusty/man1/wx-config.1.html
 # https://wiki.wxwidgets.org/Makefile
 
-CXXFLAGS := -std=gnu++17 $(shell wx-config --cxxflags base,core,gl) $(shell pkg-config --cflags freeglut) -I./include
+CXXFLAGS := -std=gnu++17 $(shell wx-config --cxxflags base,core) -I./include
 # C/C++ flags (no -pendantic)
 # -fpermissive needed for some misbehaving GTK code
 # Just for 64 bit for the memes
 CPPFLAGS := -Wall -Wno-maybe-uninitialized -ggdb -m64
 # Linker flags (-lpthread needed for threads)
 # Includes some neccessary linker flags for Gtkmm
-LDFLAGS := $(shell pkg-config --libs freeglut) $(shell wx-config --libs base,core,gl) -lpthread
+LDFLAGS := $(shell wx-config --libs base,core --static=yes) -lpthread
 ifeq ($(OS),Windows_NT)
 	# Needed for sockets on windows
 	LDFLAGS += -lws2_32
@@ -52,7 +52,7 @@ CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
 	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
 	# Copy required DLLs to folder
-	# ldd $(BUILD_DIR)/$(TARGET_EXEC) | grep '\/mingw.*\.dll' -o | xargs -I{} cp "{}" $(BUILD_DIR)
+	ldd $(BUILD_DIR)/$(TARGET_EXEC) | grep '\/mingw.*\.dll' -o | xargs -I{} cp "{}" $(BUILD_DIR)
 	# Compile GTK schema
 	# glib-compile-schemas ./share/glib-2.0/schemas
 

@@ -8,50 +8,15 @@
 #include <wx/dcbuffer.h>
 #include <wx/grid.h>
 #include <wx/wx.h>
-<<<<<<< HEAD
-=======
-
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
-#ifdef __WXMAC__
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
-
-#include <unistd.h>
->>>>>>> bf27387cf34d6d321956bfe23f51b7cccf5ad259
 
 #include "../dataHandling/buttonData.hpp"
 #include "../dataHandling/dataProcessing.hpp"
 #include "drawingCanvas.hpp"
 
-<<<<<<< HEAD
 class JoystickCanvas : public DrawingCanvas {
-	void draw(wxDC* dc);
-}
-=======
-class JoystickCanvas : public wxGLCanvas {
-private:
-	wxGLContext* co;
-	bool init;
-
 public:
-	// https://wiki.wxwidgets.org/WxGLCanvas#Multiple_Canvases
-	JoystickCanvas(wxFrame* parent);
-
-	void draw();
-
-	void OnIdle(wxIdleEvent& event);
-	void OnResize(wxIdleEvent& event);
-
-	void SetupViewport();
-
-	DECLARE_EVENT_TABLE();
+	void draw(wxDC* dc) override;
 };
->>>>>>> bf27387cf34d6d321956bfe23f51b7cccf5ad259
 
 // Simple way to render images in grid
 class renderImageInGrid : public wxGridCellRenderer {
