@@ -37,9 +37,6 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxFlexGridSi
 
 	verticalBoxSizer->Add(inputsViewSizer.get(), wxEXPAND | wxALL);
 
-	// DataProcessing is itself a list control, so add it
-	verticalBoxSizer->Add(input.get(), wxEXPAND | wxALL);
-
 	// Just add it
 	sizer->Add(verticalBoxSizer.get(), wxEXPAND | wxALL);
 }
@@ -49,5 +46,6 @@ void SideUI::onPlayPressed(wxCommandEvent& event) {
 }
 
 void SideUI::onFrameAdvancePressed(wxCommandEvent& event) {
-	// Clicked
+	// New frame must be added, will do more later
+	inputData->addNewFrame();
 }

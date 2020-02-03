@@ -1,9 +1,9 @@
 #include "dataProcessing.hpp"
 
-DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxWindow* parent) {
+DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxWindow* parent)
+	: wxListCtrl(parent, DataProcessing::LIST_CTRL_ID, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_VIRTUAL | wxLC_HRULES) {
 	// Inherit from list control
 	// Use this specific ID in order to do things
-	wxListCtrl(parent, DataProcessing::LIST_CTRL_ID, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_VIRTUAL | wxLC_HRULES);
 	buttonData   = buttons;
 	mainSettings = settings;
 	// Set the mask color via a css string
@@ -73,7 +73,7 @@ void DataProcessing::setInputCallback(std::function<void(Btn, bool)> callback) {
 
 int DataProcessing::OnGetItemColumnImage(long row, long column) const {
 	if(column == 0) {
-		// This is the frame
+		// This is the frame num
 		return -1;
 	} else {
 		// Returns index in the imagelist
@@ -94,7 +94,7 @@ wxString DataProcessing::OnGetItemText(long row, long column) const {
 	// Returns when text is needed
 	if(column == 0) {
 		// This is the frame, which is just the row number
-		return std::to_string(row);
+		return wxString::Format(wxT("%i"), row);
 	}
 	// This function shouldn't recieve any other column
 }

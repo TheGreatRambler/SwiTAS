@@ -2,9 +2,8 @@
 
 #include "mainWindow.hpp"
 
-MainWindow::MainWindow() {
-	wxFrame(NULL, wxID_ANY, "NX TAS UI", wxDefaultPosition, wxDefaultSize);
-
+MainWindow::MainWindow()
+	: wxFrame(NULL, wxID_ANY, "NX TAS UI", wxDefaultPosition, wxDefaultSize) {
 	wxImage::AddHandler(new wxPNGHandler());
 
 	// Get the main settings
