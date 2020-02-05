@@ -57,5 +57,7 @@ public:
 	// Override default signal handler:
 	void keyDownHandler(wxKeyEvent& event);
 
+	void OnSize(wxSizeEvent& event);
+
 	DECLARE_EVENT_TABLE();
 };

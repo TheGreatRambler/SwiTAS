@@ -29,9 +29,10 @@ MainWindow::MainWindow()
 	// Add the top menubar
 	addMenuBar();
 
-	SetSizer(mainSizer.get());
-	SetMinSize(wxSize(270, 220));
+	SetMinSize(wxSize(500, 400));
 	Center();
+
+	SetSizerAndFit(mainSizer.get());
 
 	// Override the keypress handler
 	// add_events(Gdk::KEY_PRESS_MASK);
@@ -41,6 +42,7 @@ MainWindow::MainWindow()
 // clang-format off
 BEGIN_EVENT_TABLE(MainWindow, wxFrame)
 	EVT_CHAR_HOOK(MainWindow::keyDownHandler)
+	EVT_SIZE(MainWindow::OnSize)
 END_EVENT_TABLE()
 // clang-format on
 
@@ -52,6 +54,13 @@ void MainWindow::keyDownHandler(wxKeyEvent& event) {
 void MainWindow::handlePreviousWindowTransform() {
 	// Resize and maximize as needed
 	// TODO
+}
+
+void MainWindow::OnSize(wxSizeEvent& event) {
+	// https://wiki.wxwidgets.org/WxSizer#Sizer_Doesn.27t_Work_When_Making_a_Custom_Control.2FWindow_.28no_autolayout.29
+	if(GetAutoLayout()) {
+		Layout();
+	}
 }
 
 void MainWindow::getGlobalSettings(rapidjson::Document* d) {

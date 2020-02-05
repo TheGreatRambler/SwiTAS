@@ -19,11 +19,10 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	// Add the list store from the columns
 	// controllerListStore = Gtk::ListStore::create(inputColumns);
 	// Set this tree view to this model
-	SetImageList(&imageList, wxIMAGE_LIST_NORMAL);
 
 	// uint8_t i = 0;
 
-	// AppendColumn("Frame");
+	AppendColumn("Frame");
 	// wxListItem frameInfo;
 	// frameInfo.SetMask(wxLIST_MASK_TEXT);
 	// frameInfo.SetColumn(i);
@@ -41,7 +40,7 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 		// Add to map for later
 		// inputColumns.buttonPixbufs[button.first] = thisIcon;
 		// Append now
-		// AppendColumn(button.second->scriptName);
+		AppendColumn(button.second->scriptName);
 		// wxListItem imageInfo;
 		// imageInfo.SetMask(wxLIST_MASK_IMAGE);
 		// imageInfo.SetColumn(i);
@@ -57,6 +56,7 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 		// Add to the columns themselves (gives value, not pointer)
 		// inputColumns.add(thisIcon);
 	}
+	SetImageList(&imageList, wxIMAGE_LIST_NORMAL);
 	// Once all columns are added, do some stuff on them
 	// for(auto& column : treeView.get_columns()) {
 	// Set to fixed size mode to speed things up
@@ -68,7 +68,7 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	// Only show the scrollbars when they are necessary:
 	// scrolledWindow->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	// Add this first frame
-	for(int i = 0; i < 100; i++) {
+	for(int i = 0; i < 30; i++) {
 		addNewFrame();
 	}
 }
@@ -92,13 +92,17 @@ int DataProcessing::OnGetItemColumnImage(long row, long column) const {
 		// Need to account for the frame being first
 		uint8_t button = column - 1;
 		uint8_t on     = inputsList[row]->buttons[button];
+		int res;
 		if(on) {
 			// Return index of on image
 			// Interleaved means it looks like this
-			return button * 2 + 1;
+			res = button * 2 + 1;
 		} else {
-			return button * 2;
+			res = button * 2;
 		}
+		wxBitmap test = imageList.GetBitmap(res);
+
+		return res;
 	}
 }
 
