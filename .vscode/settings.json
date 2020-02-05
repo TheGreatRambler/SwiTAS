@@ -73,6 +73,7 @@
 		"typeinfo": "cpp",
 		"valarray": "cpp",
 		"variant": "cpp",
-		"hash_map": "cpp"
+		"hash_map": "cpp",
+		"hash_set": "cpp"
 	}
 }

@@ -9,6 +9,10 @@
 		"request": "launch",
 		"program": "${workspaceFolder}/pc_application/bin/nxtas.exe",
 		"args": [],
+		"logging": {
+			"moduleLoad": true,
+			"exceptions": true
+		},
 		"stopAtEntry": true,
 		"cwd": "${workspaceFolder}/pc_application/bin",
 		"environment": [],

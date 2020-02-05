@@ -20,10 +20,15 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	// controllerListStore = Gtk::ListStore::create(inputColumns);
 	// Set this tree view to this model
 	SetImageList(&imageList, wxIMAGE_LIST_NORMAL);
-	// treeView.set_model(controllerListStore);
-	// Add all the columns, this somehow wasn't done already
-	// treeView.append_column("Frame", inputColumns.frameNum);
-	AppendColumn("Frame");
+
+	// uint8_t i = 0;
+
+	// AppendColumn("Frame");
+	// wxListItem frameInfo;
+	// frameInfo.SetMask(wxLIST_MASK_TEXT);
+	// frameInfo.SetColumn(i);
+	// SetItem(frameInfo);
+	// i++;
 	// Disable searching because it breaks stuff
 	// treeView.set_enable_search(false);
 	// Loop through buttons and add all of them
@@ -36,7 +41,12 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 		// Add to map for later
 		// inputColumns.buttonPixbufs[button.first] = thisIcon;
 		// Append now
-		AppendColumn(button.second->scriptName);
+		// AppendColumn(button.second->scriptName);
+		// wxListItem imageInfo;
+		// imageInfo.SetMask(wxLIST_MASK_IMAGE);
+		// imageInfo.SetColumn(i);
+		// SetItem(imageInfo);
+		// i++;
 		// Have to create a bitmap manually
 		// Bitmaps are interleaved between on and off
 		// Have to pass raw value, not pointer
@@ -58,7 +68,9 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	// Only show the scrollbars when they are necessary:
 	// scrolledWindow->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	// Add this first frame
-	addNewFrame();
+	for(int i = 0; i < 100; i++) {
+		addNewFrame();
+	}
 }
 
 // clang-format off
@@ -95,6 +107,8 @@ wxString DataProcessing::OnGetItemText(long row, long column) const {
 	if(column == 0) {
 		// This is the frame, which is just the row number
 		return wxString::Format(wxT("%i"), row);
+	} else {
+		return "";
 	}
 	// This function shouldn't recieve any other column
 }

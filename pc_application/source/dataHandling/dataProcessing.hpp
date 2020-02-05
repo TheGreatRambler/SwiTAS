@@ -2,6 +2,7 @@
 
 #include <bitset>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
 #include <functional>
 #include <map>
@@ -46,8 +47,8 @@ private:
 	// std::shared_ptr<Gtk::ScrolledWindow> scrolledWindow;
 	// Using callbacks for inputs
 	// std::function<void(Btn, bool)> inputCallback;
-	virtual int OnGetItemColumnImage(long item, long column) const;
-	virtual wxString OnGetItemText(long item, long column) const;
+	virtual int OnGetItemColumnImage(long item, long column) const override;
+	virtual wxString OnGetItemText(long item, long column) const override;
 
 public:
 	static const int LIST_CTRL_ID = 1000;
