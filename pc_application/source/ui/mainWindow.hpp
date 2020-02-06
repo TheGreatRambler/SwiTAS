@@ -16,20 +16,10 @@
 
 class MainWindow : public wxFrame {
 private:
-	// Layout that contains all items, including the menubar
-	// Gtk::VBox mainLayout;
-	// Layout that contains all the app content
-	// Gtk::HBox mainContent;
-	// Layout that contains things on the right
-	// Gtk::VBox rightSideBox;
-	// Grid containing the left hand side widgets
-	// Gtk::VBox leftGrid;
-	// Grid containing the bottom widgets
-	// Gtk::HBox bottomGrid;
-	// Menu bar containing "open file", etc...
-	// Gtk::MenuBar menuBar;
+	// The thing actually holding everything
+	std::shared_ptr<wxPanel> mainPanel;
 
-	std::shared_ptr<wxFlexGridSizer> mainSizer;
+	std::shared_ptr<wxBoxSizer> mainSizer;
 
 	// Main settings variable
 	rapidjson::Document mainSettings;

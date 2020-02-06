@@ -5,7 +5,7 @@ void FrameCanvas::draw(wxDC* dc) {
 	// Do thing
 };
 
-SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxFlexGridSizer* sizer, std::shared_ptr<DataProcessing> input) {
+SideUI::SideUI(wxPanel* parentFrame, rapidjson::Document* settings, wxBoxSizer* sizer, std::shared_ptr<DataProcessing> input) {
 	mainSettings = settings;
 	inputData    = input;
 

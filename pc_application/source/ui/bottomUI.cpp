@@ -30,7 +30,7 @@ bool BottomUI::onButtonPress(GdkEventButton* event, Btn button) {
 }
 */
 
-BottomUI::BottomUI(wxFrame* parentFrame, std::shared_ptr<ButtonData> buttons, wxFlexGridSizer* theGrid, std::shared_ptr<DataProcessing> input) {
+BottomUI::BottomUI(wxPanel* parentFrame, std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid, std::shared_ptr<DataProcessing> input) {
 	// TODO set up joysticks
 	buttonData = buttons;
 
