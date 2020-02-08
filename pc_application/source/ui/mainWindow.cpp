@@ -13,7 +13,12 @@ MainWindow::MainWindow()
 	mainicon.LoadFile(HELPERS::resolvePath(mainSettings["programIcon"].GetString()), wxBITMAP_TYPE_PNG);
 	SetIcon(mainicon);
 
-	mainSizer = std::make_shared<wxFlexGridSizer>(4, 4, 3, 3);
+	// https://forums.wxwidgets.org/viewtopic.php?t=28894
+	// https://cboard.cprogramming.com/cplusplus-programming/92653-starting-wxwidgets-wxpanel-full-size-frame.html
+	// This didn't seem to work, probably a bad sizer
+	mainPanel = std::make_shared<wxPanel>(this, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+
+	mainSizer = std::make_shared<wxBoxSizer>(wxHORIZONTAL);
 
 	// Set button data instance
 	buttonData = std::make_shared<ButtonData>();
@@ -23,15 +28,17 @@ MainWindow::MainWindow()
 	dataProcessingInstance = std::make_shared<DataProcessing>(&mainSettings, buttonData, this);
 
 	// UI instances
-	sideUI   = std::make_shared<SideUI>(this, &mainSettings, mainSizer.get(), dataProcessingInstance);
-	bottomUI = std::make_shared<BottomUI>(this, buttonData, mainSizer.get(), dataProcessingInstance);
+	sideUI   = std::make_shared<SideUI>(mainPanel.get(), &mainSettings, mainSizer.get(), dataProcessingInstance);
+	bottomUI = std::make_shared<BottomUI>(mainPanel.get(), buttonData, mainSizer.get(), dataProcessingInstance);
 
 	// Add the top menubar
 	addMenuBar();
 
-	SetSizer(mainSizer.get());
-	SetMinSize(wxSize(270, 220));
+	SetMinSize(wxSize(500, 400));
 	Center();
+
+	// mainSizer->SetSizeHints(mainPanel.get());
+	mainPanel->SetSizerAndFit(mainSizer.get());
 
 	// Override the keypress handler
 	// add_events(Gdk::KEY_PRESS_MASK);
@@ -41,6 +48,7 @@ MainWindow::MainWindow()
 // clang-format off
 BEGIN_EVENT_TABLE(MainWindow, wxFrame)
 	EVT_CHAR_HOOK(MainWindow::keyDownHandler)
+	EVT_SIZE(MainWindow::OnSize)
 END_EVENT_TABLE()
 // clang-format on
 
@@ -52,6 +60,15 @@ void MainWindow::keyDownHandler(wxKeyEvent& event) {
 void MainWindow::handlePreviousWindowTransform() {
 	// Resize and maximize as needed
 	// TODO
+}
+
+void MainWindow::OnSize(wxSizeEvent& event) {
+	// https://wiki.wxwidgets.org/WxSizer#Sizer_Doesn.27t_Work_When_Making_a_Custom_Control.2FWindow_.28no_autolayout.29
+	// https://forums.wxwidgets.org/viewtopic.php?t=28894
+	if(GetAutoLayout()) {
+		Layout();
+	}
+	event.Skip();
 }
 
 void MainWindow::getGlobalSettings(rapidjson::Document* d) {
