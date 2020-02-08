@@ -30,7 +30,7 @@ bool BottomUI::onButtonPress(GdkEventButton* event, Btn button) {
 }
 */
 
-BottomUI::BottomUI(wxFrame* parentFrame, std::shared_ptr<ButtonData> buttons, wxFlexGridSizer* theGrid, std::shared_ptr<DataProcessing> input) {
+BottomUI::BottomUI(wxPanel* parentFrame, std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid, std::shared_ptr<DataProcessing> input) {
 	// TODO set up joysticks
 	buttonData = buttons;
 
@@ -54,7 +54,11 @@ BottomUI::BottomUI(wxFrame* parentFrame, std::shared_ptr<ButtonData> buttons, wx
 	buttonGrid->Bind(wxEVT_GRID_CELL_LEFT_CLICK, &BottomUI::onGridClick, this);
 
 	for(auto const& button : KeyLocs) {
-		buttonGrid->SetCellRenderer(button.second.y, button.second.x, new renderImageInGrid(buttonData->buttonMapping[button.first]->offBitmapIcon, button.first));
+
+		wxGridCellAttr* attr = new wxGridCellAttr();
+		attr->SetRenderer(new renderImageInGrid(buttonData->buttonMapping[button.first]->offBitmapIcon, button.first));
+
+		buttonGrid->SetAttr(button.second.y, button.second.x, attr);
 		/*
 		// Add the images (the pixbuf can and will be changed later)
 		std::shared_ptr<Gtk::Image> image = std::make_shared<Gtk::Image>(buttonData->buttonMapping[button.first].offIcon);
@@ -70,6 +74,11 @@ BottomUI::BottomUI(wxFrame* parentFrame, std::shared_ptr<ButtonData> buttons, wx
 		buttonViewer.attach(*eventBox, button.second.x, button.second.y);
 		*/
 	}
+
+	// Nice source for sizer stuff
+	// http://neume.sourceforge.net/sizerdemo/
+
+	horizontalBoxSizer->SetSizeHints(parentFrame);
 
 	horizontalBoxSizer->Add(buttonGrid.get(), wxEXPAND | wxALL);
 

@@ -109,7 +109,7 @@ protected:
 	// bool onButtonPress(GdkEventButton* event, Btn button);
 
 public:
-	BottomUI(wxFrame* parentFrame, std::shared_ptr<ButtonData> buttons, wxFlexGridSizer* theGrid, std::shared_ptr<DataProcessing> input);
+	BottomUI(wxPanel* parentFrame, std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid, std::shared_ptr<DataProcessing> input);
 
 	void setIconState(Btn button, bool state);
 
