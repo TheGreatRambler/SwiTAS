@@ -15,10 +15,7 @@ MainWindow::MainWindow()
 
 	// https://forums.wxwidgets.org/viewtopic.php?t=28894
 	// https://cboard.cprogramming.com/cplusplus-programming/92653-starting-wxwidgets-wxpanel-full-size-frame.html
-	// This didn't seem to work, probably a bad sizer
-	mainPanel = std::make_shared<wxPanel>(this, wxID_ANY, wxDefaultPosition, wxDefaultSize);
-
-	mainSizer = std::make_shared<wxBoxSizer>(wxHORIZONTAL);
+	mainSizer = std::make_shared<wxFlexGridSizer>(2, 2, 0, 0);
 
 	// Set button data instance
 	buttonData = std::make_shared<ButtonData>();
@@ -28,17 +25,15 @@ MainWindow::MainWindow()
 	dataProcessingInstance = std::make_shared<DataProcessing>(&mainSettings, buttonData, this);
 
 	// UI instances
-	sideUI   = std::make_shared<SideUI>(mainPanel.get(), &mainSettings, mainSizer.get(), dataProcessingInstance);
-	bottomUI = std::make_shared<BottomUI>(mainPanel.get(), buttonData, mainSizer.get(), dataProcessingInstance);
+	sideUI   = std::make_shared<SideUI>(this, &mainSettings, mainSizer.get(), dataProcessingInstance);
+	bottomUI = std::make_shared<BottomUI>(this, buttonData, mainSizer.get(), dataProcessingInstance);
 
 	// Add the top menubar
 	addMenuBar();
 
-	SetMinSize(wxSize(500, 400));
-	Center();
-
-	// mainSizer->SetSizeHints(mainPanel.get());
-	mainPanel->SetSizerAndFit(mainSizer.get());
+	SetSizerAndFit(mainSizer.get());
+	Layout();
+	Center(wxBOTH);
 
 	// Override the keypress handler
 	// add_events(Gdk::KEY_PRESS_MASK);

@@ -30,7 +30,7 @@ bool BottomUI::onButtonPress(GdkEventButton* event, Btn button) {
 }
 */
 
-BottomUI::BottomUI(wxPanel* parentFrame, std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid, std::shared_ptr<DataProcessing> input) {
+BottomUI::BottomUI(wxFrame* parentFrame, std::shared_ptr<ButtonData> buttons, wxFlexGridSizer* theGrid, std::shared_ptr<DataProcessing> input) {
 	// TODO set up joysticks
 	buttonData = buttons;
 
@@ -55,6 +55,7 @@ BottomUI::BottomUI(wxPanel* parentFrame, std::shared_ptr<ButtonData> buttons, wx
 
 	for(auto const& button : KeyLocs) {
 
+		// https://forums.wxwidgets.org/viewtopic.php?t=40428
 		wxGridCellAttr* attr = new wxGridCellAttr();
 		attr->SetRenderer(new renderImageInGrid(buttonData->buttonMapping[button.first]->offBitmapIcon, button.first));
 
@@ -82,7 +83,6 @@ BottomUI::BottomUI(wxPanel* parentFrame, std::shared_ptr<ButtonData> buttons, wx
 
 	horizontalBoxSizer->Add(buttonGrid.get(), wxEXPAND | wxALL);
 
-	// Just add it
 	theGrid->Add(horizontalBoxSizer.get(), wxEXPAND | wxALL);
 }
 

@@ -5,7 +5,7 @@ void FrameCanvas::draw(wxDC* dc) {
 	// Do thing
 };
 
-SideUI::SideUI(wxPanel* parentFrame, rapidjson::Document* settings, wxBoxSizer* sizer, std::shared_ptr<DataProcessing> input) {
+SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxFlexGridSizer* sizer, std::shared_ptr<DataProcessing> input) {
 	mainSettings = settings;
 	inputData    = input;
 
@@ -20,10 +20,8 @@ SideUI::SideUI(wxPanel* parentFrame, rapidjson::Document* settings, wxBoxSizer* 
 	playBitmap         = std::make_shared<wxBitmap>(HELPERS::resolvePath((*mainSettings)["ui"]["playButton"].GetString()), wxBITMAP_TYPE_PNG);
 	frameAdvanceBitmap = std::make_shared<wxBitmap>(HELPERS::resolvePath((*mainSettings)["ui"]["frameAdvanceButton"].GetString()), wxBITMAP_TYPE_PNG);
 
-	playButton = std::make_shared<wxBitmapButton>();
-	playButton->SetBitmapCurrent(*playBitmap);
-	frameAdvanceButton = std::make_shared<wxBitmapButton>();
-	frameAdvanceButton->SetBitmapCurrent(*frameAdvanceBitmap);
+	playButton         = std::make_shared<wxBitmapButton>(parentFrame, wxID_ANY, *playBitmap);
+	frameAdvanceButton = std::make_shared<wxBitmapButton>(parentFrame, wxID_ANY, *frameAdvanceBitmap);
 
 	// Button handlers
 	playButton->Bind(wxEVT_BUTTON, &SideUI::onPlayPressed, this);
@@ -37,13 +35,8 @@ SideUI::SideUI(wxPanel* parentFrame, rapidjson::Document* settings, wxBoxSizer* 
 	inputsViewSizer->Add(frameDrawer.get(), wxEXPAND | wxALL);
 	inputsViewSizer->Add(inputData.get(), wxEXPAND | wxALL);
 
-	inputsViewSizer->SetSizeHints(parentFrame);
-
 	verticalBoxSizer->Add(inputsViewSizer.get(), wxEXPAND | wxALL);
 
-	verticalBoxSizer->SetSizeHints(parentFrame);
-
-	// Just add it
 	sizer->Add(verticalBoxSizer.get(), wxEXPAND | wxALL);
 }
 
