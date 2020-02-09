@@ -16,7 +16,8 @@
 
 class MainWindow : public wxFrame {
 private:
-	std::shared_ptr<wxFlexGridSizer> mainSizer;
+	// Simplify things immesnly
+	std::shared_ptr<wxBoxSizer> mainSizer;
 
 	// Main settings variable
 	rapidjson::Document mainSettings;

@@ -15,7 +15,8 @@ MainWindow::MainWindow()
 
 	// https://forums.wxwidgets.org/viewtopic.php?t=28894
 	// https://cboard.cprogramming.com/cplusplus-programming/92653-starting-wxwidgets-wxpanel-full-size-frame.html
-	mainSizer = std::make_shared<wxFlexGridSizer>(2, 2, 0, 0);
+	// This means some things have to change going on
+	mainSizer = std::make_shared<wxBoxSizer>(wxVERTICAL);
 
 	// Set button data instance
 	buttonData = std::make_shared<ButtonData>();
@@ -32,7 +33,9 @@ MainWindow::MainWindow()
 	addMenuBar();
 
 	SetSizerAndFit(mainSizer.get());
+	mainSizer->SetSizeHints(this);
 	Layout();
+	Fit();
 	Center(wxBOTH);
 
 	// Override the keypress handler

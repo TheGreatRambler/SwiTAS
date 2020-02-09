@@ -5,14 +5,14 @@ void FrameCanvas::draw(wxDC* dc) {
 	// Do thing
 };
 
-SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxFlexGridSizer* sizer, std::shared_ptr<DataProcessing> input) {
+SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* sizer, std::shared_ptr<DataProcessing> input) {
 	mainSettings = settings;
 	inputData    = input;
 
-	verticalBoxSizer = std::make_shared<wxBoxSizer>(wxVERTICAL);
+	verticalBoxSizer = std::make_shared<wxBoxSizer>(wxHORIZONTAL);
 
 	// Holds input stuff
-	inputsViewSizer = std::make_shared<wxBoxSizer>(wxHORIZONTAL);
+	inputsViewSizer = std::make_shared<wxBoxSizer>(wxVERTICAL);
 
 	frameDrawer = std::make_shared<FrameCanvas>();
 	frameDrawer->setBackgroundColor(*wxWHITE);

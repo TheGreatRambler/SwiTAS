@@ -19,7 +19,7 @@ void renderImageInGrid::Draw(wxGrid& grid, wxGridCellAttr& attr, wxDC& dc, const
 	// Call base class ::Draw to clear the cell and draw the borders etc.
 	wxGridCellRenderer::Draw(grid, attr, dc, rect, row, col, isSelected);
 	// Draw rect in the right place
-	dc.DrawBitmap(*theBitmap, rect.GetTopLeft());
+	dc.DrawBitmap(*theBitmap, rect.x, rect.y);
 }
 
 /*
@@ -30,7 +30,7 @@ bool BottomUI::onButtonPress(GdkEventButton* event, Btn button) {
 }
 */
 
-BottomUI::BottomUI(wxFrame* parentFrame, std::shared_ptr<ButtonData> buttons, wxFlexGridSizer* theGrid, std::shared_ptr<DataProcessing> input) {
+BottomUI::BottomUI(wxFrame* parentFrame, std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid, std::shared_ptr<DataProcessing> input) {
 	// TODO set up joysticks
 	buttonData = buttons;
 
@@ -48,7 +48,10 @@ BottomUI::BottomUI(wxFrame* parentFrame, std::shared_ptr<ButtonData> buttons, wx
 	horizontalBoxSizer->Add(leftJoystickDrawer.get(), wxEXPAND | wxALL);
 	horizontalBoxSizer->Add(rightJoystickDrawer.get(), wxEXPAND | wxALL);
 
-	buttonGrid = std::make_shared<wxGrid>();
+	buttonGrid = std::make_shared<wxGrid>(parentFrame, wxID_ANY);
+
+	// Height * Width
+	buttonGrid->CreateGrid(4, 11);
 
 	// Handle grid clicking
 	buttonGrid->Bind(wxEVT_GRID_CELL_LEFT_CLICK, &BottomUI::onGridClick, this);
@@ -79,7 +82,11 @@ BottomUI::BottomUI(wxFrame* parentFrame, std::shared_ptr<ButtonData> buttons, wx
 	// Nice source for sizer stuff
 	// http://neume.sourceforge.net/sizerdemo/
 
-	horizontalBoxSizer->SetSizeHints(parentFrame);
+	// No need for the weird header
+	buttonGrid->SetRowLabelSize(0);
+	buttonGrid->SetColLabelSize(0);
+	// Fit cell size to contents
+	buttonGrid->AutoSize();
 
 	horizontalBoxSizer->Add(buttonGrid.get(), wxEXPAND | wxALL);
 
@@ -93,24 +100,32 @@ void BottomUI::onGridClick(wxGridEvent& event) {
 
 	wxGridCellRenderer* cellRenderer = buttonGrid->GetCellRenderer(row, col);
 
+	// Segmentation fault
 	if(strcmp((char*)cellRenderer->GetClientData(), "cus") == 0) {
 		// This is a custom cell renderer
 		// Toggle the button state via the cell renderer hopefully
 		inputInstance->toggleButtonState(((renderImageInGrid*)cellRenderer)->getButton());
 	}
 
+	// Same DecRef stuff
+	cellRenderer->DecRef();
+
 	event.Skip();
 }
 
 void BottomUI::setIconState(Btn button, bool state) {
-	Location location = KeyLocs[button];
+	// TODO this needs to be called by DataProcessing
+	Location location           = KeyLocs[button];
+	renderImageInGrid* renderer = (renderImageInGrid*)buttonGrid->GetCellRenderer(location.y, location.x);
 	if(state) {
 		// Set the image to the on image
-		((renderImageInGrid*)buttonGrid->GetCellRenderer(location.y, location.x))->setBitmap(buttonData->buttonMapping[button]->onBitmapIcon);
+		renderer->setBitmap(buttonData->buttonMapping[button]->onBitmapIcon);
 	} else {
 		// Set the image to the off image
-		((renderImageInGrid*)buttonGrid->GetCellRenderer(location.y, location.x))->setBitmap(buttonData->buttonMapping[button]->offBitmapIcon);
+		renderer->setBitmap(buttonData->buttonMapping[button]->offBitmapIcon);
 	}
+	// Have to DecRef https://docs.wxwidgets.org/3.0/classwx_grid.html#a9640007f1e60efbaf00b3ac6f6f50f8f
+	renderer->DecRef();
 	buttonGrid->RefreshRect(buttonGrid->CellToRect(location.x, location.x));
 
 	// Don't set value in input instance because it
