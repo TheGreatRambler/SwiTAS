@@ -129,6 +129,7 @@ void DataProcessing::setButtonState(Btn button, bool state) {
 	// If state is true, on, else off
 	currentData->buttons[button] = state;
 	// Because of virtual, just trigger an update of the row
+	// Use wxListCtrl::GetSubItemRect and wxWindow::RefreshRect instead to prevent flickering
 	RefreshItem(currentFrame);
 	// Get the index of the treeview
 	// The state is being changed, so so does the UI
