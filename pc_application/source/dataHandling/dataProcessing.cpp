@@ -22,7 +22,7 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 
 	// uint8_t i = 0;
 
-	AppendColumn("Frame");
+	InsertColumn(0, "Frame", wxLIST_FORMAT_CENTER, wxLIST_AUTOSIZE);
 	// wxListItem frameInfo;
 	// frameInfo.SetMask(wxLIST_MASK_TEXT);
 	// frameInfo.SetColumn(i);
@@ -33,6 +33,7 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	// Loop through buttons and add all of them
 	// Set this now that it is recieved
 	// Loop through the buttons and add them
+	uint8_t i = 1;
 	for(auto const& button : buttonData->buttonMapping) {
 		// Gets pointer from tuple
 		// This better not be deleted when it goes out of scope
@@ -40,7 +41,8 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 		// Add to map for later
 		// inputColumns.buttonPixbufs[button.first] = thisIcon;
 		// Append now
-		AppendColumn(button.second->scriptName);
+		InsertColumn(i, button.second->normalName, wxLIST_FORMAT_CENTER, wxLIST_AUTOSIZE);
+		i++;
 		// wxListItem imageInfo;
 		// imageInfo.SetMask(wxLIST_MASK_IMAGE);
 		// imageInfo.SetColumn(i);
@@ -56,7 +58,7 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 		// Add to the columns themselves (gives value, not pointer)
 		// inputColumns.add(thisIcon);
 	}
-	SetImageList(&imageList, wxIMAGE_LIST_NORMAL);
+	SetImageList(&imageList, wxIMAGE_LIST_SMALL);
 	// Once all columns are added, do some stuff on them
 	// for(auto& column : treeView.get_columns()) {
 	// Set to fixed size mode to speed things up
@@ -100,6 +102,7 @@ int DataProcessing::OnGetItemColumnImage(long row, long column) const {
 		} else {
 			res = button * 2;
 		}
+
 		wxBitmap test = imageList.GetBitmap(res);
 
 		return res;

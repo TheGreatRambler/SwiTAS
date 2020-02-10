@@ -98,6 +98,7 @@ public:
 	// Struct containing button info
 	struct ButtonInfo {
 		std::string scriptName;
+		std::string normalName;
 		std::string viewName;
 		std::shared_ptr<wxImage> onIcon;
 		std::shared_ptr<wxImage> offIcon;

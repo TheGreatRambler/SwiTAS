@@ -9,13 +9,17 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* 
 	mainSettings = settings;
 	inputData    = input;
 
-	verticalBoxSizer = std::make_shared<wxBoxSizer>(wxHORIZONTAL);
+	// Holds everything
+	verticalBoxSizer = std::make_shared<wxBoxSizer>(wxVERTICAL);
+
+	// Holds buttons
+	buttonSizer = std::make_shared<wxBoxSizer>(wxHORIZONTAL);
 
 	// Holds input stuff
-	inputsViewSizer = std::make_shared<wxBoxSizer>(wxVERTICAL);
+	inputsViewSizer = std::make_shared<wxBoxSizer>(wxHORIZONTAL);
 
 	frameDrawer = std::make_shared<FrameCanvas>();
-	frameDrawer->setBackgroundColor(*wxWHITE);
+	frameDrawer->setBackgroundColor(*wxBLUE);
 
 	playBitmap         = std::make_shared<wxBitmap>(HELPERS::resolvePath((*mainSettings)["ui"]["playButton"].GetString()), wxBITMAP_TYPE_PNG);
 	frameAdvanceBitmap = std::make_shared<wxBitmap>(HELPERS::resolvePath((*mainSettings)["ui"]["frameAdvanceButton"].GetString()), wxBITMAP_TYPE_PNG);
@@ -29,15 +33,17 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* 
 
 	// TODO all these expands and all seem suspect
 
-	verticalBoxSizer->Add(playButton.get(), wxEXPAND | wxALL);
-	verticalBoxSizer->Add(frameAdvanceButton.get(), wxEXPAND | wxALL);
+	buttonSizer->Add(playButton.get(), 0, wxEXPAND | wxALL);
+	buttonSizer->Add(frameAdvanceButton.get(), 0, wxEXPAND | wxALL);
 
-	inputsViewSizer->Add(frameDrawer.get(), wxEXPAND | wxALL);
-	inputsViewSizer->Add(inputData.get(), wxEXPAND | wxALL);
+	verticalBoxSizer->Add(buttonSizer.get(), 0, wxEXPAND | wxALL);
 
-	verticalBoxSizer->Add(inputsViewSizer.get(), wxEXPAND | wxALL);
+	inputsViewSizer->Add(frameDrawer.get(), 0, wxEXPAND | wxALL);
+	inputsViewSizer->Add(inputData.get(), 0, wxEXPAND | wxALL);
 
-	sizer->Add(verticalBoxSizer.get(), wxEXPAND | wxALL);
+	verticalBoxSizer->Add(inputsViewSizer.get(), 0, wxEXPAND | wxALL);
+
+	sizer->Add(verticalBoxSizer.get(), 0, wxEXPAND | wxALL);
 }
 
 void SideUI::onPlayPressed(wxCommandEvent& event) {

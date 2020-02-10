@@ -6,6 +6,7 @@ void ButtonData::setupButtonMapping(rapidjson::Document* mainSettings) {
 		Btn chosenButton = stringToButton[b.name.GetString()];
 
 		std::string scriptName   = b.value["scriptName"].GetString();
+		std::string normalName   = b.value["normalName"].GetString();
 		std::string viewName     = b.value["viewName"].GetString();
 		std::string onIconImage  = HELPERS::resolvePath(b.value["onIconImage"].GetString());
 		std::string offIconImage = HELPERS::resolvePath(b.value["offIconImage"].GetString());
@@ -15,6 +16,7 @@ void ButtonData::setupButtonMapping(rapidjson::Document* mainSettings) {
 		std::shared_ptr<ButtonInfo> thisButtonInfo = std::make_shared<ButtonInfo>();
 
 		thisButtonInfo->scriptName = scriptName;
+		thisButtonInfo->normalName = normalName;
 		thisButtonInfo->viewName   = viewName;
 
 		thisButtonInfo->onIcon = std::make_shared<wxImage>();

@@ -1,6 +1,7 @@
 {
 	"buttons": {
 		"A": {
+			"normalName": "A",
 			"scriptName": "KEY_A",
 			"viewName": "A Button",
 			"onIconImage": "share/icons/nxtas/inputs/Aon.png",
@@ -8,6 +9,7 @@
 			"triggerKeybind": "a"
 		},
 		"B": {
+			"normalName": "B",
 			"scriptName": "KEY_B",
 			"viewName": "B Button",
 			"onIconImage": "share/icons/nxtas/inputs/Bon.png",
@@ -15,6 +17,7 @@
 			"triggerKeybind": "b"
 		},
 		"X": {
+			"normalName": "X",
 			"scriptName": "KEY_X",
 			"viewName": "X Button",
 			"onIconImage": "share/icons/nxtas/inputs/Xon.png",
@@ -22,6 +25,7 @@
 			"triggerKeybind": "x"
 		},
 		"Y": {
+			"normalName": "Y",
 			"scriptName": "KEY_Y",
 			"viewName": "Y Button",
 			"onIconImage": "share/icons/nxtas/inputs/Yon.png",
@@ -29,6 +33,7 @@
 			"triggerKeybind": "y"
 		},
 		"L": {
+			"normalName": "L",
 			"scriptName": "KEY_L",
 			"viewName": "L Button",
 			"onIconImage": "share/icons/nxtas/inputs/Lon.png",
@@ -36,6 +41,7 @@
 			"triggerKeybind": "t"
 		},
 		"R": {
+			"normalName": "R",
 			"scriptName": "KEY_R",
 			"viewName": "R Button",
 			"onIconImage": "share/icons/nxtas/inputs/Ron.png",
@@ -43,6 +49,7 @@
 			"triggerKeybind": "r"
 		},
 		"ZL": {
+			"normalName": "ZL",
 			"scriptName": "KEY_ZL",
 			"viewName": "ZL Trigger",
 			"onIconImage": "share/icons/nxtas/inputs/ZLon.png",
@@ -50,6 +57,7 @@
 			"triggerKeybind": "o"
 		},
 		"ZR": {
+			"normalName": "ZR",
 			"scriptName": "KEY_ZR",
 			"viewName": "ZR Trigger",
 			"onIconImage": "share/icons/nxtas/inputs/ZRon.png",
@@ -57,6 +65,7 @@
 			"triggerKeybind": "p"
 		},
 		"SL": {
+			"normalName": "SL",
 			"scriptName": "KEY_SL",
 			"viewName": "SL Trigger",
 			"onIconImage": "share/icons/nxtas/inputs/SLon.png",
@@ -64,6 +73,7 @@
 			"triggerKeybind": "q"
 		},
 		"SR": {
+			"normalName": "SR",
 			"scriptName": "KEY_SR",
 			"viewName": "SR Trigger",
 			"onIconImage": "share/icons/nxtas/inputs/SRon.png",
@@ -71,6 +81,7 @@
 			"triggerKeybind": "e"
 		},
 		"DUP": {
+			"normalName": "Dup",
 			"scriptName": "KEY_DUP",
 			"viewName": "Up on Dpad",
 			"onIconImage": "share/icons/nxtas/inputs/UPon.png",
@@ -78,6 +89,7 @@
 			"triggerKeybind": "i"
 		},
 		"DDOWN": {
+			"normalName": "Ddown",
 			"scriptName": "KEY_DDOWN",
 			"viewName": "Down on Dpad",
 			"onIconImage": "share/icons/nxtas/inputs/DOWNon.png",
@@ -85,6 +97,7 @@
 			"triggerKeybind": "k"
 		},
 		"DLEFT": {
+			"normalName": "Dleft",
 			"scriptName": "KEY_DLEFT",
 			"viewName": "Left on Dpad",
 			"onIconImage": "share/icons/nxtas/inputs/LEFTon.png",
@@ -92,6 +105,7 @@
 			"triggerKeybind": "j"
 		},
 		"DRIGHT": {
+			"normalName": "Dright",
 			"scriptName": "KEY_DRIGHT",
 			"viewName": "Right on Dpad",
 			"onIconImage": "share/icons/nxtas/inputs/RIGHTon.png",
@@ -99,6 +113,7 @@
 			"triggerKeybind": "l"
 		},
 		"PLUS": {
+			"normalName": "Plus",
 			"scriptName": "KEY_PLUS",
 			"viewName": "Plus Button",
 			"onIconImage": "share/icons/nxtas/inputs/PLUSon.png",
@@ -106,6 +121,7 @@
 			"triggerKeybind": "="
 		},
 		"MINUS": {
+			"normalName": "Minus",
 			"scriptName": "KEY_MINUS",
 			"viewName": "Minus Button",
 			"onIconImage": "share/icons/nxtas/inputs/MINUSon.png",
@@ -113,6 +129,7 @@
 			"triggerKeybind": "-"
 		},
 		"HOME": {
+			"normalName": "Home",
 			"scriptName": "KEY_HOME",
 			"viewName": "Home Button",
 			"onIconImage": "share/icons/nxtas/inputs/HOMEon.png",
@@ -120,6 +137,7 @@
 			"triggerKeybind": "h"
 		},
 		"CAPT": {
+			"normalName": "Capt",
 			"scriptName": "KEY_CAPT",
 			"viewName": "Capture Button",
 			"onIconImage": "share/icons/nxtas/inputs/CAPTon.png",
@@ -127,6 +145,7 @@
 			"triggerKeybind": "g"
 		},
 		"LS": {
+			"normalName": "LS",
 			"scriptName": "KEY_LS",
 			"viewName": "Left Stick Press",
 			"onIconImage": "share/icons/nxtas/inputs/LSTICKon.png",
@@ -134,6 +153,7 @@
 			"triggerKeybind": "n"
 		},
 		"RS": {
+			"normalName": "RS",
 			"scriptName": "KEY_RS",
 			"viewName": "Right Stick Press",
 			"onIconImage": "share/icons/nxtas/inputs/RSTICKoff.png",
@@ -143,8 +163,8 @@
 	},
 	"iconTransparent": "rgb(48,0,77)",
 	"inputsList": {
-		"imageWidth": 70,
-		"imageHeight": 70
+		"imageWidth": 40,
+		"imageHeight": 40
 	},
 	"programIcon": "share/icons/nxtas/logo/main.png",
 	"ui": {

@@ -25,6 +25,8 @@ private:
 	std::shared_ptr<wxBitmapButton> playButton;
 	std::shared_ptr<wxBitmapButton> frameAdvanceButton;
 
+	std::shared_ptr<wxBoxSizer> buttonSizer;
+
 	// Sizer holding the inputs and the fancy viewer next to them
 	std::shared_ptr<wxBoxSizer> inputsViewSizer;
 

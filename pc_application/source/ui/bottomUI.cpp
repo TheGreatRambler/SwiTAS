@@ -5,8 +5,6 @@ void JoystickCanvas::draw(wxDC* dc) {
 }
 
 renderImageInGrid::renderImageInGrid(std::shared_ptr<wxBitmap> bitmap, Btn btn) {
-	// Need users to know this is custom
-	SetClientData((char*)"cus");
 	theBitmap = bitmap;
 	button    = btn;
 }
@@ -21,14 +19,6 @@ void renderImageInGrid::Draw(wxGrid& grid, wxGridCellAttr& attr, wxDC& dc, const
 	// Draw rect in the right place
 	dc.DrawBitmap(*theBitmap, rect.x, rect.y);
 }
-
-/*
-bool BottomUI::onButtonPress(GdkEventButton* event, Btn button) {
-	// This button has just been clicked, notify the dataProcess
-	inputInstance->toggleButtonState(button);
-	return true;
-}
-*/
 
 BottomUI::BottomUI(wxFrame* parentFrame, std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid, std::shared_ptr<DataProcessing> input) {
 	// TODO set up joysticks
@@ -45,13 +35,17 @@ BottomUI::BottomUI(wxFrame* parentFrame, std::shared_ptr<ButtonData> buttons, wx
 	rightJoystickDrawer = std::make_shared<JoystickCanvas>();
 	rightJoystickDrawer->setBackgroundColor(*wxWHITE);
 
-	horizontalBoxSizer->Add(leftJoystickDrawer.get(), wxEXPAND | wxALL);
-	horizontalBoxSizer->Add(rightJoystickDrawer.get(), wxEXPAND | wxALL);
+	horizontalBoxSizer->Add(leftJoystickDrawer.get(), 0, wxEXPAND | wxALL);
+	horizontalBoxSizer->Add(rightJoystickDrawer.get(), 0, wxEXPAND | wxALL);
 
 	buttonGrid = std::make_shared<wxGrid>(parentFrame, wxID_ANY);
 
+	// Removes gridlines, this might be cool in the future
+	// https://docs.wxwidgets.org/3.0/classwx_grid.html#abf968b3b0d70d2d9cc5bacf7f9d9891a
+	buttonGrid->EnableGridLines(false);
 	// Height * Width
 	buttonGrid->CreateGrid(4, 11);
+	buttonGrid->EnableEditing(false);
 
 	// Handle grid clicking
 	buttonGrid->Bind(wxEVT_GRID_CELL_LEFT_CLICK, &BottomUI::onGridClick, this);
@@ -88,9 +82,9 @@ BottomUI::BottomUI(wxFrame* parentFrame, std::shared_ptr<ButtonData> buttons, wx
 	// Fit cell size to contents
 	buttonGrid->AutoSize();
 
-	horizontalBoxSizer->Add(buttonGrid.get(), wxEXPAND | wxALL);
+	horizontalBoxSizer->Add(buttonGrid.get(), 0, wxEXPAND | wxALL);
 
-	theGrid->Add(horizontalBoxSizer.get(), wxEXPAND | wxALL);
+	theGrid->Add(horizontalBoxSizer.get(), 0, wxEXPAND | wxALL);
 }
 
 void BottomUI::onGridClick(wxGridEvent& event) {
@@ -99,14 +93,13 @@ void BottomUI::onGridClick(wxGridEvent& event) {
 	long row = event.GetRow();
 
 	wxGridCellRenderer* cellRenderer = buttonGrid->GetCellRenderer(row, col);
-
-	// Segmentation fault
-	if(strcmp((char*)cellRenderer->GetClientData(), "cus") == 0) {
+	Btn button                       = ((renderImageInGrid*)cellRenderer)->getButton();
+	// If it has a renderer, it must be good
+	if(button != NULL) {
 		// This is a custom cell renderer
 		// Toggle the button state via the cell renderer hopefully
-		inputInstance->toggleButtonState(((renderImageInGrid*)cellRenderer)->getButton());
+		inputInstance->toggleButtonState(button);
 	}
-
 	// Same DecRef stuff
 	cellRenderer->DecRef();
 
