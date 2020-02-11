@@ -39,11 +39,14 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* 
 	verticalBoxSizer->Add(buttonSizer.get(), 1, wxEXPAND | wxALL);
 
 	inputsViewSizer->Add(frameDrawer.get(), 1, wxEXPAND | wxALL);
+	// Dataprocessing is itself a wxListCtrl
 	inputsViewSizer->Add(inputData.get(), 1, wxEXPAND | wxALL);
 
 	verticalBoxSizer->Add(inputsViewSizer.get(), 1, wxEXPAND | wxALL);
 
-	sizer->Add(verticalBoxSizer.get(), 0, wxEXPAND | wxALL);
+	// Problems with segfault at close can be traced back to the fact that wxWidgets recieves raw pointers
+	// of the sizers, but we own shared pointers, will fix later
+	sizer->Add(verticalBoxSizer.get(), 1, wxEXPAND | wxALL);
 }
 
 void SideUI::onPlayPressed(wxCommandEvent& event) {

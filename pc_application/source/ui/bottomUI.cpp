@@ -38,7 +38,8 @@ BottomUI::BottomUI(wxFrame* parentFrame, std::shared_ptr<ButtonData> buttons, wx
 	horizontalBoxSizer->Add(leftJoystickDrawer.get(), 1, wxEXPAND | wxALL);
 	horizontalBoxSizer->Add(rightJoystickDrawer.get(), 1, wxEXPAND | wxALL);
 
-	buttonGrid = std::make_shared<wxGrid>(parentFrame, wxID_ANY);
+	// According to https://forums.wxwidgets.org/viewtopic.php?p=120136#p120136, it cant be wxDefaultSize
+	buttonGrid = std::make_shared<wxGrid>(parentFrame, wxID_ANY, wxDefaultPosition, wxDefaultSize);
 
 	// Removes gridlines, this might be cool in the future
 	// https://docs.wxwidgets.org/3.0/classwx_grid.html#abf968b3b0d70d2d9cc5bacf7f9d9891a
@@ -55,7 +56,7 @@ BottomUI::BottomUI(wxFrame* parentFrame, std::shared_ptr<ButtonData> buttons, wx
 		// https://forums.wxwidgets.org/viewtopic.php?t=40428
 		wxGridCellAttr* attr = new wxGridCellAttr();
 		attr->SetRenderer(new renderImageInGrid(buttonData->buttonMapping[button.first]->offBitmapIcon, button.first));
-
+		attr->SetReadOnly(true);
 		buttonGrid->SetAttr(button.second.y, button.second.x, attr);
 		/*
 		// Add the images (the pixbuf can and will be changed later)
@@ -84,7 +85,7 @@ BottomUI::BottomUI(wxFrame* parentFrame, std::shared_ptr<ButtonData> buttons, wx
 
 	horizontalBoxSizer->Add(buttonGrid.get(), 1, wxEXPAND | wxALL);
 
-	theGrid->Add(horizontalBoxSizer.get(), 1, wxEXPAND | wxALL);
+	theGrid->Add(horizontalBoxSizer.get(), 2, wxEXPAND | wxALL);
 }
 
 void BottomUI::onGridClick(wxGridEvent& event) {

@@ -33,8 +33,8 @@ CXXFLAGS := -std=gnu++17 $(shell wx-config --cxxflags base,core) -I./include
 # Just for 64 bit for the memes
 CPPFLAGS := -Wall -Wno-maybe-uninitialized -ggdb -m64
 # Linker flags (-lpthread needed for threads)
-# Includes some neccessary linker flags for Gtkmm
-LDFLAGS := $(shell wx-config --libs base,core --static=yes) -lpthread -lcomctl32 -luxtheme
+# Includes some neccessary linker flags for win32-darkmode (will add in the future)
+LDFLAGS := $(shell wx-config --libs base,core --static=yes) -lpthread
 ifeq ($(OS),Windows_NT)
 	# Needed for sockets on windows
 	LDFLAGS += -lws2_32
