@@ -16,7 +16,7 @@ MainWindow::MainWindow()
 	// https://forums.wxwidgets.org/viewtopic.php?t=28894
 	// https://cboard.cprogramming.com/cplusplus-programming/92653-starting-wxwidgets-wxpanel-full-size-frame.html
 	// This means some things have to change going on
-	mainSizer = std::make_shared<wxBoxSizer>(wxVERTICAL);
+	mainSizer = std::make_shared<wxBoxSizer>(wxHORIZONTAL);
 
 	// Set button data instance
 	buttonData = std::make_shared<ButtonData>();
@@ -66,7 +66,6 @@ void MainWindow::OnSize(wxSizeEvent& event) {
 	if(GetAutoLayout()) {
 		Layout();
 	}
-	event.Skip();
 }
 
 void MainWindow::getGlobalSettings(rapidjson::Document* d) {

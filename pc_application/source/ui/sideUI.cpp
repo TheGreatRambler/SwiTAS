@@ -33,15 +33,15 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* 
 
 	// TODO all these expands and all seem suspect
 
-	buttonSizer->Add(playButton.get(), 0, wxEXPAND | wxALL);
-	buttonSizer->Add(frameAdvanceButton.get(), 0, wxEXPAND | wxALL);
+	buttonSizer->Add(playButton.get(), 1, wxEXPAND | wxALL);
+	buttonSizer->Add(frameAdvanceButton.get(), 1, wxEXPAND | wxALL);
 
-	verticalBoxSizer->Add(buttonSizer.get(), 0, wxEXPAND | wxALL);
+	verticalBoxSizer->Add(buttonSizer.get(), 1, wxEXPAND | wxALL);
 
-	inputsViewSizer->Add(frameDrawer.get(), 0, wxEXPAND | wxALL);
-	inputsViewSizer->Add(inputData.get(), 0, wxEXPAND | wxALL);
+	inputsViewSizer->Add(frameDrawer.get(), 1, wxEXPAND | wxALL);
+	inputsViewSizer->Add(inputData.get(), 1, wxEXPAND | wxALL);
 
-	verticalBoxSizer->Add(inputsViewSizer.get(), 0, wxEXPAND | wxALL);
+	verticalBoxSizer->Add(inputsViewSizer.get(), 1, wxEXPAND | wxALL);
 
 	sizer->Add(verticalBoxSizer.get(), 0, wxEXPAND | wxALL);
 }

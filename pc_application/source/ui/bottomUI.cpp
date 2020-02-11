@@ -35,8 +35,8 @@ BottomUI::BottomUI(wxFrame* parentFrame, std::shared_ptr<ButtonData> buttons, wx
 	rightJoystickDrawer = std::make_shared<JoystickCanvas>();
 	rightJoystickDrawer->setBackgroundColor(*wxWHITE);
 
-	horizontalBoxSizer->Add(leftJoystickDrawer.get(), 0, wxEXPAND | wxALL);
-	horizontalBoxSizer->Add(rightJoystickDrawer.get(), 0, wxEXPAND | wxALL);
+	horizontalBoxSizer->Add(leftJoystickDrawer.get(), 1, wxEXPAND | wxALL);
+	horizontalBoxSizer->Add(rightJoystickDrawer.get(), 1, wxEXPAND | wxALL);
 
 	buttonGrid = std::make_shared<wxGrid>(parentFrame, wxID_ANY);
 
@@ -82,9 +82,9 @@ BottomUI::BottomUI(wxFrame* parentFrame, std::shared_ptr<ButtonData> buttons, wx
 	// Fit cell size to contents
 	buttonGrid->AutoSize();
 
-	horizontalBoxSizer->Add(buttonGrid.get(), 0, wxEXPAND | wxALL);
+	horizontalBoxSizer->Add(buttonGrid.get(), 1, wxEXPAND | wxALL);
 
-	theGrid->Add(horizontalBoxSizer.get(), 0, wxEXPAND | wxALL);
+	theGrid->Add(horizontalBoxSizer.get(), 1, wxEXPAND | wxALL);
 }
 
 void BottomUI::onGridClick(wxGridEvent& event) {
