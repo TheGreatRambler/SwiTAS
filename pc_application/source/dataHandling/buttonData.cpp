@@ -25,9 +25,18 @@ void ButtonData::setupButtonMapping(rapidjson::Document* mainSettings) {
 		thisButtonInfo->offIcon = std::make_shared<wxImage>();
 		thisButtonInfo->offIcon->LoadFile(offIconImage, wxBITMAP_TYPE_PNG);
 
-		thisButtonInfo->onBitmapIcon = std::make_shared<wxBitmap>(*thisButtonInfo->onIcon, wxBITMAP_SCREEN_DEPTH);
-
+		thisButtonInfo->onBitmapIcon  = std::make_shared<wxBitmap>(*thisButtonInfo->onIcon, wxBITMAP_SCREEN_DEPTH);
 		thisButtonInfo->offBitmapIcon = std::make_shared<wxBitmap>(*thisButtonInfo->offIcon, wxBITMAP_SCREEN_DEPTH);
+
+		int listWidth  = (*mainSettings)["inputsList"]["imageWidth"].GetInt();
+		int listHeight = (*mainSettings)["inputsList"]["imageHeight"].GetInt();
+		int gridWidth  = (*mainSettings)["buttonGrid"]["imageWidth"].GetInt();
+		int gridHeight = (*mainSettings)["buttonGrid"]["imageHeight"].GetInt();
+
+		thisButtonInfo->resizedListOnBitmap  = std::make_shared<wxBitmap>(thisButtonInfo->onIcon->Rescale(listWidth, listHeight));
+		thisButtonInfo->resizedListOffBitmap = std::make_shared<wxBitmap>(thisButtonInfo->offIcon->Rescale(listWidth, listHeight));
+		thisButtonInfo->resizedGridOnBitmap  = std::make_shared<wxBitmap>(thisButtonInfo->onIcon->Rescale(gridWidth, gridHeight));
+		thisButtonInfo->resizedGridOffBitmap = std::make_shared<wxBitmap>(thisButtonInfo->offIcon->Rescale(gridWidth, gridHeight));
 
 		// Only one char
 		// This is because functions listen for a single char

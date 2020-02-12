@@ -163,12 +163,18 @@
 	},
 	"iconTransparent": "rgb(48,0,77)",
 	"inputsList": {
+		"imageWidth": 30,
+		"imageHeight": 30
+	},
+	"buttonGrid": {
 		"imageWidth": 40,
 		"imageHeight": 40
 	},
 	"programIcon": "share/icons/nxtas/logo/main.png",
 	"ui": {
 		"playButton": "share/icons/nxtas/buttons/playButton.png",
-		"frameAdvanceButton": "share/icons/nxtas/buttons/frameAdvanceButton.png"
+		"frameAdvanceButton": "share/icons/nxtas/buttons/frameAdvanceButton.png",
+		"buttonWidth": 80,
+		"buttonHeight": 80
 	}
 }

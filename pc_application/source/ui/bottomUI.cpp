@@ -55,7 +55,7 @@ BottomUI::BottomUI(wxFrame* parentFrame, std::shared_ptr<ButtonData> buttons, wx
 
 		// https://forums.wxwidgets.org/viewtopic.php?t=40428
 		wxGridCellAttr* attr = new wxGridCellAttr();
-		attr->SetRenderer(new renderImageInGrid(buttonData->buttonMapping[button.first]->offBitmapIcon, button.first));
+		attr->SetRenderer(new renderImageInGrid(buttonData->buttonMapping[button.first]->resizedGridOffBitmap, button.first));
 		attr->SetReadOnly(true);
 		buttonGrid->SetAttr(button.second.y, button.second.x, attr);
 		/*
@@ -96,7 +96,8 @@ void BottomUI::onGridClick(wxGridEvent& event) {
 	wxGridCellRenderer* cellRenderer = buttonGrid->GetCellRenderer(row, col);
 	Btn button                       = ((renderImageInGrid*)cellRenderer)->getButton();
 	// If it has a renderer, it must be good
-	if(button != NULL) {
+	// It spits out garbage like 4277075694 when the cell renderer is actually not a button renderer
+	if(button < Btn::BUTTONS_SIZE) {
 		// This is a custom cell renderer
 		// Toggle the button state via the cell renderer hopefully
 		inputInstance->toggleButtonState(button);
@@ -109,18 +110,19 @@ void BottomUI::onGridClick(wxGridEvent& event) {
 
 void BottomUI::setIconState(Btn button, bool state) {
 	// TODO this needs to be called by DataProcessing
-	Location location           = KeyLocs[button];
-	renderImageInGrid* renderer = (renderImageInGrid*)buttonGrid->GetCellRenderer(location.y, location.x);
+	int x                       = KeyLocs[button].x;
+	int y                       = KeyLocs[button].y;
+	renderImageInGrid* renderer = (renderImageInGrid*)buttonGrid->GetCellRenderer(y, x);
 	if(state) {
 		// Set the image to the on image
-		renderer->setBitmap(buttonData->buttonMapping[button]->onBitmapIcon);
+		renderer->setBitmap(buttonData->buttonMapping[button]->resizedGridOnBitmap);
 	} else {
 		// Set the image to the off image
-		renderer->setBitmap(buttonData->buttonMapping[button]->offBitmapIcon);
+		renderer->setBitmap(buttonData->buttonMapping[button]->resizedGridOffBitmap);
 	}
 	// Have to DecRef https://docs.wxwidgets.org/3.0/classwx_grid.html#a9640007f1e60efbaf00b3ac6f6f50f8f
 	renderer->DecRef();
-	buttonGrid->RefreshRect(buttonGrid->CellToRect(location.x, location.x));
+	buttonGrid->RefreshRect(buttonGrid->CellToRect(y, x));
 
 	// Don't set value in input instance because it
 	// Was the one that sent us here

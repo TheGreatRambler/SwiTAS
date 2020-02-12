@@ -52,8 +52,8 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 		// Bitmaps are interleaved between on and off
 		// Have to pass raw value, not pointer
 		// Have to resize also, no reference needed
-		imageList.Add(*(new wxBitmap(button.second->onIcon->Rescale(imageIconWidth, imageIconHeight))), maskColor);
-		imageList.Add(*(new wxBitmap(button.second->offIcon->Rescale(imageIconWidth, imageIconHeight))), maskColor);
+		imageList.Add(*button.second->resizedListOnBitmap, maskColor);
+		imageList.Add(*button.second->resizedListOffBitmap, maskColor);
 		// treeView.append_column(button.second.scriptName, thisIcon);
 		// Add to the columns themselves (gives value, not pointer)
 		// inputColumns.add(thisIcon);
@@ -98,9 +98,11 @@ int DataProcessing::OnGetItemColumnImage(long row, long column) const {
 		if(on) {
 			// Return index of on image
 			// Interleaved means it looks like this
-			res = button * 2 + 1;
-		} else {
 			res = button * 2;
+		} else {
+			// I'm trying something, don't return an image if off
+			// res = button * 2 + 1;
+			res = -1;
 		}
 
 		wxBitmap test = imageList.GetBitmap(res);
@@ -115,6 +117,7 @@ wxString DataProcessing::OnGetItemText(long row, long column) const {
 		// This is the frame, which is just the row number
 		return wxString::Format(wxT("%i"), row);
 	} else {
+		// Fallback for every other column
 		return "";
 	}
 	// This function shouldn't recieve any other column

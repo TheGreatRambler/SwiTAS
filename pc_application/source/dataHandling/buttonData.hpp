@@ -45,6 +45,7 @@ public:
 		CAPT,
 		LS,
 		RS,
+		BUTTONS_SIZE
 	};
 
 	// To convert names
@@ -104,6 +105,11 @@ public:
 		std::shared_ptr<wxImage> offIcon;
 		std::shared_ptr<wxBitmap> onBitmapIcon;
 		std::shared_ptr<wxBitmap> offBitmapIcon;
+		// Resized images for the UI
+		std::shared_ptr<wxBitmap> resizedListOnBitmap;
+		std::shared_ptr<wxBitmap> resizedListOffBitmap;
+		std::shared_ptr<wxBitmap> resizedGridOnBitmap;
+		std::shared_ptr<wxBitmap> resizedGridOffBitmap;
 		wxChar toggleKeybind;
 	};
 
