@@ -17,11 +17,11 @@ private:
 	uint32_t currentLast;
 
 public:
-	FrameCanvas(std::shared_ptr<DataProcessing> dataProcessing);
+	FrameCanvas(wxFrame* parent, std::shared_ptr<DataProcessing> dataProcessing);
 
 	void rangeUpdated(uint32_t first, uint32_t last);
 
-	void draw(wxDC* dc) override;
+	virtual void draw(wxDC& dc) override;
 };
 
 class SideUI {

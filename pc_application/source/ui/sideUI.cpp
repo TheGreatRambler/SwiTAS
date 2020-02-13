@@ -1,20 +1,26 @@
 #include "sideUI.hpp"
 #include <memory>
 
-FrameCanvas::FrameCanvas(std::shared_ptr<DataProcessing> dataProcessing) {
-	inputData = dataProcessing;
+FrameCanvas::FrameCanvas(wxFrame* parent, std::shared_ptr<DataProcessing> dataProcessing)
+	: DrawingCanvas(parent) {
+	currentFirst = 0;
+	currentLast  = 0;
+	inputData    = dataProcessing;
 
-	inputData->setInputCallback(std::bind(&FrameCanvas::rangeUpdated, this, std::placeholders::_1, std::placeholders::_2));
+	inputData->setViewableInputsCallback(std::bind(&FrameCanvas::rangeUpdated, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 void FrameCanvas::rangeUpdated(uint32_t first, uint32_t last) {
-	currentFirst = first;
-	currentLast  = last;
-	// Refresh now to get another draw
-	Refresh();
+	if(currentFirst != first && currentLast != last) {
+		currentFirst = first;
+		currentLast  = last;
+		// Refresh now to get another draw
+		Refresh();
+		Update();
+	}
 }
 
-void FrameCanvas::draw(wxDC* dc) {
+void FrameCanvas::draw(wxDC& dc) {
 	// Do thing
 	int width;
 	int height;
@@ -24,10 +30,11 @@ void FrameCanvas::draw(wxDC* dc) {
 
 	uint8_t boxHeight = floorf((float)width / numOfItems);
 
+	dc.SetPen(*wxGREEN);
+	dc.SetBrush(*wxLIGHT_GREY_BRUSH);
+
 	for(uint8_t i = 0; i < numOfItems; i++) {
-		dc->SetPen(*wxGREY_PEN);
-		dc->SetBrush(*wxLIGHT_GREY_BRUSH);
-		dc->DrawRectangle(wxPoint(0, boxHeight * i), wxSize(width, boxHeight));
+		dc.DrawRectangle(wxPoint(4, boxHeight * i + 4), wxSize(width - 8, boxHeight - 4));
 	}
 };
 
@@ -44,8 +51,8 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* 
 	// Holds input stuff
 	inputsViewSizer = std::make_shared<wxBoxSizer>(wxHORIZONTAL);
 
-	frameDrawer = std::make_shared<FrameCanvas>(inputData);
-	frameDrawer->setBackgroundColor(*wxBLUE);
+	frameDrawer = std::make_shared<FrameCanvas>(parentFrame, inputData);
+	frameDrawer->setBackgroundColor(*wxLIGHT_GREY);
 
 	wxImage resizedPlayImage(HELPERS::resolvePath((*mainSettings)["ui"]["playButton"].GetString()));
 	resizedPlayImage.Rescale((*mainSettings)["ui"]["buttonWidth"].GetInt(), (*mainSettings)["ui"]["buttonHeight"].GetInt());

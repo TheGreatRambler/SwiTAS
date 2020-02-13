@@ -1,24 +1,27 @@
 #include "drawingCanvas.hpp"
 
-void DrawingCanvas::draw(wxDC* dc) {}
+DrawingCanvas::DrawingCanvas(wxFrame* parent)
+	: wxWindow(parent, wxID_ANY) {}
+
+void DrawingCanvas::draw(wxDC& dc) {}
 
 void DrawingCanvas::OnPaint(wxPaintEvent& event) {
 	wxBufferedPaintDC dc(this);
 
 	// Paint the background
-	PaintBackground(&dc);
+	PaintBackground(dc);
 
 	// Paint the graphic
-	draw(&dc);
+	draw(dc);
 }
 
-void DrawingCanvas::PaintBackground(wxDC* dc) {
-	dc->SetBrush(wxBrush(backgroundColor));
-	dc->SetPen(wxPen(backgroundColor, 1));
+void DrawingCanvas::PaintBackground(wxDC& dc) {
+	dc.SetBrush(wxBrush(backgroundColor));
+	dc.SetPen(wxPen(backgroundColor, 1));
 
 	wxRect windowRect(wxPoint(0, 0), GetClientSize());
 
-	dc->DrawRectangle(windowRect);
+	dc.DrawRectangle(windowRect);
 }
 
 // Empty implementation, to prevent flicker

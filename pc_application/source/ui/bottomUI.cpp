@@ -1,6 +1,9 @@
 #include "bottomUI.hpp"
 
-void JoystickCanvas::draw(wxDC* dc) {
+JoystickCanvas::JoystickCanvas(wxFrame* parent)
+	: DrawingCanvas(parent) {}
+
+void JoystickCanvas::draw(wxDC& dc) {
 	// Do thing
 	int width;
 	int height;
@@ -33,9 +36,9 @@ BottomUI::BottomUI(wxFrame* parentFrame, std::shared_ptr<ButtonData> buttons, wx
 
 	horizontalBoxSizer = std::make_shared<wxBoxSizer>(wxHORIZONTAL);
 
-	leftJoystickDrawer = std::make_shared<JoystickCanvas>();
+	leftJoystickDrawer = std::make_shared<JoystickCanvas>(parentFrame);
 	leftJoystickDrawer->setBackgroundColor(*wxWHITE);
-	rightJoystickDrawer = std::make_shared<JoystickCanvas>();
+	rightJoystickDrawer = std::make_shared<JoystickCanvas>(parentFrame);
 	rightJoystickDrawer->setBackgroundColor(*wxWHITE);
 
 	// According to https://forums.wxwidgets.org/viewtopic.php?p=120136#p120136, it cant be wxDefaultSize

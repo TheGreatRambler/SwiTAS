@@ -15,7 +15,9 @@
 
 class JoystickCanvas : public DrawingCanvas {
 public:
-	void draw(wxDC* dc) override;
+	JoystickCanvas(wxFrame* parent);
+
+	void draw(wxDC& dc) override;
 };
 
 // Simple way to render images in grid
