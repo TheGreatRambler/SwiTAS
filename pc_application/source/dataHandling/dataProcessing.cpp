@@ -85,6 +85,10 @@ void DataProcessing::setInputCallback(std::function<void(Btn, bool)> callback) {
 	inputCallback = callback;
 }
 
+void DataProcessing::setViewableInputsCallback(std::function<void(uint32_t, uint32_t)> callback) {
+	viewableInputsCallback = callback;
+}
+
 int DataProcessing::OnGetItemColumnImage(long row, long column) const {
 	if(column == 0) {
 		// This is the frame num
@@ -146,7 +150,9 @@ void DataProcessing::setButtonState(Btn button, bool state) {
 	// treeView.scroll_to_row(currentPath);
 	// BottomUI needs to know the state changed, even if it
 	// Was the one to make us aware in the first place
-	inputCallback(button, state);
+	if(inputCallback) {
+		inputCallback(button, state);
+	}
 }
 
 void DataProcessing::toggleButtonState(Btn button) {

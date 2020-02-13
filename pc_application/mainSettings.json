@@ -167,8 +167,8 @@
 		"imageHeight": 30
 	},
 	"buttonGrid": {
-		"imageWidth": 40,
-		"imageHeight": 40
+		"imageWidth": 80,
+		"imageHeight": 80
 	},
 	"programIcon": "share/icons/nxtas/logo/main.png",
 	"ui": {

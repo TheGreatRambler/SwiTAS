@@ -1,8 +1,34 @@
 #include "sideUI.hpp"
 #include <memory>
 
+FrameCanvas::FrameCanvas(std::shared_ptr<DataProcessing> dataProcessing) {
+	inputData = dataProcessing;
+
+	inputData->setInputCallback(std::bind(&FrameCanvas::rangeUpdated, this, std::placeholders::_1, std::placeholders::_2));
+}
+
+void FrameCanvas::rangeUpdated(uint32_t first, uint32_t last) {
+	currentFirst = first;
+	currentLast  = last;
+	// Refresh now to get another draw
+	Refresh();
+}
+
 void FrameCanvas::draw(wxDC* dc) {
 	// Do thing
+	int width;
+	int height;
+	GetSize(&width, &height);
+
+	uint8_t numOfItems = currentLast - currentFirst;
+
+	uint8_t boxHeight = floorf((float)width / numOfItems);
+
+	for(uint8_t i = 0; i < numOfItems; i++) {
+		dc->SetPen(*wxGREY_PEN);
+		dc->SetBrush(*wxLIGHT_GREY_BRUSH);
+		dc->DrawRectangle(wxPoint(0, boxHeight * i), wxSize(width, boxHeight));
+	}
 };
 
 SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* sizer, std::shared_ptr<DataProcessing> input) {
@@ -18,7 +44,7 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* 
 	// Holds input stuff
 	inputsViewSizer = std::make_shared<wxBoxSizer>(wxHORIZONTAL);
 
-	frameDrawer = std::make_shared<FrameCanvas>();
+	frameDrawer = std::make_shared<FrameCanvas>(inputData);
 	frameDrawer->setBackgroundColor(*wxBLUE);
 
 	wxImage resizedPlayImage(HELPERS::resolvePath((*mainSettings)["ui"]["playButton"].GetString()));
@@ -46,7 +72,9 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* 
 
 	inputsViewSizer->Add(frameDrawer.get(), 1, wxEXPAND | wxALL);
 	// Dataprocessing is itself a wxListCtrl
-	inputsViewSizer->Add(inputData.get(), 1, wxEXPAND | wxALL);
+	// Setting the minsize so it can get very small
+	inputData->SetMinSize(wxSize(0, 0));
+	inputsViewSizer->Add(inputData.get(), 5, wxEXPAND | wxALL);
 
 	verticalBoxSizer->Add(inputsViewSizer.get(), 1, wxEXPAND | wxALL);
 

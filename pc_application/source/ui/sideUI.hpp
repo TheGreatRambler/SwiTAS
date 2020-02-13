@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <memory>
 #include <rapidjson/document.h>
 #include <wx/dcbuffer.h>
@@ -9,7 +10,17 @@
 #include "drawingCanvas.hpp"
 
 class FrameCanvas : public DrawingCanvas {
+private:
+	std::shared_ptr<DataProcessing> inputData;
+
+	uint32_t currentFirst;
+	uint32_t currentLast;
+
 public:
+	FrameCanvas(std::shared_ptr<DataProcessing> dataProcessing);
+
+	void rangeUpdated(uint32_t first, uint32_t last);
+
 	void draw(wxDC* dc) override;
 };
 

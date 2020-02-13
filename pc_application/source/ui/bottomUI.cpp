@@ -2,6 +2,9 @@
 
 void JoystickCanvas::draw(wxDC* dc) {
 	// Do thing
+	int width;
+	int height;
+	GetSize(&width, &height);
 }
 
 renderImageInGrid::renderImageInGrid(std::shared_ptr<wxBitmap> bitmap, Btn btn) {
@@ -34,9 +37,6 @@ BottomUI::BottomUI(wxFrame* parentFrame, std::shared_ptr<ButtonData> buttons, wx
 	leftJoystickDrawer->setBackgroundColor(*wxWHITE);
 	rightJoystickDrawer = std::make_shared<JoystickCanvas>();
 	rightJoystickDrawer->setBackgroundColor(*wxWHITE);
-
-	horizontalBoxSizer->Add(leftJoystickDrawer.get(), 1, wxEXPAND | wxALL);
-	horizontalBoxSizer->Add(rightJoystickDrawer.get(), 1, wxEXPAND | wxALL);
 
 	// According to https://forums.wxwidgets.org/viewtopic.php?p=120136#p120136, it cant be wxDefaultSize
 	buttonGrid = std::make_shared<wxGrid>(parentFrame, wxID_ANY, wxDefaultPosition, wxDefaultSize);
@@ -83,9 +83,15 @@ BottomUI::BottomUI(wxFrame* parentFrame, std::shared_ptr<ButtonData> buttons, wx
 	// Fit cell size to contents
 	buttonGrid->AutoSize();
 
-	horizontalBoxSizer->Add(buttonGrid.get(), 1, wxEXPAND | wxALL);
+	// These take up much less space than the grid
+	horizontalBoxSizer->Add(leftJoystickDrawer.get(), 1, wxEXPAND | wxALL);
+	horizontalBoxSizer->Add(rightJoystickDrawer.get(), 1, wxEXPAND | wxALL);
 
-	theGrid->Add(horizontalBoxSizer.get(), 2, wxEXPAND | wxALL);
+	// So it can get very small
+	buttonGrid->SetMinSize(wxSize(0, 0));
+	horizontalBoxSizer->Add(buttonGrid.get(), 4, wxEXPAND | wxALL);
+
+	theGrid->Add(horizontalBoxSizer.get(), 3, wxEXPAND | wxALL);
 }
 
 void BottomUI::onGridClick(wxGridEvent& event) {
