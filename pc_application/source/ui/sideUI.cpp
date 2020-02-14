@@ -11,7 +11,7 @@ FrameCanvas::FrameCanvas(wxFrame* parent, std::shared_ptr<DataProcessing> dataPr
 }
 
 void FrameCanvas::rangeUpdated(uint32_t first, uint32_t last) {
-	if(currentFirst != first && currentLast != last) {
+	if(first != currentFirst || last != currentLast) {
 		currentFirst = first;
 		currentLast  = last;
 		// Refresh now to get another draw
@@ -28,12 +28,17 @@ void FrameCanvas::draw(wxDC& dc) {
 
 	uint8_t numOfItems = currentLast - currentFirst;
 
-	uint8_t boxHeight = floorf((float)width / numOfItems);
+	uint8_t boxHeight = floorf((float)height / numOfItems);
 
 	dc.SetPen(*wxGREEN);
 	dc.SetBrush(*wxLIGHT_GREY_BRUSH);
 
 	for(uint8_t i = 0; i < numOfItems; i++) {
+		if(i % 2 == 0) {
+			dc.SetBrush(*wxLIGHT_GREY_BRUSH);
+		} else {
+			dc.SetBrush(*wxBLUE_BRUSH);
+		}
 		dc.DrawRectangle(wxPoint(4, boxHeight * i + 4), wxSize(width - 8, boxHeight - 4));
 	}
 };

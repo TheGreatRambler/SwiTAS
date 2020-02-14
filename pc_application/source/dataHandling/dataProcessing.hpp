@@ -68,7 +68,14 @@ public:
 
 	void onCacheHint(wxListEvent& event) {
 		if(viewableInputsCallback) {
-			viewableInputsCallback(event.GetCacheFrom(), event.GetCacheTo());
+			long numOfRowsVisible = GetCountPerPage();
+			if(numOfRowsVisible != 0) {
+				// Don't use the event values, they are wrong
+				long first = GetTopItem();
+				long last  = first + numOfRowsVisible - 1;
+
+				viewableInputsCallback(first, last);
+			}
 		}
 	}
 
