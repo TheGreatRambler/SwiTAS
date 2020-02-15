@@ -1,5 +1,27 @@
 #include "bottomUI.hpp"
 
+FrameViewerCanvas::FrameViewerCanvas(wxFrame* parent, wxBitmap* defaultImage)
+	: DrawingCanvas(parent) {
+	// Needs to be able to fit the frames
+	setPreferredSize(wxSize(1280, 720));
+	hasFrameToRender  = false;
+	defaultBackground = defaultImage;
+}
+
+void FrameViewerCanvas::draw(wxDC& dc) {
+	int width;
+	int height;
+	GetSize(&width, &height);
+	if(!hasFrameToRender) {
+		// Set scaling for the image to render without wxImage
+		dc.SetUserScale((double)width / defaultBackground->GetWidth(), (double)height / defaultBackground->GetHeight());
+		// Render the default image, that's it
+		dc.DrawBitmap(*defaultBackground, 0, 0, false);
+	} else {
+		// Do thing
+	}
+}
+
 JoystickCanvas::JoystickCanvas(wxFrame* parent)
 	: DrawingCanvas(parent) {}
 
@@ -26,20 +48,26 @@ void renderImageInGrid::Draw(wxGrid& grid, wxGridCellAttr& attr, wxDC& dc, const
 	dc.DrawBitmap(*theBitmap, rect.x, rect.y);
 }
 
-BottomUI::BottomUI(wxFrame* parentFrame, std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid, std::shared_ptr<DataProcessing> input) {
+BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid, std::shared_ptr<DataProcessing> input) {
 	// TODO set up joysticks
-	buttonData = buttons;
+	buttonData   = buttons;
+	mainSettings = settings;
 
 	inputInstance = input;
 	// Callback stuff
 	inputInstance->setInputCallback(std::bind(&BottomUI::setIconState, this, std::placeholders::_1, std::placeholders::_2));
 
+	// Game frame viewer
+
+	mainSizer          = std::make_shared<wxBoxSizer>(wxVERTICAL);
 	horizontalBoxSizer = std::make_shared<wxBoxSizer>(wxHORIZONTAL);
 
 	leftJoystickDrawer = std::make_shared<JoystickCanvas>(parentFrame);
 	leftJoystickDrawer->setBackgroundColor(*wxWHITE);
 	rightJoystickDrawer = std::make_shared<JoystickCanvas>(parentFrame);
 	rightJoystickDrawer->setBackgroundColor(*wxWHITE);
+
+	frameViewerCanvas = std::make_shared<FrameViewerCanvas>(parentFrame, new wxBitmap(HELPERS::resolvePath((*mainSettings)["videoViewerDefaultImage"].GetString()), wxBITMAP_TYPE_JPEG));
 
 	// According to https://forums.wxwidgets.org/viewtopic.php?p=120136#p120136, it cant be wxDefaultSize
 	buttonGrid = std::make_shared<wxGrid>(parentFrame, wxID_ANY, wxDefaultPosition, wxDefaultSize);
@@ -55,7 +83,6 @@ BottomUI::BottomUI(wxFrame* parentFrame, std::shared_ptr<ButtonData> buttons, wx
 	buttonGrid->Bind(wxEVT_GRID_CELL_LEFT_CLICK, &BottomUI::onGridClick, this);
 
 	for(auto const& button : KeyLocs) {
-
 		// https://forums.wxwidgets.org/viewtopic.php?t=40428
 		wxGridCellAttr* attr = new wxGridCellAttr();
 		attr->SetRenderer(new renderImageInGrid(buttonData->buttonMapping[button.first]->resizedGridOffBitmap, button.first));
@@ -94,7 +121,10 @@ BottomUI::BottomUI(wxFrame* parentFrame, std::shared_ptr<ButtonData> buttons, wx
 	buttonGrid->SetMinSize(wxSize(0, 0));
 	horizontalBoxSizer->Add(buttonGrid.get(), 4, wxEXPAND | wxALL);
 
-	theGrid->Add(horizontalBoxSizer.get(), 3, wxEXPAND | wxALL);
+	mainSizer->Add(frameViewerCanvas.get(), 1, wxSHAPED);
+	mainSizer->Add(horizontalBoxSizer.get(), 1, wxEXPAND | wxALL);
+
+	theGrid->Add(mainSizer.get(), 3, wxEXPAND | wxALL);
 }
 
 void BottomUI::onGridClick(wxGridEvent& event) {

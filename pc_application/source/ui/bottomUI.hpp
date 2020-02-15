@@ -3,6 +3,7 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <rapidjson/document.h>
 #include <unistd.h>
 #include <utility>
 #include <wx/dcbuffer.h>
@@ -11,7 +12,19 @@
 
 #include "../dataHandling/buttonData.hpp"
 #include "../dataHandling/dataProcessing.hpp"
+#include "../helpers.hpp"
 #include "drawingCanvas.hpp"
+
+class FrameViewerCanvas : public DrawingCanvas {
+private:
+	wxBitmap* defaultBackground;
+	uint8_t hasFrameToRender;
+
+public:
+	FrameViewerCanvas(wxFrame* parent, wxBitmap* defaultImage);
+
+	void draw(wxDC& dc) override;
+};
 
 class JoystickCanvas : public DrawingCanvas {
 public:
@@ -89,13 +102,20 @@ private:
 		{ Btn::RS, { 3, 3 } },
 	};
 
+	rapidjson::Document* mainSettings;
+
 	// Input instance to get inputs and such
 	std::shared_ptr<DataProcessing> inputInstance;
+
+	std::shared_ptr<wxBoxSizer> mainSizer;
 
 	std::shared_ptr<wxBoxSizer> horizontalBoxSizer;
 
 	std::shared_ptr<JoystickCanvas> leftJoystickDrawer;
 	std::shared_ptr<JoystickCanvas> rightJoystickDrawer;
+
+	// The fancy viewer for the live framedata from the switch
+	std::shared_ptr<FrameViewerCanvas> frameViewerCanvas;
 
 	// Grid containing the button viewer
 	std::shared_ptr<wxGrid> buttonGrid;
@@ -111,7 +131,7 @@ protected:
 	// bool onButtonPress(GdkEventButton* event, Btn button);
 
 public:
-	BottomUI(wxFrame* parentFrame, std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid, std::shared_ptr<DataProcessing> input);
+	BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid, std::shared_ptr<DataProcessing> input);
 
 	void setIconState(Btn button, bool state);
 

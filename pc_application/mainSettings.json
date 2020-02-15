@@ -167,10 +167,11 @@
 		"imageHeight": 30
 	},
 	"buttonGrid": {
-		"imageWidth": 80,
-		"imageHeight": 80
+		"imageWidth": 65,
+		"imageHeight": 65
 	},
 	"programIcon": "share/icons/nxtas/logo/main.png",
+	"videoViewerDefaultImage": "share/images/novideodefault.jpg",
 	"ui": {
 		"playButton": "share/icons/nxtas/buttons/playButton.png",
 		"frameAdvanceButton": "share/icons/nxtas/buttons/frameAdvanceButton.png",

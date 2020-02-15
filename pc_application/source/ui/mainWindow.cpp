@@ -5,6 +5,7 @@
 MainWindow::MainWindow()
 	: wxFrame(NULL, wxID_ANY, "NX TAS UI", wxDefaultPosition, wxDefaultSize) {
 	wxImage::AddHandler(new wxPNGHandler());
+	wxImage::AddHandler(new wxJPEGHandler());
 
 	// Get the main settings
 	getGlobalSettings(&mainSettings);
@@ -27,12 +28,13 @@ MainWindow::MainWindow()
 
 	// UI instances
 	sideUI   = std::make_shared<SideUI>(this, &mainSettings, mainSizer.get(), dataProcessingInstance);
-	bottomUI = std::make_shared<BottomUI>(this, buttonData, mainSizer.get(), dataProcessingInstance);
+	bottomUI = std::make_shared<BottomUI>(this, &mainSettings, buttonData, mainSizer.get(), dataProcessingInstance);
 
 	// Add the top menubar
 	addMenuBar();
 
-	SetSizerAndFit(mainSizer.get());
+	// No fit for now
+	SetSizer(mainSizer.get());
 	mainSizer->SetSizeHints(this);
 	Layout();
 	Fit();

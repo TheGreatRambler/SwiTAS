@@ -24,6 +24,16 @@ void DrawingCanvas::PaintBackground(wxDC& dc) {
 	dc.DrawRectangle(windowRect);
 }
 
+wxSize DrawingCanvas::DoGetBestClientSize() const {
+	// Overrides a method to let the sizer know of the preferred size
+	return preferredWindowSize;
+}
+
+void DrawingCanvas::setPreferredSize(wxSize preferredSize) {
+	// Should usually be set with the size of the bitmap, if needed
+	preferredWindowSize = preferredSize;
+}
+
 // Empty implementation, to prevent flicker
 void DrawingCanvas::OnEraseBackground(wxEraseEvent& event) {}
 
