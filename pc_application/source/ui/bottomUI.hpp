@@ -40,8 +40,13 @@ private:
 	wxBitmap* theBitmap;
 	Btn button;
 
+	uint8_t gridWidth;
+	uint8_t gridHeight;
+
+	wxGrid* parent;
+
 public:
-	renderImageInGrid(wxBitmap* bitmap, Btn btn);
+	renderImageInGrid(wxBitmap* bitmap, Btn btn, uint8_t width, uint8_t height, wxGrid* gridParent);
 
 	virtual void Draw(wxGrid& grid, wxGridCellAttr& attr, wxDC& dc, const wxRect& rect, int row, int col, bool isSelected);
 
@@ -58,7 +63,7 @@ public:
 	}
 
 	wxGridCellRenderer* Clone() const {
-		return new renderImageInGrid(theBitmap, button);
+		return new renderImageInGrid(theBitmap, button, gridWidth, gridHeight, parent);
 	}
 };
 
@@ -81,6 +86,8 @@ private:
 	//   +----+---+----+----+---+--+---+---+----+---+---+
 	// 3 |    | v |    | RS |   |  |   |   |    | B |   |
 	//   +----+---+----+----+---+--+---+---+----+---+---+
+	const uint8_t keyWidth  = 11;
+	const uint8_t keyHeight = 4;
 	std::map<Btn, Location> KeyLocs {
 		{ Btn::A, { 10, 2 } },
 		{ Btn::B, { 9, 3 } },

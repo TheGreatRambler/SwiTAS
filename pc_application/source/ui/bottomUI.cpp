@@ -22,8 +22,8 @@ void FrameViewerCanvas::draw(wxDC& dc) {
 }
 
 JoystickCanvas::JoystickCanvas(wxFrame* parent)
-	: DrawingCanvas(parent, wxSize(10, 10)) {
-	// Should be square
+	: DrawingCanvas(parent, wxSize(150, 150)) {
+	// Should be a decent size
 }
 
 void JoystickCanvas::draw(wxDC& dc) {
@@ -40,9 +40,12 @@ void JoystickCanvas::draw(wxDC& dc) {
 	dc.DrawCircle(approximateMiddle, approximateMiddle.x - 3);
 }
 
-renderImageInGrid::renderImageInGrid(wxBitmap* bitmap, Btn btn) {
-	theBitmap = bitmap;
-	button    = btn;
+renderImageInGrid::renderImageInGrid(wxBitmap* bitmap, Btn btn, uint8_t width, uint8_t height, wxGrid* gridParent) {
+	theBitmap  = bitmap;
+	button     = btn;
+	gridWidth  = width;
+	gridHeight = height;
+	parent     = gridParent;
 }
 
 void renderImageInGrid::setBitmap(wxBitmap* bitmap) {
@@ -50,9 +53,22 @@ void renderImageInGrid::setBitmap(wxBitmap* bitmap) {
 }
 
 void renderImageInGrid::Draw(wxGrid& grid, wxGridCellAttr& attr, wxDC& dc, const wxRect& rect, int row, int col, bool isSelected) {
+	int parentWidth;
+	int parentHeight;
+	parent->GetSize(&parentWidth, &parentHeight);
+
+	// This is so the images sorta fit
+	int cellWidth  = roundf((float)parentWidth / gridWidth);
+	int cellHeight = roundf((float)parentHeight / gridHeight);
+
+	// Set scaling for the image to render without wxImage
+	dc.SetUserScale((double)cellWidth / theBitmap->GetWidth(), (double)cellHeight / theBitmap->GetHeight());
+
 	// Call base class ::Draw to clear the cell and draw the borders etc.
+	// Never selected, however
 	wxGridCellRenderer::Draw(grid, attr, dc, rect, row, col, isSelected);
 	// Draw rect in the right place
+	// dc.Clear();
 	dc.DrawBitmap(*theBitmap, rect.x, rect.y);
 }
 
@@ -93,23 +109,9 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 	for(auto const& button : KeyLocs) {
 		// https://forums.wxwidgets.org/viewtopic.php?t=40428
 		wxGridCellAttr* attr = new wxGridCellAttr();
-		attr->SetRenderer(new renderImageInGrid(buttonData->buttonMapping[button.first]->resizedGridOffBitmap, button.first));
+		attr->SetRenderer(new renderImageInGrid(buttonData->buttonMapping[button.first]->resizedGridOffBitmap, button.first, keyWidth, keyHeight, buttonGrid));
 		attr->SetReadOnly(true);
 		buttonGrid->SetAttr(button.second.y, button.second.x, attr);
-		/*
-		// Add the images (the pixbuf can and will be changed later)
-		std::shared_ptr<Gtk::Image> image = std::make_shared<Gtk::Image>(buttonData->buttonMapping[button.first].offIcon);
-		// Add the eventbox
-		std::shared_ptr<Gtk::EventBox> eventBox = std::make_shared<Gtk::EventBox>();
-		eventBox->add(*image);
-		eventBox->set_events(Gdk::BUTTON_PRESS_MASK);
-		eventBox->signal_button_press_event().connect(sigc::bind<Btn>(sigc::mem_fun(*this, &BottomUI::onButtonPress), button.first));
-
-		images.insert(std::pair<Btn, std::pair<std::shared_ptr<Gtk::Image>, std::shared_ptr<Gtk::EventBox>>>(button.first, { image, eventBox }));
-
-		// Designate the off image as the default
-		buttonViewer.attach(*eventBox, button.second.x, button.second.y);
-		*/
 	}
 
 	// Nice source for sizer stuff
@@ -122,14 +124,15 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 	buttonGrid->AutoSize();
 
 	// These take up much less space than the grid
-	horizontalBoxSizer->Add(leftJoystickDrawer, 1, wxSHAPED | wxEXPAND);
-	horizontalBoxSizer->Add(rightJoystickDrawer, 1, wxSHAPED | wxEXPAND);
+	horizontalBoxSizer->Add(leftJoystickDrawer, 0, wxSHAPED | wxEXPAND | wxALIGN_LEFT);
+	horizontalBoxSizer->Add(rightJoystickDrawer, 0, wxSHAPED | wxEXPAND | wxALIGN_LEFT);
 
 	// So it can get very small
 	buttonGrid->SetMinSize(wxSize(0, 0));
 	horizontalBoxSizer->Add(buttonGrid, 1, wxEXPAND | wxALL);
 
-	mainSizer->Add(frameViewerCanvas, 1, wxSHAPED | wxALL | wxALIGN_CENTER_HORIZONTAL);
+	// Proportion HAS to be zero here, it's a requirment
+	mainSizer->Add(frameViewerCanvas, 0, wxSHAPED | wxEXPAND | wxALIGN_CENTER_HORIZONTAL);
 	mainSizer->Add(horizontalBoxSizer, 1, wxEXPAND | wxALL);
 
 	theGrid->Add(mainSizer, 3, wxEXPAND | wxALL);

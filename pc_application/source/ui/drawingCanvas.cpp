@@ -16,12 +16,8 @@ void DrawingCanvas::OnPaint(wxPaintEvent& event) {
 }
 
 void DrawingCanvas::PaintBackground(wxDC& dc) {
-	dc.SetBrush(wxBrush(backgroundColor));
-	dc.SetPen(wxPen(backgroundColor, 1));
-
-	wxRect windowRect(wxPoint(0, 0), GetClientSize());
-
-	dc.DrawRectangle(windowRect);
+	dc.SetBackground(wxBrush(backgroundColor));
+	dc.Clear();
 }
 
 // Empty implementation, to prevent flicker
