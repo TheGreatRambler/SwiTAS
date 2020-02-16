@@ -6,10 +6,9 @@
 class DrawingCanvas : public wxWindow {
 private:
 	wxColor backgroundColor;
-	wxSize preferredWindowSize;
 
 public:
-	DrawingCanvas(wxFrame* parent);
+	DrawingCanvas(wxFrame* parent, wxSize size);
 
 	// To be overriden
 	virtual void draw(wxDC& dc) = 0;
@@ -19,10 +18,6 @@ public:
 	void OnPaint(wxPaintEvent& event);
 
 	void PaintBackground(wxDC& dc);
-
-	wxSize DoGetBestClientSize() const;
-
-	void setPreferredSize(wxSize preferredSize);
 
 	// Empty implementation, to prevent flicker
 	void OnEraseBackground(wxEraseEvent& event);

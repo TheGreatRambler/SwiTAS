@@ -37,15 +37,15 @@ public:
 class renderImageInGrid : public wxGridCellRenderer {
 	// clang-format on
 private:
-	std::shared_ptr<wxBitmap> theBitmap;
+	wxBitmap* theBitmap;
 	Btn button;
 
 public:
-	renderImageInGrid(std::shared_ptr<wxBitmap> bitmap, Btn btn);
+	renderImageInGrid(wxBitmap* bitmap, Btn btn);
 
 	virtual void Draw(wxGrid& grid, wxGridCellAttr& attr, wxDC& dc, const wxRect& rect, int row, int col, bool isSelected);
 
-	void setBitmap(std::shared_ptr<wxBitmap> bitmap);
+	void setBitmap(wxBitmap* bitmap);
 
 	// Used by click handlers
 	Btn getButton() {
@@ -105,20 +105,20 @@ private:
 	rapidjson::Document* mainSettings;
 
 	// Input instance to get inputs and such
-	std::shared_ptr<DataProcessing> inputInstance;
+	DataProcessing* inputInstance;
 
-	std::shared_ptr<wxBoxSizer> mainSizer;
+	wxBoxSizer* mainSizer;
 
-	std::shared_ptr<wxBoxSizer> horizontalBoxSizer;
+	wxBoxSizer* horizontalBoxSizer;
 
-	std::shared_ptr<JoystickCanvas> leftJoystickDrawer;
-	std::shared_ptr<JoystickCanvas> rightJoystickDrawer;
+	JoystickCanvas* leftJoystickDrawer;
+	JoystickCanvas* rightJoystickDrawer;
 
 	// The fancy viewer for the live framedata from the switch
-	std::shared_ptr<FrameViewerCanvas> frameViewerCanvas;
+	FrameViewerCanvas* frameViewerCanvas;
 
 	// Grid containing the button viewer
-	std::shared_ptr<wxGrid> buttonGrid;
+	wxGrid* buttonGrid;
 
 	// The button mapping instance
 	std::shared_ptr<ButtonData> buttonData;
@@ -131,7 +131,7 @@ protected:
 	// bool onButtonPress(GdkEventButton* event, Btn button);
 
 public:
-	BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid, std::shared_ptr<DataProcessing> input);
+	BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid, DataProcessing* input);
 
 	void setIconState(Btn button, bool state);
 

@@ -21,32 +21,13 @@
 
 class ButtonData {
 private:
+	// Helper function to add transparency masks
+	void maskifyBitmap(wxBitmap* bitmap, wxColour maskColor);
+
 public:
 	// Buttons enum (coencides with the index of the bit in the input struct)
 	// Also used to identify the button everywhere else in the program
-	enum Btn {
-		A,
-		B,
-		X,
-		Y,
-		L,
-		R,
-		ZL,
-		ZR,
-		SL,
-		SR,
-		DUP,
-		DDOWN,
-		DLEFT,
-		DRIGHT,
-		PLUS,
-		MINUS,
-		HOME,
-		CAPT,
-		LS,
-		RS,
-		BUTTONS_SIZE
-	};
+	enum Btn { A, B, X, Y, L, R, ZL, ZR, SL, SR, DUP, DDOWN, DLEFT, DRIGHT, PLUS, MINUS, HOME, CAPT, LS, RS, BUTTONS_SIZE };
 
 	// To convert names
 	std::map<std::string, Btn> stringToButton {
@@ -101,15 +82,15 @@ public:
 		std::string scriptName;
 		std::string normalName;
 		std::string viewName;
-		std::shared_ptr<wxImage> onIcon;
-		std::shared_ptr<wxImage> offIcon;
-		std::shared_ptr<wxBitmap> onBitmapIcon;
-		std::shared_ptr<wxBitmap> offBitmapIcon;
+		wxImage* onIcon;
+		wxImage* offIcon;
+		wxBitmap* onBitmapIcon;
+		wxBitmap* offBitmapIcon;
 		// Resized images for the UI
-		std::shared_ptr<wxBitmap> resizedListOnBitmap;
-		std::shared_ptr<wxBitmap> resizedListOffBitmap;
-		std::shared_ptr<wxBitmap> resizedGridOnBitmap;
-		std::shared_ptr<wxBitmap> resizedGridOffBitmap;
+		wxBitmap* resizedListOnBitmap;
+		wxBitmap* resizedListOffBitmap;
+		wxBitmap* resizedGridOnBitmap;
+		wxBitmap* resizedGridOffBitmap;
 		wxChar toggleKeybind;
 	};
 

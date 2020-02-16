@@ -1,8 +1,8 @@
 #include "sideUI.hpp"
 #include <memory>
 
-FrameCanvas::FrameCanvas(wxFrame* parent, std::shared_ptr<DataProcessing> dataProcessing)
-	: DrawingCanvas(parent) {
+FrameCanvas::FrameCanvas(wxFrame* parent, DataProcessing* dataProcessing)
+	: DrawingCanvas(parent, wxDefaultSize) {
 	currentFirst = 0;
 	currentLast  = 0;
 	inputData    = dataProcessing;
@@ -43,20 +43,20 @@ void FrameCanvas::draw(wxDC& dc) {
 	}
 };
 
-SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* sizer, std::shared_ptr<DataProcessing> input) {
+SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* sizer, DataProcessing* input) {
 	mainSettings = settings;
 	inputData    = input;
 
 	// Holds everything
-	verticalBoxSizer = std::make_shared<wxBoxSizer>(wxVERTICAL);
+	verticalBoxSizer = new wxBoxSizer(wxVERTICAL);
 
 	// Holds buttons
-	buttonSizer = std::make_shared<wxBoxSizer>(wxHORIZONTAL);
+	buttonSizer = new wxBoxSizer(wxHORIZONTAL);
 
 	// Holds input stuff
-	inputsViewSizer = std::make_shared<wxBoxSizer>(wxHORIZONTAL);
+	inputsViewSizer = new wxBoxSizer(wxHORIZONTAL);
 
-	frameDrawer = std::make_shared<FrameCanvas>(parentFrame, inputData);
+	frameDrawer = new FrameCanvas(parentFrame, inputData);
 	frameDrawer->setBackgroundColor(*wxLIGHT_GREY);
 
 	wxImage resizedPlayImage(HELPERS::resolvePath((*mainSettings)["ui"]["playButton"].GetString()));
@@ -64,11 +64,11 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* 
 	wxImage resizedFrameAdvanceImage(HELPERS::resolvePath((*mainSettings)["ui"]["frameAdvanceButton"].GetString()));
 	resizedFrameAdvanceImage.Rescale((*mainSettings)["ui"]["buttonWidth"].GetInt(), (*mainSettings)["ui"]["buttonHeight"].GetInt());
 
-	playBitmap         = std::make_shared<wxBitmap>(resizedPlayImage);
-	frameAdvanceBitmap = std::make_shared<wxBitmap>(resizedFrameAdvanceImage);
+	playBitmap         = new wxBitmap(resizedPlayImage);
+	frameAdvanceBitmap = new wxBitmap(resizedFrameAdvanceImage);
 
-	playButton         = std::make_shared<wxBitmapButton>(parentFrame, wxID_ANY, *playBitmap);
-	frameAdvanceButton = std::make_shared<wxBitmapButton>(parentFrame, wxID_ANY, *frameAdvanceBitmap);
+	playButton         = new wxBitmapButton(parentFrame, wxID_ANY, *playBitmap);
+	frameAdvanceButton = new wxBitmapButton(parentFrame, wxID_ANY, *frameAdvanceBitmap);
 
 	// Button handlers
 	playButton->Bind(wxEVT_BUTTON, &SideUI::onPlayPressed, this);
@@ -76,23 +76,23 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* 
 
 	// TODO all these expands and all seem suspect
 
-	buttonSizer->Add(playButton.get(), 1);
-	buttonSizer->Add(frameAdvanceButton.get(), 1);
+	buttonSizer->Add(playButton, 1);
+	buttonSizer->Add(frameAdvanceButton, 1);
 
 	// Not wxEXPAND
-	verticalBoxSizer->Add(buttonSizer.get(), 0, wxEXPAND);
+	verticalBoxSizer->Add(buttonSizer, 0, wxEXPAND);
 
-	inputsViewSizer->Add(frameDrawer.get(), 1, wxEXPAND | wxALL);
+	inputsViewSizer->Add(frameDrawer, 1, wxEXPAND | wxALL);
 	// Dataprocessing is itself a wxListCtrl
 	// Setting the minsize so it can get very small
 	inputData->SetMinSize(wxSize(0, 0));
-	inputsViewSizer->Add(inputData.get(), 5, wxEXPAND | wxALL);
+	inputsViewSizer->Add(inputData, 5, wxEXPAND | wxALL);
 
-	verticalBoxSizer->Add(inputsViewSizer.get(), 1, wxEXPAND | wxALL);
+	verticalBoxSizer->Add(inputsViewSizer, 1, wxEXPAND | wxALL);
 
 	// Problems with segfault at close can be traced back to the fact that wxWidgets recieves raw pointers
 	// of the sizers, but we own shared pointers, will fix later
-	sizer->Add(verticalBoxSizer.get(), 1, wxEXPAND | wxALL);
+	sizer->Add(verticalBoxSizer, 1, wxEXPAND | wxALL);
 }
 
 void SideUI::onPlayPressed(wxCommandEvent& event) {

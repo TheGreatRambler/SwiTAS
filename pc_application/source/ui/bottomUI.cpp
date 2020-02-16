@@ -1,9 +1,8 @@
 #include "bottomUI.hpp"
 
 FrameViewerCanvas::FrameViewerCanvas(wxFrame* parent, wxBitmap* defaultImage)
-	: DrawingCanvas(parent) {
+	: DrawingCanvas(parent, wxSize(1280, 720)) {
 	// Needs to be able to fit the frames
-	setPreferredSize(wxSize(1280, 720));
 	hasFrameToRender  = false;
 	defaultBackground = defaultImage;
 }
@@ -23,21 +22,30 @@ void FrameViewerCanvas::draw(wxDC& dc) {
 }
 
 JoystickCanvas::JoystickCanvas(wxFrame* parent)
-	: DrawingCanvas(parent) {}
+	: DrawingCanvas(parent, wxSize(10, 10)) {
+	// Should be square
+}
 
 void JoystickCanvas::draw(wxDC& dc) {
 	// Do thing
 	int width;
 	int height;
 	GetSize(&width, &height);
+
+	wxPoint approximateMiddle((float)width / 2, (float)height / 2);
+
+	dc.SetPen(*wxGREEN);
+	dc.SetBrush(*wxLIGHT_GREY_BRUSH);
+
+	dc.DrawCircle(approximateMiddle, approximateMiddle.x - 3);
 }
 
-renderImageInGrid::renderImageInGrid(std::shared_ptr<wxBitmap> bitmap, Btn btn) {
+renderImageInGrid::renderImageInGrid(wxBitmap* bitmap, Btn btn) {
 	theBitmap = bitmap;
 	button    = btn;
 }
 
-void renderImageInGrid::setBitmap(std::shared_ptr<wxBitmap> bitmap) {
+void renderImageInGrid::setBitmap(wxBitmap* bitmap) {
 	theBitmap = bitmap;
 }
 
@@ -48,7 +56,7 @@ void renderImageInGrid::Draw(wxGrid& grid, wxGridCellAttr& attr, wxDC& dc, const
 	dc.DrawBitmap(*theBitmap, rect.x, rect.y);
 }
 
-BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid, std::shared_ptr<DataProcessing> input) {
+BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid, DataProcessing* input) {
 	// TODO set up joysticks
 	buttonData   = buttons;
 	mainSettings = settings;
@@ -59,18 +67,18 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 
 	// Game frame viewer
 
-	mainSizer          = std::make_shared<wxBoxSizer>(wxVERTICAL);
-	horizontalBoxSizer = std::make_shared<wxBoxSizer>(wxHORIZONTAL);
+	mainSizer          = new wxBoxSizer(wxVERTICAL);
+	horizontalBoxSizer = new wxBoxSizer(wxHORIZONTAL);
 
-	leftJoystickDrawer = std::make_shared<JoystickCanvas>(parentFrame);
+	leftJoystickDrawer = new JoystickCanvas(parentFrame);
 	leftJoystickDrawer->setBackgroundColor(*wxWHITE);
-	rightJoystickDrawer = std::make_shared<JoystickCanvas>(parentFrame);
+	rightJoystickDrawer = new JoystickCanvas(parentFrame);
 	rightJoystickDrawer->setBackgroundColor(*wxWHITE);
 
-	frameViewerCanvas = std::make_shared<FrameViewerCanvas>(parentFrame, new wxBitmap(HELPERS::resolvePath((*mainSettings)["videoViewerDefaultImage"].GetString()), wxBITMAP_TYPE_JPEG));
+	frameViewerCanvas = new FrameViewerCanvas(parentFrame, new wxBitmap(HELPERS::resolvePath((*mainSettings)["videoViewerDefaultImage"].GetString()), wxBITMAP_TYPE_JPEG));
 
 	// According to https://forums.wxwidgets.org/viewtopic.php?p=120136#p120136, it cant be wxDefaultSize
-	buttonGrid = std::make_shared<wxGrid>(parentFrame, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+	buttonGrid = new wxGrid(parentFrame, wxID_ANY, wxDefaultPosition, wxDefaultSize);
 
 	// Removes gridlines, this might be cool in the future
 	// https://docs.wxwidgets.org/3.0/classwx_grid.html#abf968b3b0d70d2d9cc5bacf7f9d9891a
@@ -114,17 +122,17 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 	buttonGrid->AutoSize();
 
 	// These take up much less space than the grid
-	horizontalBoxSizer->Add(leftJoystickDrawer.get(), 1, wxEXPAND | wxALL);
-	horizontalBoxSizer->Add(rightJoystickDrawer.get(), 1, wxEXPAND | wxALL);
+	horizontalBoxSizer->Add(leftJoystickDrawer, 1, wxSHAPED | wxEXPAND);
+	horizontalBoxSizer->Add(rightJoystickDrawer, 1, wxSHAPED | wxEXPAND);
 
 	// So it can get very small
 	buttonGrid->SetMinSize(wxSize(0, 0));
-	horizontalBoxSizer->Add(buttonGrid.get(), 4, wxEXPAND | wxALL);
+	horizontalBoxSizer->Add(buttonGrid, 1, wxEXPAND | wxALL);
 
-	mainSizer->Add(frameViewerCanvas.get(), 1, wxSHAPED);
-	mainSizer->Add(horizontalBoxSizer.get(), 1, wxEXPAND | wxALL);
+	mainSizer->Add(frameViewerCanvas, 1, wxSHAPED | wxALL | wxALIGN_CENTER_HORIZONTAL);
+	mainSizer->Add(horizontalBoxSizer, 1, wxEXPAND | wxALL);
 
-	theGrid->Add(mainSizer.get(), 3, wxEXPAND | wxALL);
+	theGrid->Add(mainSizer, 3, wxEXPAND | wxALL);
 }
 
 void BottomUI::onGridClick(wxGridEvent& event) {
