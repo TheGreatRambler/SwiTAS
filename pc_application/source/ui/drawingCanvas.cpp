@@ -1,7 +1,7 @@
 #include "drawingCanvas.hpp"
 
 DrawingCanvas::DrawingCanvas(wxFrame* parent, wxSize size)
-	: wxWindow(parent, wxID_ANY, wxDefaultPosition, size) {}
+	: wxWindow(parent, wxID_ANY, wxDefaultPosition, size, wxFULL_REPAINT_ON_RESIZE) {}
 
 void DrawingCanvas::draw(wxDC& dc) {}
 

@@ -1,4 +1,15 @@
 {
+	// https://www.tablesgenerator.com/text_tables
+	//      0   1    2    3   4  5   6   7   8    9  10
+	//   +----+---+----+----+---+--+---+---+----+---+---+
+	// 0 | LS |   | ZL | L  |   |  |   | R | ZR |   |   |
+	//   +----+---+----+----+---+--+---+---+----+---+---+
+	// 1 |    | ^ |    | -  |   |  |   | + |    | X |   |
+	//   +----+---+----+----+---+--+---+---+----+---+---+
+	// 2 | <  |   | >  |    | C |  | H |   | Y  |   | A |
+	//   +----+---+----+----+---+--+---+---+----+---+---+
+	// 3 |    | v |    | RS |   |  |   |   |    | B |   |
+	//   +----+---+----+----+---+--+---+---+----+---+---+
 	"buttons": {
 		"A": {
 			"normalName": "A",
@@ -6,7 +17,9 @@
 			"viewName": "A Button",
 			"onIconImage": "share/icons/nxtas/inputs/Aon.png",
 			"offIconImage": "share/icons/nxtas/inputs/Aoff.png",
-			"triggerKeybind": "a"
+			"triggerKeybind": "a",
+			"gridX": 10,
+			"gridY": 2
 		},
 		"B": {
 			"normalName": "B",
@@ -14,7 +27,9 @@
 			"viewName": "B Button",
 			"onIconImage": "share/icons/nxtas/inputs/Bon.png",
 			"offIconImage": "share/icons/nxtas/inputs/Boff.png",
-			"triggerKeybind": "b"
+			"triggerKeybind": "b",
+			"gridX": 9,
+			"gridY": 3
 		},
 		"X": {
 			"normalName": "X",
@@ -22,7 +37,9 @@
 			"viewName": "X Button",
 			"onIconImage": "share/icons/nxtas/inputs/Xon.png",
 			"offIconImage": "share/icons/nxtas/inputs/Xoff.png",
-			"triggerKeybind": "x"
+			"triggerKeybind": "x",
+			"gridX": 9,
+			"gridY": 1
 		},
 		"Y": {
 			"normalName": "Y",
@@ -30,7 +47,9 @@
 			"viewName": "Y Button",
 			"onIconImage": "share/icons/nxtas/inputs/Yon.png",
 			"offIconImage": "share/icons/nxtas/inputs/Yoff.png",
-			"triggerKeybind": "y"
+			"triggerKeybind": "y",
+			"gridX": 8,
+			"gridY": 2
 		},
 		"L": {
 			"normalName": "L",
@@ -38,7 +57,9 @@
 			"viewName": "L Button",
 			"onIconImage": "share/icons/nxtas/inputs/Lon.png",
 			"offIconImage": "share/icons/nxtas/inputs/Loff.png",
-			"triggerKeybind": "t"
+			"triggerKeybind": "t",
+			"gridX": 3,
+			"gridY": 0
 		},
 		"R": {
 			"normalName": "R",
@@ -46,7 +67,9 @@
 			"viewName": "R Button",
 			"onIconImage": "share/icons/nxtas/inputs/Ron.png",
 			"offIconImage": "share/icons/nxtas/inputs/Roff.png",
-			"triggerKeybind": "r"
+			"triggerKeybind": "r",
+			"gridX": 7,
+			"gridY": 0
 		},
 		"ZL": {
 			"normalName": "ZL",
@@ -54,7 +77,9 @@
 			"viewName": "ZL Trigger",
 			"onIconImage": "share/icons/nxtas/inputs/ZLon.png",
 			"offIconImage": "share/icons/nxtas/inputs/ZLoff.png",
-			"triggerKeybind": "o"
+			"triggerKeybind": "o",
+			"gridX": 2,
+			"gridY": 0
 		},
 		"ZR": {
 			"normalName": "ZR",
@@ -62,7 +87,9 @@
 			"viewName": "ZR Trigger",
 			"onIconImage": "share/icons/nxtas/inputs/ZRon.png",
 			"offIconImage": "share/icons/nxtas/inputs/ZRoff.png",
-			"triggerKeybind": "p"
+			"triggerKeybind": "p",
+			"gridX": 8,
+			"gridY": 0
 		},
 		"SL": {
 			"normalName": "SL",
@@ -70,7 +97,9 @@
 			"viewName": "SL Trigger",
 			"onIconImage": "share/icons/nxtas/inputs/SLon.png",
 			"offIconImage": "share/icons/nxtas/inputs/SLoff.png",
-			"triggerKeybind": "q"
+			"triggerKeybind": "q",
+			"gridX": 4,
+			"gridY": 0
 		},
 		"SR": {
 			"normalName": "SR",
@@ -78,7 +107,9 @@
 			"viewName": "SR Trigger",
 			"onIconImage": "share/icons/nxtas/inputs/SRon.png",
 			"offIconImage": "share/icons/nxtas/inputs/SRoff.png",
-			"triggerKeybind": "e"
+			"triggerKeybind": "e",
+			"gridX": 6,
+			"gridY": 0
 		},
 		"DUP": {
 			"normalName": "Dup",
@@ -86,7 +117,9 @@
 			"viewName": "Up on Dpad",
 			"onIconImage": "share/icons/nxtas/inputs/UPon.png",
 			"offIconImage": "share/icons/nxtas/inputs/UPoff.png",
-			"triggerKeybind": "i"
+			"triggerKeybind": "i",
+			"gridX": 1,
+			"gridY": 1
 		},
 		"DDOWN": {
 			"normalName": "Ddown",
@@ -94,7 +127,9 @@
 			"viewName": "Down on Dpad",
 			"onIconImage": "share/icons/nxtas/inputs/DOWNon.png",
 			"offIconImage": "share/icons/nxtas/inputs/DOWNoff.png",
-			"triggerKeybind": "k"
+			"triggerKeybind": "k",
+			"gridX": 1,
+			"gridY": 3
 		},
 		"DLEFT": {
 			"normalName": "Dleft",
@@ -102,7 +137,9 @@
 			"viewName": "Left on Dpad",
 			"onIconImage": "share/icons/nxtas/inputs/LEFTon.png",
 			"offIconImage": "share/icons/nxtas/inputs/LEFToff.png",
-			"triggerKeybind": "j"
+			"triggerKeybind": "j",
+			"gridX": 0,
+			"gridY": 2
 		},
 		"DRIGHT": {
 			"normalName": "Dright",
@@ -110,7 +147,9 @@
 			"viewName": "Right on Dpad",
 			"onIconImage": "share/icons/nxtas/inputs/RIGHTon.png",
 			"offIconImage": "share/icons/nxtas/inputs/RIGHToff.png",
-			"triggerKeybind": "l"
+			"triggerKeybind": "l",
+			"gridX": 2,
+			"gridY": 2
 		},
 		"PLUS": {
 			"normalName": "Plus",
@@ -118,7 +157,9 @@
 			"viewName": "Plus Button",
 			"onIconImage": "share/icons/nxtas/inputs/PLUSon.png",
 			"offIconImage": "share/icons/nxtas/inputs/PLUSoff.png",
-			"triggerKeybind": "="
+			"triggerKeybind": "=",
+			"gridX": 7,
+			"gridY": 1
 		},
 		"MINUS": {
 			"normalName": "Minus",
@@ -126,7 +167,9 @@
 			"viewName": "Minus Button",
 			"onIconImage": "share/icons/nxtas/inputs/MINUSon.png",
 			"offIconImage": "share/icons/nxtas/inputs/MINUSoff.png",
-			"triggerKeybind": "-"
+			"triggerKeybind": "-",
+			"gridX": 3,
+			"gridY": 1
 		},
 		"HOME": {
 			"normalName": "Home",
@@ -134,7 +177,9 @@
 			"viewName": "Home Button",
 			"onIconImage": "share/icons/nxtas/inputs/HOMEon.png",
 			"offIconImage": "share/icons/nxtas/inputs/HOMEoff.png",
-			"triggerKeybind": "h"
+			"triggerKeybind": "h",
+			"gridX": 6,
+			"gridY": 2
 		},
 		"CAPT": {
 			"normalName": "Capt",
@@ -142,7 +187,9 @@
 			"viewName": "Capture Button",
 			"onIconImage": "share/icons/nxtas/inputs/CAPTon.png",
 			"offIconImage": "share/icons/nxtas/inputs/CAPToff.png",
-			"triggerKeybind": "g"
+			"triggerKeybind": "g",
+			"gridX": 4,
+			"gridY": 2
 		},
 		"LS": {
 			"normalName": "LS",
@@ -150,7 +197,9 @@
 			"viewName": "Left Stick Press",
 			"onIconImage": "share/icons/nxtas/inputs/LSTICKon.png",
 			"offIconImage": "share/icons/nxtas/inputs/LSTICKoff.png",
-			"triggerKeybind": "n"
+			"triggerKeybind": "n",
+			"gridX": 0,
+			"gridY": 0
 		},
 		"RS": {
 			"normalName": "RS",
@@ -158,7 +207,9 @@
 			"viewName": "Right Stick Press",
 			"onIconImage": "share/icons/nxtas/inputs/RSTICKoff.png",
 			"offIconImage": "share/icons/nxtas/inputs/RSTICKon.png",
-			"triggerKeybind": "u"
+			"triggerKeybind": "u",
+			"gridX": 3,
+			"gridY": 3
 		}
 	},
 	"iconTransparent": "rgb(48,0,77)",
