@@ -6,7 +6,6 @@ void ButtonData::maskifyBitmap(wxBitmap* bitmap, wxColour maskColor) {
 
 void ButtonData::setupButtonMapping(rapidjson::Document* mainSettings) {
 	// Set up button mapping with the data obtained via JSON
-
 	for(auto& b : (*mainSettings)["buttons"].GetObject()) {
 		Btn chosenButton = stringToButton[b.name.GetString()];
 
@@ -18,7 +17,6 @@ void ButtonData::setupButtonMapping(rapidjson::Document* mainSettings) {
 		std::string keybindName  = b.value["triggerKeybind"].GetString();
 		int gridX                = b.value["gridX"].GetInt();
 		int gridY                = b.value["gridY"].GetInt();
-		// Get the gtk keyvalue from a gtk function
 
 		wxColour maskColor;
 		maskColor.Set((*mainSettings)["iconTransparent"].GetString());
