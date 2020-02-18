@@ -2,6 +2,9 @@
 
 DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxWindow* parent)
 	: wxListCtrl(parent, DataProcessing::LIST_CTRL_ID, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_VIRTUAL | wxLC_HRULES) {
+
+	// This can't handle it :(
+	SetDoubleBuffered(false);
 	// Inherit from list control
 	// Use this specific ID in order to do things
 	buttonData   = buttons;
@@ -43,6 +46,7 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 		// Append now
 		InsertColumn(i, button.second->normalName, wxLIST_FORMAT_CENTER, wxLIST_AUTOSIZE);
 		i++;
+		buttonToColumn[button.first] = i;
 		// wxListItem imageInfo;
 		// imageInfo.SetMask(wxLIST_MASK_IMAGE);
 		// imageInfo.SetColumn(i);
@@ -133,23 +137,12 @@ bool DataProcessing::getButtonState(Btn button) {
 }
 
 void DataProcessing::setButtonState(Btn button, bool state) {
-	// If state is true, on, else off
 	currentData->buttons[button] = state;
-	// Because of virtual, just trigger an update of the row
-	// Use wxListCtrl::GetSubItemRect and wxWindow::RefreshRect instead to prevent flickering
-	RefreshItem(currentFrame);
-	// Get the index of the treeview
-	// The state is being changed, so so does the UI
-	// Two pointers have to be deconstructed
-	// Gtk::TreeModel::Row row = getRowAtIndex(currentFrame);
-	// Set the image based on the state
-	// row[inputColumns.buttonPixbufs[button]] = state ? buttonData->buttonMapping[button].onIcon : buttonData->buttonMapping[button].offIcon;
-	// Send the update signal TODO
-	// controllerListStore->row_changed(currentPath, row);
-	// Focus to this specific row
-	// treeView.scroll_to_row(currentPath);
-	// BottomUI needs to know the state changed, even if it
-	// Was the one to make us aware in the first place
+	// Because of virtual, just trigger an update of the item
+	wxRect itemRect;
+	GetSubItemRect(currentFrame, buttonToColumn[button], itemRect);
+	RefreshRect(itemRect);
+	// Make the grid aware
 	if(inputCallback) {
 		inputCallback(button, state);
 	}

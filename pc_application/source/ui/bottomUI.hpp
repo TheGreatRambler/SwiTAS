@@ -29,6 +29,9 @@ private:
 	// Handle changing icon state
 	void setIconState(Btn button, bool state);
 
+	// Hashmap for location
+	std::unordered_map<std::string, Btn> locToButton;
+
 public:
 	ButtonGrid(wxFrame* parent, wxSize requiredSize, std::shared_ptr<ButtonData> data, DataProcessing* inputs);
 

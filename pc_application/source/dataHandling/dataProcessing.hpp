@@ -40,6 +40,8 @@ private:
 	rapidjson::Document* mainSettings;
 	// Mask color for transparency
 	wxColour maskColor;
+	// Map to get column
+	std::unordered_map<Btn, uint8_t> buttonToColumn;
 	virtual int OnGetItemColumnImage(long item, long column) const override;
 	virtual wxString OnGetItemText(long item, long column) const override;
 

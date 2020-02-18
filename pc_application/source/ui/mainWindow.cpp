@@ -7,6 +7,9 @@ MainWindow::MainWindow()
 	wxImage::AddHandler(new wxPNGHandler());
 	wxImage::AddHandler(new wxJPEGHandler());
 
+	// OwO what's dis?
+	SetDoubleBuffered(true);
+
 	// Get the main settings
 	getGlobalSettings(&mainSettings);
 

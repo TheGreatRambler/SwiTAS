@@ -2,6 +2,8 @@
 
 ButtonGrid::ButtonGrid(wxFrame* parent, wxSize requiredSize, std::shared_ptr<ButtonData> data, DataProcessing* inputs)
 	: DrawingCanvas(parent, requiredSize) {
+	SetDoubleBuffered(false);
+
 	buttonData             = data;
 	totalCombinedImageSize = requiredSize;
 	inputInstance          = inputs;
@@ -30,8 +32,19 @@ void ButtonGrid::draw(wxDC& dc) {
 	double scaleHeight = (double)height / totalCombinedImageSize.GetHeight();
 	dc.SetUserScale(scaleWidth, scaleHeight);
 
+	bool createMap = false;
+	if(locToButton.empty()) {
+		createMap = true;
+	}
+
 	// TODO not every image is a square :)
 	for(auto const& button : buttonData->buttonMapping) {
+		if(createMap) {
+			// This needs to be filled, but only once
+			char buf[5];
+			sprintf(buf, "%d-%d", button.second->gridX, button.second->gridY);
+			locToButton[std::string(buf)] = button.first;
+		}
 		wxBitmap* bitmap;
 		if(inputInstance->getButtonState(button.first)) {
 			bitmap = button.second->resizedGridOnBitmap;
@@ -52,19 +65,20 @@ void ButtonGrid::onGridClick(wxMouseEvent& event) {
 	int width;
 	int height;
 	GetSize(&width, &height);
-	float X = ((float)windowCoord.x / width) * buttonData->KeyWidth;
-	float Y = ((float)windowCoord.y / height) * buttonData->KeyHeight;
-	// Have to loop, no way around it
-	for(auto const& button : buttonData->buttonMapping) {
-		uint8_t locX = button.second->gridX;
-		uint8_t locY = button.second->gridY;
-		if((X > locX && X < locX + 1) && (Y > locY && Y < locY + 1)) {
-			// This is the button
-			inputInstance->toggleButtonState(button.first);
-			break;
-		}
+
+	// Want to remove everything after the decimal point
+	int X = (int)(((float)windowCoord.x / width) * buttonData->KeyWidth);
+	int Y = (int)(((float)windowCoord.y / height) * buttonData->KeyHeight);
+
+	char buf[5];
+	sprintf(buf, "%d-%d", X, Y);
+	std::string key(buf);
+
+	if(locToButton.count(key)) {
+		// Element exists, time to trigger the click
+		inputInstance->toggleButtonState(locToButton[key]);
+		Refresh();
 	}
-	// If the loop can't find anything, nothing happens
 }
 
 FrameViewerCanvas::FrameViewerCanvas(wxFrame* parent, wxBitmap* defaultImage)
