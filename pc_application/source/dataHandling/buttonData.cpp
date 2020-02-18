@@ -17,6 +17,7 @@ void ButtonData::setupButtonMapping(rapidjson::Document* mainSettings) {
 		std::string keybindName  = b.value["triggerKeybind"].GetString();
 		int gridX                = b.value["gridX"].GetInt();
 		int gridY                = b.value["gridY"].GetInt();
+		// Get the gtk keyvalue from a gtk function
 
 		wxColour maskColor;
 		maskColor.Set((*mainSettings)["iconTransparent"].GetString());
@@ -60,10 +61,9 @@ void ButtonData::setupButtonMapping(rapidjson::Document* mainSettings) {
 		// WxWidgets returns the raw char, so this can be used
 		thisButtonInfo->toggleKeybind = keybindName.at(0);
 
-		thisButtonInfo->gridX = (uint8_t)gridX;
-		thisButtonInfo->gridY = (uint8_t)gridY;
+		thisButtonInfo->gridX = gridX;
+		thisButtonInfo->gridY = gridY;
 
-		// There is supposed to be an error here
 		buttonMapping[chosenButton] = thisButtonInfo;
 	}
 }

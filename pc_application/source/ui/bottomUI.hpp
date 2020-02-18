@@ -17,12 +17,6 @@
 
 class ButtonGrid : public DrawingCanvas {
 private:
-	// Location
-	struct Location {
-		int x;
-		int y;
-	};
-
 	// The button mapping instance
 	std::shared_ptr<ButtonData> buttonData;
 

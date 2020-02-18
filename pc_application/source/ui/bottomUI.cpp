@@ -6,6 +6,8 @@ ButtonGrid::ButtonGrid(wxFrame* parent, wxSize requiredSize, std::shared_ptr<But
 	totalCombinedImageSize = requiredSize;
 	inputInstance          = inputs;
 
+	setBackgroundColor(*wxWHITE);
+
 	// Handle grid clicking
 	Bind(wxEVT_LEFT_DOWN, &ButtonGrid::onGridClick, this);
 
@@ -24,7 +26,9 @@ void ButtonGrid::draw(wxDC& dc) {
 	GetSize(&width, &height);
 
 	// Set scaling for the image to render without wxImage
-	dc.SetUserScale((double)width / totalCombinedImageSize.GetWidth(), (double)height / totalCombinedImageSize.GetHeight());
+	double scaleWidth  = (double)width / totalCombinedImageSize.GetWidth();
+	double scaleHeight = (double)height / totalCombinedImageSize.GetHeight();
+	dc.SetUserScale(scaleWidth, scaleHeight);
 
 	// TODO not every image is a square :)
 	for(auto const& button : buttonData->buttonMapping) {
@@ -43,8 +47,7 @@ void ButtonGrid::draw(wxDC& dc) {
 }
 
 void ButtonGrid::onGridClick(wxMouseEvent& event) {
-	wxPoint screenCoord = event.GetPosition();
-	wxPoint windowCoord = ScreenToClient(screenCoord);
+	wxPoint windowCoord = event.GetPosition();
 	// Divide to handle scaling
 	int width;
 	int height;
@@ -126,17 +129,17 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 	int w = buttonData->KeyWidth * buttonData->buttonMapping[Btn::A]->resizedGridOffBitmap->GetWidth();
 	int h = buttonData->KeyHeight * buttonData->buttonMapping[Btn::A]->resizedGridOffBitmap->GetHeight();
 	gridSize.SetWidth(w);
-	gridSize.SetWidth(h);
+	gridSize.SetHeight(h);
 
 	buttonGrid = new ButtonGrid(parentFrame, gridSize, buttonData, inputInstance);
 
 	frameViewerCanvas = new FrameViewerCanvas(parentFrame, new wxBitmap(HELPERS::resolvePath((*mainSettings)["videoViewerDefaultImage"].GetString()), wxBITMAP_TYPE_JPEG));
 
 	// These take up much less space than the grid
-	horizontalBoxSizer->Add(leftJoystickDrawer, 0, wxSHAPED | wxEXPAND | wxALIGN_LEFT);
-	horizontalBoxSizer->Add(rightJoystickDrawer, 0, wxSHAPED | wxEXPAND | wxALIGN_LEFT);
+	horizontalBoxSizer->Add(leftJoystickDrawer, 0, wxSHAPED | wxEXPAND);
+	horizontalBoxSizer->Add(rightJoystickDrawer, 0, wxSHAPED | wxEXPAND);
 
-	horizontalBoxSizer->Add(buttonGrid, 0, wxSHAPED | wxEXPAND | wxALIGN_LEFT);
+	horizontalBoxSizer->Add(buttonGrid, 0, wxSHAPED | wxEXPAND);
 
 	// Proportion HAS to be zero here, it's a requirment
 	mainSizer->Add(frameViewerCanvas, 0, wxSHAPED | wxEXPAND | wxALIGN_CENTER_HORIZONTAL);
