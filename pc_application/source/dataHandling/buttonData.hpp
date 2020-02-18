@@ -21,6 +21,9 @@
 
 class ButtonData {
 private:
+	// Helper function to add transparency masks
+	void maskifyBitmap(wxBitmap* bitmap, wxColour maskColor);
+
 public:
 	// Buttons enum (coencides with the index of the bit in the input struct)
 	// Also used to identify the button everywhere else in the program
@@ -45,7 +48,7 @@ public:
 		CAPT,
 		LS,
 		RS,
-		BUTTONS_SIZE
+		BUTTONS_SIZE,
 	};
 
 	// To convert names
@@ -101,17 +104,24 @@ public:
 		std::string scriptName;
 		std::string normalName;
 		std::string viewName;
-		std::shared_ptr<wxImage> onIcon;
-		std::shared_ptr<wxImage> offIcon;
-		std::shared_ptr<wxBitmap> onBitmapIcon;
-		std::shared_ptr<wxBitmap> offBitmapIcon;
+		wxImage* onIcon;
+		wxImage* offIcon;
+		wxBitmap* onBitmapIcon;
+		wxBitmap* offBitmapIcon;
 		// Resized images for the UI
-		std::shared_ptr<wxBitmap> resizedListOnBitmap;
-		std::shared_ptr<wxBitmap> resizedListOffBitmap;
-		std::shared_ptr<wxBitmap> resizedGridOnBitmap;
-		std::shared_ptr<wxBitmap> resizedGridOffBitmap;
+		wxBitmap* resizedListOnBitmap;
+		wxBitmap* resizedListOffBitmap;
+		wxBitmap* resizedGridOnBitmap;
+		wxBitmap* resizedGridOffBitmap;
+		// Keybinding
 		wxChar toggleKeybind;
+		// Grid stuff
+		uint8_t gridX;
+		uint8_t gridY;
 	};
+
+	const uint8_t KeyWidth  = 11;
+	const uint8_t KeyHeight = 4;
 
 	// TODO finish these
 	// https://gitlab.gnome.org/GNOME/gtk/blob/master/gdk/gdkkeysyms.h

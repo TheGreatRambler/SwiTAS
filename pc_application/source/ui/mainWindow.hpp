@@ -17,7 +17,7 @@
 class MainWindow : public wxFrame {
 private:
 	// Simplify things immesnly
-	std::shared_ptr<wxBoxSizer> mainSizer;
+	wxBoxSizer* mainSizer;
 
 	// Main settings variable
 	rapidjson::Document mainSettings;
@@ -29,7 +29,7 @@ private:
 	std::shared_ptr<SideUI> sideUI;
 	std::shared_ptr<BottomUI> bottomUI;
 	// Pointer to the class containing important input stuff
-	std::shared_ptr<DataProcessing> dataProcessingInstance;
+	DataProcessing* dataProcessingInstance;
 
 	void handlePreviousWindowTransform();
 
@@ -39,8 +39,6 @@ public:
 	MainWindow();
 
 	void addMenuBar();
-
-	~MainWindow();
 
 	// Override default signal handler:
 	void keyDownHandler(wxKeyEvent& event);

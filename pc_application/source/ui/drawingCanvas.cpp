@@ -1,7 +1,7 @@
 #include "drawingCanvas.hpp"
 
-DrawingCanvas::DrawingCanvas(wxFrame* parent)
-	: wxWindow(parent, wxID_ANY) {}
+DrawingCanvas::DrawingCanvas(wxFrame* parent, wxSize size)
+	: wxWindow(parent, wxID_ANY, wxDefaultPosition, size, wxFULL_REPAINT_ON_RESIZE) {}
 
 void DrawingCanvas::draw(wxDC& dc) {}
 
@@ -16,22 +16,8 @@ void DrawingCanvas::OnPaint(wxPaintEvent& event) {
 }
 
 void DrawingCanvas::PaintBackground(wxDC& dc) {
-	dc.SetBrush(wxBrush(backgroundColor));
-	dc.SetPen(wxPen(backgroundColor, 1));
-
-	wxRect windowRect(wxPoint(0, 0), GetClientSize());
-
-	dc.DrawRectangle(windowRect);
-}
-
-wxSize DrawingCanvas::DoGetBestClientSize() const {
-	// Overrides a method to let the sizer know of the preferred size
-	return preferredWindowSize;
-}
-
-void DrawingCanvas::setPreferredSize(wxSize preferredSize) {
-	// Should usually be set with the size of the bitmap, if needed
-	preferredWindowSize = preferredSize;
+	dc.SetBackground(wxBrush(backgroundColor));
+	dc.Clear();
 }
 
 // Empty implementation, to prevent flicker

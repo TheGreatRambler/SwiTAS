@@ -17,24 +17,24 @@ MainWindow::MainWindow()
 	// https://forums.wxwidgets.org/viewtopic.php?t=28894
 	// https://cboard.cprogramming.com/cplusplus-programming/92653-starting-wxwidgets-wxpanel-full-size-frame.html
 	// This means some things have to change going on
-	mainSizer = std::make_shared<wxBoxSizer>(wxHORIZONTAL);
+	mainSizer = new wxBoxSizer(wxHORIZONTAL);
 
 	// Set button data instance
 	buttonData = std::make_shared<ButtonData>();
 	// Load button data here
 	buttonData->setupButtonMapping(&mainSettings);
 
-	dataProcessingInstance = std::make_shared<DataProcessing>(&mainSettings, buttonData, this);
+	dataProcessingInstance = new DataProcessing(&mainSettings, buttonData, this);
 
 	// UI instances
-	sideUI   = std::make_shared<SideUI>(this, &mainSettings, mainSizer.get(), dataProcessingInstance);
-	bottomUI = std::make_shared<BottomUI>(this, &mainSettings, buttonData, mainSizer.get(), dataProcessingInstance);
+	sideUI   = std::make_shared<SideUI>(this, &mainSettings, mainSizer, dataProcessingInstance);
+	bottomUI = std::make_shared<BottomUI>(this, &mainSettings, buttonData, mainSizer, dataProcessingInstance);
 
 	// Add the top menubar
 	addMenuBar();
 
 	// No fit for now
-	SetSizer(mainSizer.get());
+	SetSizer(mainSizer);
 	mainSizer->SetSizeHints(this);
 	Layout();
 	Fit();
@@ -82,5 +82,3 @@ void MainWindow::addMenuBar() {
 	// Add menubar to layout
 	// mainLayout.pack_start(menuBar, Gtk::PACK_SHRINK);
 }
-
-MainWindow::~MainWindow() {}

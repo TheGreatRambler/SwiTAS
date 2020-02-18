@@ -53,8 +53,6 @@ $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
 	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
 	# Copy required DLLs to folder
 	ldd $(BUILD_DIR)/$(TARGET_EXEC) | grep '\/mingw.*\.dll' -o | xargs -I{} cp "{}" $(BUILD_DIR)
-	# Compile GTK schema
-	# glib-compile-schemas ./share/glib-2.0/schemas
 
 # assembly
 $(BUILD_DIR)/%.s.o: %.s

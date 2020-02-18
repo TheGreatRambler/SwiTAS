@@ -13,7 +13,7 @@
 			"moduleLoad": true,
 			"exceptions": true
 		},
-		"stopAtEntry": true,
+		"stopAtEntry": false,
 		"cwd": "${workspaceFolder}/pc_application/bin",
 		"environment": [],
 		"externalConsole": true,
