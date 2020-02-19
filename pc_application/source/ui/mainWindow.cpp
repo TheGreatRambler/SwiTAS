@@ -43,6 +43,12 @@ MainWindow::MainWindow()
 	Fit();
 	Center(wxBOTH);
 
+#ifdef _WIN32
+	// Enable dark mode, super experimential
+	SetWindowTheme(GetHWND(), L"DarkMode_Explorer", NULL);
+	Refresh();
+#endif
+
 	// Override the keypress handler
 	// add_events(Gdk::KEY_PRESS_MASK);
 	handlePreviousWindowTransform();

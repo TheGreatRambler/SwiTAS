@@ -38,29 +38,16 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	// Loop through the buttons and add them
 	uint8_t i = 1;
 	for(auto const& button : buttonData->buttonMapping) {
-		// Gets pointer from tuple
-		// This better not be deleted when it goes out of scope
-		// Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>> thisIcon;
-		// Add to map for later
-		// inputColumns.buttonPixbufs[button.first] = thisIcon;
-		// Append now
 		InsertColumn(i, button.second->normalName, wxLIST_FORMAT_CENTER, wxLIST_AUTOSIZE);
-		i++;
-		buttonToColumn[button.first] = i;
-		// wxListItem imageInfo;
-		// imageInfo.SetMask(wxLIST_MASK_IMAGE);
-		// imageInfo.SetColumn(i);
-		// SetItem(imageInfo);
-		// i++;
-		// Have to create a bitmap manually
-		// Bitmaps are interleaved between on and off
-		// Have to pass raw value, not pointer
-		// Have to resize also, no reference needed
+		// Shouldn't be the exact width, it's a bit too small that way
+		SetColumnWidth(i, (int)(imageIconWidth * 1.5f));
+		buttonToColumn[button.first]               = i;
+		charToButton[button.second->toggleKeybind] = button.first;
+
 		imageList.Add(*const_cast<wxBitmap*>(button.second->resizedListOnBitmap), maskColor);
 		imageList.Add(*const_cast<wxBitmap*>(button.second->resizedListOffBitmap), maskColor);
-		// treeView.append_column(button.second.scriptName, thisIcon);
-		// Add to the columns themselves (gives value, not pointer)
-		// inputColumns.add(thisIcon);
+
+		i++;
 	}
 	SetImageList(&imageList, wxIMAGE_LIST_SMALL);
 	// Once all columns are added, do some stuff on them
@@ -82,6 +69,7 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 // clang-format off
 BEGIN_EVENT_TABLE(DataProcessing, wxListCtrl)
 	EVT_LIST_CACHE_HINT(DataProcessing::LIST_CTRL_ID, DataProcessing::onCacheHint)
+	EVT_ERASE_BACKGROUND(DataProcessing::OnEraseBackground)
 END_EVENT_TABLE()
 // clang-format on
 
@@ -131,6 +119,55 @@ wxString DataProcessing::OnGetItemText(long row, long column) const {
 	// This function shouldn't recieve any other column
 }
 
+void DataProcessing::OnEraseBackground(wxEraseEvent& event) {
+	// to prevent flickering, erase only content *outside* of the
+	// actual list items stuff
+
+	if(GetItemCount() > 0) {
+		wxDC* dc = event.GetDC();
+		assert(dc);
+
+		// get some info
+		wxCoord width = 0, height = 0;
+		GetClientSize(&width, &height);
+
+		wxCoord x, y, w, h;
+		dc->SetClippingRegion(0, 0, width, height);
+		dc->GetClippingBox(&x, &y, &w, &h);
+
+		long top_item    = GetTopItem();
+		long bottom_item = top_item + GetCountPerPage();
+		if(bottom_item >= GetItemCount()) {
+			bottom_item = GetItemCount() - 1;
+		}
+
+		// trick: we want to exclude a couple pixels
+		// on the left side thus use wxLIST_RECT_LABEL
+		// for the top rect and wxLIST_RECT_BOUNDS for bottom
+		// rect
+		wxRect top_rect, bottom_rect;
+		GetItemRect(top_item, top_rect, wxLIST_RECT_LABEL);
+		GetItemRect(bottom_item, bottom_rect, wxLIST_RECT_BOUNDS);
+
+		// set the new clipping region and do erasing
+		wxRect items_rect(top_rect.GetLeftTop(), bottom_rect.GetBottomRight());
+		wxRegion reg(wxRegion(x, y, w, h));
+		reg.Subtract(items_rect);
+		dc->DestroyClippingRegion();
+		dc->SetClippingRegion(reg);
+
+		// do erasing
+		dc->SetBackground(wxBrush(GetBackgroundColour(), wxSOLID));
+		dc->Clear();
+
+		// restore old clipping region
+		dc->DestroyClippingRegion();
+		dc->SetClippingRegion(wxRegion(x, y, w, h));
+	} else {
+		event.Skip();
+	}
+}
+
 bool DataProcessing::getButtonState(Btn button) {
 	// Get value from the bitset
 	return currentData->buttons[button];
@@ -139,9 +176,13 @@ bool DataProcessing::getButtonState(Btn button) {
 void DataProcessing::setButtonState(Btn button, bool state) {
 	currentData->buttons[button] = state;
 	// Because of virtual, just trigger an update of the item
+
+	Freeze();
 	wxRect itemRect;
 	GetSubItemRect(currentFrame, buttonToColumn[button], itemRect);
 	RefreshRect(itemRect);
+	Thaw();
+
 	// Make the grid aware
 	if(inputCallback) {
 		inputCallback(button, state);
@@ -192,13 +233,7 @@ void DataProcessing::addNewFrame() {
 }
 
 void DataProcessing::handleKeyboardInput(wxChar key) {
-	for(auto const& thisButton : buttonData->buttonMapping) {
-		// See if it corresponds to the toggle keybind
-		// TODO handle set and clear commands (shift and ctrl)
-		if(key == thisButton.second->toggleKeybind) {
-			// Toggle this key and end the loop
-			toggleButtonState(thisButton.first);
-			break;
-		}
+	if(charToButton.count(key)) {
+		toggleButtonState(charToButton[key]);
 	}
 }

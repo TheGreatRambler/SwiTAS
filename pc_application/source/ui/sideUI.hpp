@@ -16,8 +16,10 @@ private:
 	uint32_t currentFirst;
 	uint32_t currentLast;
 
+	wxRect firstRect;
+
 public:
-	FrameCanvas(wxFrame* parent, DataProcessing* dataProcessing);
+	FrameCanvas(wxFrame* parent, DataProcessing* dataProcessing, wxRect firstItemRect);
 
 	void rangeUpdated(uint32_t first, uint32_t last);
 

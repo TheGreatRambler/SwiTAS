@@ -1,11 +1,14 @@
 #pragma once
 
+//#include "../thirdParty/win32darkmode/DarkMode.h"
+#include <Windows.h>
 #include <fstream>
 #include <memory>
 #include <rapidjson/document.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 #include <string>
+#include <uxtheme.h>
 #include <wx/wx.h>
 
 #include "../dataHandling/buttonData.hpp"

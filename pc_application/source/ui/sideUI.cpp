@@ -1,11 +1,12 @@
 #include "sideUI.hpp"
 #include <memory>
 
-FrameCanvas::FrameCanvas(wxFrame* parent, DataProcessing* dataProcessing)
+FrameCanvas::FrameCanvas(wxFrame* parent, DataProcessing* dataProcessing, wxRect firstItemRect)
 	: DrawingCanvas(parent, wxDefaultSize) {
 	currentFirst = 0;
 	currentLast  = 0;
 	inputData    = dataProcessing;
+	firstRect    = firstItemRect;
 
 	inputData->setViewableInputsCallback(std::bind(&FrameCanvas::rangeUpdated, this, std::placeholders::_1, std::placeholders::_2));
 }
@@ -16,7 +17,6 @@ void FrameCanvas::rangeUpdated(uint32_t first, uint32_t last) {
 		currentLast  = last;
 		// Refresh now to get another draw
 		Refresh();
-		Update();
 	}
 }
 
@@ -28,10 +28,13 @@ void FrameCanvas::draw(wxDC& dc) {
 
 	uint8_t numOfItems = currentLast - currentFirst;
 
-	uint8_t boxHeight = floorf((float)height / numOfItems);
+	// uint8_t boxHeight = floorf((float)height / numOfItems);
 
 	dc.SetPen(*wxGREEN);
 	dc.SetBrush(*wxLIGHT_GREY_BRUSH);
+
+	int startY     = firstRect.GetBottomLeft().y;
+	int itemHeight = firstRect.GetHeight();
 
 	for(uint8_t i = 0; i < numOfItems; i++) {
 		if(i % 2 == 0) {
@@ -39,7 +42,8 @@ void FrameCanvas::draw(wxDC& dc) {
 		} else {
 			dc.SetBrush(*wxBLUE_BRUSH);
 		}
-		dc.DrawRectangle(wxPoint(4, boxHeight * i + 4), wxSize(width - 8, boxHeight - 4));
+		// Slight offset to make asthetically pleasing
+		dc.DrawRectangle(wxPoint(0, startY + itemHeight * i + 4), wxSize(width - 8, itemHeight - 4));
 	}
 };
 
@@ -56,7 +60,7 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* 
 	// Holds input stuff
 	inputsViewSizer = new wxBoxSizer(wxHORIZONTAL);
 
-	frameDrawer = new FrameCanvas(parentFrame, inputData);
+	frameDrawer = new FrameCanvas(parentFrame, inputData, inputData->getFirstItemRect());
 	frameDrawer->setBackgroundColor(*wxLIGHT_GREY);
 
 	wxImage resizedPlayImage(HELPERS::resolvePath((*mainSettings)["ui"]["playButton"].GetString()));
@@ -90,9 +94,7 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* 
 
 	verticalBoxSizer->Add(inputsViewSizer, 1, wxEXPAND | wxALL);
 
-	// Problems with segfault at close can be traced back to the fact that wxWidgets recieves raw pointers
-	// of the sizers, but we own shared pointers, will fix later
-	sizer->Add(verticalBoxSizer, 1, wxEXPAND | wxALL);
+	sizer->Add(verticalBoxSizer, 2, wxEXPAND | wxALL);
 }
 
 void SideUI::onPlayPressed(wxCommandEvent& event) {

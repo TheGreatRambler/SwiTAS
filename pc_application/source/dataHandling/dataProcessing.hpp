@@ -42,6 +42,7 @@ private:
 	wxColour maskColor;
 	// Map to get column
 	std::unordered_map<Btn, uint8_t> buttonToColumn;
+	std::unordered_map<wxChar, Btn> charToButton;
 	virtual int OnGetItemColumnImage(long item, long column) const override;
 	virtual wxString OnGetItemText(long item, long column) const override;
 
@@ -64,6 +65,12 @@ public:
 
 	void addNewFrame();
 
+	wxRect getFirstItemRect() {
+		wxRect itemRect;
+		GetItemRect(GetTopItem() - 1, itemRect);
+		return itemRect;
+	}
+
 	void handleKeyboardInput(wxChar key);
 	// The class itself is the list control
 	// std::shared_ptr<wxGenericListCtrl> getWidget();
@@ -74,12 +81,14 @@ public:
 			if(numOfRowsVisible != 0) {
 				// Don't use the event values, they are wrong
 				long first = GetTopItem();
-				long last  = first + numOfRowsVisible - 1;
+				long last  = first + numOfRowsVisible;
 
 				viewableInputsCallback(first, last);
 			}
 		}
 	}
+
+	void OnEraseBackground(wxEraseEvent& event);
 
 	DECLARE_EVENT_TABLE();
 };
