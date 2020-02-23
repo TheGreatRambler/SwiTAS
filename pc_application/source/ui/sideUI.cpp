@@ -26,7 +26,7 @@ void FrameCanvas::draw(wxDC& dc) {
 	int height;
 	GetSize(&width, &height);
 
-	uint8_t numOfItems = currentLast - currentFirst;
+	uint8_t numOfItems = currentLast - currentFirst + 1;
 
 	// uint8_t boxHeight = floorf((float)height / numOfItems);
 
@@ -36,8 +36,8 @@ void FrameCanvas::draw(wxDC& dc) {
 	int startY     = firstRect.GetBottomLeft().y;
 	int itemHeight = firstRect.GetHeight();
 
-	for(uint8_t i = 0; i < numOfItems; i++) {
-		if(i % 2 == 0) {
+	for(uint32_t i = 0; i < numOfItems; i++) {
+		if((i + currentFirst) % 2 == 0) {
 			dc.SetBrush(*wxLIGHT_GREY_BRUSH);
 		} else {
 			dc.SetBrush(*wxBLUE_BRUSH);

@@ -89,6 +89,10 @@ void CommunicateWithSwitch::listenForSwitchCommands() {
 	}
 }
 
+template <typename T> void CommunicateWithSwitch::addDataToQueue(T data, DataFlag dataType) {
+
+}
+
 CommunicateWithSwitch::~CommunicateWithSwitch() {
 	serverConnection.Close();
 }

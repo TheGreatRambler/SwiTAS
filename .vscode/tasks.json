@@ -33,6 +33,22 @@
 				"kind": "build",
 				"isDefault": true
 			}
+		}, {
+			"label": "Build network test Application",
+			"type": "shell",
+			"command": "C:/msys2/usr/bin/make.exe -j 4 -C '${workspaceFolder}/network_test'",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			},
+			"problemMatcher": [{
+				"base": "$gcc",
+				"fileLocation": ["autoDetect", "${workspaceFolder}/network_test"]
+			}],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
 		}
 	]
 }

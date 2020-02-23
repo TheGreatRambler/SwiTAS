@@ -27,7 +27,7 @@ private:
 public:
 	// Buttons enum (coencides with the index of the bit in the input struct)
 	// Also used to identify the button everywhere else in the program
-	enum Btn {
+	enum Btn : uint8_t {
 		A,
 		B,
 		X,
