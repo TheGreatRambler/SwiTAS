@@ -1,13 +1,18 @@
 #pragma once
 
-#define TRY_DEQUE(queue, data) ((queue).try_dequeue(data))
-
 // clang-format off
-#define SEND_DATA(type, structData) { \
-	uint8_t data; \
-	uint16_t size; \
-	serializingProtocol.dataToBinary<type>(structData, &data, &size); \
-	serverConnection.Send(&data, size); \
+#define SEND_QUEUE_DATA(queue, type) { \
+	while(true) { \
+		type structData; \
+		if(queue.try_dequeue(structData)) { \
+			uint8_t data; \
+			uint16_t size; \
+			serializingProtocol.dataToBinary<type>(structData, &data, &size); \
+			serverConnection.Send(&data, size); \
+		} else { \
+			break; \
+		} \
+	} \
 }
 // clang-format on
 
@@ -72,6 +77,8 @@ private:
 	void unserializeData(uint8_t* buf, uint16_t bufSize, DataFlag flag);
 
 	bool handleSocketError(int res);
+
+	void runDataInQueue() {}
 
 public:
 	CommunicateWithSwitch();

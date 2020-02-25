@@ -97,10 +97,7 @@ void CommunicateWithSwitch::listenForSwitchCommands() {
 	if(connectedToServer) {
 		while(true) {
 			// First, check over every incoming queue to detect outgoing data
-			Protocol_SetProjectName structData;
-			if(TRY_DEQUE(Protocol_SetProjectName_Queue, structData)) {
-				SEND_DATA(Protocol_SetProjectName, structData)
-			}
+			SEND_QUEUE_DATA(Protocol_SetProjectName_Queue, Protocol_SetProjectName)
 
 			uint16_t dataSize;
 
