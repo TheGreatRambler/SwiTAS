@@ -1,5 +1,16 @@
 #pragma once
 
+#define TRY_DEQUE(queue, data) ((queue).try_dequeue(data))
+
+// clang-format off
+#define SEND_DATA(type, structData) { \
+	uint8_t data; \
+	uint16_t size; \
+	serializingProtocol.dataToBinary<type>(structData, &data, &size); \
+	serverConnection.Send(&data, size); \
+}
+// clang-format on
+
 #include <atomic>
 #include <concurrentqueue.h>
 #include <condition_variable>
@@ -22,6 +33,7 @@
 class CommunicateWithSwitch {
 private:
 	enum DataFlag : uint8_t {
+		SET_PROJECT_NAME,
 		SET_GAME_INFO,
 		NUM_OF_FLAGS,
 	};
@@ -36,8 +48,9 @@ private:
 	// Some queues are marked as outbound, others as inbound
 	// PC and Switch will all have the same queues, just some will become
 	// Inbound and other outbound
-	std::unordered_map<DataFlag, ConcurrentQueue> queueMap;
-	std::unordered_map<DataFlag, uint8_t> isOutbound;
+
+	// Sorry, not doing that anymore, a queue for each
+	moodycamel::ConcurrentQueue<Protocol_SetProjectName> Protocol_SetProjectName_Queue;
 
 	CActiveSocket serverConnection;
 

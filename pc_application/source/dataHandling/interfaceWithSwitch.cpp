@@ -96,16 +96,10 @@ void CommunicateWithSwitch::listenForSwitchCommands() {
 	// The format works by preceding each message with a uint16_t with the size of the message, then the message right after it
 	if(connectedToServer) {
 		while(true) {
-			// First, send data if need be
-			for(auto const& queue : queueMap) {
-				if(isOutbound[queue.first]) {
-					// This is an outbound queue
-					// Check for data
-					if(queue.second.size_approx() != 0) {
-						// There is data to send
-						uint16_t size;
-					}
-				}
+			// First, check over every incoming queue to detect outgoing data
+			Protocol_SetProjectName structData;
+			if(TRY_DEQUE(Protocol_SetProjectName_Queue, structData)) {
+				SEND_DATA(Protocol_SetProjectName, structData)
 			}
 
 			uint16_t dataSize;

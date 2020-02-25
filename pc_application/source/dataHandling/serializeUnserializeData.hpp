@@ -18,7 +18,7 @@ private:
 
 public:
 	// Both of these functions are deliberately designed to deal with any kind of struct
-	template <typename T> std::shared_ptr<T> binaryToFrame(uint8_t* data, uint16_t size);
+	template <typename T> T binaryToData(uint8_t* data, uint16_t size);
 
-	template <typename T> void frameToBinary(std::shared_ptr<T> inputData, uint8_t* data, uint16_t* size);
+	template <typename T> void dataToBinary(T inputData, uint8_t* data, uint16_t* size);
 };

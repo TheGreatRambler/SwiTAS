@@ -1,8 +1,8 @@
 #include "serializeUnserializeData.hpp"
 
-template <typename T> std::shared_ptr<T> SerializeProtocol::binaryToFrame(uint8_t* data, uint16_t size) {
+template <typename T> T SerializeProtocol::binaryToData(uint8_t* data, uint16_t size) {
 	// Load with YAS
-	std::shared_ptr<T> inputData = std::make_shared<T>();
+	T inputData;
 
 	// Create the archive
 	zpp::serializer::memory_input_archive in(serializingData);
@@ -14,7 +14,7 @@ template <typename T> std::shared_ptr<T> SerializeProtocol::binaryToFrame(uint8_
 	return inputData;
 }
 
-template <typename T> void SerializeProtocol::frameToBinary(std::shared_ptr<T> inputData, uint8_t* data, uint16_t* size) {
+template <typename T> void SerializeProtocol::dataToBinary(T inputData, uint8_t* data, uint16_t* size) {
 	// Create the archive
 	zpp::serializer::memory_output_archive out(serializingData);
 
