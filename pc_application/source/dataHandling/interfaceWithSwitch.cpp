@@ -14,6 +14,14 @@ void CommunicateWithSwitch::unserializeData(uint8_t* buf, uint16_t bufSize, Data
 }
 
 CommunicateWithSwitch::CommunicateWithSwitch() {
+	// Should keep reading network
+	keepReading = true;
+
+	// Start the thread
+	networkThread = std::make_shared<std::thread>(&CommunicateWithSwitch::initNetwork, this);
+}
+
+void CommunicateWithSwitch::initNetwork() {
 	connectedToServer = false;
 	serverConnection.Initialize();
 
@@ -22,6 +30,38 @@ CommunicateWithSwitch::CommunicateWithSwitch() {
 
 	// Block for 3 second to recieve all data
 	serverConnection.SetReceiveTimeout(3);
+
+	while(!connectedToServer) {
+		// Wait until string is good
+		std::unique_lock<std::mutex> lk(ipMutex);
+		/* To set IP, use
+			std::lock_guard<std::mutex> lk(ipMutex);
+			ipAddressServer = "[WHATEVER IP]";
+			lk.unlock();
+			cv.notify_one();
+		*/
+		// Wait for IP adress to be set
+		cv.wait(lk, [this] { return !ipAddressServer.empty(); });
+		// Use address
+		attemptConnectionToServer(ipAddressServer.c_str());
+		// Unlock lock
+		lk.unlock();
+		// If connected to server, start booling
+		if(connectedToServer) {
+			break;
+		}
+	}
+
+	// Loop forever while you can
+	while(keepReading) {
+	}
+}
+
+void CommunicateWithSwitch::endNetwork() {
+	// Stop reading
+	keepReading = false;
+	// Wait for thread to end
+	networkThread->join();
 }
 
 bool CommunicateWithSwitch::handleSocketError(int res) {
@@ -41,7 +81,7 @@ bool CommunicateWithSwitch::handleSocketError(int res) {
 	}
 }
 
-void CommunicateWithSwitch::attemptConnectionToServer(char* ip) {
+void CommunicateWithSwitch::attemptConnectionToServer(const char* ip) {
 	if(!serverConnection.Open(ip, SERVER_PORT)) {
 		// There was an error
 	} else {
@@ -56,6 +96,18 @@ void CommunicateWithSwitch::listenForSwitchCommands() {
 	// The format works by preceding each message with a uint16_t with the size of the message, then the message right after it
 	if(connectedToServer) {
 		while(true) {
+			// First, send data if need be
+			for(auto const& queue : queueMap) {
+				if(isOutbound[queue.first]) {
+					// This is an outbound queue
+					// Check for data
+					if(queue.second.size_approx() != 0) {
+						// There is data to send
+						uint16_t size;
+					}
+				}
+			}
+
 			uint16_t dataSize;
 
 			// Block for all this because it's in a main loop anyway
@@ -89,9 +141,7 @@ void CommunicateWithSwitch::listenForSwitchCommands() {
 	}
 }
 
-template <typename T> void CommunicateWithSwitch::addDataToQueue(T data, DataFlag dataType) {
-
-}
+template <typename T> void CommunicateWithSwitch::addDataToQueue(T data, DataFlag dataType) {}
 
 CommunicateWithSwitch::~CommunicateWithSwitch() {
 	serverConnection.Close();

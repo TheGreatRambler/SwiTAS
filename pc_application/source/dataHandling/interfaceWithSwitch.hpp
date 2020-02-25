@@ -1,10 +1,14 @@
 #pragma once
 
+#include <atomic>
 #include <concurrentqueue.h>
+#include <condition_variable>
 #include <errno.h>
+#include <memory>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <thread>
 #include <unistd.h>
 #include <unordered_map>
 #include <zpp.hpp>
@@ -32,11 +36,22 @@ private:
 	// Some queues are marked as outbound, others as inbound
 	// PC and Switch will all have the same queues, just some will become
 	// Inbound and other outbound
-	std::unordered_map<DataFlag, ConcurrentQueue>* queueMap;
+	std::unordered_map<DataFlag, ConcurrentQueue> queueMap;
+	std::unordered_map<DataFlag, uint8_t> isOutbound;
 
 	CActiveSocket serverConnection;
 
 	uint8_t connectedToServer;
+
+	std::shared_ptr<std::thread> networkThread;
+
+	std::mutex ipMutex;
+	std::string ipAddressServer;
+
+	std::condition_variable cv;
+
+	// Whether to keep going
+	std::atomic_bool keepReading;
 
 	// Protcol for serializing
 	SerializeProtocol serializingProtocol;
@@ -48,10 +63,14 @@ private:
 public:
 	CommunicateWithSwitch();
 
-	void attemptConnectionToServer(char* ip);
+	void attemptConnectionToServer(const char* ip);
 
-	// Called in the main loop
+	// Called in the network thread
 	void listenForSwitchCommands();
+
+	void initNetwork();
+
+	void endNetwork();
 
 	// Add ANY data to queue
 	template <typename T> void addDataToQueue(T data, DataFlag dataType);
