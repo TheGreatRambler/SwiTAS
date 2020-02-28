@@ -8,6 +8,9 @@
 			uint8_t data; \
 			uint16_t size; \
 			serializingProtocol.dataToBinary<type>(structData, &data, &size); \
+			uint16_t dataSize = htons(size); \
+			serverConnection.Send((uint8_t*) &dataSize, sizeof(dataSize)); \
+			serverConnection.Send((uint8_t*) &structData.flag, sizeof(DataFlag)); \
 			serverConnection.Send(&data, size); \
 		} else { \
 			break; \
@@ -32,43 +35,29 @@
 // Active sockets are the client
 #include "../thirdParty/clsocket/ActiveSocket.h"
 #include "serializeUnserializeData.hpp"
+#include "networkingStructures.hpp"
 
 #define SERVER_PORT 6978
 
 class CommunicateWithSwitch {
 private:
-	enum DataFlag : uint8_t {
-		SET_PROJECT_NAME,
-		SET_GAME_INFO,
-		NUM_OF_FLAGS,
-	};
-
-	// Map of queues
-	// Instance is created, and then the pointer is shared between all threads
-	// Queue is https://github.com/cameron314/concurrentqueue/blob/master/samples.md
-	// Use http://www.cplusplus.com/reference/mutex/unique_lock/
-	// Perhaps https://stackoverflow.com/questions/13103645/using-atomics-with-stdthread-in-c11
-	// Data is added to queue with a template function from the parent thread side
-	// Network thread will constantly send out data
-	// Some queues are marked as outbound, others as inbound
-	// PC and Switch will all have the same queues, just some will become
-	// Inbound and other outbound
-
 	// Sorry, not doing that anymore, a queue for each
-	moodycamel::ConcurrentQueue<Protocol_SetProjectName> Protocol_SetProjectName_Queue;
+	moodycamel::ConcurrentQueue<Protocol::SetProjectName> SetProjectName_Queue;
+	moodycamel::ConcurrentQueue<Protocol::SetCurrentFrame> SetCurrentFrame_Queue;
+	moodycamel::ConcurrentQueue<Protocol::ModifyFrame> ModifyFrame_Queue;
 
 	CActiveSocket serverConnection;
 
-	uint8_t connectedToServer;
+	std::atomic_bool connectedToServer;
 
 	std::shared_ptr<std::thread> networkThread;
 
 	std::mutex ipMutex;
-	std::string ipAddressServer;
 
 	std::condition_variable cv;
 
 	// Whether to keep going
+	// this can be set by anybody and will determine if networking continues
 	std::atomic_bool keepReading;
 
 	// Protcol for serializing

@@ -14,7 +14,7 @@ void CommunicateWithSwitch::unserializeData(uint8_t* buf, uint16_t bufSize, Data
 }
 
 CommunicateWithSwitch::CommunicateWithSwitch() {
-	// Should keep reading network
+	// Should keep reading network at the beginning
 	keepReading = true;
 
 	// Start the thread
@@ -31,30 +31,21 @@ void CommunicateWithSwitch::initNetwork() {
 	// Block for 3 second to recieve all data
 	serverConnection.SetReceiveTimeout(3);
 
-	while(!connectedToServer) {
-		// Wait until string is good
-		std::unique_lock<std::mutex> lk(ipMutex);
-		/* To set IP, use
-			std::lock_guard<std::mutex> lk(ipMutex);
-			ipAddressServer = "[WHATEVER IP]";
-			lk.unlock();
-			cv.notify_one();
-		*/
-		// Wait for IP adress to be set
-		cv.wait(lk, [this] { return !ipAddressServer.empty(); });
-		// Use address
-		attemptConnectionToServer(ipAddressServer.c_str());
-		// Unlock lock
+	// Wait until string is good
+	std::unique_lock<std::mutex> lk(ipMutex);
+	/* To set IP, use
+		std::lock_guard<std::mutex> lk(ipMutex);
+		ipAddressServer = "[WHATEVER IP]";
 		lk.unlock();
-		// If connected to server, start booling
-		if(connectedToServer) {
-			break;
-		}
-	}
+		cv.notify_one();
+	*/
+	// Wait for IP address of server to be set
+	cv.wait(lk, [this] { return connectedToServer.load(); });
+	// Unlock lock
+	lk.unlock();
 
-	// Loop forever while you can
-	while(keepReading) {
-	}
+	// This will loop forever until keepReading is set to false
+	listenForSwitchCommands();
 }
 
 void CommunicateWithSwitch::endNetwork() {
@@ -84,8 +75,11 @@ bool CommunicateWithSwitch::handleSocketError(int res) {
 void CommunicateWithSwitch::attemptConnectionToServer(const char* ip) {
 	if(!serverConnection.Open(ip, SERVER_PORT)) {
 		// There was an error
+		connectedToServer = false;
 	} else {
 		connectedToServer = true;
+		// We good, let the network thread know
+		cv.notify_one();
 	}
 }
 
@@ -94,41 +88,41 @@ void CommunicateWithSwitch::listenForSwitchCommands() {
 	// Some info: MSG_WAITALL is needed to make sure the socket waits for the specified amount of
 	// 	data, so this is changed in zed_net
 	// The format works by preceding each message with a uint16_t with the size of the message, then the message right after it
-	if(connectedToServer) {
-		while(true) {
-			// First, check over every incoming queue to detect outgoing data
-			SEND_QUEUE_DATA(Protocol_SetProjectName_Queue, Protocol_SetProjectName)
+	while(keepReading.load()) {
+		// First, check over every incoming queue to detect outgoing data
+		SEND_QUEUE_DATA(SetProjectName_Queue, Protocol::SetProjectName)
+		SEND_QUEUE_DATA(SetCurrentFrame_Queue, Protocol::SetCurrentFrame)
+		SEND_QUEUE_DATA(ModifyFrame_Queue, Protocol::ModifyFrame)
 
-			uint16_t dataSize;
+		uint16_t dataSize;
 
-			// Block for all this because it's in a main loop anyway
+		// Block for all this because it's in a main loop in a thread anyway
 
-			if(handleSocketError(serverConnection.Receive(sizeof(dataSize), (uint8_t*)&dataSize))) {
-				// This breaks the while loop
-				break;
-			}
-
-			// Get the number back to the correct representation
-			// https://linux.die.net/man/3/ntohl
-			dataSize = ntohs(dataSize);
-
-			// Get the flag now, just a uint8_t
-			DataFlag flag;
-			if(handleSocketError(serverConnection.Receive(sizeof(flag), (uint8_t*)&flag))) {
-				break;
-			}
-			// Flag now tells us the data we expect to recieve
-
-			// The message worked, so get the data
-			uint8_t* dataToRead;
-			if(handleSocketError(serverConnection.Receive(dataSize, dataToRead))) {
-				break;
-			}
-
-			// Have the data now, unserialize with zpp
-			unserializeData(dataToRead, dataSize, flag);
-			// Have the data, TODO something with it
+		if(handleSocketError(serverConnection.Receive(sizeof(dataSize), (uint8_t*)&dataSize))) {
+			// This breaks the while loop
+			break;
 		}
+
+		// Get the number back to the correct representation
+		// https://linux.die.net/man/3/ntohl
+		dataSize = ntohs(dataSize);
+
+		// Get the flag now, just a uint8_t
+		DataFlag flag;
+		if(handleSocketError(serverConnection.Receive(sizeof(flag), (uint8_t*)&flag))) {
+			break;
+		}
+		// Flag now tells us the data we expect to recieve
+
+		// The message worked, so get the data
+		uint8_t* dataToRead;
+		if(handleSocketError(serverConnection.Receive(dataSize, dataToRead))) {
+			break;
+		}
+
+		// Have the data now, unserialize with zpp
+		unserializeData(dataToRead, dataSize, flag);
+		// Have the data, TODO something with it
 	}
 }
 

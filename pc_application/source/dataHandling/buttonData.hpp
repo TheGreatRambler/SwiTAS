@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <utility>
 #include <wx/wx.h>
+#include <zpp.hpp>
 
 #include "../helpers.hpp"
 
@@ -77,7 +78,7 @@ public:
 
 	// Controller data that will be packed into the array and will be recieved from
 	// the switch
-	struct ControllerData {
+	struct ControllerData : public zpp::serializer::polymorphic {
 		// This controller's index
 		uint8_t index;
 		// Button data (stored as a bitset because it will be serialized better later)
@@ -97,6 +98,16 @@ public:
 		int16_t GYRO_1  = 0;
 		int16_t GYRO_2  = 0;
 		int16_t GYRO_3  = 0;
+
+		friend zpp::serializer::access;
+		template <typename Archive, typename Self> static void serialize(Archive& archive, Self& self) {
+			// clang-format off
+			archive(self.index, self.buttons,
+				self.LS_X, self.LS_Y, self.RS_X, self.RS_Y,
+				self.ACCEL_X, self.ACCEL_Y, self.ACCEL_Z,
+				self.GYRO_1, self.GYRO_2, self.GYRO_3);
+			// clang-format on
+		}
 	};
 
 	// Struct containing button info

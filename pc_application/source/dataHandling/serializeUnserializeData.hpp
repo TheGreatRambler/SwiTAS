@@ -5,10 +5,7 @@
 #include <memory>
 #include <zpp.hpp>
 
-// Structs for the
-struct Protocol_SetProjectName {
-	std::string name;
-};
+#include "networkingStructures.hpp"
 
 class SerializeProtocol {
 private:
