@@ -3,16 +3,7 @@
 #include <cstdint>
 #include <zpp.hpp>
 
-#include "buttonData.hpp"
-
-// Needed for ZPP
-// clang-format off
-#define SERIALIZE_DATA(...)  \
-	friend zpp::serializer::access; \
-	template <typename Archive, typename Self> static void serialize(Archive& archive, Self& self) { \
-		archive(__VA_ARGS__); \
-	}
-// clang-format on
+#include "../dataHandling/buttonData.hpp"
 
 // clang-format off
 #define DEFINE_STRUCT(Flag, body, ...) \

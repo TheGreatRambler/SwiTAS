@@ -1,8 +1,8 @@
-#include "interfaceWithSwitch.hpp"
+#include "networkInterface.hpp"
 
 // Decided upon using https://github.com/DFHack/clsocket
 
-bool CommunicateWithSwitch::readData(uint8_t* data, uint16_t sizeToRead) {
+bool CommunicateWithNetwork::readData(uint8_t* data, uint16_t sizeToRead) {
 	// Info about pointers here: https://stackoverflow.com/a/4318446
 	// Will return true on error
 	uint16_t numOfBytesSoFar = 0;
@@ -24,15 +24,15 @@ bool CommunicateWithSwitch::readData(uint8_t* data, uint16_t sizeToRead) {
 	return false;
 }
 
-CommunicateWithSwitch::CommunicateWithSwitch() {
+CommunicateWithNetwork::CommunicateWithNetwork() {
 	// Should keep reading network at the beginning
 	keepReading = true;
 
 	// Start the thread, this means that this class goes on the main thread
-	networkThread = std::make_shared<std::thread>(&CommunicateWithSwitch::initNetwork, this);
+	networkThread = std::make_shared<std::thread>(&CommunicateWithNetwork::initNetwork, this);
 }
 
-void CommunicateWithSwitch::initNetwork() {
+void CommunicateWithNetwork::initNetwork() {
 	connectedToServer = false;
 	serverConnection.Initialize();
 
@@ -57,17 +57,17 @@ void CommunicateWithSwitch::initNetwork() {
 	lk.unlock();
 
 	// This will loop forever until keepReading is set to false
-	listenForSwitchCommands();
+	listenForCommands();
 }
 
-void CommunicateWithSwitch::endNetwork() {
+void CommunicateWithNetwork::endNetwork() {
 	// Stop reading
 	keepReading = false;
 	// Wait for thread to end
 	networkThread->join();
 }
 
-bool CommunicateWithSwitch::handleSocketError(int res) {
+bool CommunicateWithNetwork::handleSocketError(int res) {
 	// Return true if it's an error, fatal or wouldblock
 	//   false if there is no error
 	if(res == -1) {
@@ -84,7 +84,8 @@ bool CommunicateWithSwitch::handleSocketError(int res) {
 	}
 }
 
-void CommunicateWithSwitch::attemptConnectionToServer(const char* ip) {
+#ifdef SERVER_IMP
+void CommunicateWithNetwork::attemptConnectionToServer(const char* ip) {
 	if(!serverConnection.Open(ip, SERVER_PORT)) {
 		// There was an error
 		connectedToServer = false;
@@ -94,8 +95,9 @@ void CommunicateWithSwitch::attemptConnectionToServer(const char* ip) {
 		cv.notify_one();
 	}
 }
+#endif
 
-void CommunicateWithSwitch::listenForSwitchCommands() {
+void CommunicateWithNetwork::listenForCommands() {
 	// Socket connected, do things
 	// Some info: MSG_WAITALL is needed to make sure the socket waits for the specified amount of
 	// 	data, so this is changed in zed_net
@@ -134,8 +136,8 @@ void CommunicateWithSwitch::listenForSwitchCommands() {
 	}
 }
 
-template <typename T> void CommunicateWithSwitch::addDataToQueue(T data, DataFlag dataType) { }
+template <typename T> void CommunicateWithNetwork::addDataToQueue(T data, DataFlag dataType) {}
 
-CommunicateWithSwitch::~CommunicateWithSwitch() {
+CommunicateWithNetwork::~CommunicateWithNetwork() {
 	serverConnection.Close();
 }

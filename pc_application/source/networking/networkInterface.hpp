@@ -32,6 +32,13 @@
 #define ADD_QUEUE(Flag) moodycamel::ConcurrentQueue<Protocol::Struct_##Flag> Queue_##Flag;
 // clang-format on
 
+// Use this from other parts of the program to send data over the network
+#define ADD_TO_QUEUE(Flag, data, networkImp) networkImp->Queue_##Flag.enqueue(data);
+
+// In order to make my life easier, this file is essentially identical between client
+// And server, defines are used to separate the two
+#define SERVER_IMP 1
+
 #include <atomic>
 #include <concurrentqueue.h>
 #include <condition_variable>
@@ -52,13 +59,8 @@
 
 #define SERVER_PORT 6978
 
-class CommunicateWithSwitch {
+class CommunicateWithNetwork {
 private:
-	ADD_QUEUE(SetProjectName)
-	ADD_QUEUE(SetCurrentFrame)
-	ADD_QUEUE(ModifyFrame)
-	ADD_QUEUE(IsPaused)
-
 	CActiveSocket serverConnection;
 
 	std::atomic_bool connectedToServer;
@@ -87,12 +89,19 @@ private:
 	bool readData(uint8_t* data, uint16_t sizeToRead);
 
 public:
-	CommunicateWithSwitch();
+	ADD_QUEUE(SetProjectName)
+	ADD_QUEUE(SetCurrentFrame)
+	ADD_QUEUE(ModifyFrame)
+	ADD_QUEUE(IsPaused)
 
+	CommunicateWithNetwork();
+
+#ifdef SERVER_IMP
 	void attemptConnectionToServer(const char* ip);
+#endif
 
 	// Called in the network thread
-	void listenForSwitchCommands();
+	void listenForCommands();
 
 	void initNetwork();
 
@@ -101,5 +110,5 @@ public:
 	// Add ANY data to queue
 	template <typename T> void addDataToQueue(T data, DataFlag dataType);
 
-	~CommunicateWithSwitch();
+	~CommunicateWithNetwork();
 };

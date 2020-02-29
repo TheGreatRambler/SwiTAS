@@ -13,8 +13,8 @@
 
 #include "../dataHandling/buttonData.hpp"
 #include "../dataHandling/dataProcessing.hpp"
-#include "../dataHandling/interfaceWithSwitch.hpp"
 #include "../helpers.hpp"
+#include "../networking/networkInterface.hpp"
 #include "bottomUI.hpp"
 #include "sideUI.hpp"
 
@@ -35,7 +35,7 @@ private:
 	// Pointer to the class containing important input stuff
 	DataProcessing* dataProcessingInstance;
 	// Networking stuff
-	std::shared_ptr<CommunicateWithSwitch> networkInstance;
+	std::shared_ptr<CommunicateWithNetwork> networkInstance;
 
 	void handlePreviousWindowTransform();
 
