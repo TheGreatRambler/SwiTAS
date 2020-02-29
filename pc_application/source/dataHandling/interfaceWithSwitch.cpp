@@ -2,15 +2,26 @@
 
 // Decided upon using https://github.com/DFHack/clsocket
 
-void CommunicateWithSwitch::unserializeData(uint8_t* buf, uint16_t bufSize, DataFlag flag) {
-	// The buffer itself
-	// https://github.com/niXman/yas/blob/master/include/yas/buffers.hpp#L67
-	// https://github.com/niXman/yas/blob/master/examples/one_func_cond/main.cpp
-	// if(flag == DataFlag::SET_GAME_INFO) {
-	// Game info has been recieved
-	//}
-	// Use serializingProtocol
-	// serializingProtocol.binaryToFrame();
+bool CommunicateWithSwitch::readData(uint8_t* data, uint16_t sizeToRead) {
+	// Info about pointers here: https://stackoverflow.com/a/4318446
+	// Will return true on error
+	uint16_t numOfBytesSoFar = 0;
+	while(numOfBytesSoFar != sizeToRead) {
+		// Have to read at the right index with the right num of bytes
+		int res = serverConnection.Receive(sizeToRead - numOfBytesSoFar, &data[numOfBytesSoFar]);
+		if(res == 0 || res == -1) {
+			// Socket has either been shutdown on other side
+			// Or has encountered an error
+			handleSocketError(res);
+			return true;
+		} else {
+			// Just num of bytes
+			// Now have to read this less bytes next time
+			numOfBytesSoFar += res;
+		}
+	}
+	// If here, success! Operation has encountered no error
+	return false;
 }
 
 CommunicateWithSwitch::CommunicateWithSwitch() {
@@ -28,7 +39,8 @@ void CommunicateWithSwitch::initNetwork() {
 	// Set to blocking for all data
 	serverConnection.SetBlocking();
 
-	// Block for 3 second to recieve all data
+	// Block for 3 seconds to recieve a byte
+	// Within 3 seconds
 	serverConnection.SetReceiveTimeout(3);
 
 	// Wait until string is good
@@ -96,8 +108,7 @@ void CommunicateWithSwitch::listenForSwitchCommands() {
 
 		// Block for all this because it's in a main loop in a thread anyway
 
-		if(handleSocketError(serverConnection.Receive(sizeof(dataSize), (uint8_t*)&dataSize))) {
-			// This breaks the while loop
+		if(readData((uint8_t*)&dataSize, sizeof(dataSize))) {
 			break;
 		}
 
@@ -105,14 +116,14 @@ void CommunicateWithSwitch::listenForSwitchCommands() {
 		// https://linux.die.net/man/3/ntohl
 		dataSize = ntohs(dataSize);
 
-		// Get the flag now, just a uint8_t
-		if(handleSocketError(serverConnection.Receive(sizeof(currentFlag), (uint8_t*)&currentFlag))) {
+		// Get the flag now, just a uint8_t, no endian conversion, I think
+		if(readData((uint8_t*)&currentFlag, sizeof(currentFlag))) {
 			break;
 		}
 		// Flag now tells us the data we expect to recieve
 
 		// The message worked, so get the data
-		if(handleSocketError(serverConnection.Receive(dataSize, dataToRead))) {
+		if(readData(dataToRead, dataSize)) {
 			break;
 		}
 
@@ -123,7 +134,7 @@ void CommunicateWithSwitch::listenForSwitchCommands() {
 	}
 }
 
-template <typename T> void CommunicateWithSwitch::addDataToQueue(T data, DataFlag dataType) {}
+template <typename T> void CommunicateWithSwitch::addDataToQueue(T data, DataFlag dataType) { }
 
 CommunicateWithSwitch::~CommunicateWithSwitch() {
 	serverConnection.Close();

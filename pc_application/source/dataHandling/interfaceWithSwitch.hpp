@@ -81,11 +81,10 @@ private:
 	uint16_t dataSize;
 	DataFlag currentFlag;
 
-	void unserializeData(uint8_t* buf, uint16_t bufSize, DataFlag flag);
-
 	bool handleSocketError(int res);
 
-	void runDataInQueue() {}
+	// This will read data until all is recieved
+	bool readData(uint8_t* data, uint16_t sizeToRead);
 
 public:
 	CommunicateWithSwitch();
