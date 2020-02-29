@@ -29,6 +29,9 @@ MainWindow::MainWindow()
 
 	dataProcessingInstance = new DataProcessing(&mainSettings, buttonData, this);
 
+	// Start networking
+	networkInstance = std::make_shared<CommunicateWithSwitch>();
+
 	// UI instances
 	sideUI   = std::make_shared<SideUI>(this, &mainSettings, mainSizer, dataProcessingInstance);
 	bottomUI = std::make_shared<BottomUI>(this, &mainSettings, buttonData, mainSizer, dataProcessingInstance);
@@ -44,7 +47,8 @@ MainWindow::MainWindow()
 	Center(wxBOTH);
 
 #ifdef _WIN32
-	// Enable dark mode, super experimential
+	// Enable dark mode, super experimential, apparently
+	// needs to be applied to every window, however
 	SetWindowTheme(GetHWND(), L"DarkMode_Explorer", NULL);
 	Refresh();
 #endif
@@ -77,6 +81,10 @@ void MainWindow::OnSize(wxSizeEvent& event) {
 	if(GetAutoLayout()) {
 		Layout();
 	}
+}
+
+void MainWindow::onIdleLoop() {
+	// Read queues from the network and do things, TODO
 }
 
 void MainWindow::getGlobalSettings(rapidjson::Document* d) {

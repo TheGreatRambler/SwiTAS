@@ -1,13 +1,13 @@
 #pragma once
 
 // clang-format off
-#define SEND_QUEUE_DATA(queue, type) { \
+#define SEND_QUEUE_DATA(Flag) { \
 	while(true) { \
-		type structData; \
-		if(queue.try_dequeue(structData)) { \
+		Protocol::Struct_##Flag structData; \
+		if(Queue_##Flag.try_dequeue(structData)) { \
 			uint8_t data; \
 			uint16_t size; \
-			serializingProtocol.dataToBinary<type>(structData, &data, &size); \
+			serializingProtocol.dataToBinary<Protocol::Struct_##Flag>(structData, &data, &size); \
 			uint16_t dataSize = htons(size); \
 			serverConnection.Send((uint8_t*) &dataSize, sizeof(dataSize)); \
 			serverConnection.Send((uint8_t*) &structData.flag, sizeof(DataFlag)); \
@@ -17,6 +17,19 @@
 		} \
 	} \
 }
+// clang-format on
+
+// clang-format off
+// The data is just shoved onto the queue and wxWidgets can read it during idle or something
+#define RECIEVE_QUEUE_DATA(Flag) \
+	if (currentFlag == DataFlag::##Flag) { \
+		Protocol::Struct_##Flag data = serializingProtocol.binaryToData<Protocol::Struct_##Flag>(dataToRead, dataSize); \
+		Queue_##Flag.enqueue(data); \
+	} \
+// clang-format on
+
+// clang-format off
+#define ADD_QUEUE(Flag) moodycamel::ConcurrentQueue<Protocol::Struct_##Flag> Queue_##Flag;
 // clang-format on
 
 #include <atomic>
@@ -41,10 +54,10 @@
 
 class CommunicateWithSwitch {
 private:
-	// Sorry, not doing that anymore, a queue for each
-	moodycamel::ConcurrentQueue<Protocol::SetProjectName> SetProjectName_Queue;
-	moodycamel::ConcurrentQueue<Protocol::SetCurrentFrame> SetCurrentFrame_Queue;
-	moodycamel::ConcurrentQueue<Protocol::ModifyFrame> ModifyFrame_Queue;
+	ADD_QUEUE(SetProjectName)
+	ADD_QUEUE(SetCurrentFrame)
+	ADD_QUEUE(ModifyFrame)
+	ADD_QUEUE(IsPaused)
 
 	CActiveSocket serverConnection;
 
@@ -62,6 +75,11 @@ private:
 
 	// Protcol for serializing
 	SerializeProtocol serializingProtocol;
+
+	// For easy access, these variables stay global
+	uint8_t* dataToRead;
+	uint16_t dataSize;
+	DataFlag currentFlag;
 
 	void unserializeData(uint8_t* buf, uint16_t bufSize, DataFlag flag);
 

@@ -6,9 +6,9 @@ void CommunicateWithSwitch::unserializeData(uint8_t* buf, uint16_t bufSize, Data
 	// The buffer itself
 	// https://github.com/niXman/yas/blob/master/include/yas/buffers.hpp#L67
 	// https://github.com/niXman/yas/blob/master/examples/one_func_cond/main.cpp
-	if(flag == DataFlag::SET_GAME_INFO) {
-		// Game info has been recieved
-	}
+	// if(flag == DataFlag::SET_GAME_INFO) {
+	// Game info has been recieved
+	//}
 	// Use serializingProtocol
 	// serializingProtocol.binaryToFrame();
 }
@@ -17,7 +17,7 @@ CommunicateWithSwitch::CommunicateWithSwitch() {
 	// Should keep reading network at the beginning
 	keepReading = true;
 
-	// Start the thread
+	// Start the thread, this means that this class goes on the main thread
 	networkThread = std::make_shared<std::thread>(&CommunicateWithSwitch::initNetwork, this);
 }
 
@@ -89,12 +89,10 @@ void CommunicateWithSwitch::listenForSwitchCommands() {
 	// 	data, so this is changed in zed_net
 	// The format works by preceding each message with a uint16_t with the size of the message, then the message right after it
 	while(keepReading.load()) {
-		// First, check over every incoming queue to detect outgoing data
-		SEND_QUEUE_DATA(SetProjectName_Queue, Protocol::SetProjectName)
-		SEND_QUEUE_DATA(SetCurrentFrame_Queue, Protocol::SetCurrentFrame)
-		SEND_QUEUE_DATA(ModifyFrame_Queue, Protocol::ModifyFrame)
-
-		uint16_t dataSize;
+		// First, check over every outgoing queue to detect outgoing data
+		SEND_QUEUE_DATA(SetProjectName)
+		SEND_QUEUE_DATA(SetCurrentFrame)
+		SEND_QUEUE_DATA(ModifyFrame)
 
 		// Block for all this because it's in a main loop in a thread anyway
 
@@ -108,21 +106,20 @@ void CommunicateWithSwitch::listenForSwitchCommands() {
 		dataSize = ntohs(dataSize);
 
 		// Get the flag now, just a uint8_t
-		DataFlag flag;
-		if(handleSocketError(serverConnection.Receive(sizeof(flag), (uint8_t*)&flag))) {
+		if(handleSocketError(serverConnection.Receive(sizeof(currentFlag), (uint8_t*)&currentFlag))) {
 			break;
 		}
 		// Flag now tells us the data we expect to recieve
 
 		// The message worked, so get the data
-		uint8_t* dataToRead;
 		if(handleSocketError(serverConnection.Receive(dataSize, dataToRead))) {
 			break;
 		}
 
-		// Have the data now, unserialize with zpp
-		unserializeData(dataToRead, dataSize, flag);
-		// Have the data, TODO something with it
+		// Now, check over incoming queues, they will absorb the data if they correspond with the flag
+		// Keep in mind, this is not the main thread, so can't act upon the data instantly
+		RECIEVE_QUEUE_DATA(IsPaused)
+		// That's it, wxWidgets will take care of it on idle
 	}
 }
 

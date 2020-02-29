@@ -14,41 +14,43 @@
 	}
 // clang-format on
 
+// clang-format off
+#define DEFINE_STRUCT(Flag, body, ...) \
+	struct Struct_##Flag : public zpp::serializer::polymorphic { \
+		DataFlag flag = DataFlag::##Flag; \
+		body \
+		friend zpp::serializer::access; \
+		template <typename Archive, typename Self> static void serialize(Archive& archive, Self& self) { \
+			archive(__VA_ARGS__); \
+		} \
+	};
+// clang-format on
+
 enum DataFlag : uint8_t {
-	SET_PROJECT_NAME,
-	SET_CURRENT_FRAME,
-	MODIFY_FRAME,
-	SET_GAME_INFO,
+	SetProjectName,
+	SetCurrentFrame,
+	ModifyFrame,
+	IsPaused,
 	NUM_OF_FLAGS,
 };
 
-namepace Protocol {
-	// Structs for the sent and recieved data
-	struct SetProjectName : public zpp::serializer::polymorphic {
-		// The DataFlag, never included in serialization
-		DataFlag flag = DataFlag::SET_PROJECT_NAME;
-
+// clang-format off
+namespace Protocol {
+	DEFINE_STRUCT(SetProjectName,
 		std::string name;
+	, self.name)
 
-		SERIALIZE_DATA(self.name)
-	};
-
-	struct SetCurrentFrame : public zpp::serializer::polymorphic {
-		// The DataFlag, never included in serialization
-		DataFlag flag = DataFlag::SET_CURRENT_FRAME;
-
+	DEFINE_STRUCT(SetCurrentFrame,
 		uint32_t frame;
+	, self.frame)
 
-		SERIALIZE_DATA(self.frame)
-	};
-
-	struct ModifyFrame : public zpp::serializer::polymorphic {
-		// The DataFlag, never included in serialization
-		DataFlag flag = DataFlag::MODIFY_FRAME;
-
+	DEFINE_STRUCT(ModifyFrame,
 		uint32_t frame;
 		ControllerData controllerData;
+	, self.frame, self.controllerData)
 
-		SERIALIZE_DATA(self.frame, self.controllerData)
-	};
+	DEFINE_STRUCT(IsPaused,
+		uint8_t isPaused;
+	, self.isPaused)
 };
+// clang-format on

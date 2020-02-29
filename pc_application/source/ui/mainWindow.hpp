@@ -13,6 +13,7 @@
 
 #include "../dataHandling/buttonData.hpp"
 #include "../dataHandling/dataProcessing.hpp"
+#include "../dataHandling/interfaceWithSwitch.hpp"
 #include "../helpers.hpp"
 #include "bottomUI.hpp"
 #include "sideUI.hpp"
@@ -33,6 +34,8 @@ private:
 	std::shared_ptr<BottomUI> bottomUI;
 	// Pointer to the class containing important input stuff
 	DataProcessing* dataProcessingInstance;
+	// Networking stuff
+	std::shared_ptr<CommunicateWithSwitch> networkInstance;
 
 	void handlePreviousWindowTransform();
 
@@ -42,6 +45,14 @@ public:
 	MainWindow();
 
 	void addMenuBar();
+
+	// Called by wxApp
+	void onIdleLoop();
+
+	void endNetworking() {
+		// Force end it
+		networkInstance->endNetwork();
+	}
 
 	// Override default signal handler:
 	void keyDownHandler(wxKeyEvent& event);
