@@ -30,7 +30,7 @@ MainWindow::MainWindow()
 	dataProcessingInstance = new DataProcessing(&mainSettings, buttonData, this);
 
 	// Start networking
-	networkInstance = std::make_shared<CommunicateWithSwitch>();
+	networkInstance = std::make_shared<CommunicateWithNetwork>();
 
 	// UI instances
 	sideUI   = std::make_shared<SideUI>(this, &mainSettings, mainSizer, dataProcessingInstance);
@@ -85,6 +85,11 @@ void MainWindow::OnSize(wxSizeEvent& event) {
 
 void MainWindow::onIdleLoop() {
 	// Read queues from the network and do things, TODO
+	CHECK_QUEUE(networkInstance, IsPaused, {
+		if(data.isPaused) {
+			// cool
+		}
+	})
 }
 
 void MainWindow::getGlobalSettings(rapidjson::Document* d) {

@@ -2,19 +2,14 @@
 #include <concurrentqueue.h>
 #include <memory>
 #include <queue>
-#include <thread>
 
-#include "communicate_with_pc.hpp"
-
-ConcurrentQueue<RecieveFrame> q;
-
-void runListener() {
-	CommunicateWithPC communicateWithPC;
-	while(true) {
-		communicateWithPC.listenForPCCommands();
-	}
-}
+#include "networking/networkInterface.hpp"
 
 int main(int argc, char* argv[]) {
-	std::thread listenerThread(&runListener);
+	// Starts its own thread
+	CommunicateWithNetwork communicateWithPC;
+	while(true) {
+		// Check the queues for data and print for debugging
+	}
+	communicateWithPC.endNetwork();
 }

@@ -46,7 +46,7 @@
 
 // In order to make my life easier, this file is essentially identical between client
 // And server, defines are used to separate the two
-#define CLIENT_IMP
+#define SERVER_IMP
 
 #include <atomic>
 #include <concurrentqueue.h>
