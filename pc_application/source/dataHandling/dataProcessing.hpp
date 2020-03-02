@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Windows.h>
 #include <bitset>
 #include <cstdint>
 #include <cstdio>
@@ -11,6 +12,7 @@
 #include <string>
 #include <tuple>
 #include <utility>
+#include <uxtheme.h>
 #include <vector>
 #include <wx/grid.h>
 #include <wx/listctrl.h>

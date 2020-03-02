@@ -37,6 +37,11 @@ private:
 	// Networking stuff
 	std::shared_ptr<CommunicateWithNetwork> networkInstance;
 
+	// Menubar
+	wxMenuBar* menuBar;
+	// Menubar menus
+	wxWindowID selectIPID;
+
 	void handlePreviousWindowTransform();
 
 	void getGlobalSettings(rapidjson::Document* d);

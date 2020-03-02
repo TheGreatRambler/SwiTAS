@@ -50,17 +50,14 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 		i++;
 	}
 	SetImageList(&imageList, wxIMAGE_LIST_SMALL);
-	// Once all columns are added, do some stuff on them
-	// for(auto& column : treeView.get_columns()) {
-	// Set to fixed size mode to speed things up
-	// column->set_sizing(Gtk::TREE_VIEW_COLUMN_FIXED);
-	//}
-	// treeView.set_fixed_height_mode(true);
-	// Add the treeview to the scrolled window
-	// scrolledWindow->add(treeView);
-	// Only show the scrollbars when they are necessary:
-	// scrolledWindow->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-	// Add this first frame
+
+#ifdef _WIN32
+	// Enable dark mode, super experimential, apparently
+	// needs to be applied to every window, however
+	SetWindowTheme(GetHWND(), L"DarkMode_Explorer", NULL);
+	Refresh();
+#endif
+
 	for(int i = 0; i < 30; i++) {
 		addNewFrame();
 	}

@@ -22,7 +22,7 @@
 // clang-format off
 // The data is just shoved onto the queue and wxWidgets can read it during idle or something
 #define RECIEVE_QUEUE_DATA(Flag) \
-	if (currentFlag == DataFlag::##Flag) { \
+	if (currentFlag == DataFlag::Flag) { \
 		Protocol::Struct_##Flag data = serializingProtocol.binaryToData<Protocol::Struct_##Flag>(dataToRead, dataSize); \
 		Queue_##Flag.enqueue(data); \
 	} \

@@ -8,7 +8,7 @@
 // clang-format off
 #define DEFINE_STRUCT(Flag, body, ...) \
 	struct Struct_##Flag : public zpp::serializer::polymorphic { \
-		DataFlag flag = DataFlag::##Flag; \
+		DataFlag flag = DataFlag::Flag; \
 		body \
 		friend zpp::serializer::access; \
 		template <typename Archive, typename Self> static void serialize(Archive& archive, Self& self) { \

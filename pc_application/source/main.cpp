@@ -4,7 +4,6 @@
 #include <thread>
 #include <wx/wx.h>
 
-#include "dataHandling/interfaceWithSwitch.hpp"
 #include "ui/mainWindow.hpp"
 
 class MainApp : public wxApp {

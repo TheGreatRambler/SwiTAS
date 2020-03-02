@@ -9,7 +9,6 @@
 
 class SerializeProtocol {
 private:
-	// clang-format on
 	// Will be converted to bytes
 	std::vector<unsigned char> serializingData;
 

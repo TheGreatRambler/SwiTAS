@@ -85,11 +85,13 @@ void MainWindow::OnSize(wxSizeEvent& event) {
 
 void MainWindow::onIdleLoop() {
 	// Read queues from the network and do things, TODO
-	CHECK_QUEUE(networkInstance, IsPaused, {
-		if(data.isPaused) {
-			// cool
-		}
-	})
+	if(networkInstance->isConnected()) {
+		CHECK_QUEUE(networkInstance, IsPaused, {
+			if(data.isPaused) {
+				// cool
+			}
+		})
+	}
 }
 
 void MainWindow::getGlobalSettings(rapidjson::Document* d) {
@@ -100,7 +102,21 @@ void MainWindow::getGlobalSettings(rapidjson::Document* d) {
 }
 
 void MainWindow::addMenuBar() {
-	// https://www.lucidarme.me/gtkmm-example-13/
-	// Add menubar to layout
-	// mainLayout.pack_start(menuBar, Gtk::PACK_SHRINK);
+	menuBar = new wxMenuBar();
+
+	wxMenu* fileMenu = new wxMenu();
+
+	selectIPID = NewControlId();
+	fileMenu->Append(selectIPID, "&Server");
+
+	/*
+		Bind(wxEVT_MENU, [](wxCommandEvent&) {
+			// cool
+			wxMessageBox("You have selected Item 1", "Your selection", wxOK | wxICON_INFORMATION);
+		}, selectIPID);
+	*/
+
+	menuBar->Append(fileMenu, "&File");
+
+	SetMenuBar(menuBar);
 }
