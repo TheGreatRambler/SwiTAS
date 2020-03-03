@@ -9,13 +9,35 @@
 
 class SerializeProtocol {
 private:
-	// clang-format on
 	// Will be converted to bytes
 	std::vector<unsigned char> serializingData;
 
 public:
 	// Both of these functions are deliberately designed to deal with any kind of struct
-	template <typename T> T binaryToData(uint8_t* data, uint16_t size);
+	template <typename T> T binaryToData(uint8_t* data, uint16_t size) {
+		// Load with YAS
+		T inputData;
 
-	template <typename T> void dataToBinary(T inputData, uint8_t* data, uint16_t* size);
+		// Create the archive
+		zpp::serializer::memory_input_archive in(serializingData);
+
+		// This simple
+		in(inputData);
+
+		serializingData.clear();
+		return inputData;
+	}
+
+	template <typename T> void dataToBinary(T inputData, uint8_t* data, uint16_t* size) {
+		// Create the archive
+		zpp::serializer::memory_output_archive out(serializingData);
+
+		out(inputData);
+
+		// Copy to pointer
+		// An unsigned char is one byte, so this is it
+		*size = (uint16_t)serializingData.size();
+		memcpy(data, serializingData.data(), *size);
+		serializingData.clear();
+	}
 };

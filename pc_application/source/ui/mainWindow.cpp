@@ -27,7 +27,7 @@ MainWindow::MainWindow()
 	// Load button data here
 	buttonData->setupButtonMapping(&mainSettings);
 
-	dataProcessingInstance = new DataProcessing(&mainSettings, buttonData, this);
+	dataProcessingInstance = new DataProcessing(&mainSettings, buttonData, networkInstance, this);
 
 	// Start networking
 	networkInstance = std::make_shared<CommunicateWithNetwork>();
@@ -109,14 +109,21 @@ void MainWindow::addMenuBar() {
 	selectIPID = NewControlId();
 	fileMenu->Append(selectIPID, "&Server");
 
-	/*
-		Bind(wxEVT_MENU, [](wxCommandEvent&) {
-			// cool
-			wxMessageBox("You have selected Item 1", "Your selection", wxOK | wxICON_INFORMATION);
-		}, selectIPID);
-	*/
-
 	menuBar->Append(fileMenu, "&File");
 
+	Bind(wxEVT_MENU, &MainWindow::handleMenuBar, this, wxID_ANY);
+
 	SetMenuBar(menuBar);
+}
+
+void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
+	wxWindowID id = commandEvent.GetId();
+	if(id == selectIPID) {
+		// IP needs to be selected
+		wxString ipAddress = wxGetTextFromUser("Please enter IP address of Nintendo Switch", "Server connect", wxEmptyString);
+		if(!ipAddress.empty()) {
+			// IP address entered
+			networkInstance->attemptConnectionToServer(ipAddress.c_str());
+		}
+	}
 }

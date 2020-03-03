@@ -137,9 +137,13 @@ void CommunicateWithNetwork::listenForCommands() {
 
 		// Block for all this because it's in a main loop in a thread anyway
 
+		uint16_t dataSize;
+
 		if(readData((uint8_t*)&dataSize, sizeof(dataSize))) {
 			break;
 		}
+
+		DataFlag currentFlag;
 
 		// Get the number back to the correct representation
 		// https://linux.die.net/man/3/ntohl
@@ -151,6 +155,8 @@ void CommunicateWithNetwork::listenForCommands() {
 		}
 		// Flag now tells us the data we expect to recieve
 
+		uint8_t* dataToRead = (uint8_t*)malloc(dataSize);
+
 		// The message worked, so get the data
 		if(readData(dataToRead, dataSize)) {
 			break;
@@ -159,7 +165,9 @@ void CommunicateWithNetwork::listenForCommands() {
 		// Now, check over incoming queues, they will absorb the data if they correspond with the flag
 		// Keep in mind, this is not the main thread, so can't act upon the data instantly
 		RECIEVE_QUEUE_DATA(IsPaused)
-		// That's it, wxWidgets will take care of it on idle
+
+		// Free memory
+		free(dataToRead);
 	}
 }
 

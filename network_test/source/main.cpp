@@ -7,6 +7,7 @@
 #include "networking/networkInterface.hpp"
 
 int main(int argc, char* argv[]) {
+	puts("Starting network test");
 	// Starts its own thread
 	CommunicateWithNetwork* communicateWithPC = new CommunicateWithNetwork();
 	uint8_t keepGoing                         = true;
@@ -20,12 +21,13 @@ int main(int argc, char* argv[]) {
 
 			CHECK_QUEUE(communicateWithPC, SetProjectName, {
 				puts(data.name.c_str());
+				keepGoing = false;
+				puts("We done bois");
 				// cool
 			})
 
 			CHECK_QUEUE(communicateWithPC, SetCurrentFrame, {
-				keepGoing = false;
-				puts("We done bois");
+				printf("%d", data.frame);
 				// cool
 			})
 		}

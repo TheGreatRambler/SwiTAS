@@ -46,6 +46,8 @@ private:
 
 	void getGlobalSettings(rapidjson::Document* d);
 
+	void handleMenuBar(wxCommandEvent& commandEvent);
+
 public:
 	MainWindow();
 

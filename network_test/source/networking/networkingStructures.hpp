@@ -3,24 +3,28 @@
 #include <cstdint>
 #include <zpp.hpp>
 
-// clang-format off
-#define DEFINE_STRUCT(Flag, body, ...) \
-	struct Struct_##Flag : public zpp::serializer::polymorphic { \
-		DataFlag flag = DataFlag::##Flag; \
-		body \
-		friend zpp::serializer::access; \
-		template <typename Archive, typename Self> static void serialize(Archive& archive, Self& self) { \
-			archive(__VA_ARGS__); \
-		} \
-	};
-// clang-format on
-
-enum DataFlag : uint8_t {
-	SetProjectName,
-	SetCurrentFrame,
-	ModifyFrame,
-	IsPaused,
-	NUM_OF_FLAGS,
+enum Btn : uint8_t {
+	A,
+	B,
+	X,
+	Y,
+	L,
+	R,
+	ZL,
+	ZR,
+	SL,
+	SR,
+	DUP,
+	DDOWN,
+	DLEFT,
+	DRIGHT,
+	PLUS,
+	MINUS,
+	HOME,
+	CAPT,
+	LS,
+	RS,
+	BUTTONS_SIZE,
 };
 
 struct ControllerData : public zpp::serializer::polymorphic {
@@ -53,6 +57,26 @@ struct ControllerData : public zpp::serializer::polymorphic {
 				self.GYRO_1, self.GYRO_2, self.GYRO_3);
 		// clang-format on
 	}
+};
+
+// clang-format off
+#define DEFINE_STRUCT(Flag, body, ...) \
+	struct Struct_##Flag : public zpp::serializer::polymorphic { \
+		DataFlag flag = DataFlag::Flag; \
+		body \
+		friend zpp::serializer::access; \
+		template <typename Archive, typename Self> static void serialize(Archive& archive, Self& self) { \
+			archive(__VA_ARGS__); \
+		} \
+	};
+// clang-format on
+
+enum DataFlag : uint8_t {
+	SetProjectName,
+	SetCurrentFrame,
+	ModifyFrame,
+	IsPaused,
+	NUM_OF_FLAGS,
 };
 
 // clang-format off

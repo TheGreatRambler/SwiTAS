@@ -22,7 +22,7 @@
 // clang-format off
 // The data is just shoved onto the queue and wxWidgets can read it during idle or something
 #define RECIEVE_QUEUE_DATA(Flag) \
-	if (currentFlag == DataFlag::##Flag) { \
+	if (currentFlag == DataFlag::Flag) { \
 		Protocol::Struct_##Flag data = serializingProtocol.binaryToData<Protocol::Struct_##Flag>(dataToRead, dataSize); \
 		Queue_##Flag.enqueue(data); \
 	} \
@@ -63,9 +63,9 @@
 
 // Active sockets are the client
 #ifdef SERVER_IMP
-#include "../thirdParty/clsocket/PassiveSocket.h"
+#include "../third_party/clsocket/PassiveSocket.h"
 #endif
-#include "../thirdParty/clsocket/ActiveSocket.h"
+#include "../third_party/clsocket/ActiveSocket.h"
 #include "serializeUnserializeData.hpp"
 #include "networkingStructures.hpp"
 
@@ -92,11 +92,6 @@ private:
 
 	// Protcol for serializing
 	SerializeProtocol serializingProtocol;
-
-	// For easy access, these variables stay global
-	uint8_t* dataToRead;
-	uint16_t dataSize;
-	DataFlag currentFlag;
 
 	bool handleSocketError(int res);
 

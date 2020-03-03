@@ -93,11 +93,6 @@ private:
 	// Protcol for serializing
 	SerializeProtocol serializingProtocol;
 
-	// For easy access, these variables stay global
-	uint8_t* dataToRead;
-	uint16_t dataSize;
-	DataFlag currentFlag;
-
 	bool handleSocketError(int res);
 
 	// This will read data until all is recieved

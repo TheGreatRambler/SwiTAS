@@ -1,14 +1,15 @@
 #include "dataProcessing.hpp"
 
-DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxWindow* parent)
+DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, std::shared_ptr<CommunicateWithNetwork> communicateWithNetwork, wxWindow* parent)
 	: wxListCtrl(parent, DataProcessing::LIST_CTRL_ID, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_VIRTUAL | wxLC_HRULES) {
 
 	// This can't handle it :(
 	SetDoubleBuffered(false);
 	// Inherit from list control
 	// Use this specific ID in order to do things
-	buttonData   = buttons;
-	mainSettings = settings;
+	buttonData      = buttons;
+	mainSettings    = settings;
+	networkInstance = communicateWithNetwork;
 	// Set the mask color via a css string
 	// https://docs.wxwidgets.org/3.0/classwx_colour.html#a08e9f56265647b8b5e1349b76eb728e3
 	maskColor.Set((*mainSettings)["iconTransparent"].GetString());
@@ -50,14 +51,14 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 		i++;
 	}
 	SetImageList(&imageList, wxIMAGE_LIST_SMALL);
-
-#ifdef _WIN32
-	// Enable dark mode, super experimential, apparently
-	// needs to be applied to every window, however
-	SetWindowTheme(GetHWND(), L"DarkMode_Explorer", NULL);
-	Refresh();
-#endif
-
+	/*
+	#ifdef _WIN32
+		// Enable dark mode, super experimential, apparently
+		// needs to be applied to every window, however
+		SetWindowTheme(GetHWND(), L"DarkMode_Explorer", NULL);
+		Refresh();
+	#endif
+	*/
 	for(int i = 0; i < 30; i++) {
 		addNewFrame();
 	}
@@ -184,6 +185,12 @@ void DataProcessing::setButtonState(Btn button, bool state) {
 	if(inputCallback) {
 		inputCallback(button, state);
 	}
+
+	// Send to switch, I guess
+	Protocol::Struct_ModifyFrame modifyFrame;
+	modifyFrame.frame          = currentFrame;
+	modifyFrame.controllerData = *currentData;
+	ADD_TO_QUEUE(ModifyFrame, modifyFrame, networkInstance)
 }
 
 void DataProcessing::toggleButtonState(Btn button) {
@@ -202,6 +209,11 @@ void DataProcessing::setCurrentFrame(uint32_t frameNum) {
 		// Focus to this specific row now
 		// This essentially scrolls to it
 		EnsureVisible(frameNum);
+
+		// Send to switch, I guess
+		Protocol::Struct_SetCurrentFrame setCurrentFrame;
+		setCurrentFrame.frame = currentFrame;
+		ADD_TO_QUEUE(SetCurrentFrame, setCurrentFrame, networkInstance)
 	}
 }
 
