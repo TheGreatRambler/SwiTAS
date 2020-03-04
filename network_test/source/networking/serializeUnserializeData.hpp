@@ -19,16 +19,16 @@ public:
 		T inputData;
 
 		// Create the archive
-		zpp::serializer::memory_input_archive in(serializingData);
+		zpp::serializer::memory_view_input_archive in(data, size);
 
 		// This simple
 		in(inputData);
 
-		serializingData.clear();
 		return inputData;
 	}
 
 	template <typename T> void dataToBinary(T inputData, uint8_t* data, uint16_t* size) {
+		serializingData.clear();
 		// Create the archive
 		zpp::serializer::memory_output_archive out(serializingData);
 
@@ -38,6 +38,5 @@ public:
 		// An unsigned char is one byte, so this is it
 		*size = (uint16_t)serializingData.size();
 		memcpy(data, serializingData.data(), *size);
-		serializingData.clear();
 	}
 };

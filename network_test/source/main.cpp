@@ -10,7 +10,8 @@ int main(int argc, char* argv[]) {
 	puts("Starting network test");
 	// Starts its own thread
 	CommunicateWithNetwork* communicateWithPC = new CommunicateWithNetwork();
-	uint8_t keepGoing                         = true;
+	puts("Instance created");
+	uint8_t keepGoing = true;
 	while(keepGoing) {
 		if(communicateWithPC->isConnected()) {
 			// Check the queues for data and print for debugging

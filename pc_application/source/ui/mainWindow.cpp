@@ -27,10 +27,11 @@ MainWindow::MainWindow()
 	// Load button data here
 	buttonData->setupButtonMapping(&mainSettings);
 
-	dataProcessingInstance = new DataProcessing(&mainSettings, buttonData, networkInstance, this);
-
 	// Start networking
 	networkInstance = std::make_shared<CommunicateWithNetwork>();
+
+	// DataProcessing can now start with the networking instance
+	dataProcessingInstance = new DataProcessing(&mainSettings, buttonData, networkInstance, this);
 
 	// UI instances
 	sideUI   = std::make_shared<SideUI>(this, &mainSettings, mainSizer, dataProcessingInstance);

@@ -66,7 +66,7 @@ void CommunicateWithNetwork::initNetwork() {
 
 	// Block for 3 seconds to recieve a byte
 	// Within 3 seconds
-	networkConnection->SetReceiveTimeout(3);
+	networkConnection->SetReceiveTimeout(5);
 
 #ifdef CLIENT_IMP
 	// Wait until string is good
@@ -78,9 +78,11 @@ void CommunicateWithNetwork::initNetwork() {
 		cv.notify_one();
 	*/
 	// Wait for IP address of server to be set
-	cv.wait(lk, [this] { return connectedToSocket.load(); });
-	// Unlock lock
-	lk.unlock();
+	// http://www.cplusplus.com/reference/condition_variable/condition_variable/
+	while(!connectedToSocket.load()) {
+		cv.wait(lk);
+	}
+
 #endif
 
 	// This will loop forever until keepReading is set to false
@@ -113,12 +115,13 @@ bool CommunicateWithNetwork::handleSocketError(int res) {
 
 #ifdef CLIENT_IMP
 void CommunicateWithNetwork::attemptConnectionToServer(const char* ip) {
+	std::unique_lock<std::mutex> lk(ipMutex);
 	if(!networkConnection->Open(ip, SERVER_PORT)) {
 		// There was an error
 		connectedToSocket = false;
 	} else {
-		connectedToSocket = true;
 		// We good, let the network thread know
+		connectedToSocket = true;
 		cv.notify_one();
 	}
 }
@@ -140,7 +143,7 @@ void CommunicateWithNetwork::listenForCommands() {
 		uint16_t dataSize;
 
 		if(readData((uint8_t*)&dataSize, sizeof(dataSize))) {
-			break;
+			continue;
 		}
 
 		DataFlag currentFlag;
@@ -151,7 +154,7 @@ void CommunicateWithNetwork::listenForCommands() {
 
 		// Get the flag now, just a uint8_t, no endian conversion, I think
 		if(readData((uint8_t*)&currentFlag, sizeof(currentFlag))) {
-			break;
+			continue;
 		}
 		// Flag now tells us the data we expect to recieve
 
@@ -159,7 +162,7 @@ void CommunicateWithNetwork::listenForCommands() {
 
 		// The message worked, so get the data
 		if(readData(dataToRead, dataSize)) {
-			break;
+			continue;
 		}
 
 		// Now, check over incoming queues, they will absorb the data if they correspond with the flag
