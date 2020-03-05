@@ -138,39 +138,40 @@ void CommunicateWithNetwork::listenForCommands() {
 		SEND_QUEUE_DATA(SetCurrentFrame)
 		SEND_QUEUE_DATA(ModifyFrame)
 
-		// Block for all this because it's in a main loop in a thread anyway
+		// Check if socket even has data before doing anything
+		if(networkConnection->Select()) {
+			uint16_t dataSize;
 
-		uint16_t dataSize;
+			if(readData((uint8_t*)&dataSize, sizeof(dataSize))) {
+				continue;
+			}
 
-		if(readData((uint8_t*)&dataSize, sizeof(dataSize))) {
-			continue;
+			DataFlag currentFlag;
+
+			// Get the number back to the correct representation
+			// https://linux.die.net/man/3/ntohl
+			dataSize = ntohs(dataSize);
+
+			// Get the flag now, just a uint8_t, no endian conversion, I think
+			if(readData((uint8_t*)&currentFlag, sizeof(currentFlag))) {
+				continue;
+			}
+			// Flag now tells us the data we expect to recieve
+
+			uint8_t* dataToRead = (uint8_t*)malloc(dataSize);
+
+			// The message worked, so get the data
+			if(readData(dataToRead, dataSize)) {
+				continue;
+			}
+
+			// Now, check over incoming queues, they will absorb the data if they correspond with the flag
+			// Keep in mind, this is not the main thread, so can't act upon the data instantly
+			RECIEVE_QUEUE_DATA(IsPaused)
+
+			// Free memory
+			free(dataToRead);
 		}
-
-		DataFlag currentFlag;
-
-		// Get the number back to the correct representation
-		// https://linux.die.net/man/3/ntohl
-		dataSize = ntohs(dataSize);
-
-		// Get the flag now, just a uint8_t, no endian conversion, I think
-		if(readData((uint8_t*)&currentFlag, sizeof(currentFlag))) {
-			continue;
-		}
-		// Flag now tells us the data we expect to recieve
-
-		uint8_t* dataToRead = (uint8_t*)malloc(dataSize);
-
-		// The message worked, so get the data
-		if(readData(dataToRead, dataSize)) {
-			continue;
-		}
-
-		// Now, check over incoming queues, they will absorb the data if they correspond with the flag
-		// Keep in mind, this is not the main thread, so can't act upon the data instantly
-		RECIEVE_QUEUE_DATA(IsPaused)
-
-		// Free memory
-		free(dataToRead);
 	}
 }
 

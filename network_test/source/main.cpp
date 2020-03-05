@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
 		if(communicateWithPC->isConnected()) {
 			// Check the queues for data and print for debugging
 			CHECK_QUEUE(communicateWithPC, ModifyFrame, {
-				printf("%d", data.frame);
+				printf("%d\n", data.frame);
 				// cool
 			})
 
@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
 			})
 
 			CHECK_QUEUE(communicateWithPC, SetCurrentFrame, {
-				printf("%d", data.frame);
+				printf("%d\n", data.frame);
 				// cool
 			})
 		}

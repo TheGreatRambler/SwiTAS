@@ -48,23 +48,24 @@ private:
 
 	void handleMenuBar(wxCommandEvent& commandEvent);
 
+	void addMenuBar();
+	void addStatusBar();
+
+	// Override default signal handler:
+	void keyDownHandler(wxKeyEvent& event);
+
+	void OnSize(wxSizeEvent& event);
+
 public:
 	MainWindow();
-
-	void addMenuBar();
-
-	// Called by wxApp
-	void onIdleLoop();
 
 	void endNetworking() {
 		// Force end it
 		networkInstance->endNetwork();
 	}
 
-	// Override default signal handler:
-	void keyDownHandler(wxKeyEvent& event);
-
-	void OnSize(wxSizeEvent& event);
+	// Called by wxApp
+	void onIdleLoop();
 
 	DECLARE_EVENT_TABLE();
 };

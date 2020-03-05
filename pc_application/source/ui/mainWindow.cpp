@@ -37,7 +37,8 @@ MainWindow::MainWindow()
 	sideUI   = std::make_shared<SideUI>(this, &mainSettings, mainSizer, dataProcessingInstance);
 	bottomUI = std::make_shared<BottomUI>(this, &mainSettings, buttonData, mainSizer, dataProcessingInstance);
 
-	// Add the top menubar
+	// Add the top menubar and the bottom statusbar
+	addStatusBar();
 	addMenuBar();
 
 	// No fit for now
@@ -117,6 +118,13 @@ void MainWindow::addMenuBar() {
 	SetMenuBar(menuBar);
 }
 
+void MainWindow::addStatusBar() {
+	// 1 element for now
+	CreateStatusBar(1);
+
+	SetStatusText("No Network Connected", 0);
+}
+
 void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 	wxWindowID id = commandEvent.GetId();
 	if(id == selectIPID) {
@@ -124,6 +132,7 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 		wxString ipAddress = wxGetTextFromUser("Please enter IP address of Nintendo Switch", "Server connect", wxEmptyString);
 		if(!ipAddress.empty()) {
 			// IP address entered
+			SetStatusText(ipAddress + ":" + std::to_string(SERVER_PORT), 0);
 			networkInstance->attemptConnectionToServer(ipAddress.c_str());
 		}
 	}
