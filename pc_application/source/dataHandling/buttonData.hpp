@@ -81,11 +81,9 @@ public:
 	struct ControllerData : public zpp::serializer::polymorphic {
 		// This controller's index
 		uint8_t index;
-		// Button data (stored as a bitset because it will be serialized better later)
-		// 20 buttons
-		// This storage can be sacrificed for the simple reason that the other data
-		// already takes up so much space
-		uint8_t buttons[20];
+		// Button data stored with bitflags in 3 bytes
+		// 20 flags need to be stored
+		uint8_t buttons[3];
 		// Joystick values
 		int16_t LS_X = 0;
 		int16_t LS_Y = 0;

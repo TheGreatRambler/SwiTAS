@@ -1,5 +1,7 @@
 #pragma once
 
+#DEFINE SET_BIT(number, bit, loc) number ^= (-(unsigned long)bit ^ number) & (1UL << loc);
+
 #include <bitset>
 #include <cstdint>
 #include <cstdio>

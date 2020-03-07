@@ -169,12 +169,34 @@ void DataProcessing::OnEraseBackground(wxEraseEvent& event) {
 }
 
 bool DataProcessing::getButtonState(Btn button) {
-	// Get value from the bitset
-	return currentData->buttons[button];
+	// Get value from the bitflags
+	uint8_t group;
+	uint8_t position;
+	if(button < 8) {
+		group    = currentData->buttons[0];
+		position = button;
+	} else if(button < 16) {
+		group    = currentData->buttons[1];
+		position = button - 8;
+	} else {
+		// All other bits go here
+		group    = currentData->buttons[2];
+		position = button - 16;
+	}
+	return (group >> position) & 1U;
 }
 
 void DataProcessing::setButtonState(Btn button, bool state) {
 	currentData->buttons[button] = state;
+
+	if(button < 8) {
+		SET_BIT(currentData->buttons[0], state, button)
+	} else if(button < 16) {
+		SET_BIT(currentData->buttons[1], state, button - 8)
+	} else {
+		// All other bits go here
+		SET_BIT(currentData->buttons[2], state, button - 16)
+	}
 	// Because of virtual, just trigger an update of the item
 
 	Freeze();
