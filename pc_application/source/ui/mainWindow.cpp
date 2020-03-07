@@ -27,16 +27,18 @@ MainWindow::MainWindow()
 	// Load button data here
 	buttonData->setupButtonMapping(&mainSettings);
 
-	dataProcessingInstance = new DataProcessing(&mainSettings, buttonData, this);
-
 	// Start networking
-	networkInstance = std::make_shared<CommunicateWithSwitch>();
+	networkInstance = std::make_shared<CommunicateWithNetwork>();
+
+	// DataProcessing can now start with the networking instance
+	dataProcessingInstance = new DataProcessing(&mainSettings, buttonData, networkInstance, this);
 
 	// UI instances
 	sideUI   = std::make_shared<SideUI>(this, &mainSettings, mainSizer, dataProcessingInstance);
 	bottomUI = std::make_shared<BottomUI>(this, &mainSettings, buttonData, mainSizer, dataProcessingInstance);
 
-	// Add the top menubar
+	// Add the top menubar and the bottom statusbar
+	addStatusBar();
 	addMenuBar();
 
 	// No fit for now
@@ -85,6 +87,13 @@ void MainWindow::OnSize(wxSizeEvent& event) {
 
 void MainWindow::onIdleLoop() {
 	// Read queues from the network and do things, TODO
+	if(networkInstance->isConnected()) {
+		CHECK_QUEUE(networkInstance, IsPaused, {
+			if(data.isPaused) {
+				// cool
+			}
+		})
+	}
 }
 
 void MainWindow::getGlobalSettings(rapidjson::Document* d) {
@@ -95,7 +104,36 @@ void MainWindow::getGlobalSettings(rapidjson::Document* d) {
 }
 
 void MainWindow::addMenuBar() {
-	// https://www.lucidarme.me/gtkmm-example-13/
-	// Add menubar to layout
-	// mainLayout.pack_start(menuBar, Gtk::PACK_SHRINK);
+	menuBar = new wxMenuBar();
+
+	wxMenu* fileMenu = new wxMenu();
+
+	selectIPID = NewControlId();
+	fileMenu->Append(selectIPID, "&Server");
+
+	menuBar->Append(fileMenu, "&File");
+
+	Bind(wxEVT_MENU, &MainWindow::handleMenuBar, this, wxID_ANY);
+
+	SetMenuBar(menuBar);
+}
+
+void MainWindow::addStatusBar() {
+	// 1 element for now
+	CreateStatusBar(1);
+
+	SetStatusText("No Network Connected", 0);
+}
+
+void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
+	wxWindowID id = commandEvent.GetId();
+	if(id == selectIPID) {
+		// IP needs to be selected
+		wxString ipAddress = wxGetTextFromUser("Please enter IP address of Nintendo Switch", "Server connect", wxEmptyString);
+		if(!ipAddress.empty()) {
+			// IP address entered
+			SetStatusText(ipAddress + ":" + std::to_string(SERVER_PORT), 0);
+			networkInstance->attemptConnectionToServer(ipAddress.c_str());
+		}
+	}
 }

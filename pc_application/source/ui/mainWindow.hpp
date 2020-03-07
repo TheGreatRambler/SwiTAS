@@ -13,8 +13,8 @@
 
 #include "../dataHandling/buttonData.hpp"
 #include "../dataHandling/dataProcessing.hpp"
-#include "../dataHandling/interfaceWithSwitch.hpp"
 #include "../helpers.hpp"
+#include "../networking/networkInterface.hpp"
 #include "bottomUI.hpp"
 #include "sideUI.hpp"
 
@@ -35,29 +35,37 @@ private:
 	// Pointer to the class containing important input stuff
 	DataProcessing* dataProcessingInstance;
 	// Networking stuff
-	std::shared_ptr<CommunicateWithSwitch> networkInstance;
+	std::shared_ptr<CommunicateWithNetwork> networkInstance;
+
+	// Menubar
+	wxMenuBar* menuBar;
+	// Menubar menus
+	wxWindowID selectIPID;
 
 	void handlePreviousWindowTransform();
 
 	void getGlobalSettings(rapidjson::Document* d);
 
-public:
-	MainWindow();
+	void handleMenuBar(wxCommandEvent& commandEvent);
 
 	void addMenuBar();
+	void addStatusBar();
 
-	// Called by wxApp
-	void onIdleLoop();
+	// Override default signal handler:
+	void keyDownHandler(wxKeyEvent& event);
+
+	void OnSize(wxSizeEvent& event);
+
+public:
+	MainWindow();
 
 	void endNetworking() {
 		// Force end it
 		networkInstance->endNetwork();
 	}
 
-	// Override default signal handler:
-	void keyDownHandler(wxKeyEvent& event);
-
-	void OnSize(wxSizeEvent& event);
+	// Called by wxApp
+	void onIdleLoop();
 
 	DECLARE_EVENT_TABLE();
 };

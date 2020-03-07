@@ -2,6 +2,7 @@
 
 #DEFINE SET_BIT(number, bit, loc) number ^= (-(unsigned long)bit ^ number) & (1UL << loc);
 
+#include <Windows.h>
 #include <bitset>
 #include <cstdint>
 #include <cstdio>
@@ -13,11 +14,13 @@
 #include <string>
 #include <tuple>
 #include <utility>
+#include <uxtheme.h>
 #include <vector>
 #include <wx/grid.h>
 #include <wx/listctrl.h>
 #include <wx/wx.h>
 
+#include "../networking/networkInterface.hpp"
 #include "buttonData.hpp"
 
 class DataProcessing : public wxListCtrl {
@@ -38,6 +41,8 @@ private:
 	// Using callbacks for inputs
 	std::function<void(Btn, bool)> inputCallback;
 	std::function<void(uint32_t, uint32_t)> viewableInputsCallback;
+	// Network instance for sending to switch
+	std::shared_ptr<CommunicateWithNetwork> networkInstance;
 	// Main settings
 	rapidjson::Document* mainSettings;
 	// Mask color for transparency
@@ -51,7 +56,7 @@ private:
 public:
 	static const int LIST_CTRL_ID = 1000;
 
-	DataProcessing(rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxWindow* parent);
+	DataProcessing(rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, std::shared_ptr<CommunicateWithNetwork> communicateWithNetwork, wxWindow* parent);
 
 	void setInputCallback(std::function<void(Btn, bool)> callback);
 

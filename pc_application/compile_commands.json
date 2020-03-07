@@ -56,27 +56,6 @@
    "-D__WXMSW__",
    "-I./include",
    "-c",
-   "source/dataHandling/interfaceWithSwitch.cpp",
-   "-o",
-   "bin/./source/dataHandling/interfaceWithSwitch.cpp.o"
-  ],
-  "file": "source/dataHandling/interfaceWithSwitch.cpp"
- },
- {
-  "directory": "C:\\Users\\aehar\\Desktop\\projects\\VSC_Projects\\NX-TAS-UI\\pc_application",
-  "arguments": [
-   "x86_64-w64-mingw32-g++",
-   "-Wall",
-   "-Wno-maybe-uninitialized",
-   "-ggdb",
-   "-m64",
-   "-std=gnu++17",
-   "-IC:/msys2/mingw64/lib/wx/include/msw-unicode-static-3.1",
-   "-IC:/msys2/mingw64/include/wx-3.1",
-   "-D_FILE_OFFSET_BITS=64",
-   "-D__WXMSW__",
-   "-I./include",
-   "-c",
    "source/main.cpp",
    "-o",
    "bin/./source/main.cpp.o"
@@ -240,27 +219,6 @@
    "-D__WXMSW__",
    "-I./include",
    "-c",
-   "source/dataHandling/serializeUnserializeData.cpp",
-   "-o",
-   "bin/./source/dataHandling/serializeUnserializeData.cpp.o"
-  ],
-  "file": "source/dataHandling/serializeUnserializeData.cpp"
- },
- {
-  "directory": "C:\\Users\\aehar\\Desktop\\projects\\VSC_Projects\\NX-TAS-UI\\pc_application",
-  "arguments": [
-   "x86_64-w64-mingw32-g++",
-   "-Wall",
-   "-Wno-maybe-uninitialized",
-   "-ggdb",
-   "-m64",
-   "-std=gnu++17",
-   "-IC:/msys2/mingw64/lib/wx/include/msw-unicode-static-3.1",
-   "-IC:/msys2/mingw64/include/wx-3.1",
-   "-D_FILE_OFFSET_BITS=64",
-   "-D__WXMSW__",
-   "-I./include",
-   "-c",
    "source/helpers.cpp",
    "-o",
    "bin/./source/helpers.cpp.o"
@@ -287,5 +245,47 @@
    "bin/./source/ui/drawingCanvas.cpp.o"
   ],
   "file": "source/ui/drawingCanvas.cpp"
+ },
+ {
+  "directory": "C:\\Users\\aehar\\Desktop\\projects\\VSC_Projects\\NX-TAS-UI\\pc_application",
+  "arguments": [
+   "x86_64-w64-mingw32-g++",
+   "-Wall",
+   "-Wno-maybe-uninitialized",
+   "-ggdb",
+   "-m64",
+   "-std=gnu++17",
+   "-IC:/msys2/mingw64/lib/wx/include/msw-unicode-static-3.1",
+   "-IC:/msys2/mingw64/include/wx-3.1",
+   "-D_FILE_OFFSET_BITS=64",
+   "-D__WXMSW__",
+   "-I./include",
+   "-c",
+   "source/networking/serializeUnserializeData.cpp",
+   "-o",
+   "bin/./source/networking/serializeUnserializeData.cpp.o"
+  ],
+  "file": "source/networking/serializeUnserializeData.cpp"
+ },
+ {
+  "directory": "C:\\Users\\aehar\\Desktop\\projects\\VSC_Projects\\NX-TAS-UI\\pc_application",
+  "arguments": [
+   "x86_64-w64-mingw32-g++",
+   "-Wall",
+   "-Wno-maybe-uninitialized",
+   "-ggdb",
+   "-m64",
+   "-std=gnu++17",
+   "-IC:/msys2/mingw64/lib/wx/include/msw-unicode-static-3.1",
+   "-IC:/msys2/mingw64/include/wx-3.1",
+   "-D_FILE_OFFSET_BITS=64",
+   "-D__WXMSW__",
+   "-I./include",
+   "-c",
+   "source/networking/networkInterface.cpp",
+   "-o",
+   "bin/./source/networking/networkInterface.cpp.o"
+  ],
+  "file": "source/networking/networkInterface.cpp"
  }
 ]

@@ -5,32 +5,30 @@
 #include <memory>
 #include <zpp.hpp>
 
-// Structs for the
-struct Protocol_SetProjectName {
-	std::string name;
-};
+#include "networkingStructures.hpp"
 
-namespace SerializeProtocol {
-	// clang-format on
+class SerializeProtocol {
+private:
 	// Will be converted to bytes
 	std::vector<unsigned char> serializingData;
 
+public:
 	// Both of these functions are deliberately designed to deal with any kind of struct
-	template <typename T> std::shared_ptr<T> binaryToData(uint8_t* data, uint16_t size) {
+	template <typename T> T binaryToData(uint8_t* data, uint16_t size) {
 		// Load with YAS
-		std::shared_ptr<T> inputData = std::make_shared<T>();
+		T inputData;
 
 		// Create the archive
-		zpp::serializer::memory_input_archive in(serializingData);
+		zpp::serializer::memory_view_input_archive in(data, size);
 
 		// This simple
 		in(inputData);
 
-		serializingData.clear();
 		return inputData;
 	}
 
-	template <typename T> void dataToBinary(std::shared_ptr<T> inputData, uint8_t* data, uint16_t* size) {
+	template <typename T> void dataToBinary(T inputData, uint8_t* data, uint16_t* size) {
+		serializingData.clear();
 		// Create the archive
 		zpp::serializer::memory_output_archive out(serializingData);
 
@@ -40,6 +38,5 @@ namespace SerializeProtocol {
 		// An unsigned char is one byte, so this is it
 		*size = (uint16_t)serializingData.size();
 		memcpy(data, serializingData.data(), *size);
-		serializingData.clear();
 	}
-}
+};

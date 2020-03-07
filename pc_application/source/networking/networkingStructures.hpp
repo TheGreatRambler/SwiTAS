@@ -3,21 +3,12 @@
 #include <cstdint>
 #include <zpp.hpp>
 
-#include "buttonData.hpp"
-
-// Needed for ZPP
-// clang-format off
-#define SERIALIZE_DATA(...)  \
-	friend zpp::serializer::access; \
-	template <typename Archive, typename Self> static void serialize(Archive& archive, Self& self) { \
-		archive(__VA_ARGS__); \
-	}
-// clang-format on
+#include "../dataHandling/buttonData.hpp"
 
 // clang-format off
 #define DEFINE_STRUCT(Flag, body, ...) \
 	struct Struct_##Flag : public zpp::serializer::polymorphic { \
-		DataFlag flag = DataFlag::##Flag; \
+		DataFlag flag = DataFlag::Flag; \
 		body \
 		friend zpp::serializer::access; \
 		template <typename Archive, typename Self> static void serialize(Archive& archive, Self& self) { \
@@ -31,6 +22,8 @@ enum DataFlag : uint8_t {
 	SetCurrentFrame,
 	ModifyFrame,
 	IsPaused,
+	RecieveGameFramebuffer,
+	RecieveGameInfo,
 	NUM_OF_FLAGS,
 };
 
@@ -52,5 +45,13 @@ namespace Protocol {
 	DEFINE_STRUCT(IsPaused,
 		uint8_t isPaused;
 	, self.isPaused)
+
+	DEFINE_STRUCT(RecieveGameFramebuffer,
+		std::vector<uint8_t> frameBuffer;
+	, self.frameBuffer)
+
+	DEFINE_STRUCT(RecieveGameInfo,
+		std::string userNickname;
+	, self.userNickname)
 };
 // clang-format on
