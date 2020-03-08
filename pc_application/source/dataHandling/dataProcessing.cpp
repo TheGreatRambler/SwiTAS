@@ -51,14 +51,8 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 		i++;
 	}
 	SetImageList(&imageList, wxIMAGE_LIST_SMALL);
-	/*
-	#ifdef _WIN32
-		// Enable dark mode, super experimential, apparently
-		// needs to be applied to every window, however
-		SetWindowTheme(GetHWND(), L"DarkMode_Explorer", NULL);
-		Refresh();
-	#endif
-	*/
+	// Set item attributes for nice colors
+	setItemAttributes();
 	for(int i = 0; i < 30; i++) {
 		addNewFrame();
 	}
@@ -67,6 +61,9 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 // clang-format off
 BEGIN_EVENT_TABLE(DataProcessing, wxListCtrl)
 	EVT_LIST_CACHE_HINT(DataProcessing::LIST_CTRL_ID, DataProcessing::onCacheHint)
+	EVT_LIST_ITEM_SELECTED(DataProcessing::LIST_CTRL_ID, DataProcessing::onSelect)
+	// This is activated via double click
+	EVT_LIST_ITEM_ACTIVATED(DataProcessing::LIST_CTRL_ID, DataProcessing::onActivate)
 	EVT_ERASE_BACKGROUND(DataProcessing::OnEraseBackground)
 END_EVENT_TABLE()
 // clang-format on
@@ -75,7 +72,7 @@ void DataProcessing::setInputCallback(std::function<void(Btn, bool)> callback) {
 	inputCallback = callback;
 }
 
-void DataProcessing::setViewableInputsCallback(std::function<void(uint32_t, uint32_t)> callback) {
+void DataProcessing::setViewableInputsCallback(std::function<void(FrameNum, FrameNum)> callback) {
 	viewableInputsCallback = callback;
 }
 
@@ -115,6 +112,37 @@ wxString DataProcessing::OnGetItemText(long row, long column) const {
 		return "";
 	}
 	// This function shouldn't recieve any other column
+}
+
+wxItemAttr* DataProcessing::OnGetItemAttr(long item) const {
+	uint8_t state = inputsList[item]->frameState;
+	return itemAttributes.at(state);
+}
+
+void DataProcessing::setItemAttributes() {
+	// Reuse both variables
+	uint8_t state = 0;
+	wxItemAttr* itemAttribute;
+
+	// Default is nothing
+	SET_BIT(state, 0, FrameState::RAN);
+	itemAttribute = new wxItemAttr();
+	itemAttribute->SetBackgroundColour(wxColor((*mainSettings)["ui"]["frameViewerColors"]["notRan"].GetString()));
+	itemAttributes[state] = itemAttribute;
+
+	SET_BIT(state, 1, FrameState::RAN);
+	itemAttribute = new wxItemAttr();
+	itemAttribute->SetBackgroundColour(wxColor((*mainSettings)["ui"]["frameViewerColors"]["ran"].GetString()));
+	itemAttributes[state] = itemAttribute;
+	SET_BIT(state, 0, FrameState::RAN);
+
+	SET_BIT(state, 1, FrameState::SAVESTATE_HOOK);
+	itemAttribute = new wxItemAttr();
+	itemAttribute->SetBackgroundColour(wxColor((*mainSettings)["ui"]["frameViewerColors"]["savestateHook"].GetString()));
+	itemAttributes[state] = itemAttribute;
+	// SavestateHook takes precedence in the case where both are present
+	SET_BIT(state, 1, FrameState::RAN);
+	itemAttributes[state] = itemAttribute;
 }
 
 void DataProcessing::OnEraseBackground(wxEraseEvent& event) {
@@ -166,6 +194,10 @@ void DataProcessing::OnEraseBackground(wxEraseEvent& event) {
 	}
 }
 
+void DataProcessing::onSelect(wxListEvent& event) {}
+
+void DataProcessing::onActivate(wxListEvent& event) {}
+
 bool DataProcessing::getButtonState(Btn button) {
 	// Get value from the bitflags
 	uint8_t group;
@@ -181,27 +213,45 @@ bool DataProcessing::getButtonState(Btn button) {
 		group    = currentData->buttons[2];
 		position = button - 16;
 	}
-	return (group >> position) & 1U;
+	return GET_BIT(group, position);
 }
 
 void DataProcessing::setButtonState(Btn button, bool state) {
 	currentData->buttons[button] = state;
 
 	if(button < 8) {
-		SET_BIT(currentData->buttons[0], state, button)
+		SET_BIT(currentData->buttons[0], state, button);
 	} else if(button < 16) {
-		SET_BIT(currentData->buttons[1], state, button - 8)
+		SET_BIT(currentData->buttons[1], state, button - 8);
 	} else {
 		// All other bits go here
-		SET_BIT(currentData->buttons[2], state, button - 16)
+		SET_BIT(currentData->buttons[2], state, button - 16);
 	}
-	// Because of virtual, just trigger an update of the item
 
-	Freeze();
-	wxRect itemRect;
-	GetSubItemRect(currentFrame, buttonToColumn[button], itemRect);
-	RefreshRect(itemRect);
-	Thaw();
+	// Because of run colors (run is invalidated on modify), need to do some trickery
+
+	// If this frame is not run, use the fast method
+	if(!GET_BIT(currentData->frameState, FrameState::RAN)) {
+		Freeze();
+		wxRect itemRect;
+		GetSubItemRect(currentFrame, buttonToColumn[button], itemRect);
+		RefreshRect(itemRect);
+		Thaw();
+	} else {
+		// If it's run, have to do a slow way, kinda
+		FrameNum frame = currentFrame + 1;
+		while(true) {
+			if(!GET_BIT(inputsList[frame]->frameState, FrameState::RAN)) {
+				// Refresh all these items
+				// I don't care if it's way off the page, I think wxWidgets handles for this
+				RefreshItems(currentFrame, frame - 1);
+				break;
+			}
+			// Set bit
+			SET_BIT(inputsList[frame]->frameState, 0, FrameState::RAN);
+			frame++;
+		}
+	}
 
 	// Make the grid aware
 	if(inputCallback) {
@@ -220,7 +270,7 @@ void DataProcessing::toggleButtonState(Btn button) {
 	setButtonState(button, !getButtonState(button));
 }
 
-void DataProcessing::setCurrentFrame(uint32_t frameNum) {
+void DataProcessing::setCurrentFrame(FrameNum frameNum) {
 	// Must be a frame that has already been written, else, raise error
 	if(frameNum < inputsList.size()) {
 		// Set the current frame to this frame
@@ -246,25 +296,46 @@ void DataProcessing::addNewFrame() {
 	currentFrame = inputsList.size();
 	// Will overwrite previous frame if need be
 	currentData = std::make_shared<ControllerData>();
+	// Set some defaults now
+	SET_BIT(currentData->frameState, 0, FrameState::RAN);
 	// Add this to the vector
 	inputsList.push_back(currentData);
-	// Add to the table
-	// Gtk::TreeModel::Row row    = *(controllerListStore->append());
-	// row[inputColumns.frameNum] = currentFrame;
-	// for(auto const& pixbufData : inputColumns.buttonPixbufs) {
-	// Turn all buttons automatically to off
-	// Dereference pointer to get to it
-	// Set all to off
-	// setButtonState(pixbufData.first, false);
-	//}
 	// Because of the usuability of virtual list controls, just update the length
 	SetItemCount(inputsList.size());
 	// Now, set the index to here so that some stuff can be ran
 	setCurrentFrame(currentFrame);
 }
 
+void DataProcessing::createSavestateHookHere() {
+	// Add one savestate hook at this frame
+	savestateHooks[currentFrame] = std::make_shared<SavestateHook>();
+	// Set the style of this frame
+	SET_BIT(currentData->frameState, 1, FrameState::SAVESTATE_HOOK);
+	// Refresh the item for it to take effect
+	RefreshItem(currentFrame);
+}
+
+void DataProcessing::runFrame() {
+	// Run the frame TODO
+	// Change the state and get colors
+	SET_BIT(currentData->frameState, 1, FrameState::RAN);
+	RefreshItem(currentFrame);
+	// Set the current frame to the next one if you can
+	if(currentFrame != inputsList.size()) {
+		// Increment frame
+		setCurrentFrame(currentFrame + 1);
+	}
+}
+
 void DataProcessing::handleKeyboardInput(wxChar key) {
 	if(charToButton.count(key)) {
 		toggleButtonState(charToButton[key]);
+	}
+}
+
+DataProcessing::~DataProcessing() {
+	for(auto& itemAttribute : itemAttributes) {
+		// Free the sucker
+		// free(itemAttribute.second);
 	}
 }

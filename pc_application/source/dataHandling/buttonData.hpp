@@ -52,6 +52,11 @@ public:
 		BUTTONS_SIZE,
 	};
 
+	enum FrameState : uint8_t {
+		RAN,
+		SAVESTATE_HOOK,
+	};
+
 	// To convert names
 	std::map<std::string, Btn> stringToButton {
 		{ "A", Btn::A },
@@ -96,6 +101,8 @@ public:
 		int16_t GYRO_1  = 0;
 		int16_t GYRO_2  = 0;
 		int16_t GYRO_3  = 0;
+		// State of the frame, mostly for the editor
+		uint8_t frameState;
 
 		friend zpp::serializer::access;
 		template <typename Archive, typename Self> static void serialize(Archive& archive, Self& self) {
@@ -103,7 +110,8 @@ public:
 			archive(self.index, self.buttons,
 				self.LS_X, self.LS_Y, self.RS_X, self.RS_Y,
 				self.ACCEL_X, self.ACCEL_Y, self.ACCEL_Z,
-				self.GYRO_1, self.GYRO_2, self.GYRO_3);
+				self.GYRO_1, self.GYRO_2, self.GYRO_3,
+				self.frameState);
 			// clang-format on
 		}
 	};
@@ -129,6 +137,11 @@ public:
 		uint8_t gridY;
 	};
 
+	struct SavestateHook {
+		// I don't know what to put here yet
+		uint32_t frame;
+	};
+
 	const uint8_t KeyWidth  = 11;
 	const uint8_t KeyHeight = 4;
 
@@ -142,5 +155,9 @@ public:
 // Some good typedef's
 
 typedef ButtonData::Btn Btn;
+typedef ButtonData::FrameState FrameState;
 typedef ButtonData::ControllerData ControllerData;
 typedef ButtonData::ButtonInfo ButtonInfo;
+typedef ButtonData::SavestateHook SavestateHook;
+// So that types are somewhat unified
+typedef uint32_t FrameNum;

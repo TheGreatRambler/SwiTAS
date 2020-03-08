@@ -214,7 +214,7 @@
 			"gridY": 3
 		}
 	},
-	"iconTransparent": "rgb(48,0,77)",
+	"iconTransparent": "rgb(48, 0, 77)",
 	"inputsList": {
 		"imageWidth": 30,
 		"imageHeight": 30
@@ -226,9 +226,15 @@
 	"programIcon": "share/icons/nxtas/logo/main.png",
 	"videoViewerDefaultImage": "share/images/novideodefault.jpg",
 	"ui": {
-		"playButton": "share/icons/nxtas/buttons/playButton.png",
+		"addFrameButton": "share/icons/nxtas/buttons/addFrameButton.png",
 		"frameAdvanceButton": "share/icons/nxtas/buttons/frameAdvanceButton.png",
+		"savestateHookButton": "share/icons/nxtas/buttons/savestateHookButton.png",
 		"buttonWidth": 80,
-		"buttonHeight": 80
+		"buttonHeight": 80,
+		"frameViewerColors": {
+			"notRan": "rgb(223, 227, 235)",
+			"ran": "rgb(144, 252, 189)",
+			"savestateHook": "rgb(252, 144, 169)"
+		}
 	}
 }

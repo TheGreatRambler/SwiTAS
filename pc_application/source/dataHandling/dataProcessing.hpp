@@ -1,6 +1,7 @@
 #pragma once
 
-#DEFINE SET_BIT(number, bit, loc) number ^= (-(unsigned long)bit ^ number) & (1UL << loc);
+#define SET_BIT(number, bit, loc) (number) ^= (-(unsigned long)(bit) ^ (number)) & (1UL << (loc))
+#define GET_BIT(number, loc) ((number) >> (loc)) & 1U
 
 #include <Windows.h>
 #include <bitset>
@@ -34,13 +35,14 @@ private:
 	// Button data
 	std::shared_ptr<ButtonData> buttonData;
 	// Current frame
-	uint32_t currentFrame;
+	FrameNum currentFrame;
+	FrameNum currentRunFrame;
 	// Tree data storing the controller stuffs
 	// Use generic because it reports scroll events
 	wxImageList imageList;
 	// Using callbacks for inputs
 	std::function<void(Btn, bool)> inputCallback;
-	std::function<void(uint32_t, uint32_t)> viewableInputsCallback;
+	std::function<void(FrameNum, FrameNum)> viewableInputsCallback;
 	// Network instance for sending to switch
 	std::shared_ptr<CommunicateWithNetwork> networkInstance;
 	// Main settings
@@ -50,8 +52,21 @@ private:
 	// Map to get column
 	std::unordered_map<Btn, uint8_t> buttonToColumn;
 	std::unordered_map<wxChar, Btn> charToButton;
+	// Probably not smart, but the current savestate hooks
+	std::unordered_map<FrameNum, std::shared_ptr<SavestateHook>> savestateHooks;
+	// Universal item attributes for certain attributes
+	std::unordered_map<uint8_t, wxItemAttr*> itemAttributes;
+
 	virtual int OnGetItemColumnImage(long item, long column) const override;
 	virtual wxString OnGetItemText(long item, long column) const override;
+	virtual wxItemAttr* OnGetItemAttr(long item) const override;
+
+	void setItemAttributes();
+
+	void OnEraseBackground(wxEraseEvent& event);
+
+	void onSelect(wxListEvent& event);
+	void onActivate(wxListEvent& event);
 
 public:
 	static const int LIST_CTRL_ID = 1000;
@@ -60,7 +75,7 @@ public:
 
 	void setInputCallback(std::function<void(Btn, bool)> callback);
 
-	void setViewableInputsCallback(std::function<void(uint32_t, uint32_t)> callback);
+	void setViewableInputsCallback(std::function<void(FrameNum, FrameNum)> callback);
 
 	bool getButtonState(Btn button);
 
@@ -68,9 +83,11 @@ public:
 
 	void toggleButtonState(Btn button);
 
-	void setCurrentFrame(uint32_t frameNum);
+	void setCurrentFrame(FrameNum frameNum);
 
 	void addNewFrame();
+	void createSavestateHookHere();
+	void runFrame();
 
 	wxRect getFirstItemRect() {
 		wxRect itemRect;
@@ -95,7 +112,7 @@ public:
 		}
 	}
 
-	void OnEraseBackground(wxEraseEvent& event);
+	~DataProcessing();
 
 	DECLARE_EVENT_TABLE();
 };

@@ -34,11 +34,11 @@ namespace Protocol {
 	, self.name)
 
 	DEFINE_STRUCT(SetCurrentFrame,
-		uint32_t frame;
+		FrameNum frame;
 	, self.frame)
 
 	DEFINE_STRUCT(ModifyFrame,
-		uint32_t frame;
+		FrameNum frame;
 		ControllerData controllerData;
 	, self.frame, self.controllerData)
 

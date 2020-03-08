@@ -11,7 +11,7 @@ FrameCanvas::FrameCanvas(wxFrame* parent, DataProcessing* dataProcessing, wxRect
 	inputData->setViewableInputsCallback(std::bind(&FrameCanvas::rangeUpdated, this, std::placeholders::_1, std::placeholders::_2));
 }
 
-void FrameCanvas::rangeUpdated(uint32_t first, uint32_t last) {
+void FrameCanvas::rangeUpdated(FrameNum first, FrameNum last) {
 	if(first != currentFirst || last != currentLast) {
 		currentFirst = first;
 		currentLast  = last;
@@ -36,7 +36,7 @@ void FrameCanvas::draw(wxDC& dc) {
 	int startY     = firstRect.GetBottomLeft().y;
 	int itemHeight = firstRect.GetHeight();
 
-	for(uint32_t i = 0; i < numOfItems; i++) {
+	for(FrameNum i = 0; i < numOfItems; i++) {
 		if((i + currentFirst) % 2 == 0) {
 			dc.SetBrush(*wxLIGHT_GREY_BRUSH);
 		} else {
@@ -63,25 +63,31 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* 
 	frameDrawer = new FrameCanvas(parentFrame, inputData, inputData->getFirstItemRect());
 	frameDrawer->setBackgroundColor(*wxLIGHT_GREY);
 
-	wxImage resizedPlayImage(HELPERS::resolvePath((*mainSettings)["ui"]["playButton"].GetString()));
-	resizedPlayImage.Rescale((*mainSettings)["ui"]["buttonWidth"].GetInt(), (*mainSettings)["ui"]["buttonHeight"].GetInt());
+	wxImage resizedaddFrameImage(HELPERS::resolvePath((*mainSettings)["ui"]["addFrameButton"].GetString()));
+	resizedaddFrameImage.Rescale((*mainSettings)["ui"]["buttonWidth"].GetInt(), (*mainSettings)["ui"]["buttonHeight"].GetInt());
 	wxImage resizedFrameAdvanceImage(HELPERS::resolvePath((*mainSettings)["ui"]["frameAdvanceButton"].GetString()));
 	resizedFrameAdvanceImage.Rescale((*mainSettings)["ui"]["buttonWidth"].GetInt(), (*mainSettings)["ui"]["buttonHeight"].GetInt());
+	wxImage resizedSavestateHookImage(HELPERS::resolvePath((*mainSettings)["ui"]["savestateHookButton"].GetString()));
+	resizedSavestateHookImage.Rescale((*mainSettings)["ui"]["buttonWidth"].GetInt(), (*mainSettings)["ui"]["buttonHeight"].GetInt());
 
-	playBitmap         = new wxBitmap(resizedPlayImage);
-	frameAdvanceBitmap = new wxBitmap(resizedFrameAdvanceImage);
+	addFrameBitmap      = new wxBitmap(resizedaddFrameImage);
+	frameAdvanceBitmap  = new wxBitmap(resizedFrameAdvanceImage);
+	savestateHookBitmap = new wxBitmap(resizedSavestateHookImage);
 
-	playButton         = new wxBitmapButton(parentFrame, wxID_ANY, *playBitmap);
-	frameAdvanceButton = new wxBitmapButton(parentFrame, wxID_ANY, *frameAdvanceBitmap);
+	addFrameButton      = new wxBitmapButton(parentFrame, wxID_ANY, *addFrameBitmap);
+	frameAdvanceButton  = new wxBitmapButton(parentFrame, wxID_ANY, *frameAdvanceBitmap);
+	savestateHookButton = new wxBitmapButton(parentFrame, wxID_ANY, *savestateHookBitmap);
 
 	// Button handlers
-	playButton->Bind(wxEVT_BUTTON, &SideUI::onPlayPressed, this);
+	addFrameButton->Bind(wxEVT_BUTTON, &SideUI::onAddFramePressed, this);
 	frameAdvanceButton->Bind(wxEVT_BUTTON, &SideUI::onFrameAdvancePressed, this);
+	savestateHookButton->Bind(wxEVT_BUTTON, &SideUI::onSavestateHookPressed, this);
 
 	// TODO all these expands and all seem suspect
 
-	buttonSizer->Add(playButton, 1);
+	buttonSizer->Add(addFrameButton, 1);
 	buttonSizer->Add(frameAdvanceButton, 1);
+	buttonSizer->Add(savestateHookButton, 1);
 
 	// Not wxEXPAND
 	verticalBoxSizer->Add(buttonSizer, 0, wxEXPAND);
@@ -97,11 +103,17 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* 
 	sizer->Add(verticalBoxSizer, 2, wxEXPAND | wxALL);
 }
 
-void SideUI::onPlayPressed(wxCommandEvent& event) {
-	// Clicked
+void SideUI::onAddFramePressed(wxCommandEvent& event) {
+	// Add frame
+	inputData->addNewFrame();
 }
 
 void SideUI::onFrameAdvancePressed(wxCommandEvent& event) {
 	// New frame must be added, will do more later
-	inputData->addNewFrame();
+	inputData->runFrame();
+}
+
+void SideUI::onSavestateHookPressed(wxCommandEvent& event) {
+	// New frame must be added, will do more later
+	inputData->createSavestateHookHere();
 }
