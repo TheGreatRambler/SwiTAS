@@ -16,12 +16,17 @@ private:
 	FrameNum currentFirst;
 	FrameNum currentLast;
 
+	FrameNum currentFrame;
+	FrameNum currentRunFrame;
+	FrameNum currentImageFrame;
+
 	wxRect firstRect;
+
+	void rangeUpdated(FrameNum first, FrameNum last);
+	void currentFrameUpdated(FrameNum frame, FrameNum runFrame, FrameNum imageFrame);
 
 public:
 	FrameCanvas(wxFrame* parent, DataProcessing* dataProcessing, wxRect firstItemRect);
-
-	void rangeUpdated(FrameNum first, FrameNum last);
 
 	virtual void draw(wxDC& dc) override;
 };

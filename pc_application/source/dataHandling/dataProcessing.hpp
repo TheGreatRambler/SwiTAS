@@ -34,24 +34,34 @@ private:
 	std::shared_ptr<ControllerData> currentData;
 	// Button data
 	std::shared_ptr<ButtonData> buttonData;
-	// Current frame
+
+	// Current frames
+	// What you can edit
 	FrameNum currentFrame;
+	// What is the state of the switch
 	FrameNum currentRunFrame;
-	// Tree data storing the controller stuffs
-	// Use generic because it reports scroll events
+	// What is the image you can see
+	FrameNum currentImageFrame;
+
 	wxImageList imageList;
+
 	// Using callbacks for inputs
 	std::function<void(Btn, bool)> inputCallback;
 	std::function<void(FrameNum, FrameNum)> viewableInputsCallback;
+	std::function<void(FrameNum, FrameNum, FrameNum)> changingSelectedFrameCallback;
+
 	// Network instance for sending to switch
 	std::shared_ptr<CommunicateWithNetwork> networkInstance;
 	// Main settings
 	rapidjson::Document* mainSettings;
+
 	// Mask color for transparency
 	wxColour maskColor;
+
 	// Map to get column
 	std::unordered_map<Btn, uint8_t> buttonToColumn;
 	std::unordered_map<wxChar, Btn> charToButton;
+
 	// Probably not smart, but the current savestate hooks
 	std::unordered_map<FrameNum, std::shared_ptr<SavestateHook>> savestateHooks;
 	// Universal item attributes for certain attributes
@@ -76,6 +86,12 @@ public:
 	void setInputCallback(std::function<void(Btn, bool)> callback);
 
 	void setViewableInputsCallback(std::function<void(FrameNum, FrameNum)> callback);
+	void setChangingSelectedFrameCallback(std::function<void(FrameNum, FrameNum, FrameNum)> callback);
+	void triggerCurrentFrameChanges() {
+		if(changingSelectedFrameCallback) {
+			changingSelectedFrameCallback(currentFrame, currentRunFrame, currentImageFrame);
+		}
+	}
 
 	bool getButtonState(Btn button);
 
@@ -91,7 +107,11 @@ public:
 
 	wxRect getFirstItemRect() {
 		wxRect itemRect;
-		GetItemRect(GetTopItem() - 1, itemRect);
+		long topItem = GetTopItem();
+		if(topItem != 0) {
+			topItem--;
+		}
+		GetItemRect(topItem, itemRect);
 		return itemRect;
 	}
 

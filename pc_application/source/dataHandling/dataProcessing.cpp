@@ -53,9 +53,15 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	SetImageList(&imageList, wxIMAGE_LIST_SMALL);
 	// Set item attributes for nice colors
 	setItemAttributes();
-	for(int i = 0; i < 30; i++) {
+	// Add one frame
+	for(uint8_t i = 0; i < 30; i++) {
 		addNewFrame();
 	}
+	// Set other frames manually, without a function
+	currentRunFrame   = 0;
+	currentImageFrame = 0;
+	// Set the current frame to the first
+	setCurrentFrame(0);
 }
 
 // clang-format off
@@ -74,6 +80,10 @@ void DataProcessing::setInputCallback(std::function<void(Btn, bool)> callback) {
 
 void DataProcessing::setViewableInputsCallback(std::function<void(FrameNum, FrameNum)> callback) {
 	viewableInputsCallback = callback;
+}
+
+void DataProcessing::setChangingSelectedFrameCallback(std::function<void(FrameNum, FrameNum, FrameNum)> callback) {
+	changingSelectedFrameCallback = callback;
 }
 
 int DataProcessing::OnGetItemColumnImage(long row, long column) const {
@@ -125,23 +135,23 @@ void DataProcessing::setItemAttributes() {
 	wxItemAttr* itemAttribute;
 
 	// Default is nothing
-	SET_BIT(state, 0, FrameState::RAN);
+	SET_BIT(state, false, FrameState::RAN);
 	itemAttribute = new wxItemAttr();
 	itemAttribute->SetBackgroundColour(wxColor((*mainSettings)["ui"]["frameViewerColors"]["notRan"].GetString()));
 	itemAttributes[state] = itemAttribute;
 
-	SET_BIT(state, 1, FrameState::RAN);
+	SET_BIT(state, true, FrameState::RAN);
 	itemAttribute = new wxItemAttr();
 	itemAttribute->SetBackgroundColour(wxColor((*mainSettings)["ui"]["frameViewerColors"]["ran"].GetString()));
 	itemAttributes[state] = itemAttribute;
-	SET_BIT(state, 0, FrameState::RAN);
+	SET_BIT(state, false, FrameState::RAN);
 
-	SET_BIT(state, 1, FrameState::SAVESTATE_HOOK);
+	SET_BIT(state, true, FrameState::SAVESTATE_HOOK);
 	itemAttribute = new wxItemAttr();
 	itemAttribute->SetBackgroundColour(wxColor((*mainSettings)["ui"]["frameViewerColors"]["savestateHook"].GetString()));
 	itemAttributes[state] = itemAttribute;
 	// SavestateHook takes precedence in the case where both are present
-	SET_BIT(state, 1, FrameState::RAN);
+	SET_BIT(state, true, FrameState::RAN);
 	itemAttributes[state] = itemAttribute;
 }
 
@@ -194,9 +204,16 @@ void DataProcessing::OnEraseBackground(wxEraseEvent& event) {
 	}
 }
 
-void DataProcessing::onSelect(wxListEvent& event) {}
+void DataProcessing::onSelect(wxListEvent& event) {
+	// The current frame has changed
+	setCurrentFrame(event.GetIndex());
+}
 
-void DataProcessing::onActivate(wxListEvent& event) {}
+void DataProcessing::onActivate(wxListEvent& event) {
+	// Select the current image frame
+	currentImageFrame = event.GetIndex();
+	setCurrentFrame(event.GetIndex());
+}
 
 bool DataProcessing::getButtonState(Btn button) {
 	// Get value from the bitflags
@@ -248,7 +265,7 @@ void DataProcessing::setButtonState(Btn button, bool state) {
 				break;
 			}
 			// Set bit
-			SET_BIT(inputsList[frame]->frameState, 0, FrameState::RAN);
+			SET_BIT(inputsList[frame]->frameState, false, FrameState::RAN);
 			frame++;
 		}
 	}
@@ -282,6 +299,8 @@ void DataProcessing::setCurrentFrame(FrameNum frameNum) {
 		// This essentially scrolls to it
 		EnsureVisible(frameNum);
 
+		triggerCurrentFrameChanges();
+
 		// Send to switch, I guess
 		Protocol::Struct_SetCurrentFrame setCurrentFrame;
 		setCurrentFrame.frame = currentFrame;
@@ -290,40 +309,44 @@ void DataProcessing::setCurrentFrame(FrameNum frameNum) {
 }
 
 void DataProcessing::addNewFrame() {
-	// On the first frame, it is already set right (because the size is zero)
-	// This will automatically add at the end even when the
-	// Current frame is not the most recent
-	currentFrame = inputsList.size();
-	// Will overwrite previous frame if need be
-	currentData = std::make_shared<ControllerData>();
+	std::shared_ptr<ControllerData> newControllerData = std::make_shared<ControllerData>();
 	// Set some defaults now
-	SET_BIT(currentData->frameState, 0, FrameState::RAN);
+	SET_BIT(newControllerData->frameState, false, FrameState::RAN);
+	SET_BIT(newControllerData->frameState, false, FrameState::SAVESTATE_HOOK);
 	// Add this to the vector
-	inputsList.push_back(currentData);
-	// Because of the usuability of virtual list controls, just update the length
+	inputsList.push_back(newControllerData);
+	// Because of the usability of virtual list controls, just update the length
 	SetItemCount(inputsList.size());
-	// Now, set the index to here so that some stuff can be ran
-	setCurrentFrame(currentFrame);
+	// Dont change the current frame (for now)
 }
 
 void DataProcessing::createSavestateHookHere() {
 	// Add one savestate hook at this frame
 	savestateHooks[currentFrame] = std::make_shared<SavestateHook>();
 	// Set the style of this frame
-	SET_BIT(currentData->frameState, 1, FrameState::SAVESTATE_HOOK);
+	SET_BIT(currentData->frameState, true, FrameState::SAVESTATE_HOOK);
 	// Refresh the item for it to take effect
 	RefreshItem(currentFrame);
 }
 
 void DataProcessing::runFrame() {
-	// Run the frame TODO
-	// Change the state and get colors
-	SET_BIT(currentData->frameState, 1, FrameState::RAN);
-	RefreshItem(currentFrame);
-	// Set the current frame to the next one if you can
-	if(currentFrame != inputsList.size()) {
-		// Increment frame
-		setCurrentFrame(currentFrame + 1);
+	if(currentRunFrame != inputsList.size()) {
+		// Increment run frame
+		currentRunFrame++;
+		// Set image frame to this too
+		currentImageFrame = currentRunFrame;
+		// Run the frame TODO
+		// Change the state and get colors
+		SET_BIT(currentData->frameState, 1, FrameState::RAN);
+		RefreshItem(currentFrame);
+		// Set the current frame to the next one if you can
+		if(currentFrame != inputsList.size()) {
+			// Increment frame
+			setCurrentFrame(currentFrame + 1);
+		} else {
+			// setCurrentFrame will already do it
+			triggerCurrentFrameChanges();
+		}
 	}
 }
 

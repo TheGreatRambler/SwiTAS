@@ -10,6 +10,8 @@ In the spirit of TASBot, it is generally considered more prestigious to display 
 
 Having access to the entire system via CFW introduces a lot of freedoms, so this project intends to place this functionality into a standard PC application, much like Bizhawk or other TAS creators. This power allows you to tas with the freedom of an emulator even though this is not an emulator. Yuzu can't TAS yet, to any dissenters out there :)
 
+This editor most closely resembles the [FCEUX TAS Editor](http://www.fceux.com/web/help/taseditor/).
+
 ## Goals
 - [ ] Frame advance
 - [ ] Full speed playback
