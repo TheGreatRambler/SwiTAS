@@ -26,7 +26,7 @@ private:
 	void currentFrameUpdated(FrameNum frame, FrameNum runFrame, FrameNum imageFrame);
 
 public:
-	FrameCanvas(wxFrame* parent, DataProcessing* dataProcessing, wxRect firstItemRect);
+	FrameCanvas(wxFrame* parent, DataProcessing* dataProcessing);
 
 	virtual void draw(wxDC& dc) override;
 };

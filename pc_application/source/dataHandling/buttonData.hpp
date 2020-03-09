@@ -91,7 +91,7 @@ public:
 		uint8_t index;
 		// Button data stored with bitflags in 3 bytes
 		// 20 flags need to be stored
-		uint8_t buttons[3];
+		int buttons;
 		// Joystick values
 		int16_t LS_X = 0;
 		int16_t LS_Y = 0;

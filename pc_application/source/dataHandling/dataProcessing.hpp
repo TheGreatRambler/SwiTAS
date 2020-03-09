@@ -105,9 +105,6 @@ public:
 	wxRect getFirstItemRect() {
 		wxRect itemRect;
 		long topItem = GetTopItem();
-		if(topItem != 0) {
-			topItem--;
-		}
 		GetItemRect(topItem, itemRect);
 		return itemRect;
 	}

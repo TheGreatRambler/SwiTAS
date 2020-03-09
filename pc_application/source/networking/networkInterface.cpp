@@ -136,7 +136,6 @@ void CommunicateWithNetwork::listenForCommands() {
 		// First, check over every outgoing queue to detect outgoing data
 		SEND_QUEUE_DATA(SendStart)
 		SEND_QUEUE_DATA(SendRunFrame)
-		SEND_QUEUE_DATA(ModifyFrame)
 
 		// Check if socket even has data before doing anything
 		if(networkConnection->Select()) {

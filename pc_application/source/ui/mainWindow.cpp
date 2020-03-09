@@ -88,11 +88,13 @@ void MainWindow::OnSize(wxSizeEvent& event) {
 void MainWindow::onIdleLoop() {
 	// Read queues from the network and do things, TODO
 	if(networkInstance->isConnected()) {
+		/*
 		CHECK_QUEUE(networkInstance, IsPaused, {
 			if(data.isPaused) {
 				// cool
 			}
 		})
+		*/
 	}
 }
 

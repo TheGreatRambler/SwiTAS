@@ -94,7 +94,7 @@ int DataProcessing::OnGetItemColumnImage(long row, long column) const {
 		// Returns index in the imagelist
 		// Need to account for the frame being first
 		uint8_t button = column - 1;
-		uint8_t on     = inputsList[row]->buttons[button];
+		bool on        = getButtonState((Btn)button);
 		int res;
 		if(on) {
 			// Return index of on image
@@ -105,8 +105,6 @@ int DataProcessing::OnGetItemColumnImage(long row, long column) const {
 			// res = button * 2 + 1;
 			res = -1;
 		}
-
-		wxBitmap test = imageList.GetBitmap(res);
 
 		return res;
 	}
@@ -217,33 +215,11 @@ void DataProcessing::onActivate(wxListEvent& event) {
 
 bool DataProcessing::getButtonState(Btn button) {
 	// Get value from the bitflags
-	uint8_t group;
-	uint8_t position;
-	if(button < 8) {
-		group    = currentData->buttons[0];
-		position = button;
-	} else if(button < 16) {
-		group    = currentData->buttons[1];
-		position = button - 8;
-	} else {
-		// All other bits go here
-		group    = currentData->buttons[2];
-		position = button - 16;
-	}
-	return GET_BIT(group, position);
+	return GET_BIT(currentData->buttons, button);
 }
 
 void DataProcessing::setButtonState(Btn button, bool state) {
-	currentData->buttons[button] = state;
-
-	if(button < 8) {
-		SET_BIT(currentData->buttons[0], state, button);
-	} else if(button < 16) {
-		SET_BIT(currentData->buttons[1], state, button - 8);
-	} else {
-		// All other bits go here
-		SET_BIT(currentData->buttons[2], state, button - 16);
-	}
+	SET_BIT(currentData->buttons, state, button);
 
 	// Because of run colors (run is invalidated on modify), need to do some trickery
 
@@ -292,6 +268,12 @@ void DataProcessing::setCurrentFrame(FrameNum frameNum) {
 		// Focus to this specific row now
 		// This essentially scrolls to it
 		EnsureVisible(frameNum);
+
+		// Make the grid aware
+		if(inputCallback) {
+			// Doesn't matter what arguments
+			inputCallback(Btn::A, false);
+		}
 
 		triggerCurrentFrameChanges();
 	}

@@ -1,12 +1,11 @@
 #include "sideUI.hpp"
 #include <memory>
 
-FrameCanvas::FrameCanvas(wxFrame* parent, DataProcessing* dataProcessing, wxRect firstItemRect)
+FrameCanvas::FrameCanvas(wxFrame* parent, DataProcessing* dataProcessing)
 	: DrawingCanvas(parent, wxDefaultSize) {
 	currentFirst = 0;
 	currentLast  = 0;
 	inputData    = dataProcessing;
-	firstRect    = firstItemRect;
 
 	inputData->setViewableInputsCallback(std::bind(&FrameCanvas::rangeUpdated, this, std::placeholders::_1, std::placeholders::_2));
 	inputData->setChangingSelectedFrameCallback(std::bind(&FrameCanvas::currentFrameUpdated, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
@@ -38,16 +37,16 @@ void FrameCanvas::draw(wxDC& dc) {
 	uint8_t numOfItems = currentLast - currentFirst + 1;
 
 	// uint8_t boxHeight = floorf((float)height / numOfItems);
+	wxRect firstRect = inputData->getFirstItemRect();
 
-	dc.SetPen(*wxBLACK_PEN);
-
-	int startY     = firstRect.GetBottomLeft().y;
+	int startY     = firstRect.GetTopLeft().y;
 	int itemHeight = firstRect.GetHeight();
 
 	float halfWidth = std::floor((float)width / 2);
 
 	for(FrameNum i = 0; i < numOfItems; i++) {
 		FrameNum frame = i + currentFirst;
+		dc.SetPen(*wxBLACK_PEN);
 		if(frame == currentFrame) {
 			// Draw yellow
 			dc.SetBrush(*wxYELLOW_BRUSH);
@@ -61,11 +60,13 @@ void FrameCanvas::draw(wxDC& dc) {
 		// Draw current run and image frame stuff
 		if(frame == currentRunFrame) {
 			// Draw green line
+			dc.SetPen(*wxGREEN_PEN);
 			dc.SetBrush(*wxGREEN_BRUSH);
 			dc.DrawRectangle(wxPoint(2, startY + itemHeight * i + 1), wxSize(halfWidth - 4, 2));
 		}
 		if(frame == currentImageFrame) {
 			// Draw orange line
+			dc.SetPen(*wxRED_PEN);
 			dc.SetBrush(*wxRED_BRUSH);
 			dc.DrawRectangle(wxPoint(halfWidth + 2, startY + itemHeight * i + 1), wxSize(halfWidth - 4, 2));
 		}
@@ -85,7 +86,7 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* 
 	// Holds input stuff
 	inputsViewSizer = new wxBoxSizer(wxHORIZONTAL);
 
-	frameDrawer = new FrameCanvas(parentFrame, inputData, inputData->getFirstItemRect());
+	frameDrawer = new FrameCanvas(parentFrame, inputData);
 	frameDrawer->setBackgroundColor(*wxLIGHT_GREY);
 
 	wxImage resizedaddFrameImage(HELPERS::resolvePath((*mainSettings)["ui"]["addFrameButton"].GetString()));
