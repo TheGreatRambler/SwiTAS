@@ -274,12 +274,6 @@ void DataProcessing::setButtonState(Btn button, bool state) {
 	if(inputCallback) {
 		inputCallback(button, state);
 	}
-
-	// Send to switch, I guess
-	Protocol::Struct_ModifyFrame modifyFrame;
-	modifyFrame.frame          = currentFrame;
-	modifyFrame.controllerData = *currentData;
-	ADD_TO_QUEUE(ModifyFrame, modifyFrame, networkInstance)
 }
 
 void DataProcessing::toggleButtonState(Btn button) {
@@ -300,11 +294,6 @@ void DataProcessing::setCurrentFrame(FrameNum frameNum) {
 		EnsureVisible(frameNum);
 
 		triggerCurrentFrameChanges();
-
-		// Send to switch, I guess
-		Protocol::Struct_SetCurrentFrame setCurrentFrame;
-		setCurrentFrame.frame = currentFrame;
-		ADD_TO_QUEUE(SetCurrentFrame, setCurrentFrame, networkInstance)
 	}
 }
 
@@ -331,22 +320,28 @@ void DataProcessing::createSavestateHookHere() {
 
 void DataProcessing::runFrame() {
 	if(currentRunFrame != inputsList.size()) {
+		std::shared_ptr<ControllerData> data = inputsList[currentRunFrame];
+
+		// Change the state and get colors
+		SET_BIT(data->frameState, 1, FrameState::RAN);
+		RefreshItem(currentRunFrame);
+
+		// If possible, make current frame this frame
+		if(currentRunFrame < inputsList.size()) {
+			// Set to this frame
+			setCurrentFrame(currentRunFrame + 1);
+		}
+
 		// Increment run frame
 		currentRunFrame++;
 		// Set image frame to this too
 		currentImageFrame = currentRunFrame;
-		// Run the frame TODO
-		// Change the state and get colors
-		SET_BIT(currentData->frameState, 1, FrameState::RAN);
-		RefreshItem(currentFrame);
-		// Set the current frame to the next one if you can
-		if(currentFrame != inputsList.size()) {
-			// Increment frame
-			setCurrentFrame(currentFrame + 1);
-		} else {
-			// setCurrentFrame will already do it
-			triggerCurrentFrameChanges();
-		}
+		triggerCurrentFrameChanges();
+
+		// Send to switch to run
+		Protocol::Struct_SendRunFrame sendFrame;
+		sendFrame.controllerData = *data;
+		ADD_TO_QUEUE(SendRunFrame, sendFrame, networkInstance)
 	}
 }
 

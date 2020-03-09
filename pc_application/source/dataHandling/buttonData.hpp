@@ -1,5 +1,8 @@
 #pragma once
 
+#define SET_BIT(number, bit, loc) (number) ^= (-(unsigned long)(bit) ^ (number)) & (1UL << (loc))
+#define GET_BIT(number, loc) ((number) >> (loc)) & 1U
+
 #include <bitset>
 #include <cstdio>
 #include <map>

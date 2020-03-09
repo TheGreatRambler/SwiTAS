@@ -134,8 +134,8 @@ void CommunicateWithNetwork::listenForCommands() {
 	// The format works by preceding each message with a uint16_t with the size of the message, then the message right after it
 	while(keepReading.load()) {
 		// First, check over every outgoing queue to detect outgoing data
-		SEND_QUEUE_DATA(SetProjectName)
-		SEND_QUEUE_DATA(SetCurrentFrame)
+		SEND_QUEUE_DATA(SendStart)
+		SEND_QUEUE_DATA(SendRunFrame)
 		SEND_QUEUE_DATA(ModifyFrame)
 
 		// Check if socket even has data before doing anything
@@ -167,7 +167,9 @@ void CommunicateWithNetwork::listenForCommands() {
 
 			// Now, check over incoming queues, they will absorb the data if they correspond with the flag
 			// Keep in mind, this is not the main thread, so can't act upon the data instantly
-			RECIEVE_QUEUE_DATA(IsPaused)
+			RECIEVE_QUEUE_DATA(RecieveDone)
+			RECIEVE_QUEUE_DATA(RecieveGameInfo)
+			RECIEVE_QUEUE_DATA(RecieveGameFramebuffer)
 
 			// Free memory
 			free(dataToRead);

@@ -99,10 +99,11 @@ private:
 	bool readData(uint8_t* data, uint16_t sizeToRead);
 
 public:
-	ADD_QUEUE(SetProjectName)
-	ADD_QUEUE(SetCurrentFrame)
-	ADD_QUEUE(ModifyFrame)
-	ADD_QUEUE(IsPaused)
+	ADD_QUEUE(SendRunFrame)
+	ADD_QUEUE(RecieveGameFramebuffer)
+	ADD_QUEUE(RecieveGameInfo)
+	ADD_QUEUE(SendStart)
+	ADD_QUEUE(RecieveDone)
 
 	CommunicateWithNetwork();
 
