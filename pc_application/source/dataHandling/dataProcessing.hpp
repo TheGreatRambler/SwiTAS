@@ -72,8 +72,16 @@ private:
 
 	void OnEraseBackground(wxEraseEvent& event);
 
+	std::vector<std::shared_ptr<ControllerData>> framesCopied;
+	int pasteInsertID;
+
+	void onRightClick(wxContextMenuEvent& event);
 	void onSelect(wxListEvent& event);
 	void onActivate(wxListEvent& event);
+	void onCopy(wxCommandEvent& event);
+	void onCut(wxCommandEvent& event);
+	void onPaste(wxCommandEvent& event);
+	void onInsertPaste(wxCommandEvent& event);
 
 public:
 	static const int LIST_CTRL_ID = 1000;

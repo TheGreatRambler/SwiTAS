@@ -20,23 +20,25 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	int imageIconWidth  = (*mainSettings)["inputsList"]["imageWidth"].GetInt();
 	int imageIconHeight = (*mainSettings)["inputsList"]["imageHeight"].GetInt();
 	imageList.Create(imageIconWidth, imageIconHeight);
-	// Add the list store from the columns
-	// controllerListStore = Gtk::ListStore::create(inputColumns);
-	// Set this tree view to this model
 
-	// uint8_t i = 0;
+	// Create keyboard handlers
+	wxAcceleratorEntry entries[3];
+	entries[0].Set(wxACCEL_CTRL, (int)'C', wxID_COPY);
+	entries[1].Set(wxACCEL_CTRL, (int)'X', wxID_CUT);
+	entries[2].Set(wxACCEL_CTRL, (int)'V', wxID_PASTE);
+	pasteInsertID = wxNewId();
+	entries[3].Set(wxACCEL_CTRL | wxACCEL_SHIFT, (int)'V', pasteInsertID);
+	wxAcceleratorTable accel(3, entries);
+	SetAcceleratorTable(accel);
+
+	// Bind each to a handler
+	Bind(wxEVT_MENU, &DataProcessing::onCopy, this, wxID_COPY);
+	Bind(wxEVT_MENU, &DataProcessing::onCut, this, wxID_CUT);
+	Bind(wxEVT_MENU, &DataProcessing::onPaste, this, wxID_PASTE);
+	Bind(wxEVT_MENU, &DataProcessing::onInsertPaste, this, pasteInsertID);
 
 	InsertColumn(0, "Frame", wxLIST_FORMAT_CENTER, wxLIST_AUTOSIZE);
-	// wxListItem frameInfo;
-	// frameInfo.SetMask(wxLIST_MASK_TEXT);
-	// frameInfo.SetColumn(i);
-	// SetItem(frameInfo);
-	// i++;
-	// Disable searching because it breaks stuff
-	// treeView.set_enable_search(false);
-	// Loop through buttons and add all of them
-	// Set this now that it is recieved
-	// Loop through the buttons and add them
+
 	uint8_t i = 1;
 	for(auto const& button : buttonData->buttonMapping) {
 		InsertColumn(i, button.second->normalName, wxLIST_FORMAT_CENTER, wxLIST_AUTOSIZE);
@@ -70,6 +72,7 @@ BEGIN_EVENT_TABLE(DataProcessing, wxListCtrl)
 	EVT_LIST_ITEM_SELECTED(DataProcessing::LIST_CTRL_ID, DataProcessing::onSelect)
 	// This is activated via double click
 	EVT_LIST_ITEM_ACTIVATED(DataProcessing::LIST_CTRL_ID, DataProcessing::onActivate)
+	EVT_CONTEXT_MENU(DataProcessing::onRightClick)
 	EVT_ERASE_BACKGROUND(DataProcessing::OnEraseBackground)
 END_EVENT_TABLE()
 // clang-format on
@@ -94,7 +97,7 @@ int DataProcessing::OnGetItemColumnImage(long row, long column) const {
 		// Returns index in the imagelist
 		// Need to account for the frame being first
 		uint8_t button = column - 1;
-		bool on        = getButtonState((Btn)button);
+		bool on        = GET_BIT(inputsList[row]->buttons, button);
 		int res;
 		if(on) {
 			// Return index of on image
@@ -202,6 +205,18 @@ void DataProcessing::OnEraseBackground(wxEraseEvent& event) {
 	}
 }
 
+void DataProcessing::onRightClick(wxContextMenuEvent& event) {
+	// Show popupmenu at position
+	wxMenu menu(wxT("Test"));
+
+	menu.Append(wxID_COPY, wxT("&Copy"));
+	menu.Append(wxID_CUT, wxT("&Cut"));
+	menu.Append(wxID_PASTE, wxT("&Paste"));
+	menu.Append(pasteInsertID, wxT("&Paste Insert"));
+
+	PopupMenu(&menu, ClientToScreen(event.GetPosition()));
+}
+
 void DataProcessing::onSelect(wxListEvent& event) {
 	// The current frame has changed
 	setCurrentFrame(event.GetIndex());
@@ -211,6 +226,64 @@ void DataProcessing::onActivate(wxListEvent& event) {
 	// Select the current image frame
 	currentImageFrame = event.GetIndex();
 	setCurrentFrame(event.GetIndex());
+}
+
+void DataProcessing::onCopy(wxCommandEvent& event) {
+	// Get all selected
+	framesCopied.clear();
+	FrameNum end = currentFrame + GetSelectedItemCount();
+	for(FrameNum i = currentFrame; i < end; i++) {
+		std::shared_ptr<ControllerData> data = std::make_shared<ControllerData>();
+		buttonData->transferControllerData(inputsList[i], data);
+		framesCopied.push_back(data);
+	}
+}
+
+void DataProcessing::onCut(wxCommandEvent& event) {
+	// Copy the elements, then delete
+	onCopy(event);
+	auto beginning = inputsList.begin();
+	// Erase them
+	inputsList.erase(beginning + currentFrame, beginning + currentFrame + GetSelectedItemCount());
+	// Refresh to see things again
+	Refresh();
+	// Make the grid aware
+	if(inputCallback) {
+		// Doesn't matter what arguments
+		inputCallback(Btn::A, false);
+	}
+}
+
+void DataProcessing::onPaste(wxCommandEvent& event) {
+	// Insert everything possible, until reaching the end
+	FrameNum end                 = inputsList.size();
+	FrameNum numOfCopiedElements = framesCopied.size();
+	for(FrameNum i = 0; i < numOfCopiedElements; i++) {
+		if(i + currentFrame < end) {
+			// Set the element, unless it's beyond the edge
+			buttonData->transferControllerData(framesCopied[i], inputsList[currentFrame + i]);
+		} else {
+			break;
+		}
+	}
+	// Make the grid aware
+	if(inputCallback) {
+		// Doesn't matter what arguments
+		inputCallback(Btn::A, false);
+	}
+}
+
+void DataProcessing::onInsertPaste(wxCommandEvent& event) {
+	// Insert right after the current frame
+	FrameNum numOfCopiedElements = framesCopied.size();
+	for(FrameNum i = 0; i < numOfCopiedElements; i++) {
+		inputsList.insert(inputsList.begin() + currentFrame + i + 1, framesCopied[i]);
+	}
+	// Make the grid aware
+	if(inputCallback) {
+		// Doesn't matter what arguments
+		inputCallback(Btn::A, false);
+	}
 }
 
 bool DataProcessing::getButtonState(Btn button) {

@@ -91,7 +91,7 @@ public:
 		uint8_t index;
 		// Button data stored with bitflags in 3 bytes
 		// 20 flags need to be stored
-		int buttons;
+		uint32_t buttons;
 		// Joystick values
 		int16_t LS_X = 0;
 		int16_t LS_Y = 0;
@@ -153,6 +153,8 @@ public:
 	std::map<Btn, std::shared_ptr<ButtonInfo>> buttonMapping;
 
 	void setupButtonMapping(rapidjson::Document* mainSettings);
+
+	void transferControllerData(std::shared_ptr<ControllerData> src, std::shared_ptr<ControllerData> dest);
 };
 
 // Some good typedef's
