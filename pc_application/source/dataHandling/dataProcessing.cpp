@@ -59,6 +59,7 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 
 		i++;
 	}
+
 	SetImageList(&imageList, wxIMAGE_LIST_SMALL);
 	// Set item attributes for nice colors
 	setItemAttributes();
@@ -222,7 +223,7 @@ void DataProcessing::onRightClick(wxContextMenuEvent& event) {
 	}
 
 	// Show popupmenu at position
-	wxMenu menu(wxT("Edit menu"));
+	wxMenu menu;
 
 	menu.Append(wxID_COPY, wxT("&Copy"));
 	menu.Append(wxID_CUT, wxT("&Cut"));
@@ -246,11 +247,31 @@ void DataProcessing::onActivate(wxListEvent& event) {
 void DataProcessing::onCopy(wxCommandEvent& event) {
 	// Get all selected
 	framesCopied.clear();
-	FrameNum end = currentFrame + GetSelectedItemCount();
-	for(FrameNum i = currentFrame; i < end; i++) {
-		std::shared_ptr<ControllerData> data = std::make_shared<ControllerData>();
-		buttonData->transferControllerData(inputsList[i], data);
-		framesCopied.push_back(data);
+
+	long itemIndex = -1;
+	if((itemIndex = GetNextItem(itemIndex, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED)) != wxNOT_FOUND) {
+		long lastSelectedItem = itemIndex + GetSelectedItemCount() - 1;
+		// There is a selected item
+		if(currentFrame >= itemIndex && currentFrame <= lastSelectedItem) {
+			// Multiselect these items
+			for(FrameNum i = itemIndex; i <= lastSelectedItem; i++) {
+				std::shared_ptr<ControllerData> data = std::make_shared<ControllerData>();
+				buttonData->transferControllerData(inputsList[i], data);
+				framesCopied.push_back(data);
+			}
+		} else {
+			// Deselect the others
+			for(FrameNum i = itemIndex; i <= lastSelectedItem; i++) {
+				SetItemState(i, 0, wxLIST_STATE_SELECTED);
+			}
+			// Select just the one
+			SetItemState(currentFrame, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+			std::shared_ptr<ControllerData> data = std::make_shared<ControllerData>();
+			buttonData->transferControllerData(inputsList[currentFrame], data);
+			framesCopied.push_back(data);
+			// See the new selection
+			Refresh();
+		}
 	}
 }
 
@@ -295,6 +316,8 @@ void DataProcessing::onInsertPaste(wxCommandEvent& event) {
 	for(FrameNum i = 0; i < numOfCopiedElements; i++) {
 		inputsList.insert(inputsList.begin() + currentFrame + i + 1, framesCopied[i]);
 	}
+	// Change number of elements to be correct
+	SetItemCount(inputsList.size());
 	Refresh();
 	// Make the grid aware
 	if(inputCallback) {
