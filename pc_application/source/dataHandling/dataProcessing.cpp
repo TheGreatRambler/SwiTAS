@@ -22,20 +22,27 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	imageList.Create(imageIconWidth, imageIconHeight);
 
 	// Create keyboard handlers
-	wxAcceleratorEntry entries[3];
+	wxAcceleratorEntry entries[4];
+	pasteInsertID = wxNewId();
+
 	entries[0].Set(wxACCEL_CTRL, (int)'C', wxID_COPY);
 	entries[1].Set(wxACCEL_CTRL, (int)'X', wxID_CUT);
 	entries[2].Set(wxACCEL_CTRL, (int)'V', wxID_PASTE);
-	pasteInsertID = wxNewId();
 	entries[3].Set(wxACCEL_CTRL | wxACCEL_SHIFT, (int)'V', pasteInsertID);
-	wxAcceleratorTable accel(3, entries);
+
+	wxAcceleratorTable accel(4, entries);
 	SetAcceleratorTable(accel);
 
-	// Bind each to a handler
+	// Bind each to a handler, both menu and button events
 	Bind(wxEVT_MENU, &DataProcessing::onCopy, this, wxID_COPY);
 	Bind(wxEVT_MENU, &DataProcessing::onCut, this, wxID_CUT);
 	Bind(wxEVT_MENU, &DataProcessing::onPaste, this, wxID_PASTE);
 	Bind(wxEVT_MENU, &DataProcessing::onInsertPaste, this, pasteInsertID);
+
+	Bind(wxEVT_BUTTON, &DataProcessing::onCopy, this, wxID_COPY);
+	Bind(wxEVT_BUTTON, &DataProcessing::onCut, this, wxID_CUT);
+	Bind(wxEVT_BUTTON, &DataProcessing::onPaste, this, wxID_PASTE);
+	Bind(wxEVT_BUTTON, &DataProcessing::onInsertPaste, this, pasteInsertID);
 
 	InsertColumn(0, "Frame", wxLIST_FORMAT_CENTER, wxLIST_AUTOSIZE);
 
@@ -206,15 +213,23 @@ void DataProcessing::OnEraseBackground(wxEraseEvent& event) {
 }
 
 void DataProcessing::onRightClick(wxContextMenuEvent& event) {
+	// Get item at location
+	const wxPoint mousePosition = ScreenToClient(event.GetPosition());
+	int flags                   = wxLIST_HITTEST_ONITEM;
+	const FrameNum item         = HitTest(mousePosition, flags);
+	if(item != wxNOT_FOUND) {
+		setCurrentFrame(item);
+	}
+
 	// Show popupmenu at position
-	wxMenu menu(wxT("Test"));
+	wxMenu menu(wxT("Edit menu"));
 
 	menu.Append(wxID_COPY, wxT("&Copy"));
 	menu.Append(wxID_CUT, wxT("&Cut"));
 	menu.Append(wxID_PASTE, wxT("&Paste"));
 	menu.Append(pasteInsertID, wxT("&Paste Insert"));
 
-	PopupMenu(&menu, ClientToScreen(event.GetPosition()));
+	PopupMenu(&menu, mousePosition);
 }
 
 void DataProcessing::onSelect(wxListEvent& event) {
@@ -262,6 +277,7 @@ void DataProcessing::onPaste(wxCommandEvent& event) {
 		if(i + currentFrame < end) {
 			// Set the element, unless it's beyond the edge
 			buttonData->transferControllerData(framesCopied[i], inputsList[currentFrame + i]);
+			RefreshItem(currentFrame + i);
 		} else {
 			break;
 		}
@@ -279,6 +295,7 @@ void DataProcessing::onInsertPaste(wxCommandEvent& event) {
 	for(FrameNum i = 0; i < numOfCopiedElements; i++) {
 		inputsList.insert(inputsList.begin() + currentFrame + i + 1, framesCopied[i]);
 	}
+	Refresh();
 	// Make the grid aware
 	if(inputCallback) {
 		// Doesn't matter what arguments
