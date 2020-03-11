@@ -11,17 +11,14 @@
 #include <rapidjson/writer.h>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 #include <wx/wx.h>
 #include <zpp.hpp>
 
 #include "../helpers.hpp"
 
-// Array including all button information
-// Index is button Id, returns Button script name, Button print name, Button
-// listview object, Button printing pixbuf when on and when off This info is
-// contained in a struct
-
-// This data is obtained via a JSON file
+// So that types are somewhat unified
+typedef uint32_t FrameNum;
 
 class ButtonData {
 private:
@@ -84,6 +81,9 @@ public:
 		{ "RS", Btn::RS },
 	};
 
+	// To convert to Btn
+	std::map<std::string, Btn> scriptNameToButton;
+
 	// Controller data that will be packed into the array and will be recieved from
 	// the switch
 	struct ControllerData : public zpp::serializer::polymorphic {
@@ -91,7 +91,7 @@ public:
 		uint8_t index;
 		// Button data stored with bitflags in 3 bytes
 		// 20 flags need to be stored
-		uint32_t buttons;
+		uint32_t buttons = 0;
 		// Joystick values
 		int16_t LS_X = 0;
 		int16_t LS_Y = 0;
@@ -105,7 +105,7 @@ public:
 		int16_t GYRO_2  = 0;
 		int16_t GYRO_3  = 0;
 		// State of the frame, mostly for the editor
-		uint8_t frameState;
+		uint8_t frameState = 0;
 
 		friend zpp::serializer::access;
 		template <typename Archive, typename Self> static void serialize(Archive& archive, Self& self) {
@@ -154,6 +154,9 @@ public:
 
 	void setupButtonMapping(rapidjson::Document* mainSettings);
 
+	void textToFrames(std::vector<std::shared_ptr<ControllerData>>& frames, std::string text, FrameNum startLoc, bool insertPaste, bool placePaste);
+	std::string framesToText(std::vector<std::shared_ptr<ControllerData>>& frames, FrameNum startLoc, FrameNum endLoc);
+
 	void transferControllerData(std::shared_ptr<ControllerData> src, std::shared_ptr<ControllerData> dest, bool placePaste);
 };
 
@@ -164,5 +167,3 @@ typedef ButtonData::FrameState FrameState;
 typedef ButtonData::ControllerData ControllerData;
 typedef ButtonData::ButtonInfo ButtonInfo;
 typedef ButtonData::SavestateHook SavestateHook;
-// So that types are somewhat unified
-typedef uint32_t FrameNum;
