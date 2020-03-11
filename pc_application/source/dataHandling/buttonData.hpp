@@ -154,7 +154,7 @@ public:
 
 	void setupButtonMapping(rapidjson::Document* mainSettings);
 
-	void transferControllerData(std::shared_ptr<ControllerData> src, std::shared_ptr<ControllerData> dest);
+	void transferControllerData(std::shared_ptr<ControllerData> src, std::shared_ptr<ControllerData> dest, bool placePaste);
 };
 
 // Some good typedef's

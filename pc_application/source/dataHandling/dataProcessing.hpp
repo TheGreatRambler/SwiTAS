@@ -74,6 +74,11 @@ private:
 
 	std::vector<std::shared_ptr<ControllerData>> framesCopied;
 	int pasteInsertID;
+	int pastePlaceID;
+	bool placePaste;
+
+	// Menu popup
+	wxMenu editMenu;
 
 	void onRightClick(wxContextMenuEvent& event);
 	void onSelect(wxListEvent& event);
@@ -82,6 +87,7 @@ private:
 	void onCut(wxCommandEvent& event);
 	void onPaste(wxCommandEvent& event);
 	void onInsertPaste(wxCommandEvent& event);
+	void onPlacePaste(wxCommandEvent& event);
 
 public:
 	static const int LIST_CTRL_ID = 1000;
@@ -117,7 +123,7 @@ public:
 		return itemRect;
 	}
 
-	void handleKeyboardInput(wxChar key);
+	bool handleKeyboardInput(wxChar key);
 	// The class itself is the list control
 	// std::shared_ptr<wxGenericListCtrl> getWidget();
 

@@ -177,7 +177,9 @@ void CommunicateWithNetwork::listenForCommands() {
 }
 
 CommunicateWithNetwork::~CommunicateWithNetwork() {
-	networkConnection->Close();
+	if(networkConnection != nullptr) {
+		networkConnection->Close();
+	}
 
 #ifdef SERVER_IMP
 	listeningServer.Close();

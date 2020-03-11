@@ -21,29 +21,6 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	int imageIconHeight = (*mainSettings)["inputsList"]["imageHeight"].GetInt();
 	imageList.Create(imageIconWidth, imageIconHeight);
 
-	// Create keyboard handlers
-	wxAcceleratorEntry entries[4];
-	pasteInsertID = wxNewId();
-
-	entries[0].Set(wxACCEL_CTRL, (int)'C', wxID_COPY);
-	entries[1].Set(wxACCEL_CTRL, (int)'X', wxID_CUT);
-	entries[2].Set(wxACCEL_CTRL, (int)'V', wxID_PASTE);
-	entries[3].Set(wxACCEL_CTRL | wxACCEL_SHIFT, (int)'V', pasteInsertID);
-
-	wxAcceleratorTable accel(4, entries);
-	SetAcceleratorTable(accel);
-
-	// Bind each to a handler, both menu and button events
-	Bind(wxEVT_MENU, &DataProcessing::onCopy, this, wxID_COPY);
-	Bind(wxEVT_MENU, &DataProcessing::onCut, this, wxID_CUT);
-	Bind(wxEVT_MENU, &DataProcessing::onPaste, this, wxID_PASTE);
-	Bind(wxEVT_MENU, &DataProcessing::onInsertPaste, this, pasteInsertID);
-
-	Bind(wxEVT_BUTTON, &DataProcessing::onCopy, this, wxID_COPY);
-	Bind(wxEVT_BUTTON, &DataProcessing::onCut, this, wxID_CUT);
-	Bind(wxEVT_BUTTON, &DataProcessing::onPaste, this, wxID_PASTE);
-	Bind(wxEVT_BUTTON, &DataProcessing::onInsertPaste, this, pasteInsertID);
-
 	InsertColumn(0, "Frame", wxLIST_FORMAT_CENTER, wxLIST_AUTOSIZE);
 
 	uint8_t i = 1;
@@ -72,6 +49,29 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	currentImageFrame = 0;
 	// Set the current frame to the first
 	setCurrentFrame(0);
+
+	// Create keyboard handlers
+	// Each menu item is added here
+	wxAcceleratorEntry entries[5];
+	pasteInsertID = wxNewId();
+	pastePlaceID  = wxNewId();
+	placePaste    = false;
+
+	entries[0].Set(wxACCEL_CTRL, (int)'C', wxID_COPY, editMenu.Append(wxID_COPY, wxT("&Copy\tCtrl+C")));
+	entries[1].Set(wxACCEL_CTRL, (int)'X', wxID_CUT, editMenu.Append(wxID_CUT, wxT("&Cut\tCtrl+X")));
+	entries[2].Set(wxACCEL_CTRL, (int)'V', wxID_PASTE, editMenu.Append(wxID_PASTE, wxT("&Paste\tCtrl+V")));
+	entries[3].Set(wxACCEL_CTRL | wxACCEL_SHIFT, (int)'V', pasteInsertID, editMenu.Append(pasteInsertID, wxT("&Paste Insert\tCtrl+Shift+V")));
+	entries[4].Set(wxACCEL_CTRL | wxACCEL_ALT, (int)'V', pastePlaceID, editMenu.Append(pasteInsertID, wxT("&Paste Place\tCtrl+Alt+V")));
+
+	wxAcceleratorTable accel(5, entries);
+	SetAcceleratorTable(accel);
+
+	// Bind each to a handler, both menu and button events
+	Bind(wxEVT_MENU, &DataProcessing::onCopy, this, wxID_COPY);
+	Bind(wxEVT_MENU, &DataProcessing::onCut, this, wxID_CUT);
+	Bind(wxEVT_MENU, &DataProcessing::onPaste, this, wxID_PASTE);
+	Bind(wxEVT_MENU, &DataProcessing::onInsertPaste, this, pasteInsertID);
+	Bind(wxEVT_MENU, &DataProcessing::onPlacePaste, this, pastePlaceID);
 }
 
 // clang-format off
@@ -222,15 +222,7 @@ void DataProcessing::onRightClick(wxContextMenuEvent& event) {
 		setCurrentFrame(item);
 	}
 
-	// Show popupmenu at position
-	wxMenu menu;
-
-	menu.Append(wxID_COPY, wxT("&Copy"));
-	menu.Append(wxID_CUT, wxT("&Cut"));
-	menu.Append(wxID_PASTE, wxT("&Paste"));
-	menu.Append(pasteInsertID, wxT("&Paste Insert"));
-
-	PopupMenu(&menu, mousePosition);
+	PopupMenu(&editMenu, mousePosition);
 }
 
 void DataProcessing::onSelect(wxListEvent& event) {
@@ -256,7 +248,7 @@ void DataProcessing::onCopy(wxCommandEvent& event) {
 			// Multiselect these items
 			for(FrameNum i = itemIndex; i <= lastSelectedItem; i++) {
 				std::shared_ptr<ControllerData> data = std::make_shared<ControllerData>();
-				buttonData->transferControllerData(inputsList[i], data);
+				buttonData->transferControllerData(inputsList[i], data, false);
 				framesCopied.push_back(data);
 			}
 		} else {
@@ -267,7 +259,7 @@ void DataProcessing::onCopy(wxCommandEvent& event) {
 			// Select just the one
 			SetItemState(currentFrame, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 			std::shared_ptr<ControllerData> data = std::make_shared<ControllerData>();
-			buttonData->transferControllerData(inputsList[currentFrame], data);
+			buttonData->transferControllerData(inputsList[currentFrame], data, false);
 			framesCopied.push_back(data);
 			// See the new selection
 			Refresh();
@@ -297,7 +289,7 @@ void DataProcessing::onPaste(wxCommandEvent& event) {
 	for(FrameNum i = 0; i < numOfCopiedElements; i++) {
 		if(i + currentFrame < end) {
 			// Set the element, unless it's beyond the edge
-			buttonData->transferControllerData(framesCopied[i], inputsList[currentFrame + i]);
+			buttonData->transferControllerData(framesCopied[i], inputsList[currentFrame + i], placePaste);
 			RefreshItem(currentFrame + i);
 		} else {
 			break;
@@ -324,6 +316,12 @@ void DataProcessing::onInsertPaste(wxCommandEvent& event) {
 		// Doesn't matter what arguments
 		inputCallback(Btn::A, false);
 	}
+}
+
+void DataProcessing::onPlacePaste(wxCommandEvent& event) {
+	placePaste = true;
+	onPaste(event);
+	placePaste = false;
 }
 
 bool DataProcessing::getButtonState(Btn button) {
@@ -440,10 +438,12 @@ void DataProcessing::runFrame() {
 	}
 }
 
-void DataProcessing::handleKeyboardInput(wxChar key) {
+bool DataProcessing::handleKeyboardInput(wxChar key) {
 	if(charToButton.count(key)) {
 		toggleButtonState(charToButton[key]);
+		return true;
 	}
+	return false;
 }
 
 DataProcessing::~DataProcessing() {

@@ -68,11 +68,17 @@ void ButtonData::setupButtonMapping(rapidjson::Document* mainSettings) {
 	}
 }
 
-void ButtonData::transferControllerData(std::shared_ptr<ControllerData> src, std::shared_ptr<ControllerData> dest) {
+void ButtonData::transferControllerData(std::shared_ptr<ControllerData> src, std::shared_ptr<ControllerData> dest, bool placePaste) {
 	// Transfer all over
 
-	dest->index      = src->index;
-	dest->buttons    = src->buttons;
+	dest->index = src->index;
+	if(placePaste) {
+		// Add them together, not replace (bitwise or)
+		dest->buttons |= src->buttons;
+	} else {
+		// Just replace
+		dest->buttons = src->buttons;
+	}
 	dest->LS_X       = src->LS_X;
 	dest->LS_Y       = src->LS_Y;
 	dest->RS_X       = src->RS_X;

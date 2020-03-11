@@ -69,7 +69,9 @@ END_EVENT_TABLE()
 
 // Override default signal handler:
 void MainWindow::keyDownHandler(wxKeyEvent& event) {
-	dataProcessingInstance->handleKeyboardInput(event.GetUnicodeKey());
+	if(!dataProcessingInstance->handleKeyboardInput(event.GetUnicodeKey())) {
+		event.Skip();
+	}
 }
 
 void MainWindow::handlePreviousWindowTransform() {
