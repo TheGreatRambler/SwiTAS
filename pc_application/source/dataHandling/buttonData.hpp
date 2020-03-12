@@ -93,10 +93,12 @@ public:
 		// 20 flags need to be stored
 		uint32_t buttons;
 		// Joystick values
-		int16_t LS_X = 0;
-		int16_t LS_Y = 0;
-		int16_t RS_X = 0;
-		int16_t RS_Y = 0;
+		// https://switchbrew.github.io/libnx/structHiddbgHdlsState.html
+		// Range -30000 to 30000
+		int32_t LS_X = 0;
+		int32_t LS_Y = 0;
+		int32_t RS_X = 0;
+		int32_t RS_Y = 0;
 		// Gyroscope and Accelerometer data (when it is implemented)
 		int16_t ACCEL_X = 0;
 		int16_t ACCEL_Y = 0;
