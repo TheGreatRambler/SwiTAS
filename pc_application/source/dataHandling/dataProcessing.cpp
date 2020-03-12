@@ -1,4 +1,5 @@
 #include "dataProcessing.hpp"
+#include "buttonData.hpp"
 
 DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, std::shared_ptr<CommunicateWithNetwork> communicateWithNetwork, wxWindow* parent)
 	: wxListCtrl(parent, DataProcessing::LIST_CTRL_ID, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_VIRTUAL | wxLC_HRULES) {
@@ -55,6 +56,7 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	wxAcceleratorEntry entries[5];
 	pasteInsertID = wxNewId();
 	pastePlaceID  = wxNewId();
+	insertPaste   = false;
 	placePaste    = false;
 
 	entries[0].Set(wxACCEL_CTRL, (int)'C', wxID_COPY, editMenu.Append(wxID_COPY, wxT("&Copy\tCtrl+C")));
@@ -237,33 +239,36 @@ void DataProcessing::onActivate(wxListEvent& event) {
 }
 
 void DataProcessing::onCopy(wxCommandEvent& event) {
-	// Get all selected
-	framesCopied.clear();
+	// First, try opening the clipboard
+	// https://docs.wxwidgets.org/3.0/classwx_clipboard.html#a6c56dbf02b1807ce61cac8134a534336
+	if(wxTheClipboard->Open()) {
+		long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+		if(firstSelectedItem != wxNOT_FOUND) {
+			long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
+			// There is a selected item
+			if(currentFrame >= firstSelectedItem && currentFrame <= lastSelectedItem) {
+				// Add these items to the clipboard
+				wxTheClipboard->SetData(new wxTextDataObject(ButtonData->framesToText(inputsList, firstSelectedItem, lastSelectedItem)));
+			} else {
+				// Deselect the others
+				for(FrameNum i = itemIndex; i <= lastSelectedItem; i++) {
+					SetItemState(i, 0, wxLIST_STATE_SELECTED);
+				}
+				// Select just the one
+				SetItemState(currentFrame, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 
-	long itemIndex = -1;
-	if((itemIndex = GetNextItem(itemIndex, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED)) != wxNOT_FOUND) {
-		long lastSelectedItem = itemIndex + GetSelectedItemCount() - 1;
-		// There is a selected item
-		if(currentFrame >= itemIndex && currentFrame <= lastSelectedItem) {
-			// Multiselect these items
-			for(FrameNum i = itemIndex; i <= lastSelectedItem; i++) {
+				wxTheClipboard->SetData(new wxTextDataObject(ButtonData->framesToText(inputsList, currentFrame, currentFrame)));
+
 				std::shared_ptr<ControllerData> data = std::make_shared<ControllerData>();
-				buttonData->transferControllerData(inputsList[i], data, false);
+				buttonData->transferControllerData(inputsList[currentFrame], data, false);
 				framesCopied.push_back(data);
+
+				// See the new selection
+				RefreshItem(currentFrame);
 			}
-		} else {
-			// Deselect the others
-			for(FrameNum i = itemIndex; i <= lastSelectedItem; i++) {
-				SetItemState(i, 0, wxLIST_STATE_SELECTED);
-			}
-			// Select just the one
-			SetItemState(currentFrame, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-			std::shared_ptr<ControllerData> data = std::make_shared<ControllerData>();
-			buttonData->transferControllerData(inputsList[currentFrame], data, false);
-			framesCopied.push_back(data);
-			// See the new selection
-			Refresh();
 		}
+
+		wxTheClipboard->Close();
 	}
 }
 
@@ -274,6 +279,7 @@ void DataProcessing::onCut(wxCommandEvent& event) {
 	// Erase them
 	inputsList.erase(beginning + currentFrame, beginning + currentFrame + GetSelectedItemCount());
 	// Refresh to see things again
+	SetItemCount(inputsList.size());
 	Refresh();
 	// Make the grid aware
 	if(inputCallback) {
@@ -283,22 +289,23 @@ void DataProcessing::onCut(wxCommandEvent& event) {
 }
 
 void DataProcessing::onPaste(wxCommandEvent& event) {
-	// Insert everything possible, until reaching the end
-	FrameNum end                 = inputsList.size();
-	FrameNum numOfCopiedElements = framesCopied.size();
-	for(FrameNum i = 0; i < numOfCopiedElements; i++) {
-		if(i + currentFrame < end) {
-			// Set the element, unless it's beyond the edge
-			buttonData->transferControllerData(framesCopied[i], inputsList[currentFrame + i], placePaste);
-			RefreshItem(currentFrame + i);
-		} else {
-			break;
+
+	if(wxTheClipboard->Open()) {
+		if(wxTheClipboard->IsSupported(wxDF_TEXT)) {
+			wxTextDataObject data;
+			wxTheClipboard->GetData(data);
+			std::string clipboardText = data.GetText();
+
+			// Get to the meaty stuff, this is it
+			ButtonData->textToFrames(inputsList, clipboardText, currentFrame, insertPaste, placePaste);
+			Refresh();
+			// Make the grid aware
+			if(inputCallback) {
+				// Doesn't matter what arguments
+				inputCallback(Btn::A, false);
+			}
 		}
-	}
-	// Make the grid aware
-	if(inputCallback) {
-		// Doesn't matter what arguments
-		inputCallback(Btn::A, false);
+		wxTheClipboard->Close();
 	}
 }
 

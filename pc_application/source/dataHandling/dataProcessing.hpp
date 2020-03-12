@@ -72,8 +72,9 @@ private:
 
 	void OnEraseBackground(wxEraseEvent& event);
 
-	std::vector<std::shared_ptr<ControllerData>> framesCopied;
 	int pasteInsertID;
+	int insertPaste;
+
 	int pastePlaceID;
 	bool placePaste;
 
