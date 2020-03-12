@@ -89,15 +89,20 @@ void ButtonData::textToFrames(std::vector<std::shared_ptr<ControllerData>>& fram
 			continue;
 
 		// Has to be decimal number
-		FrameNum frame = std::stoi(parts[currentIndexInParts], nullptr, 10);
+		FrameNum frameNum = strtol(parts[currentIndexInParts].c_str(), nullptr, 10);
 
 		if(!haveSetFirstFrame) {
 			// This is the first script frame, it will be put at the startLoc
-			firstFrame = frame;
+			firstFrame = frameNum;
 		}
 
 		// The actual index
-		FrameNum actualIndex = startLoc + (frame - firstFrame);
+		FrameNum actualIndex = startLoc + (frameNum - firstFrame);
+
+		if(actualIndex >= frames.size()) {
+			// Have to return, there are too many frames to paste
+			return;
+		}
 
 		std::shared_ptr<ControllerData> thisData;
 		if(insertPaste) {
@@ -109,12 +114,12 @@ void ButtonData::textToFrames(std::vector<std::shared_ptr<ControllerData>>& fram
 				// Can use expected indexing
 				for(FrameNum i = lastReadFrame + 1; i < actualIndex; i++) {
 					// Add a blank frame for buffer
-					inputsList.insert(inputsList.begin() + i, std::make_shared<ControllerData>());
+					frames.insert(frames.begin() + i, std::make_shared<ControllerData>());
 				}
 				// Now can easily add the frame later
 			}
 			// Insert it now, it's just a pointer
-			frames.insert(inputsList.begin() + actualIndex, thisData);
+			frames.insert(frames.begin() + actualIndex + 1, thisData);
 			// If it's the first frame, no need for padding
 		} else {
 			// Set the reference to the right one
@@ -131,12 +136,16 @@ void ButtonData::textToFrames(std::vector<std::shared_ptr<ControllerData>>& fram
 			continue;
 
 		// Deal with buttons
-		uint32_t buttonInfo;
-		for(std::string buttonName : HELPERS::splitString(parts[currentIndexInParts], ';')) {
-			if(scriptNameToButton.count(buttonName)) {
-				SET_BIT(buttonInfo, true, scriptNameToButton[buttonName])
+		uint32_t buttonInfo = 0;
+		// Can be no buttons at all
+		if(parts[currentIndexInParts] != "NONE") {
+			for(std::string buttonName : HELPERS::splitString(parts[currentIndexInParts], ';')) {
+				if(scriptNameToButton.count(buttonName)) {
+					SET_BIT(buttonInfo, true, scriptNameToButton[buttonName]);
+				}
 			}
 		}
+
 		// placePaste doesn't replace the value
 		if(placePaste) {
 			// Just OR it
@@ -151,16 +160,24 @@ void ButtonData::textToFrames(std::vector<std::shared_ptr<ControllerData>>& fram
 
 		// Joysticks
 		std::vector<std::string> joystickPartsLeft = HELPERS::splitString(parts[currentIndexInParts], ';');
-		thisData->LS_X                             = std::stoi(joystickPartsLeft[0], nullptr, 10);
-		thisData->LS_Y                             = std::stoi(joystickPartsLeft[1], nullptr, 10);
+		if(joystickPartsLeft.size() == 2) {
+			thisData->LS_X = strtol(joystickPartsLeft[0].c_str(), nullptr, 10);
+			thisData->LS_Y = strtol(joystickPartsLeft[1].c_str(), nullptr, 10);
+		} else {
+			continue;
+		}
 
 		currentIndexInParts++;
 		if(parts.size() == currentIndexInParts)
 			continue;
 
 		std::vector<std::string> joystickPartsRight = HELPERS::splitString(parts[currentIndexInParts], ';');
-		thisData->RS_X                              = std::stoi(joystickPartsRight[0], nullptr, 10);
-		thisData->RS_Y                              = std::stoi(joystickPartsRight[1], nullptr, 10);
+		if(joystickPartsRight.size() == 2) {
+			thisData->RS_X = strtol(joystickPartsRight[0].c_str(), nullptr, 10);
+			thisData->RS_Y = strtol(joystickPartsRight[1].c_str(), nullptr, 10);
+		} else {
+			continue;
+		}
 
 		currentIndexInParts++;
 		if(parts.size() == currentIndexInParts)
@@ -169,18 +186,26 @@ void ButtonData::textToFrames(std::vector<std::shared_ptr<ControllerData>>& fram
 		// Accelerometer and gyro data
 
 		std::vector<std::string> accelParts = HELPERS::splitString(parts[currentIndexInParts], ';');
-		thisData->ACCEL_X                   = std::stoi(accelParts[0], nullptr, 10);
-		thisData->ACCEL_Y                   = std::stoi(accelParts[1], nullptr, 10);
-		thisData->ACCEL_Z                   = std::stoi(accelParts[2], nullptr, 10);
+		if(accelParts.size() == 3) {
+			thisData->ACCEL_X = strtol(accelParts[0].c_str(), nullptr, 10);
+			thisData->ACCEL_Y = strtol(accelParts[1].c_str(), nullptr, 10);
+			thisData->ACCEL_Z = strtol(accelParts[2].c_str(), nullptr, 10);
+		} else {
+			continue;
+		}
 
 		currentIndexInParts++;
 		if(parts.size() == currentIndexInParts)
 			continue;
 
 		std::vector<std::string> gyroParts = HELPERS::splitString(parts[currentIndexInParts], ';');
-		thisData->GYRO_1                   = std::stoi(gyroParts[0], nullptr, 10);
-		thisData->GYRO_2                   = std::stoi(gyroParts[1], nullptr, 10);
-		thisData->GYRO_3                   = std::stoi(gyroParts[2], nullptr, 10);
+		if(gyroParts.size() == 3) {
+			thisData->GYRO_1 = strtol(gyroParts[0].c_str(), nullptr, 10);
+			thisData->GYRO_2 = strtol(gyroParts[1].c_str(), nullptr, 10);
+			thisData->GYRO_3 = strtol(gyroParts[2].c_str(), nullptr, 10);
+		} else {
+			continue;
+		}
 	}
 }
 
@@ -188,26 +213,37 @@ std::string ButtonData::framesToText(std::vector<std::shared_ptr<ControllerData>
 	std::vector<std::string> textVector;
 	// Loop through each frame and convert it
 	for(FrameNum i = startLoc; i <= endLoc; i++) {
-		std::vector<std::string> parts;
-		parts[0] = std::to_string(i);
-
 		std::shared_ptr<ControllerData> frame = frames[i];
 
-		std::vector<std::string> buttonParts;
-		for(uint8_t i = 0; i < Btn::BUTTONS_SIZE; i++) {
-			Btn button = (Btn)i;
-			if(GET_BIT(frame->buttons, button)) {
-				// Add to the string
-				buttonParts.push_back(buttonMapping[button]->scriptName);
+		// Keeping empty ones there clutters things
+		if(!isEmptyControllerData(frame)) {
+			std::vector<std::string> parts;
+			parts.push_back(std::to_string(i));
+
+			std::vector<std::string> buttonParts;
+			for(uint8_t i = 0; i < Btn::BUTTONS_SIZE; i++) {
+				Btn button = (Btn)i;
+				if(GET_BIT(frame->buttons, button)) {
+					// Add to the string
+					buttonParts.push_back(buttonMapping[button]->scriptName);
+				}
 			}
+
+			if(buttonParts.size() == 0) {
+				// Sometimes, it's nothing, so push a constant
+				parts.push_back("NONE");
+			} else {
+				parts.push_back(HELPERS::joinString(buttonParts, ";"));
+			}
+
+			parts.push_back(std::to_string(frame->LS_X) + ";" + std::to_string(frame->LS_Y));
+			parts.push_back(std::to_string(frame->RS_X) + ";" + std::to_string(frame->RS_Y));
+
+			parts.push_back(std::to_string(frame->ACCEL_X) + ";" + std::to_string(frame->ACCEL_Y) + ";" + std::to_string(frame->ACCEL_Z));
+			parts.push_back(std::to_string(frame->GYRO_1) + ";" + std::to_string(frame->GYRO_2) + ";" + std::to_string(frame->GYRO_3));
+
+			textVector.push_back(HELPERS::joinString(parts, " "));
 		}
-		parts[1] = HELPERS::joinString(buttonParts, ";");
-
-		parts[2] = std::to_string(frame->LS_X) + ";" + std::to_string(frame->LS_Y);
-		parts[3] = std::to_string(frame->ACCEL_X) + ";" + std::to_string(frame->ACCEL_Y) + ";" + std::to_string(frame->ACCEL_Z);
-		parts[4] = std::to_string(frame->GYRO_1) + ";" + std::to_string(frame->GYRO_2) + ";" + std::to_string(frame->GYRO_3);
-
-		textVector.push_back(HELPERS::joinString(parts, " "));
 	}
 	// Return with newlines
 	return HELPERS::joinString(textVector, "\n");
@@ -235,4 +271,24 @@ void ButtonData::transferControllerData(std::shared_ptr<ControllerData> src, std
 	dest->GYRO_2     = src->GYRO_2;
 	dest->GYRO_3     = src->GYRO_3;
 	dest->frameState = src->frameState;
+}
+
+bool ButtonData::isEmptyControllerData(std::shared_ptr<ControllerData> data) {
+	ControllerData emptyData;
+	// clang-format off
+	return
+		(data->index == emptyData.index) &&
+		(data->buttons == emptyData.buttons) &&
+		(data->LS_X       == emptyData.LS_X) &&
+		(data->LS_Y       == emptyData.LS_Y) &&
+		(data->RS_X       == emptyData.RS_X) &&
+		(data->RS_Y       == emptyData.RS_Y) &&
+		(data->ACCEL_X    == emptyData.ACCEL_X) &&
+		(data->ACCEL_Y    == emptyData.ACCEL_Y) &&
+		(data->ACCEL_Z    == emptyData.ACCEL_Z) &&
+		(data->GYRO_1     == emptyData.GYRO_1) &&
+		(data->GYRO_2     == emptyData.GYRO_2) &&
+		(data->GYRO_3     == emptyData.GYRO_3) &&
+		(data->frameState == emptyData.frameState);
+	// clang-format on
 }

@@ -39,25 +39,34 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	}
 
 	SetImageList(&imageList, wxIMAGE_LIST_SMALL);
-	// Set item attributes for nice colors
-	setItemAttributes();
-	// Add one frame
-	for(uint8_t i = 0; i < 30; i++) {
-		addNewFrame();
-	}
+
 	// Set other frames manually, without a function
 	currentRunFrame   = 0;
 	currentImageFrame = 0;
 	// Set the current frame to the first
+	// One frame needs to be added at the very beginning
+	addNewFrame();
 	setCurrentFrame(0);
+
+	// Set item attributes for nice colors
+	setItemAttributes();
+	// Add a few frame
+	for(uint8_t i = 0; i < 30; i++) {
+		addNewFrame();
+	}
 
 	// Create keyboard handlers
 	// Each menu item is added here
-	wxAcceleratorEntry entries[5];
-	pasteInsertID = wxNewId();
-	pastePlaceID  = wxNewId();
-	insertPaste   = false;
-	placePaste    = false;
+	wxAcceleratorEntry entries[8];
+
+	pasteInsertID   = wxNewId();
+	pastePlaceID    = wxNewId();
+	addFrameID      = wxNewId();
+	frameAdvanceID  = wxNewId();
+	savestateHookID = wxNewId();
+
+	insertPaste = false;
+	placePaste  = false;
 
 	entries[0].Set(wxACCEL_CTRL, (int)'C', wxID_COPY, editMenu.Append(wxID_COPY, wxT("&Copy\tCtrl+C")));
 	entries[1].Set(wxACCEL_CTRL, (int)'X', wxID_CUT, editMenu.Append(wxID_CUT, wxT("&Cut\tCtrl+X")));
@@ -65,7 +74,11 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	entries[3].Set(wxACCEL_CTRL | wxACCEL_SHIFT, (int)'V', pasteInsertID, editMenu.Append(pasteInsertID, wxT("&Paste Insert\tCtrl+Shift+V")));
 	entries[4].Set(wxACCEL_CTRL | wxACCEL_ALT, (int)'V', pastePlaceID, editMenu.Append(pasteInsertID, wxT("&Paste Place\tCtrl+Alt+V")));
 
-	wxAcceleratorTable accel(5, entries);
+	entries[5].Set(wxACCEL_CTRL, (int)'=', addFrameID, editMenu.Append(addFrameID, wxT("&Add Frame\tCtrl+Plus")));
+	entries[6].Set(wxACCEL_CTRL, WXK_RIGHT, frameAdvanceID, editMenu.Append(frameAdvanceID, wxT("&Frame Advance\tCtrl+Right")));
+	entries[7].Set(wxACCEL_CTRL, (int)'H', savestateHookID, editMenu.Append(savestateHookID, wxT("&Add Savestate Hook\tCtrl+H")));
+
+	wxAcceleratorTable accel(8, entries);
 	SetAcceleratorTable(accel);
 
 	// Bind each to a handler, both menu and button events
@@ -74,6 +87,9 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	Bind(wxEVT_MENU, &DataProcessing::onPaste, this, wxID_PASTE);
 	Bind(wxEVT_MENU, &DataProcessing::onInsertPaste, this, pasteInsertID);
 	Bind(wxEVT_MENU, &DataProcessing::onPlacePaste, this, pastePlaceID);
+	Bind(wxEVT_MENU, &DataProcessing::onAddFrame, this, addFrameID);
+	Bind(wxEVT_MENU, &DataProcessing::onFrameAdvance, this, frameAdvanceID);
+	Bind(wxEVT_MENU, &DataProcessing::onAddSavestateHook, this, savestateHookID);
 }
 
 // clang-format off
@@ -248,20 +264,16 @@ void DataProcessing::onCopy(wxCommandEvent& event) {
 			// There is a selected item
 			if(currentFrame >= firstSelectedItem && currentFrame <= lastSelectedItem) {
 				// Add these items to the clipboard
-				wxTheClipboard->SetData(new wxTextDataObject(ButtonData->framesToText(inputsList, firstSelectedItem, lastSelectedItem)));
+				wxTheClipboard->SetData(new wxTextDataObject(buttonData->framesToText(inputsList, firstSelectedItem, lastSelectedItem)));
 			} else {
 				// Deselect the others
-				for(FrameNum i = itemIndex; i <= lastSelectedItem; i++) {
+				for(FrameNum i = firstSelectedItem; i <= lastSelectedItem; i++) {
 					SetItemState(i, 0, wxLIST_STATE_SELECTED);
 				}
 				// Select just the one
 				SetItemState(currentFrame, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 
-				wxTheClipboard->SetData(new wxTextDataObject(ButtonData->framesToText(inputsList, currentFrame, currentFrame)));
-
-				std::shared_ptr<ControllerData> data = std::make_shared<ControllerData>();
-				buttonData->transferControllerData(inputsList[currentFrame], data, false);
-				framesCopied.push_back(data);
+				wxTheClipboard->SetData(new wxTextDataObject(buttonData->framesToText(inputsList, currentFrame, currentFrame)));
 
 				// See the new selection
 				RefreshItem(currentFrame);
@@ -294,10 +306,12 @@ void DataProcessing::onPaste(wxCommandEvent& event) {
 		if(wxTheClipboard->IsSupported(wxDF_TEXT)) {
 			wxTextDataObject data;
 			wxTheClipboard->GetData(data);
-			std::string clipboardText = data.GetText();
+			std::string clipboardText = data.GetText().ToStdString();
 
 			// Get to the meaty stuff, this is it
-			ButtonData->textToFrames(inputsList, clipboardText, currentFrame, insertPaste, placePaste);
+			buttonData->textToFrames(inputsList, clipboardText, currentFrame, insertPaste, placePaste);
+
+			SetItemCount(inputsList.size());
 			Refresh();
 			// Make the grid aware
 			if(inputCallback) {
@@ -310,25 +324,28 @@ void DataProcessing::onPaste(wxCommandEvent& event) {
 }
 
 void DataProcessing::onInsertPaste(wxCommandEvent& event) {
-	// Insert right after the current frame
-	FrameNum numOfCopiedElements = framesCopied.size();
-	for(FrameNum i = 0; i < numOfCopiedElements; i++) {
-		inputsList.insert(inputsList.begin() + currentFrame + i + 1, framesCopied[i]);
-	}
-	// Change number of elements to be correct
-	SetItemCount(inputsList.size());
-	Refresh();
-	// Make the grid aware
-	if(inputCallback) {
-		// Doesn't matter what arguments
-		inputCallback(Btn::A, false);
-	}
+	insertPaste = true;
+	onPaste(event);
+	insertPaste = false;
 }
 
 void DataProcessing::onPlacePaste(wxCommandEvent& event) {
 	placePaste = true;
 	onPaste(event);
 	placePaste = false;
+}
+
+void DataProcessing::onAddFrame(wxCommandEvent& event) {
+	// These are 1-to-1 from sideUI.cpp
+	addNewFrame();
+}
+
+void DataProcessing::onFrameAdvance(wxCommandEvent& event) {
+	runFrame();
+}
+
+void DataProcessing::onAddSavestateHook(wxCommandEvent& event) {
+	createSavestateHookHere();
 }
 
 bool DataProcessing::getButtonState(Btn button) {
@@ -394,6 +411,8 @@ void DataProcessing::setCurrentFrame(FrameNum frameNum) {
 		}
 
 		triggerCurrentFrameChanges();
+
+		Refresh();
 	}
 }
 
@@ -402,11 +421,16 @@ void DataProcessing::addNewFrame() {
 	// Set some defaults now
 	SET_BIT(newControllerData->frameState, false, FrameState::RAN);
 	SET_BIT(newControllerData->frameState, false, FrameState::SAVESTATE_HOOK);
-	// Add this to the vector
-	inputsList.push_back(newControllerData);
+	// Add this to the vector right after the selected frame
+	if(inputsList.size() == 0) {
+		inputsList.push_back(newControllerData);
+	} else {
+		inputsList.insert(inputsList.begin() + currentFrame + 1, newControllerData);
+	}
 	// Because of the usability of virtual list controls, just update the length
 	SetItemCount(inputsList.size());
 	// Dont change the current frame (for now)
+	Refresh();
 }
 
 void DataProcessing::createSavestateHookHere() {
@@ -438,6 +462,8 @@ void DataProcessing::runFrame() {
 		currentImageFrame = currentRunFrame;
 		triggerCurrentFrameChanges();
 
+		Refresh();
+
 		// Send to switch to run
 		Protocol::Struct_SendRunFrame sendFrame;
 		sendFrame.controllerData = *data;
@@ -445,9 +471,26 @@ void DataProcessing::runFrame() {
 	}
 }
 
+void DataProcessing::handleButtonInput(Btn button) {
+	// Just a generic method to handle multiselect and others
+	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if(firstSelectedItem != wxNOT_FOUND) {
+		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
+		// Now, apply the button
+		// Usually, just set to the opposite of the currently selected element
+		uint8_t state = !getButtonState(button);
+		for(FrameNum i = firstSelectedItem; i <= lastSelectedItem; i++) {
+			// This is so hacky, but oh well
+			setCurrentFrame(i);
+			setButtonState(button, state);
+		}
+		Refresh();
+	}
+}
+
 bool DataProcessing::handleKeyboardInput(wxChar key) {
 	if(charToButton.count(key)) {
-		toggleButtonState(charToButton[key]);
+		handleButtonInput(charToButton[key]);
 		return true;
 	}
 	return false;

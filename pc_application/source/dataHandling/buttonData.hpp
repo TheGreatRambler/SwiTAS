@@ -9,6 +9,7 @@
 #include <memory>
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>
+#include <string>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -82,13 +83,13 @@ public:
 	};
 
 	// To convert to Btn
-	std::map<std::string, Btn> scriptNameToButton;
+	std::unordered_map<std::string, Btn> scriptNameToButton;
 
 	// Controller data that will be packed into the array and will be recieved from
 	// the switch
 	struct ControllerData : public zpp::serializer::polymorphic {
 		// This controller's index
-		uint8_t index;
+		uint8_t index = 0;
 		// Button data stored with bitflags in 3 bytes
 		// 20 flags need to be stored
 		uint32_t buttons = 0;
@@ -160,6 +161,8 @@ public:
 	std::string framesToText(std::vector<std::shared_ptr<ControllerData>>& frames, FrameNum startLoc, FrameNum endLoc);
 
 	void transferControllerData(std::shared_ptr<ControllerData> src, std::shared_ptr<ControllerData> dest, bool placePaste);
+
+	bool isEmptyControllerData(std::shared_ptr<ControllerData> data);
 };
 
 // Some good typedef's

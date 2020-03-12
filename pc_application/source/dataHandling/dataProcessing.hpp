@@ -14,6 +14,7 @@
 #include <utility>
 #include <uxtheme.h>
 #include <vector>
+#include <wx/clipbrd.h>
 #include <wx/grid.h>
 #include <wx/listctrl.h>
 #include <wx/wx.h>
@@ -72,10 +73,14 @@ private:
 
 	void OnEraseBackground(wxEraseEvent& event);
 
+	// Custom accelerator IDs
 	int pasteInsertID;
-	int insertPaste;
-
 	int pastePlaceID;
+	int addFrameID;
+	int frameAdvanceID;
+	int savestateHookID;
+
+	int insertPaste;
 	bool placePaste;
 
 	// Menu popup
@@ -89,6 +94,10 @@ private:
 	void onPaste(wxCommandEvent& event);
 	void onInsertPaste(wxCommandEvent& event);
 	void onPlacePaste(wxCommandEvent& event);
+
+	void onAddFrame(wxCommandEvent& event);
+	void onFrameAdvance(wxCommandEvent& event);
+	void onAddSavestateHook(wxCommandEvent& event);
 
 public:
 	static const int LIST_CTRL_ID = 1000;
@@ -123,6 +132,8 @@ public:
 		GetItemRect(topItem, itemRect);
 		return itemRect;
 	}
+
+	void handleButtonInput(Btn button);
 
 	bool handleKeyboardInput(wxChar key);
 	// The class itself is the list control

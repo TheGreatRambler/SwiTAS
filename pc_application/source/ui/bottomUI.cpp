@@ -76,7 +76,7 @@ void ButtonGrid::onGridClick(wxMouseEvent& event) {
 
 	if(locToButton.count(key)) {
 		// Element exists, time to trigger the click
-		inputInstance->toggleButtonState(locToButton[key]);
+		inputInstance->handleButtonInput(locToButton[key]);
 		Refresh();
 	}
 }

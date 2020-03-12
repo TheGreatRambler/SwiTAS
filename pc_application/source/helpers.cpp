@@ -7,7 +7,7 @@ std::string HELPERS::resolvePath(std::string path) {
 	return res;
 };
 
-std::vector<std::string> HELPERS::splitString(std::string s, char delim) {
+std::vector<std::string> HELPERS::splitString(const std::string s, char delim) {
 	std::vector<std::string> result;
 	std::stringstream ss(s);
 	std::string item;
@@ -20,12 +20,16 @@ std::vector<std::string> HELPERS::splitString(std::string s, char delim) {
 }
 
 std::string HELPERS::joinString(std::vector<std::string> vec, std::string delimiter) {
-	// https://stackoverflow.com/a/40052831
-	// clang-format off
-    return std::accumulate(std::next(vec.begin()), vec.end(),
-        vec[0],
-    [&delimiter](std::string& a, std::string& b) {
-        return a + delimiter + b;
-    });
-	// clang-format on
+	if(vec.size() != 0) {
+		// https://stackoverflow.com/a/40052831
+		// clang-format off
+		return std::accumulate(std::next(vec.begin()), vec.end(),
+			vec[0],
+		[&delimiter](std::string& a, std::string& b) {
+			return a + delimiter + b;
+		});
+		// clang-format on
+	} else {
+		return "";
+	}
 }
