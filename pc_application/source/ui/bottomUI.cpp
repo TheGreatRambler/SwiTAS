@@ -15,6 +15,12 @@ ButtonGrid::ButtonGrid(wxFrame* parent, wxSize requiredSize, std::shared_ptr<But
 
 	// Callback stuff
 	inputInstance->setInputCallback(std::bind(&ButtonGrid::setIconState, this, std::placeholders::_1, std::placeholders::_2));
+
+	for(auto const& button : buttonData->buttonMapping) {
+		char buf[5];
+		sprintf(buf, "%d-%d", button.second->gridX, button.second->gridY);
+		locToButton[std::string(buf)] = button.first;
+	}
 }
 
 void ButtonGrid::setIconState(Btn button, bool state) {
@@ -32,19 +38,8 @@ void ButtonGrid::draw(wxDC& dc) {
 	double scaleHeight = (double)height / totalCombinedImageSize.GetHeight();
 	dc.SetUserScale(scaleWidth, scaleHeight);
 
-	bool createMap = false;
-	if(locToButton.empty()) {
-		createMap = true;
-	}
-
 	// TODO not every image is a square :)
 	for(auto const& button : buttonData->buttonMapping) {
-		if(createMap) {
-			// This needs to be filled, but only once
-			char buf[5];
-			sprintf(buf, "%d-%d", button.second->gridX, button.second->gridY);
-			locToButton[std::string(buf)] = button.first;
-		}
 		wxBitmap* bitmap;
 		if(inputInstance->getButtonState(button.first)) {
 			bitmap = button.second->resizedGridOnBitmap;
@@ -102,9 +97,34 @@ void FrameViewerCanvas::draw(wxDC& dc) {
 	}
 }
 
-JoystickCanvas::JoystickCanvas(wxFrame* parent)
+JoystickCanvas::JoystickCanvas(wxFrame* parent, DataProcessing* inputData, uint8_t leftJoy)
 	: DrawingCanvas(parent, wxSize(150, 150)) {
 	// Should be a decent size
+	isLeftJoystick = leftJoy;
+	inputInstance  = inputData;
+
+	// Create widgets
+	xInput                     = new wxSpinCtrl(parent);
+	yInput                     = new wxSpinCtrl(parent);
+	canGoOutsideCircleCheckbox = new wxCheckBox(parent, wxID_ANY, wxEmptyString);
+
+	xInput->Bind(wxEVT_COMMAND_SPINCTRL_UPDATED, &JoystickCanvas::xValueSet, this);
+	yInput->Bind(wxEVT_COMMAND_SPINCTRL_UPDATED, &JoystickCanvas::yValueSet, this);
+
+	xInput->SetMin(-30000);
+	xInput->SetMax(30000);
+	yInput->SetMin(-30000);
+	yInput->SetMax(30000);
+
+	inputSizer  = new wxBoxSizer(wxHORIZONTAL);
+	widgetSizer = new wxBoxSizer(wxVERTICAL);
+
+	inputSizer->Add(xInput, 0, wxEXPAND);
+	inputSizer->Add(yInput, 0, wxEXPAND);
+	inputSizer->Add(canGoOutsideCircleCheckbox, 0, wxEXPAND);
+
+	widgetSizer->Add(this, 0, wxSHAPED | wxEXPAND);
+	widgetSizer->Add(inputSizer, 1, wxEXPAND | wxALL);
 }
 
 void JoystickCanvas::draw(wxDC& dc) {
@@ -115,10 +135,95 @@ void JoystickCanvas::draw(wxDC& dc) {
 
 	wxPoint approximateMiddle((float)width / 2, (float)height / 2);
 
-	dc.SetPen(*wxGREEN);
+	dc.SetPen(*wxGREEN_PEN);
 	dc.SetBrush(*wxLIGHT_GREY_BRUSH);
 
-	dc.DrawCircle(approximateMiddle, approximateMiddle.x - 3);
+	dc.DrawCircle(approximateMiddle, approximateMiddle.x);
+
+	int32_t joyX;
+	int32_t joyY;
+
+	if(isLeftJoystick) {
+		joyX = inputInstance->getCurrentFrame()->LS_X;
+		joyY = inputInstance->getCurrentFrame()->LS_Y;
+	} else {
+		joyX = inputInstance->getCurrentFrame()->RS_X;
+		joyY = inputInstance->getCurrentFrame()->RS_Y;
+	}
+
+	int renderJoyX = (joyX / 30000.0f) * approximateMiddle.x + approximateMiddle.x;
+	int renderJoyY = (joyY / 30000.0f) * approximateMiddle.y + approximateMiddle.y;
+
+	int middleCircleRadius = std::floor((float)width / 20);
+
+	// Optimise if the angle is nonexistent
+	if(joyX != 0 && joyY != 0) {
+		float joyAngle = std::atan2(joyY, joyX);
+
+		// First, draw the rectangle
+		dc.SetBrush(*wxMEDIUM_GREY_BRUSH);
+
+		wxPoint joystickBarPoints[4];
+
+		// Calculate the angle once and then mirror to use twice
+		float barDrawingAngle = HELPERS::normalizeRadian(joyAngle + (M_PI / 2.0f));
+		int offsetX           = middleCircleRadius * std::cos(barDrawingAngle);
+		int offsetY           = middleCircleRadius * std::sin(barDrawingAngle);
+
+		joystickBarPoints[0] = wxPoint(approximateMiddle.x + offsetX, approximateMiddle.y + offsetY);
+		joystickBarPoints[1] = wxPoint(renderJoyX + offsetX, renderJoyY + offsetY);
+		joystickBarPoints[2] = wxPoint(renderJoyX - offsetX, renderJoyY - offsetY);
+		joystickBarPoints[3] = wxPoint(approximateMiddle.y - offsetX, approximateMiddle.y - offsetY);
+
+		dc.DrawPolygon(4, joystickBarPoints, approximateMiddle.x, approximateMiddle.y);
+	}
+
+	// Draw the middle ball
+	dc.SetBrush(*wxBLACK_BRUSH);
+	dc.DrawCircle(approximateMiddle, middleCircleRadius);
+
+	// Finally, draw the joystick itself
+	dc.DrawCircle(renderJoyX, renderJoyY, middleCircleRadius + 5);
+}
+
+void JoystickCanvas::xValueSet(wxSpinEvent& event) {
+	int position = event.GetPosition();
+	if(position > 30000) {
+		position = 30000;
+		event.SetPosition(position);
+	}
+
+	if(position < -30000) {
+		position = -30000;
+		event.SetPosition(position);
+	}
+
+	if(isLeftJoystick) {
+		inputInstance->getCurrentFrame()->LS_X = position;
+	} else {
+		inputInstance->getCurrentFrame()->RS_X = position;
+	}
+	Refresh();
+}
+
+void JoystickCanvas::yValueSet(wxSpinEvent& event) {
+	int position = event.GetPosition();
+	if(position > 30000) {
+		position = 30000;
+		event.SetPosition(position);
+	}
+
+	if(position < -30000) {
+		position = -30000;
+		event.SetPosition(position);
+	}
+
+	if(isLeftJoystick) {
+		inputInstance->getCurrentFrame()->LS_Y = position;
+	} else {
+		inputInstance->getCurrentFrame()->RS_Y = position;
+	}
+	Refresh();
 }
 
 BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid, DataProcessing* input) {
@@ -133,9 +238,9 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 	mainSizer          = new wxBoxSizer(wxVERTICAL);
 	horizontalBoxSizer = new wxBoxSizer(wxHORIZONTAL);
 
-	leftJoystickDrawer = new JoystickCanvas(parentFrame);
+	leftJoystickDrawer = new JoystickCanvas(parentFrame, inputInstance, true);
 	leftJoystickDrawer->setBackgroundColor(*wxWHITE);
-	rightJoystickDrawer = new JoystickCanvas(parentFrame);
+	rightJoystickDrawer = new JoystickCanvas(parentFrame, inputInstance, false);
 	rightJoystickDrawer->setBackgroundColor(*wxWHITE);
 
 	wxSize gridSize;
@@ -150,8 +255,8 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 	frameViewerCanvas = new FrameViewerCanvas(parentFrame, new wxBitmap(HELPERS::resolvePath((*mainSettings)["videoViewerDefaultImage"].GetString()), wxBITMAP_TYPE_JPEG));
 
 	// These take up much less space than the grid
-	horizontalBoxSizer->Add(leftJoystickDrawer, 0, wxSHAPED | wxEXPAND);
-	horizontalBoxSizer->Add(rightJoystickDrawer, 0, wxSHAPED | wxEXPAND);
+	horizontalBoxSizer->Add(leftJoystickDrawer->getSizer(), 0, wxSHAPED | wxEXPAND);
+	horizontalBoxSizer->Add(rightJoystickDrawer->getSizer(), 0, wxSHAPED | wxEXPAND);
 
 	horizontalBoxSizer->Add(buttonGrid, 0, wxSHAPED | wxEXPAND);
 

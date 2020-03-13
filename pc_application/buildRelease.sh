@@ -1,3 +1,5 @@
+make -j 4 BUILD=release
+
 mkdir release
 
 mkdir release/bin

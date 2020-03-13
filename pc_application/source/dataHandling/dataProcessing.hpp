@@ -126,6 +126,10 @@ public:
 	void createSavestateHookHere();
 	void runFrame();
 
+	std::shared_ptr<ControllerData> getCurrentFrame() {
+		return currentData;
+	}
+
 	wxRect getFirstItemRect() {
 		wxRect itemRect;
 		long topItem = GetTopItem();

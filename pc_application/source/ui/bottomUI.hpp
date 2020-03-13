@@ -6,8 +6,10 @@
 #include <rapidjson/document.h>
 #include <unistd.h>
 #include <utility>
+#include <wx/checkbox.h>
 #include <wx/dcbuffer.h>
 #include <wx/grid.h>
+#include <wx/spinctrl.h>
 #include <wx/wx.h>
 
 #include "../dataHandling/buttonData.hpp"
@@ -52,10 +54,34 @@ public:
 };
 
 class JoystickCanvas : public DrawingCanvas {
+private:
+	// Input instance to get inputs and such
+	DataProcessing* inputInstance;
+
+	// Used to keep the two apart
+	uint8_t isLeftJoystick;
+
+	// Handle manual number setting
+	wxSpinCtrl* xInput;
+	wxSpinCtrl* yInput;
+
+	// Checkbox for if you can drag cursor outside of circle
+	wxCheckBox* canGoOutsideCircleCheckbox;
+
+	wxBoxSizer* inputSizer;
+	wxBoxSizer* widgetSizer;
+
+	void xValueSet(wxSpinEvent& event);
+	void yValueSet(wxSpinEvent& event);
+
 public:
-	JoystickCanvas(wxFrame* parent);
+	JoystickCanvas(wxFrame* parent, DataProcessing* inputData, uint8_t leftJoy);
 
 	void draw(wxDC& dc) override;
+
+	wxBoxSizer* getSizer() {
+		return widgetSizer;
+	}
 };
 
 class BottomUI {

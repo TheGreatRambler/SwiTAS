@@ -32,6 +32,15 @@ CXXFLAGS := -std=gnu++17 $(shell wx-config --cxxflags base,core) -I./include
 # -fpermissive needed for some misbehaving GTK code
 # Just for 64 bit for the memes
 CPPFLAGS := -Wall -Wno-maybe-uninitialized -ggdb -m64
+
+ifeq ($(BUILD),release)
+# "Release" build - optimization, and no debug symbols
+CPPFLAGS += -O3 -s -DNDEBUG
+else
+# "Debug" build - no optimization, and debugging symbols
+CPPFLAGS += -Og -g
+endif
+
 # Linker flags (-lpthread needed for threads)
 # Includes some neccessary linker flags for win32-darkmode (will add in the future)
 LDFLAGS := $(shell wx-config --libs base,core --static=yes) -lpthread
