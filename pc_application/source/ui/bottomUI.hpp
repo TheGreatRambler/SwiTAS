@@ -9,6 +9,7 @@
 #include <wx/checkbox.h>
 #include <wx/dcbuffer.h>
 #include <wx/grid.h>
+#include <wx/joystick.h>
 #include <wx/spinctrl.h>
 #include <wx/wx.h>
 
@@ -27,9 +28,6 @@ private:
 
 	// Input instance to get inputs and such
 	DataProcessing* inputInstance;
-
-	// Handle changing icon state
-	void setIconState(Btn button, bool state);
 
 	// Hashmap for location
 	std::unordered_map<std::string, Btn> locToButton;
@@ -74,6 +72,11 @@ private:
 	void xValueSet(wxSpinEvent& event);
 	void yValueSet(wxSpinEvent& event);
 
+	void correctForCircleLock();
+
+	void onMouseClick(wxMouseEvent& event);
+	void onMouseDrag(wxMouseEvent& event);
+
 public:
 	JoystickCanvas(wxFrame* parent, DataProcessing* inputData, uint8_t leftJoy);
 
@@ -95,6 +98,9 @@ private:
 
 	wxBoxSizer* horizontalBoxSizer;
 
+	// Needed for joysticks
+	wxFrame* parent;
+
 	JoystickCanvas* leftJoystickDrawer;
 	JoystickCanvas* rightJoystickDrawer;
 
@@ -107,6 +113,25 @@ private:
 	// The button mapping instance
 	std::shared_ptr<ButtonData> buttonData;
 
+	wxJoystick* currentJoy;
+
+	// Just a random large number
+	static constexpr int joystickSubmenuIDBase = 77;
+
+	// Menu item for joysticks, will be exclusively used
+	// by the bottom UI, so that's why it is here
+	wxMenu* joystickSubMenu;
+	void onJoystickMenuOpen(wxMenuEvent& event);
+	void onJoystickSelect(wxCommandEvent& event);
+
+	void refreshDataViews();
+
 public:
 	BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid, DataProcessing* input);
+
+	wxMenu* getJoystickSubmenu() {
+		return joystickSubMenu;
+	}
+
+	void onJoystickChange(wxJoystickEvent& event);
 };

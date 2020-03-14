@@ -33,3 +33,8 @@ std::string HELPERS::joinString(std::vector<std::string> vec, std::string delimi
 		return "";
 	}
 }
+
+float HELPERS::normalizeRadian(float angle) {
+	float a = std::fmod(angle, 2 * M_PI);
+	return a >= 0 ? a : (a + 2 * M_PI);
+}

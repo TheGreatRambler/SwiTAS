@@ -103,7 +103,7 @@ BEGIN_EVENT_TABLE(DataProcessing, wxListCtrl)
 END_EVENT_TABLE()
 // clang-format on
 
-void DataProcessing::setInputCallback(std::function<void(Btn, bool)> callback) {
+void DataProcessing::setInputCallback(std::function<void()> callback) {
 	inputCallback = callback;
 }
 
@@ -296,7 +296,7 @@ void DataProcessing::onCut(wxCommandEvent& event) {
 	// Make the grid aware
 	if(inputCallback) {
 		// Doesn't matter what arguments
-		inputCallback(Btn::A, false);
+		inputCallback();
 	}
 }
 
@@ -316,7 +316,7 @@ void DataProcessing::onPaste(wxCommandEvent& event) {
 			// Make the grid aware
 			if(inputCallback) {
 				// Doesn't matter what arguments
-				inputCallback(Btn::A, false);
+				inputCallback();
 			}
 		}
 		wxTheClipboard->Close();
@@ -383,7 +383,7 @@ void DataProcessing::setButtonState(Btn button, bool state) {
 
 	// Make the grid aware
 	if(inputCallback) {
-		inputCallback(button, state);
+		inputCallback();
 	}
 }
 
@@ -407,7 +407,7 @@ void DataProcessing::setCurrentFrame(FrameNum frameNum) {
 		// Make the grid aware
 		if(inputCallback) {
 			// Doesn't matter what arguments
-			inputCallback(Btn::A, false);
+			inputCallback();
 		}
 
 		triggerCurrentFrameChanges();

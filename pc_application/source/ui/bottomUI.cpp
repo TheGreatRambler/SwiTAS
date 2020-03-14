@@ -13,19 +13,11 @@ ButtonGrid::ButtonGrid(wxFrame* parent, wxSize requiredSize, std::shared_ptr<But
 	// Handle grid clicking
 	Bind(wxEVT_LEFT_DOWN, &ButtonGrid::onGridClick, this);
 
-	// Callback stuff
-	inputInstance->setInputCallback(std::bind(&ButtonGrid::setIconState, this, std::placeholders::_1, std::placeholders::_2));
-
 	for(auto const& button : buttonData->buttonMapping) {
 		char buf[5];
 		sprintf(buf, "%d-%d", button.second->gridX, button.second->gridY);
 		locToButton[std::string(buf)] = button.first;
 	}
-}
-
-void ButtonGrid::setIconState(Btn button, bool state) {
-	// Just trigger a refresh (I'm too lazy)
-	Refresh();
 }
 
 void ButtonGrid::draw(wxDC& dc) {
@@ -111,6 +103,9 @@ JoystickCanvas::JoystickCanvas(wxFrame* parent, DataProcessing* inputData, uint8
 	xInput->Bind(wxEVT_COMMAND_SPINCTRL_UPDATED, &JoystickCanvas::xValueSet, this);
 	yInput->Bind(wxEVT_COMMAND_SPINCTRL_UPDATED, &JoystickCanvas::yValueSet, this);
 
+	Bind(wxEVT_LEFT_DOWN, &JoystickCanvas::onMouseClick, this);
+	Bind(wxEVT_MOTION, &JoystickCanvas::onMouseDrag, this);
+
 	xInput->SetMin(-30000);
 	xInput->SetMax(30000);
 	yInput->SetMin(-30000);
@@ -151,13 +146,16 @@ void JoystickCanvas::draw(wxDC& dc) {
 		joyY = inputInstance->getCurrentFrame()->RS_Y;
 	}
 
+	// Flip the height to resemble the coordinate system
+	joyY *= -1;
+
 	int renderJoyX = (joyX / 30000.0f) * approximateMiddle.x + approximateMiddle.x;
 	int renderJoyY = (joyY / 30000.0f) * approximateMiddle.y + approximateMiddle.y;
 
 	int middleCircleRadius = std::floor((float)width / 20);
 
 	// Optimise if the angle is nonexistent
-	if(joyX != 0 && joyY != 0) {
+	if(joyX != 0 || joyY != 0) {
 		float joyAngle = std::atan2(joyY, joyX);
 
 		// First, draw the rectangle
@@ -175,7 +173,7 @@ void JoystickCanvas::draw(wxDC& dc) {
 		joystickBarPoints[2] = wxPoint(renderJoyX - offsetX, renderJoyY - offsetY);
 		joystickBarPoints[3] = wxPoint(approximateMiddle.y - offsetX, approximateMiddle.y - offsetY);
 
-		dc.DrawPolygon(4, joystickBarPoints, approximateMiddle.x, approximateMiddle.y);
+		dc.DrawPolygon(4, joystickBarPoints);
 	}
 
 	// Draw the middle ball
@@ -184,24 +182,88 @@ void JoystickCanvas::draw(wxDC& dc) {
 
 	// Finally, draw the joystick itself
 	dc.DrawCircle(renderJoyX, renderJoyY, middleCircleRadius + 5);
+
+	// Show the actual value underneath
+	if(isLeftJoystick) {
+		xInput->SetValue(inputInstance->getCurrentFrame()->LS_X);
+		yInput->SetValue(inputInstance->getCurrentFrame()->LS_Y);
+	} else {
+		xInput->SetValue(inputInstance->getCurrentFrame()->RS_X);
+		yInput->SetValue(inputInstance->getCurrentFrame()->RS_Y);
+	}
+}
+
+void JoystickCanvas::correctForCircleLock() {
+	if(canGoOutsideCircleCheckbox->IsChecked()) {
+		int* x;
+		int* y;
+		if(isLeftJoystick) {
+			x = &(inputInstance->getCurrentFrame()->LS_X);
+			y = &(inputInstance->getCurrentFrame()->LS_Y);
+		} else {
+			x = &(inputInstance->getCurrentFrame()->RS_X);
+			y = &(inputInstance->getCurrentFrame()->RS_Y);
+		}
+		// This corrects for circle lock if the checkbox is set
+		// https://math.stackexchange.com/a/127615
+		int radiusSquared = std::pow(*x, 2) + std::pow(*y, 2);
+		if(radiusSquared > std::pow(30000, 2)) {
+			// Have to clamp it
+			*x = 30000 * (*x / std::sqrt(radiusSquared));
+			*y = 30000 * (*y / std::sqrt(radiusSquared));
+		}
+	}
+}
+
+void JoystickCanvas::onMouseClick(wxMouseEvent& event) {
+	wxPoint loc = event.GetPosition();
+	int width;
+	int height;
+	GetSize(&width, &height);
+
+	int32_t scaledX = ((float)loc.x / width) * 60000 - 30000;
+	// Y is flipped
+	int32_t scaledY = (((float)loc.y / height) * 60000 - 30000) * -1;
+
+	// Mutiply by twice the radius and then subtract the radius to get the middle
+	if(isLeftJoystick) {
+		inputInstance->getCurrentFrame()->LS_X = scaledX;
+		inputInstance->getCurrentFrame()->LS_Y = scaledY;
+	} else {
+		inputInstance->getCurrentFrame()->RS_X = scaledX;
+		inputInstance->getCurrentFrame()->RS_Y = scaledY;
+	}
+
+	correctForCircleLock();
+
+	event.Skip();
+
+	Refresh();
+}
+
+void JoystickCanvas::onMouseDrag(wxMouseEvent& event) {
+	if(event.Dragging()) {
+		// Pass it on
+		onMouseClick(event);
+	}
 }
 
 void JoystickCanvas::xValueSet(wxSpinEvent& event) {
 	int position = event.GetPosition();
 	if(position > 30000) {
 		position = 30000;
-		event.SetPosition(position);
 	}
 
 	if(position < -30000) {
 		position = -30000;
-		event.SetPosition(position);
 	}
 
 	if(isLeftJoystick) {
 		inputInstance->getCurrentFrame()->LS_X = position;
+		correctForCircleLock();
 	} else {
 		inputInstance->getCurrentFrame()->RS_X = position;
+		correctForCircleLock();
 	}
 	Refresh();
 }
@@ -210,18 +272,20 @@ void JoystickCanvas::yValueSet(wxSpinEvent& event) {
 	int position = event.GetPosition();
 	if(position > 30000) {
 		position = 30000;
-		event.SetPosition(position);
 	}
 
 	if(position < -30000) {
 		position = -30000;
-		event.SetPosition(position);
 	}
 
 	if(isLeftJoystick) {
 		inputInstance->getCurrentFrame()->LS_Y = position;
+		correctForCircleLock();
+		event.SetPosition(inputInstance->getCurrentFrame()->LS_Y);
 	} else {
 		inputInstance->getCurrentFrame()->RS_Y = position;
+		correctForCircleLock();
+		event.SetPosition(inputInstance->getCurrentFrame()->RS_Y);
 	}
 	Refresh();
 }
@@ -232,6 +296,8 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 	mainSettings = settings;
 
 	inputInstance = input;
+
+	parent = parentFrame;
 
 	// Game frame viewer
 
@@ -254,6 +320,12 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 
 	frameViewerCanvas = new FrameViewerCanvas(parentFrame, new wxBitmap(HELPERS::resolvePath((*mainSettings)["videoViewerDefaultImage"].GetString()), wxBITMAP_TYPE_JPEG));
 
+	inputInstance->setInputCallback(std::bind(&BottomUI::refreshDataViews, this));
+
+	// Add the joystick submenu
+	joystickSubMenu = new wxMenu();
+	joystickSubMenu->Bind(wxEVT_MENU_OPEN, &BottomUI::onJoystickMenuOpen, this);
+
 	// These take up much less space than the grid
 	horizontalBoxSizer->Add(leftJoystickDrawer->getSizer(), 0, wxSHAPED | wxEXPAND);
 	horizontalBoxSizer->Add(rightJoystickDrawer->getSizer(), 0, wxSHAPED | wxEXPAND);
@@ -265,4 +337,60 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 	mainSizer->Add(horizontalBoxSizer, 1, wxEXPAND | wxALL);
 
 	theGrid->Add(mainSizer, 3, wxEXPAND | wxALL);
+}
+
+void BottomUI::refreshDataViews() {
+	// Just refresh the grid and the joysticks
+	leftJoystickDrawer->Refresh();
+	rightJoystickDrawer->Refresh();
+	buttonGrid->Refresh();
+}
+
+void BottomUI::onJoystickSelect(wxCommandEvent& event) {
+	if(currentJoy != nullptr) {
+		// Disable the earlier one
+		currentJoy->ReleaseCapture();
+		delete currentJoy;
+		currentJoy = nullptr;
+	}
+	// Joystick selected, get the index to know which joy
+	currentJoy = new wxJoystick(event.GetId() - joystickSubmenuIDBase);
+	currentJoy->SetCapture(parent);
+	// Events are now bound
+}
+
+void BottomUI::onJoystickMenuOpen(wxMenuEvent& event) {
+	// Remove all current items
+	int currentNumOfItems = joystickSubMenu->GetMenuItemCount();
+	for(int i = 0; i < currentNumOfItems; i++) {
+		joystickSubMenu->Delete(i + joystickSubmenuIDBase);
+		joystickSubMenu->Unbind(wxEVT_MENU, &BottomUI::onJoystickSelect, this, i + joystickSubmenuIDBase);
+	}
+	// Get number of currently selected joysticks and list them
+	int numOfConnectedJoysticks = wxJoystick::GetNumberJoysticks();
+	for(int i = 0; i < numOfConnectedJoysticks; i++) {
+		// Briefly open it for info
+		// Not using wxJOYSTICK1 or wxJOYSTICK2, because that restricts me to two
+		wxJoystick* joy    = new wxJoystick(i);
+		wxString name      = joy->GetProductName();
+		int manufacturerID = joy->GetManufacturerId();
+		joystickSubMenu->AppendRadioItem(i + joystickSubmenuIDBase, wxString::Format(wxT("%i"), manufacturerID));
+		joystickSubMenu->Bind(wxEVT_COMMAND_MENU_SELECTED, &BottomUI::onJoystickSelect, this, i + joystickSubmenuIDBase);
+		// Delete it because it doesn't need to be used right now
+		delete joy;
+	}
+}
+
+void BottomUI::onJoystickChange(wxJoystickEvent& event) {
+	// Handle joystick events live
+	// Will be really complicated, so use this https://robsears.com/ultimate-wxjoystick-tutorial/
+	// Use https://github.com/gabomdq/gamecontrollerdb for mapping
+	if(event.IsButton()) {
+		// Button event
+		int buttonState = currentJoy->GetButtonState();
+	} else if(event.IsMove()) {
+		// Move event, I think the joysticks
+	} else if(event.IsZMove()) {
+		// Z move ??
+	}
 }
