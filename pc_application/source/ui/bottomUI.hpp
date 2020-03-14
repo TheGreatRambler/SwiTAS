@@ -116,6 +116,7 @@ private:
 
 	wxJoystick* currentJoy;
 	uint8_t currentJoyDefined;
+	int lastButtonState;
 
 	std::map<std::string, int> stringToButtonExtended {
 		{ "LSX", 0 },

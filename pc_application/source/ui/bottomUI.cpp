@@ -326,6 +326,7 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 	joystickSubMenu = new wxMenu();
 	joystickSubMenu->Bind(wxEVT_MENU_OPEN, &BottomUI::onJoystickMenuOpen, this);
 	currentJoyDefined = false;
+	lastButtonState   = 0;
 
 	// These take up much less space than the grid
 	horizontalBoxSizer->Add(leftJoystickDrawer->getSizer(), 0, wxSHAPED | wxEXPAND);
@@ -461,11 +462,22 @@ void BottomUI::onJoystickChange(wxJoystickEvent& event) {
 	// Handle joystick events live
 	// Will be really complicated, so use this https://robsears.com/ultimate-wxjoystick-tutorial/
 	// Use https://github.com/gabomdq/gamecontrollerdb for mapping
-	if(event.IsButton()) {
-		// Button event
+	if(event.IsButton() && event.ButtonIsDown()) {
+		// Button down event
+		// Check POV too just in case
 		int buttonState = currentJoy->GetButtonState();
+		for(int i = 0; i < currentJoy->GetNumberButtons(); i++) {
+			// Get the value with bitwise
+			uint8_t isPressed = GET_BIT(buttonState, i);
+			if(isPressed && !GET_BIT(lastButtonState, i)) {
+				// This button wasn't clicked before and now it is, trigger it
+				if(joyButtonToSwitch.count(i)) {
+					inputInstance->handleButtonInput((Btn)joyButtonToSwitch[i]);
+				}
+			}
+		}
 	} else if(event.IsMove()) {
-		// Move event, I think the joysticks and the hat
+		// Move event, I think any axis
 	} else if(event.IsZMove()) {
 		// Z move ??
 	}
