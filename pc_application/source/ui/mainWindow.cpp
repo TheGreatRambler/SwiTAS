@@ -141,13 +141,18 @@ void MainWindow::addStatusBar() {
 
 void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 	wxWindowID id = commandEvent.GetId();
-	if(id == selectIPID) {
-		// IP needs to be selected
-		wxString ipAddress = wxGetTextFromUser("Please enter IP address of Nintendo Switch", "Server connect", wxEmptyString);
-		if(!ipAddress.empty()) {
-			// IP address entered
-			SetStatusText(ipAddress + ":" + std::to_string(SERVER_PORT), 0);
-			networkInstance->attemptConnectionToServer(ipAddress.c_str());
+	if(id >= bottomUI->joystickSubmenuIDBase) {
+		// Send straight to bottomUI
+		bottomUI->onJoystickSelect(commandEvent);
+	} else {
+		if(id == selectIPID) {
+			// IP needs to be selected
+			wxString ipAddress = wxGetTextFromUser("Please enter IP address of Nintendo Switch", "Server connect", wxEmptyString);
+			if(!ipAddress.empty()) {
+				// IP address entered
+				SetStatusText(ipAddress + ":" + std::to_string(SERVER_PORT), 0);
+				networkInstance->attemptConnectionToServer(ipAddress.c_str());
+			}
 		}
 	}
 }

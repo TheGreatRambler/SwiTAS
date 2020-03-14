@@ -325,6 +325,7 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 	// Add the joystick submenu
 	joystickSubMenu = new wxMenu();
 	joystickSubMenu->Bind(wxEVT_MENU_OPEN, &BottomUI::onJoystickMenuOpen, this);
+	currentJoyDefined = false;
 
 	// These take up much less space than the grid
 	horizontalBoxSizer->Add(leftJoystickDrawer->getSizer(), 0, wxSHAPED | wxEXPAND);
@@ -347,16 +348,84 @@ void BottomUI::refreshDataViews() {
 }
 
 void BottomUI::onJoystickSelect(wxCommandEvent& event) {
-	if(currentJoy != nullptr) {
+	if(currentJoyDefined) {
 		// Disable the earlier one
 		currentJoy->ReleaseCapture();
 		delete currentJoy;
-		currentJoy = nullptr;
+		currentJoyDefined = false;
 	}
 	// Joystick selected, get the index to know which joy
 	currentJoy = new wxJoystick(event.GetId() - joystickSubmenuIDBase);
+	// Prepare mapping
+	joyButtonToSwitch.clear();
+	povToSwitch.clear();
+	axisToSwitch.clear();
+	// Get mapping from hex string
+	char* hexString        = (char*)getJoyHexString(currentJoy).char_str();
+	std::string joyMapping = (*mainSettings)["joystickMappings"][hexString].GetString();
+	// Break it apart and do things
+	std::vector<std::string> parts = HELPERS::splitString(joyMapping, ',');
+	for(auto const& part : parts) {
+		std::vector<std::string> inputParts = HELPERS::splitString(part, ':');
+		char firstChar                      = inputParts[1].front();
+		int index;
+		if(firstChar == 'b') {
+			// It adds one for some reason, ask SDL
+			index = strtol(inputParts[1].erase(0, 1).c_str(), nullptr, 10) - 1;
+			// This is a button
+			if(buttonData->stringToButton.count(inputParts[0])) {
+				// It's a normal button
+				joyButtonToSwitch[index] = (int)buttonData->stringToButton[inputParts[0]];
+			} else {
+				// It's extended
+				// Go beyond the end of Btn
+				joyButtonToSwitch[index] = stringToButtonExtended[inputParts[0]] + Btn::BUTTONS_SIZE;
+			}
+		} else if(firstChar == 'h') {
+			// This is a hat, usually pov
+			// Hat comprises of two parts, but basically ignore the first part
+			// Because there is usually just one hat
+			// The charactr is a bit weird, translate it
+			// #define 	SDL_HAT_UP   0x01
+			// #define 	SDL_HAT_RIGHT   0x02
+			// #define 	SDL_HAT_DOWN   0x04
+			// #define 	SDL_HAT_LEFT   0x08
+			char indexChar = inputParts[1].at(3);
+			if(indexChar == '1') {
+				index = 0;
+			} else if(indexChar == '2') {
+				index = 1;
+			} else if(indexChar == '4') {
+				index = 2;
+			} else if(indexChar == '8') {
+				index = 3;
+			}
+			// wxWidgets just does this https://docs.wxwidgets.org/3.0/classwx_joystick.html#a10712042f8cbca788ef04e96eab375a4
+			if(buttonData->stringToButton.count(inputParts[0])) {
+				// It's a normal button
+				povToSwitch[index] = (int)buttonData->stringToButton[inputParts[0]];
+			} else {
+				// It's extended
+				// Go beyond the end of Btn
+				povToSwitch[index] = stringToButtonExtended[inputParts[0]] + Btn::BUTTONS_SIZE;
+			}
+		} else if(firstChar == 'a') {
+			// This is an axis
+			index = strtol(inputParts[1].erase(0, 1).c_str(), nullptr, 10);
+			// This is a button
+			if(buttonData->stringToButton.count(inputParts[0])) {
+				// It's a normal button
+				axisToSwitch[index] = (int)buttonData->stringToButton[inputParts[0]];
+			} else {
+				// It's extended
+				// Go beyond the end of Btn
+				axisToSwitch[index] = stringToButtonExtended[inputParts[0]] + Btn::BUTTONS_SIZE;
+			}
+		}
+	}
+	// Finally, start listening
 	currentJoy->SetCapture(parent);
-	// Events are now bound
+	currentJoyDefined = true;
 }
 
 void BottomUI::onJoystickMenuOpen(wxMenuEvent& event) {
@@ -364,21 +433,28 @@ void BottomUI::onJoystickMenuOpen(wxMenuEvent& event) {
 	int currentNumOfItems = joystickSubMenu->GetMenuItemCount();
 	for(int i = 0; i < currentNumOfItems; i++) {
 		joystickSubMenu->Delete(i + joystickSubmenuIDBase);
-		joystickSubMenu->Unbind(wxEVT_MENU, &BottomUI::onJoystickSelect, this, i + joystickSubmenuIDBase);
 	}
 	// Get number of currently selected joysticks and list them
 	int numOfConnectedJoysticks = wxJoystick::GetNumberJoysticks();
 	for(int i = 0; i < numOfConnectedJoysticks; i++) {
 		// Briefly open it for info
 		// Not using wxJOYSTICK1 or wxJOYSTICK2, because that restricts me to two
-		wxJoystick* joy    = new wxJoystick(i);
-		wxString name      = joy->GetProductName();
-		int manufacturerID = joy->GetManufacturerId();
-		joystickSubMenu->AppendRadioItem(i + joystickSubmenuIDBase, wxString::Format(wxT("%i"), manufacturerID));
-		joystickSubMenu->Bind(wxEVT_COMMAND_MENU_SELECTED, &BottomUI::onJoystickSelect, this, i + joystickSubmenuIDBase);
+		wxJoystick* joy = new wxJoystick(i);
+		// wxString name   = joy->GetProductName();
+		wxString printString = getJoyHexString(joy);
+		joystickSubMenu->Append(i + joystickSubmenuIDBase, printString);
 		// Delete it because it doesn't need to be used right now
 		delete joy;
 	}
+}
+
+wxString BottomUI::getJoyHexString(wxJoystick* joy) {
+	int manufacturerID = joy->GetManufacturerId();
+	int productID      = joy->GetProductId();
+	// Convert each to a hex string using sprintf, to save on bloat from stringstream
+	char buffer[10];
+	sprintf(buffer, "0x%X,0x%X", manufacturerID, productID);
+	return wxString(buffer);
 }
 
 void BottomUI::onJoystickChange(wxJoystickEvent& event) {
@@ -389,7 +465,7 @@ void BottomUI::onJoystickChange(wxJoystickEvent& event) {
 		// Button event
 		int buttonState = currentJoy->GetButtonState();
 	} else if(event.IsMove()) {
-		// Move event, I think the joysticks
+		// Move event, I think the joysticks and the hat
 	} else if(event.IsZMove()) {
 		// Z move ??
 	}

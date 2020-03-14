@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdio>
 #include <functional>
 #include <map>
 #include <memory>
@@ -114,15 +115,27 @@ private:
 	std::shared_ptr<ButtonData> buttonData;
 
 	wxJoystick* currentJoy;
+	uint8_t currentJoyDefined;
 
-	// Just a random large number
-	static constexpr int joystickSubmenuIDBase = 77;
+	std::map<std::string, int> stringToButtonExtended {
+		{ "LSX", 0 },
+		{ "LSY", 1 },
+		{ "RSX", 2 },
+		{ "RSY", 3 },
+	};
+
+	// All of these kinda map to Btn values, there are just some extra Btn
+	// Values after the normal ones
+	std::unordered_map<int, int> joyButtonToSwitch;
+	std::unordered_map<int, int> povToSwitch;
+	std::unordered_map<int, int> axisToSwitch;
 
 	// Menu item for joysticks, will be exclusively used
 	// by the bottom UI, so that's why it is here
 	wxMenu* joystickSubMenu;
 	void onJoystickMenuOpen(wxMenuEvent& event);
-	void onJoystickSelect(wxCommandEvent& event);
+
+	wxString getJoyHexString(wxJoystick* joy);
 
 	void refreshDataViews();
 
@@ -133,5 +146,9 @@ public:
 		return joystickSubMenu;
 	}
 
+	// Just a random large number, apparently can't be larger than 76
+	static constexpr int joystickSubmenuIDBase = 23;
+
 	void onJoystickChange(wxJoystickEvent& event);
+	void onJoystickSelect(wxCommandEvent& event);
 };
