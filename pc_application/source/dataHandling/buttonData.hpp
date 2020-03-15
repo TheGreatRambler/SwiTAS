@@ -122,6 +122,9 @@ public:
 		}
 	};
 
+	static constexpr int32_t axisMin = -30000;
+	static constexpr int32_t axisMax = 30000;
+
 	// Struct containing button info
 	struct ButtonInfo {
 		std::string scriptName;

@@ -106,10 +106,10 @@ JoystickCanvas::JoystickCanvas(wxFrame* parent, DataProcessing* inputData, uint8
 	Bind(wxEVT_LEFT_DOWN, &JoystickCanvas::onMouseClick, this);
 	Bind(wxEVT_MOTION, &JoystickCanvas::onMouseDrag, this);
 
-	xInput->SetMin(-30000);
-	xInput->SetMax(30000);
-	yInput->SetMin(-30000);
-	yInput->SetMax(30000);
+	xInput->SetMin(ButtonData::axisMin);
+	xInput->SetMax(ButtonData::axisMax);
+	yInput->SetMin(ButtonData::axisMin);
+	yInput->SetMax(ButtonData::axisMax);
 
 	inputSizer  = new wxBoxSizer(wxHORIZONTAL);
 	widgetSizer = new wxBoxSizer(wxVERTICAL);
@@ -149,8 +149,8 @@ void JoystickCanvas::draw(wxDC& dc) {
 	// Flip the height to resemble the coordinate system
 	joyY *= -1;
 
-	int renderJoyX = (joyX / 30000.0f) * approximateMiddle.x + approximateMiddle.x;
-	int renderJoyY = (joyY / 30000.0f) * approximateMiddle.y + approximateMiddle.y;
+	int renderJoyX = ((float)joyX / ButtonData::axisMax) * approximateMiddle.x + approximateMiddle.x;
+	int renderJoyY = ((float)joyY / ButtonData::axisMax) * approximateMiddle.y + approximateMiddle.y;
 
 	int middleCircleRadius = std::floor((float)width / 20);
 
@@ -207,10 +207,10 @@ void JoystickCanvas::correctForCircleLock() {
 		// This corrects for circle lock if the checkbox is set
 		// https://math.stackexchange.com/a/127615
 		int radiusSquared = std::pow(*x, 2) + std::pow(*y, 2);
-		if(radiusSquared > std::pow(30000, 2)) {
+		if(radiusSquared > std::pow(ButtonData::axisMax, 2)) {
 			// Have to clamp it
-			*x = 30000 * (*x / std::sqrt(radiusSquared));
-			*y = 30000 * (*y / std::sqrt(radiusSquared));
+			*x = ButtonData::axisMax * (*x / std::sqrt(radiusSquared));
+			*y = ButtonData::axisMax * (*y / std::sqrt(radiusSquared));
 		}
 	}
 }
@@ -221,9 +221,9 @@ void JoystickCanvas::onMouseClick(wxMouseEvent& event) {
 	int height;
 	GetSize(&width, &height);
 
-	int32_t scaledX = ((float)loc.x / width) * 60000 - 30000;
+	int32_t scaledX = ((float)loc.x / width) * 60000 - ButtonData::axisMax;
 	// Y is flipped
-	int32_t scaledY = (((float)loc.y / height) * 60000 - 30000) * -1;
+	int32_t scaledY = (((float)loc.y / height) * 60000 - ButtonData::axisMax) * -1;
 
 	// Mutiply by twice the radius and then subtract the radius to get the middle
 	if(isLeftJoystick) {
@@ -250,12 +250,12 @@ void JoystickCanvas::onMouseDrag(wxMouseEvent& event) {
 
 void JoystickCanvas::xValueSet(wxSpinEvent& event) {
 	int position = event.GetPosition();
-	if(position > 30000) {
-		position = 30000;
+	if(position > ButtonData::axisMax) {
+		position = ButtonData::axisMax;
 	}
 
-	if(position < -30000) {
-		position = -30000;
+	if(position < ButtonData::axisMin) {
+		position = ButtonData::axisMin;
 	}
 
 	if(isLeftJoystick) {
@@ -270,12 +270,12 @@ void JoystickCanvas::xValueSet(wxSpinEvent& event) {
 
 void JoystickCanvas::yValueSet(wxSpinEvent& event) {
 	int position = event.GetPosition();
-	if(position > 30000) {
-		position = 30000;
+	if(position > ButtonData::axisMax) {
+		position = ButtonData::axisMax;
 	}
 
-	if(position < -30000) {
-		position = -30000;
+	if(position < ButtonData::axisMin) {
+		position = ButtonData::axisMin;
 	}
 
 	if(isLeftJoystick) {
@@ -384,8 +384,16 @@ void BottomUI::onJoystickSelect(wxCommandEvent& event) {
 	povToSwitch.clear();
 	axisToSwitch.clear();
 	// Get mapping from hex string
-	char* hexString        = (char*)getJoyHexString(currentJoy).char_str();
-	std::string joyMapping = (*mainSettings)["joystickMappings"][hexString].GetString();
+	wxString hexWxString  = getJoyHexString(currentJoy);
+	const char* hexString = hexWxString.ToUTF8().data();
+	std::string joyMapping;
+	// Check if exists and use default if not
+	if((*mainSettings)["joystickMappings"].HasMember(hexString)) {
+		joyMapping = (*mainSettings)["joystickMappings"][hexString].GetString();
+	} else {
+		// This default is for the pro controller connected to pc without drivers
+		joyMapping = (*mainSettings)["joystickMappings"]["0x45E,0x28E"].GetString();
+	}
 	// Break it apart and do things
 	std::vector<std::string> parts = HELPERS::splitString(joyMapping, ',');
 	for(auto const& part : parts) {
@@ -435,6 +443,9 @@ void BottomUI::onJoystickSelect(wxCommandEvent& event) {
 		} else if(firstChar == 'a') {
 			// This is an axis
 			index = strtol(inputParts[1].erase(0, 1).c_str(), nullptr, 10);
+			// Whether to flip the axis or not
+			bool direction       = inputParts[1].at(1) == '+';
+			axisDirection[index] = direction;
 			// This is a button
 			if(buttonData->stringToButton.count(inputParts[0])) {
 				// It's a normal button
@@ -496,7 +507,8 @@ void BottomUI::onJoystickChange(wxJoystickEvent& event) {
 				// This button wasn't clicked before and now it is, trigger it
 				// Essentially, it's a button down event for this button
 				if(joyButtonToSwitch.count(i)) {
-					inputInstance->handleButtonInput((Btn)joyButtonToSwitch[i]);
+					Btn button = (Btn)joyButtonToSwitch[i];
+					inputInstance->handleButtonInput(button);
 				}
 			}
 		}
@@ -504,20 +516,34 @@ void BottomUI::onJoystickChange(wxJoystickEvent& event) {
 		// Move event, I think any axis
 		// Check each axis individually
 		for(int i = 0; i < currentJoy->GetNumberAxes(); i++) {
-			// Range should be from -32768 to +32768
-			// Not going to check because eh
-			int axisValue = currentJoy->GetPosition(i);
+			// Range should be from -32768 to +32768 or 0 to +65535
+			// Ranges should be the same for all axis
+			int axisMin    = currentJoy->GetXMin();
+			int axisMax    = currentJoy->GetXMax();
+			int axisMiddle = std::floor((axisMin + axisMax) / 2.0f);
+			int axisValue  = currentJoy->GetPosition(i);
+
+			// Normalize to 1, then multiply by the range
+			int32_t normalizedAxisValue = ((float)(axisValue - axisMiddle) / (float)(axisMax - axisMiddle)) * ButtonData::axisMax;
+
+			// Flip if needed
+			if(!axisDirection[i]) {
+				normalizedAxisValue *= -1;
+			}
+
 			if(axisToSwitch.count(i)) {
 				int switchID = axisToSwitch[i];
 				if(switchID < Btn::BUTTONS_SIZE) {
 					// Check RS and LS only because it's susceptible to this
 					if((Btn)switchID == Btn::RS || (Btn)switchID == Btn::LS) {
-						if(axisLastState[i] < 0 && axisValue > 0) {
+						if(axisLastState[i] < 0 && axisValue > axisMiddle) {
 							// Trigger RS
 							inputInstance->handleButtonInput(Btn::RS);
-						} else if(axisLastState[i] > 0 && axisValue < 0) {
+							axisLastState[i] = 1;
+						} else if(axisLastState[i] > 0 && axisValue < axisMiddle) {
 							// Trigger LS
 							inputInstance->handleButtonInput(Btn::LS);
+							axisLastState[i] = -1;
 						}
 					}
 				} else {
@@ -527,19 +553,33 @@ void BottomUI::onJoystickChange(wxJoystickEvent& event) {
 					// AXIS VALUE ABSOLUTELY WRONG TODO
 					if(axisID == 0) {
 						// LSX
-						leftJoystickDrawer->setXValue(axisValue);
+						leftJoystickDrawer->setXValue(normalizedAxisValue);
 					} else if(axisID == 1) {
 						// LSY
-						leftJoystickDrawer->setYValue(axisValue);
+						leftJoystickDrawer->setYValue(normalizedAxisValue);
 					} else if(axisID == 2) {
 						// RSX
-						rightJoystickDrawer->setXValue(axisValue);
+						rightJoystickDrawer->setXValue(normalizedAxisValue);
 					} else if(axisID == 3) {
 						// RSY
-						rightJoystickDrawer->setYValue(axisValue);
+						rightJoystickDrawer->setYValue(normalizedAxisValue);
 					}
 				}
 			}
 		}
+	}
+
+	// I don't know what event it falls under
+	// https://docs.wxwidgets.org/3.0/classwx_joystick.html#a10712042f8cbca788ef04e96eab375a4
+	int povValue = currentJoy->GetPOVPosition() / 9000;
+	int switchID = povToSwitch[povValue];
+	if(povLastState != povValue) {
+		if(switchID < Btn::BUTTONS_SIZE) {
+			// Normal button
+			// Won't check for axis, too scared
+			Btn button = (Btn)switchID;
+			inputInstance->handleButtonInput(button);
+		}
+		povLastState = povValue;
 	}
 }

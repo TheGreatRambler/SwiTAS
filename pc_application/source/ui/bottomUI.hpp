@@ -83,8 +83,8 @@ public:
 
 	void draw(wxDC& dc) override;
 
-    void setXValue(int32_t x);
-    void setYValue(int32_t y);
+	void setXValue(int32_t x);
+	void setYValue(int32_t y);
 
 	wxBoxSizer* getSizer() {
 		return widgetSizer;
@@ -117,11 +117,6 @@ private:
 	// The button mapping instance
 	std::shared_ptr<ButtonData> buttonData;
 
-	// -32768 to +32768 for xinput, think it's the same for dinput
-	// Could be this tho 65535
-	// Need more testing
-	static constexpr joystickAxisRange = 32768;
-
 	wxJoystick* currentJoy;
 	uint8_t currentJoyDefined;
 	int lastButtonState;
@@ -139,12 +134,15 @@ private:
 	std::unordered_map<int, int> povToSwitch;
 	std::unordered_map<int, int> axisToSwitch;
 
+	// Will tell the state of the pov before
+	int povLastState;
+
 	// Will tell whether the axis was positive or negative before
 	std::unordered_map<int, int> axisLastState;
+	std::unordered_map<int, bool> axisDirection;
 
 	// Menu item for joysticks, will be exclusively used
 	// by the bottom UI, so that's why it is here
-	wxMenu* joystickSubMenu;
 	void onJoystickMenuOpen(wxMenuEvent& event);
 
 	wxString getJoyHexString(wxJoystick* joy);
@@ -154,9 +152,8 @@ private:
 public:
 	BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid, DataProcessing* input);
 
-	wxMenu* getJoystickSubmenu() {
-		return joystickSubMenu;
-	}
+	// Return it straight
+	wxMenu* joystickSubMenu;
 
 	// Just a random large number, apparently can't be larger than 76
 	static constexpr int joystickSubmenuIDBase = 23;

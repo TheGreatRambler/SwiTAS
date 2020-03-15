@@ -122,8 +122,7 @@ void MainWindow::addMenuBar() {
 	selectIPID = NewControlId();
 	fileMenu->Append(selectIPID, "&Server");
 	// Add joystick submenu
-	wxMenu* joystickSubMenu = bottomUI->getJoystickSubmenu();
-	fileMenu->AppendSubMenu(joystickSubMenu, "&List Joysticks");
+	fileMenu->AppendSubMenu(bottomUI->joystickSubMenu, "&List Joysticks");
 
 	menuBar->Append(fileMenu, "&File");
 
