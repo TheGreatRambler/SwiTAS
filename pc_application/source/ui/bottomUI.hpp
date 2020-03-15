@@ -83,6 +83,9 @@ public:
 
 	void draw(wxDC& dc) override;
 
+    void setXValue(int32_t x);
+    void setYValue(int32_t y);
+
 	wxBoxSizer* getSizer() {
 		return widgetSizer;
 	}
@@ -114,6 +117,11 @@ private:
 	// The button mapping instance
 	std::shared_ptr<ButtonData> buttonData;
 
+	// -32768 to +32768 for xinput, think it's the same for dinput
+	// Could be this tho 65535
+	// Need more testing
+	static constexpr joystickAxisRange = 32768;
+
 	wxJoystick* currentJoy;
 	uint8_t currentJoyDefined;
 	int lastButtonState;
@@ -130,6 +138,9 @@ private:
 	std::unordered_map<int, int> joyButtonToSwitch;
 	std::unordered_map<int, int> povToSwitch;
 	std::unordered_map<int, int> axisToSwitch;
+
+	// Will tell whether the axis was positive or negative before
+	std::unordered_map<int, int> axisLastState;
 
 	// Menu item for joysticks, will be exclusively used
 	// by the bottom UI, so that's why it is here
