@@ -26,3 +26,16 @@ public:
 
 	DECLARE_EVENT_TABLE();
 };
+
+// A version of DrawingCanvas that just renders an image
+class DrawingCanvasBitmap : public DrawingCanvas {
+private:
+	wxBitmap* bitmap;
+
+public:
+	DrawingCanvasBitmap(wxFrame* parent, wxSize size);
+
+    void draw(wxDC& dc) override;
+
+	void setBitmap(wxBitmap* theBitmap);
+}

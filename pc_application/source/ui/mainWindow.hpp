@@ -64,8 +64,7 @@ public:
 		networkInstance->endNetwork();
 	}
 
-	// Called by wxApp
-	void onIdleLoop();
+	void onIdle(wxIdleEvent& event);
 
 	DECLARE_EVENT_TABLE();
 };

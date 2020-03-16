@@ -65,15 +65,19 @@ BEGIN_EVENT_TABLE(MainWindow, wxFrame)
 	EVT_CHAR_HOOK(MainWindow::keyDownHandler)
 	EVT_SIZE(MainWindow::OnSize)
 	EVT_JOYSTICK_EVENTS(MainWindow::onJoystickEvents)
+    EVT_IDLE(MainWindow::onIdle)
 END_EVENT_TABLE()
 // clang-format on
 
 // Override default signal handler:
 void MainWindow::keyDownHandler(wxKeyEvent& event) {
-	// Skip the event if the key is bound or control is held
-	if(!dataProcessingInstance->handleKeyboardInput(event.GetUnicodeKey()) || event.ControlDown()) {
-		event.Skip();
+	// Only handle keybard input if control is not held down
+	if(!event.ControlDown()) {
+		dataProcessingInstance->handleKeyboardInput(event.GetUnicodeKey());
 	}
+
+	// Always skip the event
+	event.Skip();
 }
 
 void MainWindow::handlePreviousWindowTransform() {
@@ -94,16 +98,18 @@ void MainWindow::onJoystickEvents(wxJoystickEvent& event) {
 	bottomUI->onJoystickChange(event);
 }
 
-void MainWindow::onIdleLoop() {
-	// Read queues from the network and do things, TODO
-	if(networkInstance->isConnected()) {
-		/*
-		CHECK_QUEUE(networkInstance, IsPaused, {
-			if(data.isPaused) {
-				// cool
-			}
-		})
-		*/
+void MainWindow::onIdle(wxIdleEvent& event) {
+	if(IsShown()) {
+		// Read queues from the network and do things, TODO
+		if(networkInstance->isConnected()) {
+			/*
+			CHECK_QUEUE(networkInstance, IsPaused, {
+				if(data.isPaused) {
+					// cool
+				}
+			})
+			*/
+		}
 	}
 }
 
