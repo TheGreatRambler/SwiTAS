@@ -491,94 +491,108 @@ wxString BottomUI::getJoyHexString(wxJoystick* joy) {
 	return wxString(buffer);
 }
 
-void BottomUI::onJoystickChange(wxJoystickEvent& event) {
-	// Handle joystick events live
-	// Will be really complicated, so use this https://robsears.com/ultimate-wxjoystick-tutorial/
-	// Use https://github.com/gabomdq/gamecontrollerdb for mapping
-	// Check this too https://gaming.stackexchange.com/a/358794
-	// Button down event
-	// Check POV too just in case
-	int buttonState = currentJoy->GetButtonState();
-	for(int i = 0; i < currentJoy->GetNumberButtons(); i++) {
-		// Get the value with bitwise
-		uint8_t isPressed = GET_BIT(buttonState, i);
-		if(isPressed && !GET_BIT(lastButtonState, i)) {
-			// This button wasn't clicked before and now it is, trigger it
-			// Essentially, it's a button down event for this button
-			if(joyButtonToSwitch.count(i)) {
-				Btn button = (Btn)joyButtonToSwitch[i];
-				inputInstance->handleButtonInput(button);
-			}
-		}
-	}
-	// Move event, I think any axis
-	// Check each axis individually
-	for(int i = 0; i < currentJoy->GetNumberAxes(); i++) {
-		// Range should be from -32768 to +32768 or 0 to +65535
-		// Ranges should be the same for all axis
-		int axisMin = currentJoy->GetXMin();
-		int axisMax = currentJoy->GetXMax();
-		// Automatically floors
-		int axisMiddle = (axisMin + axisMax) / 2;
-		int axisValue  = currentJoy->GetPosition(i);
-
-		// Normalize to 1, then multiply by the range
-		int32_t normalizedAxisValue = ((float)(axisValue - axisMiddle) / (float)(axisMax - axisMiddle)) * ButtonData::axisMax;
-
-		// Flip if needed
-		if(!axisDirection[i]) {
-			normalizedAxisValue *= -1;
-		}
-
-		if(axisToSwitch.count(i)) {
-			int switchID = axisToSwitch[i];
-			if(switchID < Btn::BUTTONS_SIZE) {
-				// Check RS and LS only because it's susceptible to this
-				if((Btn)switchID == Btn::ZL || (Btn)switchID == Btn::ZR) {
-					if(axisValue > axisMiddle) {
-						// Trigger RS
-						inputInstance->handleButtonInput(Btn::ZL);
-					} else if(axisValue < axisMiddle) {
-						// Trigger LS
-						inputInstance->handleButtonInput(Btn::ZR);
-					}
-				}
-			} else {
-				// This is an extended value, a joystick value
-				// Just set it as a normal axis
-				int axisID = switchID - Btn::BUTTONS_SIZE;
-				// AXIS VALUE ABSOLUTELY WRONG TODO
-				if(axisID == 0) {
-					// LSX
-					leftJoystickDrawer->setXValue(normalizedAxisValue);
-				} else if(axisID == 1) {
-					// LSY
-					leftJoystickDrawer->setYValue(normalizedAxisValue);
-				} else if(axisID == 2) {
-					// RSX
-					rightJoystickDrawer->setXValue(normalizedAxisValue);
-				} else if(axisID == 3) {
-					// RSY
-					rightJoystickDrawer->setYValue(normalizedAxisValue);
-				}
-			}
-		}
-	}
-	// I don't know what event it falls under
-	// https://docs.wxwidgets.org/3.0/classwx_joystick.html#a10712042f8cbca788ef04e96eab375a4
-	int pov = currentJoy->GetPOVPosition();
-	if(pov != -1) {
-		int povValue = pov / 9000;
-		if(povToSwitch.count(povValue)) {
-			int switchID = povToSwitch[povValue];
-			if(povLastState != povValue) {
-				if(switchID < Btn::BUTTONS_SIZE) {
-					// Normal button
-					// Won't check for axis, too scared
-					Btn button = (Btn)switchID;
+void BottomUI::listenToJoystick() {
+	if(currentJoyDefined) {
+		// Handle joystick events live
+		// Will be really complicated, so use this https://robsears.com/ultimate-wxjoystick-tutorial/
+		// Use https://github.com/gabomdq/gamecontrollerdb for mapping
+		// Check this too https://gaming.stackexchange.com/a/358794
+		// Button down event
+		// Check POV too just in case
+		int buttonState = currentJoy->GetButtonState();
+		for(int i = 0; i < currentJoy->GetNumberButtons(); i++) {
+			// Get the value with bitwise
+			uint8_t isPressed = GET_BIT(buttonState, i);
+			if(isPressed && !GET_BIT(lastButtonState, i)) {
+				// This button wasn't clicked before and now it is, trigger it
+				// Essentially, it's a button down event for this button
+				if(joyButtonToSwitch.count(i)) {
+					Btn button = (Btn)joyButtonToSwitch[i];
 					inputInstance->handleButtonInput(button);
 				}
-				povLastState = povValue;
+			}
+		}
+		lastButtonState = buttonState;
+
+		// Move event, I think any axis
+		// Check each axis individually
+		for(int i = 0; i < currentJoy->GetNumberAxes(); i++) {
+			// Range should be from -32768 to +32768 or 0 to +65535
+			// Ranges should be the same for all axis
+			int axisMin = currentJoy->GetXMin();
+			int axisMax = currentJoy->GetXMax();
+			// Automatically floors
+			int axisMiddle = (axisMin + axisMax) / 2;
+			int axisValue  = currentJoy->GetPosition(i);
+
+			// Normalize to 1, then multiply by the range
+			int32_t normalizedAxisValue = ((float)(axisValue - axisMiddle) / (float)(axisMax - axisMiddle)) * ButtonData::axisMax;
+
+			// Flip if needed
+			if(!axisDirection[i]) {
+				normalizedAxisValue *= -1;
+			}
+
+			if(axisToSwitch.count(i)) {
+				int switchID = axisToSwitch[i];
+				if(switchID < Btn::BUTTONS_SIZE) {
+					// Check RS and LS only because it's susceptible to this
+					if((Btn)switchID == Btn::ZL || (Btn)switchID == Btn::ZR) {
+						if(axisValue > axisMiddle) {
+							// Trigger RS
+							if(lastState[Btn::ZL] != true) {
+								inputInstance->handleButtonInput(Btn::ZL);
+								lastState[Btn::ZL] = true;
+							}
+							// ZR is now off
+							lastState[Btn::ZR] = false;
+						} else if(axisValue < axisMiddle) {
+							// Trigger LS
+							if(lastState[Btn::ZR] != true) {
+								inputInstance->handleButtonInput(Btn::ZR);
+								lastState[Btn::ZR] = true;
+							}
+							// ZL is now off
+							lastState[Btn::ZL] = false;
+						}
+					}
+				} else {
+					// This is an extended value, a joystick value
+					// Just set it as a normal axis
+					int axisID = switchID - Btn::BUTTONS_SIZE;
+					// AXIS VALUE ABSOLUTELY WRONG TODO
+					if(axisID == 0) {
+						// LSX
+						leftJoystickDrawer->setXValue(normalizedAxisValue);
+					} else if(axisID == 1) {
+						// LSY
+						leftJoystickDrawer->setYValue(normalizedAxisValue);
+					} else if(axisID == 2) {
+						// RSX
+						rightJoystickDrawer->setXValue(normalizedAxisValue);
+					} else if(axisID == 3) {
+						// RSY
+						rightJoystickDrawer->setYValue(normalizedAxisValue);
+					}
+				}
+			}
+		}
+		// I don't know what event it falls under
+		// https://docs.wxwidgets.org/3.0/classwx_joystick.html#a10712042f8cbca788ef04e96eab375a4
+		int pov = currentJoy->GetPOVPosition();
+		if(pov != -1) {
+			int povValue = pov / 9000;
+			if(povToSwitch.count(povValue)) {
+				int switchID = povToSwitch[povValue];
+				if(povLastState != povValue) {
+					if(switchID < Btn::BUTTONS_SIZE) {
+						// Normal button
+						// Won't check for axis, too scared
+						Btn button = (Btn)switchID;
+						inputInstance->handleButtonInput(button);
+					}
+					povLastState = povValue;
+				}
 			}
 		}
 	}

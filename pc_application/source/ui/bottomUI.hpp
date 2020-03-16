@@ -117,6 +117,8 @@ private:
 	// The button mapping instance
 	std::shared_ptr<ButtonData> buttonData;
 
+	wxMenu* joystickSubMenu;
+
 	wxJoystick* currentJoy;
 	uint8_t currentJoyDefined;
 	int lastButtonState;
@@ -134,11 +136,12 @@ private:
 	std::unordered_map<int, int> povToSwitch;
 	std::unordered_map<int, int> axisToSwitch;
 
-	// Will tell the state of the pov before
-	int povLastState;
-
 	// Will tell whether the axis should be flipped or not
 	std::unordered_map<int, bool> axisDirection;
+
+	// Put here so that buttons don't rapidly change state when held
+	std::unordered_map<Btn, bool> lastState;
+	int povLastState;
 
 	// Menu item for joysticks, will be exclusively used
 	// by the bottom UI, so that's why it is here
@@ -151,12 +154,14 @@ private:
 public:
 	BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid, DataProcessing* input);
 
-	// Return it straight
-	wxMenu* joystickSubMenu;
+	void addJoystickMenu(wxMenu* parent) {
+		parent->AppendSubMenu(joystickSubMenu, "&List Joysticks");
+	}
 
 	// Just a random large number, apparently can't be larger than 76
 	static constexpr int joystickSubmenuIDBase = 23;
 
-	void onJoystickChange(wxJoystickEvent& event);
+	void listenToJoystick();
+
 	void onJoystickSelect(wxCommandEvent& event);
 };

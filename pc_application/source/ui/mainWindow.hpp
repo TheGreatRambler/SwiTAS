@@ -54,7 +54,6 @@ private:
 	// Override default signal handler:
 	void keyDownHandler(wxKeyEvent& event);
 	void OnSize(wxSizeEvent& event);
-	void onJoystickEvents(wxJoystickEvent& event);
 
 public:
 	MainWindow();

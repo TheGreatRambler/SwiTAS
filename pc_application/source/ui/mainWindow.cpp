@@ -64,7 +64,6 @@ MainWindow::MainWindow()
 BEGIN_EVENT_TABLE(MainWindow, wxFrame)
 	EVT_CHAR_HOOK(MainWindow::keyDownHandler)
 	EVT_SIZE(MainWindow::OnSize)
-	EVT_JOYSTICK_EVENTS(MainWindow::onJoystickEvents)
     EVT_IDLE(MainWindow::onIdle)
 END_EVENT_TABLE()
 // clang-format on
@@ -93,11 +92,6 @@ void MainWindow::OnSize(wxSizeEvent& event) {
 	}
 }
 
-void MainWindow::onJoystickEvents(wxJoystickEvent& event) {
-	// Pass to bottomUI, don't use it here
-	bottomUI->onJoystickChange(event);
-}
-
 void MainWindow::onIdle(wxIdleEvent& event) {
 	if(IsShown()) {
 		// Read queues from the network and do things, TODO
@@ -110,6 +104,9 @@ void MainWindow::onIdle(wxIdleEvent& event) {
 			})
 			*/
 		}
+
+		// Listen to joystick
+		bottomUI->listenToJoystick();
 	}
 }
 
@@ -128,7 +125,7 @@ void MainWindow::addMenuBar() {
 	selectIPID = NewControlId();
 	fileMenu->Append(selectIPID, "&Server");
 	// Add joystick submenu
-	fileMenu->AppendSubMenu(bottomUI->joystickSubMenu, "&List Joysticks");
+	bottomUI->addJoystickMenu(fileMenu);
 
 	menuBar->Append(fileMenu, "&File");
 
