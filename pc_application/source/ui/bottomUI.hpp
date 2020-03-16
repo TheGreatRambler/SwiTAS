@@ -137,8 +137,7 @@ private:
 	// Will tell the state of the pov before
 	int povLastState;
 
-	// Will tell whether the axis was positive or negative before
-	std::unordered_map<int, int> axisLastState;
+	// Will tell whether the axis should be flipped or not
 	std::unordered_map<int, bool> axisDirection;
 
 	// Menu item for joysticks, will be exclusively used

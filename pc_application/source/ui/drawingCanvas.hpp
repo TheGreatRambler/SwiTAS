@@ -35,7 +35,7 @@ private:
 public:
 	DrawingCanvasBitmap(wxFrame* parent, wxSize size);
 
-    void draw(wxDC& dc) override;
+	void draw(wxDC& dc) override;
 
 	void setBitmap(wxBitmap* theBitmap);
-}
+};

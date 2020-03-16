@@ -1,6 +1,7 @@
 #pragma once
 
 #include <rapidjson/document.h>
+#include <wx/event.h>
 #include <wx/utils.h>
 #include <wx/wx.h>
 
@@ -36,7 +37,7 @@ public:
 		// https://docs.wxwidgets.org/3.0/classwx_window.html#a596b1715edfc7609f352b2e000ecbaec
 		Show();
 		// Disable every window but ourselves
-		windowDisabler = new windowDisabler(this);
+		windowDisabler = new wxWindowDisabler(this);
 	}
 
 	void close() {
@@ -45,7 +46,5 @@ public:
 		delete windowDisabler;
 	}
 
-	void onIdle(wxIdleEvent& event);
-
 	DECLARE_EVENT_TABLE();
-}
+};

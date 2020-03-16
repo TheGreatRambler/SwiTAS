@@ -1,9 +1,9 @@
 #include "drawingCanvas.hpp"
 
 DrawingCanvas::DrawingCanvas(wxFrame* parent, wxSize size)
-	: wxWindow(parent, wxID_ANY, wxDefaultPosition, size, wxFULL_REPAINT_ON_RESIZE) { }
+	: wxWindow(parent, wxID_ANY, wxDefaultPosition, size, wxFULL_REPAINT_ON_RESIZE) {}
 
-void DrawingCanvas::draw(wxDC& dc) { }
+void DrawingCanvas::draw(wxDC& dc) {}
 
 void DrawingCanvas::OnPaint(wxPaintEvent& event) {
 	wxBufferedPaintDC dc(this);
@@ -21,7 +21,7 @@ void DrawingCanvas::PaintBackground(wxDC& dc) {
 }
 
 // Empty implementation, to prevent flicker
-void DrawingCanvas::OnEraseBackground(wxEraseEvent& event) { }
+void DrawingCanvas::OnEraseBackground(wxEraseEvent& event) {}
 
 void DrawingCanvas::setBackgroundColor(wxColor color) {
 	backgroundColor = color;
@@ -35,7 +35,7 @@ END_EVENT_TABLE()
 // clang-format on
 
 DrawingCanvasBitmap::DrawingCanvasBitmap(wxFrame* parent, wxSize size)
-	: DrawingCanvas(wxFrame * parent, wxSize size) {
+	: DrawingCanvas(parent, size) {
 	// Just create an empty bitmap of the right size
 	bitmap = new wxBitmap(size);
 }
