@@ -54,6 +54,8 @@ public:
 
 class JoystickCanvas : public DrawingCanvas {
 private:
+	rapidjson::Document* mainSettings;
+
 	// Input instance to get inputs and such
 	DataProcessing* inputInstance;
 
@@ -70,6 +72,8 @@ private:
 	wxBoxSizer* inputSizer;
 	wxBoxSizer* widgetSizer;
 
+	wxBitmapButton* lockButton;
+
 	void xValueSet(wxSpinEvent& event);
 	void yValueSet(wxSpinEvent& event);
 
@@ -79,7 +83,7 @@ private:
 	void onMouseDrag(wxMouseEvent& event);
 
 public:
-	JoystickCanvas(wxFrame* parent, DataProcessing* inputData, uint8_t leftJoy);
+	JoystickCanvas(rapidjson::Document* settings, wxFrame* parent, DataProcessing* inputData, uint8_t leftJoy);
 
 	void draw(wxDC& dc) override;
 
@@ -88,6 +92,10 @@ public:
 
 	wxBoxSizer* getSizer() {
 		return widgetSizer;
+	}
+
+	wxBitmapButton* getLockButton() {
+		return lockButton;
 	}
 };
 
@@ -134,10 +142,13 @@ private:
 	// Values after the normal ones
 	std::unordered_map<int, int> joyButtonToSwitch;
 	std::unordered_map<int, int> povToSwitch;
-	std::unordered_map<int, int> axisToSwitch;
+	std::unordered_map<int, int> axisButtonsToSwitch;
 
 	// Will tell whether the axis should be flipped or not
 	std::unordered_map<int, bool> axisDirection;
+
+	std::unordered_map<int, int> leftStickAxis;
+	std::unordered_map<int, int> rightStickAxis;
 
 	// Put here so that buttons don't rapidly change state when held
 	std::unordered_map<Btn, bool> lastState;
@@ -164,4 +175,7 @@ public:
 	void listenToJoystick();
 
 	void onJoystickSelect(wxCommandEvent& event);
+
+	void onLeftJoystickLock(wxCommandEvent& event);
+	void onRightJoystickLock(wxCommandEvent& event);
 };

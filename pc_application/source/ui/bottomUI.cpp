@@ -89,16 +89,19 @@ void FrameViewerCanvas::draw(wxDC& dc) {
 	}
 }
 
-JoystickCanvas::JoystickCanvas(wxFrame* parent, DataProcessing* inputData, uint8_t leftJoy)
+JoystickCanvas::JoystickCanvas(rapidjson::Document* settings, wxFrame* parent, DataProcessing* inputData, uint8_t leftJoy)
 	: DrawingCanvas(parent, wxSize(150, 150)) {
 	// Should be a decent size
 	isLeftJoystick = leftJoy;
 	inputInstance  = inputData;
+	mainSettings   = settings;
 
 	// Create widgets
 	xInput                     = new wxSpinCtrl(parent);
 	yInput                     = new wxSpinCtrl(parent);
 	canGoOutsideCircleCheckbox = new wxCheckBox(parent, wxID_ANY, wxEmptyString);
+
+	lockButton = HELPERS::getBitmapButton(parent, HELPERS::resolvePath((*mainSettings)["ui"]["joystickLockButton"].GetString()), (*mainSettings)["ui"]["buttonWidth"].GetInt(), (*mainSettings)["ui"]["buttonHeight"].GetInt());
 
 	xInput->Bind(wxEVT_COMMAND_SPINCTRL_UPDATED, &JoystickCanvas::xValueSet, this);
 	yInput->Bind(wxEVT_COMMAND_SPINCTRL_UPDATED, &JoystickCanvas::yValueSet, this);
@@ -120,6 +123,7 @@ JoystickCanvas::JoystickCanvas(wxFrame* parent, DataProcessing* inputData, uint8
 
 	widgetSizer->Add(this, 0, wxSHAPED | wxEXPAND);
 	widgetSizer->Add(inputSizer, 1, wxEXPAND | wxALL);
+	widgetSizer->Add(lockButton, 0, wxEXPAND | wxALL);
 }
 
 void JoystickCanvas::draw(wxDC& dc) {
@@ -326,10 +330,13 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 	mainSizer          = new wxBoxSizer(wxVERTICAL);
 	horizontalBoxSizer = new wxBoxSizer(wxHORIZONTAL);
 
-	leftJoystickDrawer = new JoystickCanvas(parentFrame, inputInstance, true);
+	leftJoystickDrawer = new JoystickCanvas(settings, parentFrame, inputInstance, true);
 	leftJoystickDrawer->setBackgroundColor(*wxWHITE);
-	rightJoystickDrawer = new JoystickCanvas(parentFrame, inputInstance, false);
+	rightJoystickDrawer = new JoystickCanvas(settings, parentFrame, inputInstance, false);
 	rightJoystickDrawer->setBackgroundColor(*wxWHITE);
+
+	leftJoystickDrawer->getLockButton()->Bind(wxEVT_BUTTON, &BottomUI::onLeftJoystickLock, this);
+	rightJoystickDrawer->getLockButton()->Bind(wxEVT_BUTTON, &BottomUI::onRightJoystickLock, this);
 
 	wxSize gridSize;
 	// Just to get a rough estimate
@@ -382,7 +389,11 @@ void BottomUI::onJoystickSelect(wxCommandEvent& event) {
 	// Prepare mapping
 	joyButtonToSwitch.clear();
 	povToSwitch.clear();
-	axisToSwitch.clear();
+	axisButtonsToSwitch.clear();
+	leftStickAxis.clear();
+	rightStickAxis.clear();
+	axisDirection.clear();
+	lastState.clear();
 	// Get mapping from hex string
 	wxString hexWxString  = getJoyHexString(currentJoy);
 	const char* hexString = hexWxString.ToUTF8().data();
@@ -449,11 +460,16 @@ void BottomUI::onJoystickSelect(wxCommandEvent& event) {
 			// This is a button
 			if(buttonData->stringToButton.count(inputParts[0])) {
 				// It's a normal button
-				axisToSwitch[index] = (int)buttonData->stringToButton[inputParts[0]];
+				// Add to axisButtons, as they are read continuously, unlike the other axis
+				axisButtonsToSwitch[index] = (int)buttonData->stringToButton[inputParts[0]];
 			} else {
 				// It's extended
-				// Go beyond the end of Btn
-				axisToSwitch[index] = stringToButtonExtended[inputParts[0]] + Btn::BUTTONS_SIZE;
+				// Add each kind to a separate map
+				if(inputParts[0] == "LSX" || inputParts[0] == "LSY") {
+					leftStickAxis[index] = stringToButtonExtended[inputParts[0]];
+				} else if(inputParts[0] == "RSX" || inputParts[0] == "RSY") {
+					rightStickAxis[index] = stringToButtonExtended[inputParts[0]];
+				}
 			}
 		}
 	}
@@ -519,60 +535,36 @@ void BottomUI::listenToJoystick() {
 		for(int i = 0; i < currentJoy->GetNumberAxes(); i++) {
 			// Range should be from -32768 to +32768 or 0 to +65535
 			// Ranges should be the same for all axis
-			int axisMin = currentJoy->GetXMin();
-			int axisMax = currentJoy->GetXMax();
 			// Automatically floors
-			int axisMiddle = (axisMin + axisMax) / 2;
+			int axisMiddle = (currentJoy->GetXMin() + currentJoy->GetXMax()) / 2;
 			int axisValue  = currentJoy->GetPosition(i);
 
-			// Normalize to 1, then multiply by the range
-			int32_t normalizedAxisValue = ((float)(axisValue - axisMiddle) / (float)(axisMax - axisMiddle)) * ButtonData::axisMax;
-
-			// Flip if needed
-			if(!axisDirection[i]) {
-				normalizedAxisValue *= -1;
-			}
-
-			if(axisToSwitch.count(i)) {
-				int switchID = axisToSwitch[i];
-				if(switchID < Btn::BUTTONS_SIZE) {
-					// Check RS and LS only because it's susceptible to this
-					if((Btn)switchID == Btn::ZL || (Btn)switchID == Btn::ZR) {
-						if(axisValue > axisMiddle) {
-							// Trigger RS
-							if(lastState[Btn::ZL] != true) {
-								inputInstance->handleButtonInput(Btn::ZL);
-								lastState[Btn::ZL] = true;
-							}
-							// ZR is now off
-							lastState[Btn::ZR] = false;
-						} else if(axisValue < axisMiddle) {
-							// Trigger LS
-							if(lastState[Btn::ZR] != true) {
-								inputInstance->handleButtonInput(Btn::ZR);
-								lastState[Btn::ZR] = true;
-							}
-							// ZL is now off
-							lastState[Btn::ZL] = false;
+			if(axisButtonsToSwitch.count(i)) {
+				int switchID = axisButtonsToSwitch[i];
+				// if(switchID < Btn::BUTTONS_SIZE) {
+				// Check RS and LS only because it's susceptible to this
+				if((Btn)switchID == Btn::ZL || (Btn)switchID == Btn::ZR) {
+					// Flip if needed
+					if(axisDirection[i] ? axisValue < axisMiddle : axisValue > axisMiddle) {
+						// Trigger ZL
+						if(lastState[Btn::ZL] != true) {
+							inputInstance->handleButtonInput(Btn::ZL);
+							lastState[Btn::ZL] = true;
 						}
-					}
-				} else {
-					// This is an extended value, a joystick value
-					// Just set it as a normal axis
-					int axisID = switchID - Btn::BUTTONS_SIZE;
-					// AXIS VALUE ABSOLUTELY WRONG TODO
-					if(axisID == 0) {
-						// LSX
-						leftJoystickDrawer->setXValue(normalizedAxisValue);
-					} else if(axisID == 1) {
-						// LSY
-						leftJoystickDrawer->setYValue(normalizedAxisValue);
-					} else if(axisID == 2) {
-						// RSX
-						rightJoystickDrawer->setXValue(normalizedAxisValue);
-					} else if(axisID == 3) {
-						// RSY
-						rightJoystickDrawer->setYValue(normalizedAxisValue);
+						// ZR is now off
+						lastState[Btn::ZR] = false;
+					} else if(axisDirection[i] ? axisValue > axisMiddle : axisValue < axisMiddle) {
+						// Trigger ZR
+						if(lastState[Btn::ZR] != true) {
+							inputInstance->handleButtonInput(Btn::ZR);
+							lastState[Btn::ZR] = true;
+						}
+						// ZL is now off
+						lastState[Btn::ZL] = false;
+					} else {
+						// Both are off
+						lastState[Btn::ZL] = false;
+						lastState[Btn::ZR] = false;
 					}
 				}
 			}
@@ -593,6 +585,70 @@ void BottomUI::listenToJoystick() {
 					}
 					povLastState = povValue;
 				}
+			}
+		}
+	}
+}
+
+void BottomUI::onLeftJoystickLock(wxCommandEvent& event) {
+	for(int i = 0; i < currentJoy->GetNumberAxes(); i++) {
+		// Range should be from -32768 to +32768 or 0 to +65535
+		// Ranges should be the same for all axis
+		int axisMin = currentJoy->GetXMin();
+		int axisMax = currentJoy->GetXMax();
+		// Automatically floors
+		int axisMiddle = (axisMin + axisMax) / 2;
+		int axisValue  = currentJoy->GetPosition(i);
+
+		// Normalize to 1, then multiply by the range
+		int32_t normalizedAxisValue = ((float)(axisValue - axisMiddle) / (float)(axisMax - axisMiddle)) * ButtonData::axisMax;
+
+		// Flip if needed
+		if(!axisDirection[i]) {
+			normalizedAxisValue *= -1;
+		}
+
+		if(leftStickAxis.count(i)) {
+			// This is the right axis
+			int axisID = leftStickAxis[i];
+			if(axisID == 0) {
+				// LSX
+				leftJoystickDrawer->setXValue(normalizedAxisValue);
+			} else if(axisID == 1) {
+				// LSY
+				leftJoystickDrawer->setYValue(normalizedAxisValue);
+			}
+		}
+	}
+}
+
+void BottomUI::onRightJoystickLock(wxCommandEvent& event) {
+	for(int i = 0; i < currentJoy->GetNumberAxes(); i++) {
+		// Range should be from -32768 to +32768 or 0 to +65535
+		// Ranges should be the same for all axis
+		int axisMin = currentJoy->GetXMin();
+		int axisMax = currentJoy->GetXMax();
+		// Automatically floors
+		int axisMiddle = (axisMin + axisMax) / 2;
+		int axisValue  = currentJoy->GetPosition(i);
+
+		// Normalize to 1, then multiply by the range
+		int32_t normalizedAxisValue = ((float)(axisValue - axisMiddle) / (float)(axisMax - axisMiddle)) * ButtonData::axisMax;
+
+		// Flip if needed
+		if(!axisDirection[i]) {
+			normalizedAxisValue *= -1;
+		}
+
+		if(rightStickAxis.count(i)) {
+			// This is the right axis
+			int axisID = rightStickAxis[i];
+			if(axisID == 2) {
+				// RSX
+				rightJoystickDrawer->setXValue(normalizedAxisValue);
+			} else if(axisID == 3) {
+				// RSY
+				rightJoystickDrawer->setYValue(normalizedAxisValue);
 			}
 		}
 	}

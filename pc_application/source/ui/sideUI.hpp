@@ -7,6 +7,7 @@
 #include <wx/wx.h>
 
 #include "../dataHandling/dataProcessing.hpp"
+#include "../helpers.hpp"
 #include "drawingCanvas.hpp"
 
 class FrameCanvas : public DrawingCanvas {
@@ -36,10 +37,6 @@ private:
 	rapidjson::Document* mainSettings;
 
 	wxBoxSizer* verticalBoxSizer;
-
-	wxBitmap* addFrameBitmap;
-	wxBitmap* frameAdvanceBitmap;
-	wxBitmap* savestateHookBitmap;
 
 	wxBitmapButton* addFrameButton;
 	wxBitmapButton* frameAdvanceButton;

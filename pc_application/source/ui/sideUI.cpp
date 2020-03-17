@@ -89,20 +89,11 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* 
 	frameDrawer = new FrameCanvas(parentFrame, inputData);
 	frameDrawer->setBackgroundColor(*wxLIGHT_GREY);
 
-	wxImage resizedaddFrameImage(HELPERS::resolvePath((*mainSettings)["ui"]["addFrameButton"].GetString()));
-	resizedaddFrameImage.Rescale((*mainSettings)["ui"]["buttonWidth"].GetInt(), (*mainSettings)["ui"]["buttonHeight"].GetInt());
-	wxImage resizedFrameAdvanceImage(HELPERS::resolvePath((*mainSettings)["ui"]["frameAdvanceButton"].GetString()));
-	resizedFrameAdvanceImage.Rescale((*mainSettings)["ui"]["buttonWidth"].GetInt(), (*mainSettings)["ui"]["buttonHeight"].GetInt());
-	wxImage resizedSavestateHookImage(HELPERS::resolvePath((*mainSettings)["ui"]["savestateHookButton"].GetString()));
-	resizedSavestateHookImage.Rescale((*mainSettings)["ui"]["buttonWidth"].GetInt(), (*mainSettings)["ui"]["buttonHeight"].GetInt());
+	addFrameButton = HELPERS::getBitmapButton(parentFrame, HELPERS::resolvePath((*mainSettings)["ui"]["addFrameButton"].GetString()), (*mainSettings)["ui"]["buttonWidth"].GetInt(), (*mainSettings)["ui"]["buttonHeight"].GetInt());
 
-	addFrameBitmap      = new wxBitmap(resizedaddFrameImage);
-	frameAdvanceBitmap  = new wxBitmap(resizedFrameAdvanceImage);
-	savestateHookBitmap = new wxBitmap(resizedSavestateHookImage);
+	frameAdvanceButton = HELPERS::getBitmapButton(parentFrame, HELPERS::resolvePath((*mainSettings)["ui"]["frameAdvanceButton"].GetString()), (*mainSettings)["ui"]["buttonWidth"].GetInt(), (*mainSettings)["ui"]["buttonHeight"].GetInt());
 
-	addFrameButton      = new wxBitmapButton(parentFrame, wxID_ANY, *addFrameBitmap);
-	frameAdvanceButton  = new wxBitmapButton(parentFrame, wxID_ANY, *frameAdvanceBitmap);
-	savestateHookButton = new wxBitmapButton(parentFrame, wxID_ANY, *savestateHookBitmap);
+	savestateHookButton = HELPERS::getBitmapButton(parentFrame, HELPERS::resolvePath((*mainSettings)["ui"]["savestateHookButton"].GetString()), (*mainSettings)["ui"]["buttonWidth"].GetInt(), (*mainSettings)["ui"]["buttonHeight"].GetInt());
 
 	// Button handlers
 	addFrameButton->Bind(wxEVT_BUTTON, &SideUI::onAddFramePressed, this);

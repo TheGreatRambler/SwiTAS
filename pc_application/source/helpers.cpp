@@ -38,3 +38,9 @@ float HELPERS::normalizeRadian(float angle) {
 	float a = std::fmod(angle, 2 * M_PI);
 	return a >= 0 ? a : (a + 2 * M_PI);
 }
+
+wxBitmapButton* HELPERS::getBitmapButton(wxFrame* parentFrame, std::string path, int width, int height) {
+	wxImage resizedImage(path);
+	resizedImage.Rescale(width, height);
+	return new wxBitmapButton(parentFrame, wxID_ANY, *(new wxBitmap(resizedImage)));
+}
