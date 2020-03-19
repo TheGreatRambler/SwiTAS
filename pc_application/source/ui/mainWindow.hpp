@@ -11,10 +11,12 @@
 #include <uxtheme.h>
 #include <wx/wx.h>
 
+#define CLIENT_IMP
+#include "../../sharedNetworkCode/networkInterface.hpp"
+
 #include "../dataHandling/buttonData.hpp"
 #include "../dataHandling/dataProcessing.hpp"
 #include "../helpers.hpp"
-#include "../networking/networkInterface.hpp"
 #include "bottomUI.hpp"
 #include "sideUI.hpp"
 

@@ -27,8 +27,17 @@ MainWindow::MainWindow()
 	// Load button data here
 	buttonData->setupButtonMapping(&mainSettings);
 
-	// Start networking
-	networkInstance = std::make_shared<CommunicateWithNetwork>();
+	// Start networking with set queues
+	networkInstance = std::make_shared<CommunicateWithNetwork>(
+		[](CommunicateWithNetwork* self) {
+			SEND_QUEUE_DATA(SendStart)
+			SEND_QUEUE_DATA(SendRunFrame)
+		},
+		[](CommunicateWithNetwork* self) {
+			RECIEVE_QUEUE_DATA(RecieveDone)
+			RECIEVE_QUEUE_DATA(RecieveGameInfo)
+			RECIEVE_QUEUE_DATA(RecieveGameFramebuffer)
+		});
 
 	// DataProcessing can now start with the networking instance
 	dataProcessingInstance = new DataProcessing(&mainSettings, buttonData, networkInstance, this);

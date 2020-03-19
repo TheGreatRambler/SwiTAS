@@ -2,7 +2,7 @@
 	"configurations": [{
 		"name": "Main",
 		"includePath": [
-			"${workspaceFolder}/**"
+			"${workspaceFolder}/include/**"
 		],
 		"defines": [
 			"_DEBUG",
@@ -11,7 +11,7 @@
 		],
 		"compilerPath": "C:\\msys2\\mingw64\\bin\\gcc.exe",
 		"cStandard": "c11",
-		"cppStandard": "c++11",
+		"cppStandard": "c++14",
 		"intelliSenseMode": "gcc-x64",
 		"compilerArgs": [],
 		"browse": {
@@ -20,7 +20,7 @@
 			],
 			"limitSymbolsToIncludedHeaders": true
 		},
-		"compileCommands": "${workspaceFolder}/pc_application/compile_commands.json"
+		"compileCommands": "${workspaceFolder}/compile_commands.json"
 	}],
 	"version": 4
 }

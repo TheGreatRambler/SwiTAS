@@ -20,9 +20,9 @@ public:
 	void PaintBackground(wxDC& dc);
 
 	// Empty implementation, to prevent flicker
-	void OnEraseBackground(wxEraseEvent& event);
+			void OnEraseBackground(wxEraseEvent& event);
 
-	void setBackgroundColor(wxColor color);
+			void setBackgroundColor(wxColor color);
 
 	DECLARE_EVENT_TABLE();
 };

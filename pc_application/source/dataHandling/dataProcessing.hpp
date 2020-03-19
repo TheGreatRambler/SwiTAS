@@ -19,7 +19,7 @@
 #include <wx/listctrl.h>
 #include <wx/wx.h>
 
-#include "../networking/networkInterface.hpp"
+#include "../../sharedNetworkCode/networkInterface.hpp"
 #include "buttonData.hpp"
 
 class DataProcessing : public wxListCtrl {

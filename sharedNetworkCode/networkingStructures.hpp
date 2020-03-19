@@ -1,9 +1,9 @@
 #pragma once
 
+#include "include/zpp.hpp"
 #include <cstdint>
-#include <zpp.hpp>
 
-#include "../dataHandling/buttonData.hpp"
+#include "buttonData.hpp"
 
 // clang-format off
 #define DEFINE_STRUCT(Flag, body, ...) \

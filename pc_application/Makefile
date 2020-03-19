@@ -1,13 +1,12 @@
-# A sick universal makefile
-# Might be important https://stackoverflow.com/questions/26738025/gtk-icon-missing-when-running-in-ms-windows/34673860#34673860
-# Same with this http://www.tarnyko.net/repo/gtk3_build_system/tutorial/gtk3_tutorial.htm
-# https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer
-# This needs to be set on run TODO GTK_EXE_PREFIX=[root of project with trailing /]
-# No extension for the executable
-TARGET_EXEC ?= nxtas.exe
+# A sick universal makefil
+ifeq ($(OS),Windows_NT)
+	TARGET_EXEC ?= nxtas.exe
+else
+	TARGET_EXEC ?= nxtas
+endif
 
 BUILD_DIR ?= ./bin
-SRC_DIRS ?= ./source
+SRC_DIRS ?= ./source ../sharedNetworkCode
 
 # Set compilers to MinGW64 compilers
 CC := x86_64-w64-mingw32-gcc
@@ -15,30 +14,20 @@ CXX := x86_64-w64-mingw32-g++
 
 # C flags
 CFLAGS := -std=gnu17
+
 # C++ flags
-# Single precision sets all defined floating point numbers to floats, saves on memory
-# Includes some neccessary flags for Gtkmm
-# Also, import third party headers in `include`
-# Libpath needs to be set rightcom
-
-# To fix compiling errors, check out these links:
-# http://wxwidgets.10942.n7.nabble.com/wxWidgets-and-VSCode-td93506.html
-# https://www.wxwidgets.org/blog/2019/01/wxwidgets-and-vcpkg/
-# http://manpages.ubuntu.com/manpages/trusty/man1/wx-config.1.html
-# https://wiki.wxwidgets.org/Makefile
-
 CXXFLAGS := -std=gnu++17 $(shell wx-config --cxxflags base,core) -I./include
-# C/C++ flags (no -pendantic)
-# -fpermissive needed for some misbehaving GTK code
-# Just for 64 bit for the memes
-CPPFLAGS := -Wall -Wno-maybe-uninitialized -ggdb -m64
+
+# C/C++ flags
+# For some reason, the CLIENT_IMP doesn't seem to be passing down, oh well
+CPPFLAGS := -Wall -Wno-maybe-uninitialized -ggdb -m64 -DCLIENT_IMP
 
 ifeq ($(BUILD),release)
-# "Release" build - optimization, and no debug symbols
-CPPFLAGS += -O3 -s -DNDEBUG
+	# "Release" build - optimization, and no debug symbols
+	CPPFLAGS += -O3 -s -DNDEBUG
 else
-# "Debug" build - no optimization, and debugging symbols
-CPPFLAGS += -Og -g
+	# "Debug" build - no optimization, and debugging symbols
+	CPPFLAGS += -Og -g
 endif
 
 # Linker flags (-lpthread needed for threads)

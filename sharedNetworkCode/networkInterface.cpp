@@ -24,9 +24,12 @@ bool CommunicateWithNetwork::readData(uint8_t* data, uint16_t sizeToRead) {
 	return false;
 }
 
-CommunicateWithNetwork::CommunicateWithNetwork() {
+CommunicateWithNetwork::CommunicateWithNetwork(std::function<void(CommunicateWithNetwork*)> sendCallback, std::function<void(CommunicateWithNetwork*)> recieveCallback) {
 	// Should keep reading network at the beginning
 	keepReading = true;
+
+	sendQueueDataCallback    = sendCallback;
+	recieveQueueDataCallback = recieveCallback;
 
 	// Start the thread, this means that this class goes on the main thread
 	networkThread = std::make_shared<std::thread>(&CommunicateWithNetwork::initNetwork, this);
@@ -134,18 +137,13 @@ void CommunicateWithNetwork::listenForCommands() {
 	// The format works by preceding each message with a uint16_t with the size of the message, then the message right after it
 	while(keepReading.load()) {
 		// First, check over every outgoing queue to detect outgoing data
-		SEND_QUEUE_DATA(SendStart)
-		SEND_QUEUE_DATA(SendRunFrame)
+		sendQueueDataCallback(this);
 
 		// Check if socket even has data before doing anything
 		if(networkConnection->Select()) {
-			uint16_t dataSize;
-
 			if(readData((uint8_t*)&dataSize, sizeof(dataSize))) {
 				continue;
 			}
-
-			DataFlag currentFlag;
 
 			// Get the number back to the correct representation
 			// https://linux.die.net/man/3/ntohl
@@ -157,7 +155,7 @@ void CommunicateWithNetwork::listenForCommands() {
 			}
 			// Flag now tells us the data we expect to recieve
 
-			uint8_t* dataToRead = (uint8_t*)malloc(dataSize);
+			dataToRead = (uint8_t*)malloc(dataSize);
 
 			// The message worked, so get the data
 			if(readData(dataToRead, dataSize)) {
@@ -166,9 +164,7 @@ void CommunicateWithNetwork::listenForCommands() {
 
 			// Now, check over incoming queues, they will absorb the data if they correspond with the flag
 			// Keep in mind, this is not the main thread, so can't act upon the data instantly
-			RECIEVE_QUEUE_DATA(RecieveDone)
-			RECIEVE_QUEUE_DATA(RecieveGameInfo)
-			RECIEVE_QUEUE_DATA(RecieveGameFramebuffer)
+			recieveQueueDataCallback(this);
 
 			// Free memory
 			free(dataToRead);

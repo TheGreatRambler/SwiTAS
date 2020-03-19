@@ -4,14 +4,14 @@
 #define SEND_QUEUE_DATA(Flag) { \
 	while(true) { \
 		Protocol::Struct_##Flag structData; \
-		if(Queue_##Flag.try_dequeue(structData)) { \
+		if(self->Queue_##Flag.try_dequeue(structData)) { \
 			uint8_t data; \
 			uint16_t size; \
-			serializingProtocol.dataToBinary<Protocol::Struct_##Flag>(structData, &data, &size); \
+			self->serializingProtocol.dataToBinary<Protocol::Struct_##Flag>(structData, &data, &size); \
 			uint16_t dataSize = htons(size); \
-			networkConnection->Send((uint8_t*) &dataSize, sizeof(dataSize)); \
-			networkConnection->Send((uint8_t*) &structData.flag, sizeof(DataFlag)); \
-			networkConnection->Send(&data, size); \
+			self->networkConnection->Send((uint8_t*) &dataSize, sizeof(dataSize)); \
+			self->networkConnection->Send((uint8_t*) &structData.flag, sizeof(DataFlag)); \
+			self->networkConnection->Send(&data, size); \
 		} else { \
 			break; \
 		} \
@@ -22,9 +22,9 @@
 // clang-format off
 // The data is just shoved onto the queue and wxWidgets can read it during idle or something
 #define RECIEVE_QUEUE_DATA(Flag) \
-	if (currentFlag == DataFlag::Flag) { \
-		Protocol::Struct_##Flag data = serializingProtocol.binaryToData<Protocol::Struct_##Flag>(dataToRead, dataSize); \
-		Queue_##Flag.enqueue(data); \
+	if (self->currentFlag == DataFlag::Flag) { \
+		Protocol::Struct_##Flag data = self->serializingProtocol.binaryToData<Protocol::Struct_##Flag>(self->dataToRead, self->dataSize); \
+		self->Queue_##Flag.enqueue(data); \
 	} \
 // clang-format on
 
@@ -44,12 +44,7 @@
 }
 // clang-format on
 
-// In order to make my life easier, this file is essentially identical between client
-// And server, defines are used to separate the two
-#define CLIENT_IMP
-
 #include <atomic>
-#include <concurrentqueue.h>
 #include <condition_variable>
 #include <errno.h>
 #include <memory>
@@ -59,13 +54,15 @@
 #include <thread>
 #include <unistd.h>
 #include <unordered_map>
-#include <zpp.hpp>
+
+#include "include/zpp.hpp"
+#include "include/concurrentqueue.h"
 
 // Active sockets are the client
 #ifdef SERVER_IMP
-#include "../thirdParty/clsocket/PassiveSocket.h"
+#include "thirdParty/clsocket/PassiveSocket.h"
 #endif
-#include "../thirdParty/clsocket/ActiveSocket.h"
+#include "thirdParty/clsocket/ActiveSocket.h"
 #include "serializeUnserializeData.hpp"
 #include "networkingStructures.hpp"
 
@@ -77,11 +74,12 @@ private:
 	CPassiveSocket listeningServer;
 #endif
 
-	CActiveSocket* networkConnection;
-
 	std::atomic_bool connectedToSocket;
 
 	std::shared_ptr<std::thread> networkThread;
+
+	std::function<void(CommunicateWithNetwork*)> sendQueueDataCallback;
+	std::function<void(CommunicateWithNetwork*)> recieveQueueDataCallback;
 
 	std::mutex ipMutex;
 	std::condition_variable cv;
@@ -90,22 +88,23 @@ private:
 	// this can be set by anybody and will determine if networking continues
 	std::atomic_bool keepReading;
 
-	// Protcol for serializing
-	SerializeProtocol serializingProtocol;
-
 	bool handleSocketError(int res);
 
 	// This will read data until all is recieved
 	bool readData(uint8_t* data, uint16_t sizeToRead);
 
 public:
+	// Protcol for serializing
+	SerializeProtocol serializingProtocol;
+	CActiveSocket* networkConnection;
+
 	ADD_QUEUE(SendRunFrame)
 	ADD_QUEUE(RecieveGameFramebuffer)
 	ADD_QUEUE(RecieveGameInfo)
 	ADD_QUEUE(SendStart)
 	ADD_QUEUE(RecieveDone)
 
-	CommunicateWithNetwork();
+	CommunicateWithNetwork(std::function<void(CommunicateWithNetwork*)> sendCallback, std::function<void(CommunicateWithNetwork*)> recieveCallback);
 
 #ifdef CLIENT_IMP
 	void attemptConnectionToServer(const char* ip);
@@ -121,6 +120,11 @@ public:
 	bool isConnected() {
 		return connectedToSocket.load();
 	}
+
+	// This stuff needs to be global for callback reasons
+	uint16_t dataSize;
+	DataFlag currentFlag;
+	uint8_t* dataToRead;
 
 	~CommunicateWithNetwork();
 };
