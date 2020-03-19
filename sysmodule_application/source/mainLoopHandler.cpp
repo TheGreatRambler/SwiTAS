@@ -4,14 +4,29 @@ MainLoop::MainLoop() {
 	// Start networking with set queues
 	networkInstance = std::make_shared<CommunicateWithNetwork>(
 		[](CommunicateWithNetwork* self) {
-			SEND_QUEUE_DATA(RecieveDone)
+			SEND_QUEUE_DATA(RecieveFlag)
 			SEND_QUEUE_DATA(RecieveGameInfo)
 			SEND_QUEUE_DATA(RecieveGameFramebuffer)
+			SEND_QUEUE_DATA(RecieveApplicationConnected)
 		},
 		[](CommunicateWithNetwork* self) {
-			RECIEVE_QUEUE_DATA(SendStart)
+			RECIEVE_QUEUE_DATA(SendFlag)
 			RECIEVE_QUEUE_DATA(SendRunFrame)
 		});
+
+	ViDisplay disp;
+	rc = viOpenDefaultDisplay(&disp);
+	if(R_FAILED(rc))
+		fatalThrow(rc);
+
+	rc = viGetDisplayVsyncEvent(&disp, &vsyncEvent);
+	if(R_FAILED(rc))
+		fatalThrow(rc);
+
+	// Attach Work Buffer
+	rc = hiddbgAttachHdlsWorkBuffer();
+	if(R_FAILED(rc))
+		fatalThrow(rc);
 }
 
 void MainLoop::mainLoopHandler() {
@@ -28,7 +43,12 @@ void MainLoop::mainLoopHandler() {
 				gameName = getAppName(applicationProgramId);
 				// Start the whole main loop
 			}
-			// Let PC know
+
+			ADD_TO_QUEUE(RecieveApplicationConnected, networkInstance, {
+				data.applicationName      = std::string(gameName);
+				data.applicationProgramId = applicationProgramId;
+				data.applicationProcessId = applicationProcessId;
+			})
 
 			applicationOpened = true;
 		}
@@ -36,9 +56,25 @@ void MainLoop::mainLoopHandler() {
 		// I believe this means that there is no application running
 		// If there was just an application open, let the PC know
 		if(applicationOpened) {
-
+			// clang-format off
+			ADD_TO_QUEUE(RecieveFlag, networkInstance, {
+				data.actFlag = RecieveInfo::APPLICATION_DISCONNECTED;
+			})
+			// clang-format on
 			applicationOpened = false;
 		}
+	}
+
+	if(networkInstance->isConnected()) {
+		CHECK_QUEUE(networkInstance, SendRunFrame,
+			{
+				// blah
+			})
+
+		CHECK_QUEUE(networkInstance, SendFlag,
+			{
+				// blah
+			})
 	}
 
 	svcSleepThread(5e+9);
@@ -55,5 +91,11 @@ char* MainLoop::getAppName(u64 application_id) {
 				return languageEntry->name;
 		}
 	}
-	return "";
+	return "Not Defined";
+}
+
+MainLoop::~MainLoop() {
+	rc = hiddbgReleaseHdlsWorkBuffer();
+
+	hiddbgExit();
 }

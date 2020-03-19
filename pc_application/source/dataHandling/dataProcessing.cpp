@@ -444,10 +444,10 @@ void DataProcessing::createSavestateHookHere() {
 
 void DataProcessing::runFrame() {
 	if(currentRunFrame != inputsList.size()) {
-		std::shared_ptr<ControllerData> data = inputsList[currentRunFrame];
+		std::shared_ptr<ControllerData> controllerData = inputsList[currentRunFrame];
 
 		// Change the state and get colors
-		SET_BIT(data->frameState, 1, FrameState::RAN);
+		SET_BIT(controllerData->frameState, 1, FrameState::RAN);
 		RefreshItem(currentRunFrame);
 
 		// If possible, make current frame this frame
@@ -465,9 +465,11 @@ void DataProcessing::runFrame() {
 		Refresh();
 
 		// Send to switch to run
-		Protocol::Struct_SendRunFrame sendFrame;
-		sendFrame.controllerData = *data;
-		ADD_TO_QUEUE(SendRunFrame, sendFrame, networkInstance)
+		// clang-format off
+		ADD_TO_QUEUE(SendRunFrame, networkInstance, {
+			data.controllerData = *controllerData;
+		})
+		// clang-format on
 	}
 }
 

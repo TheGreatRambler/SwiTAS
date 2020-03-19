@@ -4,12 +4,11 @@
 #define GET_BIT(number, loc) ((number) >> (loc)) & 1U
 
 #include <cstdint>
+#include <cstring>
+#include <jpeglib.h>
 #include <string>
 #include <switch.h>
 #include <vector>
-extern "C" {
-#include <jpeglib.h>
-}
 
 // Many thanks to 黯然的饭#8969 on Discord for the framebuffer implementation
 class ScreenshotHandler {

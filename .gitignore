@@ -1,7 +1,9 @@
 pc_application/bin
+pc_application/sharedNetworkCode
 
 sysmodule/nx-TAS-PC.elf
 sysmodule/nx-TAS-PC.npdm
 sysmodule/nx-TAS-PC.nso
 sysmodule/nx-TAS-PC.nsp
 sysmodule/build
+sysmodule/sharedNetworkCode

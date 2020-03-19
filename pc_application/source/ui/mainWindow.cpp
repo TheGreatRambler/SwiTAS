@@ -30,13 +30,14 @@ MainWindow::MainWindow()
 	// Start networking with set queues
 	networkInstance = std::make_shared<CommunicateWithNetwork>(
 		[](CommunicateWithNetwork* self) {
-			SEND_QUEUE_DATA(SendStart)
+			SEND_QUEUE_DATA(SendFlag)
 			SEND_QUEUE_DATA(SendRunFrame)
 		},
 		[](CommunicateWithNetwork* self) {
-			RECIEVE_QUEUE_DATA(RecieveDone)
+			RECIEVE_QUEUE_DATA(RecieveFlag)
 			RECIEVE_QUEUE_DATA(RecieveGameInfo)
 			RECIEVE_QUEUE_DATA(RecieveGameFramebuffer)
+			RECIEVE_QUEUE_DATA(RecieveApplicationConnected)
 		});
 
 	// DataProcessing can now start with the networking instance
@@ -162,7 +163,7 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 			if(!ipAddress.empty()) {
 				// IP address entered
 				SetStatusText(ipAddress + ":" + std::to_string(SERVER_PORT), 0);
-				networkInstance->attemptConnectionToServer(ipAddress.c_str());
+				networkInstance->attemptConnectionToServer(ipAddress.ToStdString());
 			}
 		}
 	}

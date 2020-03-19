@@ -1,5 +1,4 @@
 #include "screenshotHandler.hpp"
-#include "project/savestate_data.hpp"
 
 ScreenshotHandler::ScreenshotHandler() {
 	// Get the PID from the Title ID
@@ -153,6 +152,7 @@ void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>
 				// Un oh
 			}
 		}
+		svcCloseHandle(VIdbg);
 
 		jpeg_finish_compress(&cinfo);
 		jpeg_destroy_compress(&cinfo);
@@ -160,8 +160,6 @@ void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>
 		// Now that JPEG and dhash are done, send them both back
 		hash->assign(convertToHexString(dhash, sizeOfDhash));
 		jpegBuffer->assign(jpegBuf, jpegBuf + jpegSize);
-
-		svcCloseHandle(VIdbg);
 	}
 }
 

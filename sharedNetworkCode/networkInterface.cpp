@@ -51,25 +51,10 @@ void CommunicateWithNetwork::initNetwork() {
 	// Listen on localhost
 	listeningServer.Listen(NULL, SERVER_PORT);
 
-	// This will block INDEFINITELY if there is no client, so
-	// Literally nothing can happen until this finishes
-	while(true) {
-		networkConnection = listeningServer.Accept();
-		// We only care about the first connection
-		if(networkConnection != NULL) {
-			// Connection established, stop while looping
-			connectedToSocket = true;
-			break;
-		}
-	}
+	waitForNetworkConnection();
 #endif
 
-	// Set to blocking for all data
-	networkConnection->SetBlocking();
-
-	// Block for 3 seconds to recieve a byte
-	// Within 3 seconds
-	networkConnection->SetReceiveTimeout(5);
+	prepareNetworkConnection();
 
 #ifdef CLIENT_IMP
 	// Wait until string is good
@@ -92,6 +77,33 @@ void CommunicateWithNetwork::initNetwork() {
 	listenForCommands();
 }
 
+void CommunicateWithNetwork::prepareNetworkConnection() {
+	// Set to blocking for all data
+	networkConnection->SetBlocking();
+
+	// Block for 3 seconds to recieve a byte
+	// Within 3 seconds
+	networkConnection->SetReceiveTimeout(5);
+}
+
+#ifdef SERVER_IMP
+void CommunicateWithNetwork::waitForNetworkConnection() {
+	// This will block INDEFINITELY if there is no client, so
+	// Literally nothing can happen until this finishes
+	while(true) {
+		networkConnection = listeningServer.Accept();
+		// We only care about the first connection
+		if(networkConnection != NULL) {
+			// Connection established, stop while looping
+			connectedToSocket = true;
+			break;
+		}
+		// Wait briefly
+		std::this_thread::sleep_for(std::chrono::nanoseconds(5e+9));
+	}
+}
+#endif
+
 void CommunicateWithNetwork::endNetwork() {
 	// Stop reading
 	keepReading = false;
@@ -106,8 +118,28 @@ bool CommunicateWithNetwork::handleSocketError(int res) {
 		networkConnection->TranslateSocketError();
 		CSimpleSocket::CSocketError error = networkConnection->GetSocketError();
 		// It's okay if it would have blocked, just means there is no data
-		if(error != CSimpleSocket::SocketEwouldblock) {
-			// Would block is harmless
+		if(error == CSimpleSocket::SocketConnectionReset) {
+			// Abnormal disconnect, go through reconnecting
+			// More errors may need to be checked here
+			connectedToSocket = false;
+#ifdef SERVER_IMP
+			networkConnection->Close();
+			delete networkConnection;
+			// The server will just block while listening for a new connection
+			waitForNetworkConnection();
+			// When done, reconfigure
+			prepareNetworkConnection();
+#endif
+#ifdef CLIENT_IMP
+			// Try to reconnect probably 10 times
+			for(uint8_t i = 0; i < 10; i++) {
+				// Attempt to reconnect to the same IP address
+				attemptConnectionToServer(ipAddress);
+				std::this_thread::sleep_for(std::chrono::nanoseconds(1s));
+			}
+			// I dunno what to do if failure
+#endif
+		} else if(error != CSimpleSocket::SocketEwouldblock) {
 			puts(networkConnection->DescribeError());
 		}
 		return true;
@@ -117,13 +149,14 @@ bool CommunicateWithNetwork::handleSocketError(int res) {
 }
 
 #ifdef CLIENT_IMP
-void CommunicateWithNetwork::attemptConnectionToServer(const char* ip) {
+void CommunicateWithNetwork::attemptConnectionToServer(std::string ip) {
 	std::unique_lock<std::mutex> lk(ipMutex);
-	if(!networkConnection->Open(ip, SERVER_PORT)) {
+	if(!networkConnection->Open(ip.c_str(), SERVER_PORT)) {
 		// There was an error
 		connectedToSocket = false;
 	} else {
 		// We good, let the network thread know
+		ipAddress         = ip;
 		connectedToSocket = true;
 		cv.notify_one();
 	}

@@ -1,6 +1,8 @@
 #include "controller.hpp"
 
-ControllerHandler::ControllerHandler() {
+ControllerHandler::ControllerHandler(Event* vsync) {
+	vsyncEvent = vsync;
+
 	// Types include:
 	// - HidDeviceType_FullKey3
 	// - HidDeviceType_JoyLeft2
@@ -55,7 +57,8 @@ void ControllerHandler::runFrameWithPause(ControllerData controllerData) {
 		}
 	}
 
-	// Undebug application TODO <--
+	// Unpause application
+	svcCloseHandle(applicationDebug);
 	waitForVsync();
 	setInput();
 
@@ -64,7 +67,12 @@ void ControllerHandler::runFrameWithPause(ControllerData controllerData) {
 	screenshotHandler.writeFramebuffer(&dhashForThisFrame, &jpegBufferForThisFrame);
 	// Send these to the PC
 
-	// Debug the application again TODO
+	// Debug application again
+	rc = svcDebugActiveProcess(&applicationDebug, applicationPID);
+}
+
+void ControllerHandler::setApplicationProcessId(u64 pid) {
+	applicationPID = pid;
 }
 
 ControllerHandler::~ControllerHandler() {

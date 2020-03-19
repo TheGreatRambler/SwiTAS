@@ -14,12 +14,15 @@ private:
 
 	Result rc;
 
-	Event vsyncEvent;
+	Event* vsyncEvent;
 
 	ScreenshotHandler screenshotHandler;
 
+	Handle applicationDebug;
+	u64 applicationPID;
+
 	void waitForVsync() {
-		rc = eventWait(&vsyncEvent, U64_MAX);
+		rc = eventWait(vsyncEvent, U64_MAX);
 		if(R_FAILED(rc))
 			fatalThrow(rc);
 	}
@@ -31,9 +34,11 @@ private:
 	}
 
 public:
-	ControllerHandler();
+	ControllerHandler(Event* vsync);
 
 	void runFrameWithPause(ControllerData controllerData);
+
+	void setApplicationProcessId(u64 pid);
 
 	~ControllerHandler();
 };

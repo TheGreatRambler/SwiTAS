@@ -33,7 +33,13 @@
 // clang-format on
 
 // Use this from other parts of the program to send data over the network
-#define ADD_TO_QUEUE(Flag, data, networkImp) networkImp->Queue_##Flag.enqueue(data);
+// clang-format off
+#define ADD_TO_QUEUE(Flag, networkImp, bodyOfCode) { \
+	Protocol::Struct_##Flag data; \
+	bodyOfCode \
+	networkImp->Queue_##Flag.enqueue(data); \
+}
+// clang-format on
 
 // clang-format off
 #define CHECK_QUEUE(networkInstance, Flag, codeBody) { \
@@ -51,7 +57,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <chrono>
 #include <thread>
+#include <functional>
 #include <unistd.h>
 #include <unordered_map>
 
@@ -84,6 +92,10 @@ private:
 	std::mutex ipMutex;
 	std::condition_variable cv;
 
+#ifdef CLIENT_IMP
+	std::string ipAddress;
+#endif
+
 	// Whether to keep going
 	// this can be set by anybody and will determine if networking continues
 	std::atomic_bool keepReading;
@@ -101,14 +113,21 @@ public:
 	ADD_QUEUE(SendRunFrame)
 	ADD_QUEUE(RecieveGameFramebuffer)
 	ADD_QUEUE(RecieveGameInfo)
-	ADD_QUEUE(SendStart)
-	ADD_QUEUE(RecieveDone)
+	ADD_QUEUE(SendFlag)
+	ADD_QUEUE(RecieveFlag)
+	ADD_QUEUE(RecieveApplicationConnected)
 
 	CommunicateWithNetwork(std::function<void(CommunicateWithNetwork*)> sendCallback, std::function<void(CommunicateWithNetwork*)> recieveCallback);
 
 #ifdef CLIENT_IMP
-	void attemptConnectionToServer(const char* ip);
+	void attemptConnectionToServer(std::string ip);
 #endif
+
+#ifdef SERVER_IMP
+	void waitForNetworkConnection();
+#endif
+
+	void prepareNetworkConnection();
 
 	// Called in the network thread
 	void listenForCommands();

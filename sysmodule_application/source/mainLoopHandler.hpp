@@ -14,6 +14,8 @@ private:
 	u64 applicationProgramId  = 0;
 	uint8_t applicationOpened = false;
 
+	Event vsyncEvent;
+
 	std::shared_ptr<CommunicateWithNetwork> networkInstance;
 
 	static char* getAppName(u64 application_id);
@@ -22,4 +24,6 @@ public:
 	MainLoop();
 
 	void mainLoopHandler();
+
+	~MainLoop();
 };

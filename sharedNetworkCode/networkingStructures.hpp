@@ -21,17 +21,19 @@ enum DataFlag : uint8_t {
 	SendRunFrame,
 	RecieveGameFramebuffer,
 	RecieveGameInfo,
-	SendStart,
-	RecieveDone,
+	SendFlag,
+	RecieveFlag,
+	RecieveApplicationConnected,
 	NUM_OF_FLAGS,
 };
 
-enum DoneFlag : uint8_t {
+enum RecieveInfo : uint8_t {
 	RUN_FRAME_DONE,
 	FRAMEBUFFER_DONE,
+	APPLICATION_DISCONNECTED,
 };
 
-enum StartFlag : uint8_t {
+enum SendInfo : uint8_t {
 	GET_FRAMEBUFFER,
 	GET_GAME_INFO,
 };
@@ -46,7 +48,8 @@ namespace Protocol {
 	// Recieve part of the game's framebuffer
 	DEFINE_STRUCT(RecieveGameFramebuffer,
 		std::vector<uint8_t> buf;
-	, self.buf)
+		std::string dHash;
+	, self.buf, self.dHash)
 
 	// Recieve a ton of game and user info
 	DEFINE_STRUCT(RecieveGameInfo,
@@ -54,13 +57,19 @@ namespace Protocol {
 	, self.userNickname)
 
 	// Send start, with mostly everything as an enum value
-	DEFINE_STRUCT(SendStart,
-		StartFlag actFlag;
-	, self.flag)
+	DEFINE_STRUCT(SendFlag,
+		SendInfo actFlag;
+	, self.actFlag)
 
 	// Recieve done, with mostly everything as an enum value
-	DEFINE_STRUCT(RecieveDone,
-		DoneFlag actFlag;
-	, self.flag)
+	DEFINE_STRUCT(RecieveFlag,
+		RecieveInfo actFlag;
+	, self.actFlag)
+
+	DEFINE_STRUCT(RecieveApplicationConnected,
+		std::string applicationName;
+		uint64_t applicationProgramId;
+		uint64_t applicationProcessId;
+	, self.applicationName, self.applicationProgramId, self.applicationProcessId)
 };
 // clang-format on
