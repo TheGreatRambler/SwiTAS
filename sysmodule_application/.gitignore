@@ -1,0 +1,8 @@
+nx-TAS-PC.elf
+nx-TAS-PC.npdm
+nx-TAS-PC.nso
+nx-TAS-PC.nsp
+/build
+.DS_Store
+/release
+compile_commands.json

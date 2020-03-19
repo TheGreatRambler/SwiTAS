@@ -1,0 +1,19 @@
+{
+	"configurations": [{
+		"name": "DKP Aarch64",
+		"includePath": [
+			"${workspaceFolder}/include/**",
+			"${OPT}/devkitpro/libnx/include/**",
+			"${OPT}/devkitpro/libnx/include/switch/**",
+			"${OPT}/devkitpro/portlibs/switch/include/**"
+		],
+		"defines": [
+			"__SWITCH__"
+		],
+		"compilerPath": "${OPT}/devkitpro/devkitA64/bin/aarch64-none-elf-gcc",
+		"cStandard": "c11",
+		"cppStandard": "c++14",
+		"intelliSenseMode": "gcc-x64"
+	}],
+	"version": 4
+}

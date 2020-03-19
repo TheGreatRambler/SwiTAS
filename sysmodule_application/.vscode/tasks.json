@@ -1,0 +1,51 @@
+{
+	"version": "2.0.0",
+	"tasks": [{
+			"label": "Build Debug",
+			"type": "shell",
+			"promptOnClose": true,
+			"command": "make DINFO=1 -j4",
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			},
+			"problemMatcher": [{
+				"base": "$gcc",
+				"fileLocation": ["autoDetect", "${workspaceFolder}"]
+			}]
+		},
+		{
+			"label": "Build Release",
+			"type": "shell",
+			"promptOnClose": true,
+			"command": "make -j4",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			},
+			"problemMatcher": [{
+				"base": "$gcc",
+				"fileLocation": ["autoDetect", "${workspaceFolder}"]
+			}],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"label": "Clean",
+			"type": "shell",
+			"promptOnClose": true,
+			"command": "${workspaceRoot}/.vscode/scripts/clean.sh",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			},
+			"problemMatcher": [{
+				"base": "$gcc",
+				"fileLocation": ["autoDetect", "${workspaceFolder}"]
+			}]
+		}
+	]
+}
