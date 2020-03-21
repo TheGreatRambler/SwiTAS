@@ -1,56 +1,34 @@
 #include "projectHandler.hpp"
 
-ProjectHandler::ProjectHandler(DataProcessing* dataProcessingInstance)
-	: wxFrame(NULL, wxID_ANY, "Select Project", wxDefaultPosition, wxDefaultSize) {
+ProjectHandler::ProjectHandler(DataProcessing* dataProcessingInstance, rapidjson::Document* settings)
+	: wxDialog(NULL, wxID_ANY, "Select Project", wxDefaultPosition, wxDefaultSize) {
 	// Get global settings file
-	getGlobalSettings();
 	dataProcessing = dataProcessingInstance;
+	mainSettings   = settings;
 
 	mainSizer = new wxBoxSizer(wxVERTICAL);
 
-	projectList = new wxRichTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxRE_MULTILINE | wxRE_READONLY);
+	projectList = new wxListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_SINGLE);
 
-	auto recentProjectsArray = mainSettings["recentProjects"].GetArray();
+	rapidjson::GenericArray<false, rapidjson::Value> recentProjectsArray = (*mainSettings)["recentProjects"].GetArray();
 
-	wxTextAttr projectNameAttr;
-	projectNameAttr.SetFontUnderlined(true);
-	projectNameAttr.SetFontSize(30);
-	projectNameAttr.SetFontStyle(wxFONTSTYLE_ITALIC);
-	projectNameAttr.SetFontWeight(wxFONTWEIGHT_BOLD);
-	projectNameAttr.SetTextColour(wxColor(mainSettings["ui"]["recentProjectsColors"]["projectName"].GetString()));
-
-	wxTextAttr projectDirectoryAttr;
-	projectDirectoryAttr.SetFontSize(22);
-	projectDirectoryAttr.SetFontStyle(wxFONTSTYLE_NORMAL);
-	projectDirectoryAttr.SetFontWeight(wxFONTWEIGHT_LIGHT);
-	projectDirectoryAttr.SetTextColour(wxColor(mainSettings["ui"]["recentProjectsColors"]["projectDir"].GetString()));
+	std::size_t listboxSize = recentProjectsArray.Size() + 1;
+	wxString listboxItems[listboxSize];
+	std::size_t listboxIndex = 0;
 
 	for(auto const& recentProject : recentProjectsArray) {
-		// Mark as URL and give the directory as the URL
-		projectList->BeginURL(recentProject["projectDirectory"].GetString());
-		projectList->SetDefaultStyle(projectNameAttr);
-		projectList->AppendText(recentProject["projectName"].GetString());
-		projectList->AppendText(" ");
-		projectList->SetDefaultStyle(projectDirectoryAttr);
-		projectList->AppendText(recentProject["projectDirectory"].GetString());
-		projectList->EndURL();
-		projectList->AppendText("\n");
+		wxString recentProjectItem = wxString::Format("%s %s", wxString::FromUTF8(recentProject["projectName"].GetString()), wxString::FromUTF8(recentProject["projectDirectory"].GetString()));
+		listboxItems[listboxIndex] = recentProjectItem;
+		listboxIndex++;
 	}
 
-	wxTextAttr newProjectAttr;
-	newProjectAttr.SetFontSize(35);
-	newProjectAttr.SetFontStyle(wxFONTSTYLE_NORMAL);
-	newProjectAttr.SetFontWeight(wxFONTWEIGHT_LIGHT);
-	newProjectAttr.SetTextColour(wxColor(mainSettings["ui"]["recentProjectsColors"]["newProject"].GetString()));
+	listboxItems[listboxIndex] = createNewProjectText;
 
-	projectList->BeginURL("newProject");
-	projectList->SetDefaultStyle(newProjectAttr);
-	projectList->AppendText("Create New Project");
-	projectList->EndURL();
+	projectList->InsertItems(listboxSize, listboxItems, 0);
 
-	projectList->Bind(wxEVT_TEXT_URL, &ProjectHandler::onClickProject, this);
+	projectList->Bind(wxEVT_LISTBOX, &ProjectHandler::onClickProject, this);
 
-	mainSizer->Add(projectList, 0, wxEXPAND | wxALL);
+	mainSizer->Add(projectList, 0, wxEXPAND | wxALL, 5);
 
 	// Print create project input
 
@@ -59,32 +37,96 @@ ProjectHandler::ProjectHandler(DataProcessing* dataProcessingInstance)
 	Layout();
 	Fit();
 	Center(wxBOTH);
+
+	Layout();
 }
 
-void ProjectHandler::getGlobalSettings() {
-	std::ifstream settingsFile("../mainSettings.json");
-	std::string content((std::istreambuf_iterator<char>(settingsFile)), (std::istreambuf_iterator<char>()));
-	// Allow comments in JSON
-	mainSettings.Parse<rapidjson::kParseCommentsFlag>(content.c_str());
-}
-
-void ProjectHandler::onClickProject(wxTextUrlEvent& event) {
+void ProjectHandler::onClickProject(wxCommandEvent& event) {
 	wxString selectedProject = event.GetString();
-	if(selectedProject == "newProject") {
+	if(selectedProject == createNewProjectText) {
 		// Open up a new project dialog
 		wxDirDialog dlg(NULL, "Choose Project Directory", "", wxDD_DEFAULT_STYLE);
 		if(dlg.ShowModal() == wxID_OK) {
 			// Directory chosen
 			projectDir.Open(dlg.GetPath());
+			projectChosen = true;
+			Close(true);
 		}
 	} else {
 		// It's a project folder
 		projectDir.Open(selectedProject);
-		// Only difference between new project and existing project is
-		// DataProcessing is automatically filled with the existing data
+		// Fill up the data found here
+		loadProject();
+		projectChosen = true;
+		Close(true);
+	}
+}
+
+void ProjectHandler::loadProject() {
+	wxFileName inputsFileName;
+	inputsFileName.AppendDir(projectDir.GetNameWithSep());
+	inputsFileName.SetName("inputs");
+	inputsFileName.SetExt("bin");
+
+	if(inputsFileName.FileExists()) {
+		// Load up the inputs
+		wxFFileStream inputsFileStream(inputsFileName.GetFullPath(), "rb");
+		wxZlibInputStream inputsDecompressStream(inputsFileStream, wxZLIB_ZLIB | wxZLIB_NO_HEADER);
+
+		wxMemoryOutputStream dataStream;
+		dataStream.Write(inputsDecompressStream);
+		inputsFileStream.Close();
+		wxStreamBuffer* streamBuffer = dataStream.GetOutputStreamBuffer();
+
+		std::vector<std::shared_ptr<ControllerData>>* inputsList = dataProcessing->getInputsList();
+
+		// Set DataProcessing to the data found here
+		serializeProtocol.binaryToData<std::vector<std::shared_ptr<ControllerData>>>(*inputsList, (uint8_t*)streamBuffer->GetBufferStart(), streamBuffer->GetBufferSize());
 	}
 }
 
 void ProjectHandler::saveProject() {
 	// Save each set of data one by one
+	// Serialize the entire vector, first of all, with ZPP
+	std::vector<std::shared_ptr<ControllerData>>* inputsList = dataProcessing->getInputsList();
+
+	uint8_t* data;
+	std::size_t dataSize;
+	serializeProtocol.dataToBinary<std::vector<std::shared_ptr<ControllerData>>>(*inputsList, &data, &dataSize);
+
+	wxFileName inputsFileName;
+	inputsFileName.AppendDir(projectDir.GetNameWithSep());
+	inputsFileName.SetName("inputs");
+	inputsFileName.SetExt("bin");
+
+	// Delete file if already present and use binary mode
+	wxFFileStream inputsFileStream(inputsFileName.GetFullPath(), "wb");
+	wxZlibOutputStream inputsCompressStream(inputsFileStream, compressionLevel, wxZLIB_ZLIB | wxZLIB_NO_HEADER);
+	inputsCompressStream.WriteAll(data, dataSize);
+	inputsCompressStream.Sync();
+	inputsFileStream.Close();
+
+	// For now, that's it
+}
+
+void ProjectHandler::createTempProjectDir() {
+	// Open standard documents folder
+	wxString documentsFolder = wxStandardPaths::Get().GetDocumentsDir();
+	wxFileName dir(documentsFolder);
+	dir.AppendDir(wxString::Format("TAS_PROJECT_%lld", wxGetLocalTimeMillis().GetValue()));
+	projectDir.Open(dir.GetFullPath());
+	dir.Mkdir();
+}
+
+ProjectHandler::~ProjectHandler() {
+	// Write JSON settings
+	wxFFileStream inputsFileStream("../mainSettings.json", "w");
+
+	rapidjson::StringBuffer sb;
+	rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
+	writer.SetIndent('\t', 1);
+	mainSettings->Accept(writer);
+
+	inputsFileStream.WriteAll(sb.GetString(), sb.GetLength());
+	inputsFileStream.Close();
 }

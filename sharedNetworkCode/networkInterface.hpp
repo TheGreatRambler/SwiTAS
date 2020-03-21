@@ -5,13 +5,14 @@
 	while(true) { \
 		Protocol::Struct_##Flag structData; \
 		if(self->Queue_##Flag.try_dequeue(structData)) { \
-			uint8_t data; \
-			uint16_t size; \
+			uint8_t* data; \
+			std::size_t size; \
 			self->serializingProtocol.dataToBinary<Protocol::Struct_##Flag>(structData, &data, &size); \
-			uint16_t dataSize = htons(size); \
+			uint16_t dataSize = htons((uint16_t)size); \
 			self->networkConnection->Send((uint8_t*) &dataSize, sizeof(dataSize)); \
 			self->networkConnection->Send((uint8_t*) &structData.flag, sizeof(DataFlag)); \
-			self->networkConnection->Send(&data, size); \
+			self->networkConnection->Send(data, size); \
+			free(data); \
 		} else { \
 			break; \
 		} \
@@ -23,7 +24,8 @@
 // The data is just shoved onto the queue and wxWidgets can read it during idle or something
 #define RECIEVE_QUEUE_DATA(Flag) \
 	if (self->currentFlag == DataFlag::Flag) { \
-		Protocol::Struct_##Flag data = self->serializingProtocol.binaryToData<Protocol::Struct_##Flag>(self->dataToRead, self->dataSize); \
+		Protocol::Struct_##Flag data; \
+		self->serializingProtocol.binaryToData<Protocol::Struct_##Flag>(data, self->dataToRead, self->dataSize); \
 		self->Queue_##Flag.enqueue(data); \
 	} \
 // clang-format on

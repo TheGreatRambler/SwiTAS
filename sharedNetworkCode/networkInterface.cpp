@@ -135,7 +135,7 @@ bool CommunicateWithNetwork::handleSocketError(int res) {
 			for(uint8_t i = 0; i < 10; i++) {
 				// Attempt to reconnect to the same IP address
 				attemptConnectionToServer(ipAddress);
-				std::this_thread::sleep_for(std::chrono::nanoseconds(1s));
+				std::this_thread::sleep_for(std::chrono::seconds(1));
 			}
 			// I dunno what to do if failure
 #endif

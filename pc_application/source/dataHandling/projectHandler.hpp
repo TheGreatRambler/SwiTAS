@@ -2,17 +2,23 @@
 
 #include <fstream>
 #include <rapidjson/document.h>
+#include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
-#include <rapidjson/writer.h>
 #include <wx/dir.h>
 #include <wx/dirdlg.h>
+#include <wx/filename.h>
 #include <wx/grid.h>
-#include <wx/richtext/richtextctrl.h>
+#include <wx/listbox.h>
+#include <wx/mstream.h>
+#include <wx/stdpaths.h>
+#include <wx/wfstream.h>
 #include <wx/wx.h>
+#include <wx/zstream.h>
 
+#include "../../sharedNetworkCode/serializeUnserializeData.hpp"
 #include "dataProcessing.hpp"
 
-class ProjectHandler : public wxFrame {
+class ProjectHandler : public wxDialog {
 private:
 	// Add directory of project, project name, various other info
 	// This will handle opening a directory chooser at the beginning of each session
@@ -20,21 +26,35 @@ private:
 	// Probably having a list of the recent projects as well
 	// Store recent projects in mainSettings.json
 	wxBoxSizer* mainSizer;
-	wxRichTextCtrl* projectList;
+	wxListBox* projectList;
 
 	DataProcessing* dataProcessing;
 
 	wxDir projectDir;
+	SerializeProtocol serializeProtocol;
+	bool projectChosen = false;
+
+	const wxString createNewProjectText = "Create New Project";
+
+	static constexpr int compressionLevel = 7;
 
 	// Main settings variable
-	rapidjson::Document mainSettings;
+	rapidjson::Document* mainSettings;
 
-	void getGlobalSettings();
-
-	void onClickProject(wxTextUrlEvent& event);
+	void onClickProject(wxCommandEvent& event);
 
 public:
-	ProjectHandler(DataProcessing* dataProcessingInstance);
+	ProjectHandler(DataProcessing* dataProcessingInstance, rapidjson::Document* settings);
 
+	void loadProject();
 	void saveProject();
+
+	// Created if no project is chosen
+	void createTempProjectDir();
+
+	bool wasProjectChosen() {
+		return projectChosen;
+	}
+
+	~ProjectHandler();
 };

@@ -16,6 +16,7 @@
 
 #include "../dataHandling/buttonData.hpp"
 #include "../dataHandling/dataProcessing.hpp"
+#include "../dataHandling/projectHandler.hpp"
 #include "../helpers.hpp"
 #include "bottomUI.hpp"
 #include "sideUI.hpp"
@@ -30,6 +31,9 @@ private:
 
 	// Button data variable
 	std::shared_ptr<ButtonData> buttonData;
+
+	// Project handler, creates projects and saves them
+	ProjectHandler* projectHandler;
 
 	// The pointers to the classes containing the uis
 	std::shared_ptr<SideUI> sideUI;
@@ -66,6 +70,13 @@ public:
 	}
 
 	void onIdle(wxIdleEvent& event);
+
+	// Called by wxApp
+	void onStart();
+
+	void onClose(wxCloseEvent& event);
+
+	//~MainWindow();
 
 	DECLARE_EVENT_TABLE();
 };

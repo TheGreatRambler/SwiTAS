@@ -126,6 +126,10 @@ public:
 	void createSavestateHookHere();
 	void runFrame();
 
+	std::vector<std::shared_ptr<ControllerData>>* getInputsList() {
+		return &inputsList;
+	}
+
 	std::shared_ptr<ControllerData> getCurrentFrame() {
 		return currentData;
 	}

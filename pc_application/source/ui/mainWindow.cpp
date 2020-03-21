@@ -68,6 +68,18 @@ MainWindow::MainWindow()
 	// Override the keypress handler
 	// add_events(Gdk::KEY_PRESS_MASK);
 	handlePreviousWindowTransform();
+
+	projectHandler = new ProjectHandler(dataProcessingInstance, &mainSettings);
+}
+
+void MainWindow::onStart() {
+	// Now, open the choose project dialog
+	// TODO open this in wxApp because it apparently doesn't work in the constructor
+	projectHandler->ShowModal();
+	if(!projectHandler->wasProjectChosen()) {
+		// Generate a temp one
+		projectHandler->createTempProjectDir();
+	}
 }
 
 // clang-format off
@@ -75,6 +87,7 @@ BEGIN_EVENT_TABLE(MainWindow, wxFrame)
 	EVT_CHAR_HOOK(MainWindow::keyDownHandler)
 	EVT_SIZE(MainWindow::OnSize)
     EVT_IDLE(MainWindow::onIdle)
+	EVT_CLOSE(MainWindow::onClose)
 END_EVENT_TABLE()
 // clang-format on
 
@@ -167,4 +180,11 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 			}
 		}
 	}
+}
+
+void MainWindow::onClose(wxCloseEvent& event) {
+	// Close project dialog and save
+	projectHandler->saveProject();
+	projectHandler->Destroy();
+	Destroy();
 }

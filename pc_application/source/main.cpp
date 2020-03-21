@@ -14,9 +14,8 @@ public:
 	virtual bool OnInit() {
 		puts("App starting");
 		window.Show(true);
-		SetTopWindow(&window);
 		puts("Window opened");
-
+		window.onStart();
 		return true;
 	}
 
