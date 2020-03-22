@@ -63,8 +63,7 @@ void ProjectHandler::onClickProject(wxCommandEvent& event) {
 }
 
 void ProjectHandler::loadProject() {
-	wxFileName inputsFileName;
-	inputsFileName.AppendDir(projectDir.GetNameWithSep());
+	wxFileName inputsFileName = wxFileName::DirName(projectDir.GetNameWithSep());
 	inputsFileName.SetName("inputs");
 	inputsFileName.SetExt("bin");
 
@@ -77,11 +76,27 @@ void ProjectHandler::loadProject() {
 		dataStream.Write(inputsDecompressStream);
 		inputsFileStream.Close();
 		wxStreamBuffer* streamBuffer = dataStream.GetOutputStreamBuffer();
+		uint8_t* bufferPointer       = (uint8_t*)streamBuffer->GetBufferStart();
+		std::size_t bufferSize       = streamBuffer->GetBufferSize();
 
 		std::vector<std::shared_ptr<ControllerData>>* inputsList = dataProcessing->getInputsList();
 
-		// Set DataProcessing to the data found here
-		serializeProtocol.binaryToData<std::vector<std::shared_ptr<ControllerData>>>(*inputsList, (uint8_t*)streamBuffer->GetBufferStart(), streamBuffer->GetBufferSize());
+		// Loop through each part and unserialize it
+		// This is 0% endian safe
+		std::size_t sizeRead = 0;
+		while(sizeRead != bufferSize) {
+			// Find the size part first
+			uint8_t sizeOfControllerData = bufferPointer[sizeRead];
+			sizeRead += sizeof(sizeOfControllerData);
+			// Load the data
+			std::shared_ptr<ControllerData> controllerData = std::make_shared<ControllerData>();
+
+			serializeProtocol.binaryToData<ControllerData>(*controllerData, &bufferPointer[sizeRead], sizeOfControllerData);
+			// For now, just add each frame one at a time, no optimization
+			inputsList->push_back(controllerData);
+
+			sizeRead += sizeOfControllerData;
+		}
 	}
 }
 
@@ -90,19 +105,25 @@ void ProjectHandler::saveProject() {
 	// Serialize the entire vector, first of all, with ZPP
 	std::vector<std::shared_ptr<ControllerData>>* inputsList = dataProcessing->getInputsList();
 
-	uint8_t* data;
-	std::size_t dataSize;
-	serializeProtocol.dataToBinary<std::vector<std::shared_ptr<ControllerData>>>(*inputsList, &data, &dataSize);
-
-	wxFileName inputsFileName;
-	inputsFileName.AppendDir(projectDir.GetNameWithSep());
+	wxFileName inputsFileName = wxFileName::DirName(projectDir.GetNameWithSep());
 	inputsFileName.SetName("inputs");
 	inputsFileName.SetExt("bin");
 
 	// Delete file if already present and use binary mode
 	wxFFileStream inputsFileStream(inputsFileName.GetFullPath(), "wb");
 	wxZlibOutputStream inputsCompressStream(inputsFileStream, compressionLevel, wxZLIB_ZLIB | wxZLIB_NO_HEADER);
-	inputsCompressStream.WriteAll(data, dataSize);
+
+	// Kinda annoying, but actually break up the vector and add each part with the size
+	for(auto const& controllerData : *inputsList) {
+		uint8_t* data;
+		std::size_t dataSize;
+		serializeProtocol.dataToBinary<ControllerData>(*controllerData, &data, &dataSize);
+		uint8_t sizeToPrint = (uint8_t)dataSize;
+		// Probably endian issues
+		inputsCompressStream.WriteAll(&sizeToPrint, sizeof(sizeToPrint));
+		inputsCompressStream.WriteAll(data, dataSize);
+	}
+
 	inputsCompressStream.Sync();
 	inputsFileStream.Close();
 

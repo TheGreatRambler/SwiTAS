@@ -75,11 +75,13 @@ MainWindow::MainWindow()
 void MainWindow::onStart() {
 	// Now, open the choose project dialog
 	// TODO open this in wxApp because it apparently doesn't work in the constructor
+	Hide();
 	projectHandler->ShowModal();
 	if(!projectHandler->wasProjectChosen()) {
 		// Generate a temp one
 		projectHandler->createTempProjectDir();
 	}
+	Show();
 }
 
 // clang-format off

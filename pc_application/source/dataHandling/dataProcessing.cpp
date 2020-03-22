@@ -45,15 +45,12 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	currentImageFrame = 0;
 	// Set the current frame to the first
 	// One frame needs to be added at the very beginning
+	// Heck, I hate segfaults
 	addNewFrame();
 	setCurrentFrame(0);
 
 	// Set item attributes for nice colors
 	setItemAttributes();
-	// Add a few frame
-	for(uint8_t i = 0; i < 30; i++) {
-		addNewFrame();
-	}
 
 	// Create keyboard handlers
 	// Each menu item is added here
@@ -186,7 +183,7 @@ void DataProcessing::OnEraseBackground(wxEraseEvent& event) {
 	// to prevent flickering, erase only content *outside* of the
 	// actual list items stuff
 
-	if(GetItemCount() > 0) {
+	if(GetItemCount() != 0) {
 		wxDC* dc = event.GetDC();
 		assert(dc);
 
