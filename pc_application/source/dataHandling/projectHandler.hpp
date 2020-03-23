@@ -34,6 +34,10 @@ private:
 	SerializeProtocol serializeProtocol;
 	bool projectChosen = false;
 
+	std::string projectName;
+
+	int recentProjectChoice;
+
 	const wxString createNewProjectText = "Create New Project";
 
 	static constexpr int compressionLevel = 7;
@@ -54,6 +58,10 @@ public:
 
 	bool wasProjectChosen() {
 		return projectChosen;
+	}
+
+	void setProjectName(std::string name) {
+		projectName = name;
 	}
 
 	~ProjectHandler();

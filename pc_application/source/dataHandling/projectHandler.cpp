@@ -42,19 +42,24 @@ ProjectHandler::ProjectHandler(DataProcessing* dataProcessingInstance, rapidjson
 }
 
 void ProjectHandler::onClickProject(wxCommandEvent& event) {
-	wxString selectedProject = event.GetString();
-	if(selectedProject == createNewProjectText) {
+	rapidjson::GenericArray<false, rapidjson::Value> recentProjectsArray = (*mainSettings)["recentProjects"].GetArray();
+	int selectedProject                                                  = event.GetInt();
+	if(selectedProject == recentProjectsArray.Size()) {
 		// Open up a new project dialog
 		wxDirDialog dlg(NULL, "Choose Project Directory", "", wxDD_DEFAULT_STYLE);
 		if(dlg.ShowModal() == wxID_OK) {
 			// Directory chosen
 			projectDir.Open(dlg.GetPath());
-			projectChosen = true;
+			recentProjectChoice = -1;
+			projectName         = "Unnamed";
+			projectChosen       = true;
 			Close(true);
 		}
 	} else {
 		// It's a project folder
-		projectDir.Open(selectedProject);
+		projectDir.Open(recentProjectsArray[selectedProject]["projectDirectory"].GetString());
+		recentProjectChoice = selectedProject;
+		projectName         = std::string(recentProjectsArray[selectedProject]["projectName"].GetString());
 		// Fill up the data found here
 		loadProject();
 		projectChosen = true;
@@ -69,12 +74,13 @@ void ProjectHandler::loadProject() {
 
 	if(inputsFileName.FileExists()) {
 		// Load up the inputs
-		wxFFileStream inputsFileStream(inputsFileName.GetFullPath(), "rb");
+		wxString filename = inputsFileName.GetFullPath();
+		wxFFileInputStream inputsFileStream(filename, "rb");
 		wxZlibInputStream inputsDecompressStream(inputsFileStream, wxZLIB_ZLIB | wxZLIB_NO_HEADER);
 
 		wxMemoryOutputStream dataStream;
 		dataStream.Write(inputsDecompressStream);
-		inputsFileStream.Close();
+
 		wxStreamBuffer* streamBuffer = dataStream.GetOutputStreamBuffer();
 		uint8_t* bufferPointer       = (uint8_t*)streamBuffer->GetBufferStart();
 		std::size_t bufferSize       = streamBuffer->GetBufferSize();
@@ -110,7 +116,8 @@ void ProjectHandler::saveProject() {
 	inputsFileName.SetExt("bin");
 
 	// Delete file if already present and use binary mode
-	wxFFileStream inputsFileStream(inputsFileName.GetFullPath(), "wb");
+	wxString filename = inputsFileName.GetFullPath();
+	wxFFileOutputStream inputsFileStream(filename, "wb");
 	wxZlibOutputStream inputsCompressStream(inputsFileStream, compressionLevel, wxZLIB_ZLIB | wxZLIB_NO_HEADER);
 
 	// Kinda annoying, but actually break up the vector and add each part with the size
@@ -126,8 +133,44 @@ void ProjectHandler::saveProject() {
 
 	inputsCompressStream.Sync();
 	inputsFileStream.Close();
+	inputsCompressStream.Close();
 
-	// For now, that's it
+	rapidjson::GenericArray<false, rapidjson::Value> recentProjectsArray = (*mainSettings)["recentProjects"].GetArray();
+	// Add to recent projects list if not yet there, otherwise modify
+	if(recentProjectChoice == -1) {
+		// Add new
+		rapidjson::Value newRecentProject(rapidjson::kObjectType);
+
+		rapidjson::Value name;
+		name.SetString(projectName.c_str(), strlen(projectName.c_str()), mainSettings->GetAllocator());
+
+		rapidjson::Value directory;
+		wxString dirString = projectDir.GetNameWithSep();
+		directory.SetString(dirString.mb_str(), dirString.length(), mainSettings->GetAllocator());
+
+		newRecentProject.AddMember("projectDirectory", directory, mainSettings->GetAllocator());
+		newRecentProject.AddMember("projectName", name, mainSettings->GetAllocator());
+
+		// I think it's a reference, not sure
+		recentProjectsArray.PushBack(newRecentProject, mainSettings->GetAllocator());
+	} else {
+		// Modify existing values
+		wxString dirString = projectDir.GetNameWithSep();
+		recentProjectsArray[recentProjectChoice]["projectDirectory"].SetString(dirString.c_str(), dirString.length(), mainSettings->GetAllocator());
+
+		recentProjectsArray[recentProjectChoice]["projectName"].SetString(projectName.c_str(), projectName.size(), mainSettings->GetAllocator());
+	}
+
+	// Additionally, save the mainSettings and overwrite
+	wxFFileOutputStream settingsFileStream("../mainSettings.json", "w");
+
+	rapidjson::StringBuffer sb;
+	rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
+	writer.SetIndent('\t', 1);
+	mainSettings->Accept(writer);
+
+	settingsFileStream.WriteAll(sb.GetString(), sb.GetLength());
+	settingsFileStream.Close();
 }
 
 void ProjectHandler::createTempProjectDir() {
@@ -139,15 +182,4 @@ void ProjectHandler::createTempProjectDir() {
 	dir.Mkdir();
 }
 
-ProjectHandler::~ProjectHandler() {
-	// Write JSON settings
-	wxFFileStream inputsFileStream("../mainSettings.json", "w");
-
-	rapidjson::StringBuffer sb;
-	rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
-	writer.SetIndent('\t', 1);
-	mainSettings->Accept(writer);
-
-	inputsFileStream.WriteAll(sb.GetString(), sb.GetLength());
-	inputsFileStream.Close();
-}
+ProjectHandler::~ProjectHandler() {}

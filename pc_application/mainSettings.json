@@ -1,17 +1,4 @@
 {
-	/*
-	https://www.tablesgenerator.com/text_tables
-	     0   1    2    3   4  5   6   7   8    9  10
-	  +----+---+----+----+---+--+---+---+----+---+---+
-	0 | LS |   | ZL | L  |   |  |   | R | ZR |   |   |
-	  +----+---+----+----+---+--+---+---+----+---+---+
-	1 |    | ^ |    | -  |   |  |   | + |    | X |   |
-	  +----+---+----+----+---+--+---+---+----+---+---+
-	2 | <  |   | >  |    | C |  | H |   | Y  |   | A |
-	  +----+---+----+----+---+--+---+---+----+---+---+
-	3 |    | v |    | RS |   |  |   |   |    | B |   |
-	  +----+---+----+----+---+--+---+---+----+---+---+
-	  */
 	"buttons": {
 		"A": {
 			"normalName": "A",
@@ -224,7 +211,6 @@
 		"imageHeight": 65
 	},
 	"joystickMappings": {
-		// Mapping for Xbox360 controller, but it's actually a pro controller
 		"0x45E,0x28E": "A:b2,B:b1,X:b4,Y:b3,L:b5,R:b6,PLUS:b8,MINUS:b7,LS:b9,RS:b10,DUP:h0.1,DDOWN:h0.4,DLEFT:h0.8,DRIGHT:h0.2,LSX:a0+,LSY:a1-,RSX:a4+,RSY:a3-,ZL:a2-,ZR:a2-"
 	},
 	"programIcon": "share/icons/nxtas/logo/main.png",

@@ -591,64 +591,68 @@ void BottomUI::listenToJoystick() {
 }
 
 void BottomUI::onLeftJoystickLock(wxCommandEvent& event) {
-	for(int i = 0; i < currentJoy->GetNumberAxes(); i++) {
-		// Range should be from -32768 to +32768 or 0 to +65535
-		// Ranges should be the same for all axis
-		int axisMin = currentJoy->GetXMin();
-		int axisMax = currentJoy->GetXMax();
-		// Automatically floors
-		int axisMiddle = (axisMin + axisMax) / 2;
-		int axisValue  = currentJoy->GetPosition(i);
+	if(currentJoyDefined) {
+		for(int i = 0; i < currentJoy->GetNumberAxes(); i++) {
+			// Range should be from -32768 to +32768 or 0 to +65535
+			// Ranges should be the same for all axis
+			int axisMin = currentJoy->GetXMin();
+			int axisMax = currentJoy->GetXMax();
+			// Automatically floors
+			int axisMiddle = (axisMin + axisMax) / 2;
+			int axisValue  = currentJoy->GetPosition(i);
 
-		// Normalize to 1, then multiply by the range
-		int32_t normalizedAxisValue = ((float)(axisValue - axisMiddle) / (float)(axisMax - axisMiddle)) * ButtonData::axisMax;
+			// Normalize to 1, then multiply by the range
+			int32_t normalizedAxisValue = ((float)(axisValue - axisMiddle) / (float)(axisMax - axisMiddle)) * ButtonData::axisMax;
 
-		// Flip if needed
-		if(!axisDirection[i]) {
-			normalizedAxisValue *= -1;
-		}
+			// Flip if needed
+			if(!axisDirection[i]) {
+				normalizedAxisValue *= -1;
+			}
 
-		if(leftStickAxis.count(i)) {
-			// This is the right axis
-			int axisID = leftStickAxis[i];
-			if(axisID == 0) {
-				// LSX
-				leftJoystickDrawer->setXValue(normalizedAxisValue);
-			} else if(axisID == 1) {
-				// LSY
-				leftJoystickDrawer->setYValue(normalizedAxisValue);
+			if(leftStickAxis.count(i)) {
+				// This is the right axis
+				int axisID = leftStickAxis[i];
+				if(axisID == 0) {
+					// LSX
+					leftJoystickDrawer->setXValue(normalizedAxisValue);
+				} else if(axisID == 1) {
+					// LSY
+					leftJoystickDrawer->setYValue(normalizedAxisValue);
+				}
 			}
 		}
 	}
 }
 
 void BottomUI::onRightJoystickLock(wxCommandEvent& event) {
-	for(int i = 0; i < currentJoy->GetNumberAxes(); i++) {
-		// Range should be from -32768 to +32768 or 0 to +65535
-		// Ranges should be the same for all axis
-		int axisMin = currentJoy->GetXMin();
-		int axisMax = currentJoy->GetXMax();
-		// Automatically floors
-		int axisMiddle = (axisMin + axisMax) / 2;
-		int axisValue  = currentJoy->GetPosition(i);
+	if(currentJoyDefined) {
+		for(int i = 0; i < currentJoy->GetNumberAxes(); i++) {
+			// Range should be from -32768 to +32768 or 0 to +65535
+			// Ranges should be the same for all axis
+			int axisMin = currentJoy->GetXMin();
+			int axisMax = currentJoy->GetXMax();
+			// Automatically floors
+			int axisMiddle = (axisMin + axisMax) / 2;
+			int axisValue  = currentJoy->GetPosition(i);
 
-		// Normalize to 1, then multiply by the range
-		int32_t normalizedAxisValue = ((float)(axisValue - axisMiddle) / (float)(axisMax - axisMiddle)) * ButtonData::axisMax;
+			// Normalize to 1, then multiply by the range
+			int32_t normalizedAxisValue = ((float)(axisValue - axisMiddle) / (float)(axisMax - axisMiddle)) * ButtonData::axisMax;
 
-		// Flip if needed
-		if(!axisDirection[i]) {
-			normalizedAxisValue *= -1;
-		}
+			// Flip if needed
+			if(!axisDirection[i]) {
+				normalizedAxisValue *= -1;
+			}
 
-		if(rightStickAxis.count(i)) {
-			// This is the right axis
-			int axisID = rightStickAxis[i];
-			if(axisID == 2) {
-				// RSX
-				rightJoystickDrawer->setXValue(normalizedAxisValue);
-			} else if(axisID == 3) {
-				// RSY
-				rightJoystickDrawer->setYValue(normalizedAxisValue);
+			if(rightStickAxis.count(i)) {
+				// This is the right axis
+				int axisID = rightStickAxis[i];
+				if(axisID == 2) {
+					// RSX
+					rightJoystickDrawer->setXValue(normalizedAxisValue);
+				} else if(axisID == 3) {
+					// RSY
+					rightJoystickDrawer->setYValue(normalizedAxisValue);
+				}
 			}
 		}
 	}
