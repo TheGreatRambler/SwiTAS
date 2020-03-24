@@ -4,6 +4,7 @@
 
 #include <cmath>
 #include <numeric>
+#include <rapidjson/document.h>
 #include <sstream>
 #include <string>
 #include <unistd.h>
@@ -17,7 +18,7 @@ namespace HELPERS {
 	std::vector<std::string> splitString(const std::string s, char delim);
 	std::string joinString(std::vector<std::string> strings, std::string delimiter);
 
-	wxBitmapButton* getBitmapButton(wxFrame* parentFrame, std::string path, int width, int height);
+	wxBitmapButton* getBitmapButton(wxWindow* parentFrame, rapidjson::Document* settings, const char* name);
 
 	float normalizeRadian(float angle);
 }

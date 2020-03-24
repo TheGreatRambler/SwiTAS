@@ -101,7 +101,7 @@ JoystickCanvas::JoystickCanvas(rapidjson::Document* settings, wxFrame* parent, D
 	yInput                     = new wxSpinCtrl(parent);
 	canGoOutsideCircleCheckbox = new wxCheckBox(parent, wxID_ANY, wxEmptyString);
 
-	lockButton = HELPERS::getBitmapButton(parent, HELPERS::resolvePath((*mainSettings)["ui"]["joystickLockButton"].GetString()), (*mainSettings)["ui"]["buttonWidth"].GetInt(), (*mainSettings)["ui"]["buttonHeight"].GetInt());
+	lockButton = HELPERS::getBitmapButton(parent, mainSettings, "joystickLockButton");
 
 	xInput->Bind(wxEVT_COMMAND_SPINCTRL_UPDATED, &JoystickCanvas::xValueSet, this);
 	yInput->Bind(wxEVT_COMMAND_SPINCTRL_UPDATED, &JoystickCanvas::yValueSet, this);

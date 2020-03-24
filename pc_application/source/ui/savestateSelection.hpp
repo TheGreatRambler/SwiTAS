@@ -5,10 +5,11 @@
 #include <wx/utils.h>
 #include <wx/wx.h>
 
+#include "../helpers.hpp"
 #include "drawingCanvas.hpp"
 
 // This class handles both opening up a savestate and creating the first savestate
-class SavestateSelection : public wxFrame {
+class SavestateSelection : public wxDialog {
 private:
 	wxBoxSizer* imageSizer;
 	wxBoxSizer* buttonSizer;
@@ -16,8 +17,15 @@ private:
 
 	rapidjson::Document* mainSettings;
 
-	// Used to block input to everything while this is open
-	wxWindowDisabler* windowDisabler;
+	// All the buttons
+	wxBitmapButton* playButton;
+	wxBitmapButton* pauseButton;
+	wxBitmapButton* frameAdvanceButton;
+	wxBitmapButton* okButton;
+
+	// Canvases for showing the frames
+	DrawingCanvasBitmap* currentFrame;
+	DrawingCanvasBitmap* goalFrame;
 
 	// Will be set if the dialog is supposed to load savestates, not create the first one
 	bool savestateLoadDialog;
@@ -29,22 +37,15 @@ private:
 
 	void onIdle(wxIdleEvent& event);
 
+	void onPlay(wxCommandEvent& event);
+	void onPause(wxCommandEvent& event);
+	void onFrameAdvance(wxCommandEvent& event);
+	void onOk(wxCommandEvent& event);
+
 public:
 	SavestateSelection(rapidjson::Document* settings, bool isSavestateLoadDialog);
 
-	void open() {
-		// This exists apparently
-		// https://docs.wxwidgets.org/3.0/classwx_window.html#a596b1715edfc7609f352b2e000ecbaec
-		Show();
-		// Disable every window but ourselves
-		windowDisabler = new wxWindowDisabler(this);
-	}
-
-	void close() {
-		Hide();
-		// Deleting the window disabler enables all other windows
-		delete windowDisabler;
-	}
+	// Will use ShowModel for this, act like a normal wxDialog
 
 	DECLARE_EVENT_TABLE();
 };

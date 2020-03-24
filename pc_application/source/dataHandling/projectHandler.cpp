@@ -17,7 +17,7 @@ ProjectHandler::ProjectHandler(DataProcessing* dataProcessingInstance, rapidjson
 	std::size_t listboxIndex = 0;
 
 	for(auto const& recentProject : recentProjectsArray) {
-		wxString recentProjectItem = wxString::Format("%s %s", wxString::FromUTF8(recentProject["projectName"].GetString()), wxString::FromUTF8(recentProject["projectDirectory"].GetString()));
+		wxString recentProjectItem = wxString::Format("%s - %s", wxString::FromUTF8(recentProject["projectName"].GetString()), wxString::FromUTF8(recentProject["projectDirectory"].GetString()));
 		listboxItems[listboxIndex] = recentProjectItem;
 		listboxIndex++;
 	}
@@ -87,6 +87,9 @@ void ProjectHandler::loadProject() {
 
 		std::vector<std::shared_ptr<ControllerData>>* inputsList = dataProcessing->getInputsList();
 
+		// Technically, there's one item in there. Remove it
+		inputsList->clear();
+
 		// Loop through each part and unserialize it
 		// This is 0% endian safe
 		std::size_t sizeRead = 0;
@@ -103,6 +106,10 @@ void ProjectHandler::loadProject() {
 
 			sizeRead += sizeOfControllerData;
 		}
+
+		// Set the new size and refresh
+		dataProcessing->SetItemCount(inputsList->size());
+		dataProcessing->Refresh();
 	}
 }
 
@@ -132,8 +139,8 @@ void ProjectHandler::saveProject() {
 	}
 
 	inputsCompressStream.Sync();
-	inputsFileStream.Close();
 	inputsCompressStream.Close();
+	inputsFileStream.Close();
 
 	rapidjson::GenericArray<false, rapidjson::Value> recentProjectsArray = (*mainSettings)["recentProjects"].GetArray();
 	// Add to recent projects list if not yet there, otherwise modify

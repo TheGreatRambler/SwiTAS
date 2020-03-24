@@ -47,6 +47,7 @@ private:
 	wxMenuBar* menuBar;
 	// Menubar menus
 	wxWindowID selectIPID;
+	wxWindowID setNameID;
 
 	void handlePreviousWindowTransform();
 

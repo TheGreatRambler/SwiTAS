@@ -8,7 +8,7 @@ private:
 	wxColor backgroundColor;
 
 public:
-	DrawingCanvas(wxFrame* parent, wxSize size);
+	DrawingCanvas(wxWindow* parent, wxSize size);
 
 	// To be overriden
 	virtual void draw(wxDC& dc) = 0;
@@ -20,9 +20,9 @@ public:
 	void PaintBackground(wxDC& dc);
 
 	// Empty implementation, to prevent flicker
-			void OnEraseBackground(wxEraseEvent& event);
+	void OnEraseBackground(wxEraseEvent& event);
 
-			void setBackgroundColor(wxColor color);
+	void setBackgroundColor(wxColor color);
 
 	DECLARE_EVENT_TABLE();
 };
@@ -33,7 +33,7 @@ private:
 	wxBitmap* bitmap;
 
 public:
-	DrawingCanvasBitmap(wxFrame* parent, wxSize size);
+	DrawingCanvasBitmap(wxWindow* parent, wxSize size);
 
 	void draw(wxDC& dc) override;
 
