@@ -148,7 +148,9 @@ void MainWindow::addMenuBar() {
 	wxMenu* fileMenu = new wxMenu();
 
 	selectIPID = NewControlId();
+	setNameID  = NewControlId();
 	fileMenu->Append(selectIPID, "&Server");
+	fileMenu->Append(setNameID, "&Set Name");
 	// Add joystick submenu
 	bottomUI->addJoystickMenu(fileMenu);
 
@@ -172,6 +174,7 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 		// Send straight to bottomUI
 		bottomUI->onJoystickSelect(commandEvent);
 	} else {
+		// No switch statements for me
 		if(id == selectIPID) {
 			// IP needs to be selected
 			wxString ipAddress = wxGetTextFromUser("Please enter IP address of Nintendo Switch", "Server connect", wxEmptyString);
@@ -179,6 +182,12 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 				// IP address entered
 				SetStatusText(ipAddress + ":" + std::to_string(SERVER_PORT), 0);
 				networkInstance->attemptConnectionToServer(ipAddress.ToStdString());
+			}
+		} else if(id == setNameID) {
+			// Name needs to be selected
+			wxString projectName = wxGetTextFromUser("Please set the new name of the project", "Set name", projectHandler->getProjectName());
+			if(!projectName.empty()) {
+				projectHandler->setProjectName(projectName.ToStdString());
 			}
 		}
 	}

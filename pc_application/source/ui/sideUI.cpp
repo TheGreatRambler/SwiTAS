@@ -89,11 +89,11 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* 
 	frameDrawer = new FrameCanvas(parentFrame, inputData);
 	frameDrawer->setBackgroundColor(*wxLIGHT_GREY);
 
-	addFrameButton = HELPERS::getBitmapButton(parentFrame, HELPERS::resolvePath((*mainSettings)["ui"]["addFrameButton"].GetString()), (*mainSettings)["ui"]["buttonWidth"].GetInt(), (*mainSettings)["ui"]["buttonHeight"].GetInt());
+	addFrameButton = HELPERS::getBitmapButton(parentFrame, mainSettings, "addFrameButton");
 
-	frameAdvanceButton = HELPERS::getBitmapButton(parentFrame, HELPERS::resolvePath((*mainSettings)["ui"]["frameAdvanceButton"].GetString()), (*mainSettings)["ui"]["buttonWidth"].GetInt(), (*mainSettings)["ui"]["buttonHeight"].GetInt());
+	frameAdvanceButton = HELPERS::getBitmapButton(parentFrame, mainSettings, "frameAdvanceButton");
 
-	savestateHookButton = HELPERS::getBitmapButton(parentFrame, HELPERS::resolvePath((*mainSettings)["ui"]["savestateHookButton"].GetString()), (*mainSettings)["ui"]["buttonWidth"].GetInt(), (*mainSettings)["ui"]["buttonHeight"].GetInt());
+	savestateHookButton = HELPERS::getBitmapButton(parentFrame, mainSettings, "savestateHookButton");
 
 	// Button handlers
 	addFrameButton->Bind(wxEVT_BUTTON, &SideUI::onAddFramePressed, this);

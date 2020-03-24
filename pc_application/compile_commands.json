@@ -310,5 +310,29 @@
    "bin/../sharedNetworkCode/thirdParty/clsocket/SimpleSocket.cpp.o"
   ],
   "file": "../sharedNetworkCode/thirdParty/clsocket/SimpleSocket.cpp"
+ },
+ {
+  "directory": "C:\\Users\\aehar\\Desktop\\projects\\VSC_Projects\\NX-TAS-UI\\pc_application",
+  "arguments": [
+   "x86_64-w64-mingw32-g++",
+   "-Wall",
+   "-Wno-maybe-uninitialized",
+   "-ggdb",
+   "-m64",
+   "-DCLIENT_IMP",
+   "-Og",
+   "-g",
+   "-std=gnu++17",
+   "-IC:/msys2/mingw64/lib/wx/include/msw-unicode-static-3.1",
+   "-IC:/msys2/mingw64/include/wx-3.1",
+   "-D_FILE_OFFSET_BITS=64",
+   "-D__WXMSW__",
+   "-I./include",
+   "-c",
+   "source/ui/savestateSelection.cpp",
+   "-o",
+   "bin/./source/ui/savestateSelection.cpp.o"
+  ],
+  "file": "source/ui/savestateSelection.cpp"
  }
 ]

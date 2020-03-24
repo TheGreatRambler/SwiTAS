@@ -1,6 +1,6 @@
 #include "drawingCanvas.hpp"
 
-DrawingCanvas::DrawingCanvas(wxFrame* parent, wxSize size)
+DrawingCanvas::DrawingCanvas(wxWindow* parent, wxSize size)
 	: wxWindow(parent, wxID_ANY, wxDefaultPosition, size, wxFULL_REPAINT_ON_RESIZE) {}
 
 void DrawingCanvas::draw(wxDC& dc) {}
@@ -34,7 +34,7 @@ BEGIN_EVENT_TABLE(DrawingCanvas, wxWindow)
 END_EVENT_TABLE()
 // clang-format on
 
-DrawingCanvasBitmap::DrawingCanvasBitmap(wxFrame* parent, wxSize size)
+DrawingCanvasBitmap::DrawingCanvasBitmap(wxWindow* parent, wxSize size)
 	: DrawingCanvas(parent, size) {
 	// Just create an empty bitmap of the right size
 	bitmap = new wxBitmap(size);

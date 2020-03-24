@@ -64,5 +64,9 @@ public:
 		projectName = name;
 	}
 
+	std::string getProjectName() {
+		return projectName;
+	}
+
 	~ProjectHandler();
 };
