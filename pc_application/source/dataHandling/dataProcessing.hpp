@@ -20,6 +20,7 @@
 #include <wx/wx.h>
 
 #include "../../sharedNetworkCode/networkInterface.hpp"
+#include "../ui/savestateSelection.hpp"
 #include "buttonData.hpp"
 
 class DataProcessing : public wxListCtrl {
@@ -42,6 +43,10 @@ private:
 	FrameNum currentImageFrame;
 
 	wxImageList imageList;
+
+	// First savestate hook creation, then savestate loader
+	SavestateSelection* firstSavestateHookCreator;
+	SavestateSelection* savestateHookLoader;
 
 	// Using callbacks for inputs
 	std::function<void()> inputCallback;

@@ -10,6 +10,17 @@ SavestateSelection::SavestateSelection(rapidjson::Document* settings, bool isSav
 	buttonSizer = new wxBoxSizer(wxHORIZONTAL);
 	fullSizer   = new wxBoxSizer(wxVERTICAL);
 
+	leftImageSizer  = new wxBoxSizer(wxVERTICAL);
+	rightImageSizer = new wxBoxSizer(wxVERTICAL);
+
+	leftDHash  = new wxStaticText(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
+	rightDHash = new wxStaticText(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
+
+	hammingDistance = new wxStaticText(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
+
+	// To set the text, just use:
+	// leftDHash->SetLabelText(aString);
+
 	// Fill sizers
 	// Have to have play, pause and frame advance buttons
 	// Look to mainWindow for setting sizers
@@ -31,9 +42,25 @@ SavestateSelection::SavestateSelection(rapidjson::Document* settings, bool isSav
 		goalFrame = new DrawingCanvasBitmap(this, wxSize(1280, 720));
 	}
 
-	imageSizer->Add(currentFrame, 0, wxSHAPED | wxEXPAND);
+	leftImageSizer->Add(currentFrame, 0, wxSHAPED | wxEXPAND);
+
 	if(savestateLoadDialog) {
-		imageSizer->Add(goalFrame, 0, wxSHAPED | wxEXPAND);
+		// Dhashes are only used in loading, not creating the first one
+		leftImageSizer->Add(leftDHash, 1, wxEXPAND | wxALL);
+
+		rightImageSizer->Add(goalFrame, 0, wxSHAPED | wxEXPAND);
+		rightImageSizer->Add(rightDHash, 1, wxEXPAND | wxALL);
+	}
+
+	imageSizer->Add(leftImageSizer, 1, wxEXPAND | wxALL);
+	if(savestateLoadDialog) {
+		imageSizer->Add(rightImageSizer, 1, wxEXPAND | wxALL);
+	}
+
+	fullSizer->Add(imageSizer, 1, wxEXPAND | wxALL);
+
+	if(savestateLoadDialog) {
+		fullSizer->Add(hammingDistance, 1, wxEXPAND | wxALL);
 	}
 
 	buttonSizer->Add(playButton, 1);
@@ -41,7 +68,6 @@ SavestateSelection::SavestateSelection(rapidjson::Document* settings, bool isSav
 	buttonSizer->Add(frameAdvanceButton, 1);
 	buttonSizer->Add(okButton, 1);
 
-	fullSizer->Add(imageSizer, 1, wxEXPAND | wxALL);
 	fullSizer->Add(buttonSizer, 1, wxEXPAND | wxALL);
 
 	SetSizer(fullSizer);
@@ -51,6 +77,8 @@ SavestateSelection::SavestateSelection(rapidjson::Document* settings, bool isSav
 	Center(wxBOTH);
 
 	Layout();
+
+	// When done with all the stuff, close with Close(true);
 }
 
 // clang-format off
@@ -65,7 +93,18 @@ void SavestateSelection::onIdle(wxIdleEvent& event) {
 	}
 }
 
-void SavestateSelection::onPlay(wxCommandEvent& event) {}
-void SavestateSelection::onPause(wxCommandEvent& event) {}
-void SavestateSelection::onFrameAdvance(wxCommandEvent& event) {}
-void SavestateSelection::onOk(wxCommandEvent& event) {}
+void SavestateSelection::onPlay(wxCommandEvent& event) {
+	// Trigger automatic playing
+}
+void SavestateSelection::onPause(wxCommandEvent& event) {
+	// Stop automatic playing
+}
+void SavestateSelection::onFrameAdvance(wxCommandEvent& event) {
+	// Send blank input for a single frame then recieve JPEG buffer
+	// Set the dHash for the currentFrame and calc the hamming distance
+}
+void SavestateSelection::onOk(wxCommandEvent& event) {
+	// Use this frame as the savestate
+	operationSuccessful = true;
+	Close(true);
+}

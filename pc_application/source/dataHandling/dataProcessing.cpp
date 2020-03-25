@@ -40,6 +40,19 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 
 	SetImageList(&imageList, wxIMAGE_LIST_SMALL);
 
+	firstSavestateHookCreator = new SavestateSelection(mainSettings, false);
+	savestateHookLoader       = new SavestateSelection(mainSettings, true);
+
+	// JUST AS A TEST, WILL REMOVE SOON
+	// firstSavestateHookCreator->ShowModal();
+	// if(firstSavestateHookCreator->getOperationSuccessful()) {
+	//	// EBIC
+	//}
+	// savestateHookLoader->ShowModal();
+	// if(savestateHookLoader->getOperationSuccessful()) {
+	//	// EBIC
+	//}
+
 	// Set other frames manually, without a function
 	currentRunFrame   = 0;
 	currentImageFrame = 0;

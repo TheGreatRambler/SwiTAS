@@ -220,6 +220,9 @@
 		"frameAdvanceButton": "share/icons/nxtas/buttons/frameAdvanceButton.png",
 		"savestateHookButton": "share/icons/nxtas/buttons/savestateHookButton.png",
 		"joystickLockButton": "share/icons/nxtas/buttons/joystickLockButton.png",
+		"playButton": "share/icons/nxtas/buttons/playButton.png",
+		"pauseButton": "share/icons/nxtas/buttons/pauseButton.png",
+		"okButton": "share/icons/nxtas/buttons/okButton.png",
 		"buttonWidth": 80,
 		"buttonHeight": 80,
 		"frameViewerColors": {
@@ -233,8 +236,14 @@
 			"newProject": "rgb(20, 110, 66)"
 		}
 	},
-	"recentProjects": [{
-		"projectDirectory": "C:\\Users\\aehar\\Desktop\\test\\",
-		"projectName": "Bob the builder"
-	}]
+	"recentProjects": [
+		{
+			"projectDirectory": "C:\\Users\\aehar\\Desktop\\test\\",
+			"projectName": "Bob the builder"
+		},
+		{
+			"projectDirectory": "C:\\Users\\aehar\\Desktop\\bob\\",
+			"projectName": "bOB MAd e A MEss Aend DOE snt kmNOW HoW Toooooo   TAS"
+		}
+	]
 }
