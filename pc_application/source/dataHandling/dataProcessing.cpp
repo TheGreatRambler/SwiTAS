@@ -1,8 +1,14 @@
 #include "dataProcessing.hpp"
 #include "buttonData.hpp"
 
-DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, std::shared_ptr<CommunicateWithNetwork> communicateWithNetwork, wxWindow* parent)
+DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, std::shared_ptr<CommunicateWithNetwork> communicateWithNetwork, wxWindow* parent, AllSavestateHookBlocks allBlocks)
 	: wxListCtrl(parent, DataProcessing::LIST_CTRL_ID, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_VIRTUAL | wxLC_HRULES) {
+
+	// All savestate hook blocks
+	savestateHookBlocks = allBlocks;
+	// NOTE: There must be at least one block with one input when this is loaded
+	// Automatically, the first block is always at index 0
+	inputsList = savestateHookBlocks[0];
 
 	// This can't handle it :(
 	SetDoubleBuffered(false);
@@ -40,8 +46,8 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 
 	SetImageList(&imageList, wxIMAGE_LIST_SMALL);
 
-	firstSavestateHookCreator = new SavestateSelection(mainSettings, false);
-	savestateHookLoader       = new SavestateSelection(mainSettings, true);
+	savestateHookCreator = new SavestateSelection(mainSettings, false);
+	savestateHookLoader  = new SavestateSelection(mainSettings, true);
 
 	// JUST AS A TEST, WILL REMOVE SOON
 	// firstSavestateHookCreator->ShowModal();
@@ -132,8 +138,8 @@ int DataProcessing::OnGetItemColumnImage(long row, long column) const {
 	} else {
 		// Returns index in the imagelist
 		// Need to account for the frame being first
-		uint8_t button = column - 1;
-		bool on        = GET_BIT(inputsList[row]->buttons, button);
+		Btn button = (Btn)(column - 1);
+		bool on    = getButton(row, button);
 		int res;
 		if(on) {
 			// Return index of on image
@@ -161,9 +167,10 @@ wxString DataProcessing::OnGetItemText(long row, long column) const {
 	// This function shouldn't recieve any other column
 }
 
+// EXCUSE ME, WUT TODO
+// Why can't I call a const method from a const method hmmm
 wxItemAttr* DataProcessing::OnGetItemAttr(long item) const {
-	uint8_t state = inputsList[item]->frameState;
-	return itemAttributes.at(state);
+	return itemAttributes.at(getFramestateInfo(item));
 }
 
 void DataProcessing::setItemAttributes() {
@@ -274,7 +281,7 @@ void DataProcessing::onCopy(wxCommandEvent& event) {
 			// There is a selected item
 			if(currentFrame >= firstSelectedItem && currentFrame <= lastSelectedItem) {
 				// Add these items to the clipboard
-				wxTheClipboard->SetData(new wxTextDataObject(buttonData->framesToText(inputsList, firstSelectedItem, lastSelectedItem)));
+				wxTheClipboard->SetData(new wxTextDataObject(buttonData->framesToText(this, firstSelectedItem, lastSelectedItem)));
 			} else {
 				// Deselect the others
 				for(FrameNum i = firstSelectedItem; i <= lastSelectedItem; i++) {
@@ -283,7 +290,7 @@ void DataProcessing::onCopy(wxCommandEvent& event) {
 				// Select just the one
 				SetItemState(currentFrame, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 
-				wxTheClipboard->SetData(new wxTextDataObject(buttonData->framesToText(inputsList, currentFrame, currentFrame)));
+				wxTheClipboard->SetData(new wxTextDataObject(buttonData->framesToText(this, currentFrame, currentFrame)));
 
 				// See the new selection
 				RefreshItem(currentFrame);
@@ -297,17 +304,8 @@ void DataProcessing::onCopy(wxCommandEvent& event) {
 void DataProcessing::onCut(wxCommandEvent& event) {
 	// Copy the elements, then delete
 	onCopy(event);
-	auto beginning = inputsList.begin();
-	// Erase them
-	inputsList.erase(beginning + currentFrame, beginning + currentFrame + GetSelectedItemCount());
-	// Refresh to see things again
-	SetItemCount(inputsList.size());
-	Refresh();
-	// Make the grid aware
-	if(inputCallback) {
-		// Doesn't matter what arguments
-		inputCallback();
-	}
+	// Erase the frames
+	removeFrames(currentFrame, currentFrame + GetSelectedItemCount() - 1);
 }
 
 void DataProcessing::onPaste(wxCommandEvent& event) {
@@ -319,15 +317,7 @@ void DataProcessing::onPaste(wxCommandEvent& event) {
 			std::string clipboardText = data.GetText().ToStdString();
 
 			// Get to the meaty stuff, this is it
-			buttonData->textToFrames(inputsList, clipboardText, currentFrame, insertPaste, placePaste);
-
-			SetItemCount(inputsList.size());
-			Refresh();
-			// Make the grid aware
-			if(inputCallback) {
-				// Doesn't matter what arguments
-				inputCallback();
-			}
+			buttonData->textToFrames(this, clipboardText, currentFrame, insertPaste, placePaste);
 		}
 		wxTheClipboard->Close();
 	}
@@ -347,7 +337,7 @@ void DataProcessing::onPlacePaste(wxCommandEvent& event) {
 
 void DataProcessing::onAddFrame(wxCommandEvent& event) {
 	// These are 1-to-1 from sideUI.cpp
-	addNewFrame();
+	addFrame(currentFrame);
 }
 
 void DataProcessing::onFrameAdvance(wxCommandEvent& event) {
@@ -358,69 +348,19 @@ void DataProcessing::onAddSavestateHook(wxCommandEvent& event) {
 	createSavestateHookHere();
 }
 
-bool DataProcessing::getButtonState(Btn button) {
-	// Get value from the bitflags
-	return GET_BIT(currentData->buttons, button);
-}
-
-void DataProcessing::setButtonState(Btn button, bool state) {
-	SET_BIT(currentData->buttons, state, button);
-
-	// Because of run colors (run is invalidated on modify), need to do some trickery
-
-	// If this frame is not run, use the fast method
-	if(!GET_BIT(currentData->frameState, FrameState::RAN)) {
-		Freeze();
-		wxRect itemRect;
-		GetSubItemRect(currentFrame, buttonToColumn[button], itemRect);
-		RefreshRect(itemRect);
-		Thaw();
-	} else {
-		// If it's run, have to do a slow way, kinda
-		FrameNum frame = currentFrame + 1;
-		while(true) {
-			if(!GET_BIT(inputsList[frame]->frameState, FrameState::RAN)) {
-				// Refresh all these items
-				// I don't care if it's way off the page, I think wxWidgets handles for this
-				RefreshItems(currentFrame, frame - 1);
-				break;
-			}
-			// Set bit
-			SET_BIT(inputsList[frame]->frameState, false, FrameState::RAN);
-			frame++;
-		}
-	}
-
-	// Make the grid aware
-	if(inputCallback) {
-		inputCallback();
-	}
-}
-
-void DataProcessing::toggleButtonState(Btn button) {
-	// Send the `not` of the current state
-	setButtonState(button, !getButtonState(button));
-}
-
 void DataProcessing::setCurrentFrame(FrameNum frameNum) {
 	// Must be a frame that has already been written, else, raise error
-	if(frameNum < inputsList.size()) {
+	if(frameNum < inputsList->size()) {
 		// Set the current frame to this frame
 		// Shared pointer so this can be done
-		currentData = inputsList[frameNum];
+		currentData = inputsList->at(frameNum);
 		// Set the current frame to this number
 		currentFrame = frameNum;
 		// Focus to this specific row now
 		// This essentially scrolls to it
 		EnsureVisible(frameNum);
 
-		// Make the grid aware
-		if(inputCallback) {
-			// Doesn't matter what arguments
-			inputCallback();
-		}
-
-		triggerCurrentFrameChanges();
+		modifyCurrentFrameViews(currentFrame);
 
 		Refresh();
 	}
@@ -431,18 +371,23 @@ void DataProcessing::addNewFrame() {
 	// Set some defaults now
 	SET_BIT(newControllerData->frameState, false, FrameState::RAN);
 	SET_BIT(newControllerData->frameState, false, FrameState::SAVESTATE_HOOK);
+	// Add this to the vector right afteollerData = std::make_shared<ControllerData>();
+	// Set some defaults now
+	SET_BIT(newControllerData->frameState, false, FrameState::RAN);
+	SET_BIT(newControllerData->frameState, false, FrameState::SAVESTATE_HOOK);
 	// Add this to the vector right after the selected frame
-	if(inputsList.size() == 0) {
-		inputsList.push_back(newControllerData);
+	if(inputsList->size() == 0) {
+		inputsList->push_back(newControllerData);
 	} else {
-		inputsList.insert(inputsList.begin() + currentFrame + 1, newControllerData);
+		inputsList->insert(inputsList->begin() + currentFrame + 1, newControllerData);
 	}
 	// Because of the usability of virtual list controls, just update the length
-	SetItemCount(inputsList.size());
+	SetItemCount(inputsList->size());
 	// Dont change the current frame (for now)
 	Refresh();
 }
 
+// THIS NEEDS TO CHANGE COMPLETELY
 void DataProcessing::createSavestateHookHere() {
 	// Add one savestate hook at this frame
 	savestateHooks[currentFrame] = std::make_shared<SavestateHook>();
@@ -453,15 +398,14 @@ void DataProcessing::createSavestateHookHere() {
 }
 
 void DataProcessing::runFrame() {
-	if(currentRunFrame != inputsList.size()) {
-		std::shared_ptr<ControllerData> controllerData = inputsList[currentRunFrame];
+	if(currentRunFrame != inputsList->size()) {
+		// Technically, should handle for entering next savetstae hook block, but TODO
+		std::shared_ptr<ControllerData> controllerData = inputsList->at(currentRunFrame);
 
-		// Change the state and get colors
-		SET_BIT(controllerData->frameState, 1, FrameState::RAN);
-		RefreshItem(currentRunFrame);
+		setFramestateInfo(currentRunFrame, FrameState::RAN, true);
 
 		// If possible, make current frame this frame
-		if(currentRunFrame < inputsList.size()) {
+		if(currentRunFrame < inputsList->size()) {
 			// Set to this frame
 			setCurrentFrame(currentRunFrame + 1);
 		}
@@ -470,11 +414,13 @@ void DataProcessing::runFrame() {
 		currentRunFrame++;
 		// Set image frame to this too
 		currentImageFrame = currentRunFrame;
-		triggerCurrentFrameChanges();
+
+		modifyCurrentFrameViews(currentRunFrame);
 
 		Refresh();
 
 		// Send to switch to run
+		std::shared_ptr<ControllerData> controllerData = inputsList->at(currentRunFrame);
 		// clang-format off
 		ADD_TO_QUEUE(SendRunFrame, networkInstance, {
 			data.controllerData = *controllerData;
@@ -483,26 +429,9 @@ void DataProcessing::runFrame() {
 	}
 }
 
-void DataProcessing::handleButtonInput(Btn button) {
-	// Just a generic method to handle multiselect and others
-	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-	if(firstSelectedItem != wxNOT_FOUND) {
-		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
-		// Now, apply the button
-		// Usually, just set to the opposite of the currently selected element
-		uint8_t state = !getButtonState(button);
-		for(FrameNum i = firstSelectedItem; i <= lastSelectedItem; i++) {
-			// This is so hacky, but oh well
-			setCurrentFrame(i);
-			setButtonState(button, state);
-		}
-		Refresh();
-	}
-}
-
 bool DataProcessing::handleKeyboardInput(wxChar key) {
 	if(charToButton.count(key)) {
-		handleButtonInput(charToButton[key]);
+		triggerButton(charToButton[key]);
 		return true;
 	}
 	return false;

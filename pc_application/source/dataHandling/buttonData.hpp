@@ -17,6 +17,7 @@
 
 #include "../../sharedNetworkCode/buttonData.hpp"
 #include "../helpers.hpp"
+#include "dataProcessing.hpp"
 
 // So that types are somewhat unified
 typedef uint32_t FrameNum;
@@ -85,6 +86,19 @@ public:
 		uint32_t frame;
 	};
 
+	enum ControllerNumberValues : uint8_t {
+		LEFT_X,
+		LEFT_Y,
+		RIGHT_X,
+		RIGHT_Y,
+		ACCEL_X,
+		ACCEL_Y,
+		ACCEL_Z,
+		GYRO_1,
+		GYRO_2,
+		GYRO_3,
+	};
+
 	const uint8_t KeyWidth  = 11;
 	const uint8_t KeyHeight = 4;
 
@@ -94,8 +108,8 @@ public:
 
 	void setupButtonMapping(rapidjson::Document* mainSettings);
 
-	void textToFrames(std::vector<std::shared_ptr<ControllerData>>& frames, std::string text, FrameNum startLoc, bool insertPaste, bool placePaste);
-	std::string framesToText(std::vector<std::shared_ptr<ControllerData>>& frames, FrameNum startLoc, FrameNum endLoc);
+	void textToFrames(DataProcessing* dataProcessing, std::string text, FrameNum startLoc, bool insertPaste, bool placePaste);
+	std::string framesToText(DataProcessing* dataProcessing, FrameNum startLoc, FrameNum endLoc);
 
 	void transferControllerData(std::shared_ptr<ControllerData> src, std::shared_ptr<ControllerData> dest, bool placePaste);
 
@@ -106,3 +120,4 @@ public:
 
 typedef ButtonData::ButtonInfo ButtonInfo;
 typedef ButtonData::SavestateHook SavestateHook;
+typedef ButtonData::ControllerNumberValues ControllerNumberValues;

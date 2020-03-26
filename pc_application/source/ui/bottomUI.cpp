@@ -33,7 +33,7 @@ void ButtonGrid::draw(wxDC& dc) {
 	// TODO not every image is a square :)
 	for(auto const& button : buttonData->buttonMapping) {
 		wxBitmap* bitmap;
-		if(inputInstance->getButtonState(button.first)) {
+		if(inputInstance->getButtonCurrent(button.first)) {
 			bitmap = button.second->resizedGridOnBitmap;
 		} else {
 			bitmap = button.second->resizedGridOffBitmap;
@@ -63,7 +63,7 @@ void ButtonGrid::onGridClick(wxMouseEvent& event) {
 
 	if(locToButton.count(key)) {
 		// Element exists, time to trigger the click
-		inputInstance->handleButtonInput(locToButton[key]);
+		inputInstance->triggerButton(locToButton[key]);
 		Refresh();
 	}
 }
@@ -143,11 +143,11 @@ void JoystickCanvas::draw(wxDC& dc) {
 	int32_t joyY;
 
 	if(isLeftJoystick) {
-		joyX = inputInstance->getCurrentFrame()->LS_X;
-		joyY = inputInstance->getCurrentFrame()->LS_Y;
+		joyX = inputInstance->getNumberValueCurrent(ControllerNumberValues::LEFT_X);
+		joyY = inputInstance->getNumberValueCurrent(ControllerNumberValues::LEFT_Y);
 	} else {
-		joyX = inputInstance->getCurrentFrame()->RS_X;
-		joyY = inputInstance->getCurrentFrame()->RS_Y;
+		joyX = inputInstance->getNumberValueCurrent(ControllerNumberValues::RIGHT_X);
+		joyY = inputInstance->getNumberValueCurrent(ControllerNumberValues::RIGHT_Y);
 	}
 
 	// Flip the height to resemble the coordinate system
@@ -189,32 +189,41 @@ void JoystickCanvas::draw(wxDC& dc) {
 
 	// Show the actual value underneath
 	if(isLeftJoystick) {
-		xInput->SetValue(inputInstance->getCurrentFrame()->LS_X);
-		yInput->SetValue(inputInstance->getCurrentFrame()->LS_Y);
+		xInput->SetValue(inputInstance->getNumberValueCurrent(ControllerNumberValues::LEFT_X));
+		yInput->SetValue(inputInstance->getNumberValueCurrent(ControllerNumberValues::LEFT_Y));
 	} else {
-		xInput->SetValue(inputInstance->getCurrentFrame()->RS_X);
-		yInput->SetValue(inputInstance->getCurrentFrame()->RS_Y);
+		xInput->SetValue(inputInstance->getNumberValueCurrent(ControllerNumberValues::RIGHT_X));
+		yInput->SetValue(inputInstance->getNumberValueCurrent(ControllerNumberValues::RIGHT_Y));
 	}
 }
 
 void JoystickCanvas::correctForCircleLock() {
 	if(canGoOutsideCircleCheckbox->IsChecked()) {
-		int* x;
-		int* y;
+		int x;
+		int y;
 		if(isLeftJoystick) {
-			x = &(inputInstance->getCurrentFrame()->LS_X);
-			y = &(inputInstance->getCurrentFrame()->LS_Y);
+			x = inputInstance->getNumberValueCurrent(ControllerNumberValues::LEFT_X);
+			y = inputInstance->getNumberValueCurrent(ControllerNumberValues::LEFT_Y);
 		} else {
-			x = &(inputInstance->getCurrentFrame()->RS_X);
-			y = &(inputInstance->getCurrentFrame()->RS_Y);
+			x = inputInstance->getNumberValueCurrent(ControllerNumberValues::RIGHT_X);
+			y = inputInstance->getNumberValueCurrent(ControllerNumberValues::RIGHT_Y);
 		}
+
 		// This corrects for circle lock if the checkbox is set
 		// https://math.stackexchange.com/a/127615
-		int radiusSquared = std::pow(*x, 2) + std::pow(*y, 2);
+		int radiusSquared = std::pow(x, 2) + std::pow(y, 2);
 		if(radiusSquared > std::pow(ButtonData::axisMax, 2)) {
 			// Have to clamp it
-			*x = ButtonData::axisMax * (*x / std::sqrt(radiusSquared));
-			*y = ButtonData::axisMax * (*y / std::sqrt(radiusSquared));
+			x = ButtonData::axisMax * (x / std::sqrt(radiusSquared));
+			y = ButtonData::axisMax * (y / std::sqrt(radiusSquared));
+		}
+
+		if(isLeftJoystick) {
+			inputInstance->triggerNumberValues(ControllerNumberValues::LEFT_X, x);
+			inputInstance->triggerNumberValues(ControllerNumberValues::LEFT_Y, y);
+		} else {
+			inputInstance->triggerNumberValues(ControllerNumberValues::RIGHT_X, x);
+			inputInstance->triggerNumberValues(ControllerNumberValues::RIGHT_Y, y);
 		}
 	}
 }
@@ -231,11 +240,11 @@ void JoystickCanvas::onMouseClick(wxMouseEvent& event) {
 
 	// Mutiply by twice the radius and then subtract the radius to get the middle
 	if(isLeftJoystick) {
-		inputInstance->getCurrentFrame()->LS_X = scaledX;
-		inputInstance->getCurrentFrame()->LS_Y = scaledY;
+		inputInstance->triggerNumberValues(ControllerNumberValues::LEFT_X, scaledX);
+		inputInstance->triggerNumberValues(ControllerNumberValues::LEFT_Y, scaledY);
 	} else {
-		inputInstance->getCurrentFrame()->RS_X = scaledX;
-		inputInstance->getCurrentFrame()->RS_Y = scaledY;
+		inputInstance->triggerNumberValues(ControllerNumberValues::RIGHT_X, scaledX);
+		inputInstance->triggerNumberValues(ControllerNumberValues::RIGHT_Y, scaledY);
 	}
 
 	correctForCircleLock();
@@ -262,14 +271,13 @@ void JoystickCanvas::xValueSet(wxSpinEvent& event) {
 		position = ButtonData::axisMin;
 	}
 
+	setXValue(position);
+
 	if(isLeftJoystick) {
-		inputInstance->getCurrentFrame()->LS_X = position;
-		correctForCircleLock();
+		event.SetPosition(inputInstance->getNumberValueCurrent(ControllerNumberValues::LEFT_X));
 	} else {
-		inputInstance->getCurrentFrame()->RS_X = position;
-		correctForCircleLock();
+		event.SetPosition(inputInstance->getNumberValueCurrent(ControllerNumberValues::RIGHT_X));
 	}
-	Refresh();
 }
 
 void JoystickCanvas::yValueSet(wxSpinEvent& event) {
@@ -282,24 +290,21 @@ void JoystickCanvas::yValueSet(wxSpinEvent& event) {
 		position = ButtonData::axisMin;
 	}
 
+	setYValue(position);
+
 	if(isLeftJoystick) {
-		inputInstance->getCurrentFrame()->LS_Y = position;
-		correctForCircleLock();
-		event.SetPosition(inputInstance->getCurrentFrame()->LS_Y);
+		event.SetPosition(inputInstance->getNumberValueCurrent(ControllerNumberValues::LEFT_Y));
 	} else {
-		inputInstance->getCurrentFrame()->RS_Y = position;
-		correctForCircleLock();
-		event.SetPosition(inputInstance->getCurrentFrame()->RS_Y);
+		event.SetPosition(inputInstance->getNumberValueCurrent(ControllerNumberValues::RIGHT_Y));
 	}
-	Refresh();
 }
 
 void JoystickCanvas::setXValue(int32_t x) {
 	if(isLeftJoystick) {
-		inputInstance->getCurrentFrame()->LS_X = x;
+		inputInstance->triggerNumberValues(ControllerNumberValues::LEFT_X, x);
 		correctForCircleLock();
 	} else {
-		inputInstance->getCurrentFrame()->RS_X = x;
+		inputInstance->triggerNumberValues(ControllerNumberValues::RIGHT_X, x);
 		correctForCircleLock();
 	}
 	Refresh();
@@ -307,10 +312,10 @@ void JoystickCanvas::setXValue(int32_t x) {
 
 void JoystickCanvas::setYValue(int32_t y) {
 	if(isLeftJoystick) {
-		inputInstance->getCurrentFrame()->LS_Y = y;
+		inputInstance->triggerNumberValues(ControllerNumberValues::LEFT_Y, y);
 		correctForCircleLock();
 	} else {
-		inputInstance->getCurrentFrame()->RS_Y = y;
+		inputInstance->triggerNumberValues(ControllerNumberValues::RIGHT_Y, y);
 		correctForCircleLock();
 	}
 	Refresh();
@@ -524,7 +529,7 @@ void BottomUI::listenToJoystick() {
 				// Essentially, it's a button down event for this button
 				if(joyButtonToSwitch.count(i)) {
 					Btn button = (Btn)joyButtonToSwitch[i];
-					inputInstance->handleButtonInput(button);
+					inputInstance->triggerButton(button);
 				}
 			}
 		}
@@ -548,7 +553,7 @@ void BottomUI::listenToJoystick() {
 					if(axisDirection[i] ? axisValue < axisMiddle : axisValue > axisMiddle) {
 						// Trigger ZL
 						if(lastState[Btn::ZL] != true) {
-							inputInstance->handleButtonInput(Btn::ZL);
+							inputInstance->triggerButton(Btn::ZL);
 							lastState[Btn::ZL] = true;
 						}
 						// ZR is now off
@@ -556,7 +561,7 @@ void BottomUI::listenToJoystick() {
 					} else if(axisDirection[i] ? axisValue > axisMiddle : axisValue < axisMiddle) {
 						// Trigger ZR
 						if(lastState[Btn::ZR] != true) {
-							inputInstance->handleButtonInput(Btn::ZR);
+							inputInstance->triggerButton(Btn::ZR);
 							lastState[Btn::ZR] = true;
 						}
 						// ZL is now off
@@ -581,7 +586,7 @@ void BottomUI::listenToJoystick() {
 						// Normal button
 						// Won't check for axis, too scared
 						Btn button = (Btn)switchID;
-						inputInstance->handleButtonInput(button);
+						inputInstance->triggerButton(button);
 					}
 					povLastState = povValue;
 				}

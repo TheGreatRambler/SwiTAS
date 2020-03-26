@@ -72,7 +72,7 @@ void ButtonData::setupButtonMapping(rapidjson::Document* mainSettings) {
 	}
 }
 
-void ButtonData::textToFrames(std::vector<std::shared_ptr<ControllerData>>& frames, std::string text, FrameNum startLoc, bool insertPaste, bool placePaste) {
+void ButtonData::textToFrames(DataProcessing* dataProcessing, std::string text, FrameNum startLoc, bool insertPaste, bool placePaste) {
 	std::vector<std::string> frameParts = HELPERS::splitString(text, '\n');
 	bool haveSetFirstFrame              = false;
 	FrameNum firstFrame;
@@ -99,31 +99,31 @@ void ButtonData::textToFrames(std::vector<std::shared_ptr<ControllerData>>& fram
 		// The actual index
 		FrameNum actualIndex = startLoc + (frameNum - firstFrame);
 
-		if(actualIndex >= frames.size()) {
+		if(actualIndex >= dataProcessing->getFramesSize()) {
 			// Have to return, there are too many frames to paste
 			return;
 		}
 
-		std::shared_ptr<ControllerData> thisData;
+		FrameNum thisDataIndex;
+
 		if(insertPaste) {
 			// It's a new one
-			thisData = std::make_shared<ControllerData>();
 			// Loop through and add frames to keep the right offset between this frame
 			// And the last one
 			if(haveSetFirstFrame) {
 				// Can use expected indexing
 				for(FrameNum i = lastReadFrame + 1; i < actualIndex; i++) {
 					// Add a blank frame for buffer
-					frames.insert(frames.begin() + i, std::make_shared<ControllerData>());
+					dataProcessing->addFrame(i - 1);
 				}
 				// Now can easily add the frame later
 			}
 			// Insert it now, it's just a pointer
-			frames.insert(frames.begin() + actualIndex + 1, thisData);
+			dataProcessing->addFrame(actualIndex);
+			thisDataIndex = actualIndex + 1;
 			// If it's the first frame, no need for padding
 		} else {
-			// Set the reference to the right one
-			thisData = frames[actualIndex];
+			thisDataIndex = actualIndex;
 		}
 
 		// Now can set the variable
@@ -135,23 +135,19 @@ void ButtonData::textToFrames(std::vector<std::shared_ptr<ControllerData>>& fram
 		if(parts.size() == currentIndexInParts)
 			continue;
 
+		if(!placePaste) {
+			// Clear the buttons if no place paste
+			dataProcessing->clearAllButtons(thisDataIndex);
+		}
+
 		// Deal with buttons
-		uint32_t buttonInfo = 0;
 		// Can be no buttons at all
 		if(parts[currentIndexInParts] != "NONE") {
 			for(std::string buttonName : HELPERS::splitString(parts[currentIndexInParts], ';')) {
 				if(scriptNameToButton.count(buttonName)) {
-					SET_BIT(buttonInfo, true, scriptNameToButton[buttonName]);
+					dataProcessing->modifyButton(thisDataIndex, scriptNameToButton[buttonName], true);
 				}
 			}
-		}
-
-		// placePaste doesn't replace the value
-		if(placePaste) {
-			// Just OR it
-			thisData->buttons |= buttonInfo;
-		} else {
-			thisData->buttons = buttonInfo;
 		}
 
 		currentIndexInParts++;
@@ -161,8 +157,8 @@ void ButtonData::textToFrames(std::vector<std::shared_ptr<ControllerData>>& fram
 		// Joysticks
 		std::vector<std::string> joystickPartsLeft = HELPERS::splitString(parts[currentIndexInParts], ';');
 		if(joystickPartsLeft.size() == 2) {
-			thisData->LS_X = strtol(joystickPartsLeft[0].c_str(), nullptr, 10);
-			thisData->LS_Y = strtol(joystickPartsLeft[1].c_str(), nullptr, 10);
+			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::LEFT_X, strtol(joystickPartsLeft[0].c_str(), nullptr, 10));
+			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::LEFT_Y, strtol(joystickPartsLeft[1].c_str(), nullptr, 10));
 		} else {
 			continue;
 		}
@@ -173,8 +169,8 @@ void ButtonData::textToFrames(std::vector<std::shared_ptr<ControllerData>>& fram
 
 		std::vector<std::string> joystickPartsRight = HELPERS::splitString(parts[currentIndexInParts], ';');
 		if(joystickPartsRight.size() == 2) {
-			thisData->RS_X = strtol(joystickPartsRight[0].c_str(), nullptr, 10);
-			thisData->RS_Y = strtol(joystickPartsRight[1].c_str(), nullptr, 10);
+			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::RIGHT_X, strtol(joystickPartsRight[0].c_str(), nullptr, 10));
+			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::RIGHT_Y, strtol(joystickPartsRight[1].c_str(), nullptr, 10));
 		} else {
 			continue;
 		}
@@ -187,9 +183,9 @@ void ButtonData::textToFrames(std::vector<std::shared_ptr<ControllerData>>& fram
 
 		std::vector<std::string> accelParts = HELPERS::splitString(parts[currentIndexInParts], ';');
 		if(accelParts.size() == 3) {
-			thisData->ACCEL_X = strtol(accelParts[0].c_str(), nullptr, 10);
-			thisData->ACCEL_Y = strtol(accelParts[1].c_str(), nullptr, 10);
-			thisData->ACCEL_Z = strtol(accelParts[2].c_str(), nullptr, 10);
+			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::ACCEL_X, strtol(accelParts[0].c_str(), nullptr, 10));
+			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::ACCEL_Y, strtol(accelParts[1].c_str(), nullptr, 10));
+			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::ACCEL_Z, strtol(accelParts[2].c_str(), nullptr, 10));
 		} else {
 			continue;
 		}
@@ -200,30 +196,28 @@ void ButtonData::textToFrames(std::vector<std::shared_ptr<ControllerData>>& fram
 
 		std::vector<std::string> gyroParts = HELPERS::splitString(parts[currentIndexInParts], ';');
 		if(gyroParts.size() == 3) {
-			thisData->GYRO_1 = strtol(gyroParts[0].c_str(), nullptr, 10);
-			thisData->GYRO_2 = strtol(gyroParts[1].c_str(), nullptr, 10);
-			thisData->GYRO_3 = strtol(gyroParts[2].c_str(), nullptr, 10);
+			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::GYRO_1, strtol(gyroParts[0].c_str(), nullptr, 10));
+			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::GYRO_2, strtol(gyroParts[1].c_str(), nullptr, 10));
+			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::GYRO_3, strtol(gyroParts[2].c_str(), nullptr, 10));
 		} else {
 			continue;
 		}
 	}
 }
 
-std::string ButtonData::framesToText(std::vector<std::shared_ptr<ControllerData>>& frames, FrameNum startLoc, FrameNum endLoc) {
+std::string ButtonData::framesToText(DataProcessing* dataProcessing, FrameNum startLoc, FrameNum endLoc) {
 	std::vector<std::string> textVector;
 	// Loop through each frame and convert it
 	for(FrameNum i = startLoc; i <= endLoc; i++) {
-		std::shared_ptr<ControllerData> frame = frames[i];
-
 		// Keeping empty ones there clutters things
-		if(!isEmptyControllerData(frame)) {
+		if(!isEmptyControllerData(dataProcessing->getFrame(i))) {
 			std::vector<std::string> parts;
 			parts.push_back(std::to_string(i));
 
 			std::vector<std::string> buttonParts;
-			for(uint8_t i = 0; i < Btn::BUTTONS_SIZE; i++) {
-				Btn button = (Btn)i;
-				if(GET_BIT(frame->buttons, button)) {
+			for(uint8_t btn = 0; btn < Btn::BUTTONS_SIZE; btn++) {
+				Btn button = (Btn)btn;
+				if(dataProcessing->getButton(i, button)) {
 					// Add to the string
 					buttonParts.push_back(buttonMapping[button]->scriptName);
 				}
@@ -236,11 +230,11 @@ std::string ButtonData::framesToText(std::vector<std::shared_ptr<ControllerData>
 				parts.push_back(HELPERS::joinString(buttonParts, ";"));
 			}
 
-			parts.push_back(std::to_string(frame->LS_X) + ";" + std::to_string(frame->LS_Y));
-			parts.push_back(std::to_string(frame->RS_X) + ";" + std::to_string(frame->RS_Y));
+			parts.push_back(std::to_string(dataProcessing->getNumberValues(i, ControllerNumberValues::LEFT_X)) + ";" + std::to_string(dataProcessing->getNumberValues(i, ControllerNumberValues::LEFT_Y)));
+			parts.push_back(std::to_string(dataProcessing->getNumberValues(i, ControllerNumberValues::RIGHT_X)) + ";" + std::to_string(dataProcessing->getNumberValues(i, ControllerNumberValues::RIGHT_Y)));
 
-			parts.push_back(std::to_string(frame->ACCEL_X) + ";" + std::to_string(frame->ACCEL_Y) + ";" + std::to_string(frame->ACCEL_Z));
-			parts.push_back(std::to_string(frame->GYRO_1) + ";" + std::to_string(frame->GYRO_2) + ";" + std::to_string(frame->GYRO_3));
+			parts.push_back(std::to_string(dataProcessing->getNumberValues(i, ControllerNumberValues::ACCEL_X)) + ";" + std::to_string(dataProcessing->getNumberValues(i, ControllerNumberValues::ACCEL_Y)) + ";" + std::to_string(dataProcessing->getNumberValues(i, ControllerNumberValues::ACCEL_Z)));
+			parts.push_back(std::to_string(dataProcessing->getNumberValues(i, ControllerNumberValues::GYRO_1)) + ";" + std::to_string(dataProcessing->getNumberValues(i, ControllerNumberValues::GYRO_2)) + ";" + std::to_string(dataProcessing->getNumberValues(i, ControllerNumberValues::GYRO_3)));
 
 			textVector.push_back(HELPERS::joinString(parts, " "));
 		}
@@ -277,18 +271,17 @@ bool ButtonData::isEmptyControllerData(std::shared_ptr<ControllerData> data) {
 	ControllerData emptyData;
 	// clang-format off
 	return
-		(data->index == emptyData.index) &&
-		(data->buttons == emptyData.buttons) &&
-		(data->LS_X       == emptyData.LS_X) &&
-		(data->LS_Y       == emptyData.LS_Y) &&
-		(data->RS_X       == emptyData.RS_X) &&
-		(data->RS_Y       == emptyData.RS_Y) &&
-		(data->ACCEL_X    == emptyData.ACCEL_X) &&
-		(data->ACCEL_Y    == emptyData.ACCEL_Y) &&
-		(data->ACCEL_Z    == emptyData.ACCEL_Z) &&
-		(data->GYRO_1     == emptyData.GYRO_1) &&
-		(data->GYRO_2     == emptyData.GYRO_2) &&
-		(data->GYRO_3     == emptyData.GYRO_3) &&
+		(data->buttons    == emptyData.buttons)   &&
+		(data->LS_X       == emptyData.LS_X)      &&
+		(data->LS_Y       == emptyData.LS_Y)      &&
+		(data->RS_X       == emptyData.RS_X)      &&
+		(data->RS_Y       == emptyData.RS_Y)      &&
+		(data->ACCEL_X    == emptyData.ACCEL_X)   &&
+		(data->ACCEL_Y    == emptyData.ACCEL_Y)   &&
+		(data->ACCEL_Z    == emptyData.ACCEL_Z)   &&
+		(data->GYRO_1     == emptyData.GYRO_1)    &&
+		(data->GYRO_2     == emptyData.GYRO_2)    &&
+		(data->GYRO_3     == emptyData.GYRO_3)    &&
 		(data->frameState == emptyData.frameState);
 	// clang-format on
 }

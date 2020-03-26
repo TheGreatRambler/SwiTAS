@@ -2,6 +2,14 @@
 
 ProjectHandler::ProjectHandler(DataProcessing* dataProcessingInstance, rapidjson::Document* settings)
 	: wxDialog(NULL, wxID_ANY, "Select Project", wxDefaultPosition, wxDefaultSize) {
+	// OKAY
+	// Big brain time
+	// I know how savestate hooks will work
+	// Savestate hooks will represent the START of a block of inputs
+	// So, the inputs viewable in the wxListCtrl will be just one block
+	// Savestate hooks can be created at any time
+	// They don't have to be created with the current frame, they are independent of the current frame data
+	// Each block of inputs is in its own file, for git purposes
 	// Get global settings file
 	dataProcessing = dataProcessingInstance;
 	mainSettings   = settings;
@@ -84,6 +92,9 @@ void ProjectHandler::loadProject() {
 		wxStreamBuffer* streamBuffer = dataStream.GetOutputStreamBuffer();
 		uint8_t* bufferPointer       = (uint8_t*)streamBuffer->GetBufferStart();
 		std::size_t bufferSize       = streamBuffer->GetBufferSize();
+
+		// THIS REQUIRES ENTIRELY DIFFERENT FILE HANDLING TODO
+		// Now have to handle by savestate hook block
 
 		std::vector<std::shared_ptr<ControllerData>>* inputsList = dataProcessing->getInputsList();
 
