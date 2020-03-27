@@ -21,11 +21,14 @@
 
 #include "../../sharedNetworkCode/networkInterface.hpp"
 #include "../ui/savestateSelection.hpp"
+#include "buttonConstants.hpp"
 #include "buttonData.hpp"
 
 typedef std::shared_ptr<std::vector<std::shared_ptr<ControllerData>>> SavestateHookBlock;
 typedef std::shared_ptr<ControllerData> FrameData;
 typedef std::vector<std::shared_ptr<std::vector<std::shared_ptr<ControllerData>>>> AllSavestateHookBlocks;
+
+class ButtonData;
 
 class DataProcessing : public wxListCtrl {
 	// clang-format on
@@ -113,7 +116,7 @@ public:
 	static const int LIST_CTRL_ID = 1000;
 
 	// All blocks loaded in by projectManager
-	DataProcessing(rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, std::shared_ptr<CommunicateWithNetwork> communicateWithNetwork, wxWindow* parent, AllSavestateHookBlocks allBlocks);
+	DataProcessing(rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, std::shared_ptr<CommunicateWithNetwork> communicateWithNetwork, wxWindow* parent);
 
 	void setInputCallback(std::function<void()> callback);
 
@@ -125,9 +128,19 @@ public:
 		}
 	}
 
+	AllSavestateHookBlocks& getAllSavestateHookBlocks() {
+		return savestateHookBlocks;
+	}
+
+	void setAllSavestateHookBlocks(AllSavestateHookBlocks blocks) {
+		// Called by projectHandler when loading
+		// It has to have at least one block with one input
+		savestateHookBlocks = blocks;
+		setSavestateHook(0);
+	}
+
 	void setCurrentFrame(FrameNum frameNum);
 
-	void addNewFrame();
 	void createSavestateHookHere();
 	void runFrame();
 
@@ -157,6 +170,21 @@ public:
 				viewableInputsCallback(first, last);
 			}
 		}
+	}
+
+	void addNewSavestateHook() {
+		savestateHookBlocks.push_back(std::make_shared<std::vector<FrameData>>());
+		savestateHookBlocks[0]->push_back(std::make_shared<ControllerData>());
+		// NOTE: There must be at least one block with one input when this is loaded
+		// Automatically, the first block is always at index 0
+		setSavestateHook(0);
+	}
+
+	void setSavestateHook(std::size_t index) {
+		inputsList = savestateHookBlocks[index];
+		setCurrentFrame(0);
+		currentRunFrame   = 0;
+		currentImageFrame = 0;
 	}
 
 	const std::shared_ptr<ControllerData> getFrame(FrameNum frame) {
@@ -372,6 +400,10 @@ public:
 		if(IsVisible(afterFrame + 1)) {
 			Refresh();
 		}
+	}
+
+	void addFrameHere() {
+		addFrame(currentFrame);
 	}
 
 	void removeFrames(FrameNum start, FrameNum end) {

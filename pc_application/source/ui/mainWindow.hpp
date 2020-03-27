@@ -51,8 +51,6 @@ private:
 
 	void handlePreviousWindowTransform();
 
-	void getGlobalSettings(rapidjson::Document* d);
-
 	void handleMenuBar(wxCommandEvent& commandEvent);
 
 	void addMenuBar();

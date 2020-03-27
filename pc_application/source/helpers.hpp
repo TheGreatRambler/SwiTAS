@@ -3,6 +3,7 @@
 #define _USE_MATH_DEFINES
 
 #include <cmath>
+#include <fstream>
 #include <numeric>
 #include <rapidjson/document.h>
 #include <sstream>
@@ -19,6 +20,8 @@ namespace HELPERS {
 	std::string joinString(std::vector<std::string> strings, std::string delimiter);
 
 	wxBitmapButton* getBitmapButton(wxWindow* parentFrame, rapidjson::Document* settings, const char* name);
+
+	rapidjson::Document getSettingsFile(std::string filename);
 
 	float normalizeRadian(float angle);
 }

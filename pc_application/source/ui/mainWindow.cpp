@@ -7,11 +7,11 @@ MainWindow::MainWindow()
 	wxImage::AddHandler(new wxPNGHandler());
 	wxImage::AddHandler(new wxJPEGHandler());
 
-	// OwO what's dis?
+	// OwO what dis?
 	SetDoubleBuffered(true);
 
 	// Get the main settings
-	getGlobalSettings(&mainSettings);
+	mainSettings = HELPERS::getSettingsFile("../mainSettings.json");
 
 	wxIcon mainicon;
 	mainicon.LoadFile(HELPERS::resolvePath(mainSettings["programIcon"].GetString()), wxBITMAP_TYPE_PNG);
@@ -133,13 +133,6 @@ void MainWindow::onIdle(wxIdleEvent& event) {
 		// Listen to joystick
 		bottomUI->listenToJoystick();
 	}
-}
-
-void MainWindow::getGlobalSettings(rapidjson::Document* d) {
-	std::ifstream settingsFile("../mainSettings.json");
-	std::string content((std::istreambuf_iterator<char>(settingsFile)), (std::istreambuf_iterator<char>()));
-	// Allow comments in JSON
-	d->Parse<rapidjson::kParseCommentsFlag>(content.c_str());
 }
 
 void MainWindow::addMenuBar() {

@@ -1,14 +1,12 @@
 #include "dataProcessing.hpp"
 #include "buttonData.hpp"
 
-DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, std::shared_ptr<CommunicateWithNetwork> communicateWithNetwork, wxWindow* parent, AllSavestateHookBlocks allBlocks)
+DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, std::shared_ptr<CommunicateWithNetwork> communicateWithNetwork, wxWindow* parent)
 	: wxListCtrl(parent, DataProcessing::LIST_CTRL_ID, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_VIRTUAL | wxLC_HRULES) {
 
 	// All savestate hook blocks
-	savestateHookBlocks = allBlocks;
-	// NOTE: There must be at least one block with one input when this is loaded
-	// Automatically, the first block is always at index 0
-	inputsList = savestateHookBlocks[0];
+	// Start with default, will get cleared later
+	addNewSavestateHook();
 
 	// This can't handle it :(
 	SetDoubleBuffered(false);
@@ -60,13 +58,9 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	//}
 
 	// Set other frames manually, without a function
-	currentRunFrame   = 0;
-	currentImageFrame = 0;
 	// Set the current frame to the first
 	// One frame needs to be added at the very beginning
 	// Heck, I hate segfaults
-	addNewFrame();
-	setCurrentFrame(0);
 
 	// Set item attributes for nice colors
 	setItemAttributes();
@@ -138,8 +132,8 @@ int DataProcessing::OnGetItemColumnImage(long row, long column) const {
 	} else {
 		// Returns index in the imagelist
 		// Need to account for the frame being first
-		Btn button = (Btn)(column - 1);
-		bool on    = getButton(row, button);
+		Btn button    = (Btn)(column - 1);
+		const bool on = const_cast<DataProcessing*>(this)->getButton(row, button);
 		int res;
 		if(on) {
 			// Return index of on image
@@ -170,7 +164,7 @@ wxString DataProcessing::OnGetItemText(long row, long column) const {
 // EXCUSE ME, WUT TODO
 // Why can't I call a const method from a const method hmmm
 wxItemAttr* DataProcessing::OnGetItemAttr(long item) const {
-	return itemAttributes.at(getFramestateInfo(item));
+	return itemAttributes.at(const_cast<DataProcessing*>(this)->getFramestateInfo(item));
 }
 
 void DataProcessing::setItemAttributes() {
@@ -366,27 +360,6 @@ void DataProcessing::setCurrentFrame(FrameNum frameNum) {
 	}
 }
 
-void DataProcessing::addNewFrame() {
-	std::shared_ptr<ControllerData> newControllerData = std::make_shared<ControllerData>();
-	// Set some defaults now
-	SET_BIT(newControllerData->frameState, false, FrameState::RAN);
-	SET_BIT(newControllerData->frameState, false, FrameState::SAVESTATE_HOOK);
-	// Add this to the vector right afteollerData = std::make_shared<ControllerData>();
-	// Set some defaults now
-	SET_BIT(newControllerData->frameState, false, FrameState::RAN);
-	SET_BIT(newControllerData->frameState, false, FrameState::SAVESTATE_HOOK);
-	// Add this to the vector right after the selected frame
-	if(inputsList->size() == 0) {
-		inputsList->push_back(newControllerData);
-	} else {
-		inputsList->insert(inputsList->begin() + currentFrame + 1, newControllerData);
-	}
-	// Because of the usability of virtual list controls, just update the length
-	SetItemCount(inputsList->size());
-	// Dont change the current frame (for now)
-	Refresh();
-}
-
 // THIS NEEDS TO CHANGE COMPLETELY
 void DataProcessing::createSavestateHookHere() {
 	// Add one savestate hook at this frame
@@ -420,10 +393,10 @@ void DataProcessing::runFrame() {
 		Refresh();
 
 		// Send to switch to run
-		std::shared_ptr<ControllerData> controllerData = inputsList->at(currentRunFrame);
+		std::shared_ptr<ControllerData> controllerDatas = inputsList->at(currentRunFrame);
 		// clang-format off
 		ADD_TO_QUEUE(SendRunFrame, networkInstance, {
-			data.controllerData = *controllerData;
+			data.controllerData = *controllerDatas;
 		})
 		// clang-format on
 	}

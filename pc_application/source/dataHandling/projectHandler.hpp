@@ -47,6 +47,10 @@ private:
 
 	void onClickProject(wxCommandEvent& event);
 
+	wxFileName getProjectStart() {
+		return wxFileName::DirName(projectDir.GetNameWithSep());
+	}
+
 public:
 	ProjectHandler(DataProcessing* dataProcessingInstance, rapidjson::Document* settings);
 

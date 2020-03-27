@@ -17,10 +17,11 @@
 
 #include "../../sharedNetworkCode/buttonData.hpp"
 #include "../helpers.hpp"
+#include "buttonConstants.hpp"
 #include "dataProcessing.hpp"
 
-// So that types are somewhat unified
-typedef uint32_t FrameNum;
+// Forward decalre to allow headers to include each other
+class DataProcessing;
 
 class ButtonData {
 private:
@@ -60,45 +61,6 @@ public:
 	static constexpr int32_t axisMin = -30000;
 	static constexpr int32_t axisMax = 30000;
 
-	// Struct containing button info
-	struct ButtonInfo {
-		std::string scriptName;
-		std::string normalName;
-		std::string viewName;
-		wxImage* onIcon;
-		wxImage* offIcon;
-		wxBitmap* onBitmapIcon;
-		wxBitmap* offBitmapIcon;
-		// Resized images for the UI
-		wxBitmap* resizedListOnBitmap;
-		wxBitmap* resizedListOffBitmap;
-		wxBitmap* resizedGridOnBitmap;
-		wxBitmap* resizedGridOffBitmap;
-		// Keybinding
-		wxChar toggleKeybind;
-		// Grid stuff
-		uint8_t gridX;
-		uint8_t gridY;
-	};
-
-	struct SavestateHook {
-		// I don't know what to put here yet
-		uint32_t frame;
-	};
-
-	enum ControllerNumberValues : uint8_t {
-		LEFT_X,
-		LEFT_Y,
-		RIGHT_X,
-		RIGHT_Y,
-		ACCEL_X,
-		ACCEL_Y,
-		ACCEL_Z,
-		GYRO_1,
-		GYRO_2,
-		GYRO_3,
-	};
-
 	const uint8_t KeyWidth  = 11;
 	const uint8_t KeyHeight = 4;
 
@@ -115,9 +77,3 @@ public:
 
 	bool isEmptyControllerData(std::shared_ptr<ControllerData> data);
 };
-
-// Some good typedef's
-
-typedef ButtonData::ButtonInfo ButtonInfo;
-typedef ButtonData::SavestateHook SavestateHook;
-typedef ButtonData::ControllerNumberValues ControllerNumberValues;

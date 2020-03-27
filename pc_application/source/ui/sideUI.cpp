@@ -122,7 +122,7 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* 
 
 void SideUI::onAddFramePressed(wxCommandEvent& event) {
 	// Add frame
-	inputData->addNewFrame();
+	inputData->addFrameHere();
 }
 
 void SideUI::onFrameAdvancePressed(wxCommandEvent& event) {

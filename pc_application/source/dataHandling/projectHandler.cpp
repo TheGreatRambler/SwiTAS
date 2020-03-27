@@ -76,82 +76,138 @@ void ProjectHandler::onClickProject(wxCommandEvent& event) {
 }
 
 void ProjectHandler::loadProject() {
-	wxFileName inputsFileName = wxFileName::DirName(projectDir.GetNameWithSep());
-	inputsFileName.SetName("inputs");
-	inputsFileName.SetExt("bin");
+	wxFileName settingsFileName = getProjectStart();
+	settingsFileName.SetName("settings");
+	settingsFileName.SetExt("json");
 
-	if(inputsFileName.FileExists()) {
-		// Load up the inputs
-		wxString filename = inputsFileName.GetFullPath();
-		wxFFileInputStream inputsFileStream(filename, "rb");
-		wxZlibInputStream inputsDecompressStream(inputsFileStream, wxZLIB_ZLIB | wxZLIB_NO_HEADER);
+	// Load up JSON file with info
+	// First, find each savestate hook block
+	rapidjson::Document jsonSettings = HELPERS::getSettingsFile(settingsFileName.GetFullPath().ToStdString());
 
-		wxMemoryOutputStream dataStream;
-		dataStream.Write(inputsDecompressStream);
+	rapidjson::GenericArray<false, rapidjson::Value> savestateBlocksArray = jsonSettings["savestateBlocks"].GetArray();
+	std::vector<std::string> savestateFileNames(savestateBlocksArray.Size());
 
-		wxStreamBuffer* streamBuffer = dataStream.GetOutputStreamBuffer();
-		uint8_t* bufferPointer       = (uint8_t*)streamBuffer->GetBufferStart();
-		std::size_t bufferSize       = streamBuffer->GetBufferSize();
-
-		// THIS REQUIRES ENTIRELY DIFFERENT FILE HANDLING TODO
-		// Now have to handle by savestate hook block
-
-		std::vector<std::shared_ptr<ControllerData>>* inputsList = dataProcessing->getInputsList();
-
-		// Technically, there's one item in there. Remove it
-		inputsList->clear();
-
-		// Loop through each part and unserialize it
-		// This is 0% endian safe
-		std::size_t sizeRead = 0;
-		while(sizeRead != bufferSize) {
-			// Find the size part first
-			uint8_t sizeOfControllerData = bufferPointer[sizeRead];
-			sizeRead += sizeof(sizeOfControllerData);
-			// Load the data
-			std::shared_ptr<ControllerData> controllerData = std::make_shared<ControllerData>();
-
-			serializeProtocol.binaryToData<ControllerData>(*controllerData, &bufferPointer[sizeRead], sizeOfControllerData);
-			// For now, just add each frame one at a time, no optimization
-			inputsList->push_back(controllerData);
-
-			sizeRead += sizeOfControllerData;
-		}
-
-		// Set the new size and refresh
-		dataProcessing->SetItemCount(inputsList->size());
-		dataProcessing->Refresh();
+	for(auto const& savestateBlock : savestateBlocksArray) {
+		int index                 = savestateBlock["index"].GetInt();
+		savestateFileNames[index] = std::string(savestateBlock["filename"].GetString());
 	}
+
+	// The savestate hooks to create
+	AllSavestateHookBlocks savestateHookBlocks(savestateFileNames.size());
+
+	for(auto const& savestateFileName : savestateFileNames) {
+		wxString path = projectDir.GetNameWithSep() + wxFileName::GetPathSeparator() + wxString(savestateFileName);
+		if(wxFileName(path).FileExists()) {
+
+			// Load up the inputs
+			wxFFileInputStream inputsFileStream(path, "rb");
+			wxZlibInputStream inputsDecompressStream(inputsFileStream, wxZLIB_ZLIB | wxZLIB_NO_HEADER);
+
+			wxMemoryOutputStream dataStream;
+			dataStream.Write(inputsDecompressStream);
+
+			wxStreamBuffer* streamBuffer = dataStream.GetOutputStreamBuffer();
+			uint8_t* bufferPointer       = (uint8_t*)streamBuffer->GetBufferStart();
+			std::size_t bufferSize       = streamBuffer->GetBufferSize();
+
+			// THIS REQUIRES ENTIRELY DIFFERENT FILE HANDLING TODO
+			// Now have to handle by savestate hook block
+
+			SavestateHookBlock block = std::make_shared<std::vector<std::shared_ptr<ControllerData>>>();
+
+			// Loop through each part and unserialize it
+			// This is 0% endian safe
+			std::size_t sizeRead = 0;
+			while(sizeRead != bufferSize) {
+				// Find the size part first
+				uint8_t sizeOfControllerData = bufferPointer[sizeRead];
+				sizeRead += sizeof(sizeOfControllerData);
+				// Load the data
+				std::shared_ptr<ControllerData> controllerData = std::make_shared<ControllerData>();
+
+				serializeProtocol.binaryToData<ControllerData>(*controllerData, &bufferPointer[sizeRead], sizeOfControllerData);
+				// For now, just add each frame one at a time, no optimization
+				block->push_back(controllerData);
+
+				sizeRead += sizeOfControllerData;
+			}
+
+			savestateHookBlocks.push_back(block);
+		}
+	}
+
+	// Set dataProcessing
+	dataProcessing->setAllSavestateHookBlocks(savestateHookBlocks);
 }
 
 void ProjectHandler::saveProject() {
 	// Save each set of data one by one
-	// Serialize the entire vector, first of all, with ZPP
-	std::vector<std::shared_ptr<ControllerData>>* inputsList = dataProcessing->getInputsList();
 
-	wxFileName inputsFileName = wxFileName::DirName(projectDir.GetNameWithSep());
-	inputsFileName.SetName("inputs");
-	inputsFileName.SetExt("bin");
+	AllSavestateHookBlocks& savestateHookBlocks = dataProcessing->getAllSavestateHookBlocks();
 
-	// Delete file if already present and use binary mode
-	wxString filename = inputsFileName.GetFullPath();
-	wxFFileOutputStream inputsFileStream(filename, "wb");
-	wxZlibOutputStream inputsCompressStream(inputsFileStream, compressionLevel, wxZLIB_ZLIB | wxZLIB_NO_HEADER);
+	rapidjson::Document settingsJSON;
+	rapidjson::Value savestateHooksJSON(rapidjson::kArrayType);
 
-	// Kinda annoying, but actually break up the vector and add each part with the size
-	for(auto const& controllerData : *inputsList) {
-		uint8_t* data;
-		std::size_t dataSize;
-		serializeProtocol.dataToBinary<ControllerData>(*controllerData, &data, &dataSize);
-		uint8_t sizeToPrint = (uint8_t)dataSize;
-		// Probably endian issues
-		inputsCompressStream.WriteAll(&sizeToPrint, sizeof(sizeToPrint));
-		inputsCompressStream.WriteAll(data, dataSize);
+	std::size_t index = 0;
+	for(auto const& savestateHookBlock : savestateHookBlocks) {
+
+		wxFileName inputsFileName = getProjectStart();
+		inputsFileName.SetName(wxString::Format("savestate_block_%lld", index));
+		inputsFileName.SetExt("bin");
+
+		// Delete file if already present and use binary mode
+		wxString filename = inputsFileName.GetFullPath();
+		wxFFileOutputStream inputsFileStream(filename, "wb");
+		wxZlibOutputStream inputsCompressStream(inputsFileStream, compressionLevel, wxZLIB_ZLIB | wxZLIB_NO_HEADER);
+
+		// Kinda annoying, but actually break up the vector and add each part with the size
+		for(auto const& controllerData : *savestateHookBlock) {
+			uint8_t* data;
+			std::size_t dataSize;
+			serializeProtocol.dataToBinary<ControllerData>(*controllerData, &data, &dataSize);
+			uint8_t sizeToPrint = (uint8_t)dataSize;
+			// Probably endian issues
+			inputsCompressStream.WriteAll(&sizeToPrint, sizeof(sizeToPrint));
+			inputsCompressStream.WriteAll(data, dataSize);
+		}
+
+		inputsCompressStream.Sync();
+		inputsCompressStream.Close();
+		inputsFileStream.Close();
+
+		// Add the item in the savestateHooks JSON
+		rapidjson::Value savestateHookJSON(rapidjson::kObjectType);
+
+		rapidjson::Value savestateHookPath;
+		wxString path = inputsFileName.GetName();
+		savestateHookPath.SetString(path.c_str(), strlen(path.c_str()), settingsJSON.GetAllocator());
+
+		rapidjson::Value savestateHookIndex;
+		savestateHookIndex.SetUint(index);
+
+		savestateHookJSON.AddMember("filename", savestateHookPath, settingsJSON.GetAllocator());
+		savestateHookJSON.AddMember("index", savestateHookIndex, settingsJSON.GetAllocator());
+
+		savestateHooksJSON.PushBack(savestateHookJSON, settingsJSON.GetAllocator());
+
+		index++;
 	}
 
-	inputsCompressStream.Sync();
-	inputsCompressStream.Close();
-	inputsFileStream.Close();
+	settingsJSON.AddMember("savestateBlocks", savestateHooksJSON, settingsJSON.GetAllocator());
+
+	// Write out the savestate blocks in the settings, TODO, add more
+	wxFileName settingsFileName = getProjectStart();
+	settingsFileName.SetName("settings");
+	settingsFileName.SetExt("json");
+
+	wxFFileOutputStream normalSettings(settingsFileName.GetFullPath(), "w");
+	rapidjson::StringBuffer settingsSb;
+	rapidjson::PrettyWriter<rapidjson::StringBuffer> settingsWriter(settingsSb);
+	settingsWriter.SetIndent('\t', 1);
+	settingsJSON.Accept(settingsWriter);
+
+	normalSettings.WriteAll(settingsSb.GetString(), settingsSb.GetLength());
+	normalSettings.Close();
 
 	rapidjson::GenericArray<false, rapidjson::Value> recentProjectsArray = (*mainSettings)["recentProjects"].GetArray();
 	// Add to recent projects list if not yet there, otherwise modify

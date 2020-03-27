@@ -39,6 +39,15 @@ float HELPERS::normalizeRadian(float angle) {
 	return a >= 0 ? a : (a + 2 * M_PI);
 }
 
+rapidjson::Document HELPERS::getSettingsFile(std::string filename) {
+	rapidjson::Document json;
+	std::ifstream file(filename);
+	std::string content((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
+	// Allow comments in JSON
+	json.Parse<rapidjson::kParseCommentsFlag>(content.c_str());
+	return json;
+}
+
 wxBitmapButton* HELPERS::getBitmapButton(wxWindow* parentFrame, rapidjson::Document* settings, const char* name) {
 	wxImage resizedImage(HELPERS::resolvePath((*settings)["ui"][name].GetString()));
 	resizedImage.Rescale((*settings)["ui"]["buttonWidth"].GetInt(), (*settings)["ui"]["buttonHeight"].GetInt());
