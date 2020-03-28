@@ -2,10 +2,13 @@
 
 #include <arpa/inet.h>
 #include <cstring>
+#include <memory>
 #include <switch.h>
 
 #define SERVER_IMP
 #include "../../sharedNetworkCode/networkInterface.hpp"
+
+#include "controller.hpp"
 
 class MainLoop {
 private:
@@ -15,6 +18,8 @@ private:
 	uint8_t applicationOpened = false;
 
 	Event vsyncEvent;
+
+	std::unique_ptr<ControllerHandler> controller;
 
 	std::shared_ptr<CommunicateWithNetwork> networkInstance;
 

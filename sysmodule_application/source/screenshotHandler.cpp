@@ -47,8 +47,6 @@ void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>
 		jpeg_compress_struct cinfo;
 		jpeg_error_mgr jerr;
 
-		int row_stride;
-
 		cinfo.err = jpeg_std_error(&jerr);
 
 		jpeg_create_compress(&cinfo);

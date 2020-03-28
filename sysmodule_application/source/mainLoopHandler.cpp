@@ -27,6 +27,8 @@ MainLoop::MainLoop() {
 	rc = hiddbgAttachHdlsWorkBuffer();
 	if(R_FAILED(rc))
 		fatalThrow(rc);
+
+	controller = std::make_unique<ControllerHandler>(&vsyncEvent);
 }
 
 void MainLoop::mainLoopHandler() {
@@ -42,6 +44,8 @@ void MainLoop::mainLoopHandler() {
 			if(R_SUCCEEDED(rc)) {
 				gameName = getAppName(applicationProgramId);
 				// Start the whole main loop
+				// Set the application for the controller
+				controller->setApplicationProcessId(applicationProcessId);
 			}
 
 			ADD_TO_QUEUE(RecieveApplicationConnected, networkInstance, {
@@ -77,7 +81,9 @@ void MainLoop::mainLoopHandler() {
 			})
 	}
 
-	svcSleepThread(5e+9);
+	// A reasonable time to sleep the thread
+	// 1 millisecond
+	svcSleepThread(1000000);
 }
 
 char* MainLoop::getAppName(u64 application_id) {
@@ -91,7 +97,7 @@ char* MainLoop::getAppName(u64 application_id) {
 				return languageEntry->name;
 		}
 	}
-	return "Not Defined";
+	return "Game Not Defined";
 }
 
 MainLoop::~MainLoop() {

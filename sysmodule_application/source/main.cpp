@@ -119,28 +119,12 @@ void __attribute__((weak)) __appExit(void) {
 
 // Main program entrypoint
 int main(int argc, char* argv[]) {
-	// Init other services
-	
+
+	MainLoop mainLoop;
 
 	while(true) {
-		Result rc;
-		u64 process_id = 0;
-		u64 program_id = 0;
-		rc             = pmdmntGetApplicationProcessId(&process_id);
-
-		// Lifted from switchPresense-Rewritten
-		if(R_SUCCEEDED(rc)) {
-			rc = pminfoGetProgramId(&program_id, process_id);
-			if(R_SUCCEEDED(rc)) {
-				// char* gameName = getAppName(program_id);
-				// Start the whole main loop
-			}
-		}
-
-		svcSleepThread(5e+9);
+		mainLoop.mainLoopHandler();
 	}
-
-	
 
 	return 0;
 }

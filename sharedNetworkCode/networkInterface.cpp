@@ -99,7 +99,7 @@ void CommunicateWithNetwork::waitForNetworkConnection() {
 			break;
 		}
 		// Wait briefly
-		std::this_thread::sleep_for(std::chrono::nanoseconds(5e+9));
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
 }
 #endif

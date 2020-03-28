@@ -57,22 +57,24 @@ void ControllerHandler::runFrameWithPause(ControllerData controllerData) {
 		}
 	}
 
-	// Unpause application
-	svcCloseHandle(applicationDebug);
-	waitForVsync();
+	unpauseApp();
+
 	setInput();
+	waitForVsync();
 
 	std::string dhashForThisFrame;
 	std::vector<uint8_t> jpegBufferForThisFrame;
 	screenshotHandler.writeFramebuffer(&dhashForThisFrame, &jpegBufferForThisFrame);
 	// Send these to the PC
 
-	// Debug application again
-	rc = svcDebugActiveProcess(&applicationDebug, applicationPID);
+	pauseApp();
 }
 
 void ControllerHandler::setApplicationProcessId(u64 pid) {
 	applicationPID = pid;
+	// Instantly pause the app
+	waitForVsync();
+	pauseApp();
 }
 
 ControllerHandler::~ControllerHandler() {

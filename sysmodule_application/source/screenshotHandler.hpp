@@ -4,6 +4,7 @@
 #define GET_BIT(number, loc) ((number) >> (loc)) & 1U
 
 #include <cstdint>
+#include <cstdio>
 #include <cstring>
 #include <jpeglib.h>
 #include <string>

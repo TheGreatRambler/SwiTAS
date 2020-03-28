@@ -40,7 +40,7 @@ include $(DEVKITPRO)/libnx/switch_rules
 
 TARGET		:=	"nx-TAS-PC"
 BUILD		:=	build
-SOURCES		:=	source
+SOURCES		:=	source ../sharedNetworkCode ../sharedNetworkCode/thirdParty/clsocket
 DATA		:=	data
 INCLUDES	:=	include
 #ROMFS	:=	romfs
@@ -53,11 +53,11 @@ ARCH	:=	-march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE
 CFLAGS	:=	-g -Wall -O2 -ffunction-sections \
 			$(ARCH) $(DEFINES)
 
-CFLAGS	+=	$(INCLUDE) -D__SWITCH__
+CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -D__BSD_VISIBLE -DSERVER_IMP
 
 # Need Cpp11 for certain features
 # It has to be c++14 because of zpp
-CXXFLAGS	:= $(CFLAGS) -std=c++14 -DSERVER_IMP
+CXXFLAGS	:= $(CFLAGS) -std=gnu++14
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)

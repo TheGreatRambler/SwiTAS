@@ -33,6 +33,16 @@ private:
 			fatalThrow(rc);
 	}
 
+	void pauseApp() {
+		// Debug application again
+		rc = svcDebugActiveProcess(&applicationDebug, applicationPID);
+	}
+
+	void unpauseApp() {
+		// Unpause application
+		svcCloseHandle(applicationDebug);
+	}
+
 public:
 	ControllerHandler(Event* vsync);
 
