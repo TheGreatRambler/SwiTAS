@@ -95,6 +95,7 @@ void ProjectHandler::loadProject() {
 	// The savestate hooks to create
 	AllSavestateHookBlocks savestateHookBlocks(savestateFileNames.size());
 
+	std::size_t index = 0;
 	for(auto const& savestateFileName : savestateFileNames) {
 		wxString path = projectDir.GetNameWithSep() + wxFileName::GetPathSeparator() + wxString(savestateFileName);
 		if(wxFileName(path).FileExists()) {
@@ -132,7 +133,8 @@ void ProjectHandler::loadProject() {
 				sizeRead += sizeOfControllerData;
 			}
 
-			savestateHookBlocks.push_back(block);
+			savestateHookBlocks[index] = block;
+			index++;
 		}
 	}
 
@@ -146,6 +148,8 @@ void ProjectHandler::saveProject() {
 	AllSavestateHookBlocks& savestateHookBlocks = dataProcessing->getAllSavestateHookBlocks();
 
 	rapidjson::Document settingsJSON;
+	settingsJSON.SetObject();
+
 	rapidjson::Value savestateHooksJSON(rapidjson::kArrayType);
 
 	std::size_t index = 0;
@@ -175,11 +179,13 @@ void ProjectHandler::saveProject() {
 		inputsCompressStream.Close();
 		inputsFileStream.Close();
 
+		inputsFileName.MakeRelativeTo(projectDir.GetNameWithSep());
+
 		// Add the item in the savestateHooks JSON
 		rapidjson::Value savestateHookJSON(rapidjson::kObjectType);
 
 		rapidjson::Value savestateHookPath;
-		wxString path = inputsFileName.GetName();
+		wxString path = inputsFileName.GetFullPath();
 		savestateHookPath.SetString(path.c_str(), strlen(path.c_str()), settingsJSON.GetAllocator());
 
 		rapidjson::Value savestateHookIndex;

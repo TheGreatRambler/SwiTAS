@@ -132,8 +132,8 @@ int DataProcessing::OnGetItemColumnImage(long row, long column) const {
 	} else {
 		// Returns index in the imagelist
 		// Need to account for the frame being first
-		Btn button    = (Btn)(column - 1);
-		const bool on = const_cast<DataProcessing*>(this)->getButton(row, button);
+		Btn button = (Btn)(column - 1);
+		bool on    = getButton(row, button);
 		int res;
 		if(on) {
 			// Return index of on image
@@ -164,7 +164,7 @@ wxString DataProcessing::OnGetItemText(long row, long column) const {
 // EXCUSE ME, WUT TODO
 // Why can't I call a const method from a const method hmmm
 wxItemAttr* DataProcessing::OnGetItemAttr(long item) const {
-	return itemAttributes.at(const_cast<DataProcessing*>(this)->getFramestateInfo(item));
+	return itemAttributes.at(getFramestateInfo(item));
 }
 
 void DataProcessing::setItemAttributes() {
@@ -408,6 +408,288 @@ bool DataProcessing::handleKeyboardInput(wxChar key) {
 		return true;
 	}
 	return false;
+}
+
+std::shared_ptr<std::vector<std::shared_ptr<ControllerData>>> DataProcessing::getInputsList() {
+	return inputsList;
+}
+
+wxRect DataProcessing::getFirstItemRect() {
+	wxRect itemRect;
+	long topItem = GetTopItem();
+	GetItemRect(topItem, itemRect);
+	return itemRect;
+}
+
+// The class itself is the list control
+// std::shared_ptr<wxGenericListCtrl> getWidget();
+void DataProcessing::onCacheHint(wxListEvent& event) {
+	if(viewableInputsCallback) {
+		long numOfRowsVisible = GetCountPerPage();
+		if(numOfRowsVisible != 0) {
+			// Don't use the event values, they are wrong
+			long first = GetTopItem();
+			long last  = first + numOfRowsVisible;
+
+			viewableInputsCallback(first, last);
+		}
+	}
+}
+
+void DataProcessing::addNewSavestateHook() {
+	savestateHookBlocks.push_back(std::make_shared<std::vector<FrameData>>());
+	savestateHookBlocks[0]->push_back(std::make_shared<ControllerData>());
+	// NOTE: There must be at least one block with one input when this is loaded
+	// Automatically, the first block is always at index 0
+	setSavestateHook(0);
+}
+
+void DataProcessing::setSavestateHook(std::size_t index) {
+	inputsList = savestateHookBlocks[index];
+	SetItemCount(inputsList->size());
+	setCurrentFrame(0);
+	currentRunFrame   = 0;
+	currentImageFrame = 0;
+}
+
+std::shared_ptr<ControllerData> DataProcessing::getFrame(FrameNum frame) const {
+	return inputsList->at(frame);
+}
+
+void DataProcessing::triggerButton(Btn button) {
+	// Trigger button, can occur over range
+	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if(firstSelectedItem != wxNOT_FOUND) {
+		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
+		// Now, apply the button
+		// Usually, just set to the opposite of the currently selected element
+		uint8_t state = !getButton(currentFrame, button);
+		for(FrameNum i = firstSelectedItem; i <= lastSelectedItem; i++) {
+			modifyButton(i, button, state);
+		}
+	}
+}
+
+// This includes joysticks, accel, gyro, etc...
+void DataProcessing::triggerNumberValues(ControllerNumberValues joystickId, int32_t value) {
+	// Trigger joystick, can occur over range
+	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if(firstSelectedItem != wxNOT_FOUND) {
+		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
+		for(FrameNum i = firstSelectedItem; i <= lastSelectedItem; i++) {
+			setNumberValues(i, joystickId, value);
+			// No refresh for now, as the joystick is not visible in the inputsList
+		}
+	}
+}
+
+// New FANCY methods
+void DataProcessing::modifyButton(FrameNum frame, Btn button, uint8_t isPressed) {
+	SET_BIT(inputsList->at(frame)->buttons, isPressed, button);
+
+	invalidateRun(frame);
+	modifyCurrentFrameViews(frame);
+	RefreshItem(frame);
+}
+
+void DataProcessing::toggleButton(FrameNum frame, Btn button) {
+	modifyButton(frame, button, !getButton(frame, button));
+}
+
+void DataProcessing::clearAllButtons(FrameNum frame) {
+	// I think this works
+	inputsList->at(frame)->buttons = 0;
+
+	invalidateRun(frame);
+	modifyCurrentFrameViews(frame);
+	RefreshItem(frame);
+}
+
+void DataProcessing::setNumberValues(FrameNum frame, ControllerNumberValues joystickId, int32_t value) {
+	switch(joystickId) {
+	case ControllerNumberValues::LEFT_X:
+		inputsList->at(frame)->LS_X = value;
+		break;
+	case ControllerNumberValues::LEFT_Y:
+		inputsList->at(frame)->LS_Y = value;
+		break;
+	case ControllerNumberValues::RIGHT_X:
+		inputsList->at(frame)->RS_X = value;
+		break;
+	case ControllerNumberValues::RIGHT_Y:
+		inputsList->at(frame)->RS_Y = value;
+		break;
+	case ControllerNumberValues::ACCEL_X:
+		inputsList->at(frame)->ACCEL_X = value;
+		break;
+	case ControllerNumberValues::ACCEL_Y:
+		inputsList->at(frame)->ACCEL_Y = value;
+		break;
+	case ControllerNumberValues::ACCEL_Z:
+		inputsList->at(frame)->ACCEL_Z = value;
+		break;
+	case ControllerNumberValues::GYRO_1:
+		inputsList->at(frame)->GYRO_1 = value;
+		break;
+	case ControllerNumberValues::GYRO_2:
+		inputsList->at(frame)->GYRO_2 = value;
+		break;
+	case ControllerNumberValues::GYRO_3:
+		inputsList->at(frame)->GYRO_3 = value;
+		break;
+	}
+
+	modifyCurrentFrameViews(frame);
+
+	invalidateRun(frame);
+}
+
+int32_t DataProcessing::getNumberValues(FrameNum frame, ControllerNumberValues joystickId) const {
+	switch(joystickId) {
+	case ControllerNumberValues::LEFT_X:
+		return inputsList->at(frame)->LS_X;
+		break;
+	case ControllerNumberValues::LEFT_Y:
+		return inputsList->at(frame)->LS_Y;
+		break;
+	case ControllerNumberValues::RIGHT_X:
+		return inputsList->at(frame)->RS_X;
+		break;
+	case ControllerNumberValues::RIGHT_Y:
+		return inputsList->at(frame)->RS_Y;
+		break;
+	case ControllerNumberValues::ACCEL_X:
+		return inputsList->at(frame)->ACCEL_X;
+		break;
+	case ControllerNumberValues::ACCEL_Y:
+		return inputsList->at(frame)->ACCEL_Y;
+		break;
+	case ControllerNumberValues::ACCEL_Z:
+		return inputsList->at(frame)->ACCEL_Z;
+		break;
+	case ControllerNumberValues::GYRO_1:
+		return inputsList->at(frame)->GYRO_1;
+		break;
+	case ControllerNumberValues::GYRO_2:
+		return inputsList->at(frame)->GYRO_2;
+		break;
+	case ControllerNumberValues::GYRO_3:
+		return inputsList->at(frame)->GYRO_3;
+		break;
+	}
+}
+
+uint8_t DataProcessing::getButton(FrameNum frame, Btn button) const {
+	return GET_BIT(inputsList->at(frame)->buttons, button);
+}
+
+uint8_t DataProcessing::getButtonCurrent(Btn button) const {
+	return getButton(currentFrame, button);
+}
+
+int32_t DataProcessing::getNumberValueCurrent(ControllerNumberValues joystickId) const {
+	return getNumberValues(currentFrame, joystickId);
+}
+
+// Updates how the current frame looks on the UI
+// Also called when modifying anything of importance, like currentFrame
+void DataProcessing::modifyCurrentFrameViews(FrameNum frame) {
+	// Only update if it is the current frame, as this one has the focus
+	if(frame == currentFrame) {
+		// Refresh this item
+		RefreshItem(currentFrame);
+		// Refresh the grid
+		if(changingSelectedFrameCallback) {
+			changingSelectedFrameCallback(currentFrame, currentRunFrame, currentImageFrame);
+		}
+		if(inputCallback) {
+			// Doesn't matter what arguments
+			inputCallback();
+		}
+	}
+}
+
+void DataProcessing::setFramestateInfo(FrameNum frame, FrameState id, uint8_t state) {
+	SET_BIT(inputsList->at(frame)->frameState, state, id);
+
+	RefreshItem(frame);
+
+	modifyCurrentFrameViews(frame);
+}
+
+uint8_t DataProcessing::getFramestateInfo(FrameNum frame, FrameState id) const {
+	return GET_BIT(inputsList->at(frame)->frameState, id);
+}
+
+// Without the id, just return the whole hog
+uint8_t DataProcessing::getFramestateInfo(FrameNum frame) const {
+	return inputsList->at(frame)->frameState;
+}
+
+void DataProcessing::invalidateRun(FrameNum frame) {
+	while(true) {
+		if(frame == inputsList->size() || !getFramestateInfo(frame, FrameState::RAN)) {
+			// Refresh all these items
+			// I don't care if it's way off the page, I think wxWidgets handles for this
+			Refresh();
+			break;
+		}
+		// Set bit
+		setFramestateInfo(frame, FrameState::RAN, false);
+		frame++;
+	}
+}
+
+void DataProcessing::addFrame(FrameNum afterFrame) {
+	std::shared_ptr<ControllerData> newControllerData = std::make_shared<ControllerData>();
+
+	// Add this to the vector right after the selected frame
+	if(inputsList->size() == 0) {
+		inputsList->push_back(newControllerData);
+	} else {
+		inputsList->insert(inputsList->begin() + afterFrame + 1, newControllerData);
+	}
+
+	setFramestateInfo(afterFrame + 1, FrameState::RAN, false);
+	setFramestateInfo(afterFrame + 1, FrameState::SAVESTATE_HOOK, false);
+
+	// Because of the usability of virtual list controls, just update the length
+	SetItemCount(inputsList->size());
+
+	// Invalidate run for the data immidiently after this frame
+	invalidateRun(afterFrame + 2);
+
+	modifyCurrentFrameViews(afterFrame + 1);
+
+	// Be very careful about refreshing, serious lag can happen if it's done wrong
+	if(IsVisible(afterFrame + 1)) {
+		Refresh();
+	}
+}
+
+void DataProcessing::addFrameHere() {
+	addFrame(currentFrame);
+}
+
+void DataProcessing::removeFrames(FrameNum start, FrameNum end) {
+	auto beginning = inputsList->begin();
+	inputsList->erase(beginning + start, beginning + end + 1);
+
+	// Because of the usability of virtual list controls, just update the length
+	SetItemCount(inputsList->size());
+
+	// Invalidate run for the data immidiently after this frame
+	invalidateRun(start);
+
+	for(FrameNum s = start; s <= end; s++) {
+		modifyCurrentFrameViews(s);
+	}
+
+	Refresh();
+}
+
+std::size_t DataProcessing::getFramesSize() const {
+	return inputsList->size();
 }
 
 DataProcessing::~DataProcessing() {
