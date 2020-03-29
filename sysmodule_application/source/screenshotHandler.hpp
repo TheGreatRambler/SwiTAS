@@ -46,7 +46,7 @@ private:
 	// The number of bytes per hash is 117 with this, 116.25 to be precise
 	static constexpr uint8_t heightOfdhashInput = 30;
 	static constexpr uint8_t widthOfdhashInput  = 32;
-	static constexpr uint16_t sizeOfDhash       = 117;
+	static constexpr uint8_t sizeOfDhash        = 117;
 
 	// Need to find this out
 	static constexpr int jpegQuality = 85;

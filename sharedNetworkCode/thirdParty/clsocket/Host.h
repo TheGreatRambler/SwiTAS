@@ -190,10 +190,13 @@ typedef long int int64;
 #define SOCKET_ERROR_INTERUPT EINTR
 #define SOCKET_ERROR_TIMEDOUT EAGAIN
 #define WRITE(a, b, c) write(a, b, c)
-#define WRITEV(a, b, c) writev(a, b, c)
 #define GETSOCKOPT(a, b, c, d, e) getsockopt((int)a, (int)b, (int)c, (void*)d, (socklen_t*)e)
 #define SETSOCKOPT(a, b, c, d, e) setsockopt((int)a, (int)b, (int)c, (const void*)d, (int)e)
 #define GETHOSTBYNAME(a) gethostbyname(a)
+#endif
+
+#if defined(_LINUX) || defined(_DARWIN)
+#define WRITEV(a, b, c) writev(a, b, c)
 #endif
 
 /*---------------------------------------------------------------------------*/

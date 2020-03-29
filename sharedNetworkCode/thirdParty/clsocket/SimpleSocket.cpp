@@ -483,6 +483,7 @@ bool CSimpleSocket::Flush() {
 // Writev -
 //
 //------------------------------------------------------------------------------
+#ifndef __SWITCH__
 int32 CSimpleSocket::Writev(const struct iovec* pVector, size_t nCount) {
 	int32 nBytes     = 0;
 	int32 nBytesSent = 0;
@@ -506,12 +507,14 @@ int32 CSimpleSocket::Writev(const struct iovec* pVector, size_t nCount) {
 
 	return nBytesSent;
 }
+#endif
 
 //------------------------------------------------------------------------------
 //
 // Send() - Send data on a valid socket via a vector of buffers.
 //
 //------------------------------------------------------------------------------
+#ifndef __SWITCH__
 int32 CSimpleSocket::Send(const struct iovec* sendVector, int32 nNumItems) {
 	SetSocketError(SocketSuccess);
 	m_nBytesSent = 0;
@@ -522,6 +525,7 @@ int32 CSimpleSocket::Send(const struct iovec* sendVector, int32 nNumItems) {
 
 	return m_nBytesSent;
 }
+#endif
 
 //------------------------------------------------------------------------------
 //

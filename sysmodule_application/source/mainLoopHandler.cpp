@@ -8,10 +8,12 @@ MainLoop::MainLoop() {
 			SEND_QUEUE_DATA(RecieveGameInfo)
 			SEND_QUEUE_DATA(RecieveGameFramebuffer)
 			SEND_QUEUE_DATA(RecieveApplicationConnected)
+			SEND_QUEUE_DATA(RecieveLogging)
 		},
 		[](CommunicateWithNetwork* self) {
 			RECIEVE_QUEUE_DATA(SendFlag)
 			RECIEVE_QUEUE_DATA(SendRunFrame)
+			RECIEVE_QUEUE_DATA(SendLogging)
 		});
 
 	ViDisplay disp;
@@ -97,7 +99,7 @@ char* MainLoop::getAppName(u64 application_id) {
 				return languageEntry->name;
 		}
 	}
-	return "Game Not Defined";
+	return (char*)"Game Not Defined";
 }
 
 MainLoop::~MainLoop() {

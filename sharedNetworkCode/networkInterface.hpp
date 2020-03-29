@@ -116,6 +116,8 @@ public:
 	ADD_QUEUE(RecieveGameFramebuffer)
 	ADD_QUEUE(RecieveGameInfo)
 	ADD_QUEUE(SendFlag)
+	ADD_QUEUE(SendLogging)
+	ADD_QUEUE(RecieveLogging)
 	ADD_QUEUE(RecieveFlag)
 	ADD_QUEUE(RecieveApplicationConnected)
 

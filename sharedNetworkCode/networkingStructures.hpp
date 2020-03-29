@@ -22,6 +22,8 @@ enum DataFlag : uint8_t {
 	RecieveGameFramebuffer,
 	RecieveGameInfo,
 	SendFlag,
+	SendLogging,
+	RecieveLogging,
 	RecieveFlag,
 	RecieveApplicationConnected,
 	NUM_OF_FLAGS,
@@ -60,6 +62,14 @@ namespace Protocol {
 	DEFINE_STRUCT(SendFlag,
 		SendInfo actFlag;
 	, self.actFlag)
+
+	DEFINE_STRUCT(SendLogging,
+		std::string log;
+	, self.log)
+
+	DEFINE_STRUCT(RecieveLogging,
+		std::string log;
+	, self.log)
 
 	// Recieve done, with mostly everything as an enum value
 	DEFINE_STRUCT(RecieveFlag,

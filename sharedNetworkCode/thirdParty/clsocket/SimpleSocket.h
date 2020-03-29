@@ -83,9 +83,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 #define IPTOS_LOWDELAY 0x10
-#define O_NONBLOCK 0x800
-#define F_GETFL 3
-#define F_SETFL 4
 #endif
 
 #if defined(_LINUX) || defined(_DARWIN)
@@ -99,9 +96,7 @@
 #include <Ws2tcpip.h>
 #include <io.h>
 #include <winsock2.h>
-
 #define IPTOS_LOWDELAY 0x10
-
 #endif
 
 #include "Host.h"
@@ -257,7 +252,10 @@ public:
 	/// @return number of bytes actually sent, return of zero means the
 	/// connection has been shutdown on the other side, and a return of -1
 	/// means that an error has occurred.
+
+#ifndef __SWITCH__
 	virtual int32 Send(const struct iovec* sendVector, int32 nNumItems);
+#endif
 
 	/// Copies data between one file descriptor and another.
 	/// On some systems this copying is done within the kernel, and thus is
@@ -557,7 +555,10 @@ private:
 	/// @return number of bytes actually sent, return of zero means the
 	/// connection has been shutdown on the other side, and a return of -1
 	/// means that an error has occurred.
+
+#ifndef __SWITCH__
 	int32 Writev(const struct iovec* pVector, size_t nCount);
+#endif
 
 	/// Flush the socket descriptor owned by the object.
 	/// @return true data was successfully sent, else return false;
