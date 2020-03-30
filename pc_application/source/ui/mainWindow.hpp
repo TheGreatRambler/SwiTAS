@@ -5,10 +5,9 @@
 #include <fstream>
 #include <memory>
 #include <rapidjson/document.h>
-#include <rapidjson/stringbuffer.h>
-#include <rapidjson/writer.h>
 #include <string>
 #include <uxtheme.h>
+#include <wx/log.h>
 #include <wx/wx.h>
 
 #define CLIENT_IMP
@@ -43,11 +42,15 @@ private:
 	// Networking stuff
 	std::shared_ptr<CommunicateWithNetwork> networkInstance;
 
+	// Main logging window
+	wxLogWindow* logWindow;
+
 	// Menubar
 	wxMenuBar* menuBar;
 	// Menubar menus
 	wxWindowID selectIPID;
 	wxWindowID setNameID;
+	wxWindowID toggleLoggingID;
 
 	void handlePreviousWindowTransform();
 
@@ -74,8 +77,6 @@ public:
 	void onStart();
 
 	void onClose(wxCloseEvent& event);
-
-	//~MainWindow();
 
 	DECLARE_EVENT_TABLE();
 };

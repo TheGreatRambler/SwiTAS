@@ -2,11 +2,16 @@
 
 #define _USE_MATH_DEFINES
 
+#include <array>
 #include <cmath>
+#include <cstdio>
 #include <fstream>
+#include <iostream>
+#include <memory>
 #include <numeric>
 #include <rapidjson/document.h>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <unistd.h>
 #include <vector>
@@ -24,4 +29,6 @@ namespace HELPERS {
 	rapidjson::Document getSettingsFile(std::string filename);
 
 	float normalizeRadian(float angle);
+
+	std::string exec(const char* cmd);
 }

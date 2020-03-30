@@ -16,7 +16,7 @@ CXX := x86_64-w64-mingw32-g++
 CFLAGS := -std=gnu17
 
 # C++ flags
-CXXFLAGS := -std=gnu++17 $(shell wx-config --cxxflags base,core) -I./include
+CXXFLAGS := -std=gnu++17 $(shell wx-config --cxxflags base,core) $(shell pkg-config --cflags ffms2) -I./include
 
 # C/C++ flags
 # For some reason, the CLIENT_IMP doesn't seem to be passing down, oh well
@@ -32,7 +32,7 @@ endif
 
 # Linker flags (-lpthread needed for threads)
 # Includes some neccessary linker flags for win32-darkmode (will add in the future)
-LDFLAGS := $(shell wx-config --libs base,core --static=yes) -lpthread
+LDFLAGS := $(shell wx-config --libs base,core --static=yes) $(shell pkg-config --libs ffms2) -lpthread
 ifeq ($(OS),Windows_NT)
 	# Needed for sockets on windows
 	LDFLAGS += -lws2_32

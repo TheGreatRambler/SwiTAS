@@ -22,7 +22,7 @@ private:
 	u64 applicationPID;
 
 	void waitForVsync() {
-		rc = eventWait(vsyncEvent, U64_MAX);
+		rc = eventWait(vsyncEvent, UINT64_MAX);
 		if(R_FAILED(rc))
 			fatalThrow(rc);
 	}
@@ -34,14 +34,22 @@ private:
 	}
 
 	void pauseApp() {
-		// Debug application again
-		rc = svcDebugActiveProcess(&applicationDebug, applicationPID);
+		if(!isPaused) {
+			// Debug application again
+			rc       = svcDebugActiveProcess(&applicationDebug, applicationPID);
+			isPaused = true;
+		}
 	}
 
 	void unpauseApp() {
-		// Unpause application
-		svcCloseHandle(applicationDebug);
+		if(isPaused) {
+			// Unpause application
+			svcCloseHandle(applicationDebug);
+			isPaused = false;
+		}
 	}
+
+	uint8_t isPaused = false;
 
 public:
 	ControllerHandler(Event* vsync);
@@ -49,6 +57,11 @@ public:
 	void runFrameWithPause(ControllerData controllerData);
 
 	void setApplicationProcessId(u64 pid);
+
+	void reset() {
+		// For now, just this
+		unpauseApp();
+	}
 
 	~ControllerHandler();
 };

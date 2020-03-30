@@ -68,6 +68,8 @@ void MainLoop::mainLoopHandler() {
 			})
 			// clang-format on
 			applicationOpened = false;
+			// Force unpause to not get user stuck if network cuts out
+			controller->reset();
 		}
 	}
 
