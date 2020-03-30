@@ -1,7 +1,8 @@
 #include "controller.hpp"
 
-ControllerHandler::ControllerHandler(Event* vsync) {
-	vsyncEvent = vsync;
+ControllerHandler::ControllerHandler(Event* vsync, std::shared_ptr<CommunicateWithNetwork> networkImp) {
+	vsyncEvent      = vsync;
+	networkInstance = networkImp;
 
 	// Types include:
 	// - HidDeviceType_FullKey3
@@ -38,10 +39,8 @@ ControllerHandler::ControllerHandler(Event* vsync) {
 	if(R_FAILED(rc))
 		fatalThrow(rc);
 
-	// Update the state
-	rc = hiddbgSetHdlsState(HdlsHandle, &state);
-	if(R_FAILED(rc))
-		fatalThrow(rc);
+	// Update the state with the zero initialized struct
+	setInput();
 }
 
 void ControllerHandler::runFrameWithPause(ControllerData controllerData) {
@@ -57,9 +56,9 @@ void ControllerHandler::runFrameWithPause(ControllerData controllerData) {
 		}
 	}
 
-	unpauseApp();
-
 	setInput();
+
+	unpauseApp();
 	waitForVsync();
 
 	std::string dhashForThisFrame;

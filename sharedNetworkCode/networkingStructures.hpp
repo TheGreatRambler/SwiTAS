@@ -47,7 +47,7 @@ namespace Protocol {
 		ControllerData controllerData;
 	, self.controllerData)
 
-	// Recieve part of the game's framebuffer
+	// Recieve all of the game's framebuffer
 	DEFINE_STRUCT(RecieveGameFramebuffer,
 		std::vector<uint8_t> buf;
 		std::string dHash;

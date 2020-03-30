@@ -30,7 +30,7 @@ MainLoop::MainLoop() {
 	if(R_FAILED(rc))
 		fatalThrow(rc);
 
-	controller = std::make_unique<ControllerHandler>(&vsyncEvent);
+	controller = std::make_unique<ControllerHandler>(&vsyncEvent, networkInstance);
 }
 
 void MainLoop::mainLoopHandler() {
@@ -39,24 +39,24 @@ void MainLoop::mainLoopHandler() {
 	// Lifted from switchPresense-Rewritten
 	if(R_SUCCEEDED(rc)) {
 		// Application connected
-		if(!applicationOpened) {
-			// Get application info
-			char* gameName;
-			rc = pminfoGetProgramId(&applicationProgramId, applicationProcessId);
-			if(R_SUCCEEDED(rc)) {
+		// Get application info
+		char* gameName;
+		rc = pminfoGetProgramId(&applicationProgramId, applicationProcessId);
+		if(R_SUCCEEDED(rc)) {
+			if(!applicationOpened) {
 				gameName = getAppName(applicationProgramId);
+				ADD_TO_QUEUE(RecieveApplicationConnected, networkInstance, {
+					data.applicationName      = std::string(gameName);
+					data.applicationProgramId = applicationProgramId;
+					data.applicationProcessId = applicationProcessId;
+				})
+
+				applicationOpened = true;
+
 				// Start the whole main loop
 				// Set the application for the controller
 				controller->setApplicationProcessId(applicationProcessId);
 			}
-
-			ADD_TO_QUEUE(RecieveApplicationConnected, networkInstance, {
-				data.applicationName      = std::string(gameName);
-				data.applicationProgramId = applicationProgramId;
-				data.applicationProcessId = applicationProcessId;
-			})
-
-			applicationOpened = true;
 		}
 	} else {
 		// I believe this means that there is no application running

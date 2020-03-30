@@ -1,7 +1,9 @@
 #pragma once
 
+#include <memory>
 #include <switch.h>
 
+#include "../../sharedNetworkCode/networkInterface.hpp"
 #include "buttonData.hpp"
 #include "screenshotHandler.hpp"
 
@@ -15,6 +17,7 @@ private:
 	Result rc;
 
 	Event* vsyncEvent;
+	std::shared_ptr<CommunicateWithNetwork> networkInstance;
 
 	ScreenshotHandler screenshotHandler;
 
@@ -23,12 +26,6 @@ private:
 
 	void waitForVsync() {
 		rc = eventWait(vsyncEvent, UINT64_MAX);
-		if(R_FAILED(rc))
-			fatalThrow(rc);
-	}
-
-	void setInput() {
-		rc = hiddbgSetHdlsState(HdlsHandle, &state);
 		if(R_FAILED(rc))
 			fatalThrow(rc);
 	}
@@ -49,10 +46,25 @@ private:
 		}
 	}
 
+	void clearState() {
+		state.buttons                      = 0;
+		state.joysticks[JOYSTICK_LEFT].dx  = 0;
+		state.joysticks[JOYSTICK_LEFT].dy  = 0;
+		state.joysticks[JOYSTICK_RIGHT].dx = 0;
+		state.joysticks[JOYSTICK_RIGHT].dy = 0;
+	}
+
+	void setInput() {
+		rc = hiddbgSetHdlsState(HdlsHandle, &state);
+		if(R_FAILED(rc)) {
+			fatalThrow(rc);
+		}
+	}
+
 	uint8_t isPaused = false;
 
 public:
-	ControllerHandler(Event* vsync);
+	ControllerHandler(Event* vsync, std::shared_ptr<CommunicateWithNetwork> networkImp);
 
 	void runFrameWithPause(ControllerData controllerData);
 

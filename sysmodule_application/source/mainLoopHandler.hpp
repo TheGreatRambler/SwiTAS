@@ -5,9 +5,7 @@
 #include <memory>
 #include <switch.h>
 
-#define SERVER_IMP
 #include "../../sharedNetworkCode/networkInterface.hpp"
-
 #include "controller.hpp"
 
 class MainLoop {

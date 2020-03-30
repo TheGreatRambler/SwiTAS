@@ -127,13 +127,17 @@ void MainWindow::onIdle(wxIdleEvent& event) {
 	if(IsShown()) {
 		// Read queues from the network and do things, TODO
 		if(networkInstance->isConnected()) {
-			/*
-			CHECK_QUEUE(networkInstance, IsPaused, {
-				if(data.isPaused) {
-					// cool
-				}
+			// clang-format off
+			CHECK_QUEUE(networkInstance, RecieveGameFramebuffer, {
+				wxLogMessage("Framebuffer recieved");
 			})
-			*/
+			CHECK_QUEUE(networkInstance, RecieveApplicationConnected, {
+				wxLogMessage("Game opened");
+			})
+			CHECK_QUEUE(networkInstance, RecieveLogging, {
+				wxLogMessage(wxString("SWITCH: " + data.log));
+			})
+			// clang-format on
 		}
 
 		// Listen to joystick
