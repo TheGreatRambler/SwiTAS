@@ -33,6 +33,8 @@ ScreenshotHandler::ScreenshotHandler() {
 }
 
 void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>* jpegBuffer) {
+	// Might need to use this, but would possibly be more inefficent
+	// svcMapProcessMemory
 	// Debug VI before anything
 	rc = svcDebugActiveProcess(&VIdbg, VI_pid);
 	if(R_SUCCEEDED(rc)) {

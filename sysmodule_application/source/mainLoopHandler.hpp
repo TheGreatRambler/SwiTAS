@@ -3,6 +3,7 @@
 #include <arpa/inet.h>
 #include <cstring>
 #include <memory>
+#include <plog/Log.h>
 #include <switch.h>
 
 #include "../../sharedNetworkCode/networkInterface.hpp"

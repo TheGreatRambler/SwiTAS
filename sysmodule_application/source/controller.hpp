@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <plog/Log.h>
 #include <switch.h>
 
 #include "../../sharedNetworkCode/networkInterface.hpp"

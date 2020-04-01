@@ -1,4 +1,5 @@
 #include <map>
+#include <plog/Log.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -54,20 +55,27 @@ void __attribute__((weak)) __appInit(void) {
 		setsysExit();
 	}
 
-	// HID
-	rc = hidInitialize();
-	if(R_FAILED(rc))
-		fatalThrow(MAKERESULT(Module_Libnx, LibnxError_InitFail_HID));
-
-	rc = pmdmntInitialize();
-	if(R_FAILED(rc))
-		fatalThrow(rc);
-
+	// FS
 	rc = fsInitialize();
 	if(R_FAILED(rc))
 		fatalThrow(MAKERESULT(Module_Libnx, LibnxError_InitFail_FS));
 
 	fsdevMountSdmc();
+
+	// VI
+	rc = viInitialize(ViServiceType_Manager);
+	if(R_FAILED(rc))
+		fatalThrow(rc);
+
+	// HID
+	rc = hidInitialize();
+	if(R_FAILED(rc))
+		fatalThrow(MAKERESULT(Module_Libnx, LibnxError_InitFail_HID));
+
+	// PMDMNT
+	rc = pmdmntInitialize();
+	if(R_FAILED(rc))
+		fatalThrow(rc);
 
 	rc = hiddbgInitialize();
 	if(R_FAILED(rc))
@@ -78,10 +86,12 @@ void __attribute__((weak)) __appInit(void) {
 	if(R_FAILED(rc))
 		fatalThrow(rc);
 
+	// NS
 	rc = nsInitialize();
 	if(R_FAILED(rc))
 		fatalThrow(rc);
 
+	// PMINFO
 	rc = pminfoInitialize();
 	if(R_FAILED(rc))
 		fatalThrow(rc);
@@ -101,6 +111,7 @@ void __attribute__((weak)) __appInit(void) {
 		.sb_efficiency = 4,
 	};
 
+	// sockets
 	rc = socketInitialize(&sockConf);
 	if(R_FAILED(rc)) {
 		fatalThrow(rc);
@@ -110,15 +121,29 @@ void __attribute__((weak)) __appInit(void) {
 void __attribute__((weak)) userAppExit(void);
 
 void __attribute__((weak)) __appExit(void) {
-	// Cleanup default services.
+	socketExit();
+	pminfoExit();
+	nsExit();
+	setExit();
+	hiddbgExit();
+	pmdmntExit();
+	hidExit();
+	viExit();
 	fsdevUnmountAll();
 	fsExit();
-	hidExit();
+
 	smExit();
 }
 
 // Main program entrypoint
 int main(int argc, char* argv[]) {
+	remove("/NX-TAS-PC.log");
+	plog::init(plog::debug, "/NX-TAS-PC.log");
+	LOGD << "Started logging";
+
+	// Sleep thread for a test
+	// Gives me 15 seconds to turn off on reboot
+	svcSleepThread((s64)1000000000 * 15);
 
 	MainLoop mainLoop;
 

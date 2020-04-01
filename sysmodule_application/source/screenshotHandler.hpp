@@ -7,6 +7,7 @@
 #include <cstdio>
 #include <cstring>
 #include <jpeglib.h>
+#include <plog/Log.h>
 #include <string>
 #include <switch.h>
 #include <vector>
