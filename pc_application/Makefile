@@ -8,9 +8,14 @@ endif
 BUILD_DIR ?= ./bin
 SRC_DIRS ?= ./source ../sharedNetworkCode
 
+ifeq ($(OS),Windows_NT)
 # Set compilers to MinGW64 compilers
 CC := x86_64-w64-mingw32-gcc
 CXX := x86_64-w64-mingw32-g++
+else
+CC := gcc
+CXX := g++
+endif
 
 # C flags
 CFLAGS := -std=gnu17
@@ -50,7 +55,9 @@ CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
 	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
 	# Copy required DLLs to folder
-	ldd $(BUILD_DIR)/$(TARGET_EXEC) | grep '\/mingw.*\.dll' -o | xargs -I{} cp "{}" $(BUILD_DIR)
+	ifeq ($(OS),Windows_NT)
+		ldd $(BUILD_DIR)/$(TARGET_EXEC) | grep '\/mingw.*\.dll' -o | xargs -I{} cp "{}" $(BUILD_DIR)
+	endif
 
 # assembly
 $(BUILD_DIR)/%.s.o: %.s
