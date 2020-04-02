@@ -1,26 +1,51 @@
 {
-	"configurations": [{
-		"name": "Main",
-		"includePath": [
-			"${workspaceFolder}/include/**"
-		],
-		"defines": [
-			"_DEBUG",
-			"UNICODE",
-			"_UNICODE"
-		],
-		"compilerPath": "C:\\msys2\\mingw64\\bin\\gcc.exe",
-		"cStandard": "c11",
-		"cppStandard": "c++14",
-		"intelliSenseMode": "gcc-x64",
-		"compilerArgs": [],
-		"browse": {
-			"path": [
-				"${workspaceFolder}/**"
+	"configurations": [
+		{
+			"name": "Win32",
+			"includePath": [
+				"${workspaceFolder}/include/**"
 			],
-			"limitSymbolsToIncludedHeaders": true
+			"defines": [
+				"_DEBUG",
+				"UNICODE",
+				"_UNICODE"
+			],
+			"compilerPath": "C:\\msys2\\mingw64\\bin\\gcc.exe",
+			"cStandard": "c11",
+			"cppStandard": "c++14",
+			"intelliSenseMode": "gcc-x64",
+			"compilerArgs": [],
+			"browse": {
+				"path": [
+					"${workspaceFolder}/**"
+				],
+				"limitSymbolsToIncludedHeaders": true
+			},
+			"compileCommands": "${workspaceFolder}/compile_commands.json"
 		},
-		"compileCommands": "${workspaceFolder}/compile_commands.json"
-	}],
+		{
+			"name": "Linux",
+			"includePath": [
+				"${workspaceFolder}/include/**"
+			],
+			"defines": [
+				"_DEBUG",
+				"UNICODE",
+				"_UNICODE"
+			],
+			"compilerPath": "/usr/bin/gcc",
+			"cStandard": "c11",
+			"cppStandard": "c++14",
+			"intelliSenseMode": "gcc-x64",
+			"compilerArgs": [],
+			"browse": {
+				"path": [
+					"${workspaceFolder}/**"
+				],
+				"limitSymbolsToIncludedHeaders": true
+			},
+			"compileCommands": "${workspaceFolder}/compile_commands.json"
+		}
+	],
 	"version": 4
 }
