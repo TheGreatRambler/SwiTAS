@@ -1,33 +1,41 @@
-#pragma once
+#include "applicationMemoryViewer.hpp"
 
-#define __STDC_FORMAT_MACROS
-#define wxHAS_HUGE_FILES
-#include <cstdint>
-#include <inttypes.h>
-#include <mio.hpp>
-#include <system_error>
-#include <wx/file.h>
-#include <wx/filename.h>
-#include <wx/string.h>
+ApplicationMemoryManager::ApplicationMemoryManager(wxDir dir) {
+	projectDir = dir;
+}
 
-class ApplicationMemoryManager {
-private:
-	std::error_code errorCode;
-	mio::mmap_sink memoryFile;
+void ApplicationMemoryManager::setMemoryRegion(uint64_t startByte, uint64_t endByte) {
+	memMappedFile.SetPath(projectDir.GetNameWithSep() wxFileName::GetPathSeparator() + "applicationMemory");
+	// Create dir if needed
+	memMappedFile.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+	memMappedFile.SetName(wxString::Format("byte_%" PRIu64 "_to_byte_%" PRIu64));
+	memMappedFile.SetExt("bin");
 
-	wxFileName memMappedFile;
+	wxFile theFile;
+	// Allow reading and writing by all users
+	theFile.Create(memMappedFile.GetFullPath(), true, wxS_DEFAULT);
+	// Triggers sparse file creation to get the file created at the right size
+	// https://stackoverflow.com/questions/7896035/c-make-a-file-of-a-specific-size
+	theFile.Seek((endByte - startByte) - 1);
+	theFile.Write("", 1);
+	theFile.Close();
 
-public:
-	ApplicationMemoryManager();
+	// Map this file as memory
+	// https://github.com/mandreyel/mio
+	memoryFile = mio::make_mmap_sink(memMappedFile.GetFullPath(), 0, mio::map_entire_file, errorCode);
+}
 
-	// Includes startByte and up to endByte but not including it
-	// This creates a file in the project folder that's memory mapped
-	void setMemoryRegion(uint64_t startByte, uint64_t endByte);
+void ApplicationMemoryManager::getData() {
+	// Set data like a vector
+	// memoryFile[i] = "data";
+	// This is set upon reading the network
+	// This will write the data to the file
+	// memoryFile.sync(errorCode);
+	// Upon being written, the hex editor will read the data on update
+}
 
-	// Data is automatically sent at every pause, but this gets it manually
-	void getData();
-
-	// Signals the switch to stop sending memory and makes getData invalid
-	// This also deletes the memory mapped file
-	void stopMemoryCollection();
+void ApplicationMemoryManager::stopMemoryCollection() {
+	memoryFile.unmap();
+	// Close the file
+	// I don't know how to delete yet
 }
