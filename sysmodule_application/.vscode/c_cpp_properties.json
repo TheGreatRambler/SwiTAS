@@ -1,6 +1,5 @@
 {
-	"configurations": [
-		{
+	"configurations": [{
 			"name": "Linux",
 			"includePath": [
 				"${workspaceFolder}/include/**",
@@ -20,14 +19,14 @@
 			"name": "Win32",
 			"includePath": [
 				"${workspaceFolder}/include/**",
-				"C:/msys2/mingw64/opt/devkitpro/libnx/include/**",
-				"C:/msys2/mingw64/opt/devkitpro/libnx/include/switch/**",
-				"C:/msys2/mingw64/opt/devkitpro/portlibs/switch/include/**"
+				"C:/msys2/opt/devkitpro/libnx/include/**",
+				"C:/msys2/opt/devkitpro/libnx/include/switch/**",
+				"C:/msys2/opt/devkitpro/portlibs/switch/include/**"
 			],
 			"defines": [
 				"__SWITCH__"
 			],
-			"compilerPath": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc",
+			"compilerPath": "C:/msys2/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc",
 			"cStandard": "c11",
 			"cppStandard": "c++14",
 			"intelliSenseMode": "gcc-x64"

@@ -1,5 +1,6 @@
 pc_application/windowsBin
 pc_application/linuxBin
+pc_application/bin
 pc_application/sharedNetworkCode
 pc_application/compile_commands.json
 

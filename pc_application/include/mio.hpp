@@ -1177,7 +1177,7 @@ namespace mio {
 
 		/** Takes ownership of an existing mmap object. */
 		basic_shared_mmap(mmap_type&& mmap)
-			: pimpl_(std::make_shared<mmap_type>(std::move(mmap))) { }
+			: pimpl_(std::make_shared<mmap_type>(std::move(mmap))) {}
 
 		/** Takes ownership of an existing mmap object. */
 		basic_shared_mmap& operator=(mmap_type&& mmap) {
@@ -1187,7 +1187,7 @@ namespace mio {
 
 		/** Initializes this object with an already established shared mmap. */
 		basic_shared_mmap(std::shared_ptr<mmap_type> mmap)
-			: pimpl_(std::move(mmap)) { }
+			: pimpl_(std::move(mmap)) {}
 
 		/** Initializes this object with an already established shared mmap. */
 		basic_shared_mmap& operator=(std::shared_ptr<mmap_type> mmap) {

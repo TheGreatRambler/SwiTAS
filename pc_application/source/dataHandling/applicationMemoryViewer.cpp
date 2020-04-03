@@ -22,7 +22,7 @@ void ApplicationMemoryManager::setMemoryRegion(uint64_t startByte, uint64_t endB
 
 	// Map this file as memory
 	// https://github.com/mandreyel/mio
-	memoryFile = mio::make_mmap_sink(memMappedFile.GetFullPath(), 0, mio::map_entire_file, errorCode);
+	memoryFile = mio::make_mmap_sink(memMappedFile.GetFullPath().ToStdString(), 0, mio::map_entire_file, errorCode);
 }
 
 void ApplicationMemoryManager::getData() {

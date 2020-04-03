@@ -1,19 +1,16 @@
-# A sick universal makefil
-ifeq ($(OS),Windows_NT)
+UNAME := $(shell uname -o)
+
+ifeq ($(UNAME),Msys)
 	TARGET_EXEC ?= nxtas.exe
 else
 	TARGET_EXEC ?= nxtas
 endif
 
-ifeq ($(OS),Windows_NT)
-BUILD_DIR ?= ./windowsBin
-else
-BUILD_DIR ?= ./linuxBin
-endif
+BUILD_DIR ?= ./bin
 
 SRC_DIRS ?= ./source ../sharedNetworkCode
 
-ifeq ($(OS),Windows_NT)
+ifeq ($(UNAME),Msys)
 # Set compilers to MinGW64 compilers
 CC := x86_64-w64-mingw32-gcc
 CXX := x86_64-w64-mingw32-g++
@@ -43,7 +40,7 @@ endif
 # Linker flags (-lpthread needed for threads)
 # Includes some neccessary linker flags for win32-darkmode (will add in the future)
 LDFLAGS := $(shell wx-config --libs base,core) $(shell pkg-config --libs ffms2) -lpthread
-ifeq ($(OS),Windows_NT)
+ifeq ($(UNAME),Msys)
 	# Needed for sockets on windows
 	LDFLAGS += -lws2_32
 endif
@@ -57,12 +54,15 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 
+ifeq ($(UNAME),Msys)
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
 	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
 	# Copy required DLLs to folder
-	ifeq ($(OS),Windows_NT)
-		ldd $(BUILD_DIR)/$(TARGET_EXEC) | grep '\/mingw.*\.dll' -o | xargs -I{} cp "{}" $(BUILD_DIR)
-	endif
+	ldd $(BUILD_DIR)/$(TARGET_EXEC) | grep '\/mingw.*\.dll' -o | xargs -I{} cp "{}" $(BUILD_DIR)
+else
+$(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
+	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
+endif
 
 # assembly
 $(BUILD_DIR)/%.s.o: %.s
