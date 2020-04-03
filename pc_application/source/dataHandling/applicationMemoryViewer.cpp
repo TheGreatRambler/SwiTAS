@@ -1,11 +1,11 @@
 #include "applicationMemoryViewer.hpp"
 
-ApplicationMemoryManager::ApplicationMemoryManager(wxDir dir) {
-	projectDir = dir;
+ApplicationMemoryManager::ApplicationMemoryManager(wxString dir) {
+	projectDir.Open(dir);
 }
 
 void ApplicationMemoryManager::setMemoryRegion(uint64_t startByte, uint64_t endByte) {
-	memMappedFile.SetPath(projectDir.GetNameWithSep() wxFileName::GetPathSeparator() + "applicationMemory");
+	memMappedFile.SetPath(projectDir.GetNameWithSep() + wxFileName::GetPathSeparator() + "applicationMemory");
 	// Create dir if needed
 	memMappedFile.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
 	memMappedFile.SetName(wxString::Format("byte_%" PRIu64 "_to_byte_%" PRIu64));
