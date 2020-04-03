@@ -1,0 +1,100 @@
+Information for device Pro Controller (VID=0x057E PID=0x2009):
+
+Connection Information:
+------------------------------
+Device current bus speed: FullSpeed
+Device supports USB 1.1 specification
+Device supports USB 2.0 specification
+Device address: 0x0008
+Current configuration value: 0x01
+Number of open pipes: 2
+
+Device Descriptor:
+------------------------------
+0x12	bLength
+0x01	bDescriptorType
+0x0200	bcdUSB
+0x00	bDeviceClass      
+0x00	bDeviceSubClass   
+0x00	bDeviceProtocol   
+0x40	bMaxPacketSize0   (64 bytes)
+0x057E	idVendor
+0x2009	idProduct
+0x0200	bcdDevice
+0x01	iManufacturer   "Nintendo Co., Ltd."
+0x02	iProduct   "Pro Controller"
+0x03	iSerialNumber   "000000000001"
+0x01	bNumConfigurations
+
+Configuration Descriptor:
+------------------------------
+0x09	bLength
+0x02	bDescriptorType
+0x0029	wTotalLength   (41 bytes)
+0x01	bNumInterfaces
+0x01	bConfigurationValue
+0x00	iConfiguration
+0xA0	bmAttributes   (Bus-powered Device, Remote-Wakeup)
+0xFA	bMaxPower      (500 mA)
+
+Interface Descriptor:
+------------------------------
+0x09	bLength
+0x04	bDescriptorType
+0x00	bInterfaceNumber
+0x00	bAlternateSetting
+0x02	bNumEndPoints
+0x03	bInterfaceClass      (Human Interface Device Class)
+0x00	bInterfaceSubClass   
+0x00	bInterfaceProtocol   
+0x00	iInterface
+
+HID Descriptor:
+------------------------------
+0x09	bLength
+0x21	bDescriptorType
+0x0111	bcdHID
+0x00	bCountryCode
+0x01	bNumDescriptors
+0x22	bDescriptorType   (Report descriptor)
+0x00CB	bDescriptorLength
+
+Endpoint Descriptor:
+------------------------------
+0x07	bLength
+0x05	bDescriptorType
+0x81	bEndpointAddress  (IN endpoint 1)
+0x03	bmAttributes      (Transfer: Interrupt / Synch: None / Usage: Data)
+0x0040	wMaxPacketSize    (1 x 64 bytes)
+0x08	bInterval         (8 frames)
+
+Endpoint Descriptor:
+------------------------------
+0x07	bLength
+0x05	bDescriptorType
+0x01	bEndpointAddress  (OUT endpoint 1)
+0x03	bmAttributes      (Transfer: Interrupt / Synch: None / Usage: Data)
+0x0040	wMaxPacketSize    (1 x 64 bytes)
+0x08	bInterval         (8 frames)
+
+Microsoft OS Descriptor is not available. Error code: 0x0000001F
+
+String Descriptor Table
+--------------------------------
+Index  LANGID  String
+0x00   0x0000  0x0409 
+0x01   0x0409  "Nintendo Co., Ltd."
+0x02   0x0409  "Pro Controller"
+0x03   0x0409  "000000000001"
+
+------------------------------
+
+Connection path for device: 
+Contrôleur d’hôte compatible xHCI USB
+Root Hub
+Concentrateur USB générique
+Pro Controller (VID=0x057E PID=0x2009) Port: 1
+
+Running on: Windows 10 or greater
+
+Brought to you by TDD v2.11.0, Mar 26 2018, 09:54:50
