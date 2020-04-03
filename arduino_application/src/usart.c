@@ -3,9 +3,9 @@
 #include <stdio.h>
 #include <string.h>
 #include "compat.h"
-#include <libopencm3/stm32/rcc.h>
-#include <libopencm3/stm32/gpio.h>
-#include <libopencm3/stm32/usart.h>
+#include <libopencm3/sam/rcc.h>
+#include <libopencm3/sam/gpio.h>
+#include <libopencm3/sam/usart.h>
 #include "usart.h"
 
 #define UART_DBG 1
