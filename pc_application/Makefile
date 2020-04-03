@@ -5,7 +5,12 @@ else
 	TARGET_EXEC ?= nxtas
 endif
 
-BUILD_DIR ?= ./bin
+ifeq ($(OS),Windows_NT)
+BUILD_DIR ?= ./windowsBin
+else
+BUILD_DIR ?= ./linuxBin
+endif
+
 SRC_DIRS ?= ./source ../sharedNetworkCode
 
 ifeq ($(OS),Windows_NT)
@@ -37,7 +42,7 @@ endif
 
 # Linker flags (-lpthread needed for threads)
 # Includes some neccessary linker flags for win32-darkmode (will add in the future)
-LDFLAGS := $(shell wx-config --libs base,core --static=yes) $(shell pkg-config --libs ffms2) -lpthread
+LDFLAGS := $(shell wx-config --libs base,core) $(shell pkg-config --libs ffms2) -lpthread
 ifeq ($(OS),Windows_NT)
 	# Needed for sockets on windows
 	LDFLAGS += -lws2_32

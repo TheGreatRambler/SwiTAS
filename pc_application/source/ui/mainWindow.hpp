@@ -1,12 +1,14 @@
 #pragma once
 
 //#include "../thirdParty/win32darkmode/DarkMode.h"
+#ifdef _WIN32
 #include <Windows.h>
+#include <uxtheme.h>
+#endif
 #include <fstream>
 #include <memory>
 #include <rapidjson/document.h>
 #include <string>
-#include <uxtheme.h>
 #include <wx/log.h>
 #include <wx/wx.h>
 

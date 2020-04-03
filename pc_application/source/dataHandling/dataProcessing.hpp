@@ -1,6 +1,9 @@
 #pragma once
 
+#ifdef _WIN32
 #include <Windows.h>
+#include <uxtheme.h>
+#endif
 #include <bitset>
 #include <cstdint>
 #include <cstdio>
@@ -12,7 +15,6 @@
 #include <string>
 #include <tuple>
 #include <utility>
-#include <uxtheme.h>
 #include <vector>
 #include <wx/clipbrd.h>
 #include <wx/grid.h>
