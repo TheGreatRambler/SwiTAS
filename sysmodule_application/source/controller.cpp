@@ -72,8 +72,10 @@ void ControllerHandler::runFrameWithPause(ControllerData controllerData) {
 void ControllerHandler::setApplicationProcessId(u64 pid) {
 	applicationPID = pid;
 	// Instantly pause the app
-	waitForVsync();
-	pauseApp();
+	LOGD << "Start pausing app";
+	// TODO implement real stuff
+	// waitForVsync();
+	// pauseApp();
 }
 
 ControllerHandler::~ControllerHandler() {

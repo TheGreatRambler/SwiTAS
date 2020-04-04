@@ -1,8 +1,7 @@
 {
 	"version": "2.0.0",
-	"tasks": [
-		{
-			"label": "Build Debug",
+	"tasks": [{
+			"label": "Build Sysmodule Debug",
 			"type": "shell",
 			"promptOnClose": true,
 			"command": "make DINFO=1 -j4",
@@ -11,18 +10,16 @@
 				"reveal": "always",
 				"panel": "dedicated"
 			},
-			"problemMatcher": [
-				{
-					"base": "$gcc",
-					"fileLocation": [
-						"autoDetect",
-						"${workspaceFolder}"
-					]
-				}
-			]
+			"problemMatcher": [{
+				"base": "$gcc",
+				"fileLocation": [
+					"autoDetect",
+					"${workspaceFolder}"
+				]
+			}]
 		},
 		{
-			"label": "Build Release",
+			"label": "Build Sysmodule Release",
 			"type": "shell",
 			"promptOnClose": true,
 			"command": "make -j4",
@@ -30,15 +27,13 @@
 				"reveal": "always",
 				"panel": "dedicated"
 			},
-			"problemMatcher": [
-				{
-					"base": "$gcc",
-					"fileLocation": [
-						"autoDetect",
-						"${workspaceFolder}"
-					]
-				}
-			],
+			"problemMatcher": [{
+				"base": "$gcc",
+				"fileLocation": [
+					"autoDetect",
+					"${workspaceFolder}"
+				]
+			}],
 			"group": {
 				"kind": "build",
 				"isDefault": true
@@ -53,15 +48,13 @@
 				"reveal": "always",
 				"panel": "dedicated"
 			},
-			"problemMatcher": [
-				{
-					"base": "$gcc",
-					"fileLocation": [
-						"autoDetect",
-						"${workspaceFolder}"
-					]
-				}
-			]
+			"problemMatcher": [{
+				"base": "$gcc",
+				"fileLocation": [
+					"autoDetect",
+					"${workspaceFolder}"
+				]
+			}]
 		}
 	]
 }

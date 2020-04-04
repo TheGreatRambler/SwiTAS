@@ -38,6 +38,8 @@ enum RecieveInfo : uint8_t {
 enum SendInfo : uint8_t {
 	GET_FRAMEBUFFER,
 	GET_GAME_INFO,
+	PAUSE_DEBUG,
+	UNPAUSE_DEBUG,
 };
 
 // clang-format off

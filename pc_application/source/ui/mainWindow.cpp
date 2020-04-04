@@ -79,6 +79,8 @@ void MainWindow::onStart() {
 	wxLog::SetTimestamp(wxS("%Y-%m-%d %H:%M: %S"));
 	wxLog::SetActiveTarget(logWindow);
 
+	debugWindow = new DebugWindow(networkInstance);
+
 	// Now, open the choose project dialog
 	// TODO open this in wxApp because it apparently doesn't work in the constructor
 	Hide();
@@ -150,14 +152,18 @@ void MainWindow::addMenuBar() {
 
 	wxMenu* fileMenu = new wxMenu();
 
-	selectIPID      = NewControlId();
-	setNameID       = NewControlId();
-	toggleLoggingID = NewControlId();
+	selectIPID        = NewControlId();
+	setNameID         = NewControlId();
+	toggleLoggingID   = NewControlId();
+	toggleDebugMenuID = NewControlId();
 	fileMenu->Append(selectIPID, "&Server");
 	fileMenu->Append(setNameID, "&Set Name");
+
 	// Add joystick submenu
 	bottomUI->addJoystickMenu(fileMenu);
+
 	fileMenu->Append(toggleLoggingID, "&Toggle Logging");
+	fileMenu->Append(toggleDebugMenuID, "&Toggle Debug Menu");
 
 	menuBar->Append(fileMenu, "&File");
 
@@ -195,10 +201,11 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 				projectHandler->setProjectName(projectName.ToStdString());
 			}
 		} else if(id == toggleLoggingID) {
-			// Toggle logging window
-			bool isOpen = logWindow->GetFrame()->IsShown();
-			logWindow->Show(!isOpen);
+			logWindow->Show(!logWindow->GetFrame()->IsShown());
 			wxLogMessage("Toggled log window");
+		} else if(id == toggleDebugMenuID) {
+			debugWindow->Show(!debugWindow->IsShown());
+			wxLogMessage("Toggled debug window");
 		}
 	}
 }

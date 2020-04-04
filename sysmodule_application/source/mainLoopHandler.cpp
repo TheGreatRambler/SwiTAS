@@ -39,19 +39,18 @@ MainLoop::MainLoop() {
 }
 
 void MainLoop::mainLoopHandler() {
-	LOGD << "Get application process ID";
 	rc = pmdmntGetApplicationProcessId(&applicationProcessId);
 
 	// Lifted from switchPresense-Rewritten
 	if(R_SUCCEEDED(rc)) {
 		// Application connected
 		// Get application info
-		char* gameName;
 		rc = pminfoGetProgramId(&applicationProgramId, applicationProcessId);
 		if(R_SUCCEEDED(rc)) {
 			if(!applicationOpened) {
-				LOGD << "Application " + std::string(gameName) + " opened";
+				char* gameName;
 				gameName = getAppName(applicationProgramId);
+				LOGD << "Application " + std::string(gameName) + " opened";
 				ADD_TO_QUEUE(RecieveApplicationConnected, networkInstance, {
 					data.applicationName      = std::string(gameName);
 					data.applicationProgramId = applicationProgramId;
@@ -77,8 +76,6 @@ void MainLoop::mainLoopHandler() {
 			})
 			// clang-format on
 			applicationOpened = false;
-			// Force unpause to not get user stuck if network cuts out
-			controller->reset();
 		}
 	}
 
@@ -92,6 +89,9 @@ void MainLoop::mainLoopHandler() {
 			{
 				// blah
 			})
+	} else {
+		// Force unpause to not get user stuck if network cuts out
+		controller->reset();
 	}
 
 	// A reasonable time to sleep the thread
@@ -115,6 +115,9 @@ char* MainLoop::getAppName(u64 application_id) {
 
 MainLoop::~MainLoop() {
 	rc = hiddbgReleaseHdlsWorkBuffer();
+
+	// Make absolutely sure the app is unpaused on close
+	controller->reset();
 
 	hiddbgExit();
 }

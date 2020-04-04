@@ -19,6 +19,7 @@
 #include "../dataHandling/projectHandler.hpp"
 #include "../helpers.hpp"
 #include "bottomUI.hpp"
+#include "debugWindow.hpp"
 #include "sideUI.hpp"
 
 class MainWindow : public wxFrame {
@@ -45,6 +46,8 @@ private:
 
 	// Main logging window
 	wxLogWindow* logWindow;
+	// Main debug command window
+	DebugWindow* debugWindow;
 
 	// Menubar
 	wxMenuBar* menuBar;
@@ -52,6 +55,7 @@ private:
 	wxWindowID selectIPID;
 	wxWindowID setNameID;
 	wxWindowID toggleLoggingID;
+	wxWindowID toggleDebugMenuID;
 
 	void handlePreviousWindowTransform();
 
