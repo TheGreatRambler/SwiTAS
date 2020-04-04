@@ -18,6 +18,7 @@
 #include <vector>
 #include <wx/clipbrd.h>
 #include <wx/grid.h>
+#include <wx/imaglist.h>
 #include <wx/itemattr.h>
 #include <wx/listctrl.h>
 #include <wx/wx.h>

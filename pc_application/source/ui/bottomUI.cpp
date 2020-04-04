@@ -109,10 +109,8 @@ JoystickCanvas::JoystickCanvas(rapidjson::Document* settings, wxFrame* parent, D
 	Bind(wxEVT_LEFT_DOWN, &JoystickCanvas::onMouseClick, this);
 	Bind(wxEVT_MOTION, &JoystickCanvas::onMouseDrag, this);
 
-	xInput->SetMin(ButtonData::axisMin);
-	xInput->SetMax(ButtonData::axisMax);
-	yInput->SetMin(ButtonData::axisMin);
-	yInput->SetMax(ButtonData::axisMax);
+	xInput->SetRange(ButtonData::axisMin, ButtonData::axisMax);
+	yInput->SetRange(ButtonData::axisMin, ButtonData::axisMax);
 
 	inputSizer  = new wxBoxSizer(wxHORIZONTAL);
 	widgetSizer = new wxBoxSizer(wxVERTICAL);

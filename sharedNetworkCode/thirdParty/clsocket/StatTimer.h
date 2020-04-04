@@ -50,7 +50,7 @@
 #include <time.h>
 #endif
 
-#ifdef _LINUX
+#ifdef __linux__
 #include <stdio.h>
 #include <sys/time.h>
 #endif
@@ -74,9 +74,9 @@
 /// This class is designed
 class CStatTimer {
 public:
-	CStatTimer() {};
+	CStatTimer(){};
 
-	~CStatTimer() {};
+	~CStatTimer(){};
 
 	void Initialize() {
 		memset(&m_startTime, 0, sizeof(struct timeval));

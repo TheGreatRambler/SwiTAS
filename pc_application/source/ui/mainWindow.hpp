@@ -12,7 +12,6 @@
 #include <wx/log.h>
 #include <wx/wx.h>
 
-#define CLIENT_IMP
 #include "../../sharedNetworkCode/networkInterface.hpp"
 
 #include "../dataHandling/buttonData.hpp"

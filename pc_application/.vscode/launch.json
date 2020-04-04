@@ -3,47 +3,54 @@
 	// Hover to view descriptions of existing attributes.
 	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
 	"version": "0.2.0",
-	"configurations": [{
-		"name": "(gdb) Pc Application Windows",
-		"type": "cppdbg",
-		"request": "launch",
-		"program": "${workspaceFolder}/bin/nxtas.exe",
-		"args": [],
-		"logging": {
-			"moduleLoad": true,
-			"exceptions": true
+	"configurations": [
+		{
+			"name": "(gdb) Pc Application Windows",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/bin/nxtas.exe",
+			"args": [],
+			"logging": {
+				"moduleLoad": true,
+				"exceptions": true
+			},
+			"stopAtEntry": false,
+			"cwd": "${workspaceFolder}/bin",
+			"environment": [],
+			"externalConsole": true,
+			"MIMode": "gdb",
+			"miDebuggerPath": "gdb.exe",
+			"setupCommands": [
+				{
+					"description": "Enable pretty-printing for gdb",
+					"text": "-enable-pretty-printing",
+					"ignoreFailures": true
+				}
+			]
 		},
-		"stopAtEntry": false,
-		"cwd": "${workspaceFolder}/bin",
-		"environment": [],
-		"externalConsole": true,
-		"MIMode": "gdb",
-		"miDebuggerPath": "gdb.exe",
-		"setupCommands": [{
-			"description": "Enable pretty-printing for gdb",
-			"text": "-enable-pretty-printing",
-			"ignoreFailures": true
-		}]
-	}, {
-		"name": "(gdb) Pc Application Linux",
-		"type": "cppdbg",
-		"request": "launch",
-		"program": "${workspaceFolder}/bin/nxtas.exe",
-		"args": [],
-		"logging": {
-			"moduleLoad": true,
-			"exceptions": true
-		},
-		"stopAtEntry": false,
-		"cwd": "${workspaceFolder}/bin",
-		"environment": [],
-		"externalConsole": true,
-		"MIMode": "gdb",
-		"miDebuggerPath": "gdb",
-		"setupCommands": [{
-			"description": "Enable pretty-printing for gdb",
-			"text": "-enable-pretty-printing",
-			"ignoreFailures": true
-		}]
-	}]
+		{
+			"name": "(gdb) Pc Application Linux",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/bin/nxtas",
+			"args": [],
+			"logging": {
+				"moduleLoad": true,
+				"exceptions": true
+			},
+			"stopAtEntry": false,
+			"cwd": "${workspaceFolder}/bin",
+			"environment": [],
+			"externalConsole": true,
+			"MIMode": "gdb",
+			"miDebuggerPath": "gdb",
+			"setupCommands": [
+				{
+					"description": "Enable pretty-printing for gdb",
+					"text": "-enable-pretty-printing",
+					"ignoreFailures": true
+				}
+			]
+		}
+	]
 }

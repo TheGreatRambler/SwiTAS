@@ -49,7 +49,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
-#if defined(_LINUX) || defined(_DARWIN)
+#if defined(__linux__) || defined(_DARWIN)
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -58,7 +58,7 @@
 #include <sys/socket.h>
 #endif
 
-#ifdef _LINUX
+#ifdef __linux__
 #include <linux/if.h>
 #include <linux/if_ether.h>
 #include <linux/if_packet.h>
@@ -85,7 +85,7 @@
 #define IPTOS_LOWDELAY 0x10
 #endif
 
-#if defined(_LINUX) || defined(_DARWIN)
+#if defined(__linux__) || defined(_DARWIN)
 #include <fcntl.h>
 #include <sys/time.h>
 #include <sys/uio.h>
