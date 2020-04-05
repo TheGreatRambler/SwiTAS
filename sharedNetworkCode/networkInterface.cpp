@@ -47,9 +47,13 @@ void CommunicateWithNetwork::initNetwork() {
 
 #ifdef SERVER_IMP
 	listeningServer.Initialize();
+	LOGD << "Server initialized";
+
+	listeningServer.SetBlocking();
 
 	// Listen on localhost
 	listeningServer.Listen(NULL, SERVER_PORT);
+	LOGD << "Server listening";
 
 	waitForNetworkConnection();
 #endif
@@ -91,12 +95,17 @@ void CommunicateWithNetwork::waitForNetworkConnection() {
 	// This will block INDEFINITELY if there is no client, so
 	// Literally nothing can happen until this finishes
 	while(true) {
+		LOGD << "Waiting for connection";
+		// This will block until an error or otherwise
 		networkConnection = listeningServer.Accept();
 		// We only care about the first connection
 		if(networkConnection != NULL) {
 			// Connection established, stop while looping
 			connectedToSocket = true;
+			LOGD << "Client connected";
 			break;
+		} else {
+			handleSocketError(listeningServer.GetSocketError());
 		}
 		// Wait briefly
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -140,7 +149,12 @@ bool CommunicateWithNetwork::handleSocketError(int res) {
 			// I dunno what to do if failure
 #endif
 		} else if(error != CSimpleSocket::SocketEwouldblock) {
-			puts(networkConnection->DescribeError());
+#ifdef SERVER_IMP
+			LOGD << networkConnection->DescribeError();
+#endif
+#ifdef CLIENT_IMP
+			wxLogMessage(networkConnection->DescribeError());
+#endif
 		}
 		return true;
 	} else {
@@ -164,6 +178,9 @@ void CommunicateWithNetwork::attemptConnectionToServer(std::string ip) {
 #endif
 
 void CommunicateWithNetwork::listenForCommands() {
+#ifdef SERVER_IMP
+	LOGD << "Client has connected";
+#endif
 	// Socket connected, do things
 	// Some info: MSG_WAITALL is needed to make sure the socket waits for the specified amount of
 	// 	data, so this is changed in zed_net

@@ -31,22 +31,6 @@ private:
 			fatalThrow(rc);
 	}
 
-	void pauseApp() {
-		if(!isPaused) {
-			// Debug application again
-			rc       = svcDebugActiveProcess(&applicationDebug, applicationPID);
-			isPaused = true;
-		}
-	}
-
-	void unpauseApp() {
-		if(isPaused) {
-			// Unpause application
-			svcCloseHandle(applicationDebug);
-			isPaused = false;
-		}
-	}
-
 	void clearState() {
 		state.buttons                      = 0;
 		state.joysticks[JOYSTICK_LEFT].dx  = 0;
@@ -70,6 +54,22 @@ public:
 	void runFrameWithPause(ControllerData controllerData);
 
 	void setApplicationProcessId(u64 pid);
+
+	void pauseApp() {
+		if(!isPaused) {
+			// Debug application again
+			rc       = svcDebugActiveProcess(&applicationDebug, applicationPID);
+			isPaused = true;
+		}
+	}
+
+	void unpauseApp() {
+		if(isPaused) {
+			// Unpause application
+			svcCloseHandle(applicationDebug);
+			isPaused = false;
+		}
+	}
 
 	void reset() {
 		// For now, just this

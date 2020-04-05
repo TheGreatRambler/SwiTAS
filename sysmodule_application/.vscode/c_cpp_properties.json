@@ -8,7 +8,8 @@
 				"/opt/devkitpro/portlibs/switch/include/**"
 			],
 			"defines": [
-				"__SWITCH__"
+				"__SWITCH__",
+				"SERVER_IMP"
 			],
 			"compilerPath": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc",
 			"cStandard": "c11",
@@ -24,7 +25,8 @@
 				"C:/msys2/opt/devkitpro/portlibs/switch/include/**"
 			],
 			"defines": [
-				"__SWITCH__"
+				"__SWITCH__",
+				"SERVER_IMP"
 			],
 			"compilerPath": "C:/msys2/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc",
 			"cStandard": "c11",

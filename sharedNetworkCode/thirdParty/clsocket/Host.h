@@ -197,6 +197,7 @@ typedef long int int64;
 
 #if defined(__linux__) || defined(_DARWIN)
 #define WRITEV(a, b, c) writev(a, b, c)
+#define FOPEN(x, y) fopen(x, y)
 #endif
 
 /*---------------------------------------------------------------------------*/
@@ -213,7 +214,6 @@ typedef long int int64;
 #define FERROR(x) ferror(x)
 #define FFLUSH(x) fflush(x)
 #define FILENO(s) fileno(s)
-#define FOPEN(x, y) fopen(x, y)
 //#define FREAD(a,b,c,d)      fread(a, b, c, d)
 #define FSTAT(s, st) fstat(FILENO(s), st)
 //#define FWRITE(a,b,c,d)     fwrite(a, b, c, d)

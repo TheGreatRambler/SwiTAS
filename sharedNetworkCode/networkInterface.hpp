@@ -64,6 +64,12 @@
 #include <functional>
 #include <unistd.h>
 #include <unordered_map>
+#ifdef SERVER_IMP
+#include <plog/Log.h>
+#endif
+#ifdef CLIENT_IMP
+#include <wx/wx.h>
+#endif
 
 #include "include/zpp.hpp"
 #include "include/concurrentqueue.h"

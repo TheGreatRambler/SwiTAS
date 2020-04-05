@@ -15,6 +15,7 @@ private:
 	u64 applicationProcessId  = 0;
 	u64 applicationProgramId  = 0;
 	uint8_t applicationOpened = false;
+	uint8_t internetConnected = false;
 
 	Event vsyncEvent;
 

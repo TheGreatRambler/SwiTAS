@@ -74,8 +74,8 @@ void ControllerHandler::setApplicationProcessId(u64 pid) {
 	// Instantly pause the app
 	LOGD << "Start pausing app";
 	// TODO implement real stuff
-	// waitForVsync();
-	// pauseApp();
+	waitForVsync();
+	pauseApp();
 }
 
 ControllerHandler::~ControllerHandler() {

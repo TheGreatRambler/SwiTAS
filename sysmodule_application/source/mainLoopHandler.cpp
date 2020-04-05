@@ -80,16 +80,34 @@ void MainLoop::mainLoopHandler() {
 	}
 
 	if(networkInstance->isConnected()) {
+		if(!internetConnected) {
+			LOGD << "Internet connected";
+			internetConnected = true;
+		}
+		
 		CHECK_QUEUE(networkInstance, SendRunFrame,
 			{
 				// blah
 			})
 
-		CHECK_QUEUE(networkInstance, SendFlag,
-			{
-				// blah
-			})
+		CHECK_QUEUE(networkInstance, SendFlag, {
+			if(data.actFlag == SendInfo::PAUSE_DEBUG) {
+				if(applicationOpened) {
+					LOGD << "Pause app";
+					controller->pauseApp();
+				}
+			} else if(data.actFlag == SendInfo::UNPAUSE_DEBUG) {
+				if(applicationOpened) {
+					LOGD << "Unpause app";
+					controller->unpauseApp();
+				}
+			}
+		})
 	} else {
+		if(internetConnected) {
+			LOGD << "Internet disconnected";
+			internetConnected = false;
+		}
 		// Force unpause to not get user stuck if network cuts out
 		controller->reset();
 	}
