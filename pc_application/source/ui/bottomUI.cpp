@@ -495,6 +495,7 @@ void BottomUI::onJoystickMenuOpen(wxMenuEvent& event) {
 		wxJoystick* joy = new wxJoystick(i);
 		// wxString name   = joy->GetProductName();
 		wxString printString = getJoyHexString(joy);
+		// TODO for the name, use this https://forums.wxwidgets.org/viewtopic.php?f=1&t=46931&p=197440#p197459
 		joystickSubMenu->Append(i + joystickSubmenuIDBase, printString);
 		// Delete it because it doesn't need to be used right now
 		delete joy;

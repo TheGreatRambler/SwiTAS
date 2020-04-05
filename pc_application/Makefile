@@ -46,7 +46,7 @@ ifeq ($(UNAME),Msys)
 endif
 
 SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
-OBJS := $(subst ..,.,$(SRCS:%=$(BUILD_DIR)/%.o))
+OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)
 
 INC_DIRS := $(shell find $(SRC_DIRS) -type d)
@@ -56,12 +56,14 @@ CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 
 ifeq ($(UNAME),Msys)
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
-	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
+	$(eval MOVED_OBJS := $(subst ..,.,$(OBJS)))
+	$(CXX) $(MOVED_OBJS) -o $@ $(LDFLAGS)
 	# Copy required DLLs to folder
 	ldd $(BUILD_DIR)/$(TARGET_EXEC) | grep '\/mingw.*\.dll' -o | xargs -I{} cp "{}" $(BUILD_DIR)
 else
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
-	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
+	$(eval MOVED_OBJS := $(subst ..,.,$(OBJS)))
+	$(CXX) $(MOVED_OBJS) -o $@ $(LDFLAGS)
 endif
 
 # assembly
