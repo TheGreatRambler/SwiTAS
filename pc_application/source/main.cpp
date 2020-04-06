@@ -8,20 +8,22 @@
 
 class MainApp : public wxApp {
 private:
-	MainWindow window;
+	MainWindow* window;
 
 public:
 	virtual bool OnInit() {
+		window = new MainWindow();
+
 		puts("App starting");
-		window.Show(true);
+		window->Show(true);
 		puts("Window opened");
-		window.onStart();
+		window->onStart();
 		return true;
 	}
 
 	int OnExit() {
 		// Wait for the network thread to end
-		window.endNetworking();
+		window->endNetworking();
 		// No errors, return 0
 		return 0;
 	}
