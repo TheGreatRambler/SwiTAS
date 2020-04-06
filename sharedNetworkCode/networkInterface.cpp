@@ -132,6 +132,7 @@ bool CommunicateWithNetwork::handleSocketError(int res) {
 			// More errors may need to be checked here
 			connectedToSocket = false;
 #ifdef SERVER_IMP
+			LOGD << "Have to restart server";
 			networkConnection->Close();
 			delete networkConnection;
 			// The server will just block while listening for a new connection

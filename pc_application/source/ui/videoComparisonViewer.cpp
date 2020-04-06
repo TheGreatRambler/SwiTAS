@@ -15,6 +15,9 @@ void VideoComparisonViewer::displayVideoFormats(std::string url) {
 		// Check thing.json for an example
 		std::string formatString = format["format"].GetString();
 		int formatID             = format["format_id"].GetInt();
-		// If data contains `audio only`, ignore it
+		
+		if (format["format_note"].GetString() != "tiny") {
+			// Tiny means it only supports audio
+		}
 	}
 }
