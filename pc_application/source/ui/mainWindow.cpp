@@ -96,7 +96,7 @@ void MainWindow::onStart() {
 BEGIN_EVENT_TABLE(MainWindow, wxFrame)
 	EVT_CHAR_HOOK(MainWindow::keyDownHandler)
 	EVT_SIZE(MainWindow::OnSize)
-    EVT_IDLE(MainWindow::onIdle)
+	EVT_IDLE(MainWindow::onIdle)
 	EVT_CLOSE(MainWindow::onClose)
 END_EVENT_TABLE()
 // clang-format on

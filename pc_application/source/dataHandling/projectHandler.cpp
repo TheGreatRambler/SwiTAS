@@ -25,7 +25,9 @@ ProjectHandler::ProjectHandler(DataProcessing* dataProcessingInstance, rapidjson
 	std::size_t listboxIndex = 0;
 
 	for(auto const& recentProject : recentProjectsArray) {
-		wxString recentProjectItem = wxString::Format("%s - %s", wxString::FromUTF8(recentProject["projectName"].GetString()), wxString::FromUTF8(recentProject["projectDirectory"].GetString()));
+		wxString projectName       = wxString::FromUTF8(recentProject["projectName"].GetString());
+		wxString productDirectory  = wxString::FromUTF8(recentProject["projectDirectory"].GetString());
+		wxString recentProjectItem = wxString::Format("%s - %s", projectName, productDirectory);
 		listboxItems[listboxIndex] = recentProjectItem;
 		listboxIndex++;
 	}
