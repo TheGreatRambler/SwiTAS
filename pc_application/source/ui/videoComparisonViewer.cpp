@@ -16,8 +16,6 @@ VideoComparisonViewer::VideoComparisonViewer() {
 	urlInput->Bind(wxEVT_TEXT_ENTER, &VideoComparisonViewer::displayVideoFormats, this);
 	videoFormatsList->Bind(wxEVT_LISTBOX, &VideoComparisonViewer::onFormatSelection, this);
 
-	Bind(wxEVT_END_PROCESS, &VideoComparisonViewer::onVideoDownloaded, this);
-
 	videoCanvas = new DrawingCanvasBitmap(this, wxDefaultSize);
 
 	mainSizer->Add(urlInput, 0, wxEXPAND | wxALL);
@@ -39,10 +37,53 @@ VideoComparisonViewer::VideoComparisonViewer() {
 	Layout();
 }
 
+// clang-format off
+BEGIN_EVENT_TABLE(VideoComparisonViewer, wxFrame)
+	EVT_IDLE(VideoComparisonViewer::onIdle)
+    EVT_END_PROCESS(VideoComparisonViewer::onCommandDone)
+END_EVENT_TABLE()
+// clang-format on
+
+void VideoComparisonViewer::onIdle(wxIdleEvent& event) {
+	// Check command output
+	if(currentRunningCommand != RUNNING_COMMAND::NO_COMMAND) {
+		wxInputStream* inputStream = commandProcess->GetInputStream();
+		if(inputStream->CanRead()) {
+			consoleLog->Show(true);
+
+			char buffer[BUFSIZE];
+			std::size_t count = -1;
+			wxString text;
+			// https://forums.wxwidgets.org/viewtopic.php?t=24390#p104181
+			while(!inputStream->Eof() && count != 0) {
+				inputStream->Read(buffer, BUFSIZE - 1);
+				count = inputStream->LastRead();
+				if(count > 0) {
+					text.Append(buffer, count);
+				}
+			}
+
+			consoleLog->AppendText(text);
+		}
+	}
+}
+
+void VideoComparisonViewer::onCommandDone(wxProcessEvent& event) {
+	if(currentRunningCommand == RUNNING_COMMAND::DOWNLOAD_VIDEO) {
+		// Finished downloading video
+		currentRunningCommand = RUNNING_COMMAND::NO_COMMAND;
+		delete commandProcess;
+		commandProcess = nullptr;
+
+		parseVideo();
+	}
+}
+
 void VideoComparisonViewer::displayVideoFormats(wxCommandEvent& event) {
 	url = urlInput->GetLineText(0).ToStdString();
 	wxURL urlData;
 	if(urlData.SetURL(url) == wxURL_NOERR) {
+		// All these commands will block, which could be a problem for bad internet connections
 		std::string videoName = HELPERS::exec(("youtube-dl --get-filename -o '%(title)s.%(ext)s' " + url).c_str());
 		// Replace spaces with underscores
 		std::replace(videoName.begin(), videoName.end(), ' ', '_');
@@ -54,19 +95,17 @@ void VideoComparisonViewer::displayVideoFormats(wxCommandEvent& event) {
 		// First, get a temp file
 		wxString tempJsonLocation = wxFileName::CreateTempFileName("json-data");
 		// Dump data into file
+		// This will block, so hopefully the internet is good
 		HELPERS::exec(("youtube-dl -j '" + url + "' > " + tempJsonLocation.ToStdString()).c_str());
 		// Read data
 		rapidjson::Document jsonData = HELPERS::getSettingsFile(tempJsonLocation.ToStdString());
-		// TODO print info
 		// For now, loop through formats
 		int i = 0;
 		for(auto const& format : jsonData["formats"].GetArray()) {
 			// Check thing.json for an example
-			std::string formatString = format["format"].GetString();
-			int formatID             = strtol(format["format_id"].GetString(), nullptr, 10);
-
 			if(strcmp(format["format_note"].GetString(), "tiny") != 0) {
 				// Tiny means it only supports audio, we want video
+				int formatID        = strtol(format["format_id"].GetString(), nullptr, 10);
 				int width           = format["width"].GetInt();
 				int height          = format["height"].GetInt();
 				int fps             = format["fps"].GetInt();
@@ -86,21 +125,14 @@ void VideoComparisonViewer::displayVideoFormats(wxCommandEvent& event) {
 void VideoComparisonViewer::onFormatSelection(wxCommandEvent& event) {
 	int selectedFormat = formatsArray[event.GetInt()];
 	// Streaming download from youtube-dl
-	wxProcess* downloadProcess = new wxProcess(this);
-	downloadProcess->Redirect();
-	wxStdInputStreamBuffer* consoleOutputStream = new wxStdInputStreamBuffer(*downloadProcess->GetInputStream());
-	redirectOutput                              = new wxStreamToTextRedirector(consoleLog, new std::ostream(consoleOutputStream));
+	wxProcess* commandProcess = new wxProcess(this);
+	commandProcess->Redirect();
 
-	// Show console
-	consoleLog->Show(true);
 	// This will run and the progress will be seen in console
 	long pid = wxExecute(wxString::Format("youtube-dl -f %d -o %s '%s'", selectedFormat, wxString::FromUTF8(fullVideoPath), url), wxEXEC_ASYNC | wxEXEC_HIDE_CONSOLE, downloadProcess);
 }
 
-void VideoComparisonViewer::onVideoDownloaded(wxProcessEvent& event) {
-	// Downloaded, so hide console
-	delete redirectOutput;
-	// consoleLog->Show(false);
+void VideoComparisonViewer::parseVideo() {
 	// https://github.com/FFMS/ffms2/blob/master/doc/ffms2-api.md
 	FFMS_Indexer* videoIndexer = FFMS_CreateIndexer(fullVideoPath.c_str(), &ffms2Errinfo);
 	if(videoIndexer == NULL) {
@@ -137,18 +169,20 @@ void VideoComparisonViewer::onVideoDownloaded(wxProcessEvent& event) {
 	videoCanvas->SetSize(videoDimensions);
 
 	int pixfmts[2];
-	pixfmts[0] = FFMS_GetPixFmt("rgb");
+	pixfmts[0] = FFMS_GetPixFmt("rgb24");
 	pixfmts[1] = -1;
 
 	if(FFMS_SetOutputFormatV2(videosource, pixfmts, propframe->EncodedWidth, propframe->EncodedHeight, FFMS_RESIZER_BICUBIC, &ffms2Errinfo)) {
 		printFfms2Error();
 		return;
 	}
+	consoleLog->Show(false);
 
 	drawFrame(0);
 }
 
 void VideoComparisonViewer::drawFrame(int frame) {
+	consoleLog->Show(false);
 	const FFMS_Frame* curframe = FFMS_GetFrame(videosource, frame, &ffms2Errinfo);
 	if(curframe == NULL) {
 		printFfms2Error();
@@ -173,6 +207,7 @@ void VideoComparisonViewer::drawFrame(int frame) {
 		++p;
 	}
 
+	// The canvas will consume the bitmap
 	videoCanvas->setBitmap(videoFrame);
 
 	videoCanvas->Show(true);

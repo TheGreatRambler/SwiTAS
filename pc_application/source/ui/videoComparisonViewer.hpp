@@ -1,5 +1,7 @@
 #pragma once
 
+#define BUFSIZE 8192
+
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
@@ -23,6 +25,11 @@
 // Requires Youtube-DL to be downloaded
 class VideoComparisonViewer : public wxFrame {
 private:
+	enum RUNNING_COMMAND : uint8_t {
+        NO_COMMAND,
+        DOWNLOAD_VIDEO,
+    }
+
 	wxBoxSizer* mainSizer;
 
 	wxTextCtrl* urlInput;
@@ -35,7 +42,9 @@ private:
 
 	// Needs to be set by something, without trailing slash
 	wxString projectDir;
-	wxStreamToTextRedirector* redirectOutput;
+
+	wxProcess* commandProcess;
+	RUNNING_COMMAND currentRunningCommand = RUNNING_COMMAND::NO_COMMAND;
 
 	std::vector<int> formatsArray;
 
@@ -47,7 +56,8 @@ private:
 	wxSize videoDimensions;
 	DrawingCanvasBitmap* videoCanvas;
 
-	void onVideoDownloaded(wxProcessEvent& event);
+	void onCommandDone(wxProcessEvent& event);
+
 	int FFMS_CC onIndexingProgress(int64_t current, int64_t total, void* unused) {
 		consoleLog->AppendText(wxString::Format("%lu bytes of %lu bytes indexed\n", current, total));
 	}
@@ -55,12 +65,18 @@ private:
 		consoleLog->AppendText(wxString::Format("FFMS2 error: %s\n", wxString(ffms2Errinfo.Buffer)));
 	}
 
+	void parseVideo();
+
 	void drawFrame(int frame);
 
 	void displayVideoFormats(wxCommandEvent& event);
 
 	void onFormatSelection(wxCommandEvent& event);
 
+	void onIdle(wxIdleEvent& event);
+
 public:
 	VideoComparisonViewer();
+
+	DECLARE_EVENT_TABLE();
 };
