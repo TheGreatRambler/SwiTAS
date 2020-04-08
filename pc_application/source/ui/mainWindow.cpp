@@ -10,6 +10,9 @@ MainWindow::MainWindow()
 	// OwO what dis?
 	SetDoubleBuffered(true);
 
+	// Initialize FFMS2 because it can only happen once
+	FFMS_Init(0, 0);
+
 	// Get the main settings
 	mainSettings = HELPERS::getSettingsFile("../mainSettings.json");
 
@@ -216,6 +219,9 @@ void MainWindow::onClose(wxCloseEvent& event) {
 	projectHandler->Destroy();
 
 	delete wxLog::SetActiveTarget(NULL);
+
+	// TODO, this raises errors for some reason
+	// FFMS_Deinit();
 
 	Destroy();
 }

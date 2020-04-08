@@ -5,6 +5,7 @@
 #include <Windows.h>
 #include <uxtheme.h>
 #endif
+#include <ffms.h>
 #include <fstream>
 #include <memory>
 #include <rapidjson/document.h>

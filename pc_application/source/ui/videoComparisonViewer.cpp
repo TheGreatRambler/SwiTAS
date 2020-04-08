@@ -1,6 +1,10 @@
 #include "videoComparisonViewer.hpp"
 
 VideoComparisonViewer::VideoComparisonViewer() {
+	ffms2Errinfo.Buffer     = ffms2Errmsg;
+	ffms2Errinfo.BufferSize = sizeof(ffms2Errmsg);
+	ffms2Errinfo.ErrorType  = FFMS_ERROR_SUCCESS;
+	ffms2Errinfo.SubType    = FFMS_ERROR_SUCCESS;
 
 	mainSizer = new wxBoxSizer(wxVERTICAL);
 
@@ -14,13 +18,17 @@ VideoComparisonViewer::VideoComparisonViewer() {
 
 	Bind(wxEVT_END_PROCESS, &VideoComparisonViewer::onVideoDownloaded, this);
 
+	videoCanvas = new DrawingCanvasBitmap(this, wxDefaultSize);
+
 	mainSizer->Add(urlInput, 0, wxEXPAND | wxALL);
 	mainSizer->Add(videoFormatsList, 0, wxEXPAND | wxALL);
 	mainSizer->Add(consoleLog, 0, wxEXPAND | wxALL);
+	mainSizer->Add(videoCanvas, 0, wxSHAPED | wxEXPAND | wxALIGN_CENTER_HORIZONTAL);
 
 	// Hide by default
 	videoFormatsList->Show(false);
 	consoleLog->Show(true);
+	videoCanvas->Show(false);
 
 	SetSizer(mainSizer);
 	mainSizer->SetSizeHints(this);
@@ -33,39 +41,46 @@ VideoComparisonViewer::VideoComparisonViewer() {
 
 void VideoComparisonViewer::displayVideoFormats(wxCommandEvent& event) {
 	url = urlInput->GetLineText(0).ToStdString();
-	formatsArray.clear();
-	// Due to this https://forums.wxwidgets.org/viewtopic.php?t=20321
-	videoFormatsList->Deselect(videoFormatsList->GetSelection());
-	videoFormatsList->Clear();
-	// First, get a temp file
-	wxString tempJsonLocation = wxFileName::CreateTempFileName("json-data");
-	// Dump data into file
-	HELPERS::exec(("youtube-dl -j '" + url + "' > " + tempJsonLocation.ToStdString()).c_str());
-	// Read data
-	rapidjson::Document jsonData = HELPERS::getSettingsFile(tempJsonLocation.ToStdString());
-	// TODO print info
-	// For now, loop through formats
-	int i = 0;
-	for(auto const& format : jsonData["formats"].GetArray()) {
-		// Check thing.json for an example
-		std::string formatString = format["format"].GetString();
-		int formatID             = strtol(format["format_id"].GetString(), nullptr, 10);
+	wxURL urlData;
+	if(urlData.SetURL(url) == wxURL_NOERR) {
+		std::string videoName = HELPERS::exec(("youtube-dl --get-filename -o '%(title)s.%(ext)s' " + url).c_str());
+		// Replace spaces with underscores
+		std::replace(videoName.begin(), videoName.end(), ' ', '_');
+		fullVideoPath = projectDir.ToStdString() + "/videos/" + videoName;
+		formatsArray.clear();
+		// Due to this https://forums.wxwidgets.org/viewtopic.php?t=20321
+		videoFormatsList->Deselect(videoFormatsList->GetSelection());
+		videoFormatsList->Clear();
+		// First, get a temp file
+		wxString tempJsonLocation = wxFileName::CreateTempFileName("json-data");
+		// Dump data into file
+		HELPERS::exec(("youtube-dl -j '" + url + "' > " + tempJsonLocation.ToStdString()).c_str());
+		// Read data
+		rapidjson::Document jsonData = HELPERS::getSettingsFile(tempJsonLocation.ToStdString());
+		// TODO print info
+		// For now, loop through formats
+		int i = 0;
+		for(auto const& format : jsonData["formats"].GetArray()) {
+			// Check thing.json for an example
+			std::string formatString = format["format"].GetString();
+			int formatID             = strtol(format["format_id"].GetString(), nullptr, 10);
 
-		if(format["format_note"].GetString() != "tiny") {
-			// Tiny means it only supports audio, we want video
-			int width           = format["width"].GetInt();
-			int height          = format["height"].GetInt();
-			int fps             = format["fps"].GetInt();
-			wxString formatItem = wxString::Format("%dx%d, %d fps", width, height, fps);
-			videoFormatsList->InsertItems(1, &formatItem, i);
+			if(strcmp(format["format_note"].GetString(), "tiny") != 0) {
+				// Tiny means it only supports audio, we want video
+				int width           = format["width"].GetInt();
+				int height          = format["height"].GetInt();
+				int fps             = format["fps"].GetInt();
+				wxString formatItem = wxString::Format("%dx%d, %d fps", width, height, fps);
+				videoFormatsList->InsertItems(1, &formatItem, i);
 
-			formatsArray[i] = formatID;
-			i++;
+				formatsArray[i] = formatID;
+				i++;
+			}
 		}
-	}
 
-	remove(tempJsonLocation.c_str());
-	videoFormatsList->Show(true);
+		remove(tempJsonLocation.c_str());
+		videoFormatsList->Show(true);
+	}
 }
 
 void VideoComparisonViewer::onFormatSelection(wxCommandEvent& event) {
@@ -78,13 +93,88 @@ void VideoComparisonViewer::onFormatSelection(wxCommandEvent& event) {
 
 	// Show console
 	consoleLog->Show(true);
-	long pid = wxExecute(wxString::Format("youtube-dl -f %d -o %s/videos/%(title)s.%(ext)s '%s'", selectedFormat, projectDir, url), wxEXEC_ASYNC | wxEXEC_HIDE_CONSOLE, downloadProcess);
+	// This will run and the progress will be seen in console
+	long pid = wxExecute(wxString::Format("youtube-dl -f %d -o %s '%s'", selectedFormat, wxString::FromUTF8(fullVideoPath), url), wxEXEC_ASYNC | wxEXEC_HIDE_CONSOLE, downloadProcess);
 }
 
 void VideoComparisonViewer::onVideoDownloaded(wxProcessEvent& event) {
 	// Downloaded, so hide console
 	delete redirectOutput;
-	consoleLog->Show(false);
-	// Video downloaded, open ffms2
-	// The location is in youtube-dl output somewhere
+	// consoleLog->Show(false);
+	// https://github.com/FFMS/ffms2/blob/master/doc/ffms2-api.md
+	FFMS_Indexer* videoIndexer = FFMS_CreateIndexer(fullVideoPath.c_str(), &ffms2Errinfo);
+	if(videoIndexer == NULL) {
+		printFfms2Error();
+		return;
+	}
+	FFMS_SetProgressCallback(videoIndexer, this->onIndexingProgress, NULL);
+
+	FFMS_Index* index = FFMS_DoIndexing2(videoIndexer, FFMS_IEH_ABORT, &ffms2Errinfo);
+	if(index == NULL) {
+		printFfms2Error();
+		return;
+	}
+
+	int trackno = FFMS_GetFirstTrackOfType(index, FFMS_TYPE_VIDEO, &ffms2Errinfo);
+	if(trackno < 0) {
+		printFfms2Error();
+		return;
+	}
+
+	videosource = FFMS_CreateVideoSource(fullVideoPath.c_str(), trackno, index, 1, FFMS_SEEK_NORMAL, &ffms2Errinfo);
+	if(videosource == NULL) {
+		printFfms2Error();
+		return;
+	}
+
+	FFMS_DestroyIndex(index);
+
+	videoprops                  = FFMS_GetVideoProperties(videosource);
+	const FFMS_Frame* propframe = FFMS_GetFrame(videosource, 0, &ffms2Errinfo);
+
+	videoDimensions.SetWidth(propframe->EncodedWidth);
+	videoDimensions.SetHeight(propframe->EncodedHeight);
+	videoCanvas->SetSize(videoDimensions);
+
+	int pixfmts[2];
+	pixfmts[0] = FFMS_GetPixFmt("rgb");
+	pixfmts[1] = -1;
+
+	if(FFMS_SetOutputFormatV2(videosource, pixfmts, propframe->EncodedWidth, propframe->EncodedHeight, FFMS_RESIZER_BICUBIC, &ffms2Errinfo)) {
+		printFfms2Error();
+		return;
+	}
+
+	drawFrame(0);
+}
+
+void VideoComparisonViewer::drawFrame(int frame) {
+	const FFMS_Frame* curframe = FFMS_GetFrame(videosource, frame, &ffms2Errinfo);
+	if(curframe == NULL) {
+		printFfms2Error();
+		return;
+	}
+
+	// In the RGB format, the data is always in the first plane
+	uint8_t* data = curframe->Data[0];
+
+	wxBitmap* videoFrame = new wxBitmap(videoDimensions, 24);
+	wxNativePixelData nativePixelData(*videoFrame);
+
+	wxNativePixelData::Iterator p(nativePixelData);
+
+	for(int pixelIndex = 0; pixelIndex < (videoDimensions.GetWidth() * videoDimensions.GetHeight()); pixelIndex++) {
+		int dataIndex = pixelIndex * 3;
+
+		p.Red()   = data[dataIndex];
+		p.Green() = data[dataIndex + 1];
+		p.Blue()  = data[dataIndex + 2];
+
+		++p;
+	}
+
+	videoCanvas->setBitmap(videoFrame);
+
+	videoCanvas->Show(true);
+	// TODO run FFMS_DestroyVideoSource(videosource); at the end of something
 }

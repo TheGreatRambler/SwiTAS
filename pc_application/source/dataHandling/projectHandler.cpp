@@ -36,9 +36,9 @@ ProjectHandler::ProjectHandler(DataProcessing* dataProcessingInstance, rapidjson
 
 	projectList->InsertItems(listboxSize, listboxItems, 0);
 
-	projectList->Bind(wxEVT_LISTBOX, &ProjectHandler::onClickProject, this);
-
 	mainSizer->Add(projectList, 0, wxEXPAND | wxALL, 5);
+
+	projectList->Bind(wxEVT_LISTBOX, &ProjectHandler::onClickProject, this);
 
 	// Print create project input
 

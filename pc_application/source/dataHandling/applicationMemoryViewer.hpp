@@ -1,13 +1,11 @@
 #pragma once
 
-#define __STDC_FORMAT_MACROS
 #define wxHAS_HUGE_FILES
 #include <cstdint>
-#include <inttypes.h>
 #include <mio.hpp>
 #include <system_error>
-#include <wx/file.h>
 #include <wx/dir.h>
+#include <wx/file.h>
 #include <wx/filename.h>
 #include <wx/string.h>
 
