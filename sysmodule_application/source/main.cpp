@@ -121,7 +121,6 @@ void __attribute__((weak)) __appInit(void) {
 void __attribute__((weak)) userAppExit(void);
 
 void __attribute__((weak)) __appExit(void) {
-	LOGD << "Exiting app";
 	socketExit();
 	pminfoExit();
 	nsExit();

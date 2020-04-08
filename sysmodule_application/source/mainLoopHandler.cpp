@@ -84,7 +84,7 @@ void MainLoop::mainLoopHandler() {
 			LOGD << "Internet connected";
 			internetConnected = true;
 		}
-		
+
 		CHECK_QUEUE(networkInstance, SendRunFrame,
 			{
 				// blah
@@ -132,6 +132,7 @@ char* MainLoop::getAppName(u64 application_id) {
 }
 
 MainLoop::~MainLoop() {
+	LOGD << "Exiting app";
 	rc = hiddbgReleaseHdlsWorkBuffer();
 
 	// Make absolutely sure the app is unpaused on close

@@ -105,7 +105,8 @@ void CommunicateWithNetwork::waitForNetworkConnection() {
 			LOGD << "Client connected";
 			break;
 		} else {
-			handleSocketError(listeningServer.GetSocketError());
+			LOGD << "Error encountered";
+			handleSocketError(-1);
 		}
 		// Wait briefly
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -127,6 +128,7 @@ bool CommunicateWithNetwork::handleSocketError(int res) {
 		networkConnection->TranslateSocketError();
 		CSimpleSocket::CSocketError error = networkConnection->GetSocketError();
 		// It's okay if it would have blocked, just means there is no data
+		/*
 		if(error == CSimpleSocket::SocketConnectionReset) {
 			// Abnormal disconnect, go through reconnecting
 			// More errors may need to be checked here
@@ -150,13 +152,14 @@ bool CommunicateWithNetwork::handleSocketError(int res) {
 			// I dunno what to do if failure
 #endif
 		} else if(error != CSimpleSocket::SocketEwouldblock) {
+			*/
 #ifdef SERVER_IMP
-			LOGD << networkConnection->DescribeError();
+		LOGD << networkConnection->DescribeError(error);
 #endif
 #ifdef CLIENT_IMP
-			wxLogMessage(networkConnection->DescribeError());
+		wxLogMessage(networkConnection->DescribeError(error));
 #endif
-		}
+		//}
 		return true;
 	} else {
 		return false;
