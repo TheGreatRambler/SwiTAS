@@ -38,7 +38,8 @@ private:
 
 	int recentProjectChoice;
 
-	const wxString createNewProjectText = "Create New Project";
+	const wxString loadExistingProjectText = "Load Project";
+	const wxString createNewProjectText    = "Create New Project";
 
 	static constexpr int compressionLevel = 7;
 

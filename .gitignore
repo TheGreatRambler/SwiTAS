@@ -3,6 +3,7 @@ pc_application/linuxBin
 pc_application/bin
 pc_application/sharedNetworkCode
 pc_application/compile_commands.json
+pc_application/mainSettings.json
 
 sysmodule_application/nx-TAS-PC.elf
 sysmodule_application/nx-TAS-PC.npdm

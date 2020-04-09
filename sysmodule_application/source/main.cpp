@@ -131,7 +131,6 @@ void __attribute__((weak)) __appExit(void) {
 	viExit();
 	fsdevUnmountAll();
 	fsExit();
-
 	smExit();
 }
 
@@ -140,10 +139,6 @@ int main(int argc, char* argv[]) {
 	remove("/NX-TAS-PC.log");
 	plog::init(plog::debug, "/NX-TAS-PC.log");
 	LOGD << "Started logging";
-
-	// Sleep thread for a test
-	// Gives me 15 seconds to turn off on reboot
-	svcSleepThread((s64)1000000000 * 15);
 
 	MainLoop mainLoop;
 

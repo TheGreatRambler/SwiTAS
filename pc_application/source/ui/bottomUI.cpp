@@ -97,8 +97,8 @@ JoystickCanvas::JoystickCanvas(rapidjson::Document* settings, wxFrame* parent, D
 	mainSettings   = settings;
 
 	// Create widgets
-	xInput                     = new wxSpinCtrl(parent);
-	yInput                     = new wxSpinCtrl(parent);
+	xInput                     = new wxSpinCtrl(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
+	yInput                     = new wxSpinCtrl(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
 	canGoOutsideCircleCheckbox = new wxCheckBox(parent, wxID_ANY, wxEmptyString);
 
 	lockButton = HELPERS::getBitmapButton(parent, mainSettings, "joystickLockButton");

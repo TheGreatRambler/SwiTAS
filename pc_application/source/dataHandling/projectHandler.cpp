@@ -20,7 +20,7 @@ ProjectHandler::ProjectHandler(DataProcessing* dataProcessingInstance, rapidjson
 
 	rapidjson::GenericArray<false, rapidjson::Value> recentProjectsArray = (*mainSettings)["recentProjects"].GetArray();
 
-	std::size_t listboxSize = recentProjectsArray.Size() + 1;
+	std::size_t listboxSize = recentProjectsArray.Size() + 2;
 	wxString listboxItems[listboxSize];
 	std::size_t listboxIndex = 0;
 
@@ -32,7 +32,8 @@ ProjectHandler::ProjectHandler(DataProcessing* dataProcessingInstance, rapidjson
 		listboxIndex++;
 	}
 
-	listboxItems[listboxIndex] = createNewProjectText;
+	listboxItems[listboxIndex]     = loadExistingProjectText;
+	listboxItems[listboxIndex + 1] = createNewProjectText;
 
 	projectList->InsertItems(listboxSize, listboxItems, 0);
 
@@ -54,15 +55,27 @@ ProjectHandler::ProjectHandler(DataProcessing* dataProcessingInstance, rapidjson
 void ProjectHandler::onClickProject(wxCommandEvent& event) {
 	rapidjson::GenericArray<false, rapidjson::Value> recentProjectsArray = (*mainSettings)["recentProjects"].GetArray();
 	int selectedProject                                                  = event.GetInt();
-	if(selectedProject == recentProjectsArray.Size()) {
-		// Open up a new project dialog
-		wxDirDialog dlg(NULL, "Choose Project Directory", "", wxDD_DEFAULT_STYLE);
+	if(selectedProject == recentProjectsArray.Size() - 1) {
+		// Open up a load project dialog
+		wxDirDialog dlg(NULL, "Choose Project Directory", "", wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
 		if(dlg.ShowModal() == wxID_OK) {
-			// Directory chosen
 			projectDir.Open(dlg.GetPath());
 			recentProjectChoice = -1;
 			projectName         = "Unnamed";
 			projectChosen       = true;
+
+			loadProject();
+			Close(true);
+		}
+	} else if(selectedProject == recentProjectsArray.Size()) {
+		// Open up a new project dialog
+		wxDirDialog dlg(NULL, "Choose Project Directory", "", wxDD_DEFAULT_STYLE);
+		if(dlg.ShowModal() == wxID_OK) {
+			projectDir.Open(dlg.GetPath());
+			recentProjectChoice = -1;
+			projectName         = "Unnamed";
+			projectChosen       = true;
+
 			Close(true);
 		}
 	} else {
@@ -70,14 +83,16 @@ void ProjectHandler::onClickProject(wxCommandEvent& event) {
 		projectDir.Open(recentProjectsArray[selectedProject]["projectDirectory"].GetString());
 		recentProjectChoice = selectedProject;
 		projectName         = std::string(recentProjectsArray[selectedProject]["projectName"].GetString());
-		// Fill up the data found here
+		projectChosen       = true;
+
 		loadProject();
-		projectChosen = true;
 		Close(true);
 	}
 }
 
 void ProjectHandler::loadProject() {
+	// TODO, this does no error checking
+
 	wxFileName settingsFileName = getProjectStart();
 	settingsFileName.SetName("settings");
 	settingsFileName.SetExt("json");
@@ -241,6 +256,18 @@ void ProjectHandler::saveProject() {
 		recentProjectsArray[recentProjectChoice]["projectDirectory"].SetString(dirString.c_str(), dirString.length(), mainSettings->GetAllocator());
 
 		recentProjectsArray[recentProjectChoice]["projectName"].SetString(projectName.c_str(), projectName.size(), mainSettings->GetAllocator());
+	}
+
+	// Run some housekeeping to delete recent project entries that don't exist
+	auto it = recentProjectsArray.Begin();
+	while(it != recentProjectsArray.End()) {
+		wxFileName dir((*it)["projectDirectory"].GetString());
+		if(!dir.DirExists()) {
+			// Erase because the directory doesn't exist
+			it = recentProjectsArray.Erase(it);
+		} else {
+			++it;
+		}
 	}
 
 	// Additionally, save the mainSettings and overwrite

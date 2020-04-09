@@ -1,6 +1,8 @@
 #include "videoComparisonViewer.hpp"
 
-VideoComparisonViewer::VideoComparisonViewer() {
+VideoComparisonViewer::VideoComparisonViewer(rapidjson::Document* settings) {
+	mainSettings = settings;
+
 	ffms2Errinfo.Buffer     = ffms2Errmsg;
 	ffms2Errinfo.BufferSize = sizeof(ffms2Errmsg);
 	ffms2Errinfo.ErrorType  = FFMS_ERROR_SUCCESS;
@@ -11,10 +13,21 @@ VideoComparisonViewer::VideoComparisonViewer() {
 	urlInput         = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER | wxTE_CENTRE);
 	videoFormatsList = new wxListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_SINGLE);
 
+	inputSizer  = new wxBoxSizer(wxHORIZONTAL);
+	frameSelect = new wxSpinCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
+	frameSlider = new wxSlider(this, wxID_ANY, 0, 0, 10, wxDefaultPosition, wxDefaultSize, wxSL_LABELS | wxSL_HORIZONTAL);
+
+	frameSelect->Bind(wxEVT_COMMAND_SPINCTRL_UPDATED, &VideoComparisonViewer::frameChosenSpin, this);
+	frameSlider->Bind(wxEVT_SLIDER, &VideoComparisonViewer::frameChosenSlider, this);
+
+	inputSizer->Add(frameSelect, 1);
+	inputSizer->Add(frameSlider, 1);
+
 	consoleLog = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
 
 	urlInput->Bind(wxEVT_TEXT_ENTER, &VideoComparisonViewer::displayVideoFormats, this);
 	videoFormatsList->Bind(wxEVT_LISTBOX, &VideoComparisonViewer::onFormatSelection, this);
+	Bind(wxEVT_END_PROCESS, &VideoComparisonViewer::onCommandDone, this);
 
 	videoCanvas = new DrawingCanvasBitmap(this, wxDefaultSize);
 
@@ -22,6 +35,7 @@ VideoComparisonViewer::VideoComparisonViewer() {
 	mainSizer->Add(videoFormatsList, 0, wxEXPAND | wxALL);
 	mainSizer->Add(consoleLog, 0, wxEXPAND | wxALL);
 	mainSizer->Add(videoCanvas, 0, wxSHAPED | wxEXPAND | wxALIGN_CENTER_HORIZONTAL);
+	mainSizer->Add(inputSizer, 1, wxEXPAND | wxALL);
 
 	// Hide by default
 	videoFormatsList->Show(false);
@@ -40,7 +54,6 @@ VideoComparisonViewer::VideoComparisonViewer() {
 // clang-format off
 BEGIN_EVENT_TABLE(VideoComparisonViewer, wxFrame)
 	EVT_IDLE(VideoComparisonViewer::onIdle)
-    EVT_END_PROCESS(VideoComparisonViewer::onCommandDone)
 END_EVENT_TABLE()
 // clang-format on
 
@@ -129,7 +142,7 @@ void VideoComparisonViewer::onFormatSelection(wxCommandEvent& event) {
 	commandProcess->Redirect();
 
 	// This will run and the progress will be seen in console
-	long pid = wxExecute(wxString::Format("youtube-dl -f %d -o %s '%s'", selectedFormat, wxString::FromUTF8(fullVideoPath), url), wxEXEC_ASYNC | wxEXEC_HIDE_CONSOLE, downloadProcess);
+	long pid = wxExecute(wxString::Format("youtube-dl -f %d -o %s '%s'", selectedFormat, wxString::FromUTF8(fullVideoPath), url), wxEXEC_ASYNC | wxEXEC_HIDE_CONSOLE, commandProcess);
 }
 
 void VideoComparisonViewer::parseVideo() {
@@ -176,12 +189,21 @@ void VideoComparisonViewer::parseVideo() {
 		printFfms2Error();
 		return;
 	}
+
+	videoExists = true;
 	consoleLog->Show(false);
+	frameSelect->SetRange(0, videoprops->NumFrames);
+	frameSlider->SetRange(0, videoprops->NumFrames);
+
+	frameSelect->SetValue(0);
+	frameSlider->SetValue(0);
 
 	drawFrame(0);
 }
 
 void VideoComparisonViewer::drawFrame(int frame) {
+	currentFrame = frame;
+
 	consoleLog->Show(false);
 	const FFMS_Frame* curframe = FFMS_GetFrame(videosource, frame, &ffms2Errinfo);
 	if(curframe == NULL) {
@@ -212,4 +234,31 @@ void VideoComparisonViewer::drawFrame(int frame) {
 
 	videoCanvas->Show(true);
 	// TODO run FFMS_DestroyVideoSource(videosource); at the end of something
+}
+
+void VideoComparisonViewer::frameChosenSpin(wxSpinEvent& event) {
+	int value = frameSelect->GetValue();
+	if(videoExists) {
+		drawFrame(value);
+	}
+	frameSlider->SetValue(value);
+}
+void VideoComparisonViewer::frameChosenSlider(wxCommandEvent& event) {
+	int value = frameSlider->GetValue();
+	if(videoExists) {
+		drawFrame(value);
+	}
+	frameSelect->SetValue(value);
+}
+
+void VideoComparisonViewer::seekRelative(int relativeFrame) {
+	// This is given the change that has passed, not the actual frame
+	// Passed by DataProcessing
+	if(videoExists) {
+		currentFrame += relativeFrame;
+
+		if(currentFrame > -1 && currentFrame < videoprops->NumFrames) {
+			drawFrame(currentFrame);
+		}
+	}
 }

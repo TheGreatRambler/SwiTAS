@@ -12,6 +12,8 @@
 #include <vector>
 #include <wx/process.h>
 #include <wx/rawbmp.h>
+#include <wx/slider.h>
+#include <wx/spinctrl.h>
 #include <wx/stdstream.h>
 #include <wx/textctrl.h>
 #include <wx/url.h>
@@ -26,11 +28,20 @@
 class VideoComparisonViewer : public wxFrame {
 private:
 	enum RUNNING_COMMAND : uint8_t {
-        NO_COMMAND,
-        DOWNLOAD_VIDEO,
-    }
+		NO_COMMAND,
+		DOWNLOAD_VIDEO,
+	};
+
+	rapidjson::Document* mainSettings;
 
 	wxBoxSizer* mainSizer;
+	wxBoxSizer* inputSizer;
+
+	wxSpinCtrl* frameSelect;
+	wxSlider* frameSlider;
+
+	// This CAN exceed the actual number of frames
+	int currentFrame = 0;
 
 	wxTextCtrl* urlInput;
 	wxListBox* videoFormatsList;
@@ -48,6 +59,7 @@ private:
 
 	std::vector<int> formatsArray;
 
+	uint8_t videoExists = false;
 	char ffms2Errmsg[1024];
 	FFMS_ErrorInfo ffms2Errinfo;
 	FFMS_VideoSource* videosource;
@@ -70,13 +82,17 @@ private:
 	void drawFrame(int frame);
 
 	void displayVideoFormats(wxCommandEvent& event);
-
 	void onFormatSelection(wxCommandEvent& event);
+	void frameChosenSpin(wxSpinEvent& event);
+	void frameChosenSlider(wxCommandEvent& event);
 
 	void onIdle(wxIdleEvent& event);
 
 public:
-	VideoComparisonViewer();
+	VideoComparisonViewer(rapidjson::Document* settings);
+
+	// Called when running a frame from the list thing
+	void seekRelative(int relativeFrame);
 
 	DECLARE_EVENT_TABLE();
 };
