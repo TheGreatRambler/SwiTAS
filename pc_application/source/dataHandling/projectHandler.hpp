@@ -9,6 +9,7 @@
 #include <wx/filename.h>
 #include <wx/grid.h>
 #include <wx/listbox.h>
+#include <wx/msgdlg.h>
 #include <wx/mstream.h>
 #include <wx/stdpaths.h>
 #include <wx/wfstream.h>
@@ -28,6 +29,8 @@ private:
 	wxBoxSizer* mainSizer;
 	wxListBox* projectList;
 
+	uint8_t wasClosedForcefully = true;
+
 	DataProcessing* dataProcessing;
 
 	wxDir projectDir;
@@ -37,6 +40,10 @@ private:
 	std::string projectName;
 
 	int recentProjectChoice;
+
+#ifdef __WXGTK__
+	bool projectListFirstTime = true;
+#endif
 
 	const wxString loadExistingProjectText = "Load Project";
 	const wxString createNewProjectText    = "Create New Project";
@@ -71,6 +78,10 @@ public:
 
 	std::string getProjectName() {
 		return projectName;
+	}
+
+	uint8_t wasDialogClosedForcefully() {
+		return wasClosedForcefully;
 	}
 
 	~ProjectHandler();

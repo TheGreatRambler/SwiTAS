@@ -132,6 +132,10 @@ void VideoComparisonViewer::displayVideoFormats(wxCommandEvent& event) {
 
 		remove(tempJsonLocation.c_str());
 		videoFormatsList->Show(true);
+	} else {
+		// Not a valid URL
+		wxMessageDialog urlInvalidDialog(this, "This URL is invalid", "Invalid URL", wxOK);
+		urlInvalidDialog.ShowModal();
 	}
 }
 
@@ -152,7 +156,9 @@ void VideoComparisonViewer::parseVideo() {
 		printFfms2Error();
 		return;
 	}
-	FFMS_SetProgressCallback(videoIndexer, this->onIndexingProgress, NULL);
+	// This is helpful for cpp callbacks
+	// https://stackoverflow.com/a/29817048/9329945
+	FFMS_SetProgressCallback(videoIndexer, &VideoComparisonViewer::onIndexingProgress, NULL);
 
 	FFMS_Index* index = FFMS_DoIndexing2(videoIndexer, FFMS_IEH_ABORT, &ffms2Errinfo);
 	if(index == NULL) {

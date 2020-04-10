@@ -1,7 +1,10 @@
 #include "drawingCanvas.hpp"
 
 DrawingCanvas::DrawingCanvas(wxWindow* parent, wxSize size)
-	: wxWindow(parent, wxID_ANY, wxDefaultPosition, size, wxFULL_REPAINT_ON_RESIZE) {}
+	: wxWindow(parent, wxID_ANY, wxDefaultPosition, size, wxFULL_REPAINT_ON_RESIZE) {
+	// By default it's black
+	backgroundColor = *wxBLACK;
+}
 
 void DrawingCanvas::draw(wxDC& dc) {}
 

@@ -153,7 +153,7 @@ wxString DataProcessing::OnGetItemText(long row, long column) const {
 	// Returns when text is needed
 	if(column == 0) {
 		// This is the frame, which is just the row number
-		return wxString::Format(wxT("%i"), row);
+		return wxString::Format(wxT("%ld"), row);
 	} else {
 		// Fallback for every other column
 		return "";

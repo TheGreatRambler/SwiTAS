@@ -87,7 +87,7 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* 
 	inputsViewSizer = new wxBoxSizer(wxHORIZONTAL);
 
 	frameDrawer = new FrameCanvas(parentFrame, inputData);
-	frameDrawer->setBackgroundColor(*wxLIGHT_GREY);
+	frameDrawer->setBackgroundColor(*wxBLACK);
 
 	addFrameButton = HELPERS::getBitmapButton(parentFrame, mainSettings, "addFrameButton");
 

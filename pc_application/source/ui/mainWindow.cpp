@@ -88,6 +88,13 @@ void MainWindow::onStart() {
 	// TODO open this in wxApp because it apparently doesn't work in the constructor
 	Hide();
 	projectHandler->ShowModal();
+
+	if(projectHandler->wasDialogClosedForcefully()) {
+		// It was closed with X, terminate this window, and the entire application, as well
+		Close(true);
+		return;
+	}
+
 	if(!projectHandler->wasProjectChosen()) {
 		// Generate a temp one
 		projectHandler->createTempProjectDir();

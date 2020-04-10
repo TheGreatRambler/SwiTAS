@@ -10,6 +10,7 @@
 #include <ostream>
 #include <rapidjson/document.h>
 #include <vector>
+#include <wx/msgdlg.h>
 #include <wx/process.h>
 #include <wx/rawbmp.h>
 #include <wx/slider.h>
@@ -70,8 +71,10 @@ private:
 
 	void onCommandDone(wxProcessEvent& event);
 
-	int FFMS_CC onIndexingProgress(int64_t current, int64_t total, void* unused) {
-		consoleLog->AppendText(wxString::Format("%lu bytes of %lu bytes indexed\n", current, total));
+	// Hack to make c style function callbacks work
+	static int FFMS_CC onIndexingProgress(long current, long total, void* self) {
+		((VideoComparisonViewer*)self)->consoleLog->AppendText(wxString::Format("%lu bytes of %lu bytes indexed\n", current, total));
+		return 0;
 	}
 	void printFfms2Error() {
 		consoleLog->AppendText(wxString::Format("FFMS2 error: %s\n", wxString(ffms2Errinfo.Buffer)));

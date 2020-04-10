@@ -53,41 +53,71 @@ ProjectHandler::ProjectHandler(DataProcessing* dataProcessingInstance, rapidjson
 }
 
 void ProjectHandler::onClickProject(wxCommandEvent& event) {
-	rapidjson::GenericArray<false, rapidjson::Value> recentProjectsArray = (*mainSettings)["recentProjects"].GetArray();
-	int selectedProject                                                  = event.GetInt();
-	if(selectedProject == recentProjectsArray.Size() - 1) {
-		// Open up a load project dialog
-		wxDirDialog dlg(NULL, "Choose Project Directory", "", wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
-		if(dlg.ShowModal() == wxID_OK) {
-			projectDir.Open(dlg.GetPath());
-			recentProjectChoice = -1;
-			projectName         = "Unnamed";
-			projectChosen       = true;
+#ifdef __WXGTK__
+	if(!projectListFirstTime) {
+#endif
+		rapidjson::GenericArray<false, rapidjson::Value> recentProjectsArray = (*mainSettings)["recentProjects"].GetArray();
+		int selectedProject                                                  = event.GetInt();
+		if(selectedProject == recentProjectsArray.Size()) {
+			// Open up a load project dialog
+			wxDirDialog dlg(NULL, "Choose Project Directory", "", wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
+			if(dlg.ShowModal() == wxID_OK) {
+				projectDir.Open(dlg.GetPath());
+				recentProjectChoice = -1;
+				projectName         = "Unnamed";
+				projectChosen       = true;
+				wasClosedForcefully = false;
 
-			loadProject();
-			Close(true);
-		}
-	} else if(selectedProject == recentProjectsArray.Size()) {
-		// Open up a new project dialog
-		wxDirDialog dlg(NULL, "Choose Project Directory", "", wxDD_DEFAULT_STYLE);
-		if(dlg.ShowModal() == wxID_OK) {
-			projectDir.Open(dlg.GetPath());
-			recentProjectChoice = -1;
-			projectName         = "Unnamed";
-			projectChosen       = true;
+				loadProject();
+				Close(true);
+			} else {
+				projectList->Deselect(selectedProject);
+			}
+		} else if(selectedProject == recentProjectsArray.Size() + 1) {
+			// Open up a new project dialog
+			wxDirDialog dlg(NULL, "Choose Project Directory", "", wxDD_DEFAULT_STYLE);
+			if(dlg.ShowModal() == wxID_OK) {
+				projectDir.Open(dlg.GetPath());
+				recentProjectChoice = -1;
+				projectName         = "Unnamed";
+				projectChosen       = true;
+				wasClosedForcefully = false;
 
-			Close(true);
+				Close(true);
+			} else {
+				projectList->Deselect(selectedProject);
+			}
+		} else {
+			// It's a project folder
+			wxFileName dir(recentProjectsArray[selectedProject]["projectDirectory"].GetString());
+			if(dir.DirExists()) {
+				projectDir.Open(dir.GetFullPath());
+				recentProjectChoice = selectedProject;
+				projectName         = std::string(recentProjectsArray[selectedProject]["projectName"].GetString());
+				projectChosen       = true;
+				wasClosedForcefully = false;
+
+				loadProject();
+				Close(true);
+			} else {
+				// This dir doesn't exist, ask the user about it
+				wxMessageDialog deleteDialog(this, "This directory doesn't exist, should it be removed from the recent projects list?", "Delete recent project entry", wxYES_NO | wxCANCEL | wxNO_DEFAULT | wxICON_ERROR);
+				int res = deleteDialog.ShowModal();
+				projectList->Deselect(selectedProject);
+				if(res == wxID_YES) {
+					// Delete the entry
+					projectList->Delete(selectedProject);
+					projectList->Refresh();
+					(*mainSettings)["recentProjects"].GetArray().Erase(&(*mainSettings)["recentProjects"].GetArray()[selectedProject]);
+				}
+			}
 		}
+#ifdef __WXGTK__
 	} else {
-		// It's a project folder
-		projectDir.Open(recentProjectsArray[selectedProject]["projectDirectory"].GetString());
-		recentProjectChoice = selectedProject;
-		projectName         = std::string(recentProjectsArray[selectedProject]["projectName"].GetString());
-		projectChosen       = true;
-
-		loadProject();
-		Close(true);
+		projectList->Deselect(0);
+		projectListFirstTime = false;
 	}
+#endif
 }
 
 void ProjectHandler::loadProject() {
@@ -259,6 +289,7 @@ void ProjectHandler::saveProject() {
 	}
 
 	// Run some housekeeping to delete recent project entries that don't exist
+	/*
 	auto it = recentProjectsArray.Begin();
 	while(it != recentProjectsArray.End()) {
 		wxFileName dir((*it)["projectDirectory"].GetString());
@@ -269,6 +300,7 @@ void ProjectHandler::saveProject() {
 			++it;
 		}
 	}
+	*/
 
 	// Additionally, save the mainSettings and overwrite
 	wxFFileOutputStream settingsFileStream("../mainSettings.json", "w");
