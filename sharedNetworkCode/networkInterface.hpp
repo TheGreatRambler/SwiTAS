@@ -58,6 +58,7 @@
 #include <memory>
 #include <stdio.h>
 #include <stdlib.h>
+#include <exception>
 #include <string.h>
 #include <chrono>
 #include <thread>
@@ -130,7 +131,7 @@ public:
 	CommunicateWithNetwork(std::function<void(CommunicateWithNetwork*)> sendCallback, std::function<void(CommunicateWithNetwork*)> recieveCallback);
 
 #ifdef CLIENT_IMP
-	void attemptConnectionToServer(std::string ip);
+	uint8_t attemptConnectionToServer(std::string ip);
 #endif
 
 #ifdef SERVER_IMP
@@ -148,6 +149,12 @@ public:
 
 	bool isConnected() {
 		return connectedToSocket.load();
+	}
+
+	std::string getLastErrorMessage() {
+		networkConnection->TranslateSocketError();
+		CSimpleSocket::CSocketError error = networkConnection->GetSocketError();
+		return std::string(networkConnection->DescribeError(error));
 	}
 
 	// This stuff needs to be global for callback reasons

@@ -201,8 +201,12 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 			wxString ipAddress = wxGetTextFromUser("Please enter IP address of Nintendo Switch", "Server connect", wxEmptyString);
 			if(!ipAddress.empty()) {
 				// IP address entered
-				SetStatusText(ipAddress + ":" + std::to_string(SERVER_PORT), 0);
-				networkInstance->attemptConnectionToServer(ipAddress.ToStdString());
+				if(networkInstance->attemptConnectionToServer(ipAddress.ToStdString())) {
+					SetStatusText(ipAddress + ":" + std::to_string(SERVER_PORT), 0);
+				} else {
+					wxMessageDialog addressInvalidDialog(this, wxString::Format("This IP address is invalid: %s", networkInstance->getLastErrorMessage().c_str()), "Invalid IP", wxOK);
+					addressInvalidDialog.ShowModal();
+				}
 			}
 		} else if(id == setNameID) {
 			// Name needs to be selected

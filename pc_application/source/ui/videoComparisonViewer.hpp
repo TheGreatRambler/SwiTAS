@@ -72,7 +72,7 @@ private:
 	void onCommandDone(wxProcessEvent& event);
 
 	// Hack to make c style function callbacks work
-	static int FFMS_CC onIndexingProgress(long current, long total, void* self) {
+	static int FFMS_CC onIndexingProgress(long long current, long long total, void* self) {
 		((VideoComparisonViewer*)self)->consoleLog->AppendText(wxString::Format("%lu bytes of %lu bytes indexed\n", current, total));
 		return 0;
 	}

@@ -76,5 +76,6 @@
 		"hash_map": "cpp",
 		"hash_set": "cpp",
 		"climits": "cpp"
-	}
+	},
+	"C_Cpp.dimInactiveRegions": true
 }

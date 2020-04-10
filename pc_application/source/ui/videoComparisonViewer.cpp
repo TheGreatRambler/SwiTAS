@@ -158,7 +158,7 @@ void VideoComparisonViewer::parseVideo() {
 	}
 	// This is helpful for cpp callbacks
 	// https://stackoverflow.com/a/29817048/9329945
-	FFMS_SetProgressCallback(videoIndexer, &VideoComparisonViewer::onIndexingProgress, NULL);
+	FFMS_SetProgressCallback(videoIndexer, &VideoComparisonViewer::onIndexingProgress, this);
 
 	FFMS_Index* index = FFMS_DoIndexing2(videoIndexer, FFMS_IEH_ABORT, &ffms2Errinfo);
 	if(index == NULL) {

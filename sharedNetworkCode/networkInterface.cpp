@@ -62,17 +62,19 @@ void CommunicateWithNetwork::initNetwork() {
 
 #ifdef CLIENT_IMP
 	// Wait until string is good
-	std::unique_lock<std::mutex> lk(ipMutex);
-	/* To set IP, use
-		std::lock_guard<std::mutex> lk(ipMutex);
-		ipAddressServer = "[WHATEVER IP]";
-		lk.unlock();
-		cv.notify_one();
-	*/
-	// Wait for IP address of server to be set
-	// http://www.cplusplus.com/reference/condition_variable/condition_variable/
-	while(!connectedToSocket.load()) {
-		cv.wait(lk);
+	{
+		std::unique_lock<std::mutex> lk(ipMutex);
+		/* To set IP, use
+			std::lock_guard<std::mutex> lk(ipMutex);
+			ipAddressServer = "[WHATEVER IP]";
+			lk.unlock();
+			cv.notify_one();
+		*/
+		// Wait for IP address of server to be set
+		// http://www.cplusplus.com/reference/condition_variable/condition_variable/
+		while(!connectedToSocket.load()) {
+			cv.wait(lk);
+		}
 	}
 
 #endif
@@ -94,22 +96,35 @@ void CommunicateWithNetwork::prepareNetworkConnection() {
 void CommunicateWithNetwork::waitForNetworkConnection() {
 	// This will block INDEFINITELY if there is no client, so
 	// Literally nothing can happen until this finishes
-	while(true) {
-		LOGD << "Waiting for connection";
-		// This will block until an error or otherwise
-		networkConnection = listeningServer.Accept();
-		// We only care about the first connection
-		if(networkConnection != NULL) {
-			// Connection established, stop while looping
-			connectedToSocket = true;
-			LOGD << "Client connected";
-			break;
-		} else {
-			LOGD << "Error encountered";
-			handleSocketError(-1);
+	try {
+		while(true) {
+			LOGD << "Waiting for connection";
+			// This will block until an error or otherwise
+			networkConnection = listeningServer.Accept();
+			// We only care about the first connection
+			if(networkConnection != NULL) {
+				// Connection established, stop while looping
+				LOGD << "Client connected";
+				connectedToSocket = true;
+				break;
+			} else {
+				networkConnection->TranslateSocketError();
+				LOGD << "Error encountered";
+				// GETTING THE ERROR SEGFAULTS
+				// When the client is accepted, this unknown error continues to occur
+				// LOGD << networkConnection->GetSocketError();
+				// if(networkConnection->GetSocketError() == CSimpleSocket::SocketConnectionReset) {
+				//	LOGD << "Connection reset";
+				//}
+				// LOGD << networkConnection->DescribeError(networkConnection->GetSocketError());
+			}
+			// Wait briefly
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		}
-		// Wait briefly
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	} catch(const std::runtime_error& re) {
+		LOGD << "Runtime error: " << re.what();
+	} catch(const std::exception& ex) {
+		LOGD << "Error occurred: " << ex.what();
 	}
 }
 #endif
@@ -167,16 +182,18 @@ bool CommunicateWithNetwork::handleSocketError(int res) {
 }
 
 #ifdef CLIENT_IMP
-void CommunicateWithNetwork::attemptConnectionToServer(std::string ip) {
+uint8_t CommunicateWithNetwork::attemptConnectionToServer(std::string ip) {
 	std::unique_lock<std::mutex> lk(ipMutex);
 	if(!networkConnection->Open(ip.c_str(), SERVER_PORT)) {
 		// There was an error
 		connectedToSocket = false;
+		return false;
 	} else {
 		// We good, let the network thread know
 		ipAddress         = ip;
 		connectedToSocket = true;
 		cv.notify_one();
+		return true;
 	}
 }
 #endif

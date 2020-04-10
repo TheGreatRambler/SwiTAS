@@ -11,6 +11,7 @@
 #include <rapidjson/document.h>
 #include <string>
 #include <wx/log.h>
+#include <wx/msgdlg.h>
 #include <wx/wx.h>
 
 #include "../../sharedNetworkCode/networkInterface.hpp"
