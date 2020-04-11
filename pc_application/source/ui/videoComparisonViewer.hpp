@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
+#include <cstdint>
 #include <cstring>
 #include <ffms.h>
 #include <ostream>
@@ -72,18 +73,11 @@ private:
 	void onCommandDone(wxProcessEvent& event);
 
 	// Hack to make c style function callbacks work
-	#ifdef __LINUX__
-	static int FFMS_CC onIndexingProgress(long current, long total, void* self) {
+	static int FFMS_CC onIndexingProgress(int64_t current, int64_t total, void* self) {
 		((VideoComparisonViewer*)self)->consoleLog->AppendText(wxString::Format("%lu bytes of %lu bytes indexed\n", current, total));
 		return 0;
 	}
-	#endif
-	#ifdef _WIN32
-	static int FFMS_CC onIndexingProgress(long long current, long long total, void* self) {
-		((VideoComparisonViewer*)self)->consoleLog->AppendText(wxString::Format("%lu bytes of %lu bytes indexed\n", current, total));
-		return 0;
-	}
-	#endif
+
 	void printFfms2Error() {
 		consoleLog->AppendText(wxString::Format("FFMS2 error: %s\n", wxString(ffms2Errinfo.Buffer)));
 	}
