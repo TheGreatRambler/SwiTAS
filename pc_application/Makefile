@@ -23,7 +23,7 @@ endif
 CFLAGS := -std=gnu17
 
 # C++ flags
-CXXFLAGS := -std=gnu++17 $(shell wx-config --cxxflags base,core, net) $(shell pkg-config --cflags ffms2) -I./include
+CXXFLAGS := -std=gnu++17 $(shell wx-config --cxxflags base,core,net) $(shell pkg-config --cflags ffms2) -I./include
 
 # C/C++ flags
 # For some reason, the CLIENT_IMP doesn't seem to be passing down, oh well

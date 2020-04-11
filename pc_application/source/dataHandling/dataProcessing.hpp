@@ -21,6 +21,7 @@
 #include <wx/imaglist.h>
 #include <wx/itemattr.h>
 #include <wx/listctrl.h>
+#include <wx/menu.h>
 #include <wx/wx.h>
 
 #include "../../sharedNetworkCode/networkInterface.hpp"

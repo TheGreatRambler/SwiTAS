@@ -238,15 +238,15 @@
 	},
 	"recentProjects": [
 		{
-			"projectDirectory": "C:\\Users\\aehar\\Desktop\\test\\",
-			"projectName": "Bob the builder"
-		},
-		{
 			"projectDirectory": "C:\\Users\\aehar\\Desktop\\bob\\",
 			"projectName": "bOB MAd e A MEss Aend DOE snt kmNOW HoW Toooooo   TAS"
 		},
 		{
-			"projectDirectory": "C:\\Users\\aehar\\Desktop\\bruh\\",
+			"projectDirectory": "/home/thegreatrambler/Desktop/bob/",
+			"projectName": "Unnamed"
+		},
+		{
+			"projectDirectory": "/home/thegreatrambler/Desktop/bob/",
 			"projectName": "Unnamed"
 		}
 	]
