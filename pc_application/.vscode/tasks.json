@@ -3,7 +3,7 @@
 	"tasks": [{
 			"label": "Build PC Application",
 			"type": "shell",
-			"command": "make -j 4",
+			"command": "make",
 			"presentation": {
 				"reveal": "always",
 				"panel": "dedicated"
@@ -20,7 +20,7 @@
 		{
 			"label": "Force Build PC Application",
 			"type": "shell",
-			"command": "make -B -j 4",
+			"command": "make -B",
 			"presentation": {
 				"reveal": "always",
 				"panel": "dedicated"

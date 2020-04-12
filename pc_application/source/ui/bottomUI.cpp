@@ -114,12 +114,11 @@ JoystickCanvas::JoystickCanvas(rapidjson::Document* settings, wxFrame* parent, D
 
 	inputSizer  = new wxBoxSizer(wxHORIZONTAL);
 	widgetSizer = new wxBoxSizer(wxVERTICAL);
-
-	inputSizer->Add(xInput, 0, wxEXPAND);
 	inputSizer->Add(yInput, 0, wxEXPAND);
 	inputSizer->Add(canGoOutsideCircleCheckbox, 0, wxEXPAND);
 
 	widgetSizer->Add(this, 0, wxSHAPED | wxEXPAND);
+	widgetSizer->Add(xInput, 0, wxEXPAND);
 	widgetSizer->Add(inputSizer, 0, wxEXPAND | wxALL);
 	widgetSizer->Add(lockButton, 0, wxEXPAND | wxALL);
 }
@@ -361,14 +360,16 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 	lastButtonState   = 0;
 
 	// These take up much less space than the grid
-	horizontalBoxSizer->Add(leftJoystickDrawer->getSizer(), 0, wxSHAPED | wxEXPAND);
-	horizontalBoxSizer->Add(rightJoystickDrawer->getSizer(), 0, wxSHAPED | wxEXPAND);
+	horizontalBoxSizer->Add(leftJoystickDrawer->getSizer(), 0);
+	horizontalBoxSizer->Add(rightJoystickDrawer->getSizer(), 0);
 
-	horizontalBoxSizer->Add(buttonGrid, 0, wxSHAPED | wxEXPAND);
+	horizontalBoxSizer->Add(buttonGrid, 0, wxSHAPED | wxALIGN_CENTER);
+
+	frameViewerCanvas->SetMinSize(wxSize(0, 0));
 
 	// Proportion HAS to be zero here, it's a requirment
 	mainSizer->Add(frameViewerCanvas, 0, wxSHAPED | wxEXPAND | wxALIGN_CENTER_HORIZONTAL);
-	mainSizer->Add(horizontalBoxSizer, 1, wxEXPAND | wxALL);
+	mainSizer->Add(horizontalBoxSizer, 0, wxEXPAND | wxALL);
 
 	theGrid->Add(mainSizer, 3, wxEXPAND | wxALL);
 }

@@ -9,6 +9,7 @@
 #include <utility>
 #include <wx/checkbox.h>
 #include <wx/dcbuffer.h>
+#include <wx/display.h>
 #include <wx/grid.h>
 #include <wx/joystick.h>
 #include <wx/spinctrl.h>
@@ -131,7 +132,7 @@ private:
 	uint8_t currentJoyDefined;
 	int lastButtonState;
 
-	std::map<std::string, int> stringToButtonExtended {
+	std::map<std::string, int> stringToButtonExtended{
 		{ "LSX", 0 },
 		{ "LSY", 1 },
 		{ "RSX", 2 },

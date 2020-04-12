@@ -56,33 +56,28 @@ CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 
 ifeq ($(UNAME),Msys)
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
-	$(eval MOVED_OBJS := $(subst ..,.,$(OBJS)))
-	$(CXX) $(MOVED_OBJS) -o $@ $(LDFLAGS)
+	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
 	# Copy required DLLs to folder
 	ldd $(BUILD_DIR)/$(TARGET_EXEC) | grep '\/mingw.*\.dll' -o | xargs -I{} cp "{}" $(BUILD_DIR)
 else
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
-	$(eval MOVED_OBJS := $(subst ..,.,$(OBJS)))
-	$(CXX) $(MOVED_OBJS) -o $@ $(LDFLAGS)
+	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
 endif
 
 # assembly
 $(BUILD_DIR)/%.s.o: %.s
-	$(eval REALPATH := $(subst ..,.,$@))
-	$(MKDIR_P) $(dir $(REALPATH))
-	$(AS) $(ASFLAGS) -c $< -o $(REALPATH)
+	$(MKDIR_P) $(dir $@)
+	$(AS) $(ASFLAGS) -c $< -o $@
 
 # c source
 $(BUILD_DIR)/%.c.o: %.c
-	$(eval REALPATH := $(subst ..,.,$@))
-	$(MKDIR_P) $(dir $(REALPATH))
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $(REALPATH)
+	$(MKDIR_P) $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 # c++ source
 $(BUILD_DIR)/%.cpp.o: %.cpp
-	$(eval REALPATH := $(subst ..,.,$@))
-	$(MKDIR_P) $(dir $(REALPATH))
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $(REALPATH)
+	$(MKDIR_P) $(dir $@)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
 
 .PHONY: clean

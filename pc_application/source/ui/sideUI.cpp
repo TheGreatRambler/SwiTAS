@@ -110,8 +110,7 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* 
 	verticalBoxSizer->Add(buttonSizer, 0, wxEXPAND);
 
 	inputsViewSizer->Add(frameDrawer, 1, wxEXPAND | wxALL);
-	// Dataprocessing is itself a wxListCtrl
-	// Setting the minsize so it can get very small
+
 	inputData->SetMinSize(wxSize(0, 0));
 	inputsViewSizer->Add(inputData, 5, wxEXPAND | wxALL);
 
