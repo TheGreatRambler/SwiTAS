@@ -96,35 +96,29 @@ void CommunicateWithNetwork::prepareNetworkConnection() {
 void CommunicateWithNetwork::waitForNetworkConnection() {
 	// This will block INDEFINITELY if there is no client, so
 	// Literally nothing can happen until this finishes
-	try {
-		while(true) {
-			LOGD << "Waiting for connection";
-			// This will block until an error or otherwise
-			networkConnection = listeningServer.Accept();
-			// We only care about the first connection
-			if(networkConnection != NULL) {
-				// Connection established, stop while looping
-				LOGD << "Client connected";
-				connectedToSocket = true;
-				break;
-			} else {
-				networkConnection->TranslateSocketError();
-				LOGD << "Error encountered";
-				// GETTING THE ERROR SEGFAULTS
-				// When the client is accepted, this unknown error continues to occur
-				// LOGD << networkConnection->GetSocketError();
-				// if(networkConnection->GetSocketError() == CSimpleSocket::SocketConnectionReset) {
-				//	LOGD << "Connection reset";
-				//}
-				// LOGD << networkConnection->DescribeError(networkConnection->GetSocketError());
-			}
-			// Wait briefly
-			std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	while(true) {
+		LOGD << "Waiting for connection";
+		// This will block until an error or otherwise
+		networkConnection = listeningServer.Accept();
+		// We only care about the first connection
+		if(networkConnection != NULL) {
+			// Connection established, stop while looping
+			LOGD << "Client connected";
+			connectedToSocket = true;
+			return;
+		} else {
+			networkConnection->TranslateSocketError();
+			LOGD << "Error encountered";
+			// GETTING THE ERROR SEGFAULTS
+			// When the client is accepted, this unknown error continues to occur
+			// LOGD << networkConnection->GetSocketError();
+			// if(networkConnection->GetSocketError() == CSimpleSocket::SocketConnectionReset) {
+			//	LOGD << "Connection reset";
+			//}
+			// LOGD << networkConnection->DescribeError(networkConnection->GetSocketError());
 		}
-	} catch(const std::runtime_error& re) {
-		LOGD << "Runtime error: " << re.what();
-	} catch(const std::exception& ex) {
-		LOGD << "Error occurred: " << ex.what();
+		// Wait briefly
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
 }
 #endif

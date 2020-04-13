@@ -4,7 +4,7 @@
 			"label": "Build Sysmodule Debug",
 			"type": "shell",
 			"promptOnClose": true,
-			"command": "make DINFO=1 -j4",
+			"command": "make DINFO=1",
 			"group": "build",
 			"presentation": {
 				"reveal": "always",
@@ -22,7 +22,7 @@
 			"label": "Build Sysmodule Release",
 			"type": "shell",
 			"promptOnClose": true,
-			"command": "make -j4",
+			"command": "make",
 			"presentation": {
 				"reveal": "always",
 				"panel": "dedicated"

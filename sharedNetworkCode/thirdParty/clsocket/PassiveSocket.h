@@ -44,6 +44,10 @@
 #define __PASSIVESOCKET_H__
 #include "ActiveSocket.h"
 
+#ifdef SERVER_IMP
+#include <plog/Log.h>
+#endif
+
 /// Provides a platform independent class to create a passive socket.
 /// A passive socket is used to create a "listening" socket.  This type
 /// of object would be used when an application needs to wait for
