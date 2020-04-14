@@ -137,24 +137,24 @@ void MainWindow::OnSize(wxSizeEvent& event) {
 
 void MainWindow::onIdle(wxIdleEvent& event) {
 	if(IsShown()) {
-		// Read queues from the network and do things, TODO
-		if(networkInstance->isConnected()) {
-			// clang-format off
-			CHECK_QUEUE(networkInstance, RecieveGameFramebuffer, {
-				wxLogMessage("Framebuffer recieved");
-			})
-			CHECK_QUEUE(networkInstance, RecieveApplicationConnected, {
-				wxLogMessage("Game opened");
-			})
-			CHECK_QUEUE(networkInstance, RecieveLogging, {
-				wxLogMessage(wxString("SWITCH: " + data.log));
-			})
-			// clang-format on
-		}
-
 		// Listen to joystick
 		bottomUI->listenToJoystick();
 	}
+}
+
+void MainWindow::handleNetworkQueues() {
+	// clang-format off
+	CHECK_QUEUE(networkInstance, RecieveGameFramebuffer, {
+		wxLogMessage("Framebuffer recieved");
+		bottomUI->recieveGameFramebuffer(data.buf);
+	})
+	CHECK_QUEUE(networkInstance, RecieveApplicationConnected, {
+		wxLogMessage("Game opened");
+	})
+	CHECK_QUEUE(networkInstance, RecieveLogging, {
+		wxLogMessage(wxString("SWITCH: " + data.log));
+	})
+	// clang-format on
 }
 
 void MainWindow::addMenuBar() {
@@ -162,10 +162,12 @@ void MainWindow::addMenuBar() {
 
 	wxMenu* fileMenu = new wxMenu();
 
-	selectIPID        = NewControlId();
-	setNameID         = NewControlId();
-	toggleLoggingID   = NewControlId();
-	toggleDebugMenuID = NewControlId();
+	selectIPID                = NewControlId();
+	setNameID                 = NewControlId();
+	toggleLoggingID           = NewControlId();
+	toggleDebugMenuID         = NewControlId();
+	openVideoComparisonViewer = NewControlId();
+
 	fileMenu->Append(selectIPID, "&Server");
 	fileMenu->Append(setNameID, "&Set Name");
 
@@ -174,6 +176,7 @@ void MainWindow::addMenuBar() {
 
 	fileMenu->Append(toggleLoggingID, "&Toggle Logging");
 	fileMenu->Append(toggleDebugMenuID, "&Toggle Debug Menu");
+	fileMenu->Append(openVideoComparisonViewer, "&Open Video Comparison Viewer");
 
 	menuBar->Append(fileMenu, "&File");
 
@@ -220,6 +223,10 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 		} else if(id == toggleDebugMenuID) {
 			debugWindow->Show(!debugWindow->IsShown());
 			wxLogMessage("Toggled debug window");
+		} else if(id == openVideoComparisonViewer) {
+			VideoComparisonViewer* viewer = new VideoComparisonViewer(&mainSettings, this);
+			videoComparisonViewers.push_back(viewer);
+			viewer->Show(true);
 		}
 	}
 }

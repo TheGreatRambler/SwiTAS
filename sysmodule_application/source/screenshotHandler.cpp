@@ -16,6 +16,7 @@ ScreenshotHandler::ScreenshotHandler() {
 				if(info.size == 0x1A40000) {
 					// Set the address now that it is known
 					framebufferPointer = info.addr;
+					LOGD << "Framebuffer pointer found: " << framebufferPointer;
 					break;
 				}
 			} else if(info.type == MemType_Reserved) {
@@ -150,6 +151,7 @@ void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>
 			int scanlinesActuallyWritten = jpeg_write_scanlines(&cinfo, row_pointer, heightOfdhashInput);
 			if(scanlinesActuallyWritten != heightOfdhashInput) {
 				// Un oh
+				LOGD << "Scanlines wrong in JPEG";
 			}
 		}
 		svcCloseHandle(VIdbg);

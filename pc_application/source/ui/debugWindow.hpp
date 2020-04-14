@@ -10,14 +10,13 @@ class DebugWindow : public wxFrame {
 private:
 	std::shared_ptr<CommunicateWithNetwork> networkInstance;
 
-	wxBoxSizer* buttonSizer;void onClose(wxCloseEvent& event);
+	wxBoxSizer* buttonSizer;
 	wxButton* pauseButton;
 	wxButton* unpauseButton;
 
 	void onPausePressed(wxCommandEvent& event);
 	void onUnpausePressed(wxCommandEvent& event);
-
-	
+	void onClose(wxCloseEvent& event);
 
 public:
 	DebugWindow(std::shared_ptr<CommunicateWithNetwork> networkImp);

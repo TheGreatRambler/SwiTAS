@@ -1,7 +1,8 @@
 #include "videoComparisonViewer.hpp"
 
-VideoComparisonViewer::VideoComparisonViewer(rapidjson::Document* settings) {
+VideoComparisonViewer::VideoComparisonViewer(rapidjson::Document* settings, MainWindow* mainFrame) {
 	mainSettings = settings;
+	parentWindow = mainFrame;
 
 	ffms2Errinfo.Buffer     = ffms2Errmsg;
 	ffms2Errinfo.BufferSize = sizeof(ffms2Errmsg);
@@ -79,6 +80,19 @@ void VideoComparisonViewer::onIdle(wxIdleEvent& event) {
 			consoleLog->AppendText(text);
 		}
 	}
+}
+
+void VideoComparisonViewer::onClose(wxCloseEvent& event) {
+	// Help MainWindow delete this window
+	for(std::size_t i = 0; i < parentWindow->videoComparisonViewers.size(); i++) {
+		// If this is the window, remove it from the list
+		if(parentWindow->videoComparisonViewers[i] == this) {
+			parentWindow->videoComparisonViewers.erase(parentWindow->videoComparisonViewers.begin() + i);
+			break;
+		}
+	}
+
+	Destroy();
 }
 
 void VideoComparisonViewer::onCommandDone(wxProcessEvent& event) {

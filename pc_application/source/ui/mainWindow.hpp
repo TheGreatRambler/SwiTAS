@@ -10,6 +10,7 @@
 #include <memory>
 #include <rapidjson/document.h>
 #include <string>
+#include <vector>
 #include <wx/log.h>
 #include <wx/msgdlg.h>
 #include <wx/wx.h>
@@ -23,6 +24,9 @@
 #include "bottomUI.hpp"
 #include "debugWindow.hpp"
 #include "sideUI.hpp"
+#include "videoComparisonViewer.hpp"
+
+class VideoComparisonViewer;
 
 class MainWindow : public wxFrame {
 private:
@@ -58,6 +62,7 @@ private:
 	wxWindowID setNameID;
 	wxWindowID toggleLoggingID;
 	wxWindowID toggleDebugMenuID;
+	wxWindowID openVideoComparisonViewer;
 
 	void handlePreviousWindowTransform();
 
@@ -69,6 +74,8 @@ private:
 	// Override default signal handler:
 	void keyDownHandler(wxKeyEvent& event);
 	void OnSize(wxSizeEvent& event);
+
+	void handleNetworkQueues();
 
 public:
 	MainWindow();
@@ -84,6 +91,9 @@ public:
 	void onStart();
 
 	void onClose(wxCloseEvent& event);
+
+	// Video comparison frames open
+	std::vector<VideoComparisonViewer*> videoComparisonViewers;
 
 	DECLARE_EVENT_TABLE();
 };

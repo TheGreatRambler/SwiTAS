@@ -84,37 +84,45 @@ void MainLoop::mainLoopHandler() {
 			LOGD << "Internet connected";
 			internetConnected = true;
 		}
-
-		CHECK_QUEUE(networkInstance, SendRunFrame,
-			{
-				// blah
-			})
-
-		CHECK_QUEUE(networkInstance, SendFlag, {
-			if(data.actFlag == SendInfo::PAUSE_DEBUG) {
-				if(applicationOpened) {
-					LOGD << "Pause app";
-					controller->pauseApp();
-				}
-			} else if(data.actFlag == SendInfo::UNPAUSE_DEBUG) {
-				if(applicationOpened) {
-					LOGD << "Unpause app";
-					controller->unpauseApp();
-				}
-			}
-		})
 	} else {
 		if(internetConnected) {
 			LOGD << "Internet disconnected";
 			internetConnected = false;
+
+			// Force unpause to not get user stuck if network cuts out
+			controller->reset();
 		}
-		// Force unpause to not get user stuck if network cuts out
-		controller->reset();
 	}
+
+	// handle network updates always, they are stored in the queue regardless of the internet
+	handleNetworkUpdates();
 
 	// A reasonable time to sleep the thread
 	// 1 millisecond
 	svcSleepThread(1000000);
+}
+
+void MainLoop::handleNetworkUpdates() {
+	CHECK_QUEUE(networkInstance, SendRunFrame,
+		{
+			// blah
+		})
+
+	CHECK_QUEUE(networkInstance, SendFlag, {
+		if(data.actFlag == SendInfo::PAUSE_DEBUG) {
+			// Precaution to prevent the app getting stuck without the
+			// User able to unpause it
+			if(applicationOpened && internetConnected) {
+				LOGD << "Pause app";
+				controller->pauseApp();
+			}
+		} else if(data.actFlag == SendInfo::UNPAUSE_DEBUG) {
+			if(applicationOpened) {
+				LOGD << "Unpause app";
+				controller->unpauseApp();
+			}
+		}
+	})
 }
 
 char* MainLoop::getAppName(u64 application_id) {

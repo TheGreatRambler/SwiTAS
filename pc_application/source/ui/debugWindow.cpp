@@ -33,6 +33,7 @@ END_EVENT_TABLE()
 
 void DebugWindow::onClose(wxCloseEvent& event) {
 	// Only hide, not delete
+	// This prevents the entire application from closing, but oh well
 	Show(false);
 }
 

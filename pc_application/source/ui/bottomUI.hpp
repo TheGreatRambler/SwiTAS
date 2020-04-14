@@ -7,11 +7,13 @@
 #include <rapidjson/document.h>
 #include <unistd.h>
 #include <utility>
+#include <vector>
 #include <wx/checkbox.h>
 #include <wx/dcbuffer.h>
 #include <wx/display.h>
 #include <wx/grid.h>
 #include <wx/joystick.h>
+#include <wx/mstream.h>
 #include <wx/spinctrl.h>
 #include <wx/wx.h>
 
@@ -45,12 +47,18 @@ public:
 class FrameViewerCanvas : public DrawingCanvas {
 private:
 	wxBitmap* defaultBackground;
-	uint8_t hasFrameToRender;
+
+	wxBitmap* primary   = nullptr;
+	wxBitmap* secondary = nullptr;
 
 public:
 	FrameViewerCanvas(wxFrame* parent, wxBitmap* defaultImage);
 
 	void draw(wxDC& dc) override;
+
+	// TODO have the ability to compare images
+	void setPrimaryBitmap(wxBitmap* primaryBitmap);
+	void setSecondaryBitmap(wxBitmap* secondaryBitmap);
 };
 
 class JoystickCanvas : public DrawingCanvas {
@@ -172,6 +180,8 @@ public:
 
 	// Just a random large number, apparently can't be larger than 76
 	static constexpr int joystickSubmenuIDBase = 23;
+
+	void recieveGameFramebuffer(std::vector<uint8_t> jpegBuffer);
 
 	void listenToJoystick();
 
