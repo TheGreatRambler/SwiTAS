@@ -26,6 +26,8 @@
 #include "drawingCanvas.hpp"
 #include "mainWindow.hpp"
 
+class MainWindow;
+
 // TODO: Use FFMS2 and Youtube-DL
 // Requires Youtube-DL to be downloaded
 class VideoComparisonViewer : public wxFrame {

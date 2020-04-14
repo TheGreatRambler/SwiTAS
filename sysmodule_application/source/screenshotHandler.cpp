@@ -39,6 +39,7 @@ void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>
 	// Debug VI before anything
 	rc = svcDebugActiveProcess(&VIdbg, VI_pid);
 	if(R_SUCCEEDED(rc)) {
+		LOGD << "Debugging VI worked";
 		// Encode the file with libjpeg
 		// https://www.ridgesolutions.ie/index.php/2019/12/10/libjpeg-example-encode-jpeg-to-memory-buffer-instead-of-file/
 		// https://www.geeksforgeeks.org/hamming-distance-between-two-integers/
@@ -103,12 +104,20 @@ void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>
 					svcReadDebugProcessMemory(&colorParts, VIdbg, initialPointer + index, sizeof(colorParts));
 
 					// Set each value into the color data for this section of the JPEG
-					u16 startDataIndex                       = x * jpegBytesPerPixel;
-					row_pointer[yOffset][startDataIndex]     = colorParts[0];
-					row_pointer[yOffset][startDataIndex + 1] = colorParts[1];
-					row_pointer[yOffset][startDataIndex + 2] = colorParts[2];
+					uint16_t startDataIndex = x * jpegBytesPerPixel;
+
+					uint8_t red   = colorParts[0];
+					uint8_t green = colorParts[1];
+					uint8_t blue  = colorParts[2];
+
+					row_pointer[yOffset][startDataIndex]     = red;
+					row_pointer[yOffset][startDataIndex + 1] = green;
+					row_pointer[yOffset][startDataIndex + 2] = blue;
+
+					// LOGD << "Color at (" << x << "," << y << "): RGB(" << red << "," << green << "," << blue << ")";
 				}
 			}
+			LOGD << "Successfully obtained dHash chunk";
 			// Now, calculate the dhash
 			int widthOfDhashPixelChunk = framebufferWidth / widthOfdhashInput;
 			uint8_t greyscaleRow[widthOfDhashPixelChunk];
@@ -154,6 +163,8 @@ void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>
 				LOGD << "Scanlines wrong in JPEG";
 			}
 		}
+
+		LOGD << "Successfully wrote JPEG";
 		svcCloseHandle(VIdbg);
 
 		jpeg_finish_compress(&cinfo);
@@ -162,6 +173,9 @@ void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>
 		// Now that JPEG and dhash are done, send them both back
 		hash->assign(convertToHexString(dhash, sizeOfDhash));
 		jpegBuffer->assign(jpegBuf, jpegBuf + jpegSize);
+	} else {
+		svcCloseHandle(VIdbg);
+		fatalThrow(rc);
 	}
 }
 
