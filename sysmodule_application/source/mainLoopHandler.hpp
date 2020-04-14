@@ -25,6 +25,8 @@ private:
 
 	static char* getAppName(u64 application_id);
 
+	void handleNetworkUpdates();
+
 public:
 	MainLoop();
 

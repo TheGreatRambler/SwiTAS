@@ -71,7 +71,6 @@ void ButtonGrid::onGridClick(wxMouseEvent& event) {
 FrameViewerCanvas::FrameViewerCanvas(wxFrame* parent, wxBitmap* defaultImage)
 	: DrawingCanvas(parent, wxSize(1280, 720)) {
 	// Needs to be able to fit the frames
-	hasFrameToRender  = false;
 	defaultBackground = defaultImage;
 }
 
@@ -79,14 +78,34 @@ void FrameViewerCanvas::draw(wxDC& dc) {
 	int width;
 	int height;
 	GetSize(&width, &height);
-	if(!hasFrameToRender) {
-		// Set scaling for the image to render without wxImage
-		dc.SetUserScale((double)width / defaultBackground->GetWidth(), (double)height / defaultBackground->GetHeight());
-		// Render the default image, that's it
+	// Set scaling for the image to render without wxImage
+	dc.SetUserScale((double)width / defaultBackground->GetWidth(), (double)height / defaultBackground->GetHeight());
+	if(primary && !secondary) {
+		dc.DrawBitmap(*primary, 0, 0, false);
+	} else if(primary && secondary) {
+		// No action for now
+		// Will have fancy blending
 		dc.DrawBitmap(*defaultBackground, 0, 0, false);
 	} else {
-		// Do thing
+		// Render the default image, that's it
+		dc.DrawBitmap(*defaultBackground, 0, 0, false);
 	}
+}
+
+void FrameViewerCanvas::setPrimaryBitmap(wxBitmap* primaryBitmap) {
+	if(primary) {
+		delete primary;
+	}
+
+	primary = primaryBitmap;
+}
+
+void FrameViewerCanvas::setSecondaryBitmap(wxBitmap* secondaryBitmap) {
+	if(secondary) {
+		delete secondary;
+	}
+
+	secondary = secondaryBitmap;
 }
 
 JoystickCanvas::JoystickCanvas(rapidjson::Document* settings, wxFrame* parent, DataProcessing* inputData, uint8_t leftJoy)
@@ -379,6 +398,14 @@ void BottomUI::refreshDataViews() {
 	leftJoystickDrawer->Refresh();
 	rightJoystickDrawer->Refresh();
 	buttonGrid->Refresh();
+}
+
+void BottomUI::recieveGameFramebuffer(std::vector<uint8_t> jpegBuffer) {
+	wxMemoryInputStream jpegStream(jpegBuffer.data(), jpegBuffer.size());
+	wxImage jpegImage;
+	jpegImage.LoadFile(jpegStream, wxBITMAP_TYPE_JPEG);
+
+	frameViewerCanvas->setPrimaryBitmap(new wxBitmap(jpegImage));
 }
 
 void BottomUI::onJoystickSelect(wxCommandEvent& event) {

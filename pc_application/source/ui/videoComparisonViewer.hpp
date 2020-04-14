@@ -3,9 +3,9 @@
 #define BUFSIZE 8192
 
 #include <algorithm>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
-#include <cstdint>
 #include <cstring>
 #include <ffms.h>
 #include <ostream>
@@ -24,6 +24,7 @@
 
 #include "../helpers.hpp"
 #include "drawingCanvas.hpp"
+#include "mainWindow.hpp"
 
 // TODO: Use FFMS2 and Youtube-DL
 // Requires Youtube-DL to be downloaded
@@ -35,6 +36,8 @@ private:
 	};
 
 	rapidjson::Document* mainSettings;
+
+	MainWindow* parentWindow;
 
 	wxBoxSizer* mainSizer;
 	wxBoxSizer* inputSizer;
@@ -92,9 +95,10 @@ private:
 	void frameChosenSlider(wxCommandEvent& event);
 
 	void onIdle(wxIdleEvent& event);
+	void onClose(wxCloseEvent& event);
 
 public:
-	VideoComparisonViewer(rapidjson::Document* settings);
+	VideoComparisonViewer(rapidjson::Document* settings, MainWindow* mainFrame);
 
 	// Called when running a frame from the list thing
 	void seekRelative(int relativeFrame);
