@@ -55,10 +55,6 @@ private:
 
 	void onClickProject(wxCommandEvent& event);
 
-	wxFileName getProjectStart() {
-		return wxFileName::DirName(projectDir.GetNameWithSep());
-	}
-
 public:
 	ProjectHandler(DataProcessing* dataProcessingInstance, rapidjson::Document* settings);
 
@@ -67,6 +63,10 @@ public:
 
 	// Created if no project is chosen
 	void createTempProjectDir();
+
+	wxFileName getProjectStart() {
+		return wxFileName::DirName(projectDir.GetNameWithSep());
+	}
 
 	bool wasProjectChosen() {
 		return projectChosen;

@@ -1,8 +1,11 @@
 #include "videoComparisonViewer.hpp"
 
-VideoComparisonViewer::VideoComparisonViewer(rapidjson::Document* settings, MainWindow* mainFrame) {
+VideoComparisonViewer::VideoComparisonViewer(rapidjson::Document* settings, MainWindow* mainFrame, wxString projectDirectory)
+	: wxFrame(NULL, wxID_ANY, "Video Comparison Viewer", wxDefaultPosition, wxDefaultSize) {
+	// https://www.youtube.com/watch?v=su61pXgmJcw
 	mainSettings = settings;
 	parentWindow = mainFrame;
+	projectDir   = projectDirectory;
 
 	ffms2Errinfo.Buffer     = ffms2Errmsg;
 	ffms2Errinfo.BufferSize = sizeof(ffms2Errmsg);
@@ -30,7 +33,7 @@ VideoComparisonViewer::VideoComparisonViewer(rapidjson::Document* settings, Main
 	videoFormatsList->Bind(wxEVT_LISTBOX, &VideoComparisonViewer::onFormatSelection, this);
 	Bind(wxEVT_END_PROCESS, &VideoComparisonViewer::onCommandDone, this);
 
-	videoCanvas = new DrawingCanvasBitmap(this, wxDefaultSize);
+	videoCanvas = new DrawingCanvasBitmap(this, wxSize(1, 1));
 
 	mainSizer->Add(urlInput, 0, wxEXPAND | wxALL);
 	mainSizer->Add(videoFormatsList, 0, wxEXPAND | wxALL);
@@ -92,6 +95,8 @@ void VideoComparisonViewer::onClose(wxCloseEvent& event) {
 		}
 	}
 
+	FFMS_DestroyVideoSource(videosource);
+
 	Destroy();
 }
 
@@ -108,10 +113,9 @@ void VideoComparisonViewer::onCommandDone(wxProcessEvent& event) {
 
 void VideoComparisonViewer::displayVideoFormats(wxCommandEvent& event) {
 	url = urlInput->GetLineText(0).ToStdString();
-	wxURL urlData;
-	if(urlData.SetURL(url) == wxURL_NOERR) {
-		// All these commands will block, which could be a problem for bad internet connections
-		std::string videoName = HELPERS::exec(("youtube-dl --get-filename -o '%(title)s.%(ext)s' " + url).c_str());
+	// All these commands will block, which could be a problem for bad internet connections
+	std::string videoName = HELPERS::exec(("youtube-dl --get-filename -o '%(title)s.%(ext)s' " + url).c_str());
+	if(videoName.find("is not a valid URL.") == std::string::npos) {
 		// Replace spaces with underscores
 		std::replace(videoName.begin(), videoName.end(), ' ', '_');
 		fullVideoPath = projectDir.ToStdString() + "/videos/" + videoName;
@@ -120,7 +124,7 @@ void VideoComparisonViewer::displayVideoFormats(wxCommandEvent& event) {
 		videoFormatsList->Deselect(videoFormatsList->GetSelection());
 		videoFormatsList->Clear();
 		// First, get a temp file
-		wxString tempJsonLocation = wxFileName::CreateTempFileName("json-data");
+		wxString tempJsonLocation = wxFileName::CreateTempFileName("nxtas-video-json-data") + ".json";
 		// Dump data into file
 		// This will block, so hopefully the internet is good
 		HELPERS::exec(("youtube-dl -j '" + url + "' > " + tempJsonLocation.ToStdString()).c_str());
@@ -133,9 +137,9 @@ void VideoComparisonViewer::displayVideoFormats(wxCommandEvent& event) {
 			if(strcmp(format["format_note"].GetString(), "tiny") != 0) {
 				// Tiny means it only supports audio, we want video
 				int formatID        = strtol(format["format_id"].GetString(), nullptr, 10);
-				int width           = format["width"].GetInt();
-				int height          = format["height"].GetInt();
-				int fps             = format["fps"].GetInt();
+				int width           = strtol(format["width"].GetString(), nullptr, 10);
+				int height          = strtol(format["height"].GetString(), nullptr, 10);
+				int fps             = strtol(format["fps"].GetString(), nullptr, 10);
 				wxString formatItem = wxString::Format("%dx%d, %d fps", width, height, fps);
 				videoFormatsList->InsertItems(1, &formatItem, i);
 
@@ -253,7 +257,6 @@ void VideoComparisonViewer::drawFrame(int frame) {
 	videoCanvas->setBitmap(videoFrame);
 
 	videoCanvas->Show(true);
-	// TODO run FFMS_DestroyVideoSource(videosource); at the end of something
 }
 
 void VideoComparisonViewer::frameChosenSpin(wxSpinEvent& event) {

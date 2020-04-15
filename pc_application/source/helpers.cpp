@@ -66,5 +66,7 @@ std::string HELPERS::exec(const char* cmd) {
 	while(fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
 		result += buffer.data();
 	}
+	// Remove trailing newline
+	result.pop_back();
 	return result;
 }

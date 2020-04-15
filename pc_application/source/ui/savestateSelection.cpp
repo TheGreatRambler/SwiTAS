@@ -96,13 +96,17 @@ void SavestateSelection::onIdle(wxIdleEvent& event) {
 void SavestateSelection::onPlay(wxCommandEvent& event) {
 	// Trigger automatic playing
 }
+
 void SavestateSelection::onPause(wxCommandEvent& event) {
 	// Stop automatic playing
+	// also Set the dHash for the currentFrame and calc the hamming distance
 }
+
 void SavestateSelection::onFrameAdvance(wxCommandEvent& event) {
 	// Send blank input for a single frame then recieve JPEG buffer
 	// Set the dHash for the currentFrame and calc the hamming distance
 }
+
 void SavestateSelection::onOk(wxCommandEvent& event) {
 	// Use this frame as the savestate
 	operationSuccessful = true;

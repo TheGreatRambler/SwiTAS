@@ -224,7 +224,7 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 			debugWindow->Show(!debugWindow->IsShown());
 			wxLogMessage("Toggled debug window");
 		} else if(id == openVideoComparisonViewer) {
-			VideoComparisonViewer* viewer = new VideoComparisonViewer(&mainSettings, this);
+			VideoComparisonViewer* viewer = new VideoComparisonViewer(&mainSettings, this, projectHandler->getProjectStart().GetPath());
 			videoComparisonViewers.push_back(viewer);
 			viewer->Show(true);
 		}

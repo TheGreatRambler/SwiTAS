@@ -100,7 +100,7 @@ private:
 	void onClose(wxCloseEvent& event);
 
 public:
-	VideoComparisonViewer(rapidjson::Document* settings, MainWindow* mainFrame);
+	VideoComparisonViewer(rapidjson::Document* settings, MainWindow* mainFrame, wxString projectDirectory);
 
 	// Called when running a frame from the list thing
 	void seekRelative(int relativeFrame);
