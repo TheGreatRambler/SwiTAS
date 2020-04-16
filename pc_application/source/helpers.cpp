@@ -70,3 +70,10 @@ std::string HELPERS::exec(const char* cmd) {
 	result.pop_back();
 	return result;
 }
+
+wxBitmap* HELPERS::getBitmapFromJPEGData(std::vector<uint8_t> jpegBuffer) {
+	wxMemoryInputStream jpegStream(jpegBuffer.data(), jpegBuffer.size());
+	wxImage jpegImage;
+	jpegImage.LoadFile(jpegStream, wxBITMAP_TYPE_JPEG);
+	return new wxBitmap(jpegImage);
+}

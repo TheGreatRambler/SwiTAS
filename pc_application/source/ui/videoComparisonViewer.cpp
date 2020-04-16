@@ -18,7 +18,7 @@ VideoComparisonViewer::VideoComparisonViewer(rapidjson::Document* settings, Main
 	videoFormatsList = new wxListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_SINGLE);
 
 	inputSizer  = new wxBoxSizer(wxHORIZONTAL);
-	frameSelect = new wxSpinCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
+	frameSelect = new wxSpinCtrl(this, wxID_ANY, "Select Frame", wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
 	frameSlider = new wxSlider(this, wxID_ANY, 0, 0, 10, wxDefaultPosition, wxDefaultSize, wxSL_LABELS | wxSL_HORIZONTAL);
 
 	frameSelect->Bind(wxEVT_COMMAND_SPINCTRL_UPDATED, &VideoComparisonViewer::frameChosenSpin, this);
@@ -152,7 +152,7 @@ void VideoComparisonViewer::displayVideoFormats(wxCommandEvent& event) {
 		videoFormatsList->Show(true);
 	} else {
 		// Not a valid URL
-		wxMessageDialog urlInvalidDialog(this, "This URL is invalid", "Invalid URL", wxOK);
+		wxMessageDialog urlInvalidDialog(this, "This URL is invalid", "Invalid URL", wxOK | wxICON_ERROR);
 		urlInvalidDialog.ShowModal();
 	}
 }

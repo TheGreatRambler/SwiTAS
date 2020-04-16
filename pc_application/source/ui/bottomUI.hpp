@@ -13,7 +13,6 @@
 #include <wx/display.h>
 #include <wx/grid.h>
 #include <wx/joystick.h>
-#include <wx/mstream.h>
 #include <wx/spinctrl.h>
 #include <wx/wx.h>
 

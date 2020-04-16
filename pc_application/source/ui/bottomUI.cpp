@@ -116,9 +116,9 @@ JoystickCanvas::JoystickCanvas(rapidjson::Document* settings, wxFrame* parent, D
 	mainSettings   = settings;
 
 	// Create widgets
-	xInput                     = new wxSpinCtrl(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
-	yInput                     = new wxSpinCtrl(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
-	canGoOutsideCircleCheckbox = new wxCheckBox(parent, wxID_ANY, wxEmptyString);
+	xInput                     = new wxSpinCtrl(parent, wxID_ANY, "x", wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
+	yInput                     = new wxSpinCtrl(parent, wxID_ANY, "y", wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
+	canGoOutsideCircleCheckbox = new wxCheckBox(parent, wxID_ANY, "Clamp");
 
 	lockButton = HELPERS::getBitmapButton(parent, mainSettings, "joystickLockButton");
 
@@ -401,11 +401,7 @@ void BottomUI::refreshDataViews() {
 }
 
 void BottomUI::recieveGameFramebuffer(std::vector<uint8_t> jpegBuffer) {
-	wxMemoryInputStream jpegStream(jpegBuffer.data(), jpegBuffer.size());
-	wxImage jpegImage;
-	jpegImage.LoadFile(jpegStream, wxBITMAP_TYPE_JPEG);
-
-	frameViewerCanvas->setPrimaryBitmap(new wxBitmap(jpegImage));
+	frameViewerCanvas->setPrimaryBitmap(HELPERS::getBitmapFromJPEGData(jpegBuffer));
 }
 
 void BottomUI::onJoystickSelect(wxCommandEvent& event) {

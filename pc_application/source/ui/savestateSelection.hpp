@@ -2,9 +2,11 @@
 
 #include <rapidjson/document.h>
 #include <wx/event.h>
+#include <wx/spinctrl.h>
 #include <wx/utils.h>
 #include <wx/wx.h>
 
+#include "../../sharedNetworkCode/networkInterface.hpp"
 #include "../helpers.hpp"
 #include "drawingCanvas.hpp"
 
@@ -26,6 +28,8 @@ private:
 
 	rapidjson::Document* mainSettings;
 
+	std::shared_ptr<CommunicateWithNetwork> networkInstance;
+
 	// All the buttons
 	wxBitmapButton* playButton;
 	wxBitmapButton* pauseButton;
@@ -41,10 +45,18 @@ private:
 
 	bool operationSuccessful = false;
 
+	wxSpinCtrl* selectFrameAutomatically;
+
 	// To view the frames, will use if needed
 	DrawingCanvasBitmap* currentScreen;
 	// Only use with savestate loading
 	DrawingCanvasBitmap* savestateFrameTarget;
+
+	void callOk() {
+		// Use this frame as the savestate
+		operationSuccessful = true;
+		Close(true);
+	}
 
 	void onIdle(wxIdleEvent& event);
 
@@ -53,31 +65,16 @@ private:
 	void onFrameAdvance(wxCommandEvent& event);
 	void onOk(wxCommandEvent& event);
 
-	const uint16_t getHammingDistance(uint8_t* m1, uint8_t* m2, std::size_t size) {
-		// https://gist.github.com/Miguellissimo/2faa7e3c3e1800a6bf97
-		uint16_t counter = 0;
-
-		for(std::size_t i = 0; i != size; ++i) {
-			uint8_t diff = m1[i] ^ m2[i];
-
-			diff = (diff & (uint8_t)0x55) + ((diff >> 1) & (uint8_t)0x55);
-			diff = (diff & (uint8_t)0x33) + ((diff >> 2) & (uint8_t)0x33);
-			diff = (diff & (uint8_t)0x0f) + ((diff >> 4) & (uint8_t)0x0f);
-
-			counter += diff;
-		}
-
-		return counter;
-	}
-
 public:
-	SavestateSelection(rapidjson::Document* settings, bool isSavestateLoadDialog);
+	SavestateSelection(rapidjson::Document* settings, bool isSavestateLoadDialog, std::shared_ptr<CommunicateWithNetwork> networkImp);
 
 	// Will use ShowModel for this, act like a normal wxDialog
 
 	bool getOperationSuccessful() {
 		return operationSuccessful;
 	}
+
+	void setTargetFrame(wxBitmap* targetBitmap, std::string targetDhash);
 
 	DECLARE_EVENT_TABLE();
 };

@@ -40,6 +40,10 @@ enum SendInfo : uint8_t {
 	GET_GAME_INFO,
 	PAUSE_DEBUG,
 	UNPAUSE_DEBUG,
+	// These methods aren't debug because they are called by savestateHandler
+	PAUSE,
+	UNPAUSE,
+	RUN_BLANK_FRAME,
 };
 
 // clang-format off

@@ -1,10 +1,12 @@
 #include "savestateSelection.hpp"
 
-SavestateSelection::SavestateSelection(rapidjson::Document* settings, bool isSavestateLoadDialog)
+// TODO handle savestate selection through DataProcessing
+SavestateSelection::SavestateSelection(rapidjson::Document* settings, bool isSavestateLoadDialog, std::shared_ptr<CommunicateWithNetwork> networkImp)
 	: wxDialog(NULL, wxID_ANY, "Savestate Selection", wxDefaultPosition, wxDefaultSize) {
 	// Parent is specifically null because this is a separate window that opens
 	savestateLoadDialog = isSavestateLoadDialog;
 	mainSettings        = settings;
+	networkInstance     = networkImp;
 
 	imageSizer  = new wxBoxSizer(wxHORIZONTAL);
 	buttonSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -13,10 +15,10 @@ SavestateSelection::SavestateSelection(rapidjson::Document* settings, bool isSav
 	leftImageSizer  = new wxBoxSizer(wxVERTICAL);
 	rightImageSizer = new wxBoxSizer(wxVERTICAL);
 
-	leftDHash  = new wxStaticText(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
-	rightDHash = new wxStaticText(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
+	leftDHash  = new wxStaticText(this, wxID_ANY, "null", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
+	rightDHash = new wxStaticText(this, wxID_ANY, "null", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
 
-	hammingDistance = new wxStaticText(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
+	hammingDistance = new wxStaticText(this, wxID_ANY, "null", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
 
 	// To set the text, just use:
 	// leftDHash->SetLabelText(aString);
@@ -30,6 +32,8 @@ SavestateSelection::SavestateSelection(rapidjson::Document* settings, bool isSav
 	pauseButton        = HELPERS::getBitmapButton(this, mainSettings, "pauseButton");
 	frameAdvanceButton = HELPERS::getBitmapButton(this, mainSettings, "frameAdvanceButton");
 	okButton           = HELPERS::getBitmapButton(this, mainSettings, "okButton");
+
+	selectFrameAutomatically = new wxSpinCtrl(this, wxID_ANY, "Select automatically at or below this hamming distance: ", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0);
 
 	playButton->Bind(wxEVT_BUTTON, &SavestateSelection::onPlay, this);
 	pauseButton->Bind(wxEVT_BUTTON, &SavestateSelection::onPause, this);
@@ -87,28 +91,69 @@ BEGIN_EVENT_TABLE(SavestateSelection, wxDialog)
 END_EVENT_TABLE()
 // clang-format on
 
+void SavestateSelection::setTargetFrame(wxBitmap* targetBitmap, std::string targetDhash) {
+	// Called when it's a load dialog
+	goalFrame->setBitmap(targetBitmap);
+	rightDHash->SetLabel(wxString::FromUTF8(targetDhash));
+}
+
 void SavestateSelection::onIdle(wxIdleEvent& event) {
-	// Read network, TODO
-	if(IsShown()) {
-	}
+	CHECK_QUEUE(networkInstance, RecieveGameFramebuffer, {
+		currentFrame->setBitmap(HELPERS::getBitmapFromJPEGData(data.buf));
+		leftDHash->SetLabel(wxString::FromUTF8(data.dHash));
+
+		if(savestateLoadDialog) {
+			uint16_t hamming = HELPERS::getHammingDistance(leftDHash->GetLabel().ToStdString(), rightDHash->GetLabel().ToStdString());
+			hammingDistance->SetLabel(wxString::Format("%d", hamming));
+			if(hamming <= selectFrameAutomatically->GetValue()) {
+				// This frame might be identical, ask user if they want to use this frame
+				wxMessageDialog useFrameDialog(this, "This frame is very similar to the target frame, use it?", "Use this frame", wxYES_NO | wxCANCEL | wxYES_DEFAULT);
+				int res = useFrameDialog.ShowModal();
+				if(res == wxID_YES) {
+					// Use the frame
+					callOk();
+				}
+			}
+		}
+	})
 }
 
 void SavestateSelection::onPlay(wxCommandEvent& event) {
 	// Trigger automatic playing
+	// clang-format off
+	ADD_TO_QUEUE(SendFlag, networkInstance, {
+		data.actFlag = SendInfo::UNPAUSE;
+	})
+	// clang-format on
 }
 
 void SavestateSelection::onPause(wxCommandEvent& event) {
 	// Stop automatic playing
-	// also Set the dHash for the currentFrame and calc the hamming distance
+	// Do the same stuff as frameAdvance
+	// clang-format off
+	ADD_TO_QUEUE(SendFlag, networkInstance, {
+		data.actFlag = SendInfo::PAUSE;
+	})
+	ADD_TO_QUEUE(SendFlag, networkInstance, {
+		data.actFlag = SendInfo::GET_FRAMEBUFFER;
+	})
+	// clang-format on
 }
 
 void SavestateSelection::onFrameAdvance(wxCommandEvent& event) {
 	// Send blank input for a single frame then recieve JPEG buffer
+	// Blank input in this case is input that matches the inputs of the controller on the switch
 	// Set the dHash for the currentFrame and calc the hamming distance
+	// clang-format off
+	ADD_TO_QUEUE(SendFlag, networkInstance, {
+		data.actFlag = SendInfo::RUN_BLANK_FRAME;
+	})
+	ADD_TO_QUEUE(SendFlag, networkInstance, {
+		data.actFlag = SendInfo::GET_FRAMEBUFFER;
+	})
+	// clang-format on
 }
 
 void SavestateSelection::onOk(wxCommandEvent& event) {
-	// Use this frame as the savestate
-	operationSuccessful = true;
-	Close(true);
+	callOk();
 }
