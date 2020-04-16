@@ -114,36 +114,41 @@ void VideoComparisonViewer::onCommandDone(wxProcessEvent& event) {
 void VideoComparisonViewer::displayVideoFormats(wxCommandEvent& event) {
 	url = urlInput->GetLineText(0).ToStdString();
 	// All these commands will block, which could be a problem for bad internet connections
-	std::string videoName = HELPERS::exec(("youtube-dl --get-filename -o '%(title)s.%(ext)s' " + url).c_str());
+	videoName = HELPERS::exec(("youtube-dl --get-filename -o \"%(title)s.%(ext)s\" " + url).c_str());
 	if(videoName.find("is not a valid URL.") == std::string::npos) {
 		// Replace spaces with underscores
 		std::replace(videoName.begin(), videoName.end(), ' ', '_');
-		fullVideoPath = projectDir.ToStdString() + "/videos/" + videoName;
 		formatsArray.clear();
+		formatsMetadataArray.clear();
 		// Due to this https://forums.wxwidgets.org/viewtopic.php?t=20321
 		videoFormatsList->Deselect(videoFormatsList->GetSelection());
 		videoFormatsList->Clear();
 		// First, get a temp file
 		wxString tempJsonLocation = wxFileName::CreateTempFileName("nxtas-video-json-data") + ".json";
 		// Dump data into file
+		// https://www.youtube.com/watch?v=su61pXgmJcw
 		// This will block, so hopefully the internet is good
-		HELPERS::exec(("youtube-dl -j '" + url + "' > " + tempJsonLocation.ToStdString()).c_str());
+		std::string commandString = "youtube-dl -j " + url + " > " + tempJsonLocation.ToStdString();
+		HELPERS::exec(commandString.c_str());
 		// Read data
 		rapidjson::Document jsonData = HELPERS::getSettingsFile(tempJsonLocation.ToStdString());
 		// For now, loop through formats
 		int i = 0;
 		for(auto const& format : jsonData["formats"].GetArray()) {
 			// Check thing.json for an example
-			if(strcmp(format["format_note"].GetString(), "tiny") != 0) {
+			// If width and height are null, it's audio
+			if(format["width"].IsInt() && format["height"].IsInt() && format["fps"].IsInt()) {
 				// Tiny means it only supports audio, we want video
-				int formatID        = strtol(format["format_id"].GetString(), nullptr, 10);
-				int width           = strtol(format["width"].GetString(), nullptr, 10);
-				int height          = strtol(format["height"].GetString(), nullptr, 10);
-				int fps             = strtol(format["fps"].GetString(), nullptr, 10);
-				wxString formatItem = wxString::Format("%dx%d, %d fps", width, height, fps);
+				int formatID               = strtol(format["format_id"].GetString(), nullptr, 10);
+				int width                  = format["width"].GetInt();
+				int height                 = format["height"].GetInt();
+				int fps                    = format["fps"].GetInt();
+				wxString formatItem        = wxString::Format("%dx%d, %d fps", width, height, fps);
+				wxString compactFormatItem = wxString::Format("%dx%d-%d-", width, height, fps);
 				videoFormatsList->InsertItems(1, &formatItem, i);
 
-				formatsArray[i] = formatID;
+				formatsArray.push_back(formatID);
+				formatsMetadataArray.push_back(compactFormatItem.ToStdString());
 				i++;
 			}
 		}
@@ -158,13 +163,21 @@ void VideoComparisonViewer::displayVideoFormats(wxCommandEvent& event) {
 }
 
 void VideoComparisonViewer::onFormatSelection(wxCommandEvent& event) {
+	if(videoExists) {
+		FFMS_DestroyVideoSource(videosource);
+		videoExists = false;
+	}
+
 	int selectedFormat = formatsArray[event.GetInt()];
+	fullVideoPath      = projectDir.ToStdString() + "/videos/" + formatsMetadataArray[event.GetInt()] + videoName;
 	// Streaming download from youtube-dl
 	wxProcess* commandProcess = new wxProcess(this);
 	commandProcess->Redirect();
 
+	wxString commandString = wxString::Format("youtube-dl -f %d -o %s %s", selectedFormat, wxString::FromUTF8(fullVideoPath), url);
+
 	// This will run and the progress will be seen in console
-	long pid = wxExecute(wxString::Format("youtube-dl -f %d -o %s '%s'", selectedFormat, wxString::FromUTF8(fullVideoPath), url), wxEXEC_ASYNC | wxEXEC_HIDE_CONSOLE, commandProcess);
+	long pid = wxExecute(commandString, wxEXEC_ASYNC | wxEXEC_SHOW_CONSOLE, commandProcess);
 }
 
 void VideoComparisonViewer::parseVideo() {

@@ -57,10 +57,6 @@ private:
 
 	wxImageList imageList;
 
-	// First savestate hook creation, then savestate loader
-	SavestateSelection* savestateHookCreator;
-	SavestateSelection* savestateHookLoader;
-
 	// Using callbacks for inputs
 	std::function<void()> inputCallback;
 	std::function<void(FrameNum, FrameNum)> viewableInputsCallback;

@@ -65,11 +65,13 @@ private:
 	RUNNING_COMMAND currentRunningCommand = RUNNING_COMMAND::NO_COMMAND;
 
 	std::vector<int> formatsArray;
+	std::vector<std::string> formatsMetadataArray;
 
 	uint8_t videoExists = false;
+	std::string videoName;
 	char ffms2Errmsg[1024];
 	FFMS_ErrorInfo ffms2Errinfo;
-	FFMS_VideoSource* videosource;
+	FFMS_VideoSource* videosource = NULL;
 	const FFMS_VideoProperties* videoprops;
 
 	wxSize videoDimensions;

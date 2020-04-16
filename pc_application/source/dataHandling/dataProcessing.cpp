@@ -43,10 +43,11 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	}
 
 	SetImageList(&imageList, wxIMAGE_LIST_SMALL);
-
-	savestateHookCreator = new SavestateSelection(mainSettings, false);
-	savestateHookLoader  = new SavestateSelection(mainSettings, true);
-
+	// These are called like dialogs, so there won't be just one instance
+	/*
+		savestateHookCreator = new SavestateSelection(mainSettings, false, networkInstance);
+		savestateHookLoader  = new SavestateSelection(mainSettings, true, networkInstance);
+	*/
 	// JUST AS A TEST, WILL REMOVE SOON
 	// firstSavestateHookCreator->ShowModal();
 	// if(firstSavestateHookCreator->getOperationSuccessful()) {
