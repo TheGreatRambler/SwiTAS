@@ -39,12 +39,13 @@ VideoComparisonViewer::VideoComparisonViewer(rapidjson::Document* settings, Main
 	mainSizer->Add(videoFormatsList, 0, wxEXPAND | wxALL);
 	mainSizer->Add(consoleLog, 0, wxEXPAND | wxALL);
 	mainSizer->Add(videoCanvas, 0, wxSHAPED | wxEXPAND | wxALIGN_CENTER_HORIZONTAL);
-	mainSizer->Add(inputSizer, 1, wxEXPAND | wxALL);
+	mainSizer->Add(inputSizer, 0, wxEXPAND | wxALL);
 
 	// Hide by default
 	videoFormatsList->Show(false);
 	consoleLog->Show(true);
 	videoCanvas->Show(false);
+	Refresh();
 
 	SetSizer(mainSizer);
 	mainSizer->SetSizeHints(this);
@@ -67,17 +68,16 @@ void VideoComparisonViewer::onIdle(wxIdleEvent& event) {
 		wxInputStream* inputStream = commandProcess->GetInputStream();
 		if(inputStream->CanRead()) {
 			consoleLog->Show(true);
+			Refresh();
+
+			// https://forums.wxwidgets.org/viewtopic.php?t=24390#p104181
 
 			char buffer[BUFSIZE];
-			std::size_t count = -1;
 			wxString text;
-			// https://forums.wxwidgets.org/viewtopic.php?t=24390#p104181
-			while(!inputStream->Eof() && count != 0) {
-				inputStream->Read(buffer, BUFSIZE - 1);
-				count = inputStream->LastRead();
-				if(count > 0) {
-					text.Append(buffer, count);
-				}
+			inputStream->Read(buffer, BUFSIZE - 1);
+			std::size_t count = inputStream->LastRead();
+			if(count > 0) {
+				text.Append(buffer, count);
 			}
 
 			consoleLog->AppendText(text);
@@ -123,38 +123,41 @@ void VideoComparisonViewer::displayVideoFormats(wxCommandEvent& event) {
 		// Due to this https://forums.wxwidgets.org/viewtopic.php?t=20321
 		videoFormatsList->Deselect(videoFormatsList->GetSelection());
 		videoFormatsList->Clear();
-		// First, get a temp file
-		wxString tempJsonLocation = wxFileName::CreateTempFileName("nxtas-video-json-data") + ".json";
-		// Dump data into file
-		// https://www.youtube.com/watch?v=su61pXgmJcw
 		// This will block, so hopefully the internet is good
-		std::string commandString = "youtube-dl -j " + url + " > " + tempJsonLocation.ToStdString();
-		HELPERS::exec(commandString.c_str());
+		std::string commandString = "youtube-dl -j " + url;
+		std::string jsonString    = HELPERS::exec(commandString.c_str());
 		// Read data
-		rapidjson::Document jsonData = HELPERS::getSettingsFile(tempJsonLocation.ToStdString());
+		rapidjson::Document jsonData = HELPERS::getSettingsFromString(jsonString);
 		// For now, loop through formats
 		int i = 0;
-		for(auto const& format : jsonData["formats"].GetArray()) {
-			// Check thing.json for an example
-			// If width and height are null, it's audio
-			if(format["width"].IsInt() && format["height"].IsInt() && format["fps"].IsInt()) {
-				// Tiny means it only supports audio, we want video
-				int formatID               = strtol(format["format_id"].GetString(), nullptr, 10);
-				int width                  = format["width"].GetInt();
-				int height                 = format["height"].GetInt();
-				int fps                    = format["fps"].GetInt();
-				wxString formatItem        = wxString::Format("%dx%d, %d fps", width, height, fps);
-				wxString compactFormatItem = wxString::Format("%dx%d-%d-", width, height, fps);
-				videoFormatsList->InsertItems(1, &formatItem, i);
+		if(jsonData.IsObject()) {
+			for(auto const& format : jsonData["formats"].GetArray()) {
+				// Check thing.json for an example
+				// If width and height are null, it's audio
+				if(format["width"].IsInt() && format["height"].IsInt() && format["fps"].IsInt()) {
+					// Tiny means it only supports audio, we want video
+					int formatID               = strtol(format["format_id"].GetString(), nullptr, 10);
+					int width                  = format["width"].GetInt();
+					int height                 = format["height"].GetInt();
+					int fps                    = format["fps"].GetInt();
+					wxString formatItem        = wxString::Format("%dx%d, %d fps", width, height, fps);
+					wxString compactFormatItem = wxString::Format("%dx%d-%d-", width, height, fps);
+					videoFormatsList->InsertItems(1, &formatItem, i);
 
-				formatsArray.push_back(formatID);
-				formatsMetadataArray.push_back(compactFormatItem.ToStdString());
-				i++;
+					formatsArray.push_back(formatID);
+					formatsMetadataArray.push_back(compactFormatItem.ToStdString());
+					i++;
+				}
 			}
+		} else {
+			// Also not a valid URL
+			wxMessageDialog urlInvalidDialog(this, "This URL is invalid", "Invalid URL", wxOK | wxICON_ERROR);
+			urlInvalidDialog.ShowModal();
+			return;
 		}
 
-		remove(tempJsonLocation.c_str());
 		videoFormatsList->Show(true);
+		Refresh();
 	} else {
 		// Not a valid URL
 		wxMessageDialog urlInvalidDialog(this, "This URL is invalid", "Invalid URL", wxOK | wxICON_ERROR);
@@ -171,13 +174,14 @@ void VideoComparisonViewer::onFormatSelection(wxCommandEvent& event) {
 	int selectedFormat = formatsArray[event.GetInt()];
 	fullVideoPath      = projectDir.ToStdString() + "/videos/" + formatsMetadataArray[event.GetInt()] + videoName;
 	// Streaming download from youtube-dl
-	wxProcess* commandProcess = new wxProcess(this);
+	commandProcess = new wxProcess(this);
 	commandProcess->Redirect();
 
 	wxString commandString = wxString::Format("youtube-dl -f %d -o %s %s", selectedFormat, wxString::FromUTF8(fullVideoPath), url);
 
 	// This will run and the progress will be seen in console
-	long pid = wxExecute(commandString, wxEXEC_ASYNC | wxEXEC_SHOW_CONSOLE, commandProcess);
+	currentRunningCommand = RUNNING_COMMAND::DOWNLOAD_VIDEO;
+	wxExecute(commandString, wxEXEC_ASYNC | wxEXEC_SHOW_CONSOLE, commandProcess);
 }
 
 void VideoComparisonViewer::parseVideo() {
@@ -229,6 +233,8 @@ void VideoComparisonViewer::parseVideo() {
 
 	videoExists = true;
 	consoleLog->Show(false);
+	Refresh();
+
 	frameSelect->SetRange(0, videoprops->NumFrames);
 	frameSlider->SetRange(0, videoprops->NumFrames);
 
@@ -239,6 +245,7 @@ void VideoComparisonViewer::parseVideo() {
 }
 
 void VideoComparisonViewer::drawFrame(int frame) {
+	// https://www.youtube.com/watch?v=su61pXgmJcw
 	currentFrame = frame;
 
 	consoleLog->Show(false);
@@ -250,26 +257,33 @@ void VideoComparisonViewer::drawFrame(int frame) {
 
 	// In the RGB format, the data is always in the first plane
 	uint8_t* data = curframe->Data[0];
+	int linesize  = curframe->Linesize[0];
 
 	wxBitmap* videoFrame = new wxBitmap(videoDimensions, 24);
 	wxNativePixelData nativePixelData(*videoFrame);
+	nativePixelData.GetPixels();
 
 	wxNativePixelData::Iterator p(nativePixelData);
 
-	for(int pixelIndex = 0; pixelIndex < (videoDimensions.GetWidth() * videoDimensions.GetHeight()); pixelIndex++) {
-		int dataIndex = pixelIndex * 3;
+	for(int y = 0; y < videoDimensions.GetHeight(); y++) {
+		wxNativePixelData::Iterator rowStart = p;
 
-		p.Red()   = data[dataIndex];
-		p.Green() = data[dataIndex + 1];
-		p.Blue()  = data[dataIndex + 2];
+		for(int x = 0; x < videoDimensions.GetWidth(); x++) {
+			int start = y * linesize + x * 3;
+			p.Red()   = data[start];
+			p.Green() = data[start + 1];
+			p.Blue()  = data[start + 2];
+		}
 
-		++p;
+		p = rowStart;
+		p.OffsetY(nativePixelData, 1);
 	}
 
 	// The canvas will consume the bitmap
 	videoCanvas->setBitmap(videoFrame);
 
 	videoCanvas->Show(true);
+	Refresh();
 }
 
 void VideoComparisonViewer::frameChosenSpin(wxSpinEvent& event) {

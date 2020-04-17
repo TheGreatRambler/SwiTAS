@@ -48,6 +48,13 @@ rapidjson::Document HELPERS::getSettingsFile(std::string filename) {
 	return json;
 }
 
+rapidjson::Document HELPERS::getSettingsFromString(std::string jsonString) {
+	rapidjson::Document json;
+	// Allow comments in JSON
+	json.Parse<rapidjson::kParseCommentsFlag>(jsonString.c_str());
+	return json;
+}
+
 wxBitmapButton* HELPERS::getBitmapButton(wxWindow* parentFrame, rapidjson::Document* settings, const char* name) {
 	wxImage resizedImage(HELPERS::resolvePath((*settings)["ui"][name].GetString()));
 	resizedImage.Rescale((*settings)["ui"]["buttonWidth"].GetInt(), (*settings)["ui"]["buttonHeight"].GetInt());

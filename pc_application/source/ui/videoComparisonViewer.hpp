@@ -11,6 +11,7 @@
 #include <ostream>
 #include <rapidjson/document.h>
 #include <vector>
+#include <wx/longlong.h>
 #include <wx/msgdlg.h>
 #include <wx/process.h>
 #include <wx/rawbmp.h>
@@ -81,7 +82,7 @@ private:
 
 	// Hack to make c style function callbacks work
 	static int FFMS_CC onIndexingProgress(int64_t current, int64_t total, void* self) {
-		((VideoComparisonViewer*)self)->consoleLog->AppendText(wxString::Format("%lu bytes of %lu bytes indexed\n", current, total));
+		((VideoComparisonViewer*)self)->consoleLog->AppendText(wxString::Format(wxLongLongFmtSpec " bytes of " wxLongLongFmtSpec " bytes indexed\n", current, total));
 		return 0;
 	}
 

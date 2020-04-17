@@ -30,6 +30,7 @@ namespace HELPERS {
 	wxBitmapButton* getBitmapButton(wxWindow* parentFrame, rapidjson::Document* settings, const char* name);
 
 	rapidjson::Document getSettingsFile(std::string filename);
+	rapidjson::Document getSettingsFromString(std::string jsonString);
 
 	float normalizeRadian(float angle);
 

@@ -7,6 +7,7 @@
 #include <wx/dir.h>
 #include <wx/file.h>
 #include <wx/filename.h>
+#include <wx/longlong.h>
 #include <wx/string.h>
 
 class ApplicationMemoryManager {
