@@ -57,6 +57,7 @@ wxBitmapButton* HELPERS::getBitmapButton(wxWindow* parentFrame, rapidjson::Docum
 // https://stackoverflow.com/a/478960/9329945
 // Executes command and gets output
 std::string HELPERS::exec(const char* cmd) {
+	/*
 	std::array<char, 128> buffer;
 	std::string result;
 	std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
@@ -69,6 +70,20 @@ std::string HELPERS::exec(const char* cmd) {
 	// Remove trailing newline
 	result.pop_back();
 	return result;
+	*/
+	wxArrayString outputArray;
+	long resultCode = wxExecute(cmd, outputArray, wxEXEC_SHOW_CONSOLE);
+
+	std::size_t numOfLines = outputArray.GetCount();
+	if(numOfLines != 0) {
+		std::string output = outputArray[0].ToStdString();
+		for(std::size_t i = 1; i < numOfLines; i++) {
+			output += ("\n" + outputArray[i].ToStdString());
+		}
+		return output;
+	} else {
+		return "";
+	}
 }
 
 wxBitmap* HELPERS::getBitmapFromJPEGData(std::vector<uint8_t> jpegBuffer) {
@@ -85,6 +100,8 @@ int HELPERS::char2int(char input) {
 		return input - 'A' + 10;
 	if(input >= 'a' && input <= 'f')
 		return input - 'a' + 10;
+	else
+		return 0;
 }
 
 void HELPERS::hex2bin(const char* src, uint8_t* target) {

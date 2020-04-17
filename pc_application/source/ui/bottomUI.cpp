@@ -136,7 +136,7 @@ JoystickCanvas::JoystickCanvas(rapidjson::Document* settings, wxFrame* parent, D
 	inputSizer->Add(yInput, 0, wxEXPAND);
 	inputSizer->Add(canGoOutsideCircleCheckbox, 0, wxEXPAND);
 
-	widgetSizer->Add(this, 0, wxSHAPED | wxEXPAND);
+	widgetSizer->Add(this, 0, wxSHAPED | wxALIGN_CENTER_HORIZONTAL);
 	widgetSizer->Add(xInput, 0, wxEXPAND);
 	widgetSizer->Add(inputSizer, 0, wxEXPAND | wxALL);
 	widgetSizer->Add(lockButton, 0, wxEXPAND | wxALL);

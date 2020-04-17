@@ -44,20 +44,21 @@ DrawingCanvasBitmap::DrawingCanvasBitmap(wxWindow* parent, wxSize size)
 }
 
 void DrawingCanvasBitmap::draw(wxDC& dc) {
-	int width;
-	int height;
-	GetSize(&width, &height);
-	// Set scaling for the image to render without wxImage
-	dc.SetUserScale((double)width / bitmap->GetWidth(), (double)height / bitmap->GetHeight());
-	// Render the default image, that's it
-	dc.DrawBitmap(*bitmap, 0, 0, false);
-	// VERY IMPORTANT for later work drawing semi-transparent wxBitmap, use wxAlphaPixelData
-	// https://docs.wxwidgets.org/3.0/classwx_pixel_data.html
+	if(bitmap != NULL) {
+		int width;
+		int height;
+		GetSize(&width, &height);
+		// Set scaling for the image to render without wxImage
+		dc.SetUserScale((double)width / bitmap->GetWidth(), (double)height / bitmap->GetHeight());
+		dc.DrawBitmap(*bitmap, 0, 0, false);
+	}
 }
 
 void DrawingCanvasBitmap::setBitmap(wxBitmap* theBitmap) {
 	// Delete the earlier one
-	delete bitmap;
+	if(bitmap != NULL) {
+		delete bitmap;
+	}
 	// Select the new one
 	bitmap = theBitmap;
 	Refresh();

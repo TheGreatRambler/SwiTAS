@@ -40,7 +40,7 @@ private:
 	std::shared_ptr<ButtonData> buttonData;
 
 	// Project handler, creates projects and saves them
-	ProjectHandler* projectHandler;
+	std::shared_ptr<ProjectHandler> projectHandler;
 
 	// The pointers to the classes containing the uis
 	std::shared_ptr<SideUI> sideUI;

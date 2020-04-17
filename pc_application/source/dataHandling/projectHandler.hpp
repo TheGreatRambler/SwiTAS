@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fstream>
+#include <memory>
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
@@ -11,49 +12,32 @@
 #include <wx/listbox.h>
 #include <wx/msgdlg.h>
 #include <wx/mstream.h>
+#include <wx/statbmp.h>
 #include <wx/stdpaths.h>
 #include <wx/wfstream.h>
 #include <wx/wx.h>
 #include <wx/zstream.h>
 
 #include "../../sharedNetworkCode/serializeUnserializeData.hpp"
+#include "../ui/drawingCanvas.hpp"
 #include "dataProcessing.hpp"
 
-class ProjectHandler : public wxDialog {
+class ProjectHandler {
 private:
-	// Add directory of project, project name, various other info
-	// This will handle opening a directory chooser at the beginning of each session
-	// https://docs.wxwidgets.org/3.0/classwx_dir_dialog.html
-	// Probably having a list of the recent projects as well
-	// Store recent projects in mainSettings.json
-	wxBoxSizer* mainSizer;
-	wxListBox* projectList;
-
-	uint8_t wasClosedForcefully = true;
-
 	DataProcessing* dataProcessing;
 
 	wxDir projectDir;
 	SerializeProtocol serializeProtocol;
-	bool projectChosen = false;
 
 	std::string projectName;
+	uint8_t projectWasLoaded = true;
 
 	int recentProjectChoice;
-
-#ifdef __WXGTK__
-	bool projectListFirstTime = true;
-#endif
-
-	const wxString loadExistingProjectText = "Load Project";
-	const wxString createNewProjectText    = "Create New Project";
 
 	static constexpr int compressionLevel = 7;
 
 	// Main settings variable
 	rapidjson::Document* mainSettings;
-
-	void onClickProject(wxCommandEvent& event);
 
 public:
 	ProjectHandler(DataProcessing* dataProcessingInstance, rapidjson::Document* settings);
@@ -61,28 +45,77 @@ public:
 	void loadProject();
 	void saveProject();
 
-	// Created if no project is chosen
-	void createTempProjectDir();
-
 	wxFileName getProjectStart() {
 		return wxFileName::DirName(projectDir.GetNameWithSep());
-	}
-
-	bool wasProjectChosen() {
-		return projectChosen;
 	}
 
 	void setProjectName(std::string name) {
 		projectName = name;
 	}
 
+	void setRecentProjectChoice(int projectChoice) {
+		recentProjectChoice = projectChoice;
+	}
+
+	void setProjectDir(wxString dirPath) {
+		projectDir.Open(dirPath);
+		// Just in case
+		wxFileName dir(dirPath);
+		if(!dir.DirExists()) {
+			dir.Mkdir();
+		}
+	}
+
+	void setProjectWasLoaded(bool wasLoaded) {
+		projectWasLoaded = wasLoaded;
+	}
+
+	void removeRecentProject(int index) {
+		(*mainSettings)["recentProjects"].GetArray().Erase(&(*mainSettings)["recentProjects"].GetArray()[index]);
+	}
+
 	std::string getProjectName() {
 		return projectName;
 	}
+
+	rapidjson::GenericArray<false, rapidjson::Value> getRecentProjects() {
+		return (*mainSettings)["recentProjects"].GetArray();
+	}
+};
+
+class ProjectHandlerWindow : public wxDialog {
+private:
+	std::shared_ptr<ProjectHandler> projectHandler;
+
+	rapidjson::Document* mainSettings;
+
+	wxBoxSizer* mainSizer;
+	wxListBox* projectList;
+
+	const wxString loadExistingProjectText = "Load Project";
+	const wxString createNewProjectText    = "Create New Project";
+
+	uint8_t wasClosedForcefully = true;
+
+	bool projectChosen = false;
+
+#ifdef __WXGTK__
+	bool projectListFirstTime = true;
+#endif
+
+	void onClickProject(wxCommandEvent& event);
+
+public:
+	ProjectHandlerWindow(std::shared_ptr<ProjectHandler> projHandler, rapidjson::Document* settings);
 
 	uint8_t wasDialogClosedForcefully() {
 		return wasClosedForcefully;
 	}
 
-	~ProjectHandler();
+	bool wasProjectChosen() {
+		return projectChosen;
+	}
+
+	// Created if no project is chosen
+	void createTempProjectDir();
 };

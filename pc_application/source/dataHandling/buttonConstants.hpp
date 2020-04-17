@@ -16,6 +16,7 @@
 
 // So that types are somewhat unified
 typedef uint32_t FrameNum;
+typedef uint16_t SavestateBlockNum;
 
 // Struct containing button info
 struct ButtonInfo {

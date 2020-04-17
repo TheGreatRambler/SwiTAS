@@ -16,6 +16,7 @@
 #include <string>
 #include <unistd.h>
 #include <vector>
+#include <wx/arrstr.h>
 #include <wx/filename.h>
 #include <wx/mstream.h>
 #include <wx/wx.h>

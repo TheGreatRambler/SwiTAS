@@ -223,6 +223,7 @@
 		"playButton": "share/icons/nxtas/buttons/playButton.png",
 		"pauseButton": "share/icons/nxtas/buttons/pauseButton.png",
 		"okButton": "share/icons/nxtas/buttons/okButton.png",
+		"splashScreen": "share/icons/nxtas/logo/main.png",
 		"buttonWidth": 80,
 		"buttonHeight": 80,
 		"frameViewerColors": {
@@ -237,10 +238,6 @@
 		}
 	},
 	"recentProjects": [
-		{
-			"projectDirectory": "",
-			"projectName": ""
-		},
 		{
 			"projectDirectory": "/home/thegreatrambler/Desktop/bob/",
 			"projectName": "Unnamed"

@@ -74,7 +74,7 @@ MainWindow::MainWindow()
 	// add_events(Gdk::KEY_PRESS_MASK);
 	handlePreviousWindowTransform();
 
-	projectHandler = new ProjectHandler(dataProcessingInstance, &mainSettings);
+	projectHandler = std::make_shared<ProjectHandler>(dataProcessingInstance, &mainSettings);
 }
 
 void MainWindow::onStart() {
@@ -84,20 +84,20 @@ void MainWindow::onStart() {
 
 	debugWindow = new DebugWindow(networkInstance);
 
-	// Now, open the choose project dialog
-	// TODO open this in wxApp because it apparently doesn't work in the constructor
-	Hide();
-	projectHandler->ShowModal();
+	ProjectHandlerWindow projectHandlerWindow(projectHandler, &mainSettings);
 
-	if(projectHandler->wasDialogClosedForcefully()) {
+	projectHandlerWindow.ShowModal();
+
+	if(projectHandlerWindow.wasDialogClosedForcefully()) {
 		// It was closed with X, terminate this window, and the entire application, as well
+		projectHandler->setProjectWasLoaded(false);
 		Close(true);
 		return;
 	}
 
-	if(!projectHandler->wasProjectChosen()) {
+	if(!projectHandlerWindow.wasProjectChosen()) {
 		// Generate a temp one
-		projectHandler->createTempProjectDir();
+		projectHandlerWindow.createTempProjectDir();
 	}
 	Show();
 }
@@ -234,7 +234,6 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 void MainWindow::onClose(wxCloseEvent& event) {
 	// Close project dialog and save
 	projectHandler->saveProject();
-	projectHandler->Destroy();
 
 	delete wxLog::SetActiveTarget(NULL);
 

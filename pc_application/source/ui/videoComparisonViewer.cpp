@@ -1,7 +1,7 @@
 #include "videoComparisonViewer.hpp"
 
 VideoComparisonViewer::VideoComparisonViewer(rapidjson::Document* settings, MainWindow* mainFrame, wxString projectDirectory)
-	: wxFrame(NULL, wxID_ANY, "Video Comparison Viewer", wxDefaultPosition, wxDefaultSize) {
+	: wxFrame(NULL, wxID_ANY, "Video Comparison Viewer", wxDefaultPosition, wxSize(300, 200)) {
 	// https://www.youtube.com/watch?v=su61pXgmJcw
 	mainSettings = settings;
 	parentWindow = mainFrame;

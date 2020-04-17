@@ -140,6 +140,10 @@ public:
 		setSavestateHook(0);
 	}
 
+	void modifySavestate() {
+
+	}
+
 	void setCurrentFrame(FrameNum frameNum);
 
 	void createSavestateHookHere();
@@ -157,7 +161,7 @@ public:
 
 	void addNewSavestateHook();
 
-	void setSavestateHook(std::size_t index);
+	void setSavestateHook(SavestateBlockNum index);
 
 	std::shared_ptr<ControllerData> getFrame(FrameNum frame) const;
 

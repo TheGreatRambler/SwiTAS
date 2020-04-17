@@ -30,7 +30,7 @@ public:
 // A version of DrawingCanvas that just renders an image
 class DrawingCanvasBitmap : public DrawingCanvas {
 private:
-	wxBitmap* bitmap;
+	wxBitmap* bitmap = NULL;
 
 public:
 	DrawingCanvasBitmap(wxWindow* parent, wxSize size);

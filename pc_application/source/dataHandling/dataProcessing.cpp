@@ -445,7 +445,7 @@ void DataProcessing::addNewSavestateHook() {
 	setSavestateHook(0);
 }
 
-void DataProcessing::setSavestateHook(std::size_t index) {
+void DataProcessing::setSavestateHook(SavestateBlockNum index) {
 	inputsList = savestateHookBlocks[index];
 	SetItemCount(inputsList->size());
 	setCurrentFrame(0);
