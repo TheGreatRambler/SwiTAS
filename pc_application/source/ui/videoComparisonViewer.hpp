@@ -8,8 +8,10 @@
 #include <cstdlib>
 #include <cstring>
 #include <ffms.h>
+#include <memory>
 #include <ostream>
 #include <rapidjson/document.h>
+#include <thread>
 #include <vector>
 #include <wx/longlong.h>
 #include <wx/msgdlg.h>
@@ -58,6 +60,7 @@ private:
 
 	std::string url;
 	std::string fullVideoPath;
+	std::string fullVideoIndexerPath;
 
 	// Needs to be set by something, without trailing slash
 	wxString projectDir;
@@ -68,21 +71,24 @@ private:
 	std::vector<int> formatsArray;
 	std::vector<std::string> formatsMetadataArray;
 
-	uint8_t videoExists = false;
+	uint8_t videoExists  = false;
+	int recentVideoIndex = -1;
+	int selectedFormatIndex;
 	std::string videoName;
 	char ffms2Errmsg[1024];
 	FFMS_ErrorInfo ffms2Errinfo;
-	FFMS_VideoSource* videosource = NULL;
-	const FFMS_VideoProperties* videoprops;
+	FFMS_VideoSource* videosource          = NULL;
+	const FFMS_VideoProperties* videoprops = NULL;
 
 	wxSize videoDimensions;
 	DrawingCanvasBitmap* videoCanvas;
+	wxSizerItem* videoCanvasSizerItem;
 
 	void onCommandDone(wxProcessEvent& event);
 
 	// Hack to make c style function callbacks work
 	static int FFMS_CC onIndexingProgress(int64_t current, int64_t total, void* self) {
-		((VideoComparisonViewer*)self)->consoleLog->AppendText(wxString::Format(wxLongLongFmtSpec " bytes of " wxLongLongFmtSpec " bytes indexed\n", current, total));
+		((VideoComparisonViewer*)self)->consoleLog->AppendText(wxString::Format("%f percent indexed\n", ((double)current / total) * 100));
 		return 0;
 	}
 
@@ -91,6 +97,8 @@ private:
 	}
 
 	void parseVideo();
+
+	void addToRecentVideoList();
 
 	void drawFrame(int frame);
 

@@ -79,7 +79,7 @@ std::string HELPERS::exec(const char* cmd) {
 	return result;
 	*/
 	wxArrayString outputArray;
-	long resultCode = wxExecute(cmd, outputArray, wxEXEC_SHOW_CONSOLE);
+	long resultCode = wxExecute(cmd, outputArray, wxEXEC_HIDE_CONSOLE);
 
 	std::size_t numOfLines = outputArray.GetCount();
 	if(numOfLines != 0) {

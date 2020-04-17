@@ -36,16 +36,16 @@ VideoComparisonViewer::VideoComparisonViewer(rapidjson::Document* settings, Main
 	videoCanvas = new DrawingCanvasBitmap(this, wxSize(1, 1));
 
 	mainSizer->Add(urlInput, 0, wxEXPAND | wxALL);
-	mainSizer->Add(videoFormatsList, 0, wxEXPAND | wxALL);
-	mainSizer->Add(consoleLog, 0, wxEXPAND | wxALL);
-	mainSizer->Add(videoCanvas, 0, wxSHAPED | wxEXPAND | wxALIGN_CENTER_HORIZONTAL);
+	mainSizer->Add(videoFormatsList, 2, wxEXPAND | wxALL);
+	mainSizer->Add(consoleLog, 3, wxEXPAND | wxALL);
+	videoCanvasSizerItem = mainSizer->Add(videoCanvas, 0, wxSHAPED | wxEXPAND | wxALIGN_CENTER_HORIZONTAL);
 	mainSizer->Add(inputSizer, 0, wxEXPAND | wxALL);
 
 	// Hide by default
 	videoFormatsList->Show(false);
 	consoleLog->Show(true);
 	videoCanvas->Show(false);
-	Refresh();
+	Layout();
 
 	SetSizer(mainSizer);
 	mainSizer->SetSizeHints(this);
@@ -68,7 +68,7 @@ void VideoComparisonViewer::onIdle(wxIdleEvent& event) {
 		wxInputStream* inputStream = commandProcess->GetInputStream();
 		if(inputStream->CanRead()) {
 			consoleLog->Show(true);
-			Refresh();
+			Layout();
 
 			// https://forums.wxwidgets.org/viewtopic.php?t=24390#p104181
 
@@ -141,7 +141,7 @@ void VideoComparisonViewer::displayVideoFormats(wxCommandEvent& event) {
 					int height                 = format["height"].GetInt();
 					int fps                    = format["fps"].GetInt();
 					wxString formatItem        = wxString::Format("%dx%d, %d fps", width, height, fps);
-					wxString compactFormatItem = wxString::Format("%dx%d-%d-", width, height, fps);
+					wxString compactFormatItem = wxString::Format("%dx%d-%dfps", width, height, fps);
 					videoFormatsList->InsertItems(1, &formatItem, i);
 
 					formatsArray.push_back(formatID);
@@ -157,7 +157,7 @@ void VideoComparisonViewer::displayVideoFormats(wxCommandEvent& event) {
 		}
 
 		videoFormatsList->Show(true);
-		Refresh();
+		Layout();
 	} else {
 		// Not a valid URL
 		wxMessageDialog urlInvalidDialog(this, "This URL is invalid", "Invalid URL", wxOK | wxICON_ERROR);
@@ -166,39 +166,86 @@ void VideoComparisonViewer::displayVideoFormats(wxCommandEvent& event) {
 }
 
 void VideoComparisonViewer::onFormatSelection(wxCommandEvent& event) {
+	selectedFormatIndex = event.GetInt();
+
 	if(videoExists) {
 		FFMS_DestroyVideoSource(videosource);
 		videoExists = false;
 	}
 
-	int selectedFormat = formatsArray[event.GetInt()];
-	fullVideoPath      = projectDir.ToStdString() + "/videos/" + formatsMetadataArray[event.GetInt()] + videoName;
-	// Streaming download from youtube-dl
-	commandProcess = new wxProcess(this);
-	commandProcess->Redirect();
+	consoleLog->Clear();
 
-	wxString commandString = wxString::Format("youtube-dl -f %d -o %s %s", selectedFormat, wxString::FromUTF8(fullVideoPath), url);
+	int selectedFormat         = formatsArray[selectedFormatIndex];
+	std::string formatMetadata = formatsMetadataArray[selectedFormatIndex];
 
-	// This will run and the progress will be seen in console
-	currentRunningCommand = RUNNING_COMMAND::DOWNLOAD_VIDEO;
-	wxExecute(commandString, wxEXEC_ASYNC | wxEXEC_SHOW_CONSOLE, commandProcess);
+	rapidjson::GenericArray<false, rapidjson::Value> recentProjectsArray = (*mainSettings)["recentVideos"].GetArray();
+
+	recentVideoIndex = -1;
+	for(std::size_t i = 0; i < recentProjectsArray.Size(); i++) {
+		if(std::string(recentProjectsArray[i]["videoMetadata"].GetString()) == formatMetadata && std::string(recentProjectsArray[i]["videoName"].GetString()) == videoName) {
+			recentVideoIndex = i;
+			break;
+		}
+	}
+
+	if(recentVideoIndex == -1) {
+		// New video, add the stuff
+		consoleLog->AppendText("New video, have to download\n");
+		fullVideoPath        = projectDir.ToStdString() + "/videos/" + formatsMetadataArray[selectedFormatIndex] + "-" + videoName;
+		fullVideoIndexerPath = projectDir.ToStdString() + "/videos/" + formatsMetadataArray[selectedFormatIndex] + "-Indexer-" + videoName;
+
+		addToRecentVideoList();
+
+		// Streaming download from youtube-dl
+		commandProcess = new wxProcess(this);
+		commandProcess->Redirect();
+
+		wxString commandString = wxString::Format("youtube-dl -f %d -o %s %s", selectedFormat, wxString::FromUTF8(fullVideoPath), url);
+
+		// This will run and the progress will be seen in console
+		currentRunningCommand = RUNNING_COMMAND::DOWNLOAD_VIDEO;
+		wxExecute(commandString, wxEXEC_ASYNC | wxEXEC_HIDE_CONSOLE, commandProcess);
+	} else {
+		// Old video, load from disk
+		consoleLog->AppendText("Old video, loading from disk\n");
+		fullVideoPath        = std::string(recentProjectsArray[recentVideoIndex]["videoPath"].GetString());
+		fullVideoIndexerPath = std::string(recentProjectsArray[recentVideoIndex]["videoIndexerPath"].GetString());
+		parseVideo();
+	}
 }
 
 void VideoComparisonViewer::parseVideo() {
-	// https://github.com/FFMS/ffms2/blob/master/doc/ffms2-api.md
-	FFMS_Indexer* videoIndexer = FFMS_CreateIndexer(fullVideoPath.c_str(), &ffms2Errinfo);
-	if(videoIndexer == NULL) {
-		printFfms2Error();
-		return;
-	}
-	// This is helpful for cpp callbacks
-	// https://stackoverflow.com/a/29817048/9329945
-	FFMS_SetProgressCallback(videoIndexer, &VideoComparisonViewer::onIndexingProgress, this);
+	FFMS_Indexer* videoIndexer;
+	FFMS_Index* index;
+	if(recentVideoIndex == -1) {
+		// https://github.com/FFMS/ffms2/blob/master/doc/ffms2-api.md
+		videoIndexer = FFMS_CreateIndexer(fullVideoPath.c_str(), &ffms2Errinfo);
+		if(videoIndexer == NULL) {
+			printFfms2Error();
+			return;
+		}
+		// This is helpful for cpp callbacks
+		// https://stackoverflow.com/a/29817048/9329945
+		FFMS_SetProgressCallback(videoIndexer, &VideoComparisonViewer::onIndexingProgress, this);
 
-	FFMS_Index* index = FFMS_DoIndexing2(videoIndexer, FFMS_IEH_ABORT, &ffms2Errinfo);
-	if(index == NULL) {
-		printFfms2Error();
-		return;
+		index = FFMS_DoIndexing2(videoIndexer, FFMS_IEH_ABORT, &ffms2Errinfo);
+		if(index == NULL) {
+			printFfms2Error();
+			return;
+		}
+
+		int res = FFMS_WriteIndex(fullVideoIndexerPath.c_str(), index, &ffms2Errinfo);
+		if(res != 0) {
+			printFfms2Error();
+			return;
+		}
+	} else {
+		// Read index from disk
+		index = FFMS_ReadIndex(fullVideoIndexerPath.c_str(), &ffms2Errinfo);
+		if(index == NULL) {
+			printFfms2Error();
+			return;
+		}
 	}
 
 	int trackno = FFMS_GetFirstTrackOfType(index, FFMS_TYPE_VIDEO, &ffms2Errinfo);
@@ -220,7 +267,7 @@ void VideoComparisonViewer::parseVideo() {
 
 	videoDimensions.SetWidth(propframe->EncodedWidth);
 	videoDimensions.SetHeight(propframe->EncodedHeight);
-	videoCanvas->SetSize(videoDimensions);
+	videoCanvasSizerItem->SetRatio(videoDimensions);
 
 	int pixfmts[2];
 	pixfmts[0] = FFMS_GetPixFmt("rgb24");
@@ -233,7 +280,7 @@ void VideoComparisonViewer::parseVideo() {
 
 	videoExists = true;
 	consoleLog->Show(false);
-	Refresh();
+	Layout();
 
 	frameSelect->SetRange(0, videoprops->NumFrames);
 	frameSlider->SetRange(0, videoprops->NumFrames);
@@ -244,7 +291,32 @@ void VideoComparisonViewer::parseVideo() {
 	drawFrame(0);
 }
 
+void VideoComparisonViewer::addToRecentVideoList() {
+	rapidjson::Value newRecentVideo(rapidjson::kObjectType);
+
+	rapidjson::Value name;
+	name.SetString(videoName.c_str(), videoName.size(), mainSettings->GetAllocator());
+
+	rapidjson::Value metadataString;
+	std::string metadata = formatsMetadataArray[selectedFormatIndex];
+	metadataString.SetString(metadata.c_str(), metadata.size(), mainSettings->GetAllocator());
+
+	rapidjson::Value videoPath;
+	name.SetString(fullVideoPath.c_str(), fullVideoPath.size(), mainSettings->GetAllocator());
+
+	rapidjson::Value videoIndexerPath;
+	name.SetString(fullVideoIndexerPath.c_str(), fullVideoIndexerPath.size(), mainSettings->GetAllocator());
+
+	newRecentVideo.AddMember("videoName", name, mainSettings->GetAllocator());
+	newRecentVideo.AddMember("videoMetadata", metadataString, mainSettings->GetAllocator());
+	newRecentVideo.AddMember("videoPath", videoPath, mainSettings->GetAllocator());
+	newRecentVideo.AddMember("videoIndexerPath", videoIndexerPath, mainSettings->GetAllocator());
+
+	(*mainSettings)["recentVideos"].GetArray().PushBack(newRecentVideo, mainSettings->GetAllocator());
+}
+
 void VideoComparisonViewer::drawFrame(int frame) {
+	// The frames in this case are video dependent, TODO add stuff for 60fps always
 	// https://www.youtube.com/watch?v=su61pXgmJcw
 	currentFrame = frame;
 
@@ -261,7 +333,6 @@ void VideoComparisonViewer::drawFrame(int frame) {
 
 	wxBitmap* videoFrame = new wxBitmap(videoDimensions, 24);
 	wxNativePixelData nativePixelData(*videoFrame);
-	nativePixelData.GetPixels();
 
 	wxNativePixelData::Iterator p(nativePixelData);
 
@@ -273,6 +344,8 @@ void VideoComparisonViewer::drawFrame(int frame) {
 			p.Red()   = data[start];
 			p.Green() = data[start + 1];
 			p.Blue()  = data[start + 2];
+
+			++p;
 		}
 
 		p = rowStart;
@@ -283,7 +356,7 @@ void VideoComparisonViewer::drawFrame(int frame) {
 	videoCanvas->setBitmap(videoFrame);
 
 	videoCanvas->Show(true);
-	Refresh();
+	Layout();
 }
 
 void VideoComparisonViewer::frameChosenSpin(wxSpinEvent& event) {

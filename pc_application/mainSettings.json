@@ -237,8 +237,7 @@
 			"newProject": "rgb(20, 110, 66)"
 		}
 	},
-	"recentProjects": [
-		{
+	"recentProjects": [{
 			"projectDirectory": "/home/thegreatrambler/Desktop/bob/",
 			"projectName": "Unnamed"
 		},
@@ -246,5 +245,6 @@
 			"projectDirectory": "C:\\Users\\aehar\\Desktop\\bruh\\",
 			"projectName": "Unnamed"
 		}
-	]
+	],
+	"recentVideos": []
 }
