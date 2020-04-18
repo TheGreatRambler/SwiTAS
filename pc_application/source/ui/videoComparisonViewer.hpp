@@ -11,6 +11,7 @@
 #include <ffms.h>
 #include <memory>
 #include <ostream>
+#include <picosha1.hpp>
 #include <rapidjson/document.h>
 #include <thread>
 #include <vector>
@@ -33,6 +34,7 @@
 struct VideoEntry {
 	std::string videoUrl;
 	std::string videoName;
+	std::string videoFilename;
 	std::string videoMetadata;
 	std::string videoPath;
 	std::string videoIndexerPath;
@@ -65,6 +67,8 @@ private:
 
 	wxTextCtrl* consoleLog;
 
+	std::string videoName;
+	std::string videoFilename;
 	std::string url;
 	std::string fullVideoPath;
 	std::string fullVideoIndexerPath;
@@ -76,7 +80,7 @@ private:
 	RUNNING_COMMAND currentRunningCommand = RUNNING_COMMAND::NO_COMMAND;
 	std::shared_ptr<std::thread> indexingThread;
 	moodycamel::ConcurrentQueue<std::string> indexingOutput;
-	uint8_t indexingDone = false;
+	std::atomic_bool indexingDone;
 
 	std::vector<int> formatsArray;
 	std::vector<std::string> formatsMetadataArray;
@@ -84,11 +88,11 @@ private:
 	uint8_t videoExists  = false;
 	int recentVideoIndex = -1;
 	int selectedFormatIndex;
-	std::string videoName;
 	char ffms2Errmsg[1024];
 	FFMS_ErrorInfo ffms2Errinfo;
 	FFMS_VideoSource* videosource          = NULL;
 	const FFMS_VideoProperties* videoprops = NULL;
+	FFMS_Index* videoIndex;
 
 	wxSize videoDimensions;
 	DrawingCanvasBitmap* videoCanvas;
@@ -106,6 +110,7 @@ private:
 		consoleLog->AppendText(wxString::Format("FFMS2 error: %s\n", wxString(ffms2Errinfo.Buffer)));
 	}
 
+	void indexVideo();
 	void parseVideo();
 
 	void addToRecentVideoList();

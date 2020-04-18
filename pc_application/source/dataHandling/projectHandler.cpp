@@ -76,6 +76,7 @@ void ProjectHandler::loadProject() {
 
 		videoEntry->videoUrl         = std::string(videoEntryJson["videoUrl"].GetString());
 		videoEntry->videoName        = std::string(videoEntryJson["videoName"].GetString());
+		videoEntry->videoFilename    = std::string(videoEntryJson["videoFilename"].GetString());
 		videoEntry->videoMetadata    = std::string(videoEntryJson["videoMetadata"].GetString());
 		videoEntry->videoPath        = HELPERS::makeFromRelative(std::string(videoEntryJson["videoPath"].GetString()), projectDir.GetName().ToStdString());
 		videoEntry->videoIndexerPath = HELPERS::makeFromRelative(std::string(videoEntryJson["videoIndexerPath"].GetString()), projectDir.GetName().ToStdString());
@@ -161,6 +162,9 @@ void ProjectHandler::saveProject() {
 			rapidjson::Value name;
 			name.SetString(videoEntry->videoName.c_str(), videoEntry->videoName.size(), settingsJSON.GetAllocator());
 
+			rapidjson::Value filename;
+			filename.SetString(videoEntry->videoFilename.c_str(), videoEntry->videoFilename.size(), settingsJSON.GetAllocator());
+
 			rapidjson::Value metadataString;
 			metadataString.SetString(videoEntry->videoMetadata.c_str(), videoEntry->videoMetadata.size(), settingsJSON.GetAllocator());
 
@@ -172,6 +176,7 @@ void ProjectHandler::saveProject() {
 
 			newRecentVideo.AddMember("videoUrl", url, settingsJSON.GetAllocator());
 			newRecentVideo.AddMember("videoName", name, settingsJSON.GetAllocator());
+			newRecentVideo.AddMember("videoFilename", filename, settingsJSON.GetAllocator());
 			newRecentVideo.AddMember("videoMetadata", metadataString, settingsJSON.GetAllocator());
 			newRecentVideo.AddMember("videoPath", videoPath, settingsJSON.GetAllocator());
 			newRecentVideo.AddMember("videoIndexerPath", videoIndexerPath, settingsJSON.GetAllocator());

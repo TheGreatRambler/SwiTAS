@@ -83,6 +83,12 @@ void VideoComparisonViewer::onIdle(wxIdleEvent& event) {
 			consoleLog->AppendText(text);
 		}
 	}
+
+	// Check if indexing is done
+	if(indexingDone) {
+		indexingDone = false;
+		parseVideo();
+	}
 }
 
 void VideoComparisonViewer::onClose(wxCloseEvent& event) {
@@ -116,10 +122,8 @@ void VideoComparisonViewer::onCommandDone(wxProcessEvent& event) {
 void VideoComparisonViewer::displayVideoFormats(wxCommandEvent& event) {
 	url = urlInput->GetLineText(0).ToStdString();
 	// All these commands will block, which could be a problem for bad internet connections
-	videoName = HELPERS::exec(("youtube-dl --get-filename -o \"%(title)s.%(ext)s\" " + url).c_str());
-	if(videoName.find("is not a valid URL.") == std::string::npos) {
-		// Replace spaces with underscores
-		std::replace(videoName.begin(), videoName.end(), ' ', '_');
+	std::string videoCheck = HELPERS::exec(("youtube-dl --get-filename -o \"%(title)s.%(ext)s\" " + url).c_str());
+	if(videoCheck.find("is not a valid URL.") == std::string::npos) {
 		formatsArray.clear();
 		formatsMetadataArray.clear();
 		// Due to this https://forums.wxwidgets.org/viewtopic.php?t=20321
@@ -130,6 +134,10 @@ void VideoComparisonViewer::displayVideoFormats(wxCommandEvent& event) {
 		std::string jsonString    = HELPERS::exec(commandString.c_str());
 		// Read data
 		rapidjson::Document jsonData = HELPERS::getSettingsFromString(jsonString);
+
+		videoName     = std::string(jsonData["title"].GetString());
+		videoFilename = picosha2::hash256_hex_string(std::string(jsonData["title"].GetString())) + std::string(".") + std::string(jsonData["ext"].GetString());
+
 		// For now, loop through formats
 		int i = 0;
 		if(jsonData.IsObject()) {
@@ -194,8 +202,8 @@ void VideoComparisonViewer::onFormatSelection(wxCommandEvent& event) {
 	if(recentVideoIndex == -1) {
 		// New video, add the stuff
 		consoleLog->AppendText("New video, have to download\n");
-		fullVideoPath        = projectDir.ToStdString() + "/videos/" + formatsMetadataArray[selectedFormatIndex] + "-" + videoName;
-		fullVideoIndexerPath = projectDir.ToStdString() + "/videos/" + formatsMetadataArray[selectedFormatIndex] + "-Indexer-" + videoName + ".bin";
+		fullVideoPath        = projectDir.ToStdString() + "/videos/" + formatsMetadataArray[selectedFormatIndex] + "-" + videoFilename;
+		fullVideoIndexerPath = projectDir.ToStdString() + "/videos/" + formatsMetadataArray[selectedFormatIndex] + "-Indexer-" + videoFilename + ".bin";
 
 		addToRecentVideoList();
 
@@ -232,25 +240,30 @@ void VideoComparisonViewer::openWithRecent(int index) {
 	wxCommandEvent fakeCommandEvent;
 	displayVideoFormats(fakeCommandEvent);
 
-	parseVideo();
+	indexVideo();
 }
 
-void VideoComparisonViewer::parseVideo() {
-	FFMS_Indexer* videoIndexer;
-	FFMS_Index* index;
+void VideoComparisonViewer::indexVideo() {
 	if(recentVideoIndex == -1) {
-		// https://github.com/FFMS/ffms2/blob/master/doc/ffms2-api.md
+		// Start running in thread
+		indexingDone = false;
+
+		indexingThread = std::make_shared<std::thread>([]() {
+			FFMS_Indexer* videoIndexer;
+			// https://github.com/FFMS/ffms2/blob/master/doc/ffms2-api.md
 		videoIndexer = FFMS_CreateIndexer(fullVideoPath.c_str(), &ffms2Errinfo);
 		if(videoIndexer == NULL) {
 			printFfms2Error();
 			return;
 		}
+		
+		});
 		// This is helpful for cpp callbacks
 		// https://stackoverflow.com/a/29817048/9329945
 		FFMS_SetProgressCallback(videoIndexer, &VideoComparisonViewer::onIndexingProgress, this);
 
-		index = FFMS_DoIndexing2(videoIndexer, FFMS_IEH_ABORT, &ffms2Errinfo);
-		if(index == NULL) {
+		videoIndex = FFMS_DoIndexing2(videoIndexer, FFMS_IEH_ABORT, &ffms2Errinfo);
+		if(videoIndex == NULL) {
 			printFfms2Error();
 			return;
 		}
@@ -262,26 +275,30 @@ void VideoComparisonViewer::parseVideo() {
 		}
 	} else {
 		// Read index from disk
-		index = FFMS_ReadIndex(fullVideoIndexerPath.c_str(), &ffms2Errinfo);
-		if(index == NULL) {
+		videoIndex = FFMS_ReadIndex(fullVideoIndexerPath.c_str(), &ffms2Errinfo);
+		if(videoIndex == NULL) {
 			printFfms2Error();
 			return;
 		}
+		parseVideo();
 	}
+}
 
-	int trackno = FFMS_GetFirstTrackOfType(index, FFMS_TYPE_VIDEO, &ffms2Errinfo);
+void VideoComparisonViewer::parseVideo() {
+
+	int trackno = FFMS_GetFirstTrackOfType(videoIndex, FFMS_TYPE_VIDEO, &ffms2Errinfo);
 	if(trackno < 0) {
 		printFfms2Error();
 		return;
 	}
 
-	videosource = FFMS_CreateVideoSource(fullVideoPath.c_str(), trackno, index, 1, FFMS_SEEK_NORMAL, &ffms2Errinfo);
+	videosource = FFMS_CreateVideoSource(fullVideoPath.c_str(), trackno, videoIndex, 1, FFMS_SEEK_NORMAL, &ffms2Errinfo);
 	if(videosource == NULL) {
 		printFfms2Error();
 		return;
 	}
 
-	FFMS_DestroyIndex(index);
+	FFMS_DestroyIndex(videoIndex);
 
 	videoprops                  = FFMS_GetVideoProperties(videosource);
 	const FFMS_Frame* propframe = FFMS_GetFrame(videosource, 0, &ffms2Errinfo);
@@ -317,6 +334,7 @@ void VideoComparisonViewer::addToRecentVideoList() {
 
 	videoEntry->videoUrl         = urlInput->GetLineText(0).ToStdString();
 	videoEntry->videoName        = videoName;
+	videoEntry->videoFilename    = videoFilename;
 	videoEntry->videoMetadata    = formatsMetadataArray[selectedFormatIndex];
 	videoEntry->videoPath        = fullVideoPath;
 	videoEntry->videoIndexerPath = fullVideoIndexerPath;
