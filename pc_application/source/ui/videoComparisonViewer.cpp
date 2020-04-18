@@ -1,10 +1,10 @@
 #include "videoComparisonViewer.hpp"
 
-VideoComparisonViewer::VideoComparisonViewer(rapidjson::Document* settings, MainWindow* mainFrame, wxString projectDirectory)
+VideoComparisonViewer::VideoComparisonViewer(rapidjson::Document* settings, std::vector<VideoEntry>& entries, wxString projectDirectory)
 	: wxFrame(NULL, wxID_ANY, "Video Comparison Viewer", wxDefaultPosition, wxSize(300, 200)) {
 	// https://www.youtube.com/watch?v=su61pXgmJcw
 	mainSettings = settings;
-	parentWindow = mainFrame;
+	videoEntries = entries;
 	projectDir   = projectDirectory;
 
 	ffms2Errinfo.Buffer     = ffms2Errmsg;
@@ -87,6 +87,7 @@ void VideoComparisonViewer::onIdle(wxIdleEvent& event) {
 
 void VideoComparisonViewer::onClose(wxCloseEvent& event) {
 	// Help MainWindow delete this window
+	/*
 	for(std::size_t i = 0; i < parentWindow->videoComparisonViewers.size(); i++) {
 		// If this is the window, remove it from the list
 		if(parentWindow->videoComparisonViewers[i] == this) {
@@ -94,6 +95,7 @@ void VideoComparisonViewer::onClose(wxCloseEvent& event) {
 			break;
 		}
 	}
+	*/
 
 	FFMS_DestroyVideoSource(videosource);
 
@@ -181,8 +183,8 @@ void VideoComparisonViewer::onFormatSelection(wxCommandEvent& event) {
 	rapidjson::GenericArray<false, rapidjson::Value> recentProjectsArray = (*mainSettings)["recentVideos"].GetArray();
 
 	recentVideoIndex = -1;
-	for(std::size_t i = 0; i < recentProjectsArray.Size(); i++) {
-		if(std::string(recentProjectsArray[i]["videoMetadata"].GetString()) == formatMetadata && std::string(recentProjectsArray[i]["videoName"].GetString()) == videoName) {
+	for(std::size_t i = 0; i < videoEntries.size(); i++) {
+		if(videoEntries[i].videoMetadata == formatMetadata && videoEntries[i].videoName == videoName) {
 			recentVideoIndex = i;
 			break;
 		}
@@ -192,7 +194,7 @@ void VideoComparisonViewer::onFormatSelection(wxCommandEvent& event) {
 		// New video, add the stuff
 		consoleLog->AppendText("New video, have to download\n");
 		fullVideoPath        = projectDir.ToStdString() + "/videos/" + formatsMetadataArray[selectedFormatIndex] + "-" + videoName;
-		fullVideoIndexerPath = projectDir.ToStdString() + "/videos/" + formatsMetadataArray[selectedFormatIndex] + "-Indexer-" + videoName;
+		fullVideoIndexerPath = projectDir.ToStdString() + "/videos/" + formatsMetadataArray[selectedFormatIndex] + "-Indexer-" + videoName + ".bin";
 
 		addToRecentVideoList();
 
@@ -208,10 +210,24 @@ void VideoComparisonViewer::onFormatSelection(wxCommandEvent& event) {
 	} else {
 		// Old video, load from disk
 		consoleLog->AppendText("Old video, loading from disk\n");
-		fullVideoPath        = std::string(recentProjectsArray[recentVideoIndex]["videoPath"].GetString());
-		fullVideoIndexerPath = std::string(recentProjectsArray[recentVideoIndex]["videoIndexerPath"].GetString());
+		fullVideoPath        = videoEntries[recentVideoIndex].videoPath;
+		fullVideoIndexerPath = videoEntries[recentVideoIndex].videoIndexerPath;
 		parseVideo();
 	}
+}
+
+// Called when the video is selected from the menu
+void VideoComparisonViewer::openWithRecent(int index) {
+	consoleLog->AppendText("Old video, loading from disk\n");
+
+	recentVideoIndex = index;
+
+	urlInput->Clear();
+	urlInput->SetValue(wxString::FromUTF8(videoEntries[recentVideoIndex].videoUrl));
+
+	fullVideoPath        = videoEntries[recentVideoIndex].videoPath;
+	fullVideoIndexerPath = videoEntries[recentVideoIndex].videoIndexerPath;
+	parseVideo();
 }
 
 void VideoComparisonViewer::parseVideo() {
@@ -292,27 +308,15 @@ void VideoComparisonViewer::parseVideo() {
 }
 
 void VideoComparisonViewer::addToRecentVideoList() {
-	rapidjson::Value newRecentVideo(rapidjson::kObjectType);
+	VideoEntry videoEntry;
 
-	rapidjson::Value name;
-	name.SetString(videoName.c_str(), videoName.size(), mainSettings->GetAllocator());
+	videoEntry.videoUrl         = urlInput->GetLineText(0).ToStdString();
+	videoEntry.videoName        = videoName;
+	videoEntry.videoMetadata    = formatsMetadataArray[selectedFormatIndex];
+	videoEntry.videoPath        = fullVideoPath;
+	videoEntry.videoIndexerPath = fullVideoIndexerPath;
 
-	rapidjson::Value metadataString;
-	std::string metadata = formatsMetadataArray[selectedFormatIndex];
-	metadataString.SetString(metadata.c_str(), metadata.size(), mainSettings->GetAllocator());
-
-	rapidjson::Value videoPath;
-	name.SetString(fullVideoPath.c_str(), fullVideoPath.size(), mainSettings->GetAllocator());
-
-	rapidjson::Value videoIndexerPath;
-	name.SetString(fullVideoIndexerPath.c_str(), fullVideoIndexerPath.size(), mainSettings->GetAllocator());
-
-	newRecentVideo.AddMember("videoName", name, mainSettings->GetAllocator());
-	newRecentVideo.AddMember("videoMetadata", metadataString, mainSettings->GetAllocator());
-	newRecentVideo.AddMember("videoPath", videoPath, mainSettings->GetAllocator());
-	newRecentVideo.AddMember("videoIndexerPath", videoIndexerPath, mainSettings->GetAllocator());
-
-	(*mainSettings)["recentVideos"].GetArray().PushBack(newRecentVideo, mainSettings->GetAllocator());
+	videoEntries.push_back(videoEntry);
 }
 
 void VideoComparisonViewer::drawFrame(int frame) {

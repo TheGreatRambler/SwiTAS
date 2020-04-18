@@ -162,21 +162,22 @@ void MainWindow::addMenuBar() {
 
 	wxMenu* fileMenu = new wxMenu();
 
-	selectIPID                = NewControlId();
-	setNameID                 = NewControlId();
-	toggleLoggingID           = NewControlId();
-	toggleDebugMenuID         = NewControlId();
-	openVideoComparisonViewer = NewControlId();
+	selectIPID        = NewControlId();
+	setNameID         = NewControlId();
+	toggleLoggingID   = NewControlId();
+	toggleDebugMenuID = NewControlId();
 
 	fileMenu->Append(selectIPID, "&Server");
 	fileMenu->Append(setNameID, "&Set Name");
 
 	// Add joystick submenu
 	bottomUI->addJoystickMenu(fileMenu);
+	fileMenu->Append(projectHandler->getVideoSubmenu(), "&List Recent Comparison Videos");
+
+	projectHandler->getVideoSubmenu()->Bind(wxEVT_MENU_OPEN, &MainWindow::onRecentVideosMenuOpen, this);
 
 	fileMenu->Append(toggleLoggingID, "&Toggle Logging");
 	fileMenu->Append(toggleDebugMenuID, "&Toggle Debug Menu");
-	fileMenu->Append(openVideoComparisonViewer, "&Open Video Comparison Viewer");
 
 	menuBar->Append(fileMenu, "&File");
 
@@ -194,7 +195,9 @@ void MainWindow::addStatusBar() {
 
 void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 	wxWindowID id = commandEvent.GetId();
-	if(id >= bottomUI->joystickSubmenuIDBase) {
+	if(id >= projectHandler->videoComparisonEntriesMenuIDBase) {
+		projectHandler->openUpVideoComparisonViewer(id - projectHandler->videoComparisonEntriesMenuIDBase);
+	} else if(id >= bottomUI->joystickSubmenuIDBase) {
 		// Send straight to bottomUI
 		bottomUI->onJoystickSelect(commandEvent);
 	} else {
@@ -223,10 +226,6 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 		} else if(id == toggleDebugMenuID) {
 			debugWindow->Show(!debugWindow->IsShown());
 			wxLogMessage("Toggled debug window");
-		} else if(id == openVideoComparisonViewer) {
-			VideoComparisonViewer* viewer = new VideoComparisonViewer(&mainSettings, this, projectHandler->getProjectStart().GetPath());
-			videoComparisonViewers.push_back(viewer);
-			viewer->Show(true);
 		}
 	}
 }

@@ -24,9 +24,6 @@
 #include "bottomUI.hpp"
 #include "debugWindow.hpp"
 #include "sideUI.hpp"
-#include "videoComparisonViewer.hpp"
-
-class VideoComparisonViewer;
 
 class MainWindow : public wxFrame {
 private:
@@ -62,11 +59,15 @@ private:
 	wxWindowID setNameID;
 	wxWindowID toggleLoggingID;
 	wxWindowID toggleDebugMenuID;
-	wxWindowID openVideoComparisonViewer;
 
 	void handlePreviousWindowTransform();
 
 	void handleMenuBar(wxCommandEvent& commandEvent);
+
+	void onRecentVideosMenuOpen(wxMenuEvent& event) {
+		// Pass on to project handler
+		projectHandler->onRecentVideosMenuOpen(event);
+	}
 
 	void addMenuBar();
 	void addStatusBar();
@@ -91,9 +92,6 @@ public:
 	void onStart();
 
 	void onClose(wxCloseEvent& event);
-
-	// Video comparison frames open
-	std::vector<VideoComparisonViewer*> videoComparisonViewers;
 
 	DECLARE_EVENT_TABLE();
 };

@@ -143,3 +143,14 @@ const uint16_t HELPERS::getHammingDistance(std::string hexString1, std::string h
 
 	return counter;
 }
+
+std::string HELPERS::makeRelative(std::string path, std::string rootDir) {
+	wxFileName newPath(wxString::FromUTF8(path));
+	newPath.MakeRelativeTo(wxString::FromUTF8(rootDir));
+	return newPath.GetFullPath().ToStdString();
+}
+std::string HELPERS::makeFromRelative(std::string path, std::string rootDir) {
+	wxFileName newPath;
+	newPath.AppendDir(wxString::FromUTF8(rootDir));
+	return newPath.GetPath(wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR).ToStdString() + path;
+}

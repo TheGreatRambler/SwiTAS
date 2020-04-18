@@ -3,6 +3,8 @@
 ProjectHandler::ProjectHandler(DataProcessing* dataProcessingInstance, rapidjson::Document* settings) {
 	dataProcessing = dataProcessingInstance;
 	mainSettings   = settings;
+	// TODO this is simiar to the joysticks submenu
+	videoComparisonEntriesMenu = new wxMenu();
 }
 
 void ProjectHandler::loadProject() {
@@ -61,13 +63,27 @@ void ProjectHandler::loadProject() {
 				serializeProtocol.binaryToData<ControllerData>(*controllerData, &bufferPointer[sizeRead], sizeOfControllerData);
 				// For now, just add each frame one at a time, no optimization
 				block->push_back(controllerData);
+				videoIndexerPath
 
-				sizeRead += sizeOfControllerData;
+					sizeRead
+					+= sizeOfControllerData;
 			}
 
 			savestateHookBlocks[index] = block;
 			index++;
 		}
+	}
+
+	for(auto const& videoEntry : jsonSettings["videos"].GetArray()) {
+		VideoEntry videoEntry;
+
+		videoEntry.videoUrl         = std::string(videoEntry["videoUrl"].GetString());
+		videoEntry.videoName        = std::string(videoEntry["videoName"].GetString());
+		videoEntry.videoMetadata    = std::string(videoEntry["videoMetadata"].GetString());
+		videoEntry.videoPath        = HELPERS::makeFromRelative(std::string(videoEntry["videoPath"].GetString()), projectDir.GetName());
+		videoEntry.videoIndexerPath = HELPERS::makeFromRelative(std::string(videoEntry["videoIndexerPath"].GetString()), projectDir.GetName());
+
+		videoEntries.push_back(videoEntry);
 	}
 
 	// Set dataProcessing
@@ -84,7 +100,6 @@ void ProjectHandler::saveProject() {
 		settingsJSON.SetObject();
 
 		rapidjson::Value savestateHooksJSON(rapidjson::kArrayType);
-
 		std::size_t index = 0;
 		for(auto const& savestateHookBlock : savestateHookBlocks) {
 
@@ -132,7 +147,39 @@ void ProjectHandler::saveProject() {
 			index++;
 		}
 
+		rapidjson::Value recentVideoEntries(rapidjson::kArrayType);
+		for(auto const& videoEntry : videoComparisonEntries) {
+			rapidjson::Value newRecentVideo(rapidjson::kObjectType);
+
+			videoEntry.videoPath        = HELPERS::makeRelative(videoEntry.videoPath, projectDir.GetName());
+			videoEntry.videoIndexerPath = HELPERS::makeRelative(videoEntry.videoIndexerPath, projectDir.GetName());
+
+			rapidjson::Value url;
+			irl.SetString(videoEntry.videoUrl.c_str(), videoEntry.videoUrl.size(), settingsJSON.GetAllocator());
+
+			rapidjson::Value name;
+			name.SetString(videoEntry.videoName.c_str(), videoEntry.videoName.size(), settingsJSON.GetAllocator());
+
+			rapidjson::Value metadataString;
+			metadataString.SetString(videoEntry.videoMetadata.c_str(), videoEntry.videoMetadata.size(), settingsJSON.GetAllocator());
+
+			rapidjson::Value videoPath;
+			videoPath.SetString(videoEntry.videoPath.c_str(), videoEntry.videoPath.size(), settingsJSON.GetAllocator());
+
+			rapidjson::Value videoIndexerPath;
+			videoIndexerPath.SetString(videoEntry.videoIndexerPath.c_str(), videoEntry.videoIndexerPath.size(), settingsJSON.GetAllocator());
+
+			newRecentVideo.AddMember("videoUrl", url, settingsJSON.GetAllocator());
+			newRecentVideo.AddMember("videoName", name, settingsJSON.GetAllocator());
+			newRecentVideo.AddMember("videoMetadata", metadataString, settingsJSON.GetAllocator());
+			newRecentVideo.AddMember("videoPath", videoPath, settingsJSON.GetAllocator());
+			newRecentVideo.AddMember("videoIndexerPath", videoIndexerPath, settingsJSON.GetAllocator());
+
+			recentVideoEntries.PushBack(newRecentVideo, settingsJSON.GetAllocator());
+		}
+
 		settingsJSON.AddMember("savestateBlocks", savestateHooksJSON, settingsJSON.GetAllocator());
+		settingsJSON.AddMember("videos", recentVideoEntries, settingsJSON.GetAllocator());
 
 		// Write out the savestate blocks in the settings, TODO, add more
 		wxFileName settingsFileName = getProjectStart();
@@ -199,6 +246,31 @@ void ProjectHandler::saveProject() {
 		settingsFileStream.WriteAll(sb.GetString(), sb.GetLength());
 		settingsFileStream.Close();
 	}
+}
+
+void ProjectHandler::openUpVideoComparisonViewer(int index) {
+	VideoComparisonViewer* viewer = new VideoComparisonViewer(mainSettings, videoComparisonEntries, projectDir.GetName());
+	videoComparisonViewers.push_back(viewer);
+	if(index != videoComparisonEntries.size()) {
+		// Old video, load with the preset
+		viewer->openWithRecent(index);
+	}
+	viewer->Show(true);
+}
+
+void ProjectHandler::onRecentVideosMenuOpen(wxMenuEvent& event) {
+	// Remove all current items
+	int currentNumOfItems = videoComparisonEntriesMenu->GetMenuItemCount();
+	for(int i = 0; i < currentNumOfItems; i++) {
+		videoComparisonEntriesMenu->Delete(i + videoComparisonEntriesMenuIDBase);
+	}
+
+	for(int i = 0; i < videoComparisonEntries.size(); i++) {
+		wxString printString = wxString::FromUTF8(videoComparisonEntries[i].videoName + " " + videoComparisonEntries[i].videoMetadata + " " + videoComparisonEntries[i].videoUrl);
+		videoComparisonEntriesMenu->Append(i + videoComparisonEntriesMenuIDBase, printString);
+	}
+
+	videoComparisonEntriesMenu->Append(videoComparisonEntriesMenu->GetMenuItemCount() + videoComparisonEntriesMenuIDBase, "Open new video");
 }
 
 void ProjectHandlerWindow::createTempProjectDir() {

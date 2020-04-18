@@ -1,7 +1,5 @@
 #pragma once
 
-#define BUFSIZE 8192
-
 #include <algorithm>
 #include <cstdint>
 #include <cstdio>
@@ -29,7 +27,13 @@
 #include "drawingCanvas.hpp"
 #include "mainWindow.hpp"
 
-class MainWindow;
+struct VideoEntry {
+	std::string videoUrl;
+	std::string videoName;
+	std::string videoMetadata;
+	std::string videoPath;
+	std::string videoIndexerPath;
+};
 
 // TODO: Use FFMS2 and Youtube-DL
 // Requires Youtube-DL to be downloaded
@@ -42,7 +46,7 @@ private:
 
 	rapidjson::Document* mainSettings;
 
-	MainWindow* parentWindow;
+	std::vector<VideoEntry>& videoEntries;
 
 	wxBoxSizer* mainSizer;
 	wxBoxSizer* inputSizer;
@@ -111,10 +115,12 @@ private:
 	void onClose(wxCloseEvent& event);
 
 public:
-	VideoComparisonViewer(rapidjson::Document* settings, MainWindow* mainFrame, wxString projectDirectory);
+	VideoComparisonViewer(rapidjson::Document* settings, std::vector<VideoEntry>& entries, wxString projectDirectory);
 
 	// Called when running a frame from the list thing
 	void seekRelative(int relativeFrame);
+
+	void openWithRecent(int index);
 
 	DECLARE_EVENT_TABLE();
 };

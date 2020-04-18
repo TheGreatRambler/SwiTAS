@@ -20,6 +20,7 @@
 
 #include "../../sharedNetworkCode/serializeUnserializeData.hpp"
 #include "../ui/drawingCanvas.hpp"
+#include "../ui/videoComparisonViewer.hpp"
 #include "dataProcessing.hpp"
 
 class ProjectHandler {
@@ -38,6 +39,12 @@ private:
 
 	// Main settings variable
 	rapidjson::Document* mainSettings;
+
+	std::vector<VideoEntry> videoComparisonEntries;
+	wxMenu* videoComparisonEntriesMenu;
+
+	// Video comparison frames open
+	std::vector<VideoComparisonViewer*> videoComparisonViewers;
 
 public:
 	ProjectHandler(DataProcessing* dataProcessingInstance, rapidjson::Document* settings);
@@ -78,9 +85,20 @@ public:
 		return projectName;
 	}
 
+	wxMenu* getVideoSubmenu() {
+		return videoComparisonEntriesMenu;
+	}
+
+	void openUpVideoComparisonViewer(int index);
+
+	void onRecentVideosMenuOpen(wxMenuEvent& event);
+
 	rapidjson::GenericArray<false, rapidjson::Value> getRecentProjects() {
 		return (*mainSettings)["recentProjects"].GetArray();
 	}
+
+	// Just a random large number, apparently can't be larger than 76
+	static constexpr int videoComparisonEntriesMenuIDBase = 35;
 };
 
 class ProjectHandlerWindow : public wxDialog {

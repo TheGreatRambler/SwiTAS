@@ -43,4 +43,7 @@ namespace HELPERS {
 	void hex2bin(const char* src, uint8_t* target);
 
 	const uint16_t getHammingDistance(std::string hexString1, std::string hexString2);
+
+	std::string makeRelative(std::string path, std::string rootDir);
+	std::string makeFromRelative(std::string path, std::string rootDir);
 }
