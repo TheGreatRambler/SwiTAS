@@ -52,6 +52,8 @@ MainWindow::MainWindow()
 	sideUI   = std::make_shared<SideUI>(this, &mainSettings, mainSizer, dataProcessingInstance);
 	bottomUI = std::make_shared<BottomUI>(this, &mainSettings, buttonData, mainSizer, dataProcessingInstance);
 
+	projectHandler = std::make_shared<ProjectHandler>(dataProcessingInstance, &mainSettings);
+
 	// Add the top menubar and the bottom statusbar
 	addStatusBar();
 	addMenuBar();
@@ -73,8 +75,6 @@ MainWindow::MainWindow()
 	// Override the keypress handler
 	// add_events(Gdk::KEY_PRESS_MASK);
 	handlePreviousWindowTransform();
-
-	projectHandler = std::make_shared<ProjectHandler>(dataProcessingInstance, &mainSettings);
 }
 
 void MainWindow::onStart() {
@@ -172,7 +172,7 @@ void MainWindow::addMenuBar() {
 
 	// Add joystick submenu
 	bottomUI->addJoystickMenu(fileMenu);
-	fileMenu->Append(projectHandler->getVideoSubmenu(), "&List Recent Comparison Videos");
+	fileMenu->AppendSubMenu(projectHandler->getVideoSubmenu(), "&List Recent Comparison Videos");
 
 	projectHandler->getVideoSubmenu()->Bind(wxEVT_MENU_OPEN, &MainWindow::onRecentVideosMenuOpen, this);
 

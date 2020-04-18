@@ -1,6 +1,9 @@
 #pragma once
 
+#define BUFSIZE 5120
+
 #include <algorithm>
+#include <atomic>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
@@ -23,9 +26,9 @@
 #include <wx/utils.h>
 #include <wx/wx.h>
 
+#include "../../sharedNetworkCode/networkInterface.hpp"
 #include "../helpers.hpp"
 #include "drawingCanvas.hpp"
-#include "mainWindow.hpp"
 
 struct VideoEntry {
 	std::string videoUrl;
@@ -46,7 +49,7 @@ private:
 
 	rapidjson::Document* mainSettings;
 
-	std::vector<VideoEntry>& videoEntries;
+	std::vector<std::shared_ptr<VideoEntry>>& videoEntries;
 
 	wxBoxSizer* mainSizer;
 	wxBoxSizer* inputSizer;
@@ -71,6 +74,9 @@ private:
 
 	wxProcess* commandProcess;
 	RUNNING_COMMAND currentRunningCommand = RUNNING_COMMAND::NO_COMMAND;
+	std::shared_ptr<std::thread> indexingThread;
+	moodycamel::ConcurrentQueue<std::string> indexingOutput;
+	uint8_t indexingDone = false;
 
 	std::vector<int> formatsArray;
 	std::vector<std::string> formatsMetadataArray;
@@ -115,7 +121,7 @@ private:
 	void onClose(wxCloseEvent& event);
 
 public:
-	VideoComparisonViewer(rapidjson::Document* settings, std::vector<VideoEntry>& entries, wxString projectDirectory);
+	VideoComparisonViewer(rapidjson::Document* settings, std::vector<std::shared_ptr<VideoEntry>>& entries, wxString projectDirectory);
 
 	// Called when running a frame from the list thing
 	void seekRelative(int relativeFrame);

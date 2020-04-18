@@ -10,10 +10,12 @@
 #include <wx/filename.h>
 #include <wx/grid.h>
 #include <wx/listbox.h>
+#include <wx/menu.h>
 #include <wx/msgdlg.h>
 #include <wx/mstream.h>
 #include <wx/statbmp.h>
 #include <wx/stdpaths.h>
+#include <wx/string.h>
 #include <wx/wfstream.h>
 #include <wx/wx.h>
 #include <wx/zstream.h>
@@ -40,7 +42,7 @@ private:
 	// Main settings variable
 	rapidjson::Document* mainSettings;
 
-	std::vector<VideoEntry> videoComparisonEntries;
+	std::vector<std::shared_ptr<VideoEntry>> videoComparisonEntries;
 	wxMenu* videoComparisonEntriesMenu;
 
 	// Video comparison frames open

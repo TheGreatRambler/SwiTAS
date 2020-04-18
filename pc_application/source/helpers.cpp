@@ -150,7 +150,5 @@ std::string HELPERS::makeRelative(std::string path, std::string rootDir) {
 	return newPath.GetFullPath().ToStdString();
 }
 std::string HELPERS::makeFromRelative(std::string path, std::string rootDir) {
-	wxFileName newPath;
-	newPath.AppendDir(wxString::FromUTF8(rootDir));
-	return newPath.GetPath(wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR).ToStdString() + path;
+	return rootDir + "/" + path;
 }

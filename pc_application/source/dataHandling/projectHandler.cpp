@@ -63,10 +63,7 @@ void ProjectHandler::loadProject() {
 				serializeProtocol.binaryToData<ControllerData>(*controllerData, &bufferPointer[sizeRead], sizeOfControllerData);
 				// For now, just add each frame one at a time, no optimization
 				block->push_back(controllerData);
-				videoIndexerPath
-
-					sizeRead
-					+= sizeOfControllerData;
+				sizeRead += sizeOfControllerData;
 			}
 
 			savestateHookBlocks[index] = block;
@@ -74,16 +71,16 @@ void ProjectHandler::loadProject() {
 		}
 	}
 
-	for(auto const& videoEntry : jsonSettings["videos"].GetArray()) {
-		VideoEntry videoEntry;
+	for(auto const& videoEntryJson : jsonSettings["videos"].GetArray()) {
+		std::shared_ptr<VideoEntry> videoEntry = std::make_shared<VideoEntry>();
 
-		videoEntry.videoUrl         = std::string(videoEntry["videoUrl"].GetString());
-		videoEntry.videoName        = std::string(videoEntry["videoName"].GetString());
-		videoEntry.videoMetadata    = std::string(videoEntry["videoMetadata"].GetString());
-		videoEntry.videoPath        = HELPERS::makeFromRelative(std::string(videoEntry["videoPath"].GetString()), projectDir.GetName());
-		videoEntry.videoIndexerPath = HELPERS::makeFromRelative(std::string(videoEntry["videoIndexerPath"].GetString()), projectDir.GetName());
+		videoEntry->videoUrl         = std::string(videoEntryJson["videoUrl"].GetString());
+		videoEntry->videoName        = std::string(videoEntryJson["videoName"].GetString());
+		videoEntry->videoMetadata    = std::string(videoEntryJson["videoMetadata"].GetString());
+		videoEntry->videoPath        = HELPERS::makeFromRelative(std::string(videoEntryJson["videoPath"].GetString()), projectDir.GetName().ToStdString());
+		videoEntry->videoIndexerPath = HELPERS::makeFromRelative(std::string(videoEntryJson["videoIndexerPath"].GetString()), projectDir.GetName().ToStdString());
 
-		videoEntries.push_back(videoEntry);
+		videoComparisonEntries.push_back(videoEntry);
 	}
 
 	// Set dataProcessing
@@ -151,23 +148,27 @@ void ProjectHandler::saveProject() {
 		for(auto const& videoEntry : videoComparisonEntries) {
 			rapidjson::Value newRecentVideo(rapidjson::kObjectType);
 
-			videoEntry.videoPath        = HELPERS::makeRelative(videoEntry.videoPath, projectDir.GetName());
-			videoEntry.videoIndexerPath = HELPERS::makeRelative(videoEntry.videoIndexerPath, projectDir.GetName());
+			std::string projectDirectory = projectDir.GetName().ToStdString();
+			videoEntry->videoPath        = HELPERS::makeRelative(videoEntry->videoPath, projectDirectory);
+			videoEntry->videoIndexerPath = HELPERS::makeRelative(videoEntry->videoIndexerPath, projectDirectory);
+
+			std::replace(videoEntry->videoPath.begin(), videoEntry->videoPath.end(), '\\', '/');
+			std::replace(videoEntry->videoIndexerPath.begin(), videoEntry->videoIndexerPath.end(), '\\', '/');
 
 			rapidjson::Value url;
-			irl.SetString(videoEntry.videoUrl.c_str(), videoEntry.videoUrl.size(), settingsJSON.GetAllocator());
+			url.SetString(videoEntry->videoUrl.c_str(), videoEntry->videoUrl.size(), settingsJSON.GetAllocator());
 
 			rapidjson::Value name;
-			name.SetString(videoEntry.videoName.c_str(), videoEntry.videoName.size(), settingsJSON.GetAllocator());
+			name.SetString(videoEntry->videoName.c_str(), videoEntry->videoName.size(), settingsJSON.GetAllocator());
 
 			rapidjson::Value metadataString;
-			metadataString.SetString(videoEntry.videoMetadata.c_str(), videoEntry.videoMetadata.size(), settingsJSON.GetAllocator());
+			metadataString.SetString(videoEntry->videoMetadata.c_str(), videoEntry->videoMetadata.size(), settingsJSON.GetAllocator());
 
 			rapidjson::Value videoPath;
-			videoPath.SetString(videoEntry.videoPath.c_str(), videoEntry.videoPath.size(), settingsJSON.GetAllocator());
+			videoPath.SetString(videoEntry->videoPath.c_str(), videoEntry->videoPath.size(), settingsJSON.GetAllocator());
 
 			rapidjson::Value videoIndexerPath;
-			videoIndexerPath.SetString(videoEntry.videoIndexerPath.c_str(), videoEntry.videoIndexerPath.size(), settingsJSON.GetAllocator());
+			videoIndexerPath.SetString(videoEntry->videoIndexerPath.c_str(), videoEntry->videoIndexerPath.size(), settingsJSON.GetAllocator());
 
 			newRecentVideo.AddMember("videoUrl", url, settingsJSON.GetAllocator());
 			newRecentVideo.AddMember("videoName", name, settingsJSON.GetAllocator());
@@ -249,7 +250,8 @@ void ProjectHandler::saveProject() {
 }
 
 void ProjectHandler::openUpVideoComparisonViewer(int index) {
-	VideoComparisonViewer* viewer = new VideoComparisonViewer(mainSettings, videoComparisonEntries, projectDir.GetName());
+	wxString projDir              = projectDir.GetName();
+	VideoComparisonViewer* viewer = new VideoComparisonViewer(mainSettings, videoComparisonEntries, projDir);
 	videoComparisonViewers.push_back(viewer);
 	if(index != videoComparisonEntries.size()) {
 		// Old video, load with the preset
@@ -266,7 +268,7 @@ void ProjectHandler::onRecentVideosMenuOpen(wxMenuEvent& event) {
 	}
 
 	for(int i = 0; i < videoComparisonEntries.size(); i++) {
-		wxString printString = wxString::FromUTF8(videoComparisonEntries[i].videoName + " " + videoComparisonEntries[i].videoMetadata + " " + videoComparisonEntries[i].videoUrl);
+		wxString printString = wxString::FromUTF8(videoComparisonEntries[i]->videoName + " " + videoComparisonEntries[i]->videoMetadata + " " + videoComparisonEntries[i]->videoUrl);
 		videoComparisonEntriesMenu->Append(i + videoComparisonEntriesMenuIDBase, printString);
 	}
 
