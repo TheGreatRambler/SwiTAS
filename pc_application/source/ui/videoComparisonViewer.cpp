@@ -81,13 +81,18 @@ void VideoComparisonViewer::onIdle(wxIdleEvent& event) {
 			}
 
 			consoleLog->AppendText(text);
+			consoleLog->Refresh();
 		}
 	}
 
+	std::string indexingQueueOutput;
+	while(indexingOutput.try_dequeue(indexingQueueOutput)) {
+		consoleLog->AppendText(wxString::FromUTF8(indexingQueueOutput));
+		consoleLog->Refresh();
+	}
 	// Check if indexing is done
 	if(indexingDone) {
-		indexingDone = false;
-		parseVideo();
+		finalizeIndexVideoThread();
 	}
 }
 
@@ -115,15 +120,15 @@ void VideoComparisonViewer::onCommandDone(wxProcessEvent& event) {
 		delete commandProcess;
 		commandProcess = nullptr;
 
-		parseVideo();
+		indexVideo();
 	}
 }
 
 void VideoComparisonViewer::displayVideoFormats(wxCommandEvent& event) {
 	url = urlInput->GetLineText(0).ToStdString();
 	// All these commands will block, which could be a problem for bad internet connections
-	std::string videoCheck = HELPERS::exec(("youtube-dl --get-filename -o \"%(title)s.%(ext)s\" " + url).c_str());
-	if(videoCheck.find("is not a valid URL.") == std::string::npos) {
+	std::string videoCheck = HELPERS::exec(("youtube-dl --get-filename \"" + url + "\"").c_str());
+	if(videoCheck.size() != 0) {
 		formatsArray.clear();
 		formatsMetadataArray.clear();
 		// Due to this https://forums.wxwidgets.org/viewtopic.php?t=20321
@@ -143,12 +148,21 @@ void VideoComparisonViewer::displayVideoFormats(wxCommandEvent& event) {
 		if(jsonData.IsObject()) {
 			for(auto const& format : jsonData["formats"].GetArray()) {
 				// Check thing.json for an example
-				// If width and height are null, it's audio
-				if(format.HasMember("width") && format.HasMember("height") && format["width"].IsInt() && format["height"].IsInt()) {
-					// Tiny means it only supports audio, we want video
-					int formatID = strtol(format["format_id"].GetString(), nullptr, 10);
-					int width    = format["width"].GetInt();
-					int height   = format["height"].GetInt();
+				if(format.HasMember("height") && format["height"].IsInt()) {
+					// For some stupid reason, twitch removes width
+					std::string formatID = std::string(format["format_id"].GetString());
+					int height           = format["height"].GetInt();
+
+					int width;
+					if(format.HasMember("width") && format["width"].IsInt()) {
+						width = format["width"].GetInt();
+					} else if(widthFromHeight.count(height)) {
+						width = widthFromHeight[height];
+					} else {
+						// Oh heck, bail
+						continue;
+					}
+
 					// Assume fps is 60 if it is not present
 					int fps                    = (format.HasMember("fps") && format["fps"].IsInt()) ? format["fps"].GetInt() : 60;
 					wxString formatItem        = wxString::Format("%dx%d, %d fps", width, height, fps);
@@ -177,57 +191,63 @@ void VideoComparisonViewer::displayVideoFormats(wxCommandEvent& event) {
 }
 
 void VideoComparisonViewer::onFormatSelection(wxCommandEvent& event) {
-	selectedFormatIndex = event.GetInt();
+	if(!processingVideo) {
+		processingVideo     = true;
+		selectedFormatIndex = event.GetInt();
 
-	if(videoExists) {
-		FFMS_DestroyVideoSource(videosource);
-		videoExists = false;
-	}
-
-	consoleLog->Clear();
-
-	int selectedFormat         = formatsArray[selectedFormatIndex];
-	std::string formatMetadata = formatsMetadataArray[selectedFormatIndex];
-
-	rapidjson::GenericArray<false, rapidjson::Value> recentProjectsArray = (*mainSettings)["recentVideos"].GetArray();
-
-	recentVideoIndex = -1;
-	for(std::size_t i = 0; i < videoEntries.size(); i++) {
-		if(videoEntries[i]->videoMetadata == formatMetadata && videoEntries[i]->videoName == videoName) {
-			recentVideoIndex = i;
-			break;
+		if(videoExists) {
+			FFMS_DestroyVideoSource(videosource);
+			videoExists = false;
 		}
-	}
 
-	if(recentVideoIndex == -1) {
-		// New video, add the stuff
-		consoleLog->AppendText("New video, have to download\n");
-		fullVideoPath        = projectDir.ToStdString() + "/videos/" + formatsMetadataArray[selectedFormatIndex] + "-" + videoFilename;
-		fullVideoIndexerPath = projectDir.ToStdString() + "/videos/" + formatsMetadataArray[selectedFormatIndex] + "-Indexer-" + videoFilename + ".bin";
+		consoleLog->Clear();
 
-		addToRecentVideoList();
+		std::string selectedFormat = formatsArray[selectedFormatIndex];
+		std::string formatMetadata = formatsMetadataArray[selectedFormatIndex];
 
-		// Streaming download from youtube-dl
-		commandProcess = new wxProcess(this);
-		commandProcess->Redirect();
+		rapidjson::GenericArray<false, rapidjson::Value> recentProjectsArray = (*mainSettings)["recentVideos"].GetArray();
 
-		wxString commandString = wxString::Format("youtube-dl -f %d -o %s %s", selectedFormat, wxString::FromUTF8(fullVideoPath), url);
+		recentVideoIndex = -1;
+		for(std::size_t i = 0; i < videoEntries.size(); i++) {
+			if(videoEntries[i]->videoMetadata == formatMetadata && videoEntries[i]->videoName == videoName) {
+				recentVideoIndex = i;
+				break;
+			}
+		}
 
-		// This will run and the progress will be seen in console
-		currentRunningCommand = RUNNING_COMMAND::DOWNLOAD_VIDEO;
-		wxExecute(commandString, wxEXEC_ASYNC | wxEXEC_HIDE_CONSOLE, commandProcess);
-	} else {
-		// Old video, load from disk
-		consoleLog->AppendText("Old video, loading from disk\n");
-		fullVideoPath        = videoEntries[recentVideoIndex]->videoPath;
-		fullVideoIndexerPath = videoEntries[recentVideoIndex]->videoIndexerPath;
-		parseVideo();
+		if(recentVideoIndex == -1) {
+			// New video, add the stuff
+			consoleLog->AppendText("New video, have to download\n");
+			consoleLog->Refresh();
+			fullVideoPath        = projectDir.ToStdString() + "/videos/" + formatsMetadataArray[selectedFormatIndex] + "-" + videoFilename;
+			fullVideoIndexerPath = projectDir.ToStdString() + "/videos/" + formatsMetadataArray[selectedFormatIndex] + "-Indexer-" + videoFilename + ".bin";
+
+			addToRecentVideoList();
+
+			// Streaming download from youtube-dl
+			commandProcess = new wxProcess(this);
+			commandProcess->Redirect();
+
+			wxString commandString = wxString::Format("youtube-dl -f %s -o %s %s", wxString::FromUTF8(selectedFormat), wxString::FromUTF8(fullVideoPath), url);
+
+			// This will run and the progress will be seen in console
+			currentRunningCommand = RUNNING_COMMAND::DOWNLOAD_VIDEO;
+			wxExecute(commandString, wxEXEC_ASYNC | wxEXEC_HIDE_CONSOLE, commandProcess);
+		} else {
+			// Old video, load from disk
+			consoleLog->AppendText("Old video, loading from disk\n");
+			consoleLog->Refresh();
+			fullVideoPath        = videoEntries[recentVideoIndex]->videoPath;
+			fullVideoIndexerPath = videoEntries[recentVideoIndex]->videoIndexerPath;
+			indexVideo();
+		}
 	}
 }
 
 // Called when the video is selected from the menu
 void VideoComparisonViewer::openWithRecent(int index) {
 	consoleLog->AppendText("Old video, loading from disk\n");
+	consoleLog->Refresh();
 
 	recentVideoIndex = index;
 
@@ -245,34 +265,18 @@ void VideoComparisonViewer::openWithRecent(int index) {
 
 void VideoComparisonViewer::indexVideo() {
 	if(recentVideoIndex == -1) {
-		// Start running in thread
-		indexingDone = false;
-
-		indexingThread = std::make_shared<std::thread>([]() {
-			FFMS_Indexer* videoIndexer;
-			// https://github.com/FFMS/ffms2/blob/master/doc/ffms2-api.md
+		// https://github.com/FFMS/ffms2/blob/master/doc/ffms2-api.md
 		videoIndexer = FFMS_CreateIndexer(fullVideoPath.c_str(), &ffms2Errinfo);
 		if(videoIndexer == NULL) {
 			printFfms2Error();
 			return;
 		}
-		
-		});
-		// This is helpful for cpp callbacks
-		// https://stackoverflow.com/a/29817048/9329945
-		FFMS_SetProgressCallback(videoIndexer, &VideoComparisonViewer::onIndexingProgress, this);
 
-		videoIndex = FFMS_DoIndexing2(videoIndexer, FFMS_IEH_ABORT, &ffms2Errinfo);
-		if(videoIndex == NULL) {
-			printFfms2Error();
-			return;
-		}
+		indexingDone = false;
 
-		int res = FFMS_WriteIndex(fullVideoIndexerPath.c_str(), index, &ffms2Errinfo);
-		if(res != 0) {
-			printFfms2Error();
-			return;
-		}
+		FFMS_SetProgressCallback(videoIndexer, &VideoComparisonViewer::onIndexingProgress, &indexingOutput);
+
+		indexingThread = new std::thread(&VideoComparisonViewer::indexingVideoThread, this);
 	} else {
 		// Read index from disk
 		videoIndex = FFMS_ReadIndex(fullVideoIndexerPath.c_str(), &ffms2Errinfo);
@@ -284,8 +288,34 @@ void VideoComparisonViewer::indexVideo() {
 	}
 }
 
-void VideoComparisonViewer::parseVideo() {
+void VideoComparisonViewer::indexingVideoThread() {
+	videoIndex = FFMS_DoIndexing2(videoIndexer, FFMS_IEH_ABORT, &ffms2Errinfo);
+	if(videoIndex == NULL) {
+		printFfms2Error();
+		return;
+	}
 
+	indexingDone = true;
+}
+
+void VideoComparisonViewer::finalizeIndexVideoThread() {
+	indexingDone = false;
+
+	if(indexingThread->joinable()) {
+		indexingThread->join();
+	}
+	delete indexingThread;
+
+	int res = FFMS_WriteIndex(fullVideoIndexerPath.c_str(), videoIndex, &ffms2Errinfo);
+	if(res != 0) {
+		printFfms2Error();
+		return;
+	}
+
+	parseVideo();
+}
+
+void VideoComparisonViewer::parseVideo() {
 	int trackno = FFMS_GetFirstTrackOfType(videoIndex, FFMS_TYPE_VIDEO, &ffms2Errinfo);
 	if(trackno < 0) {
 		printFfms2Error();
@@ -326,6 +356,8 @@ void VideoComparisonViewer::parseVideo() {
 	frameSelect->SetValue(0);
 	frameSlider->SetValue(0);
 
+	// Finally, we can let the user change videos if desired
+	processingVideo = false;
 	drawFrame(0);
 }
 

@@ -14,6 +14,7 @@
 #include <picosha1.hpp>
 #include <rapidjson/document.h>
 #include <thread>
+#include <unordered_map>
 #include <vector>
 #include <wx/longlong.h>
 #include <wx/msgdlg.h>
@@ -49,6 +50,25 @@ private:
 		DOWNLOAD_VIDEO,
 	};
 
+	std::unordered_map<int, int> widthFromHeight{
+		// https://support.google.com/youtube/answer/6375112?co=GENIE.Platform%3DDesktop&hl=en
+		{ 2160, 3840 },
+		{ 1440, 2560 },
+		{ 1080, 1920 },
+		{ 720, 1280 },
+		{ 480, 854 },
+		{ 360, 640 },
+		{ 240, 426 },
+		// https://en.wikipedia.org/wiki/Display_resolution
+		{ 600, 800 },
+		{ 768, 1024 },
+		{ 800, 1280 },
+		{ 1024, 1280 },
+		{ 900, 1600 },
+		{ 864, 1536 },
+		{ 1152, 2048 },
+	};
+
 	rapidjson::Document* mainSettings;
 
 	std::vector<std::shared_ptr<VideoEntry>>& videoEntries;
@@ -78,21 +98,25 @@ private:
 
 	wxProcess* commandProcess;
 	RUNNING_COMMAND currentRunningCommand = RUNNING_COMMAND::NO_COMMAND;
-	std::shared_ptr<std::thread> indexingThread;
+	std::thread* indexingThread;
 	moodycamel::ConcurrentQueue<std::string> indexingOutput;
-	std::atomic_bool indexingDone;
+	std::atomic_bool indexingDone = false;
 
-	std::vector<int> formatsArray;
+	std::vector<std::string> formatsArray;
 	std::vector<std::string> formatsMetadataArray;
 
-	uint8_t videoExists  = false;
-	int recentVideoIndex = -1;
+	uint8_t videoExists     = false;
+	uint8_t processingVideo = false;
+	int recentVideoIndex    = -1;
 	int selectedFormatIndex;
+
 	char ffms2Errmsg[1024];
 	FFMS_ErrorInfo ffms2Errinfo;
+
 	FFMS_VideoSource* videosource          = NULL;
 	const FFMS_VideoProperties* videoprops = NULL;
 	FFMS_Index* videoIndex;
+	FFMS_Indexer* videoIndexer;
 
 	wxSize videoDimensions;
 	DrawingCanvasBitmap* videoCanvas;
@@ -100,18 +124,19 @@ private:
 
 	void onCommandDone(wxProcessEvent& event);
 
-	// Hack to make c style function callbacks work
-	static int FFMS_CC onIndexingProgress(int64_t current, int64_t total, void* self) {
-		((VideoComparisonViewer*)self)->consoleLog->AppendText(wxString::Format("%f percent indexed\n", ((double)current / total) * 100));
-		return 0;
-	}
-
 	void printFfms2Error() {
 		consoleLog->AppendText(wxString::Format("FFMS2 error: %s\n", wxString(ffms2Errinfo.Buffer)));
 	}
 
 	void indexVideo();
 	void parseVideo();
+
+	void indexingVideoThread();
+	void finalizeIndexVideoThread();
+	static int FFMS_CC onIndexingProgress(int64_t current, int64_t total, void* queue) {
+		((moodycamel::ConcurrentQueue<std::string>*)queue)->enqueue(wxString::Format("%f percent indexed\n", ((double)current / total) * 100).ToStdString());
+		return 0;
+	}
 
 	void addToRecentVideoList();
 

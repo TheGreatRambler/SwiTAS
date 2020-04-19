@@ -1,185 +1,116 @@
 {
-	"id": "1221428243825340416",
-	"title": "Gima\ud83d\udd79 - My Friends\ud83d\ude00 If f you wanne drop your course codes for Mario Maker 2 below, I would love to play your stuff\ud83d\udc4d #SuperMarioMaker2 #GamersUnite #Gaming #Mario",
-	"description": "My Friends\ud83d\ude00 If f you wanne drop your course codes for Mario Maker 2 below, I would love to play your stuff\ud83d\udc4d #SuperMarioMaker2 #GamersUnite #Gaming #Mario https://t.co/MXRiuvNYhR",
-	"uploader": "Gima\ud83d\udd79",
-	"timestamp": 1580046161,
-	"uploader_id": "gimazaluke",
-	"uploader_url": "https://twitter.com/gimazaluke",
-	"like_count": 21,
-	"repost_count": 4,
-	"comment_count": 9,
-	"age_limit": 0,
-	"tags": ["SuperMarioMaker2", "GamersUnite", "Gaming", "Mario"],
-	"formats": [{
-		"format_id": "hls-256",
-		"url": "https://video.twimg.com/ext_tw_video/1221428005182025728/pu/pl/480x270/KQ-ATqFBUqzjI_Oq.m3u8",
-		"manifest_url": "https://video.twimg.com/ext_tw_video/1221428005182025728/pu/pl/z2oqla4umrTNEeVM.m3u8?tag=10",
-		"tbr": 256.0,
-		"ext": "mp4",
-		"fps": null,
-		"protocol": "m3u8_native",
-		"preference": null,
-		"width": 480,
-		"height": 270,
-		"vcodec": "avc1.4d001e",
-		"acodec": "mp4a.40.2",
-		"format": "hls-256 - 480x270",
-		"http_headers": {
-			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3521.0 Safari/537.36",
-			"Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
-			"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-			"Accept-Encoding": "gzip, deflate",
-			"Accept-Language": "en-us,en;q=0.5"
-		}
-	}, {
-		"url": "https://video.twimg.com/ext_tw_video/1221428005182025728/pu/vid/480x270/vRaNBH5BupB5xfza.mp4?tag=10",
-		"format_id": "http-256",
-		"tbr": 256,
-		"width": 480,
-		"height": 270,
-		"ext": "mp4",
-		"format": "http-256 - 480x270",
-		"protocol": "https",
-		"http_headers": {
-			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3521.0 Safari/537.36",
-			"Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
-			"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-			"Accept-Encoding": "gzip, deflate",
-			"Accept-Language": "en-us,en;q=0.5"
-		}
-	}, {
-		"format_id": "hls-832",
-		"url": "https://video.twimg.com/ext_tw_video/1221428005182025728/pu/pl/640x360/LUlaBp9Ii5rya9_n.m3u8",
-		"manifest_url": "https://video.twimg.com/ext_tw_video/1221428005182025728/pu/pl/z2oqla4umrTNEeVM.m3u8?tag=10",
-		"tbr": 832.0,
-		"ext": "mp4",
-		"fps": null,
-		"protocol": "m3u8_native",
-		"preference": null,
-		"width": 640,
-		"height": 360,
-		"vcodec": "avc1.4d001f",
-		"acodec": "mp4a.40.2",
-		"format": "hls-832 - 640x360",
-		"http_headers": {
-			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3521.0 Safari/537.36",
-			"Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
-			"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-			"Accept-Encoding": "gzip, deflate",
-			"Accept-Language": "en-us,en;q=0.5"
-		}
-	}, {
-		"url": "https://video.twimg.com/ext_tw_video/1221428005182025728/pu/vid/640x360/ExkdFTDM4SB32gLX.mp4?tag=10",
-		"format_id": "http-832",
-		"tbr": 832,
-		"width": 640,
-		"height": 360,
-		"ext": "mp4",
-		"format": "http-832 - 640x360",
-		"protocol": "https",
-		"http_headers": {
-			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3521.0 Safari/537.36",
-			"Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
-			"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-			"Accept-Encoding": "gzip, deflate",
-			"Accept-Language": "en-us,en;q=0.5"
-		}
-	}, {
-		"format_id": "hls-2176",
-		"url": "https://video.twimg.com/ext_tw_video/1221428005182025728/pu/pl/1280x720/jswZxTnsyD2lQL7_.m3u8",
-		"manifest_url": "https://video.twimg.com/ext_tw_video/1221428005182025728/pu/pl/z2oqla4umrTNEeVM.m3u8?tag=10",
-		"tbr": 2176.0,
-		"ext": "mp4",
-		"fps": null,
-		"protocol": "m3u8_native",
-		"preference": null,
-		"width": 1280,
-		"height": 720,
-		"vcodec": "avc1.640020",
-		"acodec": "mp4a.40.2",
-		"format": "hls-2176 - 1280x720",
-		"http_headers": {
-			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3521.0 Safari/537.36",
-			"Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
-			"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-			"Accept-Encoding": "gzip, deflate",
-			"Accept-Language": "en-us,en;q=0.5"
-		}
-	}, {
-		"url": "https://video.twimg.com/ext_tw_video/1221428005182025728/pu/vid/1280x720/cXeMn9Yj-odWmEWJ.mp4?tag=10",
-		"format_id": "http-2176",
-		"tbr": 2176,
-		"width": 1280,
-		"height": 720,
-		"ext": "mp4",
-		"format": "http-2176 - 1280x720",
-		"protocol": "https",
-		"http_headers": {
-			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3521.0 Safari/537.36",
-			"Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
-			"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-			"Accept-Encoding": "gzip, deflate",
-			"Accept-Language": "en-us,en;q=0.5"
-		}
-	}],
-	"thumbnails": [{
-		"id": "thumb",
-		"url": "https://pbs.twimg.com/ext_tw_video_thumb/1221428005182025728/pu/img/X-gru6oGy5BMmv6G.jpg?name=thumb",
-		"width": 150,
-		"height": 150,
-		"resolution": "150x150"
-	}, {
-		"id": "small",
-		"url": "https://pbs.twimg.com/ext_tw_video_thumb/1221428005182025728/pu/img/X-gru6oGy5BMmv6G.jpg?name=small",
-		"width": 680,
-		"height": 383,
-		"resolution": "680x383"
-	}, {
-		"id": "medium",
-		"url": "https://pbs.twimg.com/ext_tw_video_thumb/1221428005182025728/pu/img/X-gru6oGy5BMmv6G.jpg?name=medium",
-		"width": 1200,
-		"height": 675,
-		"resolution": "1200x675"
-	}, {
-		"id": "large",
-		"url": "https://pbs.twimg.com/ext_tw_video_thumb/1221428005182025728/pu/img/X-gru6oGy5BMmv6G.jpg?name=large",
-		"width": 1280,
-		"height": 720,
-		"resolution": "1280x720"
-	}, {
-		"id": "orig",
-		"url": "https://pbs.twimg.com/ext_tw_video_thumb/1221428005182025728/pu/img/X-gru6oGy5BMmv6G.jpg?name=orig",
-		"width": 1280,
-		"height": 720,
-		"resolution": "1280x720"
-	}],
-	"duration": 95.95,
-	"extractor": "twitter",
-	"webpage_url": "https://twitter.com/gimazaluke/status/1221428243825340416",
-	"webpage_url_basename": "1221428243825340416",
-	"extractor_key": "Twitter",
-	"playlist": null,
-	"playlist_index": null,
-	"thumbnail": "https://pbs.twimg.com/ext_tw_video_thumb/1221428005182025728/pu/img/X-gru6oGy5BMmv6G.jpg?name=orig",
-	"display_id": "1221428243825340416",
-	"upload_date": "20200126",
-	"requested_subtitles": null,
-	"url": "https://video.twimg.com/ext_tw_video/1221428005182025728/pu/vid/1280x720/cXeMn9Yj-odWmEWJ.mp4?tag=10",
-	"format_id": "http-2176",
-	"tbr": 2176,
-	"width": 1280,
-	"height": 720,
-	"ext": "mp4",
-	"format": "http-2176 - 1280x720",
+	"display_id": "675098190",
+	"extractor": "twitch:clips",
 	"protocol": "https",
+	"fps": 60,
+	"views": 22,
+	"timestamp": 1587099901,
+	"format": "1080 - 1080p",
+	"formats": [{
+		"protocol": "https",
+		"format": "360 - 360p",
+		"url": "https://clips-media-assets2.twitch.tv/AT-cm%7C675098190-360.mp4",
+		"http_headers": {
+			"Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+			"Accept-Language": "en-us,en;q=0.5",
+			"Accept-Encoding": "gzip, deflate",
+			"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3562.1 Safari/537.36"
+		},
+		"height": 360,
+		"ext": "mp4",
+		"fps": 30,
+		"format_id": "360"
+	}, {
+		"protocol": "https",
+		"format": "480 - 480p",
+		"url": "https://clips-media-assets2.twitch.tv/AT-cm%7C675098190-480.mp4",
+		"http_headers": {
+			"Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+			"Accept-Language": "en-us,en;q=0.5",
+			"Accept-Encoding": "gzip, deflate",
+			"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3562.1 Safari/537.36"
+		},
+		"height": 480,
+		"ext": "mp4",
+		"fps": 30,
+		"format_id": "480"
+	}, {
+		"protocol": "https",
+		"format": "720 - 720p",
+		"url": "https://clips-media-assets2.twitch.tv/AT-cm%7C675098190-720.mp4",
+		"http_headers": {
+			"Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+			"Accept-Language": "en-us,en;q=0.5",
+			"Accept-Encoding": "gzip, deflate",
+			"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3562.1 Safari/537.36"
+		},
+		"height": 720,
+		"ext": "mp4",
+		"fps": 60,
+		"format_id": "720"
+	}, {
+		"protocol": "https",
+		"format": "1080 - 1080p",
+		"url": "https://clips-media-assets2.twitch.tv/AT-cm%7C675098190.mp4",
+		"http_headers": {
+			"Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+			"Accept-Language": "en-us,en;q=0.5",
+			"Accept-Encoding": "gzip, deflate",
+			"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3562.1 Safari/537.36"
+		},
+		"height": 1080,
+		"ext": "mp4",
+		"fps": 60,
+		"format_id": "1080"
+	}],
+	"height": 1080,
+	"_filename": "Be Careful-675098190.mp4",
+	"uploader": "aiden_0703_",
+	"duration": 32,
+	"format_id": "1080",
+	"upload_date": "20200417",
+	"id": "675098190",
 	"http_headers": {
-		"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3521.0 Safari/537.36",
 		"Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
-		"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+		"Accept-Language": "en-us,en;q=0.5",
 		"Accept-Encoding": "gzip, deflate",
-		"Accept-Language": "en-us,en;q=0.5"
+		"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+		"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3562.1 Safari/537.36"
 	},
-	"fulltitle": "Gima\ud83d\udd79 - My Friends\ud83d\ude00 If f you wanne drop your course codes for Mario Maker 2 below, I would love to play your stuff\ud83d\udc4d #SuperMarioMaker2 #GamersUnite #Gaming #Mario",
-	"_filename": "Gima\ud83d\udd79 - My Friends\ud83d\ude00 If f you wanne drop your course codes for Mario Maker 2 below, I would love to play your stuff\ud83d\udc4d #SuperMarioMaker2 #GamersUnite #Gaming #Mario-1221428243825340416.mp4"
+	"playlist": null,
+	"thumbnails": [{
+		"url": "https://clips-media-assets2.twitch.tv/AT-cm%7C675098190-preview-86x45.jpg",
+		"width": 86,
+		"resolution": "86x45",
+		"id": "tiny",
+		"height": 45
+	}, {
+		"url": "https://clips-media-assets2.twitch.tv/AT-cm%7C675098190-preview-260x147.jpg",
+		"width": 260,
+		"resolution": "260x147",
+		"id": "small",
+		"height": 147
+	}, {
+		"url": "https://clips-media-assets2.twitch.tv/AT-cm%7C675098190-preview-480x272.jpg",
+		"width": 480,
+		"resolution": "480x272",
+		"id": "medium",
+		"height": 272
+	}],
+	"title": "Be Careful",
+	"url": "https://clips-media-assets2.twitch.tv/AT-cm%7C675098190.mp4",
+	"extractor_key": "TwitchClips",
+	"creator": "RedFalcon",
+	"uploader_id": "499215989",
+	"ext": "mp4",
+	"playlist_index": null,
+	"webpage_url": "https://www.twitch.tv/redfalcon/clip/CarefulAggressiveMartenCharlieBitMe?filter=clips&range=7d&sort=time",
+	"requested_subtitles": null,
+	"fulltitle": "Be Careful",
+	"thumbnail": "https://clips-media-assets2.twitch.tv/AT-cm%7C675098190-preview-480x272.jpg",
+	"webpage_url_basename": "CarefulAggressiveMartenCharlieBitMe"
 }
