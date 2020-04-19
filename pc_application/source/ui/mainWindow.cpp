@@ -52,7 +52,7 @@ MainWindow::MainWindow()
 	sideUI   = std::make_shared<SideUI>(this, &mainSettings, mainSizer, dataProcessingInstance);
 	bottomUI = std::make_shared<BottomUI>(this, &mainSettings, buttonData, mainSizer, dataProcessingInstance);
 
-	projectHandler = std::make_shared<ProjectHandler>(dataProcessingInstance, &mainSettings);
+	projectHandler = std::make_shared<ProjectHandler>(this, dataProcessingInstance, &mainSettings);
 
 	// Add the top menubar and the bottom statusbar
 	addStatusBar();
@@ -82,7 +82,7 @@ void MainWindow::onStart() {
 	wxLog::SetTimestamp(wxS("%Y-%m-%d %H:%M: %S"));
 	wxLog::SetActiveTarget(logWindow);
 
-	debugWindow = new DebugWindow(networkInstance);
+	debugWindow = new DebugWindow(this, networkInstance);
 
 	ProjectHandlerWindow projectHandlerWindow(projectHandler, &mainSettings);
 

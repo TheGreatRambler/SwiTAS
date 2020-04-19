@@ -59,6 +59,7 @@ private:
 
 	// Using callbacks for inputs
 	std::function<void()> inputCallback;
+	std::function<void(FrameNum)> selectedFrameCallbackVideoViewer;
 	std::function<void(FrameNum, FrameNum)> viewableInputsCallback;
 	std::function<void(FrameNum, FrameNum, FrameNum)> changingSelectedFrameCallback;
 
@@ -120,14 +121,10 @@ public:
 	DataProcessing(rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, std::shared_ptr<CommunicateWithNetwork> communicateWithNetwork, wxWindow* parent);
 
 	void setInputCallback(std::function<void()> callback);
-
+	void setSelectedFrameCallbackVideoViewer(std::function<void(FrameNum)> callback);
 	void setViewableInputsCallback(std::function<void(FrameNum, FrameNum)> callback);
 	void setChangingSelectedFrameCallback(std::function<void(FrameNum, FrameNum, FrameNum)> callback);
-	void triggerCurrentFrameChanges() {
-		if(changingSelectedFrameCallback) {
-			changingSelectedFrameCallback(currentFrame, currentRunFrame, currentImageFrame);
-		}
-	}
+	void triggerCurrentFrameChanges();
 
 	AllSavestateHookBlocks& getAllSavestateHookBlocks() {
 		return savestateHookBlocks;
@@ -140,9 +137,7 @@ public:
 		setSavestateHook(0);
 	}
 
-	void modifySavestate() {
-
-	}
+	void modifySavestate() {}
 
 	void setCurrentFrame(FrameNum frameNum);
 

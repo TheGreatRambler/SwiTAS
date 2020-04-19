@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fstream>
+#include <functional>
 #include <memory>
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
@@ -28,6 +29,7 @@
 class ProjectHandler {
 private:
 	DataProcessing* dataProcessing;
+	wxFrame* parentFrame;
 
 	wxDir projectDir;
 	SerializeProtocol serializeProtocol;
@@ -48,8 +50,11 @@ private:
 	// Video comparison frames open
 	std::vector<VideoComparisonViewer*> videoComparisonViewers;
 
+	void closeVideoComparisonViewer(VideoComparisonViewer* viewer);
+	void updateVideoComparisonViewers(FrameNum delta);
+
 public:
-	ProjectHandler(DataProcessing* dataProcessingInstance, rapidjson::Document* settings);
+	ProjectHandler(wxFrame* parent, DataProcessing* dataProcessingInstance, rapidjson::Document* settings);
 
 	void loadProject();
 	void saveProject();

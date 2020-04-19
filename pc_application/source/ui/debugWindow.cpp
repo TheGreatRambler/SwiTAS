@@ -1,7 +1,7 @@
 #include "debugWindow.hpp"
 
-DebugWindow::DebugWindow(std::shared_ptr<CommunicateWithNetwork> networkImp)
-	: wxFrame(NULL, wxID_ANY, "Debug Menu", wxDefaultPosition, wxDefaultSize) {
+DebugWindow::DebugWindow(wxFrame* parent, std::shared_ptr<CommunicateWithNetwork> networkImp)
+	: wxFrame(parent, wxID_ANY, "Debug Menu", wxDefaultPosition, wxDefaultSize) {
 	// Start hidden
 	Hide();
 	networkInstance = networkImp;

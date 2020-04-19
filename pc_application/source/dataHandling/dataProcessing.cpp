@@ -118,12 +118,22 @@ void DataProcessing::setInputCallback(std::function<void()> callback) {
 	inputCallback = callback;
 }
 
+void DataProcessing::setSelectedFrameCallbackVideoViewer(std::function<void(FrameNum)> callback) {
+	selectedFrameCallbackVideoViewer = callback;
+}
+
 void DataProcessing::setViewableInputsCallback(std::function<void(FrameNum, FrameNum)> callback) {
 	viewableInputsCallback = callback;
 }
 
 void DataProcessing::setChangingSelectedFrameCallback(std::function<void(FrameNum, FrameNum, FrameNum)> callback) {
 	changingSelectedFrameCallback = callback;
+}
+
+void DataProcessing::triggerCurrentFrameChanges() {
+	if(changingSelectedFrameCallback) {
+		changingSelectedFrameCallback(currentFrame, currentRunFrame, currentImageFrame);
+	}
 }
 
 int DataProcessing::OnGetItemColumnImage(long row, long column) const {
@@ -257,6 +267,9 @@ void DataProcessing::onRightClick(wxContextMenuEvent& event) {
 
 void DataProcessing::onSelect(wxListEvent& event) {
 	// The current frame has changed
+	if(selectedFrameCallbackVideoViewer) {
+		selectedFrameCallbackVideoViewer(event.GetIndex() - currentFrame);
+	}
 	setCurrentFrame(event.GetIndex());
 }
 

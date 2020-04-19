@@ -19,7 +19,7 @@ private:
 	void onClose(wxCloseEvent& event);
 
 public:
-	DebugWindow(std::shared_ptr<CommunicateWithNetwork> networkImp);
+	DebugWindow(wxFrame* parent, std::shared_ptr<CommunicateWithNetwork> networkImp);
 
 	DECLARE_EVENT_TABLE();
 };

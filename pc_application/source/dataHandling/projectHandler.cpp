@@ -1,10 +1,13 @@
 #include "projectHandler.hpp"
 
-ProjectHandler::ProjectHandler(DataProcessing* dataProcessingInstance, rapidjson::Document* settings) {
+ProjectHandler::ProjectHandler(wxFrame* parent, DataProcessing* dataProcessingInstance, rapidjson::Document* settings) {
 	dataProcessing = dataProcessingInstance;
 	mainSettings   = settings;
+	parentFrame    = parent;
 	// TODO this is simiar to the joysticks submenu
 	videoComparisonEntriesMenu = new wxMenu();
+
+	dataProcessing->setSelectedFrameCallbackVideoViewer(std::bind(&ProjectHandler::updateVideoComparisonViewers, this, std::placeholders::_1));
 }
 
 void ProjectHandler::loadProject() {
@@ -256,13 +259,31 @@ void ProjectHandler::saveProject() {
 
 void ProjectHandler::openUpVideoComparisonViewer(int index) {
 	wxString projDir              = projectDir.GetName();
-	VideoComparisonViewer* viewer = new VideoComparisonViewer(mainSettings, videoComparisonEntries, projDir);
+	VideoComparisonViewer* viewer = new VideoComparisonViewer(parentFrame, std::bind(&ProjectHandler::closeVideoComparisonViewer, this, std::placeholders::_1), mainSettings, videoComparisonEntries, projDir);
 	videoComparisonViewers.push_back(viewer);
 	if(index != videoComparisonEntries.size()) {
 		// Old video, load with the preset
 		viewer->openWithRecent(index);
 	}
 	viewer->Show(true);
+}
+
+void ProjectHandler::closeVideoComparisonViewer(VideoComparisonViewer* viewer) {
+	// Seek for the instance in the vector and remove it
+	// Don't delete it, as the window did that itself
+	for(std::size_t i = 0; i < videoComparisonViewers.size(); i++) {
+		// If this is the window, remove it from the list
+		if(videoComparisonViewers[i] == viewer) {
+			videoComparisonViewers.erase(videoComparisonViewers.begin() + i);
+			break;
+		}
+	}
+}
+
+void ProjectHandler::updateVideoComparisonViewers(FrameNum delta) {
+	for(std::size_t i = 0; i < videoComparisonViewers.size(); i++) {
+		videoComparisonViewers[i]->seekRelative(delta);
+	}
 }
 
 void ProjectHandler::onRecentVideosMenuOpen(wxMenuEvent& event) {

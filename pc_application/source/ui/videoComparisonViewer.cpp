@@ -1,11 +1,12 @@
 #include "videoComparisonViewer.hpp"
 
-VideoComparisonViewer::VideoComparisonViewer(rapidjson::Document* settings, std::vector<std::shared_ptr<VideoEntry>>& entries, wxString projectDirectory)
-	: wxFrame(NULL, wxID_ANY, "Video Comparison Viewer", wxDefaultPosition, wxSize(300, 200))
+VideoComparisonViewer::VideoComparisonViewer(wxFrame* parent, std::function<void(VideoComparisonViewer*)> callback, rapidjson::Document* settings, std::vector<std::shared_ptr<VideoEntry>>& entries, wxString projectDirectory)
+	: wxFrame(parent, wxID_ANY, "Video Comparison Viewer", wxDefaultPosition, wxSize(300, 200), wxDEFAULT_FRAME_STYLE | wxFRAME_FLOAT_ON_PARENT)
 	, videoEntries(entries) {
 	// https://www.youtube.com/watch?v=su61pXgmJcw
-	mainSettings = settings;
-	projectDir   = projectDirectory;
+	mainSettings  = settings;
+	projectDir    = projectDirectory;
+	closeCallback = callback;
 
 	ffms2Errinfo.Buffer     = ffms2Errmsg;
 	ffms2Errinfo.BufferSize = sizeof(ffms2Errmsg);
@@ -81,18 +82,7 @@ void VideoComparisonViewer::onIdle(wxIdleEvent& event) {
 			}
 
 			consoleLog->AppendText(text);
-			consoleLog->Refresh();
 		}
-	}
-
-	std::string indexingQueueOutput;
-	while(indexingOutput.try_dequeue(indexingQueueOutput)) {
-		consoleLog->AppendText(wxString::FromUTF8(indexingQueueOutput));
-		consoleLog->Refresh();
-	}
-	// Check if indexing is done
-	if(indexingDone) {
-		finalizeIndexVideoThread();
 	}
 }
 
@@ -109,6 +99,8 @@ void VideoComparisonViewer::onClose(wxCloseEvent& event) {
 	*/
 
 	FFMS_DestroyVideoSource(videosource);
+
+	closeCallback(this);
 
 	Destroy();
 }
@@ -218,7 +210,7 @@ void VideoComparisonViewer::onFormatSelection(wxCommandEvent& event) {
 		if(recentVideoIndex == -1) {
 			// New video, add the stuff
 			consoleLog->AppendText("New video, have to download\n");
-			consoleLog->Refresh();
+
 			fullVideoPath        = projectDir.ToStdString() + "/videos/" + formatsMetadataArray[selectedFormatIndex] + "-" + videoFilename;
 			fullVideoIndexerPath = projectDir.ToStdString() + "/videos/" + formatsMetadataArray[selectedFormatIndex] + "-Indexer-" + videoFilename + ".bin";
 
@@ -236,7 +228,7 @@ void VideoComparisonViewer::onFormatSelection(wxCommandEvent& event) {
 		} else {
 			// Old video, load from disk
 			consoleLog->AppendText("Old video, loading from disk\n");
-			consoleLog->Refresh();
+
 			fullVideoPath        = videoEntries[recentVideoIndex]->videoPath;
 			fullVideoIndexerPath = videoEntries[recentVideoIndex]->videoIndexerPath;
 			indexVideo();
@@ -247,7 +239,6 @@ void VideoComparisonViewer::onFormatSelection(wxCommandEvent& event) {
 // Called when the video is selected from the menu
 void VideoComparisonViewer::openWithRecent(int index) {
 	consoleLog->AppendText("Old video, loading from disk\n");
-	consoleLog->Refresh();
 
 	recentVideoIndex = index;
 
@@ -265,6 +256,7 @@ void VideoComparisonViewer::openWithRecent(int index) {
 
 void VideoComparisonViewer::indexVideo() {
 	if(recentVideoIndex == -1) {
+		consoleLog->AppendText("Start indexing video\n");
 		// https://github.com/FFMS/ffms2/blob/master/doc/ffms2-api.md
 		videoIndexer = FFMS_CreateIndexer(fullVideoPath.c_str(), &ffms2Errinfo);
 		if(videoIndexer == NULL) {
@@ -272,11 +264,20 @@ void VideoComparisonViewer::indexVideo() {
 			return;
 		}
 
-		indexingDone = false;
+		videoIndex = FFMS_DoIndexing2(videoIndexer, FFMS_IEH_ABORT, &ffms2Errinfo);
+		if(videoIndex == NULL) {
+			printFfms2Error();
+			return;
+		}
 
-		FFMS_SetProgressCallback(videoIndexer, &VideoComparisonViewer::onIndexingProgress, &indexingOutput);
+		int res = FFMS_WriteIndex(fullVideoIndexerPath.c_str(), videoIndex, &ffms2Errinfo);
+		if(res != 0) {
+			printFfms2Error();
+			return;
+		}
+		consoleLog->AppendText("Finish indexing video\n");
 
-		indexingThread = new std::thread(&VideoComparisonViewer::indexingVideoThread, this);
+		parseVideo();
 	} else {
 		// Read index from disk
 		videoIndex = FFMS_ReadIndex(fullVideoIndexerPath.c_str(), &ffms2Errinfo);
@@ -286,33 +287,6 @@ void VideoComparisonViewer::indexVideo() {
 		}
 		parseVideo();
 	}
-}
-
-void VideoComparisonViewer::indexingVideoThread() {
-	videoIndex = FFMS_DoIndexing2(videoIndexer, FFMS_IEH_ABORT, &ffms2Errinfo);
-	if(videoIndex == NULL) {
-		printFfms2Error();
-		return;
-	}
-
-	indexingDone = true;
-}
-
-void VideoComparisonViewer::finalizeIndexVideoThread() {
-	indexingDone = false;
-
-	if(indexingThread->joinable()) {
-		indexingThread->join();
-	}
-	delete indexingThread;
-
-	int res = FFMS_WriteIndex(fullVideoIndexerPath.c_str(), videoIndex, &ffms2Errinfo);
-	if(res != 0) {
-		printFfms2Error();
-		return;
-	}
-
-	parseVideo();
 }
 
 void VideoComparisonViewer::parseVideo() {
@@ -376,7 +350,6 @@ void VideoComparisonViewer::addToRecentVideoList() {
 
 void VideoComparisonViewer::drawFrame(int frame) {
 	// The frames in this case are video dependent, TODO add stuff for 60fps always
-	// https://www.youtube.com/watch?v=su61pXgmJcw
 	currentFrame = frame;
 
 	consoleLog->Show(false);
@@ -441,6 +414,8 @@ void VideoComparisonViewer::seekRelative(int relativeFrame) {
 
 		if(currentFrame > -1 && currentFrame < videoprops->NumFrames) {
 			drawFrame(currentFrame);
+			frameSlider->SetValue(currentFrame);
+			frameSelect->SetValue(currentFrame);
 		}
 	}
 }

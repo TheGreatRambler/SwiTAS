@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ffms.h>
+#include <functional>
 #include <memory>
 #include <ostream>
 #include <picosha1.hpp>
@@ -50,7 +51,7 @@ private:
 		DOWNLOAD_VIDEO,
 	};
 
-	std::unordered_map<int, int> widthFromHeight{
+	std::unordered_map<int, int> widthFromHeight {
 		// https://support.google.com/youtube/answer/6375112?co=GENIE.Platform%3DDesktop&hl=en
 		{ 2160, 3840 },
 		{ 1440, 2560 },
@@ -98,9 +99,6 @@ private:
 
 	wxProcess* commandProcess;
 	RUNNING_COMMAND currentRunningCommand = RUNNING_COMMAND::NO_COMMAND;
-	std::thread* indexingThread;
-	moodycamel::ConcurrentQueue<std::string> indexingOutput;
-	std::atomic_bool indexingDone = false;
 
 	std::vector<std::string> formatsArray;
 	std::vector<std::string> formatsMetadataArray;
@@ -122,6 +120,8 @@ private:
 	DrawingCanvasBitmap* videoCanvas;
 	wxSizerItem* videoCanvasSizerItem;
 
+	std::function<void(VideoComparisonViewer*)> closeCallback;
+
 	void onCommandDone(wxProcessEvent& event);
 
 	void printFfms2Error() {
@@ -130,13 +130,6 @@ private:
 
 	void indexVideo();
 	void parseVideo();
-
-	void indexingVideoThread();
-	void finalizeIndexVideoThread();
-	static int FFMS_CC onIndexingProgress(int64_t current, int64_t total, void* queue) {
-		((moodycamel::ConcurrentQueue<std::string>*)queue)->enqueue(wxString::Format("%f percent indexed\n", ((double)current / total) * 100).ToStdString());
-		return 0;
-	}
 
 	void addToRecentVideoList();
 
@@ -151,7 +144,7 @@ private:
 	void onClose(wxCloseEvent& event);
 
 public:
-	VideoComparisonViewer(rapidjson::Document* settings, std::vector<std::shared_ptr<VideoEntry>>& entries, wxString projectDirectory);
+	VideoComparisonViewer(wxFrame* parent, std::function<void(VideoComparisonViewer*)> callback, rapidjson::Document* settings, std::vector<std::shared_ptr<VideoEntry>>& entries, wxString projectDirectory);
 
 	// Called when running a frame from the list thing
 	void seekRelative(int relativeFrame);
