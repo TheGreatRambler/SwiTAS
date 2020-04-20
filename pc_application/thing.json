@@ -1,116 +1,185 @@
 {
-	"display_id": "675098190",
-	"extractor": "twitch:clips",
+	"display_id": "1250057210182467591",
+	"extractor": "twitter",
+	"tbr": 2176,
 	"protocol": "https",
-	"fps": 60,
-	"views": 22,
-	"timestamp": 1587099901,
-	"format": "1080 - 1080p",
+	"description": "Aus Langeweile ein Mario Maker 2 lvl gemacht und aufgenommen\ud83d\ude02 #Mario @Ninton7 https://t.co/9JldTUuaMR",
+	"tags": ["Mario"],
+	"timestamp": 1586871838,
+	"format": "http-2176 - 1280x720",
 	"formats": [{
-		"protocol": "https",
-		"format": "360 - 360p",
-		"url": "https://clips-media-assets2.twitch.tv/AT-cm%7C675098190-360.mp4",
 		"http_headers": {
 			"Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
 			"Accept-Language": "en-us,en;q=0.5",
 			"Accept-Encoding": "gzip, deflate",
 			"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3562.1 Safari/537.36"
+			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.70 Safari/537.36"
 		},
+		"protocol": "m3u8_native",
+		"format": "hls-256 - 480x270",
+		"url": "https://video.twimg.com/ext_tw_video/1250056520806674442/pu/pl/480x270/9wI7qpQp9di7FPAb.m3u8",
+		"vcodec": "avc1.4d001e",
+		"tbr": 256.0,
+		"height": 270,
+		"width": 480,
+		"ext": "mp4",
+		"preference": null,
+		"fps": null,
+		"manifest_url": "https://video.twimg.com/ext_tw_video/1250056520806674442/pu/pl/ewvbG_pt9vYVt-yN.m3u8?tag=10",
+		"format_id": "hls-256",
+		"acodec": "mp4a.40.2"
+	}, {
+		"http_headers": {
+			"Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+			"Accept-Language": "en-us,en;q=0.5",
+			"Accept-Encoding": "gzip, deflate",
+			"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.70 Safari/537.36"
+		},
+		"protocol": "https",
+		"format": "http-256 - 480x270",
+		"url": "https://video.twimg.com/ext_tw_video/1250056520806674442/pu/vid/480x270/kkiTYqSCH3fW2YX2.mp4?tag=10",
+		"tbr": 256,
+		"height": 270,
+		"width": 480,
+		"ext": "mp4",
+		"format_id": "http-256"
+	}, {
+		"http_headers": {
+			"Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+			"Accept-Language": "en-us,en;q=0.5",
+			"Accept-Encoding": "gzip, deflate",
+			"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.70 Safari/537.36"
+		},
+		"protocol": "m3u8_native",
+		"format": "hls-832 - 640x360",
+		"url": "https://video.twimg.com/ext_tw_video/1250056520806674442/pu/pl/640x360/rHsCFZFK_I3mCh_L.m3u8",
+		"vcodec": "avc1.4d001f",
+		"tbr": 832.0,
 		"height": 360,
+		"width": 640,
 		"ext": "mp4",
-		"fps": 30,
-		"format_id": "360"
+		"preference": null,
+		"fps": null,
+		"manifest_url": "https://video.twimg.com/ext_tw_video/1250056520806674442/pu/pl/ewvbG_pt9vYVt-yN.m3u8?tag=10",
+		"format_id": "hls-832",
+		"acodec": "mp4a.40.2"
 	}, {
-		"protocol": "https",
-		"format": "480 - 480p",
-		"url": "https://clips-media-assets2.twitch.tv/AT-cm%7C675098190-480.mp4",
 		"http_headers": {
 			"Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
 			"Accept-Language": "en-us,en;q=0.5",
 			"Accept-Encoding": "gzip, deflate",
 			"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3562.1 Safari/537.36"
+			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.70 Safari/537.36"
 		},
-		"height": 480,
-		"ext": "mp4",
-		"fps": 30,
-		"format_id": "480"
-	}, {
 		"protocol": "https",
-		"format": "720 - 720p",
-		"url": "https://clips-media-assets2.twitch.tv/AT-cm%7C675098190-720.mp4",
+		"format": "http-832 - 640x360",
+		"url": "https://video.twimg.com/ext_tw_video/1250056520806674442/pu/vid/640x360/DntiGG4ONZ1znnaN.mp4?tag=10",
+		"tbr": 832,
+		"height": 360,
+		"width": 640,
+		"ext": "mp4",
+		"format_id": "http-832"
+	}, {
 		"http_headers": {
 			"Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
 			"Accept-Language": "en-us,en;q=0.5",
 			"Accept-Encoding": "gzip, deflate",
 			"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3562.1 Safari/537.36"
+			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.70 Safari/537.36"
 		},
+		"protocol": "m3u8_native",
+		"format": "hls-2176 - 1280x720",
+		"url": "https://video.twimg.com/ext_tw_video/1250056520806674442/pu/pl/1280x720/pHKclCi_ClJja7bA.m3u8",
+		"vcodec": "avc1.640020",
+		"tbr": 2176.0,
 		"height": 720,
+		"width": 1280,
 		"ext": "mp4",
-		"fps": 60,
-		"format_id": "720"
+		"preference": null,
+		"fps": null,
+		"manifest_url": "https://video.twimg.com/ext_tw_video/1250056520806674442/pu/pl/ewvbG_pt9vYVt-yN.m3u8?tag=10",
+		"format_id": "hls-2176",
+		"acodec": "mp4a.40.2"
 	}, {
-		"protocol": "https",
-		"format": "1080 - 1080p",
-		"url": "https://clips-media-assets2.twitch.tv/AT-cm%7C675098190.mp4",
 		"http_headers": {
 			"Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
 			"Accept-Language": "en-us,en;q=0.5",
 			"Accept-Encoding": "gzip, deflate",
 			"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3562.1 Safari/537.36"
+			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.70 Safari/537.36"
 		},
-		"height": 1080,
+		"protocol": "https",
+		"format": "http-2176 - 1280x720",
+		"url": "https://video.twimg.com/ext_tw_video/1250056520806674442/pu/vid/1280x720/0F-sSitSwoaSYgGq.mp4?tag=10",
+		"tbr": 2176,
+		"height": 720,
+		"width": 1280,
 		"ext": "mp4",
-		"fps": 60,
-		"format_id": "1080"
+		"format_id": "http-2176"
 	}],
-	"height": 1080,
-	"_filename": "Be Careful-675098190.mp4",
-	"uploader": "aiden_0703_",
-	"duration": 32,
-	"format_id": "1080",
-	"upload_date": "20200417",
-	"id": "675098190",
+	"height": 720,
+	"_filename": "Ninton - Aus Langeweile ein Mario Maker 2 lvl gemacht und aufgenommen\ud83d\ude02 #Mario @Ninton7-1250057210182467591.mp4",
+	"like_count": 1,
+	"uploader": "Ninton",
+	"duration": 79.424,
+	"format_id": "http-2176",
+	"upload_date": "20200414",
+	"id": "1250057210182467591",
+	"playlist": null,
+	"thumbnails": [{
+		"url": "https://pbs.twimg.com/ext_tw_video_thumb/1250056520806674442/pu/img/c6MRbxW2InO_fQFA.jpg?name=thumb",
+		"width": 150,
+		"resolution": "150x150",
+		"id": "thumb",
+		"height": 150
+	}, {
+		"url": "https://pbs.twimg.com/ext_tw_video_thumb/1250056520806674442/pu/img/c6MRbxW2InO_fQFA.jpg?name=small",
+		"width": 680,
+		"resolution": "680x383",
+		"id": "small",
+		"height": 383
+	}, {
+		"url": "https://pbs.twimg.com/ext_tw_video_thumb/1250056520806674442/pu/img/c6MRbxW2InO_fQFA.jpg?name=medium",
+		"width": 1200,
+		"resolution": "1200x675",
+		"id": "medium",
+		"height": 675
+	}, {
+		"url": "https://pbs.twimg.com/ext_tw_video_thumb/1250056520806674442/pu/img/c6MRbxW2InO_fQFA.jpg?name=large",
+		"width": 1280,
+		"resolution": "1280x720",
+		"id": "large",
+		"height": 720
+	}, {
+		"url": "https://pbs.twimg.com/ext_tw_video_thumb/1250056520806674442/pu/img/c6MRbxW2InO_fQFA.jpg?name=orig",
+		"width": 1280,
+		"resolution": "1280x720",
+		"id": "orig",
+		"height": 720
+	}],
+	"title": "Ninton - Aus Langeweile ein Mario Maker 2 lvl gemacht und aufgenommen\ud83d\ude02 #Mario @Ninton7",
+	"url": "https://video.twimg.com/ext_tw_video/1250056520806674442/pu/vid/1280x720/0F-sSitSwoaSYgGq.mp4?tag=10",
+	"extractor_key": "Twitter",
+	"ext": "mp4",
 	"http_headers": {
 		"Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
 		"Accept-Language": "en-us,en;q=0.5",
 		"Accept-Encoding": "gzip, deflate",
 		"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-		"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3562.1 Safari/537.36"
+		"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.70 Safari/537.36"
 	},
-	"playlist": null,
-	"thumbnails": [{
-		"url": "https://clips-media-assets2.twitch.tv/AT-cm%7C675098190-preview-86x45.jpg",
-		"width": 86,
-		"resolution": "86x45",
-		"id": "tiny",
-		"height": 45
-	}, {
-		"url": "https://clips-media-assets2.twitch.tv/AT-cm%7C675098190-preview-260x147.jpg",
-		"width": 260,
-		"resolution": "260x147",
-		"id": "small",
-		"height": 147
-	}, {
-		"url": "https://clips-media-assets2.twitch.tv/AT-cm%7C675098190-preview-480x272.jpg",
-		"width": 480,
-		"resolution": "480x272",
-		"id": "medium",
-		"height": 272
-	}],
-	"title": "Be Careful",
-	"url": "https://clips-media-assets2.twitch.tv/AT-cm%7C675098190.mp4",
-	"extractor_key": "TwitchClips",
-	"creator": "RedFalcon",
-	"uploader_id": "499215989",
-	"ext": "mp4",
-	"playlist_index": null,
-	"webpage_url": "https://www.twitch.tv/redfalcon/clip/CarefulAggressiveMartenCharlieBitMe?filter=clips&range=7d&sort=time",
+	"repost_count": 0,
+	"uploader_id": "Ninton7",
+	"width": 1280,
+	"comment_count": 0,
+	"uploader_url": "https://twitter.com/Ninton7",
+	"webpage_url": "https://twitter.com/Ninton7/status/1250057210182467591",
 	"requested_subtitles": null,
-	"fulltitle": "Be Careful",
-	"thumbnail": "https://clips-media-assets2.twitch.tv/AT-cm%7C675098190-preview-480x272.jpg",
-	"webpage_url_basename": "CarefulAggressiveMartenCharlieBitMe"
+	"fulltitle": "Ninton - Aus Langeweile ein Mario Maker 2 lvl gemacht und aufgenommen\ud83d\ude02 #Mario @Ninton7",
+	"age_limit": 0,
+	"thumbnail": "https://pbs.twimg.com/ext_tw_video_thumb/1250056520806674442/pu/img/c6MRbxW2InO_fQFA.jpg?name=orig",
+	"webpage_url_basename": "1250057210182467591",
+	"playlist_index": null
 }

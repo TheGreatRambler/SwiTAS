@@ -51,23 +51,14 @@ private:
 		DOWNLOAD_VIDEO,
 	};
 
-	std::unordered_map<int, int> widthFromHeight {
-		// https://support.google.com/youtube/answer/6375112?co=GENIE.Platform%3DDesktop&hl=en
-		{ 2160, 3840 },
-		{ 1440, 2560 },
-		{ 1080, 1920 },
+	std::unordered_map<int, int> widthFromHeight{
+		// https://www.quora.com/What-are-these-240p-360p-480p-720p-1080p-units-for-videos-Whats-the-basic-idea-behind-it
+		{ 240, 352 },
+		{ 360, 480 },
+		{ 480, 858 },
 		{ 720, 1280 },
-		{ 480, 854 },
-		{ 360, 640 },
-		{ 240, 426 },
-		// https://en.wikipedia.org/wiki/Display_resolution
-		{ 600, 800 },
-		{ 768, 1024 },
-		{ 800, 1280 },
-		{ 1024, 1280 },
-		{ 900, 1600 },
-		{ 864, 1536 },
-		{ 1152, 2048 },
+		{ 1080, 1920 },
+		{ 2160, 3860 },
 	};
 
 	rapidjson::Document* mainSettings;

@@ -1,11 +1,16 @@
 #pragma once
 
+#include <cmath>
 #include <wx/dcbuffer.h>
 #include <wx/wx.h>
 
 class DrawingCanvas : public wxWindow {
 private:
 	wxColor backgroundColor;
+
+protected:
+	double zoomScale = 1;
+	wxPoint zoomPoint;
 
 public:
 	DrawingCanvas(wxWindow* parent, wxSize size);
@@ -16,6 +21,7 @@ public:
 	// http://www.informit.com/articles/article.aspx?p=405047
 
 	void OnPaint(wxPaintEvent& event);
+	void OnMousewheel(wxMouseEvent& event);
 
 	void PaintBackground(wxDC& dc);
 
