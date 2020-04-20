@@ -4,7 +4,6 @@ DrawingCanvas::DrawingCanvas(wxWindow* parent, wxSize size)
 	: wxWindow(parent, wxID_ANY, wxDefaultPosition, size, wxFULL_REPAINT_ON_RESIZE) {
 	// By default it's black
 	backgroundColor = *wxBLACK;
-	zoomPoint       = wxDefaultPosition;
 }
 
 void DrawingCanvas::draw(wxDC& dc) {}
@@ -41,6 +40,11 @@ void DrawingCanvas::OnMousewheel(wxMouseEvent& event) {
 	Refresh();
 }
 
+void DrawingCanvas::OnDrag(wxMouseEvent& event) {
+	zoomPoint = event.GetPosition();
+	Refresh();
+}
+
 // clang-format off
 BEGIN_EVENT_TABLE(DrawingCanvas, wxWindow)
     EVT_PAINT(DrawingCanvas::OnPaint)
@@ -70,10 +74,10 @@ void DrawingCanvasBitmap::draw(wxDC& dc) {
 		if(zoomPoint != wxDefaultPosition) {
 			wxPoint adjustedZoomPoint;
 			// TODO fix this crap
-			adjustedZoomPoint.x = dc.DeviceToLogicalX(zoomPoint.x);
-			adjustedZoomPoint.y = dc.DeviceToLogicalY(zoomPoint.y);
-			wxPoint middlePoint = zoomPoint - adjustedZoomPoint;
-			dc.SetDeviceOrigin(middlePoint.x, middlePoint.y);
+			adjustedZoomPoint.x = dc.LogicalToDeviceX(zoomPoint.x);
+			adjustedZoomPoint.y = dc.LogicalToDeviceY(zoomPoint.y);
+			wxPoint imageCorner = zoomPoint - (adjustedZoomPoint * scale);
+			dc.SetDeviceOrigin(imageCorner.x, imageCorner.y);
 		}
 
 		dc.DrawBitmap(*bitmap, 0, 0, false);
@@ -88,4 +92,10 @@ void DrawingCanvasBitmap::setBitmap(wxBitmap* theBitmap) {
 	// Select the new one
 	bitmap = theBitmap;
 	Refresh();
+}
+
+DrawingCanvasBitmap::~DrawingCanvasBitmap() {
+	if(bitmap != NULL) {
+		delete bitmap;
+	}
 }
