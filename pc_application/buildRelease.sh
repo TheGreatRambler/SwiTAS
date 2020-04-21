@@ -1,6 +1,7 @@
-make -j 4 BUILD=release
+make -B BUILD=release
 
 mkdir release
+rm nxtaspc.zip
 
 mkdir release/bin
 cp bin/* release/bin

@@ -218,7 +218,8 @@
 	"ui": {
 		"addFrameButton": "share/icons/nxtas/buttons/addFrameButton.png",
 		"frameAdvanceButton": "share/icons/nxtas/buttons/frameAdvanceButton.png",
-		"savestateHookButton": "share/icons/nxtas/buttons/savestateHookButton.png",
+		"savestateHookCreateButton": "share/icons/nxtas/buttons/savestateHookCreateButton.png",
+		"savestateHookLoadButton": "share/icons/nxtas/buttons/savestateHookLoadButton.png",
 		"joystickLockButton": "share/icons/nxtas/buttons/joystickLockButton.png",
 		"playButton": "share/icons/nxtas/buttons/playButton.png",
 		"pauseButton": "share/icons/nxtas/buttons/pauseButton.png",

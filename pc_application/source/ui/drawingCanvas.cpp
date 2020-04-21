@@ -71,7 +71,7 @@ void DrawingCanvasBitmap::draw(wxDC& dc) {
 		// Scale for width and height are the same
 		double scale = (double)width / bitmap->GetWidth();
 
-		// https://forums.wxwidgets.org/viewtopic.php?t=21080
+		// https://forums.wxwidgets.org/viewtopic.php?f=1&t=46751&p=196414#p196414
 		scale *= zoomScale;
 		dc.SetUserScale(scale, scale);
 		if(zoomPoint != wxDefaultPosition) {

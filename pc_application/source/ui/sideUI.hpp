@@ -44,9 +44,8 @@ private:
 
 	wxBitmapButton* addFrameButton;
 	wxBitmapButton* frameAdvanceButton;
-	wxBitmapButton* savestateHookButton;
-
-	wxNotebook* inputsNotebook;
+	wxBitmapButton* savestateHookCreateButton;
+	wxBitmapButton* savestateHookLoadButton;
 
 	wxBoxSizer* buttonSizer;
 
@@ -65,10 +64,8 @@ private:
 
 	void onAddFramePressed(wxCommandEvent& event);
 	void onFrameAdvancePressed(wxCommandEvent& event);
-	void onSavestateHookPressed(wxCommandEvent& event);
-
-	void OnNotebookClose(wxCloseEvent& event);
-	void inputsPageChanged(wxBookCtrlEvent& event);
+	void onSavestateHookCreatePressed(wxCommandEvent& event);
+	void onSavestateHookLoadPressed(wxCommandEvent& event);
 
 public:
 	SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* sizer, DataProcessing* input, std::shared_ptr<CommunicateWithNetwork> networkImp);

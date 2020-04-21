@@ -89,28 +89,23 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* 
 	frameDrawer = new FrameCanvas(parentFrame, inputData);
 	frameDrawer->setBackgroundColor(*wxBLACK);
 
-	addFrameButton      = HELPERS::getBitmapButton(parentFrame, mainSettings, "addFrameButton");
-	frameAdvanceButton  = HELPERS::getBitmapButton(parentFrame, mainSettings, "frameAdvanceButton");
-	savestateHookButton = HELPERS::getBitmapButton(parentFrame, mainSettings, "savestateHookButton");
-
-	inputsNotebook = new wxNotebook(parentFrame, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNB_TOP | wxNB_MULTILINE);
-	inputsNotebook->Bind(wxEVT_CLOSE_WINDOW, &SideUI::OnNotebookClose, this);
-	inputsNotebook->Bind(wxEVT_NOTEBOOK_PAGE_CHANGED, &SideUI::inputsPageChanged, this);
-
-	// https://forums.wxwidgets.org/viewtopic.php?t=4181
-	shouldIgnorePageChange = true;
-	inputsNotebook->AddPage(inputData, "0", true);
+	addFrameButton            = HELPERS::getBitmapButton(parentFrame, mainSettings, "addFrameButton");
+	frameAdvanceButton        = HELPERS::getBitmapButton(parentFrame, mainSettings, "frameAdvanceButton");
+	savestateHookCreateButton = HELPERS::getBitmapButton(parentFrame, mainSettings, "savestateHookCreateButton");
+	savestateHookLoadButton   = HELPERS::getBitmapButton(parentFrame, mainSettings, "savestateHookLoadButton");
 
 	// Button handlers
 	addFrameButton->Bind(wxEVT_BUTTON, &SideUI::onAddFramePressed, this);
 	frameAdvanceButton->Bind(wxEVT_BUTTON, &SideUI::onFrameAdvancePressed, this);
-	savestateHookButton->Bind(wxEVT_BUTTON, &SideUI::onSavestateHookPressed, this);
+	savestateHookCreateButton->Bind(wxEVT_BUTTON, &SideUI::onSavestateHookCreatePressed, this);
+	savestateHookLoadButton->Bind(wxEVT_BUTTON, &SideUI::onSavestateHookLoadPressed, this);
 
 	// TODO all these expands and all seem suspect
 
 	buttonSizer->Add(addFrameButton, 1);
 	buttonSizer->Add(frameAdvanceButton, 1);
-	buttonSizer->Add(savestateHookButton, 1);
+	buttonSizer->Add(savestateHookCreateButton, 1);
+	buttonSizer->Add(savestateHookLoadButton, 1);
 
 	// Not wxEXPAND
 	verticalBoxSizer->Add(buttonSizer, 0, wxEXPAND);
@@ -135,27 +130,19 @@ void SideUI::onFrameAdvancePressed(wxCommandEvent& event) {
 	inputData->runFrame();
 }
 
-void SideUI::onSavestateHookPressed(wxCommandEvent& event) {
+void SideUI::onSavestateHookCreatePressed(wxCommandEvent& event) {
 	createSavestateHook();
 }
 
-void SideUI::OnNotebookClose(wxCloseEvent& event) {
-	// https://forums.wxwidgets.org/viewtopic.php?t=4181
-	for(std::size_t i = 0; i < inputsNotebook->GetPageCount(); i++) {
-		inputsNotebook->RemovePage(0);
-	}
-	delete inputData;
-}
+void SideUI::onSavestateHookLoadPressed(wxCommandEvent& event) {
+	// Open up the savestate viewer
+	SavestateLister savestateSelection(inputData);
 
-void SideUI::inputsPageChanged(wxBookCtrlEvent& event) {
-	// https://forums.wxwidgets.org/viewtopic.php?t=4181
-	if(shouldIgnorePageChange) {
-		// Reset for later
-		shouldIgnorePageChange = false;
-	} else {
-		loadSavestateHook(event.GetSelection());
+	savestateSelection.ShowModal();
+
+	if(savestateSelection.getOperationSuccessful()) {
+		loadSavestateHook(savestateSelection.getSelectedSavestate());
 	}
-	event.Veto();
 }
 
 bool SideUI::createSavestateHook() {
@@ -174,9 +161,7 @@ bool SideUI::createSavestateHook() {
 		blocks[blocks.size() - 1]->dHash      = savestateSelection.getNewDhash();
 		blocks[blocks.size() - 1]->screenshot = savestateSelection.getNewScreenshot();
 
-		// Scroll
-		shouldIgnorePageChange = true;
-		inputsNotebook->AddPage(new wxWindow(), wxString::Format("%d", blocks.size() - 1), true);
+		inputData->setSavestateHook(blocks.size() - 1);
 
 		return true;
 	} else {

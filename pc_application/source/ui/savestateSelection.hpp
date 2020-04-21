@@ -2,13 +2,41 @@
 
 #include <rapidjson/document.h>
 #include <wx/event.h>
+#include <wx/scrolwin.h>
 #include <wx/spinctrl.h>
 #include <wx/utils.h>
 #include <wx/wx.h>
 
 #include "../../sharedNetworkCode/networkInterface.hpp"
+#include "../dataHandling/dataProcessing.hpp"
 #include "../helpers.hpp"
 #include "drawingCanvas.hpp"
+
+// Class listing out the savestates in a grid so they can be selected
+class SavestateLister : public wxDialog {
+private:
+	wxBoxSizer* mainSizer;
+
+	wxGridSizer* projectList;
+	wxScrolledWindow* projectListHolder;
+	DataProcessing* inputInstance;
+
+	bool operationSuccessful = false;
+	int selectedSavestate;
+
+	void onSavestateHookSelect(wxMouseEvent& event);
+
+public:
+	SavestateLister(DataProcessing* input);
+
+	bool getOperationSuccessful() {
+		return operationSuccessful;
+	}
+
+	int getSelectedSavestate() {
+		return selectedSavestate;
+	}
+};
 
 // This class handles both opening up a savestate and creating the first savestate
 class SavestateSelection : public wxDialog {

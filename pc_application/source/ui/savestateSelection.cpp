@@ -1,6 +1,55 @@
 #include "savestateSelection.hpp"
 
-// TODO handle savestate selection through DataProcessing
+SavestateLister::SavestateLister(DataProcessing* input)
+	: wxDialog(NULL, wxID_ANY, "Savestate Listing", wxDefaultPosition, wxDefaultSize) {
+	inputInstance = input;
+
+	mainSizer = new wxBoxSizer(wxVERTICAL);
+
+	// 3 columns
+	projectList       = new wxGridSizer(3);
+	projectListHolder = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+
+	// Add each individual savestate hook for viewing
+	int i = 0;
+	for(auto const& savestateHook : inputInstance->getAllSavestateHookBlocks()) {
+		wxBoxSizer* dataSizer = new wxBoxSizer(wxVERTICAL);
+
+		wxStaticText* dHash = new wxStaticText(this, wxID_ANY, wxString::FromUTF8(savestateHook->dHash), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
+
+		wxBitmap* screenshot               = savestateHook->screenshot;
+		DrawingCanvasBitmap* drawingCanvas = new DrawingCanvasBitmap(this, wxSize(1280, 720));
+		drawingCanvas->setBitmap(screenshot);
+
+		drawingCanvas->Bind(wxEVT_LEFT_DOWN, &SavestateLister::onSavestateHookSelect, this, wxID_ANY, wxID_ANY, (wxObject*)new int(i));
+
+		dataSizer->Add(dHash, 1);
+		dataSizer->Add(drawingCanvas, 0, wxSHAPED);
+
+		projectList->Add(dataSizer, 1);
+		i++;
+	}
+
+	projectListHolder->SetSizer(projectList);
+
+	mainSizer->Add(projectListHolder, 1, wxEXPAND | wxALL);
+
+	SetSizer(mainSizer);
+	mainSizer->SetSizeHints(this);
+	Layout();
+	Fit();
+	Center(wxBOTH);
+
+	Layout();
+}
+
+void SavestateLister::onSavestateHookSelect(wxMouseEvent& event) {
+	int index           = *((int*)event.GetEventUserData());
+	selectedSavestate   = index;
+	operationSuccessful = true;
+	Close(true);
+}
+
 SavestateSelection::SavestateSelection(rapidjson::Document* settings, bool isSavestateLoadDialog, std::shared_ptr<CommunicateWithNetwork> networkImp)
 	: wxDialog(NULL, wxID_ANY, "Savestate Selection", wxDefaultPosition, wxDefaultSize) {
 	// Parent is specifically null because this is a separate window that opens
@@ -46,13 +95,13 @@ SavestateSelection::SavestateSelection(rapidjson::Document* settings, bool isSav
 		goalFrame = new DrawingCanvasBitmap(this, wxSize(1280, 720));
 	}
 
-	leftImageSizer->Add(currentFrame, 0, wxSHAPED | wxEXPAND);
+	leftImageSizer->Add(currentFrame, 0, wxSHAPED);
 
 	if(savestateLoadDialog) {
 		// Dhashes are only used in loading, not creating the first one
 		leftImageSizer->Add(leftDHash, 1, wxEXPAND | wxALL);
 
-		rightImageSizer->Add(goalFrame, 0, wxSHAPED | wxEXPAND);
+		rightImageSizer->Add(goalFrame, 0, wxSHAPED);
 		rightImageSizer->Add(rightDHash, 1, wxEXPAND | wxALL);
 	}
 

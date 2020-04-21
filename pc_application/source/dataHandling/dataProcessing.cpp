@@ -43,25 +43,6 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	}
 
 	SetImageList(&imageList, wxIMAGE_LIST_SMALL);
-	// These are called like dialogs, so there won't be just one instance
-	/*
-		savestateHookCreator = new SavestateSelection(mainSettings, false, networkInstance);
-		savestateHookLoader  = new SavestateSelection(mainSettings, true, networkInstance);
-	*/
-	// JUST AS A TEST, WILL REMOVE SOON
-	// firstSavestateHookCreator->ShowModal();
-	// if(firstSavestateHookCreator->getOperationSuccessful()) {
-	//	// EBIC
-	//}
-	// savestateHookLoader->ShowModal();
-	// if(savestateHookLoader->getOperationSuccessful()) {
-	//	// EBIC
-	//}
-
-	// Set other frames manually, without a function
-	// Set the current frame to the first
-	// One frame needs to be added at the very beginning
-	// Heck, I hate segfaults
 
 	// Set item attributes for nice colors
 	setItemAttributes();
