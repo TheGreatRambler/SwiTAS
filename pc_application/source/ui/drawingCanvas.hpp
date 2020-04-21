@@ -46,4 +46,6 @@ public:
 
 	void setBitmap(wxBitmap* theBitmap);
 	wxBitmap* getBitmap();
+
+	~DrawingCanvasBitmap();
 };
