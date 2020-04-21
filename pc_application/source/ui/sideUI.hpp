@@ -4,11 +4,14 @@
 #include <memory>
 #include <rapidjson/document.h>
 #include <wx/dcbuffer.h>
+#include <wx/notebook.h>
 #include <wx/wx.h>
 
+#include "../../sharedNetworkCode/networkInterface.hpp"
 #include "../dataHandling/dataProcessing.hpp"
 #include "../helpers.hpp"
 #include "drawingCanvas.hpp"
+#include "savestateSelection.hpp"
 
 class FrameCanvas : public DrawingCanvas {
 private:
@@ -35,12 +38,15 @@ public:
 class SideUI {
 private:
 	rapidjson::Document* mainSettings;
+	std::shared_ptr<CommunicateWithNetwork> networkInterface;
 
 	wxBoxSizer* verticalBoxSizer;
 
 	wxBitmapButton* addFrameButton;
 	wxBitmapButton* frameAdvanceButton;
 	wxBitmapButton* savestateHookButton;
+
+	wxNotebook* inputsNotebook;
 
 	wxBoxSizer* buttonSizer;
 
@@ -55,10 +61,18 @@ private:
 	// Input instance to get inputs and such
 	DataProcessing* inputData;
 
+	bool shouldIgnorePageChange = false;
+
 	void onAddFramePressed(wxCommandEvent& event);
 	void onFrameAdvancePressed(wxCommandEvent& event);
 	void onSavestateHookPressed(wxCommandEvent& event);
 
+	void OnNotebookClose(wxCloseEvent& event);
+	void inputsPageChanged(wxBookCtrlEvent& event);
+
 public:
-	SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* sizer, DataProcessing* input);
+	SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* sizer, DataProcessing* input, std::shared_ptr<CommunicateWithNetwork> networkImp);
+
+	bool createSavestateHook();
+	bool loadSavestateHook(SavestateBlockNum block);
 };

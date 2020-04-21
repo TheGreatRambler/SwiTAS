@@ -34,7 +34,7 @@ enum Btn : uint8_t {
 
 enum FrameState : uint8_t {
 	RAN,
-	SAVESTATE_HOOK,
+	SAVESTATE,
 };
 
 // Controller data that will be packed into the array and will be recieved from

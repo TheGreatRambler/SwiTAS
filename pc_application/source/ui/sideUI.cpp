@@ -1,5 +1,4 @@
 #include "sideUI.hpp"
-#include <memory>
 
 FrameCanvas::FrameCanvas(wxFrame* parent, DataProcessing* dataProcessing)
 	: DrawingCanvas(parent, wxDefaultSize) {
@@ -73,9 +72,10 @@ void FrameCanvas::draw(wxDC& dc) {
 	}
 };
 
-SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* sizer, DataProcessing* input) {
-	mainSettings = settings;
-	inputData    = input;
+SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* sizer, DataProcessing* input, std::shared_ptr<CommunicateWithNetwork> networkImp) {
+	mainSettings     = settings;
+	inputData        = input;
+	networkInterface = networkImp;
 
 	// Holds everything
 	verticalBoxSizer = new wxBoxSizer(wxVERTICAL);
@@ -89,11 +89,17 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* 
 	frameDrawer = new FrameCanvas(parentFrame, inputData);
 	frameDrawer->setBackgroundColor(*wxBLACK);
 
-	addFrameButton = HELPERS::getBitmapButton(parentFrame, mainSettings, "addFrameButton");
-
-	frameAdvanceButton = HELPERS::getBitmapButton(parentFrame, mainSettings, "frameAdvanceButton");
-
+	addFrameButton      = HELPERS::getBitmapButton(parentFrame, mainSettings, "addFrameButton");
+	frameAdvanceButton  = HELPERS::getBitmapButton(parentFrame, mainSettings, "frameAdvanceButton");
 	savestateHookButton = HELPERS::getBitmapButton(parentFrame, mainSettings, "savestateHookButton");
+
+	inputsNotebook = new wxNotebook(parentFrame, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNB_TOP | wxNB_MULTILINE);
+	inputsNotebook->Bind(wxEVT_CLOSE_WINDOW, &SideUI::OnNotebookClose, this);
+	inputsNotebook->Bind(wxEVT_NOTEBOOK_PAGE_CHANGED, &SideUI::inputsPageChanged, this);
+
+	// https://forums.wxwidgets.org/viewtopic.php?t=4181
+	shouldIgnorePageChange = true;
+	inputsNotebook->AddPage(inputData, "0", true);
 
 	// Button handlers
 	addFrameButton->Bind(wxEVT_BUTTON, &SideUI::onAddFramePressed, this);
@@ -130,6 +136,66 @@ void SideUI::onFrameAdvancePressed(wxCommandEvent& event) {
 }
 
 void SideUI::onSavestateHookPressed(wxCommandEvent& event) {
-	// New frame must be added, will do more later
-	inputData->createSavestateHookHere();
+	createSavestateHook();
+}
+
+void SideUI::OnNotebookClose(wxCloseEvent& event) {
+	// https://forums.wxwidgets.org/viewtopic.php?t=4181
+	for(std::size_t i = 0; i < inputsNotebook->GetPageCount(); i++) {
+		inputsNotebook->RemovePage(0);
+	}
+	delete inputData;
+}
+
+void SideUI::inputsPageChanged(wxBookCtrlEvent& event) {
+	// https://forums.wxwidgets.org/viewtopic.php?t=4181
+	if(shouldIgnorePageChange) {
+		// Reset for later
+		shouldIgnorePageChange = false;
+	} else {
+		loadSavestateHook(event.GetSelection());
+	}
+	event.Veto();
+}
+
+bool SideUI::createSavestateHook() {
+	// Create savestate and push it onto dataProcessing
+	AllSavestateHookBlocks& blocks = inputData->getAllSavestateHookBlocks();
+	if(blocks.size() != 1 && blocks[0]->inputs->size() != 1) {
+		// Not a new project, add the savestate hook before continuing
+		inputData->addNewSavestateHook("", new wxBitmap());
+	}
+	// Open up the savestate viewer
+	SavestateSelection savestateSelection(mainSettings, false, networkInterface);
+
+	savestateSelection.ShowModal();
+
+	if(savestateSelection.getOperationSuccessful()) {
+		blocks[blocks.size() - 1]->dHash      = savestateSelection.getNewDhash();
+		blocks[blocks.size() - 1]->screenshot = savestateSelection.getNewScreenshot();
+
+		// Scroll
+		shouldIgnorePageChange = true;
+		inputsNotebook->AddPage(new wxWindow(), wxString::Format("%d", blocks.size() - 1), true);
+
+		return true;
+	} else {
+		return false;
+	}
+}
+
+bool SideUI::loadSavestateHook(SavestateBlockNum block) {
+	std::shared_ptr<SavestateHook> savestateHook = inputData->getAllSavestateHookBlocks()[block];
+
+	SavestateSelection savestateSelection(mainSettings, true, networkInterface);
+	savestateSelection.setTargetFrame(savestateHook->screenshot, savestateHook->dHash);
+
+	savestateSelection.ShowModal();
+
+	if(savestateSelection.getOperationSuccessful()) {
+		inputData->setSavestateHook(block);
+		return true;
+	} else {
+		return false;
+	}
 }

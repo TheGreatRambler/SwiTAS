@@ -49,7 +49,7 @@ MainWindow::MainWindow()
 	dataProcessingInstance = new DataProcessing(&mainSettings, buttonData, networkInstance, this);
 
 	// UI instances
-	sideUI   = std::make_shared<SideUI>(this, &mainSettings, mainSizer, dataProcessingInstance);
+	sideUI   = std::make_shared<SideUI>(this, &mainSettings, mainSizer, dataProcessingInstance, networkInstance);
 	bottomUI = std::make_shared<BottomUI>(this, &mainSettings, buttonData, mainSizer, dataProcessingInstance);
 
 	projectHandler = std::make_shared<ProjectHandler>(this, dataProcessingInstance, &mainSettings);
@@ -86,6 +86,7 @@ void MainWindow::onStart() {
 
 	ProjectHandlerWindow projectHandlerWindow(projectHandler, &mainSettings);
 
+	Show(false);
 	projectHandlerWindow.ShowModal();
 
 	if(projectHandlerWindow.wasDialogClosedForcefully()) {
@@ -99,7 +100,18 @@ void MainWindow::onStart() {
 		// Generate a temp one
 		projectHandlerWindow.createTempProjectDir();
 	}
-	Show();
+
+	// Ask for internet connection to get started
+	if(askForIP()) {
+		// Tethered, create savestate
+		if(!sideUI->createSavestateHook()) {
+			// Not successful, close everything
+			Close(true);
+			return;
+		}
+	}
+
+	Show(true);
 }
 
 // clang-format off
@@ -203,17 +215,7 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 	} else {
 		// No switch statements for me
 		if(id == selectIPID) {
-			// IP needs to be selected
-			wxString ipAddress = wxGetTextFromUser("Please enter IP address of Nintendo Switch", "Server connect", wxEmptyString);
-			if(!ipAddress.empty()) {
-				// IP address entered
-				if(networkInstance->attemptConnectionToServer(ipAddress.ToStdString())) {
-					SetStatusText(ipAddress + ":" + std::to_string(SERVER_PORT), 0);
-				} else {
-					wxMessageDialog addressInvalidDialog(this, wxString::Format("This IP address is invalid: %s", networkInstance->getLastErrorMessage().c_str()), "Invalid IP", wxOK);
-					addressInvalidDialog.ShowModal();
-				}
-			}
+			askForIP();
 		} else if(id == setNameID) {
 			// Name needs to be selected
 			wxString projectName = wxGetTextFromUser("Please set the new name of the project", "Set name", projectHandler->getProjectName());
@@ -227,6 +229,29 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 			debugWindow->Show(!debugWindow->IsShown());
 			wxLogMessage("Toggled debug window");
 		}
+	}
+}
+
+bool MainWindow::askForIP() {
+	// Returns if it's tethered or not, it's a secret passcode for development
+	// IP needs to be selected
+	wxString ipAddress = wxGetTextFromUser("Please enter IP address of Nintendo Switch", "Server connect", wxEmptyString);
+	if(!ipAddress.empty()) {
+		if(ipAddress == "untethered") {
+			return false;
+		} else {
+			// IP address entered
+			if(networkInstance->attemptConnectionToServer(ipAddress.ToStdString())) {
+				SetStatusText(ipAddress + ":" + std::to_string(SERVER_PORT), 0);
+			} else {
+				wxMessageDialog addressInvalidDialog(this, wxString::Format("This IP address is invalid: %s", networkInstance->getLastErrorMessage().c_str()), "Invalid IP", wxOK);
+				addressInvalidDialog.ShowModal();
+			}
+			return true;
+		}
+	} else {
+		// If the IP is wrong, just pronounce it untethered
+		return false;
 	}
 }
 

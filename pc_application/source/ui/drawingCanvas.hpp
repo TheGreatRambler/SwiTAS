@@ -22,6 +22,7 @@ public:
 
 	void OnPaint(wxPaintEvent& event);
 	void OnMousewheel(wxMouseEvent& event);
+	void OnMouseMove(wxMouseEvent& event);
 
 	void PaintBackground(wxDC& dc);
 
@@ -44,4 +45,5 @@ public:
 	void draw(wxDC& dc) override;
 
 	void setBitmap(wxBitmap* theBitmap);
+	wxBitmap* getBitmap();
 };

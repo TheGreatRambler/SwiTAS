@@ -6,7 +6,7 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 
 	// All savestate hook blocks
 	// Start with default, will get cleared later
-	addNewSavestateHook();
+	addNewSavestateHook("", new wxBitmap());
 
 	// This can't handle it :(
 	SetDoubleBuffered(false);
@@ -70,11 +70,11 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	// Each menu item is added here
 	wxAcceleratorEntry entries[8];
 
-	pasteInsertID   = wxNewId();
-	pastePlaceID    = wxNewId();
-	addFrameID      = wxNewId();
-	frameAdvanceID  = wxNewId();
-	savestateHookID = wxNewId();
+	pasteInsertID  = wxNewId();
+	pastePlaceID   = wxNewId();
+	addFrameID     = wxNewId();
+	frameAdvanceID = wxNewId();
+	savestateID    = wxNewId();
 
 	insertPaste = false;
 	placePaste  = false;
@@ -87,7 +87,7 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 
 	entries[5].Set(wxACCEL_CTRL, (int)'=', addFrameID, editMenu.Append(addFrameID, wxT("&Add Frame\tCtrl+Plus")));
 	entries[6].Set(wxACCEL_CTRL, WXK_RIGHT, frameAdvanceID, editMenu.Append(frameAdvanceID, wxT("&Frame Advance\tCtrl+Right")));
-	entries[7].Set(wxACCEL_CTRL, (int)'H', savestateHookID, editMenu.Append(savestateHookID, wxT("&Add Savestate Hook\tCtrl+H")));
+	entries[7].Set(wxACCEL_CTRL, (int)'H', savestateID, editMenu.Append(savestateID, wxT("&Add Savestate Hook\tCtrl+H")));
 
 	wxAcceleratorTable accel(8, entries);
 	SetAcceleratorTable(accel);
@@ -100,7 +100,7 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	Bind(wxEVT_MENU, &DataProcessing::onPlacePaste, this, pastePlaceID);
 	Bind(wxEVT_MENU, &DataProcessing::onAddFrame, this, addFrameID);
 	Bind(wxEVT_MENU, &DataProcessing::onFrameAdvance, this, frameAdvanceID);
-	Bind(wxEVT_MENU, &DataProcessing::onAddSavestateHook, this, savestateHookID);
+	Bind(wxEVT_MENU, &DataProcessing::onAddSavestate, this, savestateID);
 }
 
 // clang-format off
@@ -195,9 +195,9 @@ void DataProcessing::setItemAttributes() {
 	itemAttributes[state] = itemAttribute;
 	SET_BIT(state, false, FrameState::RAN);
 
-	SET_BIT(state, true, FrameState::SAVESTATE_HOOK);
+	SET_BIT(state, true, FrameState::SAVESTATE);
 	itemAttribute = new wxItemAttr();
-	itemAttribute->SetBackgroundColour(wxColor((*mainSettings)["ui"]["frameViewerColors"]["savestateHook"].GetString()));
+	itemAttribute->SetBackgroundColour(wxColor((*mainSettings)["ui"]["frameViewerColors"]["savestate"].GetString()));
 	itemAttributes[state] = itemAttribute;
 	// SavestateHook takes precedence in the case where both are present
 	SET_BIT(state, true, FrameState::RAN);
@@ -352,8 +352,8 @@ void DataProcessing::onFrameAdvance(wxCommandEvent& event) {
 	runFrame();
 }
 
-void DataProcessing::onAddSavestateHook(wxCommandEvent& event) {
-	createSavestateHookHere();
+void DataProcessing::onAddSavestate(wxCommandEvent& event) {
+	createSavestateHere();
 }
 
 void DataProcessing::setCurrentFrame(FrameNum frameNum) {
@@ -375,11 +375,11 @@ void DataProcessing::setCurrentFrame(FrameNum frameNum) {
 }
 
 // THIS NEEDS TO CHANGE COMPLETELY
-void DataProcessing::createSavestateHookHere() {
+void DataProcessing::createSavestateHere() {
 	// Add one savestate hook at this frame
-	savestateHooks[currentFrame] = std::make_shared<SavestateHook>();
+	savestates[currentFrame] = std::make_shared<Savestate>();
 	// Set the style of this frame
-	SET_BIT(currentData->frameState, true, FrameState::SAVESTATE_HOOK);
+	SET_BIT(currentData->frameState, true, FrameState::SAVESTATE);
 	// Refresh the item for it to take effect
 	RefreshItem(currentFrame);
 }
@@ -450,20 +450,26 @@ void DataProcessing::onCacheHint(wxListEvent& event) {
 	}
 }
 
-void DataProcessing::addNewSavestateHook() {
-	savestateHookBlocks.push_back(std::make_shared<std::vector<FrameData>>());
-	savestateHookBlocks[0]->push_back(std::make_shared<ControllerData>());
+void DataProcessing::addNewSavestateHook(std::string dHash, wxBitmap* screenshot) {
+	std::shared_ptr<SavestateHook> savestateHook = std::make_shared<SavestateHook>();
+	savestateHook->dHash                         = dHash;
+	savestateHook->screenshot                    = screenshot;
+	savestateHook->inputs                        = std::make_shared<std::vector<FrameData>>();
+	savestateHookBlocks.push_back(savestateHook);
+	savestateHookBlocks[0]->inputs->push_back(std::make_shared<ControllerData>());
 	// NOTE: There must be at least one block with one input when this is loaded
 	// Automatically, the first block is always at index 0
-	setSavestateHook(0);
+	setSavestateHook(savestateHookBlocks.size() - 1);
 }
 
 void DataProcessing::setSavestateHook(SavestateBlockNum index) {
-	inputsList = savestateHookBlocks[index];
+	inputsList = savestateHookBlocks[index]->inputs;
 	SetItemCount(inputsList->size());
 	setCurrentFrame(0);
 	currentRunFrame   = 0;
 	currentImageFrame = 0;
+
+	Refresh();
 }
 
 std::shared_ptr<ControllerData> DataProcessing::getFrame(FrameNum frame) const {
@@ -665,7 +671,7 @@ void DataProcessing::addFrame(FrameNum afterFrame) {
 	}
 
 	setFramestateInfo(afterFrame + 1, FrameState::RAN, false);
-	setFramestateInfo(afterFrame + 1, FrameState::SAVESTATE_HOOK, false);
+	setFramestateInfo(afterFrame + 1, FrameState::SAVESTATE, false);
 
 	// Because of the usability of virtual list controls, just update the length
 	SetItemCount(inputsList->size());

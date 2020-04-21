@@ -74,6 +74,14 @@ public:
 		return operationSuccessful;
 	}
 
+	std::string getNewDhash() {
+		return leftDHash->GetLabel().ToStdString();
+	}
+
+	wxBitmap* getNewScreenshot() {
+		return currentFrame->getBitmap();
+	}
+
 	void setTargetFrame(wxBitmap* targetBitmap, std::string targetDhash);
 
 	DECLARE_EVENT_TABLE();

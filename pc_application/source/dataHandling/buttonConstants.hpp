@@ -39,9 +39,16 @@ struct ButtonInfo {
 	uint8_t gridY;
 };
 
-struct SavestateHook {
+struct Savestate {
 	// I don't know what to put here yet
 	uint32_t frame;
+};
+
+typedef std::shared_ptr<std::vector<std::shared_ptr<ControllerData>>> SavestateHookBlock;
+struct SavestateHook {
+	std::string dHash;
+	wxBitmap* screenshot;
+	SavestateHookBlock inputs;
 };
 
 enum ControllerNumberValues : uint8_t {

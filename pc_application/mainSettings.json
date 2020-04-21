@@ -229,7 +229,7 @@
 		"frameViewerColors": {
 			"notRan": "rgb(223, 227, 235)",
 			"ran": "rgb(144, 252, 189)",
-			"savestateHook": "rgb(252, 144, 169)"
+			"savestate": "rgb(252, 144, 169)"
 		},
 		"recentProjectsColors": {
 			"projectName": "rgb(12, 44, 112)",
@@ -237,8 +237,7 @@
 			"newProject": "rgb(20, 110, 66)"
 		}
 	},
-	"recentProjects": [
-		{
+	"recentProjects": [{
 			"projectDirectory": "/home/thegreatrambler/Desktop/bob/",
 			"projectName": "Unnamed"
 		},

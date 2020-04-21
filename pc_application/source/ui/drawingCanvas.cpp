@@ -41,11 +41,19 @@ void DrawingCanvas::OnMousewheel(wxMouseEvent& event) {
 	Refresh();
 }
 
+void DrawingCanvas::OnMouseMove(wxMouseEvent& event) {
+	if(event.Dragging()) {
+		zoomPoint = event.GetPosition();
+		Refresh();
+	}
+}
+
 // clang-format off
 BEGIN_EVENT_TABLE(DrawingCanvas, wxWindow)
     EVT_PAINT(DrawingCanvas::OnPaint)
     EVT_ERASE_BACKGROUND(DrawingCanvas::OnEraseBackground)
 	EVT_MOUSEWHEEL(DrawingCanvas::OnMousewheel)
+	EVT_MOTION(DrawingCanvas::OnMouseMove)
 END_EVENT_TABLE()
 // clang-format on
 
@@ -88,4 +96,8 @@ void DrawingCanvasBitmap::setBitmap(wxBitmap* theBitmap) {
 	// Select the new one
 	bitmap = theBitmap;
 	Refresh();
+}
+
+wxBitmap* DrawingCanvasBitmap::getBitmap() {
+	return bitmap;
 }

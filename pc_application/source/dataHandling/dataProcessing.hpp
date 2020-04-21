@@ -29,9 +29,8 @@
 #include "buttonConstants.hpp"
 #include "buttonData.hpp"
 
-typedef std::shared_ptr<std::vector<std::shared_ptr<ControllerData>>> SavestateHookBlock;
 typedef std::shared_ptr<ControllerData> FrameData;
-typedef std::vector<std::shared_ptr<std::vector<std::shared_ptr<ControllerData>>>> AllSavestateHookBlocks;
+typedef std::vector<std::shared_ptr<SavestateHook>> AllSavestateHookBlocks;
 
 class ButtonData;
 
@@ -76,7 +75,7 @@ private:
 	std::unordered_map<wxChar, Btn> charToButton;
 
 	// Probably not smart, but the current savestate hooks
-	std::unordered_map<FrameNum, std::shared_ptr<SavestateHook>> savestateHooks;
+	std::unordered_map<FrameNum, std::shared_ptr<Savestate>> savestates;
 	// Universal item attributes for certain attributes
 	std::unordered_map<uint8_t, wxItemAttr*> itemAttributes;
 
@@ -93,7 +92,7 @@ private:
 	int pastePlaceID;
 	int addFrameID;
 	int frameAdvanceID;
-	int savestateHookID;
+	int savestateID;
 
 	int insertPaste;
 	bool placePaste;
@@ -112,7 +111,7 @@ private:
 
 	void onAddFrame(wxCommandEvent& event);
 	void onFrameAdvance(wxCommandEvent& event);
-	void onAddSavestateHook(wxCommandEvent& event);
+	void onAddSavestate(wxCommandEvent& event);
 
 public:
 	static const int LIST_CTRL_ID = 1000;
@@ -141,7 +140,7 @@ public:
 
 	void setCurrentFrame(FrameNum frameNum);
 
-	void createSavestateHookHere();
+	void createSavestateHere();
 	void runFrame();
 
 	std::shared_ptr<std::vector<std::shared_ptr<ControllerData>>> getInputsList();
@@ -154,7 +153,7 @@ public:
 
 	void onCacheHint(wxListEvent& event);
 
-	void addNewSavestateHook();
+	void addNewSavestateHook(std::string dHash, wxBitmap* screenshot);
 
 	void setSavestateHook(SavestateBlockNum index);
 

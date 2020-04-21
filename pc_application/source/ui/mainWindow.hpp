@@ -76,6 +76,7 @@ private:
 	void keyDownHandler(wxKeyEvent& event);
 	void OnSize(wxSizeEvent& event);
 
+	bool askForIP();
 	void handleNetworkQueues();
 
 public:

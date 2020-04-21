@@ -48,10 +48,8 @@ void ProjectHandler::loadProject() {
 			uint8_t* bufferPointer       = (uint8_t*)streamBuffer->GetBufferStart();
 			std::size_t bufferSize       = streamBuffer->GetBufferSize();
 
-			// THIS REQUIRES ENTIRELY DIFFERENT FILE HANDLING TODO
-			// Now have to handle by savestate hook block
-
-			SavestateHookBlock block = std::make_shared<std::vector<std::shared_ptr<ControllerData>>>();
+			std::shared_ptr<SavestateHook> savestateHook = std::make_shared<SavestateHook>();
+			SavestateHookBlock block                     = std::make_shared<std::vector<std::shared_ptr<ControllerData>>>();
 
 			// Loop through each part and unserialize it
 			// This is 0% endian safe
@@ -69,7 +67,13 @@ void ProjectHandler::loadProject() {
 				sizeRead += sizeOfControllerData;
 			}
 
-			savestateHookBlocks[index] = block;
+			savestateHook->inputs = block;
+			savestateHook->dHash  = std::string(jsonSettings["savestateBlocks"].GetArray()[index]["dHash"].GetString());
+
+			wxImage screenshotImage(projectDir.GetNameWithSep() + wxFileName::GetPathSeparator() + wxString::FromUTF8(jsonSettings["savestateBlocks"].GetArray()[index]["screenshot"].GetString()), wxBITMAP_TYPE_JPEG);
+			savestateHook->screenshot = new wxBitmap(screenshotImage);
+
+			savestateHookBlocks[index] = savestateHook;
 			index++;
 		}
 	}
@@ -108,13 +112,19 @@ void ProjectHandler::saveProject() {
 			inputsFileName.SetName(wxString::Format("savestate_block_%lld", index));
 			inputsFileName.SetExt("bin");
 
+			wxFileName screenshotFileName = getProjectStart();
+			screenshotFileName.SetName(wxString::Format("savestate_block_%lld_screenshot", index));
+			screenshotFileName.SetExt("jpg");
+
+			savestateHookBlock->screenshot->SaveFile(screenshotFileName.GetFullPath(), wxBITMAP_TYPE_JPEG);
+
 			// Delete file if already present and use binary mode
 			wxString filename = inputsFileName.GetFullPath();
 			wxFFileOutputStream inputsFileStream(filename, "wb");
 			wxZlibOutputStream inputsCompressStream(inputsFileStream, compressionLevel, wxZLIB_ZLIB | wxZLIB_NO_HEADER);
 
 			// Kinda annoying, but actually break up the vector and add each part with the size
-			for(auto const& controllerData : *savestateHookBlock) {
+			for(auto const& controllerData : *(savestateHookBlock->inputs)) {
 				uint8_t* data;
 				std::size_t dataSize;
 				serializeProtocol.dataToBinary<ControllerData>(*controllerData, &data, &dataSize);
@@ -140,8 +150,17 @@ void ProjectHandler::saveProject() {
 			rapidjson::Value savestateHookIndex;
 			savestateHookIndex.SetUint(index);
 
+			rapidjson::Value dHash;
+			savestateHookPath.SetString(savestateHookBlock->dHash.c_str(), strlen(savestateHookBlock->dHash.c_str()), settingsJSON.GetAllocator());
+
+			rapidjson::Value screenshot;
+			wxString screenshotPath = screenshotFileName.GetFullPath();
+			savestateHookPath.SetString(screenshotPath.c_str(), strlen(screenshotPath.c_str()), settingsJSON.GetAllocator());
+
 			savestateHookJSON.AddMember("filename", savestateHookPath, settingsJSON.GetAllocator());
 			savestateHookJSON.AddMember("index", savestateHookIndex, settingsJSON.GetAllocator());
+			savestateHookJSON.AddMember("dHash", dHash, settingsJSON.GetAllocator());
+			savestateHookJSON.AddMember("screenshot", screenshot, settingsJSON.GetAllocator());
 
 			savestateHooksJSON.PushBack(savestateHookJSON, settingsJSON.GetAllocator());
 
@@ -229,20 +248,6 @@ void ProjectHandler::saveProject() {
 
 			recentProjectsArray[recentProjectChoice]["projectName"].SetString(projectName.c_str(), projectName.size(), mainSettings->GetAllocator());
 		}
-
-		// Run some housekeeping to delete recent project entries that don't exist
-		/*
-		auto it = recentProjectsArray.Begin();
-		while(it != recentProjectsArray.End()) {
-			wxFileName dir((*it)["projectDirectory"].GetString());
-			if(!dir.DirExists()) {
-				// Erase because the directory doesn't exist
-				it = recentProjectsArray.Erase(it);
-			} else {
-				++it;
-			}
-		}
-		*/
 
 		// Additionally, save the mainSettings and overwrite
 		wxFFileOutputStream settingsFileStream("../mainSettings.json", "w");
@@ -389,6 +394,8 @@ void ProjectHandlerWindow::onClickProject(wxCommandEvent& event) {
 				projectHandler->setProjectName("Unnamed");
 				projectChosen       = true;
 				wasClosedForcefully = false;
+
+				isNewProject = true;
 
 				Close(true);
 			} else {

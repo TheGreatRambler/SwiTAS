@@ -121,6 +121,7 @@ private:
 	const wxString createNewProjectText    = "Create New Project";
 
 	uint8_t wasClosedForcefully = true;
+	bool isNewProject           = false;
 
 	bool projectChosen = false;
 
@@ -139,6 +140,10 @@ public:
 
 	bool wasProjectChosen() {
 		return projectChosen;
+	}
+
+	bool loadedNewProject() {
+		return isNewProject;
 	}
 
 	// Created if no project is chosen
