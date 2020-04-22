@@ -34,7 +34,7 @@ void ProjectHandler::loadProject() {
 
 	std::size_t index = 0;
 	for(auto const& savestateFileName : savestateFileNames) {
-		wxString path = projectDir.GetNameWithSep() + wxFileName::GetPathSeparator() + wxString(savestateFileName);
+		wxString path = projectDir.GetNameWithSep() + wxString(savestateFileName);
 		if(wxFileName(path).FileExists()) {
 
 			// Load up the inputs
@@ -70,7 +70,7 @@ void ProjectHandler::loadProject() {
 			savestateHook->inputs = block;
 			savestateHook->dHash  = std::string(jsonSettings["savestateBlocks"].GetArray()[index]["dHash"].GetString());
 
-			wxImage screenshotImage(projectDir.GetNameWithSep() + wxFileName::GetPathSeparator() + wxString::FromUTF8(jsonSettings["savestateBlocks"].GetArray()[index]["screenshot"].GetString()), wxBITMAP_TYPE_JPEG);
+			wxImage screenshotImage(projectDir.GetNameWithSep() + wxString::FromUTF8(jsonSettings["savestateBlocks"].GetArray()[index]["screenshot"].GetString()), wxBITMAP_TYPE_JPEG);
 			savestateHook->screenshot = new wxBitmap(screenshotImage);
 
 			savestateHookBlocks[index] = savestateHook;
@@ -108,19 +108,20 @@ void ProjectHandler::saveProject() {
 		std::size_t index = 0;
 		for(auto const& savestateHookBlock : savestateHookBlocks) {
 
-			wxFileName inputsFileName = getProjectStart();
-			inputsFileName.SetName(wxString::Format("savestate_block_%lld", index));
-			inputsFileName.SetExt("bin");
+			wxFileName inputsFilename = getProjectStart();
+			inputsFilename.SetName(wxString::Format("savestate_block_%lld", index));
+			inputsFilename.SetExt("bin");
+			inputsFilename.MakeRelativeTo(getProjectStart().GetFullPath());
 
 			wxFileName screenshotFileName = getProjectStart();
 			screenshotFileName.SetName(wxString::Format("savestate_block_%lld_screenshot", index));
 			screenshotFileName.SetExt("jpg");
+			screenshotFileName.MakeRelativeTo(getProjectStart().GetFullPath());
 
 			savestateHookBlock->screenshot->SaveFile(screenshotFileName.GetFullPath(), wxBITMAP_TYPE_JPEG);
 
 			// Delete file if already present and use binary mode
-			wxString filename = inputsFileName.GetFullPath();
-			wxFFileOutputStream inputsFileStream(filename, "wb");
+			wxFFileOutputStream inputsFileStream(inputsFilename.GetFullPath(), "wb");
 			wxZlibOutputStream inputsCompressStream(inputsFileStream, compressionLevel, wxZLIB_ZLIB | wxZLIB_NO_HEADER);
 
 			// Kinda annoying, but actually break up the vector and add each part with the size
@@ -138,26 +139,24 @@ void ProjectHandler::saveProject() {
 			inputsCompressStream.Close();
 			inputsFileStream.Close();
 
-			inputsFileName.MakeRelativeTo(projectDir.GetNameWithSep());
-
 			// Add the item in the savestateHooks JSON
 			rapidjson::Value savestateHookJSON(rapidjson::kObjectType);
 
-			rapidjson::Value savestateHookPath;
-			wxString path = inputsFileName.GetFullPath();
-			savestateHookPath.SetString(path.c_str(), strlen(path.c_str()), settingsJSON.GetAllocator());
+			rapidjson::Value savestateHook;
+			wxString savestateHookPath = inputsFilename.GetFullPath();
+			savestateHook.SetString(savestateHookPath.c_str(), strlen(savestateHookPath.c_str()), settingsJSON.GetAllocator());
 
 			rapidjson::Value savestateHookIndex;
 			savestateHookIndex.SetUint(index);
 
 			rapidjson::Value dHash;
-			savestateHookPath.SetString(savestateHookBlock->dHash.c_str(), strlen(savestateHookBlock->dHash.c_str()), settingsJSON.GetAllocator());
+			dHash.SetString(savestateHookBlock->dHash.c_str(), strlen(savestateHookBlock->dHash.c_str()), settingsJSON.GetAllocator());
 
 			rapidjson::Value screenshot;
 			wxString screenshotPath = screenshotFileName.GetFullPath();
-			savestateHookPath.SetString(screenshotPath.c_str(), strlen(screenshotPath.c_str()), settingsJSON.GetAllocator());
+			screenshot.SetString(screenshotPath.c_str(), strlen(screenshotPath.c_str()), settingsJSON.GetAllocator());
 
-			savestateHookJSON.AddMember("filename", savestateHookPath, settingsJSON.GetAllocator());
+			savestateHookJSON.AddMember("filename", savestateHook, settingsJSON.GetAllocator());
 			savestateHookJSON.AddMember("index", savestateHookIndex, settingsJSON.GetAllocator());
 			savestateHookJSON.AddMember("dHash", dHash, settingsJSON.GetAllocator());
 			savestateHookJSON.AddMember("screenshot", screenshot, settingsJSON.GetAllocator());
@@ -365,71 +364,62 @@ ProjectHandlerWindow::ProjectHandlerWindow(std::shared_ptr<ProjectHandler> projH
 }
 
 void ProjectHandlerWindow::onClickProject(wxCommandEvent& event) {
-#ifdef __WXGTK__
-	if(!projectListFirstTime) {
-#endif
-		rapidjson::GenericArray<false, rapidjson::Value> recentProjectsArray = projectHandler->getRecentProjects();
-		int selectedProject                                                  = event.GetInt();
-		if(selectedProject == recentProjectsArray.Size()) {
-			// Open up a load project dialog
-			wxDirDialog dlg(NULL, "Choose Project Directory", "", wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
-			if(dlg.ShowModal() == wxID_OK) {
-				projectHandler->setProjectDir(dlg.GetPath());
-				projectHandler->setRecentProjectChoice(-1);
-				projectHandler->setProjectName("Unnamed");
-				projectChosen       = true;
-				wasClosedForcefully = false;
+	rapidjson::GenericArray<false, rapidjson::Value> recentProjectsArray = projectHandler->getRecentProjects();
+	int selectedProject                                                  = event.GetInt();
+	if(selectedProject == recentProjectsArray.Size()) {
+		// Open up a load project dialog
+		wxDirDialog dlg(NULL, "Choose Project Directory", "", wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
+		if(dlg.ShowModal() == wxID_OK) {
+			projectHandler->setProjectDir(dlg.GetPath());
+			projectHandler->setRecentProjectChoice(-1);
+			projectHandler->setProjectName("Unnamed");
+			projectChosen       = true;
+			wasClosedForcefully = false;
 
-				projectHandler->loadProject();
-				Close(true);
-			} else {
-				projectList->Deselect(selectedProject);
-			}
-		} else if(selectedProject == recentProjectsArray.Size() + 1) {
-			// Open up a new project dialog
-			wxDirDialog dlg(NULL, "Choose Project Directory", "", wxDD_DEFAULT_STYLE);
-			if(dlg.ShowModal() == wxID_OK) {
-				projectHandler->setProjectDir(dlg.GetPath());
-				projectHandler->setRecentProjectChoice(-1);
-				projectHandler->setProjectName("Unnamed");
-				projectChosen       = true;
-				wasClosedForcefully = false;
-
-				isNewProject = true;
-
-				Close(true);
-			} else {
-				projectList->Deselect(selectedProject);
-			}
+			projectHandler->loadProject();
+			Close(true);
 		} else {
-			// It's a project folder
-			wxFileName dir(recentProjectsArray[selectedProject]["projectDirectory"].GetString());
-			if(dir.DirExists()) {
-				projectHandler->setProjectDir(dir.GetFullPath());
-				projectHandler->setRecentProjectChoice(selectedProject);
-				projectHandler->setProjectName(std::string(recentProjectsArray[selectedProject]["projectName"].GetString()));
-				projectChosen       = true;
-				wasClosedForcefully = false;
+			projectList->Deselect(selectedProject);
+		}
+	} else if(selectedProject == recentProjectsArray.Size() + 1) {
+		// Open up a new project dialog
+		wxDirDialog dlg(NULL, "Choose Project Directory", "", wxDD_DEFAULT_STYLE);
+		if(dlg.ShowModal() == wxID_OK) {
+			projectHandler->setProjectDir(dlg.GetPath());
+			projectHandler->setRecentProjectChoice(-1);
+			projectHandler->setProjectName("Unnamed");
+			projectChosen       = true;
+			wasClosedForcefully = false;
 
-				projectHandler->loadProject();
-				Close(true);
-			} else {
-				// This dir doesn't exist, ask the user about it
-				wxMessageDialog deleteDialog(this, "This directory doesn't exist, should it be removed from the recent projects list?", "Delete recent project entry", wxYES_NO | wxCANCEL | wxNO_DEFAULT | wxICON_ERROR);
-				int res = deleteDialog.ShowModal();
-				projectList->Deselect(selectedProject);
-				if(res == wxID_YES) {
-					// Delete the entry
-					projectList->Delete(selectedProject);
-					projectList->Refresh();
-					projectHandler->removeRecentProject(selectedProject);
-				}
+			isNewProject = true;
+
+			Close(true);
+		} else {
+			projectList->Deselect(selectedProject);
+		}
+	} else {
+		// It's a project folder
+		wxFileName dir(recentProjectsArray[selectedProject]["projectDirectory"].GetString());
+		if(dir.DirExists()) {
+			projectHandler->setProjectDir(dir.GetFullPath());
+			projectHandler->setRecentProjectChoice(selectedProject);
+			projectHandler->setProjectName(std::string(recentProjectsArray[selectedProject]["projectName"].GetString()));
+			projectChosen       = true;
+			wasClosedForcefully = false;
+
+			projectHandler->loadProject();
+			Close(true);
+		} else {
+			// This dir doesn't exist, ask the user about it
+			wxMessageDialog deleteDialog(this, "This directory doesn't exist, should it be removed from the recent projects list?", "Delete recent project entry", wxYES_NO | wxCANCEL | wxNO_DEFAULT | wxICON_ERROR);
+			int res = deleteDialog.ShowModal();
+			projectList->Deselect(selectedProject);
+			if(res == wxID_YES) {
+				// Delete the entry
+				projectList->Delete(selectedProject);
+				projectList->Refresh();
+				projectHandler->removeRecentProject(selectedProject);
 			}
 		}
-#ifdef __WXGTK__
-	} else {
-		projectList->Deselect(0);
-		projectListFirstTime = false;
 	}
-#endif
 }

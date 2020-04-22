@@ -25,7 +25,6 @@
 #include <wx/wx.h>
 
 #include "../../sharedNetworkCode/networkInterface.hpp"
-#include "../ui/savestateSelection.hpp"
 #include "buttonConstants.hpp"
 #include "buttonData.hpp"
 

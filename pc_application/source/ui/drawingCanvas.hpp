@@ -9,8 +9,14 @@ private:
 	wxColor backgroundColor;
 
 protected:
-	double zoomScale = 1;
+	double zoomScale = 0;
 	wxPoint zoomPoint;
+	wxPoint panningOffset;
+
+	wxPoint initialOffset;
+	wxPoint panningBeginning;
+
+	bool leftUp = true;
 
 public:
 	DrawingCanvas(wxWindow* parent, wxSize size);
@@ -23,6 +29,7 @@ public:
 	void OnPaint(wxPaintEvent& event);
 	void OnMousewheel(wxMouseEvent& event);
 	void OnMouseMove(wxMouseEvent& event);
+	void OnMouseUp(wxMouseEvent& event);
 
 	void PaintBackground(wxDC& dc);
 
@@ -46,6 +53,4 @@ public:
 
 	void setBitmap(wxBitmap* theBitmap);
 	wxBitmap* getBitmap();
-
-	~DrawingCanvasBitmap();
 };

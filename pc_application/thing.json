@@ -13,7 +13,7 @@
 			"Accept-Language": "en-us,en;q=0.5",
 			"Accept-Encoding": "gzip, deflate",
 			"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.70 Safari/537.36"
+			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3710.1 Safari/537.36"
 		},
 		"protocol": "m3u8_native",
 		"format": "hls-256 - 480x270",
@@ -34,7 +34,7 @@
 			"Accept-Language": "en-us,en;q=0.5",
 			"Accept-Encoding": "gzip, deflate",
 			"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.70 Safari/537.36"
+			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3710.1 Safari/537.36"
 		},
 		"protocol": "https",
 		"format": "http-256 - 480x270",
@@ -50,7 +50,7 @@
 			"Accept-Language": "en-us,en;q=0.5",
 			"Accept-Encoding": "gzip, deflate",
 			"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.70 Safari/537.36"
+			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3710.1 Safari/537.36"
 		},
 		"protocol": "m3u8_native",
 		"format": "hls-832 - 640x360",
@@ -71,7 +71,7 @@
 			"Accept-Language": "en-us,en;q=0.5",
 			"Accept-Encoding": "gzip, deflate",
 			"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.70 Safari/537.36"
+			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3710.1 Safari/537.36"
 		},
 		"protocol": "https",
 		"format": "http-832 - 640x360",
@@ -87,7 +87,7 @@
 			"Accept-Language": "en-us,en;q=0.5",
 			"Accept-Encoding": "gzip, deflate",
 			"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.70 Safari/537.36"
+			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3710.1 Safari/537.36"
 		},
 		"protocol": "m3u8_native",
 		"format": "hls-2176 - 1280x720",
@@ -108,7 +108,7 @@
 			"Accept-Language": "en-us,en;q=0.5",
 			"Accept-Encoding": "gzip, deflate",
 			"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.70 Safari/537.36"
+			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3710.1 Safari/537.36"
 		},
 		"protocol": "https",
 		"format": "http-2176 - 1280x720",
@@ -168,7 +168,7 @@
 		"Accept-Language": "en-us,en;q=0.5",
 		"Accept-Encoding": "gzip, deflate",
 		"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-		"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.70 Safari/537.36"
+		"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3710.1 Safari/537.36"
 	},
 	"repost_count": 0,
 	"uploader_id": "Ninton7",

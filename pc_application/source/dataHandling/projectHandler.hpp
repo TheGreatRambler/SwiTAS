@@ -125,10 +125,6 @@ private:
 
 	bool projectChosen = false;
 
-#ifdef __WXGTK__
-	bool projectListFirstTime = true;
-#endif
-
 	void onClickProject(wxCommandEvent& event);
 
 public:
