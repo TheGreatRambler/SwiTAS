@@ -79,7 +79,7 @@ void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>
 		LOGD << "Create mem dest";
 
 		// HANGS RIGHT HERE
-		jpeg_start_compress(&cinfo, TRUE);
+		jpeg_start_compress(&cinfo, true);
 
 		LOGD << "Start compress";
 

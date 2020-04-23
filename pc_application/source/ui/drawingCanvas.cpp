@@ -110,6 +110,11 @@ void DrawingCanvasBitmap::setBitmap(wxBitmap* theBitmap) {
 	}
 	// Select the new one
 	bitmap = theBitmap;
+
+	zoomScale        = 0;
+	panningOffset    = wxPoint(0, 0);
+	panningBeginning = wxPoint(0, 0);
+
 	Refresh();
 }
 
