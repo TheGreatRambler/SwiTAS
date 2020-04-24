@@ -28,13 +28,14 @@ VideoComparisonViewer::VideoComparisonViewer(wxFrame* parent, std::function<void
 	inputSizer->Add(frameSelect, 1);
 	inputSizer->Add(frameSlider, 1);
 
-	consoleLog = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
+	consoleLog  = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
+	videoCanvas = new DrawingCanvasBitmap(this, wxSize(1, 1));
 
 	urlInput->Bind(wxEVT_TEXT_ENTER, &VideoComparisonViewer::displayVideoFormats, this);
+	urlInput->Bind(wxEVT_ENTER_WINDOW, &VideoComparisonViewer::onEnterUrl, this);
+	videoCanvas->Bind(wxEVT_ENTER_WINDOW, &VideoComparisonViewer::onEnterVideo, this);
 	videoFormatsList->Bind(wxEVT_LISTBOX, &VideoComparisonViewer::onFormatSelection, this);
 	Bind(wxEVT_END_PROCESS, &VideoComparisonViewer::onCommandDone, this);
-
-	videoCanvas = new DrawingCanvasBitmap(this, wxSize(1, 1));
 
 	mainSizer->Add(urlInput, 0, wxEXPAND | wxALL);
 	mainSizer->Add(videoFormatsList, 2, wxEXPAND | wxALL);
@@ -250,6 +251,8 @@ void VideoComparisonViewer::openWithRecent(int index) {
 
 	wxCommandEvent fakeCommandEvent;
 	displayVideoFormats(fakeCommandEvent);
+	videoFormatsList->Show(false);
+	Layout();
 
 	indexVideo();
 }

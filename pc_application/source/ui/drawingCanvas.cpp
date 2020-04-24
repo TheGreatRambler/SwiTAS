@@ -86,14 +86,15 @@ void DrawingCanvasBitmap::draw(wxDC& dc) {
 		double scale = (double)windowSize.GetWidth() / bitmap->GetWidth();
 
 		// https://forums.wxwidgets.org/viewtopic.php?f=1&t=46751&p=196414#p196414
-		double currentScale = scale * std::exp(zoomScale);
+		double secondaryScale = std::exp(zoomScale);
+		double currentScale   = scale * secondaryScale;
 		// double lastScale    = std::exp(scale * lastZoomScale);
 
 		dc.SetUserScale(currentScale, currentScale);
 		if(zoomPoint != wxDefaultPosition) {
 			wxPoint zoomOffsetPoint = (zoomPoint - dc.GetDeviceOrigin());
 
-			wxPoint imageCorner = zoomPoint - zoomOffsetPoint * currentScale;
+			wxPoint imageCorner = zoomPoint - zoomOffsetPoint * secondaryScale;
 			wxPoint origin      = imageCorner + panningOffset;
 
 			dc.SetDeviceOrigin(origin.x, origin.y);
@@ -111,9 +112,9 @@ void DrawingCanvasBitmap::setBitmap(wxBitmap* theBitmap) {
 	// Select the new one
 	bitmap = theBitmap;
 
-	zoomScale        = 0;
-	panningOffset    = wxPoint(0, 0);
-	panningBeginning = wxPoint(0, 0);
+	// zoomScale        = 0;
+	// panningOffset    = wxPoint(0, 0);
+	// panningBeginning = wxPoint(0, 0);
 
 	Refresh();
 }

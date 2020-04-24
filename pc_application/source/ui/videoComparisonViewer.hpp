@@ -134,6 +134,15 @@ private:
 	void onIdle(wxIdleEvent& event);
 	void onClose(wxCloseEvent& event);
 
+	void onEnterVideo(wxMouseEvent& event) {
+		videoFormatsList->Show(false);
+		Layout();
+	}
+	void onEnterUrl(wxMouseEvent& event) {
+		videoFormatsList->Show(true);
+		Layout();
+	}
+
 public:
 	VideoComparisonViewer(wxFrame* parent, std::function<void(VideoComparisonViewer*)> callback, rapidjson::Document* settings, std::vector<std::shared_ptr<VideoEntry>>& entries, wxString projectDirectory);
 
