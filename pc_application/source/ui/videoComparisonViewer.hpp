@@ -67,6 +67,7 @@ private:
 
 	wxBoxSizer* mainSizer;
 	wxBoxSizer* inputSizer;
+	wxBoxSizer* urlSizer;
 
 	wxSpinCtrl* frameSelect;
 	wxSlider* frameSlider;
@@ -78,6 +79,8 @@ private:
 	wxListBox* videoFormatsList;
 
 	wxTextCtrl* consoleLog;
+
+	wxBitmapButton* trashVideo;
 
 	std::string videoName;
 	std::string videoFilename;
@@ -133,6 +136,8 @@ private:
 
 	void onIdle(wxIdleEvent& event);
 	void onClose(wxCloseEvent& event);
+
+	void onTrashVideo(wxCommandEvent& event);
 
 	void onEnterVideo(wxMouseEvent& event) {
 		videoFormatsList->Show(false);

@@ -61,23 +61,22 @@ wxBitmapButton* HELPERS::getBitmapButton(wxWindow* parentFrame, rapidjson::Docum
 	return new wxBitmapButton(parentFrame, wxID_ANY, *(new wxBitmap(resizedImage)));
 }
 
+wxBitmapButton* HELPERS::getSystemBitmapButton(wxWindow* parentFrame, wxArtID id) {
+	return new wxBitmapButton(parentFrame, wxID_ANY, wxArtProvider::GetBitmap(id));
+}
+
+void HELPERS::addDarkmodeWindows(wxWindow* window) {
+#ifdef _WIN32
+	// Enable dark mode, super experimential, apparently
+	// needs to be applied to every window, however
+	SetWindowTheme(window->GetHWND(), L"DarkMode_Explorer", NULL);
+	window->Refresh();
+#endif
+}
+
 // https://stackoverflow.com/a/478960/9329945
 // Executes command and gets output
 std::string HELPERS::exec(const char* cmd) {
-	/*
-	std::array<char, 128> buffer;
-	std::string result;
-	std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
-	if(!pipe) {
-		throw std::runtime_error("popen() failed!");
-	}
-	while(fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
-		result += buffer.data();
-	}
-	// Remove trailing newline
-	result.pop_back();
-	return result;
-	*/
 	wxArrayString outputArray;
 	long resultCode = wxExecute(cmd, outputArray, wxEXEC_HIDE_CONSOLE);
 

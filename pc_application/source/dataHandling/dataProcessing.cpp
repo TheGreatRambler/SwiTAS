@@ -64,11 +64,11 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	entries[1].Set(wxACCEL_CTRL, (int)'X', wxID_CUT, editMenu.Append(wxID_CUT, wxT("&Cut\tCtrl+X")));
 	entries[2].Set(wxACCEL_CTRL, (int)'V', wxID_PASTE, editMenu.Append(wxID_PASTE, wxT("&Paste\tCtrl+V")));
 	entries[3].Set(wxACCEL_CTRL | wxACCEL_SHIFT, (int)'V', pasteInsertID, editMenu.Append(pasteInsertID, wxT("&Paste Insert\tCtrl+Shift+V")));
-	entries[4].Set(wxACCEL_CTRL | wxACCEL_ALT, (int)'V', pastePlaceID, editMenu.Append(pasteInsertID, wxT("&Paste Place\tCtrl+Alt+V")));
+	entries[4].Set(wxACCEL_CTRL | wxACCEL_ALT, (int)'V', pastePlaceID, editMenu.Append(pastePlaceID, wxT("&Paste Place\tCtrl+Alt+V")));
 
 	entries[5].Set(wxACCEL_CTRL, (int)'=', addFrameID, editMenu.Append(addFrameID, wxT("&Add Frame\tCtrl+Plus")));
 	entries[6].Set(wxACCEL_CTRL, WXK_RIGHT, frameAdvanceID, editMenu.Append(frameAdvanceID, wxT("&Frame Advance\tCtrl+Right")));
-	entries[7].Set(wxACCEL_CTRL, (int)'H', savestateID, editMenu.Append(savestateID, wxT("&Add Savestate Hook\tCtrl+H")));
+	entries[7].Set(wxACCEL_CTRL, (int)'H', savestateID, editMenu.Append(savestateID, wxT("&Add Savestate\tCtrl+H")));
 
 	wxAcceleratorTable accel(8, entries);
 	SetAcceleratorTable(accel);
@@ -334,6 +334,7 @@ void DataProcessing::onFrameAdvance(wxCommandEvent& event) {
 }
 
 void DataProcessing::onAddSavestate(wxCommandEvent& event) {
+	// NEEDS WORK
 	createSavestateHere();
 }
 
@@ -357,6 +358,7 @@ void DataProcessing::setCurrentFrame(FrameNum frameNum) {
 
 // THIS NEEDS TO CHANGE COMPLETELY
 void DataProcessing::createSavestateHere() {
+	// NEEDS WORK
 	// Add one savestate hook at this frame
 	savestates[currentFrame] = std::make_shared<Savestate>();
 	// Set the style of this frame

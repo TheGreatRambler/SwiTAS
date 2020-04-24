@@ -8,7 +8,7 @@ for /R %%f in (*.svg) do if not "%%~f" == inputicons.svg (
       -z ^
 	  --export-background="rgb(48,0,77)" ^
       --export-background-opacity=255 ^
-      --export-height=100 ^
+      --export-height=300 ^
       --export-png="%%~dpnf.png" ^
       --file="%%~f"
 )

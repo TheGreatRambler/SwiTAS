@@ -54,6 +54,8 @@ MainWindow::MainWindow()
 
 	projectHandler = std::make_shared<ProjectHandler>(this, dataProcessingInstance, &mainSettings);
 
+	HELPERS::addDarkmodeWindows(this);
+
 	// Add the top menubar and the bottom statusbar
 	addStatusBar();
 	addMenuBar();
@@ -64,13 +66,6 @@ MainWindow::MainWindow()
 	Layout();
 	Fit();
 	Center(wxBOTH);
-
-#ifdef _WIN32
-	// Enable dark mode, super experimential, apparently
-	// needs to be applied to every window, however
-	SetWindowTheme(GetHWND(), L"DarkMode_Explorer", NULL);
-	Refresh();
-#endif
 
 	// Override the keypress handler
 	// add_events(Gdk::KEY_PRESS_MASK);

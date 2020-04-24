@@ -113,6 +113,7 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* 
 	inputsViewSizer->Add(frameDrawer, 1, wxEXPAND | wxALL);
 
 	inputData->SetMinSize(wxSize(0, 0));
+	HELPERS::addDarkmodeWindows(inputData);
 	inputsViewSizer->Add(inputData, 5, wxEXPAND | wxALL);
 
 	verticalBoxSizer->Add(inputsViewSizer, 1, wxEXPAND | wxALL);

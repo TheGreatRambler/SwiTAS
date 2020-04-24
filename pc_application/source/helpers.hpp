@@ -2,6 +2,10 @@
 
 #define _USE_MATH_DEFINES
 
+#ifdef _WIN32
+#include <Windows.h>
+#include <uxtheme.h>
+#endif
 #include <array>
 #include <cmath>
 #include <cstdint>
@@ -17,6 +21,7 @@
 #include <unistd.h>
 #include <vector>
 #include <wx/arrstr.h>
+#include <wx/artprov.h>
 #include <wx/filename.h>
 #include <wx/mstream.h>
 #include <wx/wx.h>
@@ -28,6 +33,9 @@ namespace HELPERS {
 	std::string joinString(std::vector<std::string> strings, std::string delimiter);
 
 	wxBitmapButton* getBitmapButton(wxWindow* parentFrame, rapidjson::Document* settings, const char* name);
+	wxBitmapButton* getSystemBitmapButton(wxWindow* parentFrame, wxArtID id);
+
+	void addDarkmodeWindows(wxWindow* window);
 
 	rapidjson::Document getSettingsFile(std::string filename);
 	rapidjson::Document getSettingsFromString(std::string jsonString);

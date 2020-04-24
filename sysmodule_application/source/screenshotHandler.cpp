@@ -197,7 +197,7 @@ void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>
 		// Now that JPEG and dhash are done, send them both back
 		hash->assign(convertToHexString(dhash, sizeOfDhash));
 		jpegBuffer->resize(jpegSize);
-		memcpy(&(jpegBuffer->data[0]), jpegBuf, jpegSize);
+		memcpy(jpegBuffer->data(), jpegBuf, jpegSize);
 
 		jpeg_destroy_compress(&cinfo);
 	} else {

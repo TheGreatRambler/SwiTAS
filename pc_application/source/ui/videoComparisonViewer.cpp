@@ -14,8 +14,10 @@ VideoComparisonViewer::VideoComparisonViewer(wxFrame* parent, std::function<void
 	ffms2Errinfo.SubType    = FFMS_ERROR_SUCCESS;
 
 	mainSizer = new wxBoxSizer(wxVERTICAL);
+	urlSizer  = new wxBoxSizer(wxHORIZONTAL);
 
 	urlInput         = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER | wxTE_CENTRE);
+	trashVideo       = HELPERS::getSystemBitmapButton(this, wxART_DELETE);
 	videoFormatsList = new wxListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_SINGLE);
 
 	inputSizer  = new wxBoxSizer(wxHORIZONTAL);
@@ -32,22 +34,25 @@ VideoComparisonViewer::VideoComparisonViewer(wxFrame* parent, std::function<void
 	videoCanvas = new DrawingCanvasBitmap(this, wxSize(1, 1));
 
 	urlInput->Bind(wxEVT_TEXT_ENTER, &VideoComparisonViewer::displayVideoFormats, this);
+	trashVideo->Bind(wxEVT_BUTTON, &VideoComparisonViewer::onTrashVideo, this);
 	urlInput->Bind(wxEVT_ENTER_WINDOW, &VideoComparisonViewer::onEnterUrl, this);
 	videoCanvas->Bind(wxEVT_ENTER_WINDOW, &VideoComparisonViewer::onEnterVideo, this);
 	videoFormatsList->Bind(wxEVT_LISTBOX, &VideoComparisonViewer::onFormatSelection, this);
 	Bind(wxEVT_END_PROCESS, &VideoComparisonViewer::onCommandDone, this);
 
-	mainSizer->Add(urlInput, 0, wxEXPAND | wxALL);
+	urlSizer->Add(urlInput, 0, wxEXPAND | wxALL);
+	urlSizer->Add(trashVideo, 1);
+
+	mainSizer->Add(urlSizer, 0, wxEXPAND | wxALL);
 	mainSizer->Add(videoFormatsList, 2, wxEXPAND | wxALL);
 	mainSizer->Add(consoleLog, 3, wxEXPAND | wxALL);
 	videoCanvasSizerItem = mainSizer->Add(videoCanvas, 0, wxSHAPED | wxEXPAND | wxALIGN_CENTER_HORIZONTAL);
 	mainSizer->Add(inputSizer, 0, wxEXPAND | wxALL);
 
 	// Hide by default
+	trashVideo->Show(false);
 	videoFormatsList->Show(false);
-	consoleLog->Show(true);
 	videoCanvas->Show(false);
-	Layout();
 
 	SetSizer(mainSizer);
 	mainSizer->SetSizeHints(this);
@@ -61,6 +66,7 @@ VideoComparisonViewer::VideoComparisonViewer(wxFrame* parent, std::function<void
 // clang-format off
 BEGIN_EVENT_TABLE(VideoComparisonViewer, wxFrame)
 	EVT_IDLE(VideoComparisonViewer::onIdle)
+	EVT_CLOSE(VideoComparisonViewer::onClose)
 END_EVENT_TABLE()
 // clang-format on
 
@@ -88,22 +94,19 @@ void VideoComparisonViewer::onIdle(wxIdleEvent& event) {
 }
 
 void VideoComparisonViewer::onClose(wxCloseEvent& event) {
-	// Help MainWindow delete this window
-	/*
-	for(std::size_t i = 0; i < parentWindow->videoComparisonViewers.size(); i++) {
-		// If this is the window, remove it from the list
-		if(parentWindow->videoComparisonViewers[i] == this) {
-			parentWindow->videoComparisonViewers.erase(parentWindow->videoComparisonViewers.begin() + i);
-			break;
-		}
-	}
-	*/
-
 	FFMS_DestroyVideoSource(videosource);
 
 	closeCallback(this);
 
 	Destroy();
+}
+
+void VideoComparisonViewer::onTrashVideo(wxCommandEvent& event) {
+	remove(videoEntries[recentVideoIndex]->videoPath.c_str());
+	remove(videoEntries[recentVideoIndex]->videoIndexerPath.c_str());
+	videoEntries.erase(videoEntries.begin() + recentVideoIndex);
+
+	Close(true);
 }
 
 void VideoComparisonViewer::onCommandDone(wxProcessEvent& event) {
@@ -119,6 +122,10 @@ void VideoComparisonViewer::onCommandDone(wxProcessEvent& event) {
 
 void VideoComparisonViewer::displayVideoFormats(wxCommandEvent& event) {
 	url = urlInput->GetLineText(0).ToStdString();
+
+	trashVideo->Show(false);
+	Layout();
+
 	// All these commands will block, which could be a problem for bad internet connections
 	std::string videoCheck = HELPERS::exec(("youtube-dl --get-filename \"" + url + "\"").c_str());
 	if(videoCheck.size() != 0) {
@@ -335,6 +342,11 @@ void VideoComparisonViewer::parseVideo() {
 
 	// Finally, we can let the user change videos if desired
 	processingVideo = false;
+
+	// Let them delete the video if desired
+	trashVideo->Show(true);
+	Layout();
+
 	drawFrame(0);
 }
 

@@ -68,9 +68,9 @@ void ProjectHandler::loadProject() {
 			}
 
 			savestateHook->inputs = block;
-			savestateHook->dHash  = std::string(jsonSettings["savestateBlocks"].GetArray()[index]["dHash"].GetString());
+			savestateHook->dHash  = std::string(savestateBlocksArray[index]["dHash"].GetString());
 
-			wxImage screenshotImage(projectDir.GetNameWithSep() + wxString::FromUTF8(jsonSettings["savestateBlocks"].GetArray()[index]["screenshot"].GetString()), wxBITMAP_TYPE_JPEG);
+			wxImage screenshotImage(projectDir.GetNameWithSep() + wxString::FromUTF8(savestateBlocksArray[index]["screenshot"].GetString()), wxBITMAP_TYPE_JPEG);
 			savestateHook->screenshot = new wxBitmap(screenshotImage);
 
 			savestateHookBlocks[index] = savestateHook;
@@ -111,12 +111,10 @@ void ProjectHandler::saveProject() {
 			wxFileName inputsFilename = getProjectStart();
 			inputsFilename.SetName(wxString::Format("savestate_block_%lld", index));
 			inputsFilename.SetExt("bin");
-			inputsFilename.MakeRelativeTo(getProjectStart().GetFullPath());
 
 			wxFileName screenshotFileName = getProjectStart();
 			screenshotFileName.SetName(wxString::Format("savestate_block_%lld_screenshot", index));
 			screenshotFileName.SetExt("jpg");
-			screenshotFileName.MakeRelativeTo(getProjectStart().GetFullPath());
 
 			savestateHookBlock->screenshot->SaveFile(screenshotFileName.GetFullPath(), wxBITMAP_TYPE_JPEG);
 
@@ -141,6 +139,8 @@ void ProjectHandler::saveProject() {
 
 			// Add the item in the savestateHooks JSON
 			rapidjson::Value savestateHookJSON(rapidjson::kObjectType);
+			inputsFilename.MakeRelativeTo(getProjectStart().GetFullPath());
+			screenshotFileName.MakeRelativeTo(getProjectStart().GetFullPath());
 
 			rapidjson::Value savestateHook;
 			wxString savestateHookPath = inputsFilename.GetFullPath();

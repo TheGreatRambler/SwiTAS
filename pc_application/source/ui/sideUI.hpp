@@ -60,8 +60,6 @@ private:
 	// Input instance to get inputs and such
 	DataProcessing* inputData;
 
-	bool shouldIgnorePageChange = false;
-
 	void onAddFramePressed(wxCommandEvent& event);
 	void onFrameAdvancePressed(wxCommandEvent& event);
 	void onSavestateHookCreatePressed(wxCommandEvent& event);
