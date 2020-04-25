@@ -40,8 +40,8 @@ VideoComparisonViewer::VideoComparisonViewer(wxFrame* parent, std::function<void
 	videoFormatsList->Bind(wxEVT_LISTBOX, &VideoComparisonViewer::onFormatSelection, this);
 	Bind(wxEVT_END_PROCESS, &VideoComparisonViewer::onCommandDone, this);
 
-	urlSizer->Add(urlInput, 0, wxEXPAND | wxALL);
-	urlSizer->Add(trashVideo, 1);
+	urlSizer->Add(urlInput, 1, wxEXPAND | wxALL);
+	urlSizer->Add(trashVideo, 0);
 
 	mainSizer->Add(urlSizer, 0, wxEXPAND | wxALL);
 	mainSizer->Add(videoFormatsList, 2, wxEXPAND | wxALL);
@@ -102,8 +102,10 @@ void VideoComparisonViewer::onClose(wxCloseEvent& event) {
 }
 
 void VideoComparisonViewer::onTrashVideo(wxCommandEvent& event) {
-	remove(videoEntries[recentVideoIndex]->videoPath.c_str());
-	remove(videoEntries[recentVideoIndex]->videoIndexerPath.c_str());
+	const char* videoPath        = videoEntries[recentVideoIndex]->videoPath.c_str();
+	const char* videoIndexerPath = videoEntries[recentVideoIndex]->videoIndexerPath.c_str();
+	remove(videoPath);
+	remove(videoIndexerPath);
 	videoEntries.erase(videoEntries.begin() + recentVideoIndex);
 
 	Close(true);
@@ -163,7 +165,7 @@ void VideoComparisonViewer::displayVideoFormats(wxCommandEvent& event) {
 						continue;
 					}
 
-					// Assume fps is 60 if it is not present
+					// Assume fps is 30 if it is not present
 					int fps                    = (format.HasMember("fps") && format["fps"].IsInt()) ? format["fps"].GetInt() : 60;
 					wxString formatItem        = wxString::Format("%dx%d, %d fps", width, height, fps);
 					wxString compactFormatItem = wxString::Format("%dx%d-%dfps", width, height, fps);
@@ -221,8 +223,6 @@ void VideoComparisonViewer::onFormatSelection(wxCommandEvent& event) {
 
 			fullVideoPath        = projectDir.ToStdString() + "/videos/" + formatsMetadataArray[selectedFormatIndex] + "-" + videoFilename;
 			fullVideoIndexerPath = projectDir.ToStdString() + "/videos/" + formatsMetadataArray[selectedFormatIndex] + "-Indexer-" + videoFilename + ".bin";
-
-			addToRecentVideoList();
 
 			// Streaming download from youtube-dl
 			commandProcess = new wxProcess(this);
@@ -287,6 +287,8 @@ void VideoComparisonViewer::indexVideo() {
 		}
 		consoleLog->AppendText("Finish indexing video\n");
 
+		// Finally, add to recent videos list and set the index to an actual one
+		addToRecentVideoList();
 		parseVideo();
 	} else {
 		// Read index from disk
@@ -360,6 +362,7 @@ void VideoComparisonViewer::addToRecentVideoList() {
 	videoEntry->videoPath        = fullVideoPath;
 	videoEntry->videoIndexerPath = fullVideoIndexerPath;
 
+	recentVideoIndex = videoEntries.size();
 	videoEntries.push_back(videoEntry);
 }
 

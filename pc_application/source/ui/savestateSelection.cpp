@@ -7,27 +7,28 @@ SavestateLister::SavestateLister(DataProcessing* input)
 	mainSizer = new wxBoxSizer(wxVERTICAL);
 
 	// 3 columns
-	projectList       = new wxGridSizer(3);
+	projectList       = new wxWrapSizer(wxVERTICAL);
 	projectListHolder = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize);
 
 	// Add each individual savestate hook for viewing
-	int i = 0;
 	for(auto const& savestateHook : inputInstance->getAllSavestateHookBlocks()) {
 		wxBoxSizer* dataSizer = new wxBoxSizer(wxVERTICAL);
 
 		wxStaticText* dHash = new wxStaticText(this, wxID_ANY, wxString::FromUTF8(savestateHook->dHash), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
 
-		wxBitmap* screenshot               = savestateHook->screenshot;
-		DrawingCanvasBitmap* drawingCanvas = new DrawingCanvasBitmap(this, wxSize(1280, 720));
+		wxBitmap* screenshot = savestateHook->screenshot;
+		// Size is reduced by 4 so the bitmap isn't massive
+		DrawingCanvasBitmap* drawingCanvas = new DrawingCanvasBitmap(this, wxSize(1280 / 4, 720 / 4));
 		drawingCanvas->setBitmap(screenshot);
 
-		drawingCanvas->Bind(wxEVT_LEFT_DOWN, &SavestateLister::onSavestateHookSelect, this, wxID_ANY, wxID_ANY, (wxObject*)new int(i));
+		savestateScreenshots.push_back(drawingCanvas);
+
+		drawingCanvas->Bind(wxEVT_LEFT_DOWN, &SavestateLister::onSavestateHookSelect, this);
 
 		dataSizer->Add(dHash, 1);
 		dataSizer->Add(drawingCanvas, 0, wxSHAPED);
 
 		projectList->Add(dataSizer, 1);
-		i++;
 	}
 
 	projectListHolder->SetSizer(projectList);
@@ -44,10 +45,15 @@ SavestateLister::SavestateLister(DataProcessing* input)
 }
 
 void SavestateLister::onSavestateHookSelect(wxMouseEvent& event) {
-	int index           = *((int*)event.GetEventUserData());
-	selectedSavestate   = index;
-	operationSuccessful = true;
-	Close(true);
+	DrawingCanvasBitmap* drawingCanvas = (DrawingCanvasBitmap*)event.GetEventObject();
+	for(std::size_t i = 0; i < savestateScreenshots.size(); i++) {
+		if(drawingCanvas == savestateScreenshots[i]) {
+			selectedSavestate   = i;
+			operationSuccessful = true;
+			Close(true);
+			break;
+		}
+	}
 }
 
 SavestateSelection::SavestateSelection(rapidjson::Document* settings, bool isSavestateLoadDialog, std::shared_ptr<CommunicateWithNetwork> networkImp)
@@ -89,10 +95,11 @@ SavestateSelection::SavestateSelection(rapidjson::Document* settings, bool isSav
 	frameAdvanceButton->Bind(wxEVT_BUTTON, &SavestateSelection::onFrameAdvance, this);
 	okButton->Bind(wxEVT_BUTTON, &SavestateSelection::onOk, this);
 
-	currentFrame = new DrawingCanvasBitmap(this, wxSize(1280, 720));
+	// Divide by two because it's usually too big
+	currentFrame = new DrawingCanvasBitmap(this, wxSize(1280 / 2, 720 / 2));
 	if(savestateLoadDialog) {
 		// Otherwise, just show the frame to save on
-		goalFrame = new DrawingCanvasBitmap(this, wxSize(1280, 720));
+		goalFrame = new DrawingCanvasBitmap(this, wxSize(1280 / 2, 720 / 2));
 	}
 
 	leftImageSizer->Add(currentFrame, 0, wxSHAPED);

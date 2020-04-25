@@ -170,7 +170,7 @@ bool SideUI::createSavestateHook() {
 	}
 }
 
-bool SideUI::loadSavestateHook(SavestateBlockNum block) {
+bool SideUI::loadSavestateHook(int block) {
 	std::shared_ptr<SavestateHook> savestateHook = inputData->getAllSavestateHookBlocks()[block];
 
 	SavestateSelection savestateSelection(mainSettings, true, networkInterface);

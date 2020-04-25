@@ -9,6 +9,7 @@ RunLuaScript::RunLuaScript(std::shared_ptr<ProjectHandler> projHandler, std::sha
 
 	luaState["dataProcessing"] = inputInstance;
 
+	// http://www.fceux.com/web/help/fceux.html?LuaScripting.html
 	// https://github.com/ThePhD/sol2/blob/develop/examples/source/tutorials/quick_n_dirty/userdata_memory_reference.cpp
 	// Enable dataProcessing as a lua type, TODO add public calls for lua to use
 	// luaState.new_usertype<DataProcessing>("DataProcessing",

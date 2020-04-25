@@ -5,6 +5,7 @@
 #include <wx/scrolwin.h>
 #include <wx/spinctrl.h>
 #include <wx/utils.h>
+#include <wx/wrapsizer.h>
 #include <wx/wx.h>
 
 #include "../../sharedNetworkCode/networkInterface.hpp"
@@ -17,9 +18,11 @@ class SavestateLister : public wxDialog {
 private:
 	wxBoxSizer* mainSizer;
 
-	wxGridSizer* projectList;
+	wxWrapSizer* projectList;
 	wxScrolledWindow* projectListHolder;
 	DataProcessing* inputInstance;
+
+	std::vector<DrawingCanvasBitmap*> savestateScreenshots;
 
 	bool operationSuccessful = false;
 	int selectedSavestate;

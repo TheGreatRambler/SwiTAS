@@ -69,5 +69,5 @@ public:
 	SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* sizer, DataProcessing* input, std::shared_ptr<CommunicateWithNetwork> networkImp);
 
 	bool createSavestateHook();
-	bool loadSavestateHook(SavestateBlockNum block);
+	bool loadSavestateHook(int block);
 };
