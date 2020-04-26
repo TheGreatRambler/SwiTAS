@@ -45,7 +45,6 @@ void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>
 
 	jpeg_compress_struct cinfo;
 	jpeg_error_mgr jerr;
-	long numOfWarnings = 0;
 
 	cinfo.err       = jpeg_std_error(&jerr);
 	jerr.error_exit = [](j_common_ptr cinfo) {
@@ -63,26 +62,24 @@ void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>
 
 	jpeg_create_compress(&cinfo);
 
-	cinfo.image_width  = framebufferWidth;
-	cinfo.image_height = framebufferHeight;
+	// Encode to memory
+	FILE* outfile = fopen(tempScreenshotName, "wb");
+	// unsigned char* jpegBuf;
+	// unsigned long jpegSize;
+	// jpeg_mem_dest(&cinfo, &jpegBuf, &jpegSize);
+	jpeg_stdio_dest(&cinfo, outfile);
 
-	// Save data by actually removing alpha
-	// Present in the framebuffer, but not needed
+	LOGD << "Create mem dest";
+
+	cinfo.image_width      = framebufferWidth;
+	cinfo.image_height     = framebufferHeight;
 	cinfo.input_components = 3;
-	cinfo.in_color_space   = JCS_EXT_RGB;
+	cinfo.in_color_space   = JCS_RGB;
 
 	jpeg_set_defaults(&cinfo);
 	jpeg_set_quality(&cinfo, jpegQuality, true);
 
-	LOGD << "Set defaults";
-
-	// Encode to memory
-	unsigned char* jpegBuf;
-	unsigned long jpegSize;
-
-	jpeg_mem_dest(&cinfo, &jpegBuf, &jpegSize);
-
-	LOGD << "Create mem dest";
+	LOGD << "Set defaults: " << framebufferWidth << " " << framebufferHeight;
 
 	// CRASHES RIGHT HERE
 	jpeg_start_compress(&cinfo, true);
@@ -108,7 +105,6 @@ void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>
 	if(R_SUCCEEDED(rc)) {
 		LOGD << "Debugging VI worked";
 		while(cinfo.next_scanline < cinfo.image_height) {
-			LOGD << "Handle scanline " << cinfo.next_scanline << " of " << cinfo.image_height;
 			// Obtain data for each row
 			for(int yOffset = 0; yOffset < heightOfdhashInput; yOffset++) {
 				for(int x = 0; x < framebufferWidth; x++) {
@@ -138,8 +134,6 @@ void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>
 					row_pointer[yOffset][startDataIndex]     = red;
 					row_pointer[yOffset][startDataIndex + 1] = green;
 					row_pointer[yOffset][startDataIndex + 2] = blue;
-
-					// LOGD << "Color at (" << x << "," << y << "): RGB(" << red << "," << green << "," << blue << ")";
 				}
 			}
 			LOGD << "Successfully obtained dHash chunk at y=" << cinfo.next_scanline;
@@ -196,10 +190,20 @@ void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>
 
 		// Now that JPEG and dhash are done, send them both back
 		hash->assign(convertToHexString(dhash, sizeOfDhash));
-		jpegBuffer->resize(jpegSize);
-		memcpy(jpegBuffer->data(), jpegBuf, jpegSize);
+		// jpegBuffer->resize(jpegSize);
+		// memcpy(jpegBuffer->data(), jpegBuf, jpegSize);
 
 		jpeg_destroy_compress(&cinfo);
+		fclose(outfile);
+
+		// Read all data into memory
+		hash->assign(convertToHexString(dhash, sizeOfDhash));
+
+		jpegBuffer->clear();
+		std::ifstream file(tempScreenshotName, std::ios::binary);
+		std::copy(std::istream_iterator<uint8_t>(file), std::istream_iterator<uint8_t>(), std::back_inserter(*jpegBuffer));
+		file.close();
+		// remove(tempScreenshotName);
 	} else {
 		jpeg_destroy_compress(&cinfo);
 		svcCloseHandle(VIdbg);

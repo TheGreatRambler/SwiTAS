@@ -6,7 +6,11 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
+#include <fstream>
+#include <iterator>
+extern "C" {
 #include <jpeglib.h>
+}
 #include <plog/Log.h>
 #include <string>
 #include <switch.h>
@@ -25,6 +29,8 @@ private:
 	};
 
 	Result rc;
+
+	const char* tempScreenshotName = "/VI_SCREENSHOT_TEMP.jpg";
 
 	u64 VI_pid;
 	// The Title Id of VI (The display manager)
