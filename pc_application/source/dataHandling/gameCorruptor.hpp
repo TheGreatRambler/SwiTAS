@@ -5,6 +5,7 @@
 #include "../../sharedNetworkCode/networkInterface.hpp"
 #include "dataProcessing.hpp"
 #include "projectHandler.hpp"
+#include "../ui/drawingCanvas.hpp"
 
 class GameCorruptor : public wxDialog {
 private:
@@ -13,6 +14,10 @@ private:
 
 	wxBoxSizer* mainSizer;
 
+	void onIdle(wxIdleEvent& event);
+
 public:
 	GameCorruptor(wxWindow* parent, std::shared_ptr<ProjectHandler> projHandler, std::shared_ptr<CommunicateWithNetwork> networkImp);
+
+	DECLARE_EVENT_TABLE();
 };

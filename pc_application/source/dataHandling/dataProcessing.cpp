@@ -330,7 +330,9 @@ void DataProcessing::onAddFrame(wxCommandEvent& event) {
 }
 
 void DataProcessing::onFrameAdvance(wxCommandEvent& event) {
-	runFrame();
+	if(tethered) {
+		runFrame();
+	}
 }
 
 void DataProcessing::onAddSavestate(wxCommandEvent& event) {

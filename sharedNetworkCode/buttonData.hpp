@@ -73,3 +73,25 @@ struct ControllerData : public zpp::serializer::polymorphic {
 		// clang-format on
 	}
 };
+
+// Not button data, but the memory info
+// Mirrors libnx MemoryInfo
+struct GameMemoryInfo {
+	uint64_t addr;            ///< Base address.
+	uint64_t size;            ///< Size.
+	uint32_t type;            ///< Memory type (see lower 8 bits of \ref MemoryState).
+	uint32_t attr;            ///< Memory attributes (see \ref MemoryAttribute).
+	uint32_t perm;            ///< Memory permissions (see \ref Permission).
+	uint32_t device_refcount; ///< Device reference count.
+	uint32_t ipc_refcount;    ///< IPC reference count.
+	uint32_t padding;         ///< Padding.
+
+	friend zpp::serializer::access;
+	template <typename Archive, typename Self> static void serialize(Archive& archive, Self& self) {
+		// clang-format off
+			archive(self.addr, self.size, self.type,
+				self.attr, self.perm, self.device_refcount,
+				ipc_refcount, self.padding);
+		// clang-format on
+	}
+};

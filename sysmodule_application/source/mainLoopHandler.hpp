@@ -12,8 +12,9 @@
 class MainLoop {
 private:
 	Result rc;
-	u64 applicationProcessId  = 0;
-	u64 applicationProgramId  = 0;
+	u64 applicationProcessId = 0;
+	u64 applicationProgramId = 0;
+	cstd::string gameName;
 	uint8_t applicationOpened = false;
 	uint8_t internetConnected = false;
 
@@ -26,6 +27,7 @@ private:
 	static char* getAppName(u64 application_id);
 
 	void handleNetworkUpdates();
+	void sendGameInfo();
 
 public:
 	MainLoop();

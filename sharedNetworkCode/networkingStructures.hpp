@@ -26,6 +26,7 @@ enum DataFlag : uint8_t {
 	RecieveLogging,
 	RecieveFlag,
 	RecieveApplicationConnected,
+	RecieveGameMemoryInfo,
 	NUM_OF_FLAGS,
 };
 
@@ -61,8 +62,12 @@ namespace Protocol {
 
 	// Recieve a ton of game and user info
 	DEFINE_STRUCT(RecieveGameInfo,
-		std::string userNickname;
-	, self.userNickname)
+		std::string applicationName;
+		uint64_t applicationProgramId;
+		uint64_t applicationProcessId;
+		//std::string userNickname;
+		std::vector<GameMemoryInfo> memoryInfo;
+	, self.applicationName, self.applicationProgramId, self.applicationProcessId)
 
 	// Send start, with mostly everything as an enum value
 	DEFINE_STRUCT(SendFlag,
@@ -86,6 +91,7 @@ namespace Protocol {
 		std::string applicationName;
 		uint64_t applicationProgramId;
 		uint64_t applicationProcessId;
+		std::vector memoryInfo;
 	, self.applicationName, self.applicationProgramId, self.applicationProcessId)
 };
 // clang-format on

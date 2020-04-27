@@ -15,6 +15,7 @@
 
 #include "../dataHandling/buttonData.hpp"
 #include "../dataHandling/dataProcessing.hpp"
+#include "../dataHandling/gameCorruptor.hpp"
 #include "../dataHandling/projectHandler.hpp"
 #include "../helpers.hpp"
 #include "bottomUI.hpp"
@@ -55,6 +56,7 @@ private:
 	wxWindowID setNameID;
 	wxWindowID toggleLoggingID;
 	wxWindowID toggleDebugMenuID;
+	wxWindowID openGameCorruptor;
 
 	void handlePreviousWindowTransform();
 

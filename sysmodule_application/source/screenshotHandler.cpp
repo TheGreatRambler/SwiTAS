@@ -27,10 +27,7 @@ ScreenshotHandler::ScreenshotHandler() {
 		}
 		svcCloseHandle(VIdbg);
 	}
-
-	for(int i = 0; i < heightOfdhashInput; i++) {
-		row_pointer[i] = (uint8_t*)malloc(jpegFramebufferScanlineSize);
-	}
+	row_pointer[0] = (uint8_t*)malloc(jpegFramebufferScanlineSize);
 }
 
 void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>* jpegBuffer) {
@@ -105,6 +102,7 @@ void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>
 	if(R_SUCCEEDED(rc)) {
 		LOGD << "Debugging VI worked";
 		while(cinfo.next_scanline < cinfo.image_height) {
+			/*
 			// Obtain data for each row
 			for(int yOffset = 0; yOffset < heightOfdhashInput; yOffset++) {
 				for(int x = 0; x < framebufferWidth; x++) {
@@ -181,6 +179,36 @@ void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>
 				// Un oh
 				LOGD << "Scanlines wrong in JPEG";
 			}
+			*/
+			for(int x = 0; x < framebufferWidth; x++) {
+				uint16_t y = cinfo.next_scanline;
+				// Get the index
+				// https://github.com/averne/dvdnx/blob/master/src/screen.hpp#L74
+				// Swizzling pattern:
+				//    y6,y5,y4,y3,y2,y1,y0,x7,x6,x5,x4,x3,x2,x1,x0
+				// -> x7,x6,x5,y6,y5,y4,y3,x4,y2,y1,x3,y0,x2,x1,x0
+				// Bits x0-4 and y0-6 are from memory layout spec (see TRM 20.1.2 - Block Linear) and libnx hardcoded values
+				constexpr uint32_t x_mask = (__builtin_ctz(framebufferWidth) - 1) << 5;
+				const uint32_t swizzled_x = ((x & x_mask) * 128) + ((x & 0b00010000) * 8) + ((x & 0b00001000) * 2) + (x & 0b00000111);
+				const uint32_t swizzled_y = ((y & 0b1111000) * 32) + ((y & 0b0000110) * 16) + ((y & 0b0000001) * 8);
+				uint32_t index            = swizzled_x + swizzled_y;
+
+				// Laid out like RGBA
+				uint8_t colorParts[4];
+				svcReadDebugProcessMemory(&colorParts, VIdbg, initialPointer + index, sizeof(colorParts));
+
+				// Set each value into the color data for this section of the JPEG
+				uint16_t startDataIndex = x * jpegBytesPerPixel;
+
+				uint8_t red   = colorParts[0];
+				uint8_t green = colorParts[1];
+				uint8_t blue  = colorParts[2];
+
+				row_pointer[0][startDataIndex]     = red;
+				row_pointer[0][startDataIndex + 1] = green;
+				row_pointer[0][startDataIndex + 2] = blue;
+			}
+			jpeg_write_scanlines(&cinfo, row_pointer, 1);
 		}
 
 		LOGD << "Successfully wrote JPEG";
@@ -223,7 +251,5 @@ std::string ScreenshotHandler::convertToHexString(uint8_t* data, uint16_t size) 
 }
 
 ScreenshotHandler::~ScreenshotHandler() {
-	for(int i = 0; i < heightOfdhashInput; i++) {
-		free(row_pointer[i]);
-	}
+	free(row_pointer[0]);
 }

@@ -94,6 +94,8 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* 
 	savestateHookCreateButton = HELPERS::getBitmapButton(parentFrame, mainSettings, "savestateHookCreateButton");
 	savestateHookLoadButton   = HELPERS::getBitmapButton(parentFrame, mainSettings, "savestateHookLoadButton");
 
+	untether();
+
 	// Button handlers
 	addFrameButton->Bind(wxEVT_BUTTON, &SideUI::onAddFramePressed, this);
 	frameAdvanceButton->Bind(wxEVT_BUTTON, &SideUI::onFrameAdvancePressed, this);
@@ -127,8 +129,10 @@ void SideUI::onAddFramePressed(wxCommandEvent& event) {
 }
 
 void SideUI::onFrameAdvancePressed(wxCommandEvent& event) {
-	// New frame must be added, will do more later
-	inputData->runFrame();
+	// MUST be tethered
+	if(tethered) {
+		inputData->runFrame();
+	}
 }
 
 void SideUI::onSavestateHookCreatePressed(wxCommandEvent& event) {
@@ -164,8 +168,10 @@ bool SideUI::createSavestateHook() {
 
 		inputData->setSavestateHook(blocks.size() - 1);
 
+		tether();
 		return true;
 	} else {
+		untether();
 		return false;
 	}
 }
@@ -180,8 +186,10 @@ bool SideUI::loadSavestateHook(int block) {
 
 	if(savestateSelection.getOperationSuccessful()) {
 		inputData->setSavestateHook(block);
+		tether();
 		return true;
 	} else {
+		untether();
 		return false;
 	}
 }

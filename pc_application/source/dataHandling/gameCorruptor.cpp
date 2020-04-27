@@ -1,7 +1,7 @@
 #include "gameCorruptor.hpp"
 
 GameCorruptor::GameCorruptor(wxWindow* parent, std::shared_ptr<ProjectHandler> projHandler, std::shared_ptr<CommunicateWithNetwork> networkImp)
-	: wxDialog(parent, wxID_ANY, "Game Corruptor", wxDefaultPosition, wxDefaultSize) {
+	: wxDialog(parent, wxID_ANY, "Game Corruptor", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE | wxMAXIMIZE) {
 	projectHandler  = projHandler;
 	networkInstance = networkImp;
 
@@ -25,4 +25,14 @@ GameCorruptor::GameCorruptor(wxWindow* parent, std::shared_ptr<ProjectHandler> p
 	Center(wxBOTH);
 
 	Layout();
+}
+
+// clang-format off
+BEGIN_EVENT_TABLE(GameCorruptor, wxDialog)
+    EVT_IDLE(GameCorruptor::onIdle)
+END_EVENT_TABLE()
+// clang-format on
+
+void GameCorruptor::onIdle(wxIdleEvent& event) {
+	// Check networkInstance for memory info and enable everything
 }

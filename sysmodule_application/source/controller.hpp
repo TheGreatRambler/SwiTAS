@@ -71,6 +71,10 @@ public:
 		}
 	}
 
+	Handle getApplicationDebugHandle() {
+		return applicationDebug;
+	}
+
 	void unpauseApp() {
 		if(isPaused) {
 			// Unpause application

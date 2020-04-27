@@ -97,14 +97,7 @@ void MainWindow::onStart() {
 	}
 
 	// Ask for internet connection to get started
-	if(askForIP()) {
-		// Tethered, create savestate
-		if(!sideUI->createSavestateHook()) {
-			// Not successful, close everything
-			Close(true);
-			return;
-		}
-	}
+	askForIP();
 
 	Show(true);
 }
@@ -173,6 +166,7 @@ void MainWindow::addMenuBar() {
 	setNameID         = NewControlId();
 	toggleLoggingID   = NewControlId();
 	toggleDebugMenuID = NewControlId();
+	openGameCorruptor = NewControlId();
 
 	fileMenu->Append(selectIPID, "&Server");
 	fileMenu->Append(setNameID, "&Set Name");
@@ -185,6 +179,7 @@ void MainWindow::addMenuBar() {
 
 	fileMenu->Append(toggleLoggingID, "&Toggle Logging");
 	fileMenu->Append(toggleDebugMenuID, "&Toggle Debug Menu");
+	fileMenu->Append(openGameCorruptor, "&Open Game Corruptor");
 
 	menuBar->Append(fileMenu, "&File");
 
@@ -223,30 +218,34 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 		} else if(id == toggleDebugMenuID) {
 			debugWindow->Show(!debugWindow->IsShown());
 			wxLogMessage("Toggled debug window");
+		} else if(id == openGameCorruptor) {
+			Show(false);
+			sideUI->untether();
+			GameCorruptor gameCorruptor(this, projectHandler, networkInstance);
+			gameCorruptor.ShowModal();
+			Show(true);
 		}
 	}
 }
 
 bool MainWindow::askForIP() {
-	// Returns if it's tethered or not, it's a secret passcode for development
-	// IP needs to be selected
-	wxString ipAddress = wxGetTextFromUser("Please enter IP address of Nintendo Switch", "Server connect", wxEmptyString);
-	if(!ipAddress.empty()) {
-		if(ipAddress == "untethered") {
-			return false;
-		} else {
+	while(true) {
+		wxString ipAddress = wxGetTextFromUser("Please enter IP address of Nintendo Switch", "Server connect", wxEmptyString);
+		if(!ipAddress.empty()) {
 			// IP address entered
 			if(networkInstance->attemptConnectionToServer(ipAddress.ToStdString())) {
 				SetStatusText(ipAddress + ":" + std::to_string(SERVER_PORT), 0);
+				return true;
 			} else {
 				wxMessageDialog addressInvalidDialog(this, wxString::Format("This IP address is invalid: %s", networkInstance->getLastErrorMessage().c_str()), "Invalid IP", wxOK);
 				addressInvalidDialog.ShowModal();
+				// Run again
+				continue;
 			}
-			return true;
+		} else {
+			// If the IP is unentered (cancel button), just pronounce it untethered
+			return false;
 		}
-	} else {
-		// If the IP is wrong, just pronounce it untethered
-		return false;
 	}
 }
 

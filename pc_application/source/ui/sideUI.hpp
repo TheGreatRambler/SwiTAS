@@ -42,6 +42,8 @@ private:
 
 	wxBoxSizer* verticalBoxSizer;
 
+	bool tethered = false;
+
 	wxBitmapButton* addFrameButton;
 	wxBitmapButton* frameAdvanceButton;
 	wxBitmapButton* savestateHookCreateButton;
@@ -70,4 +72,20 @@ public:
 
 	bool createSavestateHook();
 	bool loadSavestateHook(int block);
+
+	void untether() {
+		// Will need more indication
+		// TODO have switch itself notify the PC when fishy buisness is going on
+		// So it can untether itself
+		wxLogMessage("Untether Switch");
+		frameAdvanceButton->Enable(false);
+		inputData->setTethered(false);
+		tethered = false;
+	}
+	void tether() {
+		wxLogMessage("Tether Switch");
+		frameAdvanceButton->Enable(true);
+		inputData->setTethered(true);
+		tethered = true;
+	}
 };

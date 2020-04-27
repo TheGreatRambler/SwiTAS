@@ -45,6 +45,8 @@ private:
 	// Vector holding the savestate hook blocks
 	AllSavestateHookBlocks savestateHookBlocks;
 
+	bool tethered = false;
+
 	// Current frames (all relative to the start of the savestate hook block)
 	// What you can edit
 	FrameNum currentFrame;
@@ -133,6 +135,10 @@ public:
 		// It has to have at least one block with one input
 		savestateHookBlocks = blocks;
 		setSavestateHook(0);
+	}
+
+	void setTethered(bool flag) {
+		tethered = flag;
 	}
 
 	void modifySavestate() {}

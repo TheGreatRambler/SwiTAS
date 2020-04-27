@@ -59,7 +59,7 @@ private:
 	static constexpr int jpegQuality = 85;
 
 	// Array of pointers to the start of each scanline
-	uint8_t* row_pointer[heightOfdhashInput];
+	uint8_t* row_pointer[1];
 
 	// Pointer to framebuffer data in VI
 	uint64_t framebufferPointer;

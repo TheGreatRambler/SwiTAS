@@ -48,11 +48,10 @@ void MainLoop::mainLoopHandler() {
 		rc = pminfoGetProgramId(&applicationProgramId, applicationProcessId);
 		if(R_SUCCEEDED(rc)) {
 			if(!applicationOpened) {
-				char* gameName;
-				gameName = getAppName(applicationProgramId);
-				LOGD << "Application " + std::string(gameName) + " opened";
+				gameName = std::string(getAppName(applicationProgramId));
+				LOGD << "Application " + gameName + " opened";
 				ADD_TO_QUEUE(RecieveApplicationConnected, networkInstance, {
-					data.applicationName      = std::string(gameName);
+					data.applicationName      = gameName;
 					data.applicationProgramId = applicationProgramId;
 					data.applicationProcessId = applicationProcessId;
 				})
@@ -123,6 +122,39 @@ void MainLoop::handleNetworkUpdates() {
 			}
 		}
 	})
+}
+
+void MainLoop::sendGameInfo() {
+	if(applicationOpened) {
+
+		std::vector<GameMemoryInfo> memoryInfo;
+
+		// Will get more info via
+		// https://github.com/switchbrew/switch-examples/blob/master/account/source/main.c
+
+		uint64_t addr = 0;
+		controller->pauseApp();
+		Handle applicationHandle = controller->getApplicationDebugHandle();
+		while(true) {
+			MemoryInfo info;
+			uint32_t pageinfo;
+			rc = svcQueryDebugProcessMemory(&info, &pageinfo, applicationHandle, addr);
+			memoryInfo.push_back(info);
+			addr += info.size;
+
+			if(R_FAILED(rc)) {
+				break;
+			}
+		}
+		controller->unpauseApp();
+
+		ADD_TO_QUEUE(RecieveGameInfo, networkInstance, {
+			data.applicationName      = gameName;
+			data.applicationProgramId = applicationProgramId;
+			data.applicationProcessId = applicationProcessId;
+			data.memoryInfo           = memoryInfo;
+		})
+	}
 }
 
 char* MainLoop::getAppName(u64 application_id) {
