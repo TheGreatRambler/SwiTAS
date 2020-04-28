@@ -39,6 +39,7 @@ void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>
 	// https://raw.githubusercontent.com/libjpeg-turbo/libjpeg-turbo/master/libjpeg.txt
 	// https://dev.w3.org/Amaya/libjpeg/example.c
 	// https://github.com/LuaDist/libjpeg/blob/master/example.c
+	/*
 
 	jpeg_compress_struct cinfo;
 	jpeg_error_mgr jerr;
@@ -89,7 +90,7 @@ void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>
 
 	LOGD << "Write comment marker";
 
-	uint64_t initialPointer = framebufferPointer + FramebufferType::FOREGROUND * framebufferSize;
+	uint64_t initialPointer = framebufferPointer + FramebufferType::HOME1 * framebufferSize;
 	// Encode
 
 	uint8_t dhash[sizeOfDhash];
@@ -102,7 +103,6 @@ void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>
 	if(R_SUCCEEDED(rc)) {
 		LOGD << "Debugging VI worked";
 		while(cinfo.next_scanline < cinfo.image_height) {
-			/*
 			// Obtain data for each row
 			for(int yOffset = 0; yOffset < heightOfdhashInput; yOffset++) {
 				for(int x = 0; x < framebufferWidth; x++) {
@@ -179,7 +179,6 @@ void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>
 				// Un oh
 				LOGD << "Scanlines wrong in JPEG";
 			}
-			*/
 			for(int x = 0; x < framebufferWidth; x++) {
 				uint16_t y = cinfo.next_scanline;
 				// Get the index
@@ -237,6 +236,8 @@ void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>
 		svcCloseHandle(VIdbg);
 		fatalThrow(rc);
 	}
+	*/
+
 }
 
 std::string ScreenshotHandler::convertToHexString(uint8_t* data, uint16_t size) {

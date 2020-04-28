@@ -14,7 +14,7 @@ private:
 	Result rc;
 	u64 applicationProcessId = 0;
 	u64 applicationProgramId = 0;
-	cstd::string gameName;
+	std::string gameName;
 	uint8_t applicationOpened = false;
 	uint8_t internetConnected = false;
 
@@ -28,6 +28,19 @@ private:
 
 	void handleNetworkUpdates();
 	void sendGameInfo();
+
+	GameMemoryInfo getGameMemoryInfo(MemoryInfo memInfo) {
+		GameMemoryInfo info;
+		info.addr            = memInfo.addr;
+		info.size            = memInfo.size;
+		info.type            = memInfo.type;
+		info.attr            = memInfo.attr;
+		info.perm            = memInfo.perm;
+		info.device_refcount = memInfo.device_refcount;
+		info.ipc_refcount    = memInfo.ipc_refcount;
+		info.padding         = memInfo.padding;
+		return info;
+	}
 
 public:
 	MainLoop();

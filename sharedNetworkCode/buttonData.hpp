@@ -91,7 +91,7 @@ struct GameMemoryInfo {
 		// clang-format off
 			archive(self.addr, self.size, self.type,
 				self.attr, self.perm, self.device_refcount,
-				ipc_refcount, self.padding);
+				self.ipc_refcount, self.padding);
 		// clang-format on
 	}
 };
