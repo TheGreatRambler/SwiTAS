@@ -32,10 +32,6 @@ private:
 
 	const char* tempScreenshotName = "/VI_SCREENSHOT_TEMP.jpg";
 
-	u64 VI_pid;
-	// The Title Id of VI (The display manager)
-	static constexpr u64 VITitleId = 0x010000000000002D;
-	Handle VIdbg;
 	// Size of the framebuffer
 	// Width * Height * Byte depth (1280 * 720 * 4)
 	static constexpr uint16_t framebufferWidth  = 1280;
@@ -59,7 +55,7 @@ private:
 	static constexpr int jpegQuality = 85;
 
 	// Array of pointers to the start of each scanline
-	uint8_t* row_pointer[1];
+	uint8_t* row_pointer[heightOfdhashInput];
 
 	// Pointer to framebuffer data in VI
 	uint64_t framebufferPointer;
