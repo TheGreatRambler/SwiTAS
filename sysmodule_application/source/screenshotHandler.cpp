@@ -77,26 +77,23 @@ void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>
 	capsscOpenRawScreenShotReadStream(&unk, &unk, &unk, ViLayerStack_ApplicationForDebug, 1000000);
 	while(cinfo.next_scanline < cinfo.image_height) {
 		// Obtain data for each row
+		uint32_t dataIndex = cinfo.next_scanline * rowSize;
+		uint8_t dhashChunk[rowSize * heightOfdhashInput];
+		uint64_t bytesRead;
+		capsscReadRawScreenShotReadStream(&bytesRead, dhashChunk, sizeof(dhashChunk), dataIndex);
+		if(bytesRead != sizeof(dhashChunk)) {
+			LOGD << "Dhash chunk read incorrrectly";
+		}
 		for(int yOffset = 0; yOffset < heightOfdhashInput; yOffset++) {
 			for(int x = 0; x < framebufferWidth; x++) {
-				uint16_t y     = cinfo.next_scanline + yOffset;
-				uint32_t index = (y * rowSize) + x;
-
-				// Laid out like RGBA
-				uint8_t colorParts[4];
-				// svcReadDebugProcessMemory(&colorParts, VIdbg, initialPointer + index, sizeof(colorParts));
-				uint64_t bytesRead;
-				capsscReadRawScreenShotReadStream(&bytesRead, colorParts, sizeof(colorParts), index);
-				if(bytesRead != 4) {
-					LOGD << "Bytes read was wrong";
-				}
+				uint32_t index = (yOffset * rowSize) + x;
 
 				// Set each value into the color data for this section of the JPEG
 				uint16_t startDataIndex = x * jpegBytesPerPixel;
 
-				uint8_t red   = colorParts[0];
-				uint8_t green = colorParts[1];
-				uint8_t blue  = colorParts[2];
+				uint8_t red   = dhashChunk[index];
+				uint8_t green = dhashChunk[index + 1];
+				uint8_t blue  = dhashChunk[index + 2];
 
 				row_pointer[yOffset][startDataIndex]     = red;
 				row_pointer[yOffset][startDataIndex + 1] = green;
