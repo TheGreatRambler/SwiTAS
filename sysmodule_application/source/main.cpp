@@ -5,7 +5,6 @@
 #include <string.h>
 #include <string>
 #include <switch.h>
-#include <switch/services/capsc.h>
 #include <vector>
 
 #include "controller.hpp"
@@ -69,7 +68,7 @@ void __attribute__((weak)) __appInit(void) {
 		fatalThrow(rc);
 
 	// Screenshot service
-	rc = capscInitialize();
+	rc = capsscInitialize();
 	if(R_FAILED(rc))
 		fatalThrow(rc);
 
@@ -134,7 +133,7 @@ void __attribute__((weak)) __appExit(void) {
 	hiddbgExit();
 	pmdmntExit();
 	hidExit();
-	capssuExit();
+	capsscExit();
 	viExit();
 	fsdevUnmountAll();
 	fsExit();

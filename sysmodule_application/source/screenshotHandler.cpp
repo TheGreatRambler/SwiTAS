@@ -1,10 +1,6 @@
 #include "screenshotHandler.hpp"
 
-ScreenshotHandler::ScreenshotHandler() {
-	for(int i = 0; i < heightOfdhashInput; i++) {
-		row_pointer[i] = (uint8_t*)malloc(jpegFramebufferScanlineSize);
-	}
-}
+ScreenshotHandler::ScreenshotHandler() {}
 
 void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>* jpegBuffer) {
 	// Encode the file with libjpeg
@@ -18,6 +14,8 @@ void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>
 
 	jpeg_compress_struct cinfo;
 	jpeg_error_mgr jerr;
+
+	uint8_t row_pointer[heightOfdhashInput][jpegFramebufferScanlineSize];
 
 	cinfo.err       = jpeg_std_error(&jerr);
 	jerr.error_exit = [](j_common_ptr cinfo) {
@@ -179,8 +177,4 @@ std::string ScreenshotHandler::convertToHexString(uint8_t* data, uint16_t size) 
 		s[2 * i + 1] = hexmap[data[i] & 0x0F];
 	}
 	return s;
-}
-
-ScreenshotHandler::~ScreenshotHandler() {
-	free(row_pointer[0]);
 }

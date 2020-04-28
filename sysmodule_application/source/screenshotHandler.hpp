@@ -54,9 +54,6 @@ private:
 	// Need to find this out
 	static constexpr int jpegQuality = 85;
 
-	// Array of pointers to the start of each scanline
-	uint8_t* row_pointer[heightOfdhashInput];
-
 	// Pointer to framebuffer data in VI
 	uint64_t framebufferPointer;
 
@@ -67,6 +64,4 @@ public:
 
 	// Returns a dHash (to determine similarity) and a jpegBuffer to actually view
 	void writeFramebuffer(std::string* hash, std::vector<uint8_t>* jpegBuffer);
-
-	~ScreenshotHandler();
 };
