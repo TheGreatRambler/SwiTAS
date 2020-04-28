@@ -91,7 +91,7 @@ namespace Protocol {
 		std::string applicationName;
 		uint64_t applicationProgramId;
 		uint64_t applicationProcessId;
-		std::vector memoryInfo;
+		std::vector<GameMemoryInfo> memoryInfo;
 	, self.applicationName, self.applicationProgramId, self.applicationProcessId)
 };
 // clang-format on

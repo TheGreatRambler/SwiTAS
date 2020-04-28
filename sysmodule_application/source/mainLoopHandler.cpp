@@ -139,7 +139,7 @@ void MainLoop::sendGameInfo() {
 			MemoryInfo info;
 			uint32_t pageinfo;
 			rc = svcQueryDebugProcessMemory(&info, &pageinfo, applicationHandle, addr);
-			memoryInfo.push_back(info);
+			memoryInfo.push_back(getGameMemoryInfo(info));
 			addr += info.size;
 
 			if(R_FAILED(rc)) {
