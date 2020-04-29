@@ -55,6 +55,7 @@ private:
 	static constexpr int jpegQuality = 85;
 
 	uint8_t* row_pointer[heightOfdhashInput];
+	uint8_t* jpegBuf;
 
 	static std::string convertToHexString(uint8_t* data, uint16_t size);
 

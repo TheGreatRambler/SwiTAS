@@ -4,6 +4,7 @@ ScreenshotHandler::ScreenshotHandler() {
 	for(int i = 0; i < heightOfdhashInput; i++) {
 		row_pointer[i] = (uint8_t*)malloc(jpegFramebufferScanlineSize);
 	}
+	jpegBuf = (uint8_t*)malloc(0x80000);
 }
 
 void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>* jpegBuffer) {
@@ -169,10 +170,11 @@ void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>
 	// remove(tempScreenshotName);
 	*/
 
+	// TODO write dHash in pc app
+
 	uint64_t outSize;
-	uint8_t jpegBuf[0x80000];
 	LOGD << "About to capture screenshot";
-	rc = capsscCaptureJpegScreenShot(&outSize, jpegBuf, sizeof(jpegBuf), ViLayerStack::ViLayerStack_Default, 100000000);
+	rc = capsscCaptureJpegScreenShot(&outSize, jpegBuf, 0x80000, ViLayerStack::ViLayerStack_ApplicationForDebug, 100000000);
 	LOGD << "Done capturing screenshot";
 	if(R_FAILED(rc)) {
 		LOGD << "JPEG wrong";
@@ -198,4 +200,5 @@ ScreenshotHandler::~ScreenshotHandler() {
 	for(int i = 0; i < heightOfdhashInput; i++) {
 		free(row_pointer[i]);
 	}
+	free(jpegBuf);
 }
