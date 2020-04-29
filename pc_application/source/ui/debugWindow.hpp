@@ -11,11 +11,14 @@ private:
 	std::shared_ptr<CommunicateWithNetwork> networkInstance;
 
 	wxBoxSizer* buttonSizer;
+
 	wxButton* pauseButton;
 	wxButton* unpauseButton;
+	wxButton* getFramebufferButton;
 
 	void onPausePressed(wxCommandEvent& event);
 	void onUnpausePressed(wxCommandEvent& event);
+	void onGetFramebufferPressed(wxCommandEvent& event);
 	void onClose(wxCloseEvent& event);
 
 public:

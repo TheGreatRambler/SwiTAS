@@ -57,8 +57,7 @@ namespace Protocol {
 	// Recieve all of the game's framebuffer
 	DEFINE_STRUCT(RecieveGameFramebuffer,
 		std::vector<uint8_t> buf;
-		std::string dHash;
-	, self.buf, self.dHash)
+	, self.buf)
 
 	// Recieve a ton of game and user info
 	DEFINE_STRUCT(RecieveGameInfo,
@@ -67,7 +66,7 @@ namespace Protocol {
 		uint64_t applicationProcessId;
 		//std::string userNickname;
 		std::vector<GameMemoryInfo> memoryInfo;
-	, self.applicationName, self.applicationProgramId, self.applicationProcessId)
+	, self.applicationName, self.applicationProgramId, self.applicationProcessId, self.memoryInfo)
 
 	// Send start, with mostly everything as an enum value
 	DEFINE_STRUCT(SendFlag,
@@ -91,7 +90,6 @@ namespace Protocol {
 		std::string applicationName;
 		uint64_t applicationProgramId;
 		uint64_t applicationProcessId;
-		std::vector<GameMemoryInfo> memoryInfo;
 	, self.applicationName, self.applicationProgramId, self.applicationProcessId)
 };
 // clang-format on

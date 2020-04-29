@@ -136,39 +136,14 @@ bool CommunicateWithNetwork::handleSocketError(int res) {
 	if(res == -1) {
 		networkConnection->TranslateSocketError();
 		CSimpleSocket::CSocketError error = networkConnection->GetSocketError();
-		// It's okay if it would have blocked, just means there is no data
-		/*
-		if(error == CSimpleSocket::SocketConnectionReset) {
-			// Abnormal disconnect, go through reconnecting
-			// More errors may need to be checked here
-			connectedToSocket = false;
+		if(error != CSimpleSocket::CSocketError::SocketTimedout) {
 #ifdef SERVER_IMP
-			LOGD << "Have to restart server";
-			networkConnection->Close();
-			delete networkConnection;
-			// The server will just block while listening for a new connection
-			waitForNetworkConnection();
-			// When done, reconfigure
-			prepareNetworkConnection();
+			LOGD << networkConnection->DescribeError(error);
 #endif
 #ifdef CLIENT_IMP
-			// Try to reconnect probably 10 times
-			for(uint8_t i = 0; i < 10; i++) {
-				// Attempt to reconnect to the same IP address
-				attemptConnectionToServer(ipAddress);
-				std::this_thread::sleep_for(std::chrono::seconds(1));
-			}
-			// I dunno what to do if failure
+			wxLogMessage(networkConnection->DescribeError(error));
 #endif
-		} else if(error != CSimpleSocket::SocketEwouldblock) {
-			*/
-#ifdef SERVER_IMP
-		LOGD << networkConnection->DescribeError(error);
-#endif
-#ifdef CLIENT_IMP
-		wxLogMessage(networkConnection->DescribeError(error));
-#endif
-		//}
+		}
 		return true;
 	} else {
 		return false;
@@ -197,8 +172,6 @@ void CommunicateWithNetwork::listenForCommands() {
 	LOGD << "Client has connected";
 #endif
 	// Socket connected, do things
-	// Some info: MSG_WAITALL is needed to make sure the socket waits for the specified amount of
-	// 	data, so this is changed in zed_net
 	// The format works by preceding each message with a uint16_t with the size of the message, then the message right after it
 	while(keepReading.load()) {
 		// First, check over every outgoing queue to detect outgoing data

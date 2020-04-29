@@ -57,6 +57,9 @@ private:
 
 	wxStaticText* hammingDistance;
 
+	int dhashWidth;
+	int dhashHeight;
+
 	rapidjson::Document* mainSettings;
 
 	std::shared_ptr<CommunicateWithNetwork> networkInstance;

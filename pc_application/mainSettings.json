@@ -215,6 +215,8 @@
 	},
 	"programIcon": "share/icons/nxtas/logo/main.png",
 	"videoViewerDefaultImage": "share/images/novideodefault.jpg",
+	"dhashWidth": 21,
+	"dhashHeight": 20,
 	"ui": {
 		"addFrameButton": "share/icons/nxtas/buttons/addFrameButton.png",
 		"frameAdvanceButton": "share/icons/nxtas/buttons/frameAdvanceButton.png",

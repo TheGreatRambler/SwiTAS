@@ -77,13 +77,13 @@ public:
 		// Will need more indication
 		// TODO have switch itself notify the PC when fishy buisness is going on
 		// So it can untether itself
-		wxLogMessage("Untether Switch");
+		// wxLogMessage("Untether Switch");
 		frameAdvanceButton->Enable(false);
 		inputData->setTethered(false);
 		tethered = false;
 	}
 	void tether() {
-		wxLogMessage("Tether Switch");
+		// wxLogMessage("Tether Switch");
 		frameAdvanceButton->Enable(true);
 		inputData->setTethered(true);
 		tethered = true;

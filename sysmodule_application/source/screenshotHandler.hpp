@@ -3,6 +3,8 @@
 #define SET_BIT(number, bit, loc) (number) ^= (-(unsigned long)(bit) ^ (number)) & (1UL << (loc))
 #define GET_BIT(number, loc) ((number) >> (loc)) & 1U
 
+#define JPEG_BUF_SIZE 0x80000
+
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
@@ -16,10 +18,13 @@ extern "C" {
 #include <switch.h>
 #include <vector>
 
+#include "../../sharedNetworkCode/networkInterface.hpp"
+
 // Many thanks to 黯然的饭#8969 on Discord for the framebuffer implementation
 class ScreenshotHandler {
 private:
 	// Different framebuffers are avaliable within VI
+	/*
 	enum FramebufferType : uint8_t {
 		FOREGROUND,
 		APPLET,
@@ -55,15 +60,16 @@ private:
 	static constexpr int jpegQuality = 85;
 
 	uint8_t* row_pointer[heightOfdhashInput];
-	uint8_t* jpegBuf;
+	*/
+	Result rc;
 
-	static std::string convertToHexString(uint8_t* data, uint16_t size);
+	uint8_t* jpegBuf;
 
 public:
 	ScreenshotHandler();
 
 	// Returns a dHash (to determine similarity) and a jpegBuffer to actually view
-	void writeFramebuffer(std::string* hash, std::vector<uint8_t>* jpegBuffer);
+	void writeFramebuffer(std::shared_ptr<CommunicateWithNetwork> networkInstance);
 
 	~ScreenshotHandler();
 };

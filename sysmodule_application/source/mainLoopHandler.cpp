@@ -120,6 +120,11 @@ void MainLoop::handleNetworkUpdates() {
 				LOGD << "Unpause app";
 				controller->unpauseApp();
 			}
+		} else if(data.actFlag == SendInfo::GET_FRAMEBUFFER) {
+			if(applicationOpened) {
+				LOGD << "Get framebuffer";
+				controller->getFramebuffer();
+			}
 		}
 	})
 }

@@ -60,17 +60,9 @@ void ControllerHandler::runFrameWithPause(ControllerData controllerData) {
 
 	unpauseApp();
 	waitForVsync();
-
-	std::string dhashForThisFrame;
-	std::vector<uint8_t> jpegBufferForThisFrame;
-	screenshotHandler.writeFramebuffer(&dhashForThisFrame, &jpegBufferForThisFrame);
-	// Send these to the PC
-	ADD_TO_QUEUE(RecieveGameFramebuffer, networkInstance, {
-		data.buf   = jpegBufferForThisFrame;
-		data.dHash = dhashForThisFrame;
-	})
-
 	pauseApp();
+
+	screenshotHandler.writeFramebuffer(networkInstance);
 }
 
 void ControllerHandler::setApplicationProcessId(u64 pid) {

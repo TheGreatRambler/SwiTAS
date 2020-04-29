@@ -63,6 +63,9 @@ SavestateSelection::SavestateSelection(rapidjson::Document* settings, bool isSav
 	mainSettings        = settings;
 	networkInstance     = networkImp;
 
+	dhashWidth  = (*mainSettings)["dhashWidth"].GetInt();
+	dhashHeight = (*mainSettings)["dhashHeight"].GetInt();
+
 	imageSizer  = new wxBoxSizer(wxHORIZONTAL);
 	buttonSizer = new wxBoxSizer(wxHORIZONTAL);
 	fullSizer   = new wxBoxSizer(wxVERTICAL);
@@ -155,11 +158,12 @@ void SavestateSelection::setTargetFrame(wxBitmap* targetBitmap, std::string targ
 
 void SavestateSelection::onIdle(wxIdleEvent& event) {
 	CHECK_QUEUE(networkInstance, RecieveGameFramebuffer, {
-		currentFrame->setBitmap(HELPERS::getBitmapFromJPEGData(data.buf));
-		leftDHash->SetLabel(wxString::FromUTF8(data.dHash));
+		wxImage screenshot = HELPERS::getImageFromJPEGData(data.buf);
+		currentFrame->setBitmap(new wxBitmap(screenshot));
+		leftDHash->SetLabel(HELPERS::calculateDhash(screenshot, dhashWidth, dhashHeight));
 
 		if(savestateLoadDialog) {
-			uint16_t hamming = HELPERS::getHammingDistance(leftDHash->GetLabel().ToStdString(), rightDHash->GetLabel().ToStdString());
+			uint16_t hamming = HELPERS::getHammingDistance(leftDHash->GetLabel(), rightDHash->GetLabel());
 			hammingDistance->SetLabel(wxString::Format("%d", hamming));
 			if(hamming <= selectFrameAutomatically->GetValue()) {
 				// This frame might be identical, ask user if they want to use this frame

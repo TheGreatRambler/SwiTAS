@@ -92,54 +92,38 @@ std::string HELPERS::exec(const char* cmd) {
 	}
 }
 
-wxBitmap* HELPERS::getBitmapFromJPEGData(std::vector<uint8_t> jpegBuffer) {
+wxImage HELPERS::getImageFromJPEGData(std::vector<uint8_t> jpegBuffer) {
 	wxMemoryInputStream jpegStream(jpegBuffer.data(), jpegBuffer.size());
 	wxImage jpegImage;
 	jpegImage.LoadFile(jpegStream, wxBITMAP_TYPE_JPEG);
-	return new wxBitmap(jpegImage);
+	return jpegImage;
 }
 
-int HELPERS::char2int(char input) {
-	if(input >= '0' && input <= '9')
-		return input - '0';
-	if(input >= 'A' && input <= 'F')
-		return input - 'A' + 10;
-	if(input >= 'a' && input <= 'f')
-		return input - 'a' + 10;
-	else
-		return 0;
-}
-
-void HELPERS::hex2bin(const char* src, uint8_t* target) {
-	// https://stackoverflow.com/a/17261928/9329945
-	while(*src && src[1]) {
-		*(target++) = char2int(*src) * 16 + char2int(src[1]);
-		src += 2;
+wxString HELPERS::calculateDhash(wxImage image, int dhashWidth, int dhashHeight) {
+	// Returns dhash as binary, 010011010, in string
+	// https://github.com/telows/Image-Bath/blob/master/dhash.cpp
+	wxImage copy = image.ConvertToGreyscale();
+	copy.Rescale(dhashWidth, dhashHeight, wxIMAGE_QUALITY_NORMAL);
+	char dhash[(dhashWidth - 1) * dhashHeight];
+	unsigned char* imagePointer = copy.GetData();
+	for(int y = 0; y < dhashHeight; y++) {
+		for(int x = 1; x < dhashWidth; x++) {
+			int thisPixelPointer              = ((y * dhashWidth) + x) * 4;
+			unsigned char leftPixel           = imagePointer[thisPixelPointer - 4];
+			unsigned char rightPixel          = imagePointer[thisPixelPointer];
+			dhash[(y * (dhashWidth - 1)) + x] = leftPixel > rightPixel ? '1' : '0';
+		}
 	}
+	return wxString(dhash, sizeof(dhash));
 }
 
-const uint16_t HELPERS::getHammingDistance(std::string hexString1, std::string hexString2) {
-	// Both hex strings MUST have the same size
-	uint8_t m1[hexString1.length() / 2];
-	uint8_t m2[hexString2.length() / 2];
-	std::size_t size = hexString1.length() / 2;
-
-	hex2bin(hexString1.c_str(), m1);
-	hex2bin(hexString2.c_str(), m2);
-
-	// https://gist.github.com/Miguellissimo/2faa7e3c3e1800a6bf97
-	uint16_t counter = 0;
-
-	for(std::size_t i = 0; i != size; ++i) {
-		uint8_t diff = m1[i] ^ m2[i];
-
-		diff = (diff & (uint8_t)0x55) + ((diff >> 1) & (uint8_t)0x55);
-		diff = (diff & (uint8_t)0x33) + ((diff >> 2) & (uint8_t)0x33);
-		diff = (diff & (uint8_t)0x0f) + ((diff >> 4) & (uint8_t)0x0f);
-
-		counter += diff;
+const int HELPERS::getHammingDistance(wxString string1, wxString string2) {
+	int counter = 0;
+	for(int i = 0; i < string1.size(); i++) {
+		if(string1.GetChar(i) != string2.GetChar(i)) {
+			counter++;
+		}
 	}
-
 	return counter;
 }
 
@@ -148,6 +132,7 @@ std::string HELPERS::makeRelative(std::string path, std::string rootDir) {
 	newPath.MakeRelativeTo(wxString::FromUTF8(rootDir));
 	return newPath.GetFullPath().ToStdString();
 }
+
 std::string HELPERS::makeFromRelative(std::string path, std::string rootDir) {
 	return rootDir + "/" + path;
 }

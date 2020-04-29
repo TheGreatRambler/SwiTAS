@@ -61,16 +61,13 @@ public:
 			LOGD << "Pausing";
 			rc       = svcDebugActiveProcess(&applicationDebug, applicationPID);
 			isPaused = true;
-			std::string dhashForThisFrame;
-			std::vector<uint8_t> jpegBufferForThisFrame;
-			LOGD << "Writing framebuffer in pause";
-			screenshotHandler.writeFramebuffer(&dhashForThisFrame, &jpegBufferForThisFrame);
-			// Send these to the PC
-			ADD_TO_QUEUE(RecieveGameFramebuffer, networkInstance, {
-				data.buf   = jpegBufferForThisFrame;
-				data.dHash = dhashForThisFrame;
-			})
+
+			screenshotHandler.writeFramebuffer(networkInstance);
 		}
+	}
+
+	void getFramebuffer() {
+		screenshotHandler.writeFramebuffer(networkInstance);
 	}
 
 	Handle getApplicationDebugHandle() {

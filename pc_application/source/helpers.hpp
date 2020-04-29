@@ -44,13 +44,10 @@ namespace HELPERS {
 
 	std::string exec(const char* cmd);
 
-	wxBitmap* getBitmapFromJPEGData(std::vector<uint8_t> jpegBuffer);
+	wxImage getImageFromJPEGData(std::vector<uint8_t> jpegBuffer);
+	wxString calculateDhash(wxImage image, int dhashWidth, int dhashHeight);
 
-	int char2int(char input);
-
-	void hex2bin(const char* src, uint8_t* target);
-
-	const uint16_t getHammingDistance(std::string hexString1, std::string hexString2);
+	const int getHammingDistance(wxString string1, wxString string2);
 
 	std::string makeRelative(std::string path, std::string rootDir);
 	std::string makeFromRelative(std::string path, std::string rootDir);
