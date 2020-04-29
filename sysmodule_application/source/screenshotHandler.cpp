@@ -1,8 +1,14 @@
 #include "screenshotHandler.hpp"
 
-ScreenshotHandler::ScreenshotHandler() {}
+ScreenshotHandler::ScreenshotHandler() {
+	for(int i = 0; i < heightOfdhashInput; i++) {
+		row_pointer[i] = (uint8_t*)malloc(jpegFramebufferScanlineSize);
+	}
+}
 
 void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>* jpegBuffer) {
+	/*
+	LOGD << "Starting writing framebuffer";
 	// Encode the file with libjpeg
 	// https://www.ridgesolutions.ie/index.php/2019/12/10/libjpeg-example-encode-jpeg-to-memory-buffer-instead-of-file/
 	// https://www.geeksforgeeks.org/hamming-distance-between-two-integers/
@@ -14,8 +20,6 @@ void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>
 
 	jpeg_compress_struct cinfo;
 	jpeg_error_mgr jerr;
-
-	uint8_t row_pointer[heightOfdhashInput][jpegFramebufferScanlineSize];
 
 	cinfo.err       = jpeg_std_error(&jerr);
 	jerr.error_exit = [](j_common_ptr cinfo) {
@@ -63,16 +67,13 @@ void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>
 
 	LOGD << "Write comment marker";
 
-	uint64_t initialPointer = framebufferPointer + FramebufferType::HOME1 * framebufferSize;
-	// Encode
-
 	uint8_t dhash[sizeOfDhash];
 	int indexByteDhash    = 0;
 	uint8_t indexBitDhash = 0;
 	// Might need to use this, but would possibly be more inefficent
 	// svcMapProcessMemory
 	uint64_t unk;
-	capsscOpenRawScreenShotReadStream(&unk, &unk, &unk, ViLayerStack_ApplicationForDebug, 1000000);
+	capsscOpenRawScreenShotReadStream(&unk, &unk, &unk, ViLayerStack::ViLayerStack_Default, 1000000);
 	while(cinfo.next_scanline < cinfo.image_height) {
 		// Obtain data for each row
 		uint32_t dataIndex = cinfo.next_scanline * rowSize;
@@ -166,6 +167,20 @@ void ScreenshotHandler::writeFramebuffer(std::string* hash, std::vector<uint8_t>
 	std::copy(std::istream_iterator<uint8_t>(file), std::istream_iterator<uint8_t>(), std::back_inserter(*jpegBuffer));
 	file.close();
 	// remove(tempScreenshotName);
+	*/
+
+	uint64_t outSize;
+	uint8_t jpegBuf[0x80000];
+	LOGD << "About to capture screenshot";
+	rc = capsscCaptureJpegScreenShot(&outSize, jpegBuf, sizeof(jpegBuf), ViLayerStack::ViLayerStack_Default, 100000000);
+	LOGD << "Done capturing screenshot";
+	if(R_FAILED(rc)) {
+		LOGD << "JPEG wrong";
+	}
+
+	FILE* outfile = fopen(tempScreenshotName, "wb");
+	fwrite(jpegBuf, outSize, 1, outfile);
+	fclose(outfile);
 }
 
 std::string ScreenshotHandler::convertToHexString(uint8_t* data, uint16_t size) {
@@ -177,4 +192,10 @@ std::string ScreenshotHandler::convertToHexString(uint8_t* data, uint16_t size) 
 		s[2 * i + 1] = hexmap[data[i] & 0x0F];
 	}
 	return s;
+}
+
+ScreenshotHandler::~ScreenshotHandler() {
+	for(int i = 0; i < heightOfdhashInput; i++) {
+		free(row_pointer[i]);
+	}
 }

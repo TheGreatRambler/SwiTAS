@@ -54,8 +54,7 @@ private:
 	// Need to find this out
 	static constexpr int jpegQuality = 85;
 
-	// Pointer to framebuffer data in VI
-	uint64_t framebufferPointer;
+	uint8_t* row_pointer[heightOfdhashInput];
 
 	static std::string convertToHexString(uint8_t* data, uint16_t size);
 
@@ -64,4 +63,6 @@ public:
 
 	// Returns a dHash (to determine similarity) and a jpegBuffer to actually view
 	void writeFramebuffer(std::string* hash, std::vector<uint8_t>* jpegBuffer);
+
+	~ScreenshotHandler();
 };
