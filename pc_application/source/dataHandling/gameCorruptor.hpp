@@ -10,7 +10,7 @@
 class MemorySectionViewer : public DrawingCanvas {
 private:
 public:
-	MemorySectionViewer(wxFrame* parent);
+	MemorySectionViewer(wxWindow* parent);
 
 	virtual void draw(wxDC& dc) override;
 };

@@ -9,9 +9,14 @@ bool CommunicateWithNetwork::readData(uint8_t* data, uint16_t sizeToRead) {
 	while(numOfBytesSoFar != sizeToRead) {
 		// Have to read at the right index with the right num of bytes
 		int res = networkConnection->Receive(sizeToRead - numOfBytesSoFar, &data[numOfBytesSoFar]);
-		if(res == 0 || res == -1) {
-			// Socket has either been shutdown on other side
-			// Or has encountered an error
+		if(res == 0) {
+			connectedToSocket = false;
+#ifdef SERVER_IMP
+			waitForNetworkConnection();
+#endif
+			return true;
+		} else if(res == -1) {
+			// Socket has encountered an error
 			handleSocketError(res);
 			return true;
 		} else {
@@ -96,6 +101,7 @@ void CommunicateWithNetwork::prepareNetworkConnection() {
 void CommunicateWithNetwork::waitForNetworkConnection() {
 	// This will block INDEFINITELY if there is no client, so
 	// Literally nothing can happen until this finishes
+	networkConnection = NULL;
 	while(true) {
 		LOGD << "Waiting for connection";
 		// This will block until an error or otherwise

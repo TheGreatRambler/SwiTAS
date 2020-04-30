@@ -1,6 +1,6 @@
 #include "gameCorruptor.hpp"
 
-MemorySectionViewer::MemorySectionViewer(wxFrame* parent)
+MemorySectionViewer::MemorySectionViewer(wxWindow* parent)
 	: DrawingCanvas(parent, wxDefaultSize) {}
 
 void MemorySectionViewer::draw(wxDC& dc) {
