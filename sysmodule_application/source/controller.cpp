@@ -50,6 +50,7 @@ void ControllerHandler::runFrameWithPause(ControllerData controllerData) {
 	state.joysticks[JOYSTICK_RIGHT].dx = controllerData.RS_X;
 	state.joysticks[JOYSTICK_RIGHT].dy = controllerData.RS_Y;
 
+	state.buttons = 0;
 	for(auto const& button : btnToHidKeys) {
 		if(GET_BIT(controllerData.buttons, button.first)) {
 			state.buttons |= button.second;

@@ -8,7 +8,6 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
-#include <fstream>
 #include <iterator>
 extern "C" {
 #include <jpeglib.h>

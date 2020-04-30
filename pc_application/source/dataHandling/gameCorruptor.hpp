@@ -3,9 +3,17 @@
 #include <wx/wx.h>
 
 #include "../../sharedNetworkCode/networkInterface.hpp"
+#include "../ui/drawingCanvas.hpp"
 #include "dataProcessing.hpp"
 #include "projectHandler.hpp"
-#include "../ui/drawingCanvas.hpp"
+
+class MemorySectionViewer : public DrawingCanvas {
+private:
+public:
+	MemorySectionViewer(wxFrame* parent);
+
+	virtual void draw(wxDC& dc) override;
+};
 
 class GameCorruptor : public wxDialog {
 private:
@@ -13,6 +21,8 @@ private:
 	std::shared_ptr<CommunicateWithNetwork> networkInstance;
 
 	wxBoxSizer* mainSizer;
+
+	MemorySectionViewer* memorySectionViewer;
 
 	void onIdle(wxIdleEvent& event);
 

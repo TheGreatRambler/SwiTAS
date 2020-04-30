@@ -141,7 +141,7 @@ void MainLoop::sendGameInfo() {
 		controller->pauseApp();
 		Handle applicationHandle = controller->getApplicationDebugHandle();
 		while(true) {
-			MemoryInfo info;
+			MemoryInfo info = { 0 };
 			uint32_t pageinfo;
 			rc = svcQueryDebugProcessMemory(&info, &pageinfo, applicationHandle, addr);
 			memoryInfo.push_back(getGameMemoryInfo(info));

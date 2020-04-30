@@ -107,18 +107,10 @@ void CommunicateWithNetwork::waitForNetworkConnection() {
 			connectedToSocket = true;
 			return;
 		} else {
-			networkConnection->TranslateSocketError();
-			LOGD << "Error encountered";
-			// GETTING THE ERROR SEGFAULTS
-			// When the client is accepted, this unknown error continues to occur
-			// LOGD << networkConnection->GetSocketError();
-			// if(networkConnection->GetSocketError() == CSimpleSocket::SocketConnectionReset) {
-			//	LOGD << "Connection reset";
-			//}
-			// LOGD << networkConnection->DescribeError(networkConnection->GetSocketError());
+			handleSocketError(-1);
 		}
 		// Wait briefly
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		std::this_thread::yield();
 	}
 }
 #endif
@@ -144,6 +136,8 @@ bool CommunicateWithNetwork::handleSocketError(int res) {
 			wxLogMessage(networkConnection->DescribeError(error));
 #endif
 		}
+		// TODO if the error is about the network cutting off, run waitForNetworkConnection again if server
+		// If client, notify app
 		return true;
 	} else {
 		return false;
@@ -207,6 +201,7 @@ void CommunicateWithNetwork::listenForCommands() {
 			// Free memory
 			free(dataToRead);
 		}
+		std::this_thread::yield();
 	}
 }
 

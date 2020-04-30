@@ -7,8 +7,8 @@ ScreenshotHandler::ScreenshotHandler() {
 void ScreenshotHandler::writeFramebuffer(std::shared_ptr<CommunicateWithNetwork> networkInstance) {
 	uint64_t outSize;
 	rc = capsscCaptureJpegScreenShot(&outSize, jpegBuf, JPEG_BUF_SIZE, ViLayerStack::ViLayerStack_ApplicationForDebug, 100000000);
-	LOGD << "Done capturing screenshot";
 	if(R_SUCCEEDED(rc)) {
+		LOGD << "Screenshot size: " << outSize;
 		std::vector<uint8_t> buf(outSize);
 		memcpy(buf.data(), jpegBuf, outSize);
 		// clang-format off

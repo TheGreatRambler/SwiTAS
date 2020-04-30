@@ -6,7 +6,7 @@
 #include <zpp.hpp>
 
 // Convert my button mappings to the ones recognized by the switch
-const std::unordered_map<Btn, HidControllerKeys> btnToHidKeys {
+const std::unordered_map<Btn, HidControllerKeys> btnToHidKeys{
 	{ Btn::A, KEY_A },
 	{ Btn::B, KEY_B },
 	{ Btn::X, KEY_X },
