@@ -43,7 +43,7 @@
 			"label": "Clean",
 			"type": "shell",
 			"promptOnClose": true,
-			"command": "${workspaceRoot}/.vscode/scripts/clean.sh",
+			"command": ".vscode/scripts/clean.sh",
 			"presentation": {
 				"reveal": "always",
 				"panel": "dedicated"
@@ -55,6 +55,17 @@
 					"${workspaceFolder}"
 				]
 			}]
+		},
+		{
+			"label": "Upload to Switch",
+			"type": "shell",
+			"promptOnClose": true,
+			"command": "./upload.sh",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			},
+			"problemMatcher": []
 		}
 	]
 }

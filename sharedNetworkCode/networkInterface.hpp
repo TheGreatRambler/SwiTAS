@@ -8,10 +8,10 @@
 			uint8_t* data; \
 			std::size_t size; \
 			self->serializingProtocol.dataToBinary<Protocol::Struct_##Flag>(structData, &data, &size); \
-			uint16_t dataSize = htons((uint16_t)size); \
-			self->networkConnection->Send((uint8_t*) &dataSize, sizeof(dataSize)); \
-			self->networkConnection->Send((uint8_t*) &structData.flag, sizeof(DataFlag)); \
-			self->networkConnection->Send(data, size); \
+			uint32_t dataSize = htons((uint32_t)size); \
+			self->sendData(&dataSize, sizeof(dataSize)); \
+			self->sendData(&structData.flag, sizeof(DataFlag)); \
+			self->sendData(data, size); \
 			free(data); \
 		} else { \
 			break; \
@@ -51,6 +51,8 @@
 	} \
 }
 // clang-format on
+
+#define SEND_BUF 1500
 
 #include <atomic>
 #include <condition_variable>
@@ -109,10 +111,7 @@ private:
 	// this can be set by anybody and will determine if networking continues
 	std::atomic_bool keepReading;
 
-	bool handleSocketError(int res);
-
-	// This will read data until all is recieved
-	bool readData(uint8_t* data, uint16_t sizeToRead);
+	bool handleSocketError();
 
 public:
 	// Protcol for serializing
@@ -143,6 +142,9 @@ public:
 	// Called in the network thread
 	void listenForCommands();
 
+	bool readData(void* data, uint32_t sizeToRead);
+	bool sendData(void* data, uint32_t sizeToSend);
+
 	void initNetwork();
 
 	void endNetwork();
@@ -158,7 +160,7 @@ public:
 	}
 
 	// This stuff needs to be global for callback reasons
-	uint16_t dataSize;
+	uint32_t dataSize;
 	DataFlag currentFlag;
 	uint8_t* dataToRead;
 

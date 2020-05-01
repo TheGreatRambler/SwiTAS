@@ -2,13 +2,14 @@
 
 // Decided upon using https://github.com/DFHack/clsocket
 
-bool CommunicateWithNetwork::readData(uint8_t* data, uint16_t sizeToRead) {
+bool CommunicateWithNetwork::readData(void* data, uint32_t sizeToRead) {
 	// Info about pointers here: https://stackoverflow.com/a/4318446
 	// Will return true on error
-	uint16_t numOfBytesSoFar = 0;
+	uint8_t* dataPointer     = (uint8_t*)data;
+	uint32_t numOfBytesSoFar = 0;
 	while(numOfBytesSoFar != sizeToRead) {
 		// Have to read at the right index with the right num of bytes
-		int res = networkConnection->Receive(sizeToRead - numOfBytesSoFar, &data[numOfBytesSoFar]);
+		int res = networkConnection->Receive(sizeToRead - numOfBytesSoFar, &dataPointer[numOfBytesSoFar]);
 		if(res == 0) {
 			connectedToSocket = false;
 #ifdef SERVER_IMP
@@ -17,7 +18,7 @@ bool CommunicateWithNetwork::readData(uint8_t* data, uint16_t sizeToRead) {
 			return true;
 		} else if(res == -1) {
 			// Socket has encountered an error
-			handleSocketError(res);
+			handleSocketError();
 			return true;
 		} else {
 			// Just num of bytes
@@ -26,6 +27,26 @@ bool CommunicateWithNetwork::readData(uint8_t* data, uint16_t sizeToRead) {
 		}
 	}
 	// If here, success! Operation has encountered no error
+	return false;
+}
+
+bool CommunicateWithNetwork::sendData(void* data, uint32_t sizeToSend) {
+	uint8_t* dataPointer = (uint8_t*)data;
+	uint32_t i           = 0;
+	while(i < sizeToSend) {
+		uint32_t dataSize = std::min(sizeToSend - i, (uint32_t)SEND_BUF);
+		int res           = networkConnection->Send(&dataPointer[i], dataSize);
+		if(res == 0) {
+			// Socket shutdown, TODO inform PC of this
+			return true;
+		} else if(res == -1) {
+			// Socket has encountered an error
+			handleSocketError();
+			return true;
+		} else {
+			i += res;
+		}
+	}
 	return false;
 }
 
@@ -113,7 +134,7 @@ void CommunicateWithNetwork::waitForNetworkConnection() {
 			connectedToSocket = true;
 			return;
 		} else {
-			handleSocketError(-1);
+			handleSocketError();
 		}
 		// Wait briefly
 		std::this_thread::yield();
@@ -128,26 +149,21 @@ void CommunicateWithNetwork::endNetwork() {
 	networkThread->join();
 }
 
-bool CommunicateWithNetwork::handleSocketError(int res) {
+bool CommunicateWithNetwork::handleSocketError() {
 	// Return true if it's an error, fatal or wouldblock
 	//   false if there is no error
-	if(res == -1) {
-		networkConnection->TranslateSocketError();
-		CSimpleSocket::CSocketError error = networkConnection->GetSocketError();
-		if(error != CSimpleSocket::CSocketError::SocketTimedout) {
+	networkConnection->TranslateSocketError();
+	CSimpleSocket::CSocketError error = networkConnection->GetSocketError();
+	if(error != CSimpleSocket::CSocketError::SocketTimedout) {
 #ifdef SERVER_IMP
-			LOGD << networkConnection->DescribeError(error);
+		LOGD << networkConnection->DescribeError(error);
 #endif
 #ifdef CLIENT_IMP
-			wxLogMessage(networkConnection->DescribeError(error));
+		wxLogMessage(networkConnection->DescribeError(error));
 #endif
-		}
-		// TODO if the error is about the network cutting off, run waitForNetworkConnection again if server
-		// If client, notify app
-		return true;
-	} else {
-		return false;
 	}
+	// TODO if the error is about the network cutting off, run waitForNetworkConnection again if server
+	// If client, notify app
 }
 
 #ifdef CLIENT_IMP
@@ -179,7 +195,7 @@ void CommunicateWithNetwork::listenForCommands() {
 
 		// Check if socket even has data before doing anything
 		if(networkConnection->Select()) {
-			if(readData((uint8_t*)&dataSize, sizeof(dataSize))) {
+			if(readData(&dataSize, sizeof(dataSize))) {
 				continue;
 			}
 
@@ -188,7 +204,7 @@ void CommunicateWithNetwork::listenForCommands() {
 			dataSize = ntohs(dataSize);
 
 			// Get the flag now, just a uint8_t, no endian conversion, I think
-			if(readData((uint8_t*)&currentFlag, sizeof(currentFlag))) {
+			if(readData(&currentFlag, sizeof(currentFlag))) {
 				continue;
 			}
 			// Flag now tells us the data we expect to recieve

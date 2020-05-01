@@ -14,7 +14,7 @@ private:
 
 public:
 	// Both of these functions are deliberately designed to deal with any kind of struct
-	template <typename T> void binaryToData(T& outputData, uint8_t* data, uint16_t size) {
+	template <typename T> void binaryToData(T& outputData, uint8_t* data, uint32_t size) {
 		// Create the archive
 		zpp::serializer::memory_view_input_archive in(data, size);
 
@@ -31,7 +31,7 @@ public:
 
 		// Copy to pointer
 		// An unsigned char is one byte, so this is it
-		*size = (uint16_t)serializingData.size();
+		*size = (uint32_t)serializingData.size();
 		// Needs to be freed afterwards
 		*data = (uint8_t*)malloc(*size);
 		memcpy(*data, serializingData.data(), *size);
