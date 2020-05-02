@@ -9,6 +9,8 @@
 			std::size_t size; \
 			self->serializingProtocol.dataToBinary<Protocol::Struct_##Flag>(structData, &data, &size); \
 			uint32_t dataSize = htons((uint32_t)size); \
+			uint16_t secretKey = htons(SECRET_PACKET_KEY); \
+			self->sendData(&secretKey, sizeof(secretKey)); \
 			self->sendData(&dataSize, sizeof(dataSize)); \
 			self->sendData(&structData.flag, sizeof(DataFlag)); \
 			self->sendData(data, size); \
@@ -52,8 +54,6 @@
 }
 // clang-format on
 
-#define SEND_BUF 1500
-
 #include <atomic>
 #include <condition_variable>
 #include <errno.h>
@@ -86,6 +86,9 @@
 #include "networkingStructures.hpp"
 
 #define SERVER_PORT 6978
+// Random number to define the beginning of packets, just in case of errors
+#define SECRET_PACKET_KEY 23578
+#define SOCKET_TIMEOUT_SECONDS 5
 
 class CommunicateWithNetwork {
 private:
@@ -94,6 +97,7 @@ private:
 #endif
 
 	std::atomic_bool connectedToSocket;
+	std::atomic_bool otherSideDisconnected;
 
 	std::shared_ptr<std::thread> networkThread;
 
@@ -111,7 +115,11 @@ private:
 	// this can be set by anybody and will determine if networking continues
 	std::atomic_bool keepReading;
 
-	bool handleSocketError();
+	bool handleSocketError(const char* extraMessage);
+	void handleFatalError();
+#ifdef CLIENT_IMP
+	void waitForIPSelection();
+#endif
 
 public:
 	// Protcol for serializing
@@ -148,6 +156,10 @@ public:
 	void initNetwork();
 
 	void endNetwork();
+
+	// This returns true ONCE, it sets the flag to false when it returns true
+	// This prevents false retriggers
+	bool hasOtherSideJustDisconnected();
 
 	bool isConnected() {
 		return connectedToSocket.load();

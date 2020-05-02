@@ -11,48 +11,70 @@ bool CommunicateWithNetwork::readData(void* data, uint32_t sizeToRead) {
 		// Have to read at the right index with the right num of bytes
 		int res = networkConnection->Receive(sizeToRead - numOfBytesSoFar, &dataPointer[numOfBytesSoFar]);
 		if(res == 0) {
-			connectedToSocket = false;
-#ifdef SERVER_IMP
-			waitForNetworkConnection();
-#endif
+			handleFatalError();
 			return true;
 		} else if(res == -1) {
-			// Socket has encountered an error
-			handleSocketError();
-			return true;
+			// If errors are nonfatal, attempt another goaround
+			// TODO limit number of tries to prevent a brick
+			if(handleSocketError("during read")) {
+				handleFatalError();
+				return true;
+			}
 		} else {
 			// Just num of bytes
 			// Now have to read this less bytes next time
 			numOfBytesSoFar += res;
 		}
+		std::this_thread::yield();
 	}
 	// If here, success! Operation has encountered no error
 	return false;
 }
 
 bool CommunicateWithNetwork::sendData(void* data, uint32_t sizeToSend) {
-	uint8_t* dataPointer = (uint8_t*)data;
-	uint32_t i           = 0;
-	while(i < sizeToSend) {
-		uint32_t dataSize = std::min(sizeToSend - i, (uint32_t)SEND_BUF);
-		int res           = networkConnection->Send(&dataPointer[i], dataSize);
+	uint8_t* dataPointer     = (uint8_t*)data;
+	uint32_t numOfBytesSoFar = 0;
+	while(numOfBytesSoFar != sizeToSend) {
+		int res = networkConnection->Send(&dataPointer[numOfBytesSoFar], sizeToSend - numOfBytesSoFar);
 		if(res == 0) {
-			// Socket shutdown, TODO inform PC of this
+			handleFatalError();
 			return true;
 		} else if(res == -1) {
-			// Socket has encountered an error
-			handleSocketError();
-			return true;
+			// If errors are nonfatal, attempt another goaround
+			// TODO limit number of tries to prevent a brick
+			if(handleSocketError("during send")) {
+				handleFatalError();
+				return true;
+			}
 		} else {
-			i += res;
+			numOfBytesSoFar += res;
 		}
+		std::this_thread::yield();
 	}
 	return false;
 }
 
+void CommunicateWithNetwork::handleFatalError() {
+	connectedToSocket     = false;
+	otherSideDisconnected = true;
+	networkConnection->Close();
+#ifdef SERVER_IMP
+	waitForNetworkConnection();
+#endif
+#ifdef CLIENT_IMP
+	networkConnection = new CActiveSocket();
+
+	networkConnection->Initialize();
+	waitForIPSelection();
+#endif
+	prepareNetworkConnection();
+}
+
 CommunicateWithNetwork::CommunicateWithNetwork(std::function<void(CommunicateWithNetwork*)> sendCallback, std::function<void(CommunicateWithNetwork*)> recieveCallback) {
 	// Should keep reading network at the beginning
-	keepReading = true;
+	keepReading           = true;
+	connectedToSocket     = false;
+	otherSideDisconnected = false;
 
 	sendQueueDataCallback    = sendCallback;
 	recieveQueueDataCallback = recieveCallback;
@@ -62,8 +84,6 @@ CommunicateWithNetwork::CommunicateWithNetwork(std::function<void(CommunicateWit
 }
 
 void CommunicateWithNetwork::initNetwork() {
-	connectedToSocket = false;
-
 #ifdef CLIENT_IMP
 	// Create the socket straight off
 	networkConnection = new CActiveSocket();
@@ -76,6 +96,7 @@ void CommunicateWithNetwork::initNetwork() {
 	LOGD << "Server initialized";
 
 	listeningServer.SetBlocking();
+	listeningServer.SetReceiveTimeout(SOCKET_TIMEOUT_SECONDS);
 
 	// Listen on localhost
 	listeningServer.Listen(NULL, SERVER_PORT);
@@ -84,9 +105,18 @@ void CommunicateWithNetwork::initNetwork() {
 	waitForNetworkConnection();
 #endif
 
+#ifdef CLIENT_IMP
+	waitForIPSelection();
+#endif
+
 	prepareNetworkConnection();
 
+	// This will loop forever until keepReading is set to false
+	listenForCommands();
+}
+
 #ifdef CLIENT_IMP
+void CommunicateWithNetwork::waitForIPSelection() {
 	// Wait until string is good
 	{
 		std::unique_lock<std::mutex> lk(ipMutex);
@@ -100,22 +130,19 @@ void CommunicateWithNetwork::initNetwork() {
 		// http://www.cplusplus.com/reference/condition_variable/condition_variable/
 		while(!connectedToSocket.load()) {
 			cv.wait(lk);
+			std::this_thread::yield();
 		}
 	}
-
-#endif
-
-	// This will loop forever until keepReading is set to false
-	listenForCommands();
 }
+#endif
 
 void CommunicateWithNetwork::prepareNetworkConnection() {
 	// Set to blocking for all data
 	networkConnection->SetBlocking();
 
-	// Block for 3 seconds to recieve a byte
-	// Within 3 seconds
-	networkConnection->SetReceiveTimeout(5);
+	// Block for 5 seconds to recieve a byte
+	// Within 5 seconds
+	networkConnection->SetReceiveTimeout(SOCKET_TIMEOUT_SECONDS);
 }
 
 #ifdef SERVER_IMP
@@ -132,15 +159,24 @@ void CommunicateWithNetwork::waitForNetworkConnection() {
 			// Connection established, stop while looping
 			LOGD << "Client connected";
 			connectedToSocket = true;
-			return;
+			break;
 		} else {
-			handleSocketError();
+			handleSocketError("during server accept attempts");
 		}
 		// Wait briefly
 		std::this_thread::yield();
 	}
 }
 #endif
+
+bool CommunicateWithNetwork::hasOtherSideJustDisconnected() {
+	if(otherSideDisconnected.load()) {
+		otherSideDisconnected = false;
+		return true;
+	} else {
+		return false;
+	}
+}
 
 void CommunicateWithNetwork::endNetwork() {
 	// Stop reading
@@ -149,36 +185,58 @@ void CommunicateWithNetwork::endNetwork() {
 	networkThread->join();
 }
 
-bool CommunicateWithNetwork::handleSocketError() {
-	// Return true if it's an error, fatal or wouldblock
+bool CommunicateWithNetwork::handleSocketError(const char* extraMessage) {
+	// Return true if it's a fatal error that should try to reconnect sockets
 	//   false if there is no error
 	networkConnection->TranslateSocketError();
-	CSimpleSocket::CSocketError error = networkConnection->GetSocketError();
-	if(error != CSimpleSocket::CSocketError::SocketTimedout) {
+	CSimpleSocket::CSocketError e = networkConnection->GetSocketError();
+	// Some errors are just annoying and spam
+	using E = CSimpleSocket::CSocketError;
+	// clang-format off
+	if(e != E::SocketSuccess
+		&& e != E::SocketTimedout
+		&& e != E::SocketEwouldblock
+		&& e != E::SocketEinprogress
+		&& e != E::SocketInterrupted) {
+		// clang-format on
 #ifdef SERVER_IMP
-		LOGD << networkConnection->DescribeError(error);
+		LOGD << networkConnection->DescribeError(e) << " " << extraMessage;
 #endif
 #ifdef CLIENT_IMP
-		wxLogMessage(networkConnection->DescribeError(error));
+		wxLogMessage(wxString::FromUTF8(networkConnection->DescribeError(e)) + " " + extraMessage);
 #endif
+		// clang-format off
+		if(e == E::SocketConnectionRefused
+			|| e == E::SocketNotconnected
+			|| e == E::SocketConnectionAborted
+			|| e == E::SocketProtocolError
+			|| e == E::SocketFirewallError
+			|| e == E::SocketConnectionReset) {
+			// clang-format on
+			return true;
+		}
 	}
-	// TODO if the error is about the network cutting off, run waitForNetworkConnection again if server
-	// If client, notify app
+	return false;
 }
 
 #ifdef CLIENT_IMP
 uint8_t CommunicateWithNetwork::attemptConnectionToServer(std::string ip) {
-	std::unique_lock<std::mutex> lk(ipMutex);
-	if(!networkConnection->Open(ip.c_str(), SERVER_PORT)) {
-		// There was an error
-		connectedToSocket = false;
-		return false;
+	if(!connectedToSocket) {
+		std::unique_lock<std::mutex> lk(ipMutex);
+		if(!networkConnection->Open(ip.c_str(), SERVER_PORT)) {
+			// There was an error
+			handleSocketError("during connection attempt");
+			return false;
+		} else {
+			// We good, let the network thread know
+			ipAddress         = ip;
+			connectedToSocket = true;
+			cv.notify_one();
+			return true;
+		}
 	} else {
-		// We good, let the network thread know
-		ipAddress         = ip;
-		connectedToSocket = true;
-		cv.notify_one();
-		return true;
+		// The program is already connected, need to do this differently
+		return false;
 	}
 }
 #endif
@@ -195,6 +253,16 @@ void CommunicateWithNetwork::listenForCommands() {
 
 		// Check if socket even has data before doing anything
 		if(networkConnection->Select()) {
+			uint16_t secretKey;
+			if(readData(&secretKey, sizeof(secretKey))) {
+				continue;
+			}
+
+			if(ntohs(secretKey) != SECRET_PACKET_KEY) {
+				// For lightweight safety, append a secret packet key to identify the start of packets
+				continue;
+			}
+
 			if(readData(&dataSize, sizeof(dataSize))) {
 				continue;
 			}
@@ -213,6 +281,7 @@ void CommunicateWithNetwork::listenForCommands() {
 
 			// The message worked, so get the data
 			if(readData(dataToRead, dataSize)) {
+				free(dataToRead);
 				continue;
 			}
 

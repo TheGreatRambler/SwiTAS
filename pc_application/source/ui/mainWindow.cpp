@@ -155,6 +155,12 @@ void MainWindow::handleNetworkQueues() {
 		wxLogMessage(wxString("SWITCH: " + data.log));
 	})
 	// clang-format on
+	if(networkInstance->hasOtherSideJustDisconnected()) {
+		wxLogMessage("Server disconnected, required to re-enter IP");
+		SetStatusText("", 0);
+		// Show the dialog immidently
+		askForIP();
+	}
 }
 
 void MainWindow::addMenuBar() {
