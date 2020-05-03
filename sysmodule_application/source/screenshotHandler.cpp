@@ -9,8 +9,7 @@ void ScreenshotHandler::writeFramebuffer(std::shared_ptr<CommunicateWithNetwork>
 	rc = capsscCaptureJpegScreenShot(&outSize, jpegBuf, JPEG_BUF_SIZE, ViLayerStack::ViLayerStack_ApplicationForDebug, 100000000);
 	if(R_SUCCEEDED(rc)) {
 		LOGD << "Screenshot size: " << outSize;
-		std::vector<uint8_t> buf(outSize);
-		memcpy(buf.data(), jpegBuf, outSize);
+		std::vector<uint8_t> buf(jpegBuf, jpegBuf + outSize);
 		// clang-format off
 		ADD_TO_QUEUE(RecieveGameFramebuffer, networkInstance, {
 			data.buf   = buf;

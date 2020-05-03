@@ -62,7 +62,7 @@ public:
 			rc       = svcDebugActiveProcess(&applicationDebug, applicationPID);
 			isPaused = true;
 
-			screenshotHandler.writeFramebuffer(networkInstance);
+			// screenshotHandler.writeFramebuffer(networkInstance);
 		}
 	}
 

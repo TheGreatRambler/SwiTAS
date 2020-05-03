@@ -258,6 +258,7 @@ bool MainWindow::askForIP() {
 void MainWindow::onClose(wxCloseEvent& event) {
 	// Close project dialog and save
 	projectHandler->saveProject();
+	networkInstance->endNetwork();
 
 	delete wxLog::SetActiveTarget(NULL);
 

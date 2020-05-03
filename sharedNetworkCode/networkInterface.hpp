@@ -8,12 +8,21 @@
 			uint8_t* data; \
 			std::size_t size; \
 			self->serializingProtocol.dataToBinary<Protocol::Struct_##Flag>(structData, &data, &size); \
-			uint32_t dataSize = htons((uint32_t)size); \
+			uint32_t dataSize = htonl((uint32_t)size); \
 			uint16_t secretKey = htons(SECRET_PACKET_KEY); \
 			self->sendData(&secretKey, sizeof(secretKey)); \
-			self->sendData(&dataSize, sizeof(dataSize)); \
-			self->sendData(&structData.flag, sizeof(DataFlag)); \
-			self->sendData(data, size); \
+			if (self->sendData(&dataSize, sizeof(dataSize))) { \
+				free(data); \
+				continue; \
+			} \
+			if (self->sendData(&structData.flag, sizeof(DataFlag))) { \
+				free(data); \
+				continue; \
+			} \
+			if (self->sendData(data, size)) { \
+				free(data); \
+				continue; \
+			} \
 			free(data); \
 		} else { \
 			break; \
@@ -49,7 +58,7 @@
 #define CHECK_QUEUE(networkInstance, Flag, codeBody) { \
 	Protocol::Struct_##Flag data; \
 	while (networkInstance->Queue_##Flag.try_dequeue(data)) { \
-	 codeBody \
+		codeBody \
 	} \
 }
 // clang-format on

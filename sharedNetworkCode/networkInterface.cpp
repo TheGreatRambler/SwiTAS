@@ -11,13 +11,11 @@ bool CommunicateWithNetwork::readData(void* data, uint32_t sizeToRead) {
 		// Have to read at the right index with the right num of bytes
 		int res = networkConnection->Receive(sizeToRead - numOfBytesSoFar, &dataPointer[numOfBytesSoFar]);
 		if(res == 0) {
-			handleFatalError();
 			return true;
 		} else if(res == -1) {
 			// If errors are nonfatal, attempt another goaround
 			// TODO limit number of tries to prevent a brick
 			if(handleSocketError("during read")) {
-				handleFatalError();
 				return true;
 			}
 		} else {
@@ -37,13 +35,11 @@ bool CommunicateWithNetwork::sendData(void* data, uint32_t sizeToSend) {
 	while(numOfBytesSoFar != sizeToSend) {
 		int res = networkConnection->Send(&dataPointer[numOfBytesSoFar], sizeToSend - numOfBytesSoFar);
 		if(res == 0) {
-			handleFatalError();
 			return true;
 		} else if(res == -1) {
 			// If errors are nonfatal, attempt another goaround
 			// TODO limit number of tries to prevent a brick
 			if(handleSocketError("during send")) {
-				handleFatalError();
 				return true;
 			}
 		} else {
@@ -255,24 +251,32 @@ void CommunicateWithNetwork::listenForCommands() {
 		if(networkConnection->Select()) {
 			uint16_t secretKey;
 			if(readData(&secretKey, sizeof(secretKey))) {
+				handleFatalError();
 				continue;
 			}
 
 			if(ntohs(secretKey) != SECRET_PACKET_KEY) {
 				// For lightweight safety, append a secret packet key to identify the start of packets
+				// Don't handle fatal error
 				continue;
 			}
 
 			if(readData(&dataSize, sizeof(dataSize))) {
+				handleFatalError();
 				continue;
 			}
 
 			// Get the number back to the correct representation
 			// https://linux.die.net/man/3/ntohl
-			dataSize = ntohs(dataSize);
+			dataSize = ntohl(dataSize);
+
+#ifdef SERVER_IMP
+			LOGD << dataSize;
+#endif
 
 			// Get the flag now, just a uint8_t, no endian conversion, I think
 			if(readData(&currentFlag, sizeof(currentFlag))) {
+				handleFatalError();
 				continue;
 			}
 			// Flag now tells us the data we expect to recieve
@@ -282,6 +286,7 @@ void CommunicateWithNetwork::listenForCommands() {
 			// The message worked, so get the data
 			if(readData(dataToRead, dataSize)) {
 				free(dataToRead);
+				handleFatalError();
 				continue;
 			}
 
