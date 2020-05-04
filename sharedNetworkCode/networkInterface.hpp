@@ -130,6 +130,10 @@ private:
 	void waitForIPSelection();
 #endif
 
+	void yieldThread() {
+		std::this_thread::yield();
+	}
+
 public:
 	// Protcol for serializing
 	SerializeProtocol serializingProtocol;

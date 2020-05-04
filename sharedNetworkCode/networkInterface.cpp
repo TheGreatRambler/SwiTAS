@@ -10,6 +10,9 @@ bool CommunicateWithNetwork::readData(void* data, uint32_t sizeToRead) {
 	while(numOfBytesSoFar != sizeToRead) {
 		// Have to read at the right index with the right num of bytes
 		int res = networkConnection->Receive(sizeToRead - numOfBytesSoFar, &dataPointer[numOfBytesSoFar]);
+#ifdef SERVER_IMP
+		LOGD << "read error: " << res;
+#endif
 		if(res == 0) {
 			return true;
 		} else if(res == -1) {
@@ -23,7 +26,7 @@ bool CommunicateWithNetwork::readData(void* data, uint32_t sizeToRead) {
 			// Now have to read this less bytes next time
 			numOfBytesSoFar += res;
 		}
-		std::this_thread::yield();
+		yieldThread();
 	}
 	// If here, success! Operation has encountered no error
 	return false;
@@ -45,12 +48,18 @@ bool CommunicateWithNetwork::sendData(void* data, uint32_t sizeToSend) {
 		} else {
 			numOfBytesSoFar += res;
 		}
-		std::this_thread::yield();
+		yieldThread();
 	}
 	return false;
 }
 
 void CommunicateWithNetwork::handleFatalError() {
+#ifdef SERVER_IMP
+	LOGD << "Network fataled";
+#endif
+#ifdef CLIENT_IMP
+	wxLogMessage("Network fataled");
+#endif
 	connectedToSocket     = false;
 	otherSideDisconnected = true;
 	networkConnection->Close();
@@ -126,7 +135,7 @@ void CommunicateWithNetwork::waitForIPSelection() {
 		// http://www.cplusplus.com/reference/condition_variable/condition_variable/
 		while(!connectedToSocket.load()) {
 			cv.wait(lk);
-			std::this_thread::yield();
+			yieldThread();
 		}
 	}
 }
@@ -160,7 +169,7 @@ void CommunicateWithNetwork::waitForNetworkConnection() {
 			handleSocketError("during server accept attempts");
 		}
 		// Wait briefly
-		std::this_thread::yield();
+		yieldThread();
 	}
 }
 #endif
@@ -186,15 +195,20 @@ bool CommunicateWithNetwork::handleSocketError(const char* extraMessage) {
 	//   false if there is no error
 	networkConnection->TranslateSocketError();
 	CSimpleSocket::CSocketError e = networkConnection->GetSocketError();
+#ifdef SERVER_IMP
+	LOGD << "net error: " << e;
+#endif
 	// Some errors are just annoying and spam
 	using E = CSimpleSocket::CSocketError;
 	// clang-format off
-	if(e != E::SocketSuccess
-		&& e != E::SocketTimedout
-		&& e != E::SocketEwouldblock
-		&& e != E::SocketEinprogress
-		&& e != E::SocketInterrupted) {
+	if (e == E::SocketSuccess
+		|| e == E::SocketTimedout
+		|| e == E::SocketEwouldblock
+		|| e == E::SocketEinprogress
+		|| e == E::SocketInterrupted) {
 		// clang-format on
+		return false;
+	} else {
 #ifdef SERVER_IMP
 		LOGD << networkConnection->DescribeError(e) << " " << extraMessage;
 #endif
@@ -210,9 +224,10 @@ bool CommunicateWithNetwork::handleSocketError(const char* extraMessage) {
 			|| e == E::SocketConnectionReset) {
 			// clang-format on
 			return true;
+		} else {
+			return false;
 		}
 	}
-	return false;
 }
 
 #ifdef CLIENT_IMP
@@ -297,7 +312,7 @@ void CommunicateWithNetwork::listenForCommands() {
 			// Free memory
 			free(dataToRead);
 		}
-		std::this_thread::yield();
+		yieldThread();
 	}
 }
 
