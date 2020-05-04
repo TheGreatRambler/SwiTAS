@@ -1,7 +1,6 @@
 #include "controller.hpp"
 
-ControllerHandler::ControllerHandler(Event* vsync, std::shared_ptr<CommunicateWithNetwork> networkImp) {
-	vsyncEvent      = vsync;
+ControllerHandler::ControllerHandler(std::shared_ptr<CommunicateWithNetwork> networkImp) {
 	networkInstance = networkImp;
 
 	// Types include:
@@ -44,13 +43,12 @@ ControllerHandler::ControllerHandler(Event* vsync, std::shared_ptr<CommunicateWi
 }
 
 void ControllerHandler::runFrameWithPause(ControllerData controllerData) {
+	clearState();
 	// Set data one at a time
 	state.joysticks[JOYSTICK_LEFT].dx  = controllerData.LS_X;
 	state.joysticks[JOYSTICK_LEFT].dy  = controllerData.LS_Y;
 	state.joysticks[JOYSTICK_RIGHT].dx = controllerData.RS_X;
 	state.joysticks[JOYSTICK_RIGHT].dy = controllerData.RS_Y;
-
-	state.buttons = 0;
 	for(auto const& button : btnToHidKeys) {
 		if(GET_BIT(controllerData.buttons, button.first)) {
 			state.buttons |= button.second;
@@ -64,15 +62,6 @@ void ControllerHandler::runFrameWithPause(ControllerData controllerData) {
 	pauseApp();
 
 	screenshotHandler.writeFramebuffer(networkInstance);
-}
-
-void ControllerHandler::setApplicationProcessId(u64 pid) {
-	applicationPID = pid;
-	// Instantly pause the app
-	LOGD << "Start pausing app";
-	// TODO implement real stuff
-	waitForVsync();
-	pauseApp();
 }
 
 ControllerHandler::~ControllerHandler() {

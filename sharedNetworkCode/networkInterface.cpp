@@ -7,15 +7,16 @@ bool CommunicateWithNetwork::readData(void* data, uint32_t sizeToRead) {
 	// Will return true on error
 	uint8_t* dataPointer     = (uint8_t*)data;
 	uint32_t numOfBytesSoFar = 0;
-	while(numOfBytesSoFar != sizeToRead) {
-		// Have to read at the right index with the right num of bytes
+	while(numOfBytesSoFar < sizeToRead) {
+// Have to read at the right index with the right num of bytes
+#ifdef SERVER_IMP
+		LOGD << "size: " << sizeToRead << " numbytessofar: " << numOfBytesSoFar;
+#endif
 		int res = networkConnection->Receive(sizeToRead - numOfBytesSoFar, &dataPointer[numOfBytesSoFar]);
 #ifdef SERVER_IMP
 		LOGD << "read error: " << res;
 #endif
-		if(res == 0) {
-			return true;
-		} else if(res == -1) {
+		if(res == 0 || res == -1) {
 			// If errors are nonfatal, attempt another goaround
 			// TODO limit number of tries to prevent a brick
 			if(handleSocketError("during read")) {
@@ -35,11 +36,9 @@ bool CommunicateWithNetwork::readData(void* data, uint32_t sizeToRead) {
 bool CommunicateWithNetwork::sendData(void* data, uint32_t sizeToSend) {
 	uint8_t* dataPointer     = (uint8_t*)data;
 	uint32_t numOfBytesSoFar = 0;
-	while(numOfBytesSoFar != sizeToSend) {
+	while(numOfBytesSoFar < sizeToSend) {
 		int res = networkConnection->Send(&dataPointer[numOfBytesSoFar], sizeToSend - numOfBytesSoFar);
-		if(res == 0) {
-			return true;
-		} else if(res == -1) {
+		if(res == 0 || res == -1) {
 			// If errors are nonfatal, attempt another goaround
 			// TODO limit number of tries to prevent a brick
 			if(handleSocketError("during send")) {
@@ -210,7 +209,7 @@ bool CommunicateWithNetwork::handleSocketError(const char* extraMessage) {
 		return false;
 	} else {
 #ifdef SERVER_IMP
-		LOGD << networkConnection->DescribeError(e) << " " << extraMessage;
+		LOGD << std::string(networkConnection->DescribeError(e)) << " " << std::string(extraMessage);
 #endif
 #ifdef CLIENT_IMP
 		wxLogMessage(wxString::FromUTF8(networkConnection->DescribeError(e)) + " " + extraMessage);

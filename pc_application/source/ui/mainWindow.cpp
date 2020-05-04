@@ -36,6 +36,7 @@ MainWindow::MainWindow()
 			SEND_QUEUE_DATA(SendFlag)
 			SEND_QUEUE_DATA(SendRunFrame)
 			SEND_QUEUE_DATA(SendLogging)
+			SEND_QUEUE_DATA(SendTrackMemoryRegion)
 		},
 		[](CommunicateWithNetwork* self) {
 			RECIEVE_QUEUE_DATA(RecieveFlag)
@@ -43,6 +44,7 @@ MainWindow::MainWindow()
 			RECIEVE_QUEUE_DATA(RecieveGameFramebuffer)
 			RECIEVE_QUEUE_DATA(RecieveApplicationConnected)
 			RECIEVE_QUEUE_DATA(RecieveLogging)
+			RECIEVE_QUEUE_DATA(RecieveMemoryRegion)
 		});
 
 	// DataProcessing can now start with the networking instance

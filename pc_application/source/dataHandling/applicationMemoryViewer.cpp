@@ -1,31 +1,44 @@
 #include "applicationMemoryViewer.hpp"
 
-ApplicationMemoryManager::ApplicationMemoryManager(wxString dir) {
-	projectDir.Open(dir);
+ApplicationMemoryManager::ApplicationMemoryManager(wxString dir, std::shared_ptr<CommunicateWithNetwork> networkImp) {
+	projectDir      = dir;
+	networkInstance = networkImp;
 }
 
-void ApplicationMemoryManager::setMemoryRegion(uint64_t startByte, uint64_t endByte) {
-	memMappedFile.SetPath(projectDir.GetNameWithSep() + wxFileName::GetPathSeparator() + "applicationMemory");
+void ApplicationMemoryManager::addMemoryRegion(uint64_t startByte, uint64_t size) {
+	std::shared_ptr<MemorySection> memorySection = std::make_shared<MemorySection>();
+
+	memorySection->startByte = startByte;
+	memorySection->size      = size;
+
+	memorySection->memMappedFile.SetPath(projectDir + "applicationMemory");
 	// Create dir if needed
-	memMappedFile.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
-	memMappedFile.SetName(wxString::Format("byte_" wxLongLongFmtSpec "_to_byte_" wxLongLongFmtSpec, startByte, endByte));
-	memMappedFile.SetExt("bin");
+	memorySection->memMappedFile.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+	memorySection->memMappedFile.SetName(wxString::Format("byte_%ll_to_byte_%ll", startByte, startByte + size));
+	memorySection->memMappedFile.SetExt("bin");
 
 	wxFile theFile;
 	// Allow reading and writing by all users
-	theFile.Create(memMappedFile.GetFullPath(), true, wxS_DEFAULT);
+	theFile.Create(memorySection->memMappedFile.GetFullPath(), true, wxS_DEFAULT);
 	// Triggers sparse file creation to get the file created at the right size
 	// https://stackoverflow.com/questions/7896035/c-make-a-file-of-a-specific-size
-	theFile.Seek((endByte - startByte) - 1);
+	theFile.Seek(size - 1);
 	theFile.Write("", 1);
 	theFile.Close();
 
 	// Map this file as memory
 	// https://github.com/mandreyel/mio
-	memoryFile = mio::make_mmap_sink(memMappedFile.GetFullPath().ToStdString(), 0, mio::map_entire_file, errorCode);
+	memorySection->memoryFile = mio::make_mmap_sink(memorySection->memMappedFile.GetFullPath().ToStdString(), 0, mio::map_entire_file, errorCode);
+
+	memorySections.insert(std::pair<std::string, std::shared_ptr<MemorySection>>(getID(startByte, size), memorySection));
+
+	ADD_TO_QUEUE(SendTrackMemoryRegion, networkInstance, {
+		data.startByte = startByte;
+		data.size      = size;
+	})
 }
 
-void ApplicationMemoryManager::getData() {
+void ApplicationMemoryManager::getData(uint64_t startByte, uint64_t size) {
 	// Set data like a vector
 	// memoryFile[i] = "data";
 	// This is set upon reading the network
@@ -34,8 +47,8 @@ void ApplicationMemoryManager::getData() {
 	// Upon being written, the hex editor will read the data on update
 }
 
-void ApplicationMemoryManager::stopMemoryCollection() {
-	memoryFile.unmap();
+void ApplicationMemoryManager::stopMemoryCollection(uint64_t startByte, uint64_t size) {
+	memorySections[getID(startByte, size)]->memoryFile.unmap();
 	// Close the file
 	// I don't know how to delete yet
 }

@@ -17,19 +17,7 @@ private:
 
 	Result rc;
 
-	Event* vsyncEvent;
 	std::shared_ptr<CommunicateWithNetwork> networkInstance;
-
-	ScreenshotHandler screenshotHandler;
-
-	Handle applicationDebug;
-	u64 applicationPID;
-
-	void waitForVsync() {
-		rc = eventWait(vsyncEvent, UINT64_MAX);
-		if(R_FAILED(rc))
-			fatalThrow(rc);
-	}
 
 	void clearState() {
 		state.buttons                      = 0;
@@ -46,46 +34,10 @@ private:
 		}
 	}
 
-	uint8_t isPaused = false;
-
 public:
-	ControllerHandler(Event* vsync, std::shared_ptr<CommunicateWithNetwork> networkImp);
+	ControllerHandler(std::shared_ptr<CommunicateWithNetwork> networkImp);
 
 	void runFrameWithPause(ControllerData controllerData);
-
-	void setApplicationProcessId(u64 pid);
-
-	void pauseApp() {
-		if(!isPaused) {
-			// Debug application again
-			LOGD << "Pausing";
-			rc       = svcDebugActiveProcess(&applicationDebug, applicationPID);
-			isPaused = true;
-
-			// screenshotHandler.writeFramebuffer(networkInstance);
-		}
-	}
-
-	void getFramebuffer() {
-		screenshotHandler.writeFramebuffer(networkInstance);
-	}
-
-	Handle getApplicationDebugHandle() {
-		return applicationDebug;
-	}
-
-	void unpauseApp() {
-		if(isPaused) {
-			// Unpause application
-			svcCloseHandle(applicationDebug);
-			isPaused = false;
-		}
-	}
-
-	void reset() {
-		// For now, just this
-		unpauseApp();
-	}
 
 	~ControllerHandler();
 };

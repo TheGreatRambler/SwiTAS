@@ -4,6 +4,7 @@
 #include <memory>
 #include <plog/Log.h>
 #include <switch.h>
+#include <vector>
 
 #include "../../sharedNetworkCode/networkInterface.hpp"
 #include "controller.hpp"
@@ -19,26 +20,50 @@ private:
 
 	Event vsyncEvent;
 
+	// WILL BE MORE
 	std::unique_ptr<ControllerHandler> controller;
 
 	std::shared_ptr<CommunicateWithNetwork> networkInstance;
+
+	std::vector<std::pair<uint64_t, uint64_t>> memoryRegions;
+
+	ScreenshotHandler screenshotHandler;
+
+	Handle applicationDebug;
+	u64 applicationPID;
+
+	uint8_t isPaused = false;
 
 	static char* getAppName(u64 application_id);
 
 	void handleNetworkUpdates();
 	void sendGameInfo();
 
-	GameMemoryInfo getGameMemoryInfo(MemoryInfo memInfo) {
-		GameMemoryInfo info;
-		info.addr            = memInfo.addr;
-		info.size            = memInfo.size;
-		info.type            = memInfo.type;
-		info.attr            = memInfo.attr;
-		info.perm            = memInfo.perm;
-		info.device_refcount = memInfo.device_refcount;
-		info.ipc_refcount    = memInfo.ipc_refcount;
-		info.padding         = memInfo.padding;
-		return info;
+	GameMemoryInfo getGameMemoryInfo(MemoryInfo memInfo);
+
+	void pauseApp();
+
+	void waitForVsync() {
+		rc = eventWait(vsyncEvent, UINT64_MAX);
+		if(R_FAILED(rc))
+			fatalThrow(rc);
+	}
+
+	void getFramebuffer() {
+		screenshotHandler.writeFramebuffer(networkInstance);
+	}
+
+	void unpauseApp() {
+		if(isPaused) {
+			// Unpause application
+			svcCloseHandle(applicationDebug);
+			isPaused = false;
+		}
+	}
+
+	void reset() {
+		// For now, just this
+		unpauseApp();
 	}
 
 public:

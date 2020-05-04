@@ -10,11 +10,13 @@ MainLoop::MainLoop() {
 			SEND_QUEUE_DATA(RecieveGameFramebuffer)
 			SEND_QUEUE_DATA(RecieveApplicationConnected)
 			SEND_QUEUE_DATA(RecieveLogging)
+			SEND_QUEUE_DATA(RecieveMemoryRegion)
 		},
 		[](CommunicateWithNetwork* self) {
 			RECIEVE_QUEUE_DATA(SendFlag)
 			RECIEVE_QUEUE_DATA(SendRunFrame)
 			RECIEVE_QUEUE_DATA(SendLogging)
+			RECIEVE_QUEUE_DATA(SendTrackMemoryRegion)
 		});
 
 	LOGD << "Open display";
@@ -35,7 +37,7 @@ MainLoop::MainLoop() {
 		fatalThrow(rc);
 
 	LOGD << "Create controller";
-	controller = std::make_unique<ControllerHandler>(&vsyncEvent, networkInstance);
+	controller = std::make_unique<ControllerHandler>(networkInstance);
 }
 
 void MainLoop::mainLoopHandler() {
@@ -60,8 +62,9 @@ void MainLoop::mainLoopHandler() {
 
 				// Start the whole main loop
 				// Set the application for the controller
-				LOGD << "Start controller";
-				controller->setApplicationProcessId(applicationProcessId);
+				LOGD << "Start controllers";
+				waitForVsync();
+				pauseApp();
 			}
 		}
 	} else {
@@ -89,7 +92,7 @@ void MainLoop::mainLoopHandler() {
 			internetConnected = false;
 
 			// Force unpause to not get user stuck if network cuts out
-			controller->reset();
+			reset();
 		}
 	}
 
@@ -102,10 +105,15 @@ void MainLoop::mainLoopHandler() {
 }
 
 void MainLoop::handleNetworkUpdates() {
-	CHECK_QUEUE(networkInstance, SendRunFrame,
-		{
-			// blah
-		})
+	CHECK_QUEUE(networkInstance, SendRunFrame, {
+		LOGD << "Running frame";
+		controller->runFrameWithPause(data.controllerData);
+	})
+
+	CHECK_QUEUE(networkInstance, SendTrackMemoryRegion, {
+		LOGD << "Track memory region";
+		memoryRegions.push_back(std::pair<uint64_t, uint64_t>(data.startByte, data.size));
+	})
 
 	CHECK_QUEUE(networkInstance, SendFlag, {
 		if(data.actFlag == SendInfo::PAUSE_DEBUG) {
@@ -113,17 +121,17 @@ void MainLoop::handleNetworkUpdates() {
 			// User able to unpause it
 			if(applicationOpened && internetConnected) {
 				LOGD << "Pause app";
-				controller->pauseApp();
+				pauseApp();
 			}
 		} else if(data.actFlag == SendInfo::UNPAUSE_DEBUG) {
 			if(applicationOpened) {
 				LOGD << "Unpause app";
-				controller->unpauseApp();
+				unpauseApp();
 			}
 		} else if(data.actFlag == SendInfo::GET_FRAMEBUFFER) {
 			if(applicationOpened) {
 				LOGD << "Get framebuffer";
-				controller->getFramebuffer();
+				getFramebuffer();
 			}
 		}
 	})
@@ -174,6 +182,41 @@ char* MainLoop::getAppName(u64 application_id) {
 		}
 	}
 	return (char*)"Game Not Defined";
+}
+
+GameMemoryInfo MainLoop::getGameMemoryInfo(MemoryInfo memInfo) {
+	GameMemoryInfo info;
+	info.addr            = memInfo.addr;
+	info.size            = memInfo.size;
+	info.type            = memInfo.type;
+	info.attr            = memInfo.attr;
+	info.perm            = memInfo.perm;
+	info.device_refcount = memInfo.device_refcount;
+	info.ipc_refcount    = memInfo.ipc_refcount;
+	info.padding         = memInfo.padding;
+	return info;
+}
+
+void MainLoop::pauseApp() {
+	if(!isPaused) {
+		// Debug application again
+		LOGD << "Pausing";
+		rc       = svcDebugActiveProcess(&applicationDebug, applicationPID);
+		isPaused = true;
+
+		screenshotHandler.writeFramebuffer(networkInstance);
+
+		for(auto const& memoryRegion : memoryRegions) {
+			std::vector<uint8_t> buf(memoryRegion.second);
+			svcReadDebugProcessMemory(buf->data(), applicationHandle, memoryRegion.first, memoryRegion.second);
+
+			ADD_TO_QUEUE(RecieveMemoryRegion, networkInstance, {
+				data.startByte = memoryRegion.first;
+				data.size      = memoryRegion.second;
+				data.memory    = buf;
+			})
+		}
+	}
 }
 
 MainLoop::~MainLoop() {

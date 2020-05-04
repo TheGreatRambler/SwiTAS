@@ -23,6 +23,8 @@ enum DataFlag : uint8_t {
 	RecieveGameInfo,
 	SendFlag,
 	SendLogging,
+	SendTrackMemoryRegion,
+	RecieveMemoryRegion,
 	RecieveLogging,
 	RecieveFlag,
 	RecieveApplicationConnected,
@@ -76,6 +78,17 @@ namespace Protocol {
 	DEFINE_STRUCT(SendLogging,
 		std::string log;
 	, self.log)
+
+	DEFINE_STRUCT(SendTrackMemoryRegion,
+		uint64_t startByte;
+		uint64_t size;
+	, self.startByte, self.size)
+
+	DEFINE_STRUCT(RecieveMemoryRegion,
+		uint64_t startByte;
+		uint64_t size;
+		std::vector<uint8_t> memory;
+	, self.startByte, self.size, self.memory)
 
 	DEFINE_STRUCT(RecieveLogging,
 		std::string log;
