@@ -6,23 +6,12 @@
 		Protocol::Struct_##Flag structData; \
 		if(self->Queue_##Flag.try_dequeue(structData)) { \
 			uint8_t* data; \
-			std::size_t size; \
+			uint32_t size; \
 			self->serializingProtocol.dataToBinary<Protocol::Struct_##Flag>(structData, &data, &size); \
-			uint32_t dataSize = htonl((uint32_t)size); \
-			uint16_t secretKey = htons(SECRET_PACKET_KEY); \
-			self->sendData(&secretKey, sizeof(secretKey)); \
-			if (self->sendData(&dataSize, sizeof(dataSize))) { \
-				free(data); \
-				continue; \
-			} \
-			if (self->sendData(&structData.flag, sizeof(DataFlag))) { \
-				free(data); \
-				continue; \
-			} \
-			if (self->sendData(data, size)) { \
-				free(data); \
-				continue; \
-			} \
+			uint32_t dataSize = htonl(size); \
+			self->sendData(&dataSize, sizeof(dataSize)); \
+			self->sendData(&structData.flag, sizeof(DataFlag)); \
+			self->sendData(data, size); \
 			free(data); \
 		} else { \
 			break; \
@@ -96,8 +85,8 @@
 
 #define SERVER_PORT 6978
 // Random number to define the beginning of packets, just in case of errors
-#define SECRET_PACKET_KEY 23578
-#define SOCKET_TIMEOUT_SECONDS 5
+#define SOCKET_TIMEOUT_SECONDS 1
+#define SOCKET_TIMEOUT_MICROSECONDS 0
 
 class CommunicateWithNetwork {
 private:
@@ -105,8 +94,12 @@ private:
 	CPassiveSocket listeningServer;
 #endif
 
+	using E = CSimpleSocket::CSocketError;
+
 	std::atomic_bool connectedToSocket;
 	std::atomic_bool otherSideDisconnected;
+
+	CSimpleSocket::CSocketError lastError;
 
 	std::shared_ptr<std::thread> networkThread;
 
@@ -165,7 +158,7 @@ public:
 	// Called in the network thread
 	void listenForCommands();
 
-	bool readData(void* data, uint32_t sizeToRead);
+	bool readData(void* data, uint32_t sizeToRead, bool returnOnTimeout);
 	bool sendData(void* data, uint32_t sizeToSend);
 
 	void initNetwork();

@@ -98,6 +98,7 @@ void FrameViewerCanvas::setPrimaryBitmap(wxBitmap* primaryBitmap) {
 	}
 
 	primary = primaryBitmap;
+	Refresh();
 }
 
 void FrameViewerCanvas::setSecondaryBitmap(wxBitmap* secondaryBitmap) {

@@ -2,24 +2,27 @@
 
 // Decided upon using https://github.com/DFHack/clsocket
 
-bool CommunicateWithNetwork::readData(void* data, uint32_t sizeToRead) {
+bool CommunicateWithNetwork::readData(void* data, uint32_t sizeToRead, bool returnOnTimeout) {
 	// Info about pointers here: https://stackoverflow.com/a/4318446
 	// Will return true on error
 	uint8_t* dataPointer     = (uint8_t*)data;
 	uint32_t numOfBytesSoFar = 0;
-	while(numOfBytesSoFar < sizeToRead) {
-// Have to read at the right index with the right num of bytes
-#ifdef SERVER_IMP
-		LOGD << "size: " << sizeToRead << " numbytessofar: " << numOfBytesSoFar;
-#endif
+	while(numOfBytesSoFar != sizeToRead) {
+		// Send data while stuck
+		sendQueueDataCallback(this);
+		// Have to read at the right index with the right num of bytes
 		int res = networkConnection->Receive(sizeToRead - numOfBytesSoFar, &dataPointer[numOfBytesSoFar]);
-#ifdef SERVER_IMP
-		LOGD << "read error: " << res;
-#endif
-		if(res == 0 || res == -1) {
+		if(res == 0) {
+			return true;
+		} else if(res == -1) {
 			// If errors are nonfatal, attempt another goaround
 			// TODO limit number of tries to prevent a brick
 			if(handleSocketError("during read")) {
+				handleFatalError();
+				return true;
+			}
+			if(returnOnTimeout && (lastError == E::SocketTimedout || lastError == E::SocketEwouldblock)) {
+				// Not a fatal, but return
 				return true;
 			}
 		} else {
@@ -27,27 +30,37 @@ bool CommunicateWithNetwork::readData(void* data, uint32_t sizeToRead) {
 			// Now have to read this less bytes next time
 			numOfBytesSoFar += res;
 		}
-		yieldThread();
+		std::this_thread::yield();
 	}
 	// If here, success! Operation has encountered no error
 	return false;
 }
 
 bool CommunicateWithNetwork::sendData(void* data, uint32_t sizeToSend) {
+#ifdef SERVER_IMP
+	LOGD << sizeToSend << " bytes sent";
+#endif
 	uint8_t* dataPointer     = (uint8_t*)data;
 	uint32_t numOfBytesSoFar = 0;
-	while(numOfBytesSoFar < sizeToSend) {
+	while(numOfBytesSoFar != sizeToSend) {
 		int res = networkConnection->Send(&dataPointer[numOfBytesSoFar], sizeToSend - numOfBytesSoFar);
-		if(res == 0 || res == -1) {
+		if(res == 0) {
+			return true;
+		} else if(res == -1) {
 			// If errors are nonfatal, attempt another goaround
 			// TODO limit number of tries to prevent a brick
 			if(handleSocketError("during send")) {
+				handleFatalError();
+				return true;
+			}
+			if(lastError == E::SocketTimedout || lastError == E::SocketEwouldblock) {
+				// Not a fatal, but return
 				return true;
 			}
 		} else {
 			numOfBytesSoFar += res;
 		}
-		yieldThread();
+		std::this_thread::yield();
 	}
 	return false;
 }
@@ -100,7 +113,7 @@ void CommunicateWithNetwork::initNetwork() {
 	LOGD << "Server initialized";
 
 	listeningServer.SetBlocking();
-	listeningServer.SetReceiveTimeout(SOCKET_TIMEOUT_SECONDS);
+	listeningServer.SetReceiveTimeout(SOCKET_TIMEOUT_SECONDS, SOCKET_TIMEOUT_MICROSECONDS);
 
 	// Listen on localhost
 	listeningServer.Listen(NULL, SERVER_PORT);
@@ -146,7 +159,7 @@ void CommunicateWithNetwork::prepareNetworkConnection() {
 
 	// Block for 5 seconds to recieve a byte
 	// Within 5 seconds
-	networkConnection->SetReceiveTimeout(SOCKET_TIMEOUT_SECONDS);
+	networkConnection->SetReceiveTimeout(SOCKET_TIMEOUT_SECONDS, SOCKET_TIMEOUT_MICROSECONDS);
 }
 
 #ifdef SERVER_IMP
@@ -194,11 +207,8 @@ bool CommunicateWithNetwork::handleSocketError(const char* extraMessage) {
 	//   false if there is no error
 	networkConnection->TranslateSocketError();
 	CSimpleSocket::CSocketError e = networkConnection->GetSocketError();
-#ifdef SERVER_IMP
-	LOGD << "net error: " << e;
-#endif
+	lastError                     = e;
 	// Some errors are just annoying and spam
-	using E = CSimpleSocket::CSocketError;
 	// clang-format off
 	if (e == E::SocketSuccess
 		|| e == E::SocketTimedout
@@ -258,59 +268,37 @@ void CommunicateWithNetwork::listenForCommands() {
 	// Socket connected, do things
 	// The format works by preceding each message with a uint16_t with the size of the message, then the message right after it
 	while(keepReading.load()) {
-		// First, check over every outgoing queue to detect outgoing data
 		sendQueueDataCallback(this);
 
-		// Check if socket even has data before doing anything
-		if(networkConnection->Select()) {
-			uint16_t secretKey;
-			if(readData(&secretKey, sizeof(secretKey))) {
-				handleFatalError();
-				continue;
-			}
-
-			if(ntohs(secretKey) != SECRET_PACKET_KEY) {
-				// For lightweight safety, append a secret packet key to identify the start of packets
-				// Don't handle fatal error
-				continue;
-			}
-
-			if(readData(&dataSize, sizeof(dataSize))) {
-				handleFatalError();
-				continue;
-			}
-
-			// Get the number back to the correct representation
-			// https://linux.die.net/man/3/ntohl
-			dataSize = ntohl(dataSize);
-
-#ifdef SERVER_IMP
-			LOGD << dataSize;
-#endif
-
-			// Get the flag now, just a uint8_t, no endian conversion, I think
-			if(readData(&currentFlag, sizeof(currentFlag))) {
-				handleFatalError();
-				continue;
-			}
-			// Flag now tells us the data we expect to recieve
-
-			dataToRead = (uint8_t*)malloc(dataSize);
-
-			// The message worked, so get the data
-			if(readData(dataToRead, dataSize)) {
-				free(dataToRead);
-				handleFatalError();
-				continue;
-			}
-
-			// Now, check over incoming queues, they will absorb the data if they correspond with the flag
-			// Keep in mind, this is not the main thread, so can't act upon the data instantly
-			recieveQueueDataCallback(this);
-
-			// Free memory
-			free(dataToRead);
+		if(readData(&dataSize, sizeof(dataSize), true)) {
+			continue;
 		}
+
+		// Get the number back to the correct representation
+		// https://linux.die.net/man/3/ntohl
+		dataSize = ntohl(dataSize);
+
+		// Get the flag now, just a uint8_t, no endian conversion, I think
+		if(readData(&currentFlag, sizeof(currentFlag), false)) {
+			continue;
+		}
+		// Flag now tells us the data we expect to recieve
+
+		dataToRead = (uint8_t*)malloc(dataSize);
+
+		// The message worked, so get the data
+		if(readData(dataToRead, dataSize, false)) {
+			free(dataToRead);
+			continue;
+		}
+
+		// Now, check over incoming queues, they will absorb the data if they correspond with the flag
+		// Keep in mind, this is not the main thread, so can't act upon the data instantly
+		recieveQueueDataCallback(this);
+
+		// Free memory
+		free(dataToRead);
+
 		yieldThread();
 	}
 }

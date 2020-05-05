@@ -37,7 +37,7 @@ private:
 public:
 	ControllerHandler(std::shared_ptr<CommunicateWithNetwork> networkImp);
 
-	void runFrameWithPause(ControllerData controllerData);
+	void runFrame(ControllerData controllerData);
 
 	~ControllerHandler();
 };

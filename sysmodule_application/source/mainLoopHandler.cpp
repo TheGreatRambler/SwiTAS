@@ -107,7 +107,11 @@ void MainLoop::mainLoopHandler() {
 void MainLoop::handleNetworkUpdates() {
 	CHECK_QUEUE(networkInstance, SendRunFrame, {
 		LOGD << "Running frame";
-		controller->runFrameWithPause(data.controllerData);
+		controller->runFrame(data.controllerData);
+		unpauseApp();
+		screenshotHandler.writeFramebuffer(networkInstance);
+		waitForVsync();
+		pauseApp();
 	})
 
 	CHECK_QUEUE(networkInstance, SendTrackMemoryRegion, {
@@ -130,8 +134,11 @@ void MainLoop::handleNetworkUpdates() {
 			}
 		} else if(data.actFlag == SendInfo::GET_FRAMEBUFFER) {
 			if(applicationOpened) {
+				// I don't think you can get a framebuffer while it's paused
+				/*
 				LOGD << "Get framebuffer";
-				getFramebuffer();
+				screenshotHandler.writeFramebuffer(networkInstance);
+				*/
 			}
 		}
 	})
@@ -146,12 +153,11 @@ void MainLoop::sendGameInfo() {
 		// https://github.com/switchbrew/switch-examples/blob/master/account/source/main.c
 
 		uint64_t addr = 0;
-		controller->pauseApp();
-		Handle applicationHandle = controller->getApplicationDebugHandle();
+		pauseApp();
 		while(true) {
 			MemoryInfo info = { 0 };
 			uint32_t pageinfo;
-			rc = svcQueryDebugProcessMemory(&info, &pageinfo, applicationHandle, addr);
+			rc = svcQueryDebugProcessMemory(&info, &pageinfo, applicationDebug, addr);
 			memoryInfo.push_back(getGameMemoryInfo(info));
 			addr += info.size;
 
@@ -159,7 +165,7 @@ void MainLoop::sendGameInfo() {
 				break;
 			}
 		}
-		controller->unpauseApp();
+		unpauseApp();
 
 		ADD_TO_QUEUE(RecieveGameInfo, networkInstance, {
 			data.applicationName      = gameName;
@@ -201,14 +207,14 @@ void MainLoop::pauseApp() {
 	if(!isPaused) {
 		// Debug application again
 		LOGD << "Pausing";
-		rc       = svcDebugActiveProcess(&applicationDebug, applicationPID);
-		isPaused = true;
-
 		screenshotHandler.writeFramebuffer(networkInstance);
+
+		rc       = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
+		isPaused = true;
 
 		for(auto const& memoryRegion : memoryRegions) {
 			std::vector<uint8_t> buf(memoryRegion.second);
-			svcReadDebugProcessMemory(buf->data(), applicationHandle, memoryRegion.first, memoryRegion.second);
+			svcReadDebugProcessMemory(buf.data(), applicationDebug, memoryRegion.first, memoryRegion.second);
 
 			ADD_TO_QUEUE(RecieveMemoryRegion, networkInstance, {
 				data.startByte = memoryRegion.first;
@@ -224,7 +230,7 @@ MainLoop::~MainLoop() {
 	rc = hiddbgReleaseHdlsWorkBuffer();
 
 	// Make absolutely sure the app is unpaused on close
-	controller->reset();
+	reset();
 
 	hiddbgExit();
 }

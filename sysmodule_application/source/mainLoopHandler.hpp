@@ -17,6 +17,7 @@ private:
 	std::string gameName;
 	uint8_t applicationOpened = false;
 	uint8_t internetConnected = false;
+	Handle applicationDebug;
 
 	Event vsyncEvent;
 
@@ -28,9 +29,6 @@ private:
 	std::vector<std::pair<uint64_t, uint64_t>> memoryRegions;
 
 	ScreenshotHandler screenshotHandler;
-
-	Handle applicationDebug;
-	u64 applicationPID;
 
 	uint8_t isPaused = false;
 
@@ -44,13 +42,9 @@ private:
 	void pauseApp();
 
 	void waitForVsync() {
-		rc = eventWait(vsyncEvent, UINT64_MAX);
+		rc = eventWait(&vsyncEvent, UINT64_MAX);
 		if(R_FAILED(rc))
 			fatalThrow(rc);
-	}
-
-	void getFramebuffer() {
-		screenshotHandler.writeFramebuffer(networkInstance);
 	}
 
 	void unpauseApp() {

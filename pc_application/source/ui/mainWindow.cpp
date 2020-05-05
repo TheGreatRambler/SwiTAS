@@ -142,6 +142,8 @@ void MainWindow::onIdle(wxIdleEvent& event) {
 		// Listen to joystick
 		bottomUI->listenToJoystick();
 	}
+
+	handleNetworkQueues();
 }
 
 void MainWindow::handleNetworkQueues() {

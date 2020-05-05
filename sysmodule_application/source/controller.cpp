@@ -42,7 +42,7 @@ ControllerHandler::ControllerHandler(std::shared_ptr<CommunicateWithNetwork> net
 	setInput();
 }
 
-void ControllerHandler::runFrameWithPause(ControllerData controllerData) {
+void ControllerHandler::runFrame(ControllerData controllerData) {
 	clearState();
 	// Set data one at a time
 	state.joysticks[JOYSTICK_LEFT].dx  = controllerData.LS_X;
@@ -56,12 +56,6 @@ void ControllerHandler::runFrameWithPause(ControllerData controllerData) {
 	}
 
 	setInput();
-
-	unpauseApp();
-	waitForVsync();
-	pauseApp();
-
-	screenshotHandler.writeFramebuffer(networkInstance);
 }
 
 ControllerHandler::~ControllerHandler() {
