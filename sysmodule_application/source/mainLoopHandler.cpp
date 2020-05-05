@@ -43,6 +43,8 @@ MainLoop::MainLoop() {
 void MainLoop::mainLoopHandler() {
 	rc = pmdmntGetApplicationProcessId(&applicationProcessId);
 
+	LOGD << "Main loop";
+
 	// Lifted from switchPresense-Rewritten
 	if(R_SUCCEEDED(rc)) {
 		// Application connected
@@ -99,9 +101,7 @@ void MainLoop::mainLoopHandler() {
 	// handle network updates always, they are stored in the queue regardless of the internet
 	handleNetworkUpdates();
 
-	// A reasonable time to sleep the thread
-	// 1 millisecond
-	svcSleepThread(1000000);
+	std::this_thread::yield();
 }
 
 void MainLoop::handleNetworkUpdates() {

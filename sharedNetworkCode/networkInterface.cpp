@@ -8,6 +8,7 @@ bool CommunicateWithNetwork::readData(void* data, uint32_t sizeToRead) {
 	uint8_t* dataPointer     = (uint8_t*)data;
 	uint32_t numOfBytesSoFar = 0;
 	while(numOfBytesSoFar != sizeToRead) {
+		std::this_thread::yield();
 		// Have to read at the right index with the right num of bytes
 		int res = networkConnection->Receive(sizeToRead - numOfBytesSoFar, &dataPointer[numOfBytesSoFar]);
 		if(res == 0) {
@@ -23,19 +24,16 @@ bool CommunicateWithNetwork::readData(void* data, uint32_t sizeToRead) {
 			// Now have to read this less bytes next time
 			numOfBytesSoFar += res;
 		}
-		yieldThread();
 	}
 	// If here, success! Operation has encountered no error
 	return false;
 }
 
 bool CommunicateWithNetwork::sendData(void* data, uint32_t sizeToSend) {
-#ifdef SERVER_IMP
-	LOGD << sizeToSend << " bytes sent";
-#endif
 	uint8_t* dataPointer     = (uint8_t*)data;
 	uint32_t numOfBytesSoFar = 0;
 	while(numOfBytesSoFar != sizeToSend) {
+		std::this_thread::yield();
 		int res = networkConnection->Send(&dataPointer[numOfBytesSoFar], sizeToSend - numOfBytesSoFar);
 		if(res == 0) {
 			return true;
@@ -48,7 +46,6 @@ bool CommunicateWithNetwork::sendData(void* data, uint32_t sizeToSend) {
 		} else {
 			numOfBytesSoFar += res;
 		}
-		yieldThread();
 	}
 	return false;
 }
@@ -134,20 +131,25 @@ void CommunicateWithNetwork::waitForIPSelection() {
 		// Wait for IP address of server to be set
 		// http://www.cplusplus.com/reference/condition_variable/condition_variable/
 		while(!connectedToSocket.load()) {
+			if(!keepReading) {
+				break;
+			}
 			cv.wait(lk);
-			yieldThread();
+			std::this_thread::yield();
 		}
 	}
 }
 #endif
 
 void CommunicateWithNetwork::prepareNetworkConnection() {
-	// Set to blocking for all data
-	networkConnection->SetBlocking();
+	if(keepReading) {
+		// Set to blocking for all data
+		networkConnection->SetBlocking();
 
-	// Block for 5 seconds to recieve a byte
-	// Within 5 seconds
-	networkConnection->SetReceiveTimeout(SOCKET_TIMEOUT_SECONDS, SOCKET_TIMEOUT_MICROSECONDS);
+		// Block for 5 seconds to recieve a byte
+		// Within 5 seconds
+		networkConnection->SetReceiveTimeout(SOCKET_TIMEOUT_SECONDS, SOCKET_TIMEOUT_MICROSECONDS);
+	}
 }
 
 #ifdef SERVER_IMP
@@ -155,7 +157,7 @@ void CommunicateWithNetwork::waitForNetworkConnection() {
 	// This will block INDEFINITELY if there is no client, so
 	// Literally nothing can happen until this finishes
 	networkConnection = NULL;
-	while(true) {
+	while(keepReading) {
 		LOGD << "Waiting for connection";
 		// This will block until an error or otherwise
 		networkConnection = listeningServer.Accept();
@@ -169,7 +171,7 @@ void CommunicateWithNetwork::waitForNetworkConnection() {
 			handleSocketError("during server accept attempts");
 		}
 		// Wait briefly
-		yieldThread();
+		std::this_thread::yield();
 	}
 }
 #endif
@@ -261,27 +263,26 @@ void CommunicateWithNetwork::listenForCommands() {
 	writeThread = std::make_shared<std::thread>(&CommunicateWithNetwork::writeFunc, this);
 
 	while(keepReading) {
+		std::this_thread::yield();
+
 		if(networkError) {
 			handleFatalError();
 			networkError = false;
 		}
-		yieldThread();
+
+		std::this_thread::yield();
 	}
 
 	// Stop read and write threads
 	readAndWriteThreadsContinue = false;
 	readThread->join();
 	writeThread->join();
-
-	// Socket connected, do things
-	// The format works by preceding each message with a uint16_t with the size of the message, then the message right after it
-	while(keepReading.load()) {
-		sendQueueDataCallback(this);
-	}
 }
 
 void CommunicateWithNetwork::readFunc() {
 	while(readAndWriteThreadsContinue) {
+		std::this_thread::yield();
+
 		if(!networkError) {
 			if(readData(&dataSize, sizeof(dataSize))) {
 				networkError = true;
@@ -316,17 +317,19 @@ void CommunicateWithNetwork::readFunc() {
 			free(dataToRead);
 		}
 
-		yieldThread();
+		std::this_thread::yield();
 	}
 }
 
 void CommunicateWithNetwork::writeFunc() {
 	while(readAndWriteThreadsContinue) {
+		std::this_thread::yield();
+
 		if(!networkError) {
 			sendQueueDataCallback(this);
 		}
 
-		yieldThread();
+		std::this_thread::yield();
 	}
 }
 

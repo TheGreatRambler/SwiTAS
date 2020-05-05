@@ -85,7 +85,7 @@
 
 #define SERVER_PORT 6978
 // Random number to define the beginning of packets, just in case of errors
-#define SOCKET_TIMEOUT_SECONDS 5
+#define SOCKET_TIMEOUT_SECONDS 2
 #define SOCKET_TIMEOUT_MICROSECONDS 0
 
 class CommunicateWithNetwork {
@@ -127,10 +127,6 @@ private:
 #ifdef CLIENT_IMP
 	void waitForIPSelection();
 #endif
-
-	void yieldThread() {
-		std::this_thread::yield();
-	}
 
 	void readFunc();
 	void writeFunc();

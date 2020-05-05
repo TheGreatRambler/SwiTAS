@@ -125,7 +125,7 @@ void ProjectHandler::saveProject() {
 			// Kinda annoying, but actually break up the vector and add each part with the size
 			for(auto const& controllerData : *(savestateHookBlock->inputs)) {
 				uint8_t* data;
-				std::size_t dataSize;
+				uint32_t dataSize;
 				serializeProtocol.dataToBinary<ControllerData>(*controllerData, &data, &dataSize);
 				uint8_t sizeToPrint = (uint8_t)dataSize;
 				// Probably endian issues

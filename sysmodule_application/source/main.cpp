@@ -152,5 +152,7 @@ int main(int argc, char* argv[]) {
 		mainLoop.mainLoopHandler();
 	}
 
+	LOGD << "Loop done";
+
 	return 0;
 }
