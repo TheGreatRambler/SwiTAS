@@ -85,7 +85,7 @@
 
 #define SERVER_PORT 6978
 // Random number to define the beginning of packets, just in case of errors
-#define SOCKET_TIMEOUT_SECONDS 1
+#define SOCKET_TIMEOUT_SECONDS 5
 #define SOCKET_TIMEOUT_MICROSECONDS 0
 
 class CommunicateWithNetwork {
@@ -99,9 +99,14 @@ private:
 	std::atomic_bool connectedToSocket;
 	std::atomic_bool otherSideDisconnected;
 
+	std::atomic_bool readAndWriteThreadsContinue;
+	std::atomic_bool networkError;
+
 	CSimpleSocket::CSocketError lastError;
 
 	std::shared_ptr<std::thread> networkThread;
+	std::shared_ptr<std::thread> readThread;
+	std::shared_ptr<std::thread> writeThread;
 
 	std::function<void(CommunicateWithNetwork*)> sendQueueDataCallback;
 	std::function<void(CommunicateWithNetwork*)> recieveQueueDataCallback;
@@ -126,6 +131,9 @@ private:
 	void yieldThread() {
 		std::this_thread::yield();
 	}
+
+	void readFunc();
+	void writeFunc();
 
 public:
 	// Protcol for serializing
@@ -158,7 +166,7 @@ public:
 	// Called in the network thread
 	void listenForCommands();
 
-	bool readData(void* data, uint32_t sizeToRead, bool returnOnTimeout);
+	bool readData(void* data, uint32_t sizeToRead);
 	bool sendData(void* data, uint32_t sizeToSend);
 
 	void initNetwork();

@@ -2,14 +2,12 @@
 
 // Decided upon using https://github.com/DFHack/clsocket
 
-bool CommunicateWithNetwork::readData(void* data, uint32_t sizeToRead, bool returnOnTimeout) {
+bool CommunicateWithNetwork::readData(void* data, uint32_t sizeToRead) {
 	// Info about pointers here: https://stackoverflow.com/a/4318446
 	// Will return true on error
 	uint8_t* dataPointer     = (uint8_t*)data;
 	uint32_t numOfBytesSoFar = 0;
 	while(numOfBytesSoFar != sizeToRead) {
-		// Send data while stuck
-		sendQueueDataCallback(this);
 		// Have to read at the right index with the right num of bytes
 		int res = networkConnection->Receive(sizeToRead - numOfBytesSoFar, &dataPointer[numOfBytesSoFar]);
 		if(res == 0) {
@@ -18,11 +16,6 @@ bool CommunicateWithNetwork::readData(void* data, uint32_t sizeToRead, bool retu
 			// If errors are nonfatal, attempt another goaround
 			// TODO limit number of tries to prevent a brick
 			if(handleSocketError("during read")) {
-				handleFatalError();
-				return true;
-			}
-			if(returnOnTimeout && (lastError == E::SocketTimedout || lastError == E::SocketEwouldblock)) {
-				// Not a fatal, but return
 				return true;
 			}
 		} else {
@@ -30,7 +23,7 @@ bool CommunicateWithNetwork::readData(void* data, uint32_t sizeToRead, bool retu
 			// Now have to read this less bytes next time
 			numOfBytesSoFar += res;
 		}
-		std::this_thread::yield();
+		yieldThread();
 	}
 	// If here, success! Operation has encountered no error
 	return false;
@@ -50,17 +43,12 @@ bool CommunicateWithNetwork::sendData(void* data, uint32_t sizeToSend) {
 			// If errors are nonfatal, attempt another goaround
 			// TODO limit number of tries to prevent a brick
 			if(handleSocketError("during send")) {
-				handleFatalError();
-				return true;
-			}
-			if(lastError == E::SocketTimedout || lastError == E::SocketEwouldblock) {
-				// Not a fatal, but return
 				return true;
 			}
 		} else {
 			numOfBytesSoFar += res;
 		}
-		std::this_thread::yield();
+		yieldThread();
 	}
 	return false;
 }
@@ -265,39 +253,78 @@ void CommunicateWithNetwork::listenForCommands() {
 #ifdef SERVER_IMP
 	LOGD << "Client has connected";
 #endif
+
+	networkError                = false;
+	readAndWriteThreadsContinue = true;
+
+	readThread  = std::make_shared<std::thread>(&CommunicateWithNetwork::readFunc, this);
+	writeThread = std::make_shared<std::thread>(&CommunicateWithNetwork::writeFunc, this);
+
+	while(keepReading) {
+		if(networkError) {
+			handleFatalError();
+			networkError = false;
+		}
+		yieldThread();
+	}
+
+	// Stop read and write threads
+	readAndWriteThreadsContinue = false;
+	readThread->join();
+	writeThread->join();
+
 	// Socket connected, do things
 	// The format works by preceding each message with a uint16_t with the size of the message, then the message right after it
 	while(keepReading.load()) {
 		sendQueueDataCallback(this);
+	}
+}
 
-		if(readData(&dataSize, sizeof(dataSize), true)) {
-			continue;
-		}
+void CommunicateWithNetwork::readFunc() {
+	while(readAndWriteThreadsContinue) {
+		if(!networkError) {
+			if(readData(&dataSize, sizeof(dataSize))) {
+				networkError = true;
+				continue;
+			}
 
-		// Get the number back to the correct representation
-		// https://linux.die.net/man/3/ntohl
-		dataSize = ntohl(dataSize);
+			// Get the number back to the correct representation
+			// https://linux.die.net/man/3/ntohl
+			dataSize = ntohl(dataSize);
 
-		// Get the flag now, just a uint8_t, no endian conversion, I think
-		if(readData(&currentFlag, sizeof(currentFlag), false)) {
-			continue;
-		}
-		// Flag now tells us the data we expect to recieve
+			// Get the flag now, just a uint8_t, no endian conversion, I think
+			if(readData(&currentFlag, sizeof(currentFlag))) {
+				networkError = true;
+				continue;
+			}
+			// Flag now tells us the data we expect to recieve
 
-		dataToRead = (uint8_t*)malloc(dataSize);
+			dataToRead = (uint8_t*)malloc(dataSize);
 
-		// The message worked, so get the data
-		if(readData(dataToRead, dataSize, false)) {
+			// The message worked, so get the data
+			if(readData(dataToRead, dataSize)) {
+				free(dataToRead);
+				networkError = true;
+				continue;
+			}
+
+			// Now, check over incoming queues, they will absorb the data if they correspond with the flag
+			// Keep in mind, this is not the main thread, so can't act upon the data instantly
+			recieveQueueDataCallback(this);
+
+			// Free memory
 			free(dataToRead);
-			continue;
 		}
 
-		// Now, check over incoming queues, they will absorb the data if they correspond with the flag
-		// Keep in mind, this is not the main thread, so can't act upon the data instantly
-		recieveQueueDataCallback(this);
+		yieldThread();
+	}
+}
 
-		// Free memory
-		free(dataToRead);
+void CommunicateWithNetwork::writeFunc() {
+	while(readAndWriteThreadsContinue) {
+		if(!networkError) {
+			sendQueueDataCallback(this);
+		}
 
 		yieldThread();
 	}
