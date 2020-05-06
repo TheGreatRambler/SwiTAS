@@ -8,7 +8,7 @@ bool CommunicateWithNetwork::readData(void* data, uint32_t sizeToRead) {
 	uint8_t* dataPointer     = (uint8_t*)data;
 	uint32_t numOfBytesSoFar = 0;
 	while(numOfBytesSoFar != sizeToRead) {
-		std::this_thread::yield();
+		yieldThread();
 		// Have to read at the right index with the right num of bytes
 		int res = networkConnection->Receive(sizeToRead - numOfBytesSoFar, &dataPointer[numOfBytesSoFar]);
 		if(res == 0) {
@@ -33,7 +33,7 @@ bool CommunicateWithNetwork::sendData(void* data, uint32_t sizeToSend) {
 	uint8_t* dataPointer     = (uint8_t*)data;
 	uint32_t numOfBytesSoFar = 0;
 	while(numOfBytesSoFar != sizeToSend) {
-		std::this_thread::yield();
+		yieldThread();
 		int res = networkConnection->Send(&dataPointer[numOfBytesSoFar], sizeToSend - numOfBytesSoFar);
 		if(res == 0) {
 			return true;
@@ -135,7 +135,7 @@ void CommunicateWithNetwork::waitForIPSelection() {
 				break;
 			}
 			cv.wait(lk);
-			std::this_thread::yield();
+			yieldThread();
 		}
 	}
 }
@@ -171,7 +171,7 @@ void CommunicateWithNetwork::waitForNetworkConnection() {
 			handleSocketError("during server accept attempts");
 		}
 		// Wait briefly
-		std::this_thread::yield();
+		yieldThread();
 	}
 }
 #endif
@@ -186,6 +186,10 @@ bool CommunicateWithNetwork::hasOtherSideJustDisconnected() {
 }
 
 void CommunicateWithNetwork::endNetwork() {
+#ifdef SERVER_IMP
+	LOGD << "Request to close server";
+#endif
+
 	// Stop reading
 	keepReading = false;
 	// Wait for thread to end
@@ -256,33 +260,28 @@ void CommunicateWithNetwork::listenForCommands() {
 	LOGD << "Client has connected";
 #endif
 
-	networkError                = false;
-	readAndWriteThreadsContinue = true;
+	networkError = false;
 
-	readThread  = std::make_shared<std::thread>(&CommunicateWithNetwork::readFunc, this);
-	writeThread = std::make_shared<std::thread>(&CommunicateWithNetwork::writeFunc, this);
+	readThread = std::make_shared<std::thread>(&CommunicateWithNetwork::readFunc, this);
 
 	while(keepReading) {
-		std::this_thread::yield();
-
 		if(networkError) {
 			handleFatalError();
 			networkError = false;
+		} else {
+			// Send data in this thread to save on threads
+			sendQueueDataCallback(this);
 		}
 
-		std::this_thread::yield();
+		yieldThread();
 	}
 
-	// Stop read and write threads
-	readAndWriteThreadsContinue = false;
+	// Stop read thread
 	readThread->join();
-	writeThread->join();
 }
 
 void CommunicateWithNetwork::readFunc() {
-	while(readAndWriteThreadsContinue) {
-		std::this_thread::yield();
-
+	while(keepReading) {
 		if(!networkError) {
 			if(readData(&dataSize, sizeof(dataSize))) {
 				networkError = true;
@@ -317,19 +316,7 @@ void CommunicateWithNetwork::readFunc() {
 			free(dataToRead);
 		}
 
-		std::this_thread::yield();
-	}
-}
-
-void CommunicateWithNetwork::writeFunc() {
-	while(readAndWriteThreadsContinue) {
-		std::this_thread::yield();
-
-		if(!networkError) {
-			sendQueueDataCallback(this);
-		}
-
-		std::this_thread::yield();
+		yieldThread();
 	}
 }
 

@@ -99,14 +99,12 @@ private:
 	std::atomic_bool connectedToSocket;
 	std::atomic_bool otherSideDisconnected;
 
-	std::atomic_bool readAndWriteThreadsContinue;
 	std::atomic_bool networkError;
 
 	CSimpleSocket::CSocketError lastError;
 
 	std::shared_ptr<std::thread> networkThread;
 	std::shared_ptr<std::thread> readThread;
-	std::shared_ptr<std::thread> writeThread;
 
 	std::function<void(CommunicateWithNetwork*)> sendQueueDataCallback;
 	std::function<void(CommunicateWithNetwork*)> recieveQueueDataCallback;
@@ -130,6 +128,10 @@ private:
 
 	void readFunc();
 	void writeFunc();
+
+	void yieldThread() {
+		std::this_thread::sleep_for(std::chrono::milliseconds(3));
+	}
 
 public:
 	// Protcol for serializing
