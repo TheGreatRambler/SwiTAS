@@ -21,62 +21,83 @@ void ProjectHandler::loadProject() {
 	// First, find each savestate hook block
 	rapidjson::Document jsonSettings = HELPERS::getSettingsFile(settingsFileName.GetFullPath().ToStdString());
 
-	rapidjson::GenericArray<false, rapidjson::Value> savestateBlocksArray = jsonSettings["savestateBlocks"].GetArray();
-	std::vector<std::string> savestateFileNames(savestateBlocksArray.Size());
+	auto playersArray = jsonSettings["players"].GetArray();
 
-	for(auto const& savestateBlock : savestateBlocksArray) {
-		int index                 = savestateBlock["index"].GetInt();
-		savestateFileNames[index] = std::string(savestateBlock["filename"].GetString());
+	std::vector<uint8_t> playerList(playersArray.Size());
+
+	uint8_t playerIndex = 0;
+	for(auto const& player : playersArray) {
+		uint8_t index     = player["index"].GetInt();
+		playerList[index] = playerIndex;
+		playerIndex++;
 	}
 
-	// The savestate hooks to create
-	AllSavestateHookBlocks savestateHookBlocks(savestateFileNames.size());
+	// The players to create
+	AllPlayers players(playersArray.Size());
 
-	std::size_t index = 0;
-	for(auto const& savestateFileName : savestateFileNames) {
-		wxString path = projectDir.GetNameWithSep() + wxString(savestateFileName);
-		if(wxFileName(path).FileExists()) {
+	for(auto const& player : playerList) {
+		auto savestateBlocksArray = playersArray[player]["savestateHooks"].GetArray();
 
-			// Load up the inputs
-			wxFFileInputStream inputsFileStream(path, "rb");
-			wxZlibInputStream inputsDecompressStream(inputsFileStream, wxZLIB_ZLIB | wxZLIB_NO_HEADER);
+		std::vector<std::string> savestateFileNames(savestateBlocksArray.Size());
 
-			wxMemoryOutputStream dataStream;
-			dataStream.Write(inputsDecompressStream);
-
-			wxStreamBuffer* streamBuffer = dataStream.GetOutputStreamBuffer();
-			uint8_t* bufferPointer       = (uint8_t*)streamBuffer->GetBufferStart();
-			std::size_t bufferSize       = streamBuffer->GetBufferSize();
-
-			std::shared_ptr<SavestateHook> savestateHook = std::make_shared<SavestateHook>();
-			SavestateHookBlock block                     = std::make_shared<std::vector<std::shared_ptr<ControllerData>>>();
-
-			// Loop through each part and unserialize it
-			// This is 0% endian safe
-			std::size_t sizeRead = 0;
-			while(sizeRead != bufferSize) {
-				// Find the size part first
-				uint8_t sizeOfControllerData = bufferPointer[sizeRead];
-				sizeRead += sizeof(sizeOfControllerData);
-				// Load the data
-				std::shared_ptr<ControllerData> controllerData = std::make_shared<ControllerData>();
-
-				serializeProtocol.binaryToData<ControllerData>(*controllerData, &bufferPointer[sizeRead], sizeOfControllerData);
-				// For now, just add each frame one at a time, no optimization
-				block->push_back(controllerData);
-				sizeRead += sizeOfControllerData;
-			}
-
-			savestateHook->inputs = block;
-			savestateHook->dHash  = std::string(savestateBlocksArray[index]["dHash"].GetString());
-
-			wxImage screenshotImage(projectDir.GetNameWithSep() + wxString::FromUTF8(savestateBlocksArray[index]["screenshot"].GetString()), wxBITMAP_TYPE_JPEG);
-			savestateHook->screenshot = new wxBitmap(screenshotImage);
-
-			savestateHookBlocks[index] = savestateHook;
-			index++;
+		for(auto const& savestateBlock : savestateBlocksArray) {
+			int index                 = savestateBlock["index"].GetInt();
+			savestateFileNames[index] = std::string(savestateBlock["filename"].GetString());
 		}
+
+		std::shared_ptr<AllSavestateHookBlocks> savestateHookBlocks = std::make_shared<AllSavestateHookBlocks>(savestateFileNames.size());
+
+		std::size_t index = 0;
+		for(auto const& savestateFileName : savestateFileNames) {
+			wxString path = projectDir.GetNameWithSep() + wxString(savestateFileName);
+			if(wxFileName(path).FileExists()) {
+
+				// Load up the inputs
+				wxFFileInputStream inputsFileStream(path, "rb");
+				wxZlibInputStream inputsDecompressStream(inputsFileStream, wxZLIB_ZLIB | wxZLIB_NO_HEADER);
+
+				wxMemoryOutputStream dataStream;
+				dataStream.Write(inputsDecompressStream);
+
+				wxStreamBuffer* streamBuffer = dataStream.GetOutputStreamBuffer();
+				uint8_t* bufferPointer       = (uint8_t*)streamBuffer->GetBufferStart();
+				std::size_t bufferSize       = streamBuffer->GetBufferSize();
+
+				std::shared_ptr<SavestateHook> savestateHook = std::make_shared<SavestateHook>();
+				SavestateHookBlock block                     = std::make_shared<std::vector<std::shared_ptr<ControllerData>>>();
+
+				// Loop through each part and unserialize it
+				// This is 0% endian safe
+				std::size_t sizeRead = 0;
+				while(sizeRead != bufferSize) {
+					// Find the size part first
+					uint8_t sizeOfControllerData = bufferPointer[sizeRead];
+					sizeRead += sizeof(sizeOfControllerData);
+					// Load the data
+					std::shared_ptr<ControllerData> controllerData = std::make_shared<ControllerData>();
+
+					serializeProtocol.binaryToData<ControllerData>(*controllerData, &bufferPointer[sizeRead], sizeOfControllerData);
+					// For now, just add each frame one at a time, no optimization
+					block->push_back(controllerData);
+					sizeRead += sizeOfControllerData;
+				}
+
+				savestateHook->inputs = block;
+				savestateHook->dHash  = std::string(savestateBlocksArray[index]["dHash"].GetString());
+
+				wxImage screenshotImage(projectDir.GetNameWithSep() + wxString::FromUTF8(savestateBlocksArray[index]["screenshot"].GetString()), wxBITMAP_TYPE_JPEG);
+				savestateHook->screenshot = new wxBitmap(screenshotImage);
+
+				savestateHookBlocks->push_back(savestateHook);
+				index++;
+			}
+		}
+
+		players.push_back(savestateHookBlocks);
 	}
+
+	// Set dataProcessing
+	dataProcessing->setAllPlayers(players);
 
 	for(auto const& videoEntryJson : jsonSettings["videos"].GetArray()) {
 		std::shared_ptr<VideoEntry> videoEntry = std::make_shared<VideoEntry>();
@@ -90,81 +111,99 @@ void ProjectHandler::loadProject() {
 
 		videoComparisonEntries.push_back(videoEntry);
 	}
-
-	// Set dataProcessing
-	dataProcessing->setAllSavestateHookBlocks(savestateHookBlocks);
 }
 
 void ProjectHandler::saveProject() {
 	if(projectWasLoaded) {
 		// Save each set of data one by one
 
-		AllSavestateHookBlocks& savestateHookBlocks = dataProcessing->getAllSavestateHookBlocks();
-
 		rapidjson::Document settingsJSON;
 		settingsJSON.SetObject();
 
-		rapidjson::Value savestateHooksJSON(rapidjson::kArrayType);
-		std::size_t index = 0;
-		for(auto const& savestateHookBlock : savestateHookBlocks) {
+		rapidjson::Value playersJSON(rapidjson::kArrayType);
 
-			wxFileName inputsFilename = getProjectStart();
-			inputsFilename.SetName(wxString::Format("savestate_block_%lld", index));
-			inputsFilename.SetExt("bin");
+		AllPlayers& players = dataProcessing->getAllPlayers();
 
-			wxFileName screenshotFileName = getProjectStart();
-			screenshotFileName.SetName(wxString::Format("savestate_block_%lld_screenshot", index));
-			screenshotFileName.SetExt("jpg");
+		std::size_t playerIndexNum = 0;
+		for(auto const& player : players) {
+			AllSavestateHookBlocks& savestateHookBlocks = *player;
 
-			savestateHookBlock->screenshot->SaveFile(screenshotFileName.GetFullPath(), wxBITMAP_TYPE_JPEG);
+			rapidjson::Value savestateHooksJSON(rapidjson::kArrayType);
+			std::size_t savestateHookIndexNum = 0;
+			for(auto const& savestateHookBlock : savestateHookBlocks) {
 
-			// Delete file if already present and use binary mode
-			wxFFileOutputStream inputsFileStream(inputsFilename.GetFullPath(), "wb");
-			wxZlibOutputStream inputsCompressStream(inputsFileStream, compressionLevel, wxZLIB_ZLIB | wxZLIB_NO_HEADER);
+				wxFileName inputsFilename = getProjectStart();
+				inputsFilename.SetName(wxString::Format("savestate_block_%lld_player_%d", savestateHookIndexNum, playerIndexNum));
+				inputsFilename.SetExt("bin");
 
-			// Kinda annoying, but actually break up the vector and add each part with the size
-			for(auto const& controllerData : *(savestateHookBlock->inputs)) {
-				uint8_t* data;
-				uint32_t dataSize;
-				serializeProtocol.dataToBinary<ControllerData>(*controllerData, &data, &dataSize);
-				uint8_t sizeToPrint = (uint8_t)dataSize;
-				// Probably endian issues
-				inputsCompressStream.WriteAll(&sizeToPrint, sizeof(sizeToPrint));
-				inputsCompressStream.WriteAll(data, dataSize);
+				wxFileName screenshotFileName = getProjectStart();
+				screenshotFileName.SetName(wxString::Format("savestate_block_%lld_player_%d_screenshot", savestateHookIndexNum, playerIndexNum));
+				screenshotFileName.SetExt("jpg");
+
+				savestateHookBlock->screenshot->SaveFile(screenshotFileName.GetFullPath(), wxBITMAP_TYPE_JPEG);
+
+				// Delete file if already present and use binary mode
+				wxFFileOutputStream inputsFileStream(inputsFilename.GetFullPath(), "wb");
+				wxZlibOutputStream inputsCompressStream(inputsFileStream, compressionLevel, wxZLIB_ZLIB | wxZLIB_NO_HEADER);
+
+				// Kinda annoying, but actually break up the vector and add each part with the size
+				for(auto const& controllerData : *(savestateHookBlock->inputs)) {
+					uint8_t* data;
+					uint32_t dataSize;
+					serializeProtocol.dataToBinary<ControllerData>(*controllerData, &data, &dataSize);
+					uint8_t sizeToPrint = (uint8_t)dataSize;
+					// Probably endian issues
+					inputsCompressStream.WriteAll(&sizeToPrint, sizeof(sizeToPrint));
+					inputsCompressStream.WriteAll(data, dataSize);
+				}
+
+				inputsCompressStream.Sync();
+				inputsCompressStream.Close();
+				inputsFileStream.Close();
+
+				// Add the item in the savestateHooks JSON
+				rapidjson::Value savestateHookJSON(rapidjson::kObjectType);
+				inputsFilename.MakeRelativeTo(getProjectStart().GetFullPath());
+				screenshotFileName.MakeRelativeTo(getProjectStart().GetFullPath());
+
+				rapidjson::Value savestateHook;
+				wxString savestateHookPath = inputsFilename.GetFullPath();
+				savestateHook.SetString(savestateHookPath.c_str(), strlen(savestateHookPath.c_str()), settingsJSON.GetAllocator());
+
+				rapidjson::Value savestateHookIndex;
+				savestateHookIndex.SetUint(savestateHookIndexNum);
+
+				rapidjson::Value dHash;
+				dHash.SetString(savestateHookBlock->dHash.c_str(), strlen(savestateHookBlock->dHash.c_str()), settingsJSON.GetAllocator());
+
+				rapidjson::Value screenshot;
+				wxString screenshotPath = screenshotFileName.GetFullPath();
+				screenshot.SetString(screenshotPath.c_str(), strlen(screenshotPath.c_str()), settingsJSON.GetAllocator());
+
+				savestateHookJSON.AddMember("filename", savestateHook, settingsJSON.GetAllocator());
+				savestateHookJSON.AddMember("index", savestateHookIndex, settingsJSON.GetAllocator());
+				savestateHookJSON.AddMember("dHash", dHash, settingsJSON.GetAllocator());
+				savestateHookJSON.AddMember("screenshot", screenshot, settingsJSON.GetAllocator());
+
+				savestateHooksJSON.PushBack(savestateHookJSON, settingsJSON.GetAllocator());
+
+				savestateHookIndexNum++;
 			}
 
-			inputsCompressStream.Sync();
-			inputsCompressStream.Close();
-			inputsFileStream.Close();
+			rapidjson::Value playerJSON(rapidjson::kObjectType);
 
-			// Add the item in the savestateHooks JSON
-			rapidjson::Value savestateHookJSON(rapidjson::kObjectType);
-			inputsFilename.MakeRelativeTo(getProjectStart().GetFullPath());
-			screenshotFileName.MakeRelativeTo(getProjectStart().GetFullPath());
+			rapidjson::Value playerIndex;
+			playerIndex.SetUint(playerIndexNum);
 
-			rapidjson::Value savestateHook;
-			wxString savestateHookPath = inputsFilename.GetFullPath();
-			savestateHook.SetString(savestateHookPath.c_str(), strlen(savestateHookPath.c_str()), settingsJSON.GetAllocator());
+			playerJSON.AddMember("index", playerIndex, settingsJSON.GetAllocator());
+			playerJSON.AddMember("savestateBlocks", savestateHooksJSON, settingsJSON.GetAllocator());
 
-			rapidjson::Value savestateHookIndex;
-			savestateHookIndex.SetUint(index);
+			playersJSON.PushBack(playerJSON, settingsJSON.GetAllocator());
 
-			rapidjson::Value dHash;
-			dHash.SetString(savestateHookBlock->dHash.c_str(), strlen(savestateHookBlock->dHash.c_str()), settingsJSON.GetAllocator());
-
-			rapidjson::Value screenshot;
-			wxString screenshotPath = screenshotFileName.GetFullPath();
-			screenshot.SetString(screenshotPath.c_str(), strlen(screenshotPath.c_str()), settingsJSON.GetAllocator());
-
-			savestateHookJSON.AddMember("filename", savestateHook, settingsJSON.GetAllocator());
-			savestateHookJSON.AddMember("index", savestateHookIndex, settingsJSON.GetAllocator());
-			savestateHookJSON.AddMember("dHash", dHash, settingsJSON.GetAllocator());
-			savestateHookJSON.AddMember("screenshot", screenshot, settingsJSON.GetAllocator());
-
-			savestateHooksJSON.PushBack(savestateHookJSON, settingsJSON.GetAllocator());
-
-			index++;
+			playerIndexNum++;
 		}
+
+		settingsJSON.AddMember("players", playersJSON, settingsJSON.GetAllocator());
 
 		rapidjson::Value recentVideoEntries(rapidjson::kArrayType);
 		for(auto const& videoEntry : videoComparisonEntries) {
@@ -205,7 +244,6 @@ void ProjectHandler::saveProject() {
 			recentVideoEntries.PushBack(newRecentVideo, settingsJSON.GetAllocator());
 		}
 
-		settingsJSON.AddMember("savestateBlocks", savestateHooksJSON, settingsJSON.GetAllocator());
 		settingsJSON.AddMember("videos", recentVideoEntries, settingsJSON.GetAllocator());
 
 		// Write out the savestate blocks in the settings, TODO, add more

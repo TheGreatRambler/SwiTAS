@@ -6,6 +6,7 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 
 	// All savestate hook blocks
 	// Start with default, will get cleared later
+	addNewPlayer();
 	addNewSavestateHook("", new wxBitmap());
 
 	// This can't handle it :(
@@ -248,9 +249,6 @@ void DataProcessing::onRightClick(wxContextMenuEvent& event) {
 
 void DataProcessing::onSelect(wxListEvent& event) {
 	// The current frame has changed
-	if(selectedFrameCallbackVideoViewer) {
-		selectedFrameCallbackVideoViewer(event.GetIndex() - currentFrame);
-	}
 	setCurrentFrame(event.GetIndex());
 }
 
@@ -353,6 +351,9 @@ void DataProcessing::setCurrentFrame(FrameNum frameNum) {
 		EnsureVisible(frameNum);
 
 		modifyCurrentFrameViews(currentFrame);
+		if(selectedFrameCallbackVideoViewer) {
+			selectedFrameCallbackVideoViewer(event.GetIndex() - currentFrame);
+		}
 
 		Refresh();
 	}
@@ -391,13 +392,15 @@ void DataProcessing::runFrame() {
 
 		Refresh();
 
-		// Send to switch to run
-		std::shared_ptr<ControllerData> controllerDatas = inputsList->at(currentRunFrame);
-		// clang-format off
-		ADD_TO_QUEUE(SendRunFrame, networkInstance, {
-			data.controllerData = *controllerDatas;
-		})
-		// clang-format on
+		// Send to switch to run for each player
+		for(uint8_t playerIndex = 0; playerIndex < allPlayers.size(); playerIndex++) {
+			std::shared_ptr<ControllerData> controllerDatas = allPlayers[playerIndex]->at(currentSavestateHook)->inputs->at(currentRunFrame);
+			ADD_TO_QUEUE(SendRunFrame, networkInstance, {
+				data.controllerData = *controllerDatas;
+				data.frame          = currentRunFrame;
+				data.playerIndex    = playerIndex;
+			})
+		}
 	}
 }
 
@@ -436,25 +439,55 @@ void DataProcessing::onCacheHint(wxListEvent& event) {
 }
 
 void DataProcessing::addNewSavestateHook(std::string dHash, wxBitmap* screenshot) {
-	std::shared_ptr<SavestateHook> savestateHook = std::make_shared<SavestateHook>();
-	savestateHook->dHash                         = dHash;
-	savestateHook->screenshot                    = screenshot;
-	savestateHook->inputs                        = std::make_shared<std::vector<FrameData>>();
-	savestateHookBlocks.push_back(savestateHook);
-	savestateHookBlocks[0]->inputs->push_back(std::make_shared<ControllerData>());
-	// NOTE: There must be at least one block with one input when this is loaded
-	// Automatically, the first block is always at index 0
-	setSavestateHook(savestateHookBlocks.size() - 1);
+	// Has to be done for every controller
+	for(uint8_t i = 0; i < allPlayers.size(); i++) {
+		std::shared_ptr<SavestateHook> savestateHook = std::make_shared<SavestateHook>();
+		savestateHook->dHash                         = dHash;
+		savestateHook->screenshot                    = screenshot;
+		savestateHook->inputs                        = std::make_shared<std::vector<FrameData>>();
+		allPlayers[i]->push_back(savestateHook);
+		allPlayers[i]->at(0)->inputs->push_back(std::make_shared<ControllerData>());
+		// NOTE: There must be at least one block with one input when this is loaded
+		// Automatically, the first block is always at index 0
+		setSavestateHook(allPlayers[i]->size() - 1);
+	}
 }
 
 void DataProcessing::setSavestateHook(SavestateBlockNum index) {
-	inputsList = savestateHookBlocks[index]->inputs;
+	inputsList = allPlayers[viewingPlayerIndex]->at(index)->inputs;
 	SetItemCount(inputsList->size());
 	setCurrentFrame(0);
-	currentRunFrame   = 0;
-	currentImageFrame = 0;
+	currentRunFrame      = 0;
+	currentImageFrame    = 0;
+	currentSavestateHook = index;
 
 	Refresh();
+}
+
+void DataProcessing::removeSavestateHook(SavestateBlockNum index) {
+	if(allPlayers[viewingPlayerIndex]->size() > 1) {
+		allPlayers[viewingPlayerIndex]->erase(allPlayers[viewingPlayerIndex]->begin() + index);
+		setSavestateHook(allPlayers[viewingPlayerIndex]->size() - 1);
+	}
+}
+
+void DataProcessing::addNewPlayer() {
+	allPlayers.push_back(std::make_shared<std::vector<std::shared_ptr<SavestateHook>>>());
+	setPlayer(allPlayers.size() - 1);
+}
+
+void DataProcessing::setPlayer(uint8_t playerIndex) {
+	viewingPlayerIndex = playerIndex;
+	if(allPlayers[viewingPlayerIndex]->size() != 0) {
+		setSavestateHook(currentSavestateHook);
+	}
+}
+
+void DataProcessing::removePlayer(uint8_t playerIndex) {
+	if(allPlayers.size() > 1) {
+		allPlayers.erase(allPlayers.begin() + playerIndex);
+		setPlayer(allPlayers.size() - 1);
+	}
 }
 
 std::shared_ptr<ControllerData> DataProcessing::getFrame(FrameNum frame) const {

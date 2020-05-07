@@ -147,6 +147,7 @@ public:
 	ADD_QUEUE(RecieveFlag)
 	ADD_QUEUE(RecieveApplicationConnected)
 	ADD_QUEUE(SendTrackMemoryRegion)
+	ADD_QUEUE(SendSetNumControllers)
 	ADD_QUEUE(RecieveMemoryRegion)
 
 	CommunicateWithNetwork(std::function<void(CommunicateWithNetwork*)> sendCallback, std::function<void(CommunicateWithNetwork*)> recieveCallback);

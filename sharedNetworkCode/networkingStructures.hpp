@@ -24,6 +24,7 @@ enum DataFlag : uint8_t {
 	SendFlag,
 	SendLogging,
 	SendTrackMemoryRegion,
+	SendSetNumControllers,
 	RecieveMemoryRegion,
 	RecieveLogging,
 	RecieveFlag,
@@ -59,6 +60,7 @@ namespace Protocol {
 		// This is the frame of this frame, the framebuffer
 		// sent back will be one more than this frame
 		uint32_t frame;
+		uint8_t playerIndex;
 	, self.controllerData)
 
 	// Recieve all of the game's framebuffer
@@ -89,6 +91,10 @@ namespace Protocol {
 		uint64_t startByte;
 		uint64_t size;
 	, self.startByte, self.size)
+
+	DEFINE_STRUCT(SendSetNumControllers,
+		uint8_t size;
+	, self.size)
 
 	DEFINE_STRUCT(RecieveMemoryRegion,
 		uint64_t startByte;

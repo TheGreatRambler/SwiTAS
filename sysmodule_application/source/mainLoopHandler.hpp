@@ -68,6 +68,10 @@ private:
 	// to match a TAS controller, so you don't get stuck while in TAS mode
 	void matchFirstControllerToTASController();
 
+	// Deletes all controllers upon being started, hid:dbg as well as normal
+	// controllers. Otherwise, it sets the number of hid:dbg controllers
+	void setControllerNumber(uint8_t numOfControllers);
+
 public:
 	MainLoop();
 

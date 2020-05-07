@@ -29,6 +29,7 @@
 #include "buttonData.hpp"
 
 typedef std::shared_ptr<ControllerData> FrameData;
+typedef std::vector<std::shared_ptr<std::vector<std::shared_ptr<SavestateHook>>>> AllPlayers;
 typedef std::vector<std::shared_ptr<SavestateHook>> AllSavestateHookBlocks;
 
 class ButtonData;
@@ -43,7 +44,8 @@ private:
 	// Button data instance (never changes)
 	std::shared_ptr<ButtonData> buttonData;
 	// Vector holding the savestate hook blocks
-	AllSavestateHookBlocks savestateHookBlocks;
+	// Is a vector of the players as well
+	AllPlayers allPlayers;
 
 	bool tethered = false;
 
@@ -54,6 +56,10 @@ private:
 	FrameNum currentRunFrame;
 	// What is the image you can see
 	FrameNum currentImageFrame;
+	// Savestate hook number
+	SavestateBlockNum currentSavestateHook = 0;
+
+	uint8_t viewingPlayerIndex = 0;
 
 	wxImageList imageList;
 
@@ -127,14 +133,18 @@ public:
 	void triggerCurrentFrameChanges();
 
 	AllSavestateHookBlocks& getAllSavestateHookBlocks() {
-		return savestateHookBlocks;
+		return *allPlayers[viewingPlayerIndex];
 	}
 
-	void setAllSavestateHookBlocks(AllSavestateHookBlocks blocks) {
+	void setAllPlayers(AllPlayers players) {
 		// Called by projectHandler when loading
 		// It has to have at least one block with one input
-		savestateHookBlocks = blocks;
-		setSavestateHook(0);
+		allPlayers = players;
+		setPlayer(0);
+	}
+
+	AllPlayers& getAllPlayers() {
+		return allPlayers;
 	}
 
 	void setTethered(bool flag) {
@@ -159,8 +169,12 @@ public:
 	void onCacheHint(wxListEvent& event);
 
 	void addNewSavestateHook(std::string dHash, wxBitmap* screenshot);
-
 	void setSavestateHook(SavestateBlockNum index);
+	void removeSavestateHook(SavestateBlockNum index);
+
+	void addNewPlayer();
+	void setPlayer(uint8_t playerIndex);
+	void removePlayer(uint8_t playerIndex);
 
 	std::shared_ptr<ControllerData> getFrame(FrameNum frame) const;
 

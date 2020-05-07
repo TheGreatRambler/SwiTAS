@@ -17,6 +17,7 @@ MainLoop::MainLoop() {
 			RECIEVE_QUEUE_DATA(SendRunFrame)
 			RECIEVE_QUEUE_DATA(SendLogging)
 			RECIEVE_QUEUE_DATA(SendTrackMemoryRegion)
+			RECIEVE_QUEUE_DATA(SendSetNumControllers)
 		});
 
 	LOGD << "Open display";
@@ -35,9 +36,6 @@ MainLoop::MainLoop() {
 	rc = hiddbgAttachHdlsWorkBuffer();
 	if(R_FAILED(rc))
 		fatalThrow(rc);
-
-	LOGD << "Create controller";
-	controllers.push_back(std::make_unique<ControllerHandler>(networkInstance));
 }
 
 void MainLoop::mainLoopHandler() {
@@ -139,6 +137,12 @@ void MainLoop::handleNetworkUpdates() {
 		} else if(data.actFlag == SendInfo::RUN_BLANK_FRAME) {
 		}
 	})
+
+	// clang-format off
+	CHECK_QUEUE(networkInstance, SendSetNumControllers, {
+		setControllerNumber(data.size);
+	})
+	// clang-format on
 }
 
 void MainLoop::sendGameInfo() {
@@ -185,6 +189,14 @@ char* MainLoop::getAppName(u64 application_id) {
 		}
 	}
 	return (char*)"Game Not Defined";
+}
+
+void MainLoop::setControllerNumber(uint8_t numOfControllers) {
+	controllers.clear();
+	for(uint8_t i = 0l i < numOfControllers; i++) {
+		controllers.push_back(std::make_unique<ControllerHandler>(networkInstance));
+	}
+	// Now, user is required to reconnect any controllers manually
 }
 
 GameMemoryInfo MainLoop::getGameMemoryInfo(MemoryInfo memInfo) {
