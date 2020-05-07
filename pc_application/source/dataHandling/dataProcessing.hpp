@@ -51,11 +51,11 @@ private:
 
 	// Current frames (all relative to the start of the savestate hook block)
 	// What you can edit
-	FrameNum currentFrame;
+	FrameNum currentFrame = 0;
 	// What is the state of the switch
-	FrameNum currentRunFrame;
+	FrameNum currentRunFrame = 0;
 	// What is the image you can see
-	FrameNum currentImageFrame;
+	FrameNum currentImageFrame = 0;
 	// Savestate hook number
 	SavestateBlockNum currentSavestateHook = 0;
 
@@ -68,6 +68,7 @@ private:
 	std::function<void(FrameNum)> selectedFrameCallbackVideoViewer;
 	std::function<void(FrameNum, FrameNum)> viewableInputsCallback;
 	std::function<void(FrameNum, FrameNum, FrameNum)> changingSelectedFrameCallback;
+	std::function<void(uint8_t, uint8_t)> playerInfoCallback;
 
 	// Network instance for sending to switch
 	std::shared_ptr<CommunicateWithNetwork> networkInstance;
@@ -130,6 +131,7 @@ public:
 	void setSelectedFrameCallbackVideoViewer(std::function<void(FrameNum)> callback);
 	void setViewableInputsCallback(std::function<void(FrameNum, FrameNum)> callback);
 	void setChangingSelectedFrameCallback(std::function<void(FrameNum, FrameNum, FrameNum)> callback);
+	void setPlayerInfoCallback(std::function<void(uint8_t, uint8_t)> callback);
 	void triggerCurrentFrameChanges();
 
 	AllSavestateHookBlocks& getAllSavestateHookBlocks() {
@@ -151,7 +153,7 @@ public:
 		tethered = flag;
 	}
 
-	void modifySavestate() {}
+	void modifySavestate() { }
 
 	void setCurrentFrame(FrameNum frameNum);
 
@@ -175,6 +177,8 @@ public:
 	void addNewPlayer();
 	void setPlayer(uint8_t playerIndex);
 	void removePlayer(uint8_t playerIndex);
+	void removeThisPlayer();
+	void sendPlayerNum();
 
 	std::shared_ptr<ControllerData> getFrame(FrameNum frame) const;
 

@@ -93,6 +93,11 @@ private:
 	void callOk() {
 		// Use this frame as the savestate
 		operationSuccessful = true;
+		// clang-format off
+	    ADD_TO_QUEUE(SendFlag, networkInstance, {
+		    data.actFlag = SendInfo::START_TAS_MODE;
+	    })
+		// clang-format on
 		Close(true);
 	}
 

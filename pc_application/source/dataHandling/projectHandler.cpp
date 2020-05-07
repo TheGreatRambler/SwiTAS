@@ -98,6 +98,7 @@ void ProjectHandler::loadProject() {
 
 	// Set dataProcessing
 	dataProcessing->setAllPlayers(players);
+	dataProcessing->sendPlayerNum();
 
 	for(auto const& videoEntryJson : jsonSettings["videos"].GetArray()) {
 		std::shared_ptr<VideoEntry> videoEntry = std::make_shared<VideoEntry>();

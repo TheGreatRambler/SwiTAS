@@ -62,8 +62,8 @@ void MainLoop::mainLoopHandler() {
 
 				// Start the whole main loop
 				// Set the application for the controller
-				LOGD << "Start controllers";
-				pauseApp();
+				// LOGD << "Start controllers";
+				// pauseApp();
 			}
 		}
 	} else {
@@ -135,6 +135,9 @@ void MainLoop::handleNetworkUpdates() {
 				screenshotHandler.writeFramebuffer(networkInstance);
 			}
 		} else if(data.actFlag == SendInfo::RUN_BLANK_FRAME) {
+		} else if(data.actFlag == SendInfo::START_TAS_MODE) {
+			LOGD << "Start TAS mode";
+			pauseApp();
 		}
 	})
 
@@ -244,7 +247,7 @@ void MainLoop::pauseApp() {
 	}
 }
 
-void MainLoop::matchFirstControllerToTASController() {}
+void MainLoop::matchFirstControllerToTASController() { }
 
 MainLoop::~MainLoop() {
 	LOGD << "Exiting app";

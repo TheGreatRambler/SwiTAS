@@ -48,6 +48,10 @@ private:
 	wxBitmapButton* frameAdvanceButton;
 	wxBitmapButton* savestateHookCreateButton;
 	wxBitmapButton* savestateHookLoadButton;
+	wxBitmapButton* playerAddButton;
+	wxBitmapButton* playerRemoveButton;
+
+	wxComboBox* playerSelect;
 
 	wxBoxSizer* buttonSizer;
 
@@ -62,10 +66,16 @@ private:
 	// Input instance to get inputs and such
 	DataProcessing* inputData;
 
+	void setPlayerInfo(uint8_t size, uint8_t selected);
+    void playerSelected(wxCommandEvent& event);
+	uint8_t setPlayerFromHere = false;
+
 	void onAddFramePressed(wxCommandEvent& event);
 	void onFrameAdvancePressed(wxCommandEvent& event);
 	void onSavestateHookCreatePressed(wxCommandEvent& event);
 	void onSavestateHookLoadPressed(wxCommandEvent& event);
+	void onPlayerAddPressed(wxCommandEvent& event);
+	void onPlayerRemovePressed(wxCommandEvent& event);
 
 public:
 	SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* sizer, DataProcessing* input, std::shared_ptr<CommunicateWithNetwork> networkImp);

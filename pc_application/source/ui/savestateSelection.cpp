@@ -142,6 +142,13 @@ SavestateSelection::SavestateSelection(rapidjson::Document* settings, std::share
 
 	Layout();
 
+	// Pause at the beginning to get the framebuffer and stuff
+	// clang-format off
+    ADD_TO_QUEUE(SendFlag, networkInstance, {
+		data.actFlag = SendInfo::PAUSE;
+	})
+	// clang-format on
+
 	// When done with all the stuff, close with Close(true);
 }
 
@@ -159,6 +166,7 @@ void SavestateSelection::setTargetFrame(wxBitmap* targetBitmap, std::string targ
 }
 
 void SavestateSelection::onIdle(wxIdleEvent& event) {
+	/*
 	CHECK_QUEUE(networkInstance, RecieveGameFramebuffer, {
 		wxImage screenshot = HELPERS::getImageFromJPEGData(data.buf);
 		currentFrame->setBitmap(new wxBitmap(screenshot));
@@ -178,6 +186,7 @@ void SavestateSelection::onIdle(wxIdleEvent& event) {
 			}
 		}
 	})
+	*/
 }
 
 void SavestateSelection::onPlay(wxCommandEvent& event) {
@@ -214,4 +223,4 @@ void SavestateSelection::onOk(wxCommandEvent& event) {
 	callOk();
 }
 
-void SavestateSelection::onClose(wxCloseEvent& event) {}
+void SavestateSelection::onClose(wxCloseEvent& event) { }

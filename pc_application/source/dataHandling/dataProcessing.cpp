@@ -112,6 +112,10 @@ void DataProcessing::setChangingSelectedFrameCallback(std::function<void(FrameNu
 	changingSelectedFrameCallback = callback;
 }
 
+void DataProcessing::setPlayerInfoCallback(std::function<void(uint8_t, uint8_t)> callback) {
+	playerInfoCallback = callback;
+}
+
 void DataProcessing::triggerCurrentFrameChanges() {
 	if(changingSelectedFrameCallback) {
 		changingSelectedFrameCallback(currentFrame, currentRunFrame, currentImageFrame);
@@ -474,12 +478,19 @@ void DataProcessing::removeSavestateHook(SavestateBlockNum index) {
 void DataProcessing::addNewPlayer() {
 	allPlayers.push_back(std::make_shared<std::vector<std::shared_ptr<SavestateHook>>>());
 	setPlayer(allPlayers.size() - 1);
+	sendPlayerNum();
 }
 
 void DataProcessing::setPlayer(uint8_t playerIndex) {
 	viewingPlayerIndex = playerIndex;
+	// Make sure there are savestate hooks
 	if(allPlayers[viewingPlayerIndex]->size() != 0) {
+		FrameNum cuFrame = currentFrame;
 		setSavestateHook(currentSavestateHook);
+		setCurrentFrame(curFrame);
+	}
+	if(playerInfoCallback) {
+		playerInfoCallback(allPlayers.size(), viewingPlayerIndex);
 	}
 }
 
@@ -487,6 +498,24 @@ void DataProcessing::removePlayer(uint8_t playerIndex) {
 	if(allPlayers.size() > 1) {
 		allPlayers.erase(allPlayers.begin() + playerIndex);
 		setPlayer(allPlayers.size() - 1);
+	}
+	sendPlayerNum();
+}
+
+void DataProcessing::removeThisPlayer() {
+	removePlayer(viewingPlayerIndex);
+}
+
+void DataProcessing::sendPlayerNum() {
+	uint8_t size = allPlayers.size();
+	// clang-format off
+	ADD_TO_QUEUE(SendSetNumControllers, networkInstance, {
+		data.size = size;
+	})
+	// clang-format on
+	// Also sends to SideUI
+	if(playerInfoCallback) {
+		playerInfoCallback(size, viewingPlayerIndex);
 	}
 }
 

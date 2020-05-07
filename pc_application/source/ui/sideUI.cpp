@@ -93,6 +93,11 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* 
 	frameAdvanceButton        = HELPERS::getBitmapButton(parentFrame, mainSettings, "frameAdvanceButton");
 	savestateHookCreateButton = HELPERS::getBitmapButton(parentFrame, mainSettings, "savestateHookCreateButton");
 	savestateHookLoadButton   = HELPERS::getBitmapButton(parentFrame, mainSettings, "savestateHookLoadButton");
+	playerAddButton           = HELPERS::getBitmapButton(parentFrame, mainSettings, "playerAddButton");
+	playerRemoveButton        = HELPERS::getBitmapButton(parentFrame, mainSettings, "playerRemoveButton");
+
+	playerSelect = new wxComboBox(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_DROPDOWN | wxCB_READONLY);
+	inputInstance->setPlayerInfoCallback(std::bind(&SideUI::setPlayerInfo, this, std::placeholders::_1, std::placeholders::_2));
 
 	untether();
 
@@ -101,6 +106,8 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* 
 	frameAdvanceButton->Bind(wxEVT_BUTTON, &SideUI::onFrameAdvancePressed, this);
 	savestateHookCreateButton->Bind(wxEVT_BUTTON, &SideUI::onSavestateHookCreatePressed, this);
 	savestateHookLoadButton->Bind(wxEVT_BUTTON, &SideUI::onSavestateHookLoadPressed, this);
+	playerAddButton->Bind(wxEVT_BUTTON, &SideUI::onPlayerAddPressed, this);
+	playerRemoveButton->Bind(wxEVT_BUTTON, &SideUI::onPlayerRemovePressed, this);
 
 	// TODO all these expands and all seem suspect
 
@@ -108,6 +115,8 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* 
 	buttonSizer->Add(frameAdvanceButton, 1);
 	buttonSizer->Add(savestateHookCreateButton, 1);
 	buttonSizer->Add(savestateHookLoadButton, 1);
+	buttonSizer->Add(playerAddButton, 1);
+	buttonSizer->Add(playerRemoveButton, 1);
 
 	// Not wxEXPAND
 	verticalBoxSizer->Add(buttonSizer, 0, wxEXPAND);
@@ -121,6 +130,26 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* 
 	verticalBoxSizer->Add(inputsViewSizer, 1, wxEXPAND | wxALL);
 
 	sizer->Add(verticalBoxSizer, 2, wxEXPAND | wxALL);
+}
+
+void SideUI::setPlayerInfo(uint8_t size, uint8_t selected) {
+	// Deselect
+	playerSelect->SetSelection(wxNOT_FOUND);
+	playerSelect->Clear();
+	for(uint8_t i = 0; i < size; i++) {
+		playerSelect->Append(wxString::Format("Player %d", playerNum));
+	}
+	setPlayerFromHere = true;
+	playerSelect->SetSelection(selected);
+	playerSelect->Refresh();
+}
+
+void SideUI::playerSelected(wxCommandEvent& event) {
+	if(!setPlayerFromHere) {
+		inputInstance->setPlayer(event.GetSelection());
+	} else {
+		setPlayerFromHere = false;
+	}
 }
 
 void SideUI::onAddFramePressed(wxCommandEvent& event) {
@@ -150,6 +179,14 @@ void SideUI::onSavestateHookLoadPressed(wxCommandEvent& event) {
 	}
 }
 
+void SideUI::onPlayerAddPressed(wxCommandEvent& event) {
+	inputData->addNewPlayer();
+}
+
+void SideUI::onPlayerRemovePressed(wxCommandEvent& event) {
+	inputData->removeThisPlayer();
+}
+
 bool SideUI::createSavestateHook() {
 	// Create savestate and push it onto dataProcessing
 	AllSavestateHookBlocks& blocks = inputData->getAllSavestateHookBlocks();
@@ -158,38 +195,48 @@ bool SideUI::createSavestateHook() {
 		inputData->addNewSavestateHook("", new wxBitmap());
 	}
 	// Open up the savestate viewer
-	SavestateSelection savestateSelection(mainSettings, false, networkInterface);
+	if(networkInterface->isConnected()) {
+		SavestateSelection savestateSelection(mainSettings, false, networkInterface);
+		savestateSelection.ShowModal();
 
-	savestateSelection.ShowModal();
+		if(savestateSelection.getOperationSuccessful()) {
+			blocks[blocks.size() - 1]->dHash      = savestateSelection.getNewDhash();
+			blocks[blocks.size() - 1]->screenshot = savestateSelection.getNewScreenshot();
 
-	if(savestateSelection.getOperationSuccessful()) {
-		blocks[blocks.size() - 1]->dHash      = savestateSelection.getNewDhash();
-		blocks[blocks.size() - 1]->screenshot = savestateSelection.getNewScreenshot();
+			inputData->setSavestateHook(blocks.size() - 1);
 
-		inputData->setSavestateHook(blocks.size() - 1);
-
-		tether();
-		return true;
+			tether();
+			return true;
+		} else {
+			untether();
+			return false;
+		}
 	} else {
-		untether();
-		return false;
+		// No network testing or anything, bitmap is empty in this case
+		inputData->setSavestateHook(blocks.size() - 1);
+		return true;
 	}
 }
 
 bool SideUI::loadSavestateHook(int block) {
-	std::shared_ptr<SavestateHook> savestateHook = inputData->getAllSavestateHookBlocks()[block];
+	if(networkInterface->isConnected()) {
+		std::shared_ptr<SavestateHook> savestateHook = inputData->getAllSavestateHookBlocks()[block];
 
-	SavestateSelection savestateSelection(mainSettings, true, networkInterface);
-	savestateSelection.setTargetFrame(savestateHook->screenshot, savestateHook->dHash);
+		SavestateSelection savestateSelection(mainSettings, true, networkInterface);
+		savestateSelection.setTargetFrame(savestateHook->screenshot, savestateHook->dHash);
 
-	savestateSelection.ShowModal();
+		savestateSelection.ShowModal();
 
-	if(savestateSelection.getOperationSuccessful()) {
-		inputData->setSavestateHook(block);
-		tether();
-		return true;
+		if(savestateSelection.getOperationSuccessful()) {
+			inputData->setSavestateHook(block);
+			tether();
+			return true;
+		} else {
+			untether();
+			return false;
+		}
 	} else {
-		untether();
-		return false;
+		inputData->setSavestateHook(block);
+		return true;
 	}
 }
