@@ -1,11 +1,36 @@
 #pragma once
 
+#define ADD_NETWORK_CALLBACK_MAP(Flag) std::unordered_map<uint8_t, std::function<void(const Protocol::Struct_##Flag&)>> Callbacks_##Flag;
+
+// clang-format off
+#define ADD_NETWORK_CALLBACK(Flag, callbackBody) \
+projectHandler->Callbacks_##Flag[NETWORK_CALLBACK_ID] = \
+[this] (const Protocol::Struct_##Flag& data) { \
+	callbackBody \
+};
+// clang-format on
+
+#define REMOVE_NETWORK_CALLBACK(Flag) projectHandler->Callbacks_##Flag.erase(NETWORK_CALLBACK_ID);
+
+// Comes from the network code
+// clang-format off
+#define PROCESS_NETWORK_CALLBACKS(networkInstance, Flag) { \
+	Protocol::Struct_##Flag data; \
+	while (networkInstance->Queue_##Flag.try_dequeue(data)) { \
+		for (auto const& callback : projectHandler->Callbacks_##Flag) { \
+			callback.second(data); \
+		} \
+	} \
+}
+// clang-format on
+
 #include <fstream>
 #include <functional>
 #include <memory>
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <unordered_map>
 #include <wx/dir.h>
 #include <wx/dirdlg.h>
 #include <wx/filename.h>
@@ -55,6 +80,13 @@ private:
 
 public:
 	ProjectHandler(wxFrame* parent, DataProcessing* dataProcessingInstance, rapidjson::Document* settings);
+
+	ADD_NETWORK_CALLBACK_MAP(RecieveFlag)
+	ADD_NETWORK_CALLBACK_MAP(RecieveGameInfo)
+	ADD_NETWORK_CALLBACK_MAP(RecieveGameFramebuffer)
+	ADD_NETWORK_CALLBACK_MAP(RecieveApplicationConnected)
+	ADD_NETWORK_CALLBACK_MAP(RecieveLogging)
+	ADD_NETWORK_CALLBACK_MAP(RecieveMemoryRegion)
 
 	void loadProject();
 	void saveProject();
@@ -106,6 +138,12 @@ public:
 
 	// Just a random large number, apparently can't be larger than 76
 	static constexpr int videoComparisonEntriesMenuIDBase = 35;
+};
+
+class NetworkCallbackHandler {
+private:
+public:
+	NetworkCallbackHandler();
 };
 
 class ProjectHandlerWindow : public wxDialog {

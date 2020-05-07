@@ -37,7 +37,8 @@ private:
 public:
 	ControllerHandler(std::shared_ptr<CommunicateWithNetwork> networkImp);
 
-	void runFrame(ControllerData controllerData);
+	void setFrame(ControllerData controllerData);
+	void setFrame(u64 buttons, JoystickPosition left, JoystickPosition right);
 
 	~ControllerHandler();
 };

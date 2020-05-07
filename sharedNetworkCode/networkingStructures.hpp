@@ -41,6 +41,8 @@ enum RecieveInfo : uint8_t {
 enum SendInfo : uint8_t {
 	GET_FRAMEBUFFER,
 	GET_GAME_INFO,
+	START_TAS_MODE,
+	END_TAS_MODE,
 	PAUSE_DEBUG,
 	UNPAUSE_DEBUG,
 	// These methods aren't debug because they are called by savestateHandler
@@ -54,11 +56,15 @@ namespace Protocol {
 	// Run a single frame and return when done
 	DEFINE_STRUCT(SendRunFrame,
 		ControllerData controllerData;
+		// This is the frame of this frame, the framebuffer
+		// sent back will be one more than this frame
+		uint32_t frame;
 	, self.controllerData)
 
 	// Recieve all of the game's framebuffer
 	DEFINE_STRUCT(RecieveGameFramebuffer,
 		std::vector<uint8_t> buf;
+		uint32_t frame;
 	, self.buf)
 
 	// Recieve a ton of game and user info

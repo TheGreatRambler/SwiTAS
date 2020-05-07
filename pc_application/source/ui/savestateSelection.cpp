@@ -56,12 +56,13 @@ void SavestateLister::onSavestateHookSelect(wxMouseEvent& event) {
 	}
 }
 
-SavestateSelection::SavestateSelection(rapidjson::Document* settings, bool isSavestateLoadDialog, std::shared_ptr<CommunicateWithNetwork> networkImp)
+SavestateSelection::SavestateSelection(rapidjson::Document* settings, std::shared_ptr<ProjectHandler> projHandler, bool isSavestateLoadDialog, std::shared_ptr<CommunicateWithNetwork> networkImp)
 	: wxDialog(NULL, wxID_ANY, "Savestate Selection", wxDefaultPosition, wxDefaultSize) {
 	// Parent is specifically null because this is a separate window that opens
 	savestateLoadDialog = isSavestateLoadDialog;
 	mainSettings        = settings;
 	networkInstance     = networkImp;
+	projectHandler      = projHandler;
 
 	dhashWidth  = (*mainSettings)["dhashWidth"].GetInt();
 	dhashHeight = (*mainSettings)["dhashHeight"].GetInt();
@@ -147,6 +148,7 @@ SavestateSelection::SavestateSelection(rapidjson::Document* settings, bool isSav
 // clang-format off
 BEGIN_EVENT_TABLE(SavestateSelection, wxDialog)
     EVT_IDLE(SavestateSelection::onIdle)
+	EVT_CLOSE(SavestateSelection::onClose)
 END_EVENT_TABLE()
 // clang-format on
 
@@ -194,9 +196,6 @@ void SavestateSelection::onPause(wxCommandEvent& event) {
 	ADD_TO_QUEUE(SendFlag, networkInstance, {
 		data.actFlag = SendInfo::PAUSE;
 	})
-	ADD_TO_QUEUE(SendFlag, networkInstance, {
-		data.actFlag = SendInfo::GET_FRAMEBUFFER;
-	})
 	// clang-format on
 }
 
@@ -208,12 +207,11 @@ void SavestateSelection::onFrameAdvance(wxCommandEvent& event) {
 	ADD_TO_QUEUE(SendFlag, networkInstance, {
 		data.actFlag = SendInfo::RUN_BLANK_FRAME;
 	})
-	ADD_TO_QUEUE(SendFlag, networkInstance, {
-		data.actFlag = SendInfo::GET_FRAMEBUFFER;
-	})
 	// clang-format on
 }
 
 void SavestateSelection::onOk(wxCommandEvent& event) {
 	callOk();
 }
+
+void SavestateSelection::onClose(wxCloseEvent& event) {}

@@ -24,6 +24,8 @@
 
 class MainWindow : public wxFrame {
 private:
+	const uint8_t NETWORK_CALLBACK_ID = 0;
+
 	// Simplify things immesnly
 	wxBoxSizer* mainSizer;
 
@@ -73,6 +75,8 @@ private:
 	// Override default signal handler:
 	void keyDownHandler(wxKeyEvent& event);
 	void OnSize(wxSizeEvent& event);
+	void onClose(wxCloseEvent& event);
+	void onIdle(wxIdleEvent& event);
 
 	bool askForIP();
 	void handleNetworkQueues();
@@ -85,12 +89,8 @@ public:
 		networkInstance->endNetwork();
 	}
 
-	void onIdle(wxIdleEvent& event);
-
 	// Called by wxApp
 	void onStart();
-
-	void onClose(wxCloseEvent& event);
 
 	DECLARE_EVENT_TABLE();
 };

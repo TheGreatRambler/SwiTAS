@@ -37,7 +37,7 @@ MainLoop::MainLoop() {
 		fatalThrow(rc);
 
 	LOGD << "Create controller";
-	controller = std::make_unique<ControllerHandler>(networkInstance);
+	controllers.push_back(std::make_unique<ControllerHandler>(networkInstance));
 }
 
 void MainLoop::mainLoopHandler() {
@@ -65,7 +65,6 @@ void MainLoop::mainLoopHandler() {
 				// Start the whole main loop
 				// Set the application for the controller
 				LOGD << "Start controllers";
-				waitForVsync();
 				pauseApp();
 			}
 		}
@@ -107,7 +106,7 @@ void MainLoop::mainLoopHandler() {
 void MainLoop::handleNetworkUpdates() {
 	CHECK_QUEUE(networkInstance, SendRunFrame, {
 		LOGD << "Running frame";
-		controller->runFrame(data.controllerData);
+		controller[0]->runFrame(data.controllerData);
 		unpauseApp();
 		screenshotHandler.writeFramebuffer(networkInstance);
 		waitForVsync();
@@ -134,12 +133,10 @@ void MainLoop::handleNetworkUpdates() {
 			}
 		} else if(data.actFlag == SendInfo::GET_FRAMEBUFFER) {
 			if(applicationOpened) {
-				// I don't think you can get a framebuffer while it's paused
-				/*
 				LOGD << "Get framebuffer";
 				screenshotHandler.writeFramebuffer(networkInstance);
-				*/
 			}
+		} else if(data.actFlag == SendInfo::RUN_BLANK_FRAME) {
 		}
 	})
 }
@@ -203,27 +200,39 @@ GameMemoryInfo MainLoop::getGameMemoryInfo(MemoryInfo memInfo) {
 	return info;
 }
 
+void MainLoop::runSingleFrame() {
+	if(isPaused) {
+		unpauseApp();
+		waitForVsync();
+		pauseApp();
+	}
+}
+
 void MainLoop::pauseApp() {
 	if(!isPaused) {
 		// Debug application again
 		LOGD << "Pausing";
-		screenshotHandler.writeFramebuffer(networkInstance);
 
 		rc       = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
 		isPaused = true;
 
-		for(auto const& memoryRegion : memoryRegions) {
-			std::vector<uint8_t> buf(memoryRegion.second);
-			svcReadDebugProcessMemory(buf.data(), applicationDebug, memoryRegion.first, memoryRegion.second);
+		screenshotHandler.writeFramebuffer(networkInstance);
+		/*
+				for(auto const& memoryRegion : memoryRegions) {
+					std::vector<uint8_t> buf(memoryRegion.second);
+					svcReadDebugProcessMemory(buf.data(), applicationDebug, memoryRegion.first, memoryRegion.second);
 
-			ADD_TO_QUEUE(RecieveMemoryRegion, networkInstance, {
-				data.startByte = memoryRegion.first;
-				data.size      = memoryRegion.second;
-				data.memory    = buf;
-			})
-		}
+					ADD_TO_QUEUE(RecieveMemoryRegion, networkInstance, {
+						data.startByte = memoryRegion.first;
+						data.size      = memoryRegion.second;
+						data.memory    = buf;
+					})
+				}
+				*/
 	}
 }
+
+void MainLoop::matchFirstControllerToTASController() {}
 
 MainLoop::~MainLoop() {
 	LOGD << "Exiting app";

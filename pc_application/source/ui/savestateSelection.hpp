@@ -10,6 +10,7 @@
 
 #include "../../sharedNetworkCode/networkInterface.hpp"
 #include "../dataHandling/dataProcessing.hpp"
+#include "../dataHandling/projectHandler.hpp"
 #include "../helpers.hpp"
 #include "drawingCanvas.hpp"
 
@@ -44,6 +45,8 @@ public:
 // This class handles both opening up a savestate and creating the first savestate
 class SavestateSelection : public wxDialog {
 private:
+	const uint8_t NETWORK_CALLBACK_ID = 1;
+
 	wxBoxSizer* imageSizer;
 	wxBoxSizer* buttonSizer;
 	wxBoxSizer* fullSizer;
@@ -61,6 +64,7 @@ private:
 	int dhashHeight;
 
 	rapidjson::Document* mainSettings;
+	std::shared_ptr<ProjectHandler> projectHandler;
 
 	std::shared_ptr<CommunicateWithNetwork> networkInstance;
 
@@ -99,8 +103,10 @@ private:
 	void onFrameAdvance(wxCommandEvent& event);
 	void onOk(wxCommandEvent& event);
 
+	void onClose(wxCloseEvent& event);
+
 public:
-	SavestateSelection(rapidjson::Document* settings, bool isSavestateLoadDialog, std::shared_ptr<CommunicateWithNetwork> networkImp);
+	SavestateSelection(rapidjson::Document* settings, std::shared_ptr<ProjectHandler> projHandler, bool isSavestateLoadDialog, std::shared_ptr<CommunicateWithNetwork> networkImp);
 
 	// Will use ShowModel for this, act like a normal wxDialog
 

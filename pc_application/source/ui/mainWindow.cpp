@@ -47,6 +47,8 @@ MainWindow::MainWindow()
 			RECIEVE_QUEUE_DATA(RecieveMemoryRegion)
 		});
 
+	handleNetworkQueues();
+
 	// DataProcessing can now start with the networking instance
 	dataProcessingInstance = new DataProcessing(&mainSettings, buttonData, networkInstance, this);
 
@@ -143,21 +145,28 @@ void MainWindow::onIdle(wxIdleEvent& event) {
 		bottomUI->listenToJoystick();
 	}
 
-	handleNetworkQueues();
+	// This handles callbacks for all different classes
+	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveFlag)
+	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveGameInfo)
+	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveGameFramebuffer)
+	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveApplicationConnected)
+	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveLogging)
+	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveMemoryRegion)
 }
 
 void MainWindow::handleNetworkQueues() {
 	// clang-format off
-	CHECK_QUEUE(networkInstance, RecieveGameFramebuffer, {
+	ADD_NETWORK_CALLBACK(RecieveApplicationConnected, {
+		wxLogMessage("Game opened");
+	})
+	ADD_NETWORK_CALLBACK(RecieveLogging, {
+		wxLogMessage(wxString("SWITCH: " + data.log));
+	})
+	ADD_NETWORK_CALLBACK(RecieveGameFramebuffer, {
 		wxLogMessage("Framebuffer recieved");
 		bottomUI->recieveGameFramebuffer(data.buf);
 	})
-	CHECK_QUEUE(networkInstance, RecieveApplicationConnected, {
-		wxLogMessage("Game opened");
-	})
-	CHECK_QUEUE(networkInstance, RecieveLogging, {
-		wxLogMessage(wxString("SWITCH: " + data.log));
-	})
+
 	// clang-format on
 	if(networkInstance->hasOtherSideJustDisconnected()) {
 		wxLogMessage("Server disconnected, required to re-enter IP");
@@ -260,6 +269,10 @@ bool MainWindow::askForIP() {
 }
 
 void MainWindow::onClose(wxCloseEvent& event) {
+	REMOVE_NETWORK_CALLBACK(RecieveApplicationConnected)
+	REMOVE_NETWORK_CALLBACK(RecieveLogging)
+	REMOVE_NETWORK_CALLBACK(RecieveGameFramebuffer)
+
 	// Close project dialog and save
 	projectHandler->saveProject();
 	networkInstance->endNetwork();

@@ -27,11 +27,7 @@ ControllerHandler::ControllerHandler(std::shared_ptr<CommunicateWithNetwork> net
 	state.batteryCharge = 4;
 
 	// Set Buttons and Joysticks
-	state.buttons                      = 0;
-	state.joysticks[JOYSTICK_LEFT].dx  = 0;
-	state.joysticks[JOYSTICK_LEFT].dy  = 0;
-	state.joysticks[JOYSTICK_RIGHT].dx = 0;
-	state.joysticks[JOYSTICK_RIGHT].dy = 0;
+	clearState();
 
 	// Attach the controller
 	rc = hiddbgAttachHdlsVirtualDevice(&HdlsHandle, &device);
@@ -42,7 +38,7 @@ ControllerHandler::ControllerHandler(std::shared_ptr<CommunicateWithNetwork> net
 	setInput();
 }
 
-void ControllerHandler::runFrame(ControllerData controllerData) {
+void ControllerHandler::setFrame(ControllerData controllerData) {
 	clearState();
 	// Set data one at a time
 	state.joysticks[JOYSTICK_LEFT].dx  = controllerData.LS_X;
@@ -54,6 +50,18 @@ void ControllerHandler::runFrame(ControllerData controllerData) {
 			state.buttons |= button.second;
 		}
 	}
+
+	setInput();
+}
+
+void ControllerHandler::setFrame(u64 buttons, JoystickPosition left, JoystickPosition right) {
+	clearState();
+
+	state.buttons                      = buttons;
+	state.joysticks[JOYSTICK_LEFT].dx  = left.dx;
+	state.joysticks[JOYSTICK_LEFT].dy  = left.dy;
+	state.joysticks[JOYSTICK_RIGHT].dx = right.dx;
+	state.joysticks[JOYSTICK_RIGHT].dy = right.dy;
 
 	setInput();
 }

@@ -17,12 +17,13 @@ private:
 	std::string gameName;
 	uint8_t applicationOpened = false;
 	uint8_t internetConnected = false;
+	uint8_t isInTASMode       = false;
 	Handle applicationDebug;
 
 	Event vsyncEvent;
 
 	// WILL BE MORE
-	std::unique_ptr<ControllerHandler> controller;
+	std::vector<std::unique_ptr<ControllerHandler>> controllers;
 
 	std::shared_ptr<CommunicateWithNetwork> networkInstance;
 
@@ -55,10 +56,17 @@ private:
 		}
 	}
 
+	// This assumes that the app is paused
+	void runSingleFrame();
+
 	void reset() {
 		// For now, just this
 		unpauseApp();
 	}
+
+	// This allows you to use the inputs in a real controller
+	// to match a TAS controller, so you don't get stuck while in TAS mode
+	void matchFirstControllerToTASController();
 
 public:
 	MainLoop();
