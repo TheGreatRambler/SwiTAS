@@ -86,7 +86,6 @@ void MainWindow::onStart() {
 
 	ProjectHandlerWindow projectHandlerWindow(projectHandler, &mainSettings);
 
-	Show(false);
 	projectHandlerWindow.ShowModal();
 
 	if(projectHandlerWindow.wasDialogClosedForcefully()) {
@@ -103,8 +102,6 @@ void MainWindow::onStart() {
 
 	// Ask for internet connection to get started
 	askForIP();
-
-	Show(true);
 }
 
 // clang-format off
@@ -250,7 +247,7 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 			Show(true);
 		} else if(id == exportAsText) {
 			wxFileName exportedText = projectHandler->getProjectStart();
-			exportedText.SetName(wxString::Format("player_%d_exported", dataProcessingInstance->getCurrentPlayer()));
+			exportedText.SetName(wxString::Format("player_%u_exported", dataProcessingInstance->getCurrentPlayer() + 1));
 			exportedText.SetExt("ssctf");
 
 			dataProcessingInstance->exportCurrentPlayerToFile(exportedText);
@@ -259,23 +256,28 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 }
 
 bool MainWindow::askForIP() {
-	while(true) {
-		wxString ipAddress = wxGetTextFromUser("Please enter IP address of Nintendo Switch", "Server connect", wxEmptyString);
-		if(!ipAddress.empty()) {
-			// IP address entered
-			if(networkInstance->attemptConnectionToServer(ipAddress.ToStdString())) {
-				SetStatusText(ipAddress + ":" + std::to_string(SERVER_PORT), 0);
-				return true;
+	if(!networkInstance->isConnected()) {
+		while(true) {
+			wxString ipAddress = wxGetTextFromUser("Please enter IP address of Nintendo Switch", "Server connect", wxEmptyString);
+			if(!ipAddress.empty()) {
+				// IP address entered
+				if(networkInstance->attemptConnectionToServer(ipAddress.ToStdString())) {
+					SetStatusText(ipAddress + ":" + std::to_string(SERVER_PORT), 0);
+					return true;
+				} else {
+					wxMessageDialog addressInvalidDialog(this, wxString::Format("This IP address is invalid: %s", networkInstance->getLastErrorMessage().c_str()), "Invalid IP", wxOK);
+					addressInvalidDialog.ShowModal();
+					// Run again
+					continue;
+				}
 			} else {
-				wxMessageDialog addressInvalidDialog(this, wxString::Format("This IP address is invalid: %s", networkInstance->getLastErrorMessage().c_str()), "Invalid IP", wxOK);
-				addressInvalidDialog.ShowModal();
-				// Run again
-				continue;
+				// If the IP is unentered (cancel button), just pronounce it untethered
+				return false;
 			}
-		} else {
-			// If the IP is unentered (cancel button), just pronounce it untethered
-			return false;
 		}
+	} else {
+		wxMessageDialog addressInvalidDialog(this, wxString::Format("The server is already running"), "Server running", wxOK);
+		addressInvalidDialog.ShowModal();
 	}
 }
 

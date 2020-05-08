@@ -33,7 +33,7 @@ private:
 
 	std::string getID(uint64_t startByte, uint64_t size) {
 		char buffer[50];
-		int n = sprintf(buffer, "%ll-%ll", startByte, size);
+		int n = sprintf(buffer, "%llu-%llu", startByte, size);
 		return std::string(buffer, n);
 	}
 

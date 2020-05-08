@@ -141,9 +141,12 @@ public:
 	}
 
 	void setAllPlayers(AllPlayers players) {
-		// Called by projectHandler when loading
+		// Called by projectHandlerplayers when loading
 		// It has to have at least one block with one input
-		allPlayers = players;
+		allPlayers.clear();
+		for(auto& player : players) {
+			allPlayers.push_back(player);
+		}
 		setPlayer(0);
 	}
 
@@ -156,6 +159,9 @@ public:
 	}
 	SavestateBlockNum getCurrentSavestateHook() {
 		return currentSavestateHook;
+	}
+	FrameNum getCurrentFrame() {
+		return currentFrame;
 	}
 	SavestateBlockNum getNumOfSavestateHooks(uint8_t player) {
 		return allPlayers[player]->size();
@@ -197,6 +203,8 @@ public:
 
 	std::shared_ptr<ControllerData> getFrame(FrameNum frame) const;
 
+	void scrollToSpecific(uint8_t player, SavestateBlockNum savestateHookNum, FrameNum frame);
+
 	// New FANCY methods
 	void triggerButton(Btn button);
 	void modifyButton(FrameNum frame, Btn button, uint8_t isPressed);
@@ -206,7 +214,7 @@ public:
 	uint8_t getButtonSpecific(FrameNum frame, Btn button, SavestateBlockNum savestateHookNum, uint8_t player) const;
 	uint8_t getButtonCurrent(Btn button) const;
 
-// This includes joysticks, accel, gyro, etc...
+	// This includes joysticks, accel, gyro, etc...
 	void triggerNumberValues(ControllerNumberValues joystickId, int16_t value);
 	void setNumberValues(FrameNum frame, ControllerNumberValues joystickId, int16_t value);
 	int16_t getNumberValues(FrameNum frame, ControllerNumberValues joystickId) const;

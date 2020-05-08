@@ -35,21 +35,24 @@ void ProjectHandler::loadProject() {
 	// The players to create
 	AllPlayers players(playersArray.Size());
 
+	playerIndex = 0;
 	for(auto const& player : playerList) {
-		auto savestateBlocksArray = playersArray[player]["savestateHooks"].GetArray();
+		auto savestateBlocksArray = playersArray[player]["savestateBlocks"].GetArray();
 
-		std::vector<std::string> savestateFileNames(savestateBlocksArray.Size());
+		std::vector<SavestateBlockNum> savestateHookList(savestateBlocksArray.Size());
 
+		SavestateBlockNum blockIndex = 0;
 		for(auto const& savestateBlock : savestateBlocksArray) {
-			int index                 = savestateBlock["index"].GetInt();
-			savestateFileNames[index] = std::string(savestateBlock["filename"].GetString());
+			SavestateBlockNum index  = savestateBlock["index"].GetInt();
+			savestateHookList[index] = blockIndex;
+			blockIndex++;
 		}
 
-		std::shared_ptr<AllSavestateHookBlocks> savestateHookBlocks = std::make_shared<AllSavestateHookBlocks>(savestateFileNames.size());
+		std::shared_ptr<AllSavestateHookBlocks> savestateHookBlocks = std::make_shared<AllSavestateHookBlocks>(savestateHookList.size());
 
-		std::size_t index = 0;
-		for(auto const& savestateFileName : savestateFileNames) {
-			wxString path = projectDir.GetNameWithSep() + wxString(savestateFileName);
+		SavestateBlockNum savestateHookIndex = 0;
+		for(auto const& savestateIndex : savestateHookList) {
+			wxString path = projectDir.GetNameWithSep() + wxString::FromUTF8(savestateBlocksArray[savestateIndex]["filename"].GetString());
 			if(wxFileName(path).FileExists()) {
 
 				// Load up the inputs
@@ -83,22 +86,26 @@ void ProjectHandler::loadProject() {
 				}
 
 				savestateHook->inputs = block;
-				savestateHook->dHash  = std::string(savestateBlocksArray[index]["dHash"].GetString());
+				savestateHook->dHash  = std::string(savestateBlocksArray[savestateIndex]["dHash"].GetString());
 
-				wxImage screenshotImage(projectDir.GetNameWithSep() + wxString::FromUTF8(savestateBlocksArray[index]["screenshot"].GetString()), wxBITMAP_TYPE_JPEG);
+				wxImage screenshotImage(projectDir.GetNameWithSep() + wxString::FromUTF8(savestateBlocksArray[savestateIndex]["screenshot"].GetString()), wxBITMAP_TYPE_JPEG);
 				savestateHook->screenshot = new wxBitmap(screenshotImage);
 
-				savestateHookBlocks->push_back(savestateHook);
-				index++;
+				(*savestateHookBlocks)[savestateHookIndex] = savestateHook;
+
+				savestateHookIndex++;
 			}
 		}
 
-		players.push_back(savestateHookBlocks);
+		players[playerIndex] = savestateHookBlocks;
+
+		playerIndex++;
 	}
 
 	// Set dataProcessing
 	dataProcessing->setAllPlayers(players);
 	dataProcessing->sendPlayerNum();
+	dataProcessing->scrollToSpecific(jsonSettings["currentPlayer"].GetUint64(), jsonSettings["currentSavestateBlock"].GetUint(), jsonSettings["currentFrame"].GetUint());
 
 	for(auto const& videoEntryJson : jsonSettings["videos"].GetArray()) {
 		std::shared_ptr<VideoEntry> videoEntry = std::make_shared<VideoEntry>();
@@ -115,6 +122,7 @@ void ProjectHandler::loadProject() {
 }
 
 void ProjectHandler::saveProject() {
+	// TODO save project every so often
 	if(projectWasLoaded) {
 		// Save each set of data one by one
 
@@ -125,23 +133,29 @@ void ProjectHandler::saveProject() {
 
 		AllPlayers& players = dataProcessing->getAllPlayers();
 
-		std::size_t playerIndexNum = 0;
+		uint8_t playerIndexNum = 0;
 		for(auto const& player : players) {
 			AllSavestateHookBlocks& savestateHookBlocks = *player;
 
 			rapidjson::Value savestateHooksJSON(rapidjson::kArrayType);
-			std::size_t savestateHookIndexNum = 0;
+			SavestateBlockNum savestateHookIndexNum = 0;
 			for(auto const& savestateHookBlock : savestateHookBlocks) {
-
 				wxFileName inputsFilename = getProjectStart();
-				inputsFilename.SetName(wxString::Format("savestate_block_%lld_player_%d", savestateHookIndexNum, playerIndexNum));
+				inputsFilename.SetName(wxString::Format("savestate_block_%hu_player_%u", savestateHookIndexNum, playerIndexNum + 1));
 				inputsFilename.SetExt("bin");
 
 				wxFileName screenshotFileName = getProjectStart();
-				screenshotFileName.SetName(wxString::Format("savestate_block_%lld_player_%d_screenshot", savestateHookIndexNum, playerIndexNum));
+				screenshotFileName.SetName(wxString::Format("savestate_block_%hu_player_%u_screenshot", savestateHookIndexNum, playerIndexNum + 1));
 				screenshotFileName.SetExt("jpg");
 
-				savestateHookBlock->screenshot->SaveFile(screenshotFileName.GetFullPath(), wxBITMAP_TYPE_JPEG);
+				if(savestateHookBlock->screenshot->IsOk()) {
+					savestateHookBlock->screenshot->SaveFile(screenshotFileName.GetFullPath(), wxBITMAP_TYPE_JPEG);
+				} else {
+					wxImage defaultImg(1280, 720);
+					// Set all of it to a pretty grey
+					defaultImg.SetRGB(wxRect(0, 0, 1280, 720), 76, 82, 92);
+					defaultImg.SaveFile(screenshotFileName.GetFullPath(), wxBITMAP_TYPE_JPEG);
+				}
 
 				// Delete file if already present and use binary mode
 				wxFFileOutputStream inputsFileStream(inputsFilename.GetFullPath(), "wb");
@@ -205,6 +219,19 @@ void ProjectHandler::saveProject() {
 		}
 
 		settingsJSON.AddMember("players", playersJSON, settingsJSON.GetAllocator());
+
+		rapidjson::Value lastPlayerIndex;
+		lastPlayerIndex.SetUint(dataProcessing->getCurrentPlayer());
+
+		rapidjson::Value lastSavestateHookIndex;
+		lastSavestateHookIndex.SetUint(dataProcessing->getCurrentSavestateHook());
+
+		rapidjson::Value lastFrame;
+		lastFrame.SetUint64(dataProcessing->getCurrentFrame());
+
+		settingsJSON.AddMember("currentPlayer", lastPlayerIndex, settingsJSON.GetAllocator());
+		settingsJSON.AddMember("currentSavestateBlock", lastSavestateHookIndex, settingsJSON.GetAllocator());
+		settingsJSON.AddMember("currentFrame", lastFrame, settingsJSON.GetAllocator());
 
 		rapidjson::Value recentVideoEntries(rapidjson::kArrayType);
 		for(auto const& videoEntry : videoComparisonEntries) {
@@ -348,7 +375,7 @@ void ProjectHandlerWindow::createTempProjectDir() {
 	// Open standard documents folder
 	wxString documentsFolder = wxStandardPaths::Get().GetDocumentsDir();
 	wxFileName dir(documentsFolder);
-	dir.AppendDir(wxString::Format("TAS_PROJECT_%lld", wxGetLocalTimeMillis().GetValue()));
+	dir.AppendDir(wxString::Format("TAS_PROJECT_%" wxLongLongFmtSpec, wxGetLocalTimeMillis().GetValue()));
 	projectHandler->setProjectDir(dir.GetFullPath());
 }
 

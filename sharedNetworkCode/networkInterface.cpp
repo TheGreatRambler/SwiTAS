@@ -119,24 +119,10 @@ void CommunicateWithNetwork::initNetwork() {
 
 #ifdef CLIENT_IMP
 void CommunicateWithNetwork::waitForIPSelection() {
-	// Wait until string is good
 	{
 		std::unique_lock<std::mutex> lk(ipMutex);
-		/* To set IP, use
-			std::lock_guard<std::mutex> lk(ipMutex);
-			ipAddressServer = "[WHATEVER IP]";
-			lk.unlock();
-			cv.notify_one();
-		*/
-		// Wait for IP address of server to be set
-		// http://www.cplusplus.com/reference/condition_variable/condition_variable/
-		while(!connectedToSocket.load()) {
-			if(!keepReading) {
-				break;
-			}
+		while(!connectedToSocket)
 			cv.wait(lk);
-			yieldThread();
-		}
 	}
 }
 #endif
@@ -186,14 +172,29 @@ bool CommunicateWithNetwork::hasOtherSideJustDisconnected() {
 }
 
 void CommunicateWithNetwork::endNetwork() {
-#ifdef SERVER_IMP
-	LOGD << "Request to close server";
+	keepReading = false;
+
+#ifdef CLIENT_IMP
+	// This will automatically handle if the network has never been connected to
+	if(!isConnected()) {
+		std::unique_lock<std::mutex> lk(ipMutex);
+		connectedToSocket = true;
+		cv.notify_one();
+	}
 #endif
 
-	// Stop reading
-	keepReading = false;
 	// Wait for thread to end
 	networkThread->join();
+
+	if(networkConnection != nullptr) {
+		networkConnection->Close();
+	}
+
+#ifdef SERVER_IMP
+	listeningServer.Close();
+#endif
+
+	delete networkConnection;
 }
 
 bool CommunicateWithNetwork::handleSocketError(const char* extraMessage) {
@@ -235,21 +236,19 @@ bool CommunicateWithNetwork::handleSocketError(const char* extraMessage) {
 
 #ifdef CLIENT_IMP
 uint8_t CommunicateWithNetwork::attemptConnectionToServer(std::string ip) {
-	if(!connectedToSocket) {
-		std::unique_lock<std::mutex> lk(ipMutex);
-		if(!networkConnection->Open(ip.c_str(), SERVER_PORT)) {
-			// There was an error
-			handleSocketError("during connection attempt");
-			return false;
-		} else {
-			// We good, let the network thread know
-			ipAddress         = ip;
+	if(networkConnection->Open(ip.c_str(), SERVER_PORT)) {
+		// We good, let the network thread know
+		// Either connected successfully or a disconnect has been requested
+		{
+			std::lock_guard<std::mutex> lk(ipMutex);
 			connectedToSocket = true;
-			cv.notify_one();
-			return true;
 		}
+		cv.notify_one();
+		ipAddress = ip;
+		return true;
 	} else {
-		// The program is already connected, need to do this differently
+		// There was an error
+		handleSocketError("during connection attempt");
 		return false;
 	}
 }
@@ -318,16 +317,4 @@ void CommunicateWithNetwork::readFunc() {
 
 		yieldThread();
 	}
-}
-
-CommunicateWithNetwork::~CommunicateWithNetwork() {
-	if(networkConnection != nullptr) {
-		networkConnection->Close();
-	}
-
-#ifdef SERVER_IMP
-	listeningServer.Close();
-#endif
-
-	delete networkConnection;
 }

@@ -99,6 +99,7 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 
 	playerSelect = new wxComboBox(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_DROPDOWN | wxCB_READONLY);
 	inputData->setPlayerInfoCallback(std::bind(&SideUI::setPlayerInfo, this, std::placeholders::_1, std::placeholders::_2));
+	playerSelect->Bind(wxEVT_COMBOBOX, &SideUI::playerSelected, this);
 
 	untether();
 
@@ -121,11 +122,12 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 
 	// Not wxEXPAND
 	verticalBoxSizer->Add(buttonSizer, 0, wxEXPAND);
+	verticalBoxSizer->Add(playerSelect, 0, wxEXPAND);
 
 	inputsViewSizer->Add(frameDrawer, 1, wxEXPAND | wxALL);
 
 	inputData->SetMinSize(wxSize(0, 0));
-	HELPERS::addDarkmodeWindows(inputData);
+	// HELPERS::addDarkmodeWindows(inputData);
 	inputsViewSizer->Add(inputData, 5, wxEXPAND | wxALL);
 
 	verticalBoxSizer->Add(inputsViewSizer, 1, wxEXPAND | wxALL);
@@ -140,17 +142,12 @@ void SideUI::setPlayerInfo(uint8_t size, uint8_t selected) {
 	for(uint8_t i = 0; i < size; i++) {
 		playerSelect->Append(wxString::Format("Player %d", i + 1));
 	}
-	setPlayerFromHere = true;
 	playerSelect->SetSelection(selected);
 	playerSelect->Refresh();
 }
 
 void SideUI::playerSelected(wxCommandEvent& event) {
-	if(!setPlayerFromHere) {
-		inputData->setPlayer(event.GetSelection());
-	} else {
-		setPlayerFromHere = false;
-	}
+	inputData->setPlayer(event.GetSelection());
 }
 
 void SideUI::onAddFramePressed(wxCommandEvent& event) {

@@ -68,8 +68,7 @@ private:
 	DataProcessing* inputData;
 
 	void setPlayerInfo(uint8_t size, uint8_t selected);
-    void playerSelected(wxCommandEvent& event);
-	uint8_t setPlayerFromHere = false;
+	void playerSelected(wxCommandEvent& event);
 
 	void onAddFramePressed(wxCommandEvent& event);
 	void onFrameAdvancePressed(wxCommandEvent& event);
