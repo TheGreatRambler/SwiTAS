@@ -24,7 +24,7 @@
 
 class MainWindow : public wxFrame {
 private:
-	const uint8_t NETWORK_CALLBACK_ID = 0;
+	uint8_t NETWORK_CALLBACK_ID = 0;
 
 	// Simplify things immesnly
 	wxBoxSizer* mainSizer;
@@ -55,6 +55,7 @@ private:
 	wxMenuBar* menuBar;
 	// Menubar menus
 	wxWindowID selectIPID;
+	wxWindowID exportAsText;
 	wxWindowID setNameID;
 	wxWindowID toggleLoggingID;
 	wxWindowID toggleDebugMenuID;

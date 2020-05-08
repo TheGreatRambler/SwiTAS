@@ -1,13 +1,20 @@
 #pragma once
 
-#define ADD_NETWORK_CALLBACK_MAP(Flag) std::unordered_map<uint8_t, std::function<void(const Protocol::Struct_##Flag&)>> Callbacks_##Flag;
+// clang-format off
+#define ADD_NETWORK_CALLBACK_MAP(Flag) std::unordered_map<uint8_t, \
+	std::function<void(const Protocol::Struct_##Flag&)>> Callbacks_##Flag;
+// clang-format on
 
 // clang-format off
-#define ADD_NETWORK_CALLBACK(Flag, callbackBody) \
-projectHandler->Callbacks_##Flag[NETWORK_CALLBACK_ID] = \
-[this] (const Protocol::Struct_##Flag& data) { \
-	callbackBody \
-};
+// https://stackoverflow.com/a/20583578/9329945
+#define ADD_NETWORK_CALLBACK(Flag, callbackBody) { \
+	std::function<void(const Protocol::Struct_##Flag&)> func = \
+		[this] (const Protocol::Struct_##Flag& data) { \
+			callbackBody \
+		}; \
+	projectHandler->Callbacks_##Flag.insert(std::make_pair<uint8_t, \
+		std::function<void(const Protocol::Struct_##Flag&)>>(std::move(NETWORK_CALLBACK_ID), std::move(func))); \
+}
 // clang-format on
 
 #define REMOVE_NETWORK_CALLBACK(Flag) projectHandler->Callbacks_##Flag.erase(NETWORK_CALLBACK_ID);
@@ -76,7 +83,7 @@ private:
 	std::vector<VideoComparisonViewer*> videoComparisonViewers;
 
 	void closeVideoComparisonViewer(VideoComparisonViewer* viewer);
-	void updateVideoComparisonViewers(FrameNum delta);
+	void updateVideoComparisonViewers(int delta);
 
 public:
 	ProjectHandler(wxFrame* parent, DataProcessing* dataProcessingInstance, rapidjson::Document* settings);

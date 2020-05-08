@@ -17,7 +17,7 @@ public:
 
 class GameCorruptor : public wxDialog {
 private:
-	const uint8_t NETWORK_CALLBACK_ID = 2;
+	uint8_t NETWORK_CALLBACK_ID = 2;
 
 	std::shared_ptr<ProjectHandler> projectHandler;
 	std::shared_ptr<CommunicateWithNetwork> networkInstance;

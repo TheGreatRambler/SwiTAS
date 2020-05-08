@@ -45,7 +45,7 @@ public:
 // This class handles both opening up a savestate and creating the first savestate
 class SavestateSelection : public wxDialog {
 private:
-	const uint8_t NETWORK_CALLBACK_ID = 1;
+	uint8_t NETWORK_CALLBACK_ID = 1;
 
 	wxBoxSizer* imageSizer;
 	wxBoxSizer* buttonSizer;

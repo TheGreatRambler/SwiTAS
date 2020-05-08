@@ -100,7 +100,7 @@ void DataProcessing::setInputCallback(std::function<void()> callback) {
 	inputCallback = callback;
 }
 
-void DataProcessing::setSelectedFrameCallbackVideoViewer(std::function<void(FrameNum)> callback) {
+void DataProcessing::setSelectedFrameCallbackVideoViewer(std::function<void(int)> callback) {
 	selectedFrameCallbackVideoViewer = callback;
 }
 
@@ -119,6 +119,17 @@ void DataProcessing::setPlayerInfoCallback(std::function<void(uint8_t, uint8_t)>
 void DataProcessing::triggerCurrentFrameChanges() {
 	if(changingSelectedFrameCallback) {
 		changingSelectedFrameCallback(currentFrame, currentRunFrame, currentImageFrame);
+	}
+}
+
+void DataProcessing::exportCurrentPlayerToFile(wxFileName exportTarget) {
+	wxFile file(exportTarget.GetFullPath(), wxFile::write);
+
+	if(file.IsOpened()) {
+		// This will block FOR AGES, no way around it
+		std::string exported = buttonData->framesToText(this, 0, 0, viewingPlayerIndex);
+		file.Write(wxString::FromUTF8(exported));
+		file.Close();
 	}
 }
 
@@ -272,7 +283,7 @@ void DataProcessing::onCopy(wxCommandEvent& event) {
 			// There is a selected item
 			if(currentFrame >= firstSelectedItem && currentFrame <= lastSelectedItem) {
 				// Add these items to the clipboard
-				wxTheClipboard->SetData(new wxTextDataObject(buttonData->framesToText(this, firstSelectedItem, lastSelectedItem)));
+				wxTheClipboard->SetData(new wxTextDataObject(buttonData->framesToText(this, firstSelectedItem, lastSelectedItem, -1)));
 			} else {
 				// Deselect the others
 				for(FrameNum i = firstSelectedItem; i <= lastSelectedItem; i++) {
@@ -281,7 +292,7 @@ void DataProcessing::onCopy(wxCommandEvent& event) {
 				// Select just the one
 				SetItemState(currentFrame, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 
-				wxTheClipboard->SetData(new wxTextDataObject(buttonData->framesToText(this, currentFrame, currentFrame)));
+				wxTheClipboard->SetData(new wxTextDataObject(buttonData->framesToText(this, currentFrame, currentFrame, -1)));
 
 				// See the new selection
 				RefreshItem(currentFrame);
@@ -349,15 +360,16 @@ void DataProcessing::setCurrentFrame(FrameNum frameNum) {
 		// Shared pointer so this can be done
 		currentData = inputsList->at(frameNum);
 		// Set the current frame to this number
-		currentFrame = frameNum;
 		// Focus to this specific row now
 		// This essentially scrolls to it
 		EnsureVisible(frameNum);
 
-		modifyCurrentFrameViews(currentFrame);
+		modifyCurrentFrameViews(frameNum);
 		if(selectedFrameCallbackVideoViewer) {
-			selectedFrameCallbackVideoViewer(event.GetIndex() - currentFrame);
+			selectedFrameCallbackVideoViewer((int)frameNum - currentFrame);
 		}
+
+		currentFrame = frameNum;
 
 		Refresh();
 	}
@@ -485,7 +497,7 @@ void DataProcessing::setPlayer(uint8_t playerIndex) {
 	viewingPlayerIndex = playerIndex;
 	// Make sure there are savestate hooks
 	if(allPlayers[viewingPlayerIndex]->size() != 0) {
-		FrameNum cuFrame = currentFrame;
+		FrameNum curFrame = currentFrame;
 		setSavestateHook(currentSavestateHook);
 		setCurrentFrame(curFrame);
 	}
@@ -646,8 +658,47 @@ int32_t DataProcessing::getNumberValues(FrameNum frame, ControllerNumberValues j
 	}
 }
 
+int32_t DataProcessing::getNumberValuesSpecific(FrameNum frame, ControllerNumberValues joystickId, SavestateBlockNum savestateHookNum, uint8_t player) const {
+	switch(joystickId) {
+	case ControllerNumberValues::LEFT_X:
+		return inputsList->at(frame)->LS_X;
+		break;
+	case ControllerNumberValues::LEFT_Y:
+		return inputsList->at(frame)->LS_Y;
+		break;
+	case ControllerNumberValues::RIGHT_X:
+		return inputsList->at(frame)->RS_X;
+		break;
+	case ControllerNumberValues::RIGHT_Y:
+		return inputsList->at(frame)->RS_Y;
+		break;
+	case ControllerNumberValues::ACCEL_X:
+		return inputsList->at(frame)->ACCEL_X;
+		break;
+	case ControllerNumberValues::ACCEL_Y:
+		return inputsList->at(frame)->ACCEL_Y;
+		break;
+	case ControllerNumberValues::ACCEL_Z:
+		return inputsList->at(frame)->ACCEL_Z;
+		break;
+	case ControllerNumberValues::GYRO_1:
+		return inputsList->at(frame)->GYRO_1;
+		break;
+	case ControllerNumberValues::GYRO_2:
+		return inputsList->at(frame)->GYRO_2;
+		break;
+	case ControllerNumberValues::GYRO_3:
+		return inputsList->at(frame)->GYRO_3;
+		break;
+	}
+}
+
 uint8_t DataProcessing::getButton(FrameNum frame, Btn button) const {
 	return GET_BIT(inputsList->at(frame)->buttons, button);
+}
+
+uint8_t DataProcessing::getButtonSpecific(FrameNum frame, Btn button, SavestateBlockNum savestateHookNum, uint8_t player) const {
+	return GET_BIT(allPlayers[player]->at(savestateHookNum)->inputs->at(frame)->buttons, button);
 }
 
 uint8_t DataProcessing::getButtonCurrent(Btn button) const {
@@ -684,6 +735,14 @@ void DataProcessing::setFramestateInfo(FrameNum frame, FrameState id, uint8_t st
 	modifyCurrentFrameViews(frame);
 }
 
+void DataProcessing::setFramestateInfoSpecific(FrameNum frame, FrameState id, uint8_t state, SavestateBlockNum savestateHookNum, uint8_t player) {
+	if(savestateHookNum == currentSavestateHook && player == viewingPlayerIndex) {
+		setFramestateInfo(frame, id, state);
+	} else {
+		SET_BIT(allPlayers[player]->at(savestateHookNum)->inputs->at(frame)->frameState, state, id);
+	}
+}
+
 uint8_t DataProcessing::getFramestateInfo(FrameNum frame, FrameState id) const {
 	return GET_BIT(inputsList->at(frame)->frameState, id);
 }
@@ -707,24 +766,45 @@ void DataProcessing::invalidateRun(FrameNum frame) {
 	}
 }
 
+void DataProcessing::invalidateRunSpecific(FrameNum frame, SavestateBlockNum savestateHookNum, uint8_t player) {
+	auto list = allPlayers[player]->at(savestateHookNum)->inputs;
+	while(true) {
+		if(frame == list->size() || !getFramestateInfo(frame, FrameState::RAN)) {
+			// Refresh all these items
+			// I don't care if it's way off the page, I think wxWidgets handles for this
+			Refresh();
+			break;
+		}
+		// Set bit
+		setFramestateInfoSpecific(frame, FrameState::RAN, false, savestateHookNum, player);
+		frame++;
+	}
+}
+
 void DataProcessing::addFrame(FrameNum afterFrame) {
 	std::shared_ptr<ControllerData> newControllerData = std::make_shared<ControllerData>();
 
 	// Add this to the vector right after the selected frame
-	if(inputsList->size() == 0) {
-		inputsList->push_back(newControllerData);
-	} else {
-		inputsList->insert(inputsList->begin() + afterFrame + 1, newControllerData);
-	}
+	uint8_t playerIndex = 0;
+	for(auto& player : allPlayers) {
+		if(player->at(currentSavestateHook)->inputs->size() == 0) {
+			player->at(currentSavestateHook)->inputs->push_back(newControllerData);
+		} else {
+			auto begin = player->at(currentSavestateHook)->inputs->begin();
+			player->at(currentSavestateHook)->inputs->insert(begin + afterFrame + 1, newControllerData);
+		}
 
-	setFramestateInfo(afterFrame + 1, FrameState::RAN, false);
-	setFramestateInfo(afterFrame + 1, FrameState::SAVESTATE, false);
+		setFramestateInfoSpecific(afterFrame + 1, FrameState::RAN, false, currentSavestateHook, playerIndex);
+		setFramestateInfoSpecific(afterFrame + 1, FrameState::SAVESTATE, false, currentSavestateHook, playerIndex);
+
+		// Invalidate run for the data immidiently after this frame
+		invalidateRunSpecific(afterFrame + 2, currentSavestateHook, playerIndex);
+
+		playerIndex++;
+	}
 
 	// Because of the usability of virtual list controls, just update the length
 	SetItemCount(inputsList->size());
-
-	// Invalidate run for the data immidiently after this frame
-	invalidateRun(afterFrame + 2);
 
 	modifyCurrentFrameViews(afterFrame + 1);
 
@@ -739,14 +819,19 @@ void DataProcessing::addFrameHere() {
 }
 
 void DataProcessing::removeFrames(FrameNum start, FrameNum end) {
-	auto beginning = inputsList->begin();
-	inputsList->erase(beginning + start, beginning + end + 1);
+	uint8_t playerIndex = 0;
+	for(auto& player : allPlayers) {
+		auto beginning = player->at(currentSavestateHook)->inputs->begin();
+		player->at(currentSavestateHook)->inputs->erase(beginning + start, beginning + end + 1);
+
+		// Invalidate run for the data immidiently after this frame
+		invalidateRunSpecific(start, currentSavestateHook, playerIndex);
+
+		playerIndex++;
+	}
 
 	// Because of the usability of virtual list controls, just update the length
 	SetItemCount(inputsList->size());
-
-	// Invalidate run for the data immidiently after this frame
-	invalidateRun(start);
 
 	for(FrameNum s = start; s <= end; s++) {
 		modifyCurrentFrameViews(s);

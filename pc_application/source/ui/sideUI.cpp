@@ -72,10 +72,11 @@ void FrameCanvas::draw(wxDC& dc) {
 	}
 };
 
-SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* sizer, DataProcessing* input, std::shared_ptr<CommunicateWithNetwork> networkImp) {
+SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ProjectHandler> projHandler, wxBoxSizer* sizer, DataProcessing* input, std::shared_ptr<CommunicateWithNetwork> networkImp) {
 	mainSettings     = settings;
 	inputData        = input;
 	networkInterface = networkImp;
+	projectHandler   = projHandler;
 
 	// Holds everything
 	verticalBoxSizer = new wxBoxSizer(wxVERTICAL);
@@ -97,7 +98,7 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* 
 	playerRemoveButton        = HELPERS::getBitmapButton(parentFrame, mainSettings, "playerRemoveButton");
 
 	playerSelect = new wxComboBox(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_DROPDOWN | wxCB_READONLY);
-	inputInstance->setPlayerInfoCallback(std::bind(&SideUI::setPlayerInfo, this, std::placeholders::_1, std::placeholders::_2));
+	inputData->setPlayerInfoCallback(std::bind(&SideUI::setPlayerInfo, this, std::placeholders::_1, std::placeholders::_2));
 
 	untether();
 
@@ -137,7 +138,7 @@ void SideUI::setPlayerInfo(uint8_t size, uint8_t selected) {
 	playerSelect->SetSelection(wxNOT_FOUND);
 	playerSelect->Clear();
 	for(uint8_t i = 0; i < size; i++) {
-		playerSelect->Append(wxString::Format("Player %d", playerNum));
+		playerSelect->Append(wxString::Format("Player %d", i));
 	}
 	setPlayerFromHere = true;
 	playerSelect->SetSelection(selected);
@@ -146,7 +147,7 @@ void SideUI::setPlayerInfo(uint8_t size, uint8_t selected) {
 
 void SideUI::playerSelected(wxCommandEvent& event) {
 	if(!setPlayerFromHere) {
-		inputInstance->setPlayer(event.GetSelection());
+		inputData->setPlayer(event.GetSelection());
 	} else {
 		setPlayerFromHere = false;
 	}
@@ -196,7 +197,7 @@ bool SideUI::createSavestateHook() {
 	}
 	// Open up the savestate viewer
 	if(networkInterface->isConnected()) {
-		SavestateSelection savestateSelection(mainSettings, false, networkInterface);
+		SavestateSelection savestateSelection(mainSettings, projectHandler, false, networkInterface);
 		savestateSelection.ShowModal();
 
 		if(savestateSelection.getOperationSuccessful()) {
@@ -222,7 +223,7 @@ bool SideUI::loadSavestateHook(int block) {
 	if(networkInterface->isConnected()) {
 		std::shared_ptr<SavestateHook> savestateHook = inputData->getAllSavestateHookBlocks()[block];
 
-		SavestateSelection savestateSelection(mainSettings, true, networkInterface);
+		SavestateSelection savestateSelection(mainSettings, projectHandler, true, networkInterface);
 		savestateSelection.setTargetFrame(savestateHook->screenshot, savestateHook->dHash);
 
 		savestateSelection.ShowModal();

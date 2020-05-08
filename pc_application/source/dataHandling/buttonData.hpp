@@ -71,7 +71,7 @@ public:
 	void setupButtonMapping(rapidjson::Document* mainSettings);
 
 	void textToFrames(DataProcessing* dataProcessing, std::string text, FrameNum startLoc, bool insertPaste, bool placePaste);
-	std::string framesToText(DataProcessing* dataProcessing, FrameNum startLoc, FrameNum endLoc);
+	std::string framesToText(DataProcessing* dataProcessing, FrameNum startLoc, FrameNum endLoc, int playerIndex);
 
 	void transferControllerData(std::shared_ptr<ControllerData> src, std::shared_ptr<ControllerData> dest, bool placePaste);
 

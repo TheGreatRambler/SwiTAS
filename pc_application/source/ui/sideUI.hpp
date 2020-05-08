@@ -39,6 +39,7 @@ class SideUI {
 private:
 	rapidjson::Document* mainSettings;
 	std::shared_ptr<CommunicateWithNetwork> networkInterface;
+	std::shared_ptr<ProjectHandler> projectHandler;
 
 	wxBoxSizer* verticalBoxSizer;
 
@@ -78,7 +79,7 @@ private:
 	void onPlayerRemovePressed(wxCommandEvent& event);
 
 public:
-	SideUI(wxFrame* parentFrame, rapidjson::Document* settings, wxBoxSizer* sizer, DataProcessing* input, std::shared_ptr<CommunicateWithNetwork> networkImp);
+	SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ProjectHandler> projHandler, wxBoxSizer* sizer, DataProcessing* input, std::shared_ptr<CommunicateWithNetwork> networkImp);
 
 	bool createSavestateHook();
 	bool loadSavestateHook(int block);

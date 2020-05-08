@@ -205,38 +205,74 @@ void ButtonData::textToFrames(DataProcessing* dataProcessing, std::string text, 
 	}
 }
 
-std::string ButtonData::framesToText(DataProcessing* dataProcessing, FrameNum startLoc, FrameNum endLoc) {
+std::string ButtonData::framesToText(DataProcessing* dataProcessing, FrameNum startLoc, FrameNum endLoc, int playerIndex) {
+	// If the player index is provided, get every savestate hook in that player
 	std::vector<std::string> textVector;
 	// Loop through each frame and convert it
-	for(FrameNum i = startLoc; i <= endLoc; i++) {
-		// Keeping empty ones there clutters things
-		if(!isEmptyControllerData(dataProcessing->getFrame(i))) {
-			std::vector<std::string> parts;
-			parts.push_back(std::to_string(i));
+	SavestateBlockNum start;
+	SavestateBlockNum end;
+	if(playerIndex == -1) {
+		start = dataProcessing->getCurrentSavestateHook();
+		end   = dataProcessing->getCurrentSavestateHook() + 1;
+	} else {
+		start = 0;
+		end   = dataProcessing->getNumOfSavestateHooks(playerIndex);
+	}
 
-			std::vector<std::string> buttonParts;
-			for(uint8_t btn = 0; btn < Btn::BUTTONS_SIZE; btn++) {
-				Btn button = (Btn)btn;
-				if(dataProcessing->getButton(i, button)) {
-					// Add to the string
-					buttonParts.push_back(buttonMapping[button]->scriptName);
+	FrameNum indexForAllSavestateHooks = 0;
+	for(SavestateBlockNum j = start; j < end; j++) {
+		if(playerIndex == -1) {
+			startLoc = 0;
+			endLoc   = dataProcessing->getNumOfFramesInSavestateHook(j, playerIndex) - 1;
+		}
+
+		for(FrameNum i = startLoc; i <= endLoc; i++) {
+			// Keeping empty ones there clutters things
+			if(!isEmptyControllerData(dataProcessing->getFrame(i))) {
+				std::vector<std::string> parts;
+
+				if(playerIndex == -1) {
+					parts.push_back(std::to_string(i));
+				} else {
+					parts.push_back(std::to_string(indexForAllSavestateHooks));
 				}
+
+				std::vector<std::string> buttonParts;
+				for(uint8_t btn = 0; btn < Btn::BUTTONS_SIZE; btn++) {
+					Btn button = (Btn)btn;
+					if(dataProcessing->getButtonSpecific(i, button, j, playerIndex)) {
+						// Add to the string
+						buttonParts.push_back(buttonMapping[button]->scriptName);
+					}
+				}
+
+				if(buttonParts.size() == 0) {
+					// Sometimes, it's nothing, so push a constant
+					parts.push_back("NONE");
+				} else {
+					parts.push_back(HELPERS::joinString(buttonParts, ";"));
+				}
+
+				// clang-format off
+				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, ControllerNumberValues::LEFT_X, j, playerIndex)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, ControllerNumberValues::LEFT_Y, j, playerIndex)));
+
+				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, ControllerNumberValues::RIGHT_X, j, playerIndex)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, ControllerNumberValues::RIGHT_Y, j, playerIndex)));
+
+				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, ControllerNumberValues::ACCEL_X, j, playerIndex)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, ControllerNumberValues::ACCEL_Y, j, playerIndex)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, ControllerNumberValues::ACCEL_Z, j, playerIndex)));
+
+				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, ControllerNumberValues::GYRO_1, j, playerIndex)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, ControllerNumberValues::GYRO_2, j, playerIndex)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, ControllerNumberValues::GYRO_3, j, playerIndex)));
+				// clang-format on
+
+				textVector.push_back(HELPERS::joinString(parts, " "));
 			}
 
-			if(buttonParts.size() == 0) {
-				// Sometimes, it's nothing, so push a constant
-				parts.push_back("NONE");
-			} else {
-				parts.push_back(HELPERS::joinString(buttonParts, ";"));
-			}
-
-			parts.push_back(std::to_string(dataProcessing->getNumberValues(i, ControllerNumberValues::LEFT_X)) + ";" + std::to_string(dataProcessing->getNumberValues(i, ControllerNumberValues::LEFT_Y)));
-			parts.push_back(std::to_string(dataProcessing->getNumberValues(i, ControllerNumberValues::RIGHT_X)) + ";" + std::to_string(dataProcessing->getNumberValues(i, ControllerNumberValues::RIGHT_Y)));
-
-			parts.push_back(std::to_string(dataProcessing->getNumberValues(i, ControllerNumberValues::ACCEL_X)) + ";" + std::to_string(dataProcessing->getNumberValues(i, ControllerNumberValues::ACCEL_Y)) + ";" + std::to_string(dataProcessing->getNumberValues(i, ControllerNumberValues::ACCEL_Z)));
-			parts.push_back(std::to_string(dataProcessing->getNumberValues(i, ControllerNumberValues::GYRO_1)) + ";" + std::to_string(dataProcessing->getNumberValues(i, ControllerNumberValues::GYRO_2)) + ";" + std::to_string(dataProcessing->getNumberValues(i, ControllerNumberValues::GYRO_3)));
-
-			textVector.push_back(HELPERS::joinString(parts, " "));
+			indexForAllSavestateHooks++;
 		}
 	}
 	// Return with newlines

@@ -54,7 +54,7 @@ MainWindow::MainWindow()
 	dataProcessingInstance = new DataProcessing(&mainSettings, buttonData, networkInstance, this);
 
 	// UI instances
-	sideUI   = std::make_shared<SideUI>(this, &mainSettings, mainSizer, dataProcessingInstance, networkInstance);
+	sideUI   = std::make_shared<SideUI>(this, &mainSettings, projectHandler, mainSizer, dataProcessingInstance, networkInstance);
 	bottomUI = std::make_shared<BottomUI>(this, &mainSettings, buttonData, mainSizer, dataProcessingInstance);
 
 	projectHandler = std::make_shared<ProjectHandler>(this, dataProcessingInstance, &mainSettings);
@@ -183,23 +183,27 @@ void MainWindow::addMenuBar() {
 	wxMenu* fileMenu = new wxMenu();
 
 	selectIPID        = NewControlId();
+	exportAsText      = NewControlId();
 	setNameID         = NewControlId();
 	toggleLoggingID   = NewControlId();
 	toggleDebugMenuID = NewControlId();
 	openGameCorruptor = NewControlId();
 
-	fileMenu->Append(selectIPID, "&Server");
-	fileMenu->Append(setNameID, "&Set Name");
+	fileMenu->Append(exportAsText, "Export To Text Format\tCtrl+Alt+E");
+	fileMenu->Append(setNameID, "Set Name\tCtrl+Alt+N");
 
 	// Add joystick submenu
 	bottomUI->addJoystickMenu(fileMenu);
-	fileMenu->AppendSubMenu(projectHandler->getVideoSubmenu(), "&List Recent Comparison Videos");
+	fileMenu->AppendSubMenu(projectHandler->getVideoSubmenu(), "List Recent Comparison Videos\tCtrl+Alt+L");
 
 	projectHandler->getVideoSubmenu()->Bind(wxEVT_MENU_OPEN, &MainWindow::onRecentVideosMenuOpen, this);
 
-	fileMenu->Append(toggleLoggingID, "&Toggle Logging");
-	fileMenu->Append(toggleDebugMenuID, "&Toggle Debug Menu");
-	fileMenu->Append(openGameCorruptor, "&Open Game Corruptor");
+	fileMenu->AppendSeparator();
+
+	fileMenu->Append(selectIPID, "Set Switch IP\tCtrl+I");
+	fileMenu->Append(toggleLoggingID, "Toggle Logging\tCtrl+Shift+L");
+	fileMenu->Append(toggleDebugMenuID, "Toggle Debug Menu\tCtrl+D");
+	fileMenu->Append(openGameCorruptor, "Open Game Corruptor\tCtrl+B");
 
 	menuBar->Append(fileMenu, "&File");
 
@@ -244,6 +248,12 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 			GameCorruptor gameCorruptor(this, projectHandler, networkInstance);
 			gameCorruptor.ShowModal();
 			Show(true);
+		} else if(id == exportAsText) {
+			wxFileName exportedText = projectHandler->getProjectStart();
+			exportedText.SetName(wxString::Format("player_%d_exported", dataProcessingInstance->getCurrentPlayer()));
+			exportedText.SetExt("ssctf");
+
+			dataProcessingInstance->exportCurrentPlayerToFile(exportedText);
 		}
 	}
 }

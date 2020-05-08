@@ -323,7 +323,7 @@ void ProjectHandler::closeVideoComparisonViewer(VideoComparisonViewer* viewer) {
 	}
 }
 
-void ProjectHandler::updateVideoComparisonViewers(FrameNum delta) {
+void ProjectHandler::updateVideoComparisonViewers(int delta) {
 	for(std::size_t i = 0; i < videoComparisonViewers.size(); i++) {
 		videoComparisonViewers[i]->seekRelative(delta);
 	}

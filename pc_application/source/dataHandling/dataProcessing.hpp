@@ -128,11 +128,13 @@ public:
 	DataProcessing(rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, std::shared_ptr<CommunicateWithNetwork> communicateWithNetwork, wxWindow* parent);
 
 	void setInputCallback(std::function<void()> callback);
-	void setSelectedFrameCallbackVideoViewer(std::function<void(FrameNum)> callback);
+	void setSelectedFrameCallbackVideoViewer(std::function<void(int)> callback);
 	void setViewableInputsCallback(std::function<void(FrameNum, FrameNum)> callback);
 	void setChangingSelectedFrameCallback(std::function<void(FrameNum, FrameNum, FrameNum)> callback);
 	void setPlayerInfoCallback(std::function<void(uint8_t, uint8_t)> callback);
 	void triggerCurrentFrameChanges();
+
+	void exportCurrentPlayerToFile(wxFileName exportTarget);
 
 	AllSavestateHookBlocks& getAllSavestateHookBlocks() {
 		return *allPlayers[viewingPlayerIndex];
@@ -149,11 +151,24 @@ public:
 		return allPlayers;
 	}
 
+	uint8_t getCurrentPlayer() {
+		return viewingPlayerIndex;
+	}
+	SavestateBlockNum getCurrentSavestateHook() {
+		return currentSavestateHook;
+	}
+	SavestateBlockNum getNumOfSavestateHooks(uint8_t player) {
+		return allPlayers[player]->size();
+	}
+	FrameNum getNumOfFramesInSavestateHook(SavestateBlockNum i, uint8_t player) {
+		return allPlayers[player]->at(i)->inputs->size();
+	}
+
 	void setTethered(bool flag) {
 		tethered = flag;
 	}
 
-	void modifySavestate() { }
+	void modifySavestate() {}
 
 	void setCurrentFrame(FrameNum frameNum);
 
@@ -182,26 +197,21 @@ public:
 
 	std::shared_ptr<ControllerData> getFrame(FrameNum frame) const;
 
-	void triggerButton(Btn button);
-
 	// This includes joysticks, accel, gyro, etc...
 	void triggerNumberValues(ControllerNumberValues joystickId, int32_t value);
 
 	// New FANCY methods
+	void triggerButton(Btn button);
 	void modifyButton(FrameNum frame, Btn button, uint8_t isPressed);
-
 	void toggleButton(FrameNum frame, Btn button);
-
 	void clearAllButtons(FrameNum frame);
-
-	void setNumberValues(FrameNum frame, ControllerNumberValues joystickId, int32_t value);
-
-	int32_t getNumberValues(FrameNum frame, ControllerNumberValues joystickId) const;
-
 	uint8_t getButton(FrameNum frame, Btn button) const;
-
+	uint8_t getButtonSpecific(FrameNum frame, Btn button, SavestateBlockNum savestateHookNum, uint8_t player) const;
 	uint8_t getButtonCurrent(Btn button) const;
 
+	void setNumberValues(FrameNum frame, ControllerNumberValues joystickId, int32_t value);
+	int32_t getNumberValues(FrameNum frame, ControllerNumberValues joystickId) const;
+	int32_t getNumberValuesSpecific(FrameNum frame, ControllerNumberValues joystickId, SavestateBlockNum savestateHookNum, uint8_t player) const;
 	int32_t getNumberValueCurrent(ControllerNumberValues joystickId) const;
 
 	// Updates how the current frame looks on the UI
@@ -209,18 +219,16 @@ public:
 	void modifyCurrentFrameViews(FrameNum frame);
 
 	void setFramestateInfo(FrameNum frame, FrameState id, uint8_t state);
-
+	void setFramestateInfoSpecific(FrameNum frame, FrameState id, uint8_t state, SavestateBlockNum savestateHookNum, uint8_t player);
 	uint8_t getFramestateInfo(FrameNum frame, FrameState id) const;
-
 	// Without the id, just return the whole hog
 	uint8_t getFramestateInfo(FrameNum frame) const;
 
 	void invalidateRun(FrameNum frame);
+	void invalidateRunSpecific(FrameNum frame, SavestateBlockNum savestateHookNum, uint8_t player);
 
 	void addFrame(FrameNum afterFrame);
-
 	void addFrameHere();
-
 	void removeFrames(FrameNum start, FrameNum end);
 
 	std::size_t getFramesSize() const;

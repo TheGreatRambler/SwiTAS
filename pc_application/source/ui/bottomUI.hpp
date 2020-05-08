@@ -134,12 +134,13 @@ private:
 	std::shared_ptr<ButtonData> buttonData;
 
 	wxMenu* joystickSubMenu;
+	uint8_t joysticksExist;
 
 	wxJoystick* currentJoy;
 	uint8_t currentJoyDefined;
 	int lastButtonState;
 
-	std::map<std::string, int> stringToButtonExtended{
+	std::map<std::string, int> stringToButtonExtended {
 		{ "LSX", 0 },
 		{ "LSY", 1 },
 		{ "RSX", 2 },
