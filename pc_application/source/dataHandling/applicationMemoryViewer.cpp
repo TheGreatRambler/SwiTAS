@@ -14,7 +14,7 @@ void ApplicationMemoryManager::addMemoryRegion(uint64_t startByte, uint64_t size
 	memorySection->memMappedFile.SetPath(projectDir + "applicationMemory");
 	// Create dir if needed
 	memorySection->memMappedFile.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
-	memorySection->memMappedFile.SetName(wxString::Format("byte_%ll_to_byte_%ll", startByte, startByte + size));
+	memorySection->memMappedFile.SetName(wxString::Format("byte_%" wxLongLongFmtSpec "_to_byte_%" wxLongLongFmtSpec, startByte, startByte + size));
 	memorySection->memMappedFile.SetExt("bin");
 
 	wxFile theFile;

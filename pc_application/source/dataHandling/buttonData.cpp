@@ -221,7 +221,7 @@ std::string ButtonData::framesToText(DataProcessing* dataProcessing, FrameNum st
 
 	FrameNum indexForAllSavestateHooks = 0;
 	for(SavestateBlockNum j = start; j < end; j++) {
-		if(playerIndex == -1) {
+		if(playerIndex != -1) {
 			startLoc = 0;
 			endLoc   = dataProcessing->getNumOfFramesInSavestateHook(j, playerIndex) - 1;
 		}
@@ -240,7 +240,13 @@ std::string ButtonData::framesToText(DataProcessing* dataProcessing, FrameNum st
 				std::vector<std::string> buttonParts;
 				for(uint8_t btn = 0; btn < Btn::BUTTONS_SIZE; btn++) {
 					Btn button = (Btn)btn;
-					if(dataProcessing->getButtonSpecific(i, button, j, playerIndex)) {
+					uint8_t isSelected;
+					if(playerIndex == -1) {
+						isSelected = dataProcessing->getButton(i, button);
+					} else {
+						isSelected = dataProcessing->getButtonSpecific(i, button, j, playerIndex);
+					}
+					if(isSelected) {
 						// Add to the string
 						buttonParts.push_back(buttonMapping[button]->scriptName);
 					}

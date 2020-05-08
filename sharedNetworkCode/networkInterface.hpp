@@ -177,7 +177,7 @@ public:
 	bool hasOtherSideJustDisconnected();
 
 	bool isConnected() {
-		return connectedToSocket.load();
+		return connectedToSocket;
 	}
 
 	std::string getLastErrorMessage() {
@@ -190,6 +190,4 @@ public:
 	uint32_t dataSize;
 	DataFlag currentFlag;
 	uint8_t* dataToRead;
-
-	~CommunicateWithNetwork();
 };

@@ -85,11 +85,6 @@ private:
 public:
 	MainWindow();
 
-	void endNetworking() {
-		// Force end it
-		networkInstance->endNetwork();
-	}
-
 	// Called by wxApp
 	void onStart();
 

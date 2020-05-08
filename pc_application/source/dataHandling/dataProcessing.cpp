@@ -83,9 +83,6 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	Bind(wxEVT_MENU, &DataProcessing::onAddFrame, this, addFrameID);
 	Bind(wxEVT_MENU, &DataProcessing::onFrameAdvance, this, frameAdvanceID);
 	Bind(wxEVT_MENU, &DataProcessing::onAddSavestate, this, savestateID);
-
-	// Select the first item
-	SetItemState(0, wxLIST_STATE_FOCUSED, wxLIST_STATE_FOCUSED);
 }
 
 // clang-format off
@@ -367,12 +364,18 @@ void DataProcessing::setCurrentFrame(FrameNum frameNum) {
 		// This essentially scrolls to it
 		EnsureVisible(frameNum);
 
+		currentFrame = frameNum;
+
+		// If not selected by wxWidgets, do so
+		if(!GetItemState(frameNum, wxLIST_STATE_FOCUSED)) {
+			// This will trigger another setFrame, but that's fine
+			SetItemState(0, wxLIST_STATE_FOCUSED, wxLIST_STATE_FOCUSED);
+		}
+
 		modifyCurrentFrameViews(frameNum);
 		if(selectedFrameCallbackVideoViewer) {
 			selectedFrameCallbackVideoViewer((int)frameNum - currentFrame);
 		}
-
-		currentFrame = frameNum;
 
 		Refresh();
 	}
@@ -492,30 +495,32 @@ void DataProcessing::removeSavestateHook(SavestateBlockNum index) {
 
 void DataProcessing::addNewPlayer() {
 	std::shared_ptr<std::vector<std::shared_ptr<SavestateHook>>> player = std::make_shared<std::vector<std::shared_ptr<SavestateHook>>>();
-	allPlayers.push_back(player);
 
-	if(allPlayers.size() != 1) {
+	if(allPlayers.size() != 0) {
 		// Running it so early on boot seems to break networking
 		sendPlayerNum();
 
 		// Match this player to the number of savestate hooks as the first player
 		for(auto const& firstPlayer : *allPlayers[0]) {
 			std::shared_ptr<SavestateHook> savestateHook = std::make_shared<SavestateHook>();
-			player->push_back(savestateHook);
+			savestateHook->inputs                        = std::make_shared<std::vector<std::shared_ptr<ControllerData>>>();
 			for(FrameNum i = 0; i < firstPlayer->inputs->size(); i++) {
+				// Create empty frames to add
 				savestateHook->inputs->push_back(std::make_shared<ControllerData>());
 			}
 			savestateHook->dHash      = "";
 			savestateHook->screenshot = new wxBitmap();
+			player->push_back(savestateHook);
 		}
 	}
+
+	allPlayers.push_back(player);
 
 	setPlayer(allPlayers.size() - 1);
 }
 
 void DataProcessing::setPlayer(uint8_t playerIndex) {
 	viewingPlayerIndex = playerIndex;
-	inputsList         = allPlayers[playerIndex]->at(currentSavestateHook)->inputs;
 	// Make sure there are savestate hooks
 	if(allPlayers[viewingPlayerIndex]->size() != 0) {
 		FrameNum curFrame = currentFrame;
@@ -554,6 +559,12 @@ void DataProcessing::sendPlayerNum() {
 
 std::shared_ptr<ControllerData> DataProcessing::getFrame(FrameNum frame) const {
 	return inputsList->at(frame);
+}
+
+void DataProcessing::scrollToSpecific(uint8_t player, SavestateBlockNum savestateHookNum, FrameNum frame) {
+	setPlayer(player);
+	setSavestateHook(savestateHookNum);
+	setCurrentFrame(frame);
 }
 
 void DataProcessing::triggerButton(Btn button) {
@@ -803,11 +814,11 @@ void DataProcessing::invalidateRunSpecific(FrameNum frame, SavestateBlockNum sav
 }
 
 void DataProcessing::addFrame(FrameNum afterFrame) {
-	std::shared_ptr<ControllerData> newControllerData = std::make_shared<ControllerData>();
-
 	// Add this to the vector right after the selected frame
 	uint8_t playerIndex = 0;
 	for(auto& player : allPlayers) {
+		std::shared_ptr<ControllerData> newControllerData = std::make_shared<ControllerData>();
+
 		if(player->at(currentSavestateHook)->inputs->size() == 0) {
 			player->at(currentSavestateHook)->inputs->push_back(newControllerData);
 		} else {

@@ -15,7 +15,7 @@ ButtonGrid::ButtonGrid(wxFrame* parent, wxSize requiredSize, std::shared_ptr<But
 
 	for(auto const& button : buttonData->buttonMapping) {
 		char buf[5];
-		sprintf(buf, "%d-%d", button.second->gridX, button.second->gridY);
+		sprintf(buf, "%u-%u", button.second->gridX, button.second->gridY);
 		locToButton[std::string(buf)] = button.first;
 	}
 }
@@ -58,7 +58,7 @@ void ButtonGrid::onGridClick(wxMouseEvent& event) {
 	int Y = (int)(((float)windowCoord.y / height) * buttonData->KeyHeight);
 
 	char buf[5];
-	sprintf(buf, "%d-%d", X, Y);
+	sprintf(buf, "%u-%u", X, Y);
 	std::string key(buf);
 
 	if(locToButton.count(key)) {
