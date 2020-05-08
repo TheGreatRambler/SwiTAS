@@ -12,13 +12,13 @@ Having access to the entire system via CFW introduces a lot of freedoms, so this
 
 This editor most closely resembles the [FCEUX TAS Editor](http://www.fceux.com/web/help/taseditor/).
 
-## Goals
-- [ ] Frame advance
-- [ ] Full speed playback
-- [ ] Savestates
-- [ ] Game-specific savestates
-- [ ] Project saving on Switch
-- [ ] Project saving on PC
+## How To Use:
+* Create a project, load a project, or load a recent project with the dialog at start.
+![Load Project](screenshots/loadproject.png)
+* Select the IP address of your switch in order to take advantage of Switch homebrew for TASing. This menu appears at start and in `File/Set Switch IP`. (**THIS FEATURE IS CURRENTLY UNSUPPORTED**)
+![Select Switch IP](screenshots/selectip.png)
+* Select a frame in the *Piano Roll* to begin editing frames. Add frames with `Ctrl + Plus`, create and remove savestate blocks with the buttons on the top, and create and select players. All the familiar commands are here, right click to see them all. Included are `Paste Place`, which only adds buttons if they are not present, and `Paste Insert`, which inserts the frame below the selected one. `Undo` and `Redo` support are planned.
+![Piano Roll](screenshots/pianoroll.png)
 
 ## Thanks
 - [Hamhub7](https://github.com/hamhub7): The creator of Nx-TAS
