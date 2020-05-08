@@ -40,18 +40,16 @@ enum FrameState : uint8_t {
 // Controller data that will be packed into the array and will be recieved from
 // the switch
 struct ControllerData : public zpp::serializer::polymorphic {
-	// This controller's index
-	uint8_t index = 0;
 	// Button data stored with bitflags in 3 bytes
 	// 20 flags need to be stored
 	uint32_t buttons = 0;
 	// Joystick values
 	// https://switchbrew.github.io/libnx/structHiddbgHdlsState.html
 	// Range -30000 to 30000
-	int32_t LS_X = 0;
-	int32_t LS_Y = 0;
-	int32_t RS_X = 0;
-	int32_t RS_Y = 0;
+	int16_t LS_X = 0;
+	int16_t LS_Y = 0;
+	int16_t RS_X = 0;
+	int16_t RS_Y = 0;
 	// Gyroscope and Accelerometer data (when it is implemented)
 	int16_t ACCEL_X = 0;
 	int16_t ACCEL_Y = 0;
@@ -65,7 +63,7 @@ struct ControllerData : public zpp::serializer::polymorphic {
 	friend zpp::serializer::access;
 	template <typename Archive, typename Self> static void serialize(Archive& archive, Self& self) {
 		// clang-format off
-			archive(self.index, self.buttons,
+			archive(self.buttons,
 				self.LS_X, self.LS_Y, self.RS_X, self.RS_Y,
 				self.ACCEL_X, self.ACCEL_Y, self.ACCEL_Z,
 				self.GYRO_1, self.GYRO_2, self.GYRO_3,

@@ -48,8 +48,6 @@ MainWindow::MainWindow()
 			RECIEVE_QUEUE_DATA(RecieveMemoryRegion)
 		});
 
-	handleNetworkQueues();
-
 	// DataProcessing can now start with the networking instance
 	dataProcessingInstance = new DataProcessing(&mainSettings, buttonData, networkInstance, this);
 
@@ -58,6 +56,8 @@ MainWindow::MainWindow()
 	bottomUI = std::make_shared<BottomUI>(this, &mainSettings, buttonData, mainSizer, dataProcessingInstance);
 
 	projectHandler = std::make_shared<ProjectHandler>(this, dataProcessingInstance, &mainSettings);
+
+	handleNetworkQueues();
 
 	HELPERS::addDarkmodeWindows(this);
 

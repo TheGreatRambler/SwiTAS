@@ -58,14 +58,12 @@ public:
 	// To convert to Btn
 	std::unordered_map<std::string, Btn> scriptNameToButton;
 
-	static constexpr int32_t axisMin = -30000;
-	static constexpr int32_t axisMax = 30000;
+	static constexpr int16_t axisMin = -30000;
+	static constexpr int16_t axisMax = 30000;
 
 	const uint8_t KeyWidth  = 11;
 	const uint8_t KeyHeight = 4;
 
-	// TODO finish these
-	// https://gitlab.gnome.org/GNOME/gtk/blob/master/gdk/gdkkeysyms.h
 	std::map<Btn, std::shared_ptr<ButtonInfo>> buttonMapping;
 
 	void setupButtonMapping(rapidjson::Document* mainSettings);

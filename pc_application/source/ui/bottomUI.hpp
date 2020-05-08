@@ -95,8 +95,8 @@ public:
 
 	void draw(wxDC& dc) override;
 
-	void setXValue(int32_t x);
-	void setYValue(int32_t y);
+	void setXValue(int16_t x);
+	void setYValue(int16_t y);
 
 	wxBoxSizer* getSizer() {
 		return widgetSizer;

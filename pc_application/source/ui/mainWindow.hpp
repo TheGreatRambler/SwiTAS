@@ -24,7 +24,7 @@
 
 class MainWindow : public wxFrame {
 private:
-	uint8_t NETWORK_CALLBACK_ID = 0;
+	const uint8_t NETWORK_CALLBACK_ID = 0;
 
 	// Simplify things immesnly
 	wxBoxSizer* mainSizer;

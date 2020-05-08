@@ -282,7 +282,6 @@ std::string ButtonData::framesToText(DataProcessing* dataProcessing, FrameNum st
 void ButtonData::transferControllerData(std::shared_ptr<ControllerData> src, std::shared_ptr<ControllerData> dest, bool placePaste) {
 	// Transfer all over
 
-	dest->index = src->index;
 	if(placePaste) {
 		// Add them together, not replace (bitwise or)
 		dest->buttons |= src->buttons;

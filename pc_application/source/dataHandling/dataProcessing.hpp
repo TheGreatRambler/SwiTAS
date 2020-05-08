@@ -197,9 +197,6 @@ public:
 
 	std::shared_ptr<ControllerData> getFrame(FrameNum frame) const;
 
-	// This includes joysticks, accel, gyro, etc...
-	void triggerNumberValues(ControllerNumberValues joystickId, int32_t value);
-
 	// New FANCY methods
 	void triggerButton(Btn button);
 	void modifyButton(FrameNum frame, Btn button, uint8_t isPressed);
@@ -209,10 +206,12 @@ public:
 	uint8_t getButtonSpecific(FrameNum frame, Btn button, SavestateBlockNum savestateHookNum, uint8_t player) const;
 	uint8_t getButtonCurrent(Btn button) const;
 
-	void setNumberValues(FrameNum frame, ControllerNumberValues joystickId, int32_t value);
-	int32_t getNumberValues(FrameNum frame, ControllerNumberValues joystickId) const;
-	int32_t getNumberValuesSpecific(FrameNum frame, ControllerNumberValues joystickId, SavestateBlockNum savestateHookNum, uint8_t player) const;
-	int32_t getNumberValueCurrent(ControllerNumberValues joystickId) const;
+// This includes joysticks, accel, gyro, etc...
+	void triggerNumberValues(ControllerNumberValues joystickId, int16_t value);
+	void setNumberValues(FrameNum frame, ControllerNumberValues joystickId, int16_t value);
+	int16_t getNumberValues(FrameNum frame, ControllerNumberValues joystickId) const;
+	int16_t getNumberValuesSpecific(FrameNum frame, ControllerNumberValues joystickId, SavestateBlockNum savestateHookNum, uint8_t player) const;
+	int16_t getNumberValueCurrent(ControllerNumberValues joystickId) const;
 
 	// Updates how the current frame looks on the UI
 	// Also called when modifying anything of importance, like currentFrame

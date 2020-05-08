@@ -8,12 +8,9 @@
 // clang-format off
 // https://stackoverflow.com/a/20583578/9329945
 #define ADD_NETWORK_CALLBACK(Flag, callbackBody) { \
-	std::function<void(const Protocol::Struct_##Flag&)> func = \
-		[this] (const Protocol::Struct_##Flag& data) { \
-			callbackBody \
-		}; \
-	projectHandler->Callbacks_##Flag.insert(std::make_pair<uint8_t, \
-		std::function<void(const Protocol::Struct_##Flag&)>>(std::move(NETWORK_CALLBACK_ID), std::move(func))); \
+	projectHandler->Callbacks_##Flag.emplace(NETWORK_CALLBACK_ID, [&] (const Protocol::Struct_##Flag& data) { \
+		callbackBody \
+	}); \
 }
 // clang-format on
 

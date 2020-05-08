@@ -83,6 +83,9 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	Bind(wxEVT_MENU, &DataProcessing::onAddFrame, this, addFrameID);
 	Bind(wxEVT_MENU, &DataProcessing::onFrameAdvance, this, frameAdvanceID);
 	Bind(wxEVT_MENU, &DataProcessing::onAddSavestate, this, savestateID);
+
+	// Select the first item
+	SetItemState(0, wxLIST_STATE_FOCUSED, wxLIST_STATE_FOCUSED);
 }
 
 // clang-format off
@@ -488,13 +491,31 @@ void DataProcessing::removeSavestateHook(SavestateBlockNum index) {
 }
 
 void DataProcessing::addNewPlayer() {
-	allPlayers.push_back(std::make_shared<std::vector<std::shared_ptr<SavestateHook>>>());
+	std::shared_ptr<std::vector<std::shared_ptr<SavestateHook>>> player = std::make_shared<std::vector<std::shared_ptr<SavestateHook>>>();
+	allPlayers.push_back(player);
+
+	if(allPlayers.size() != 1) {
+		// Running it so early on boot seems to break networking
+		sendPlayerNum();
+
+		// Match this player to the number of savestate hooks as the first player
+		for(auto const& firstPlayer : *allPlayers[0]) {
+			std::shared_ptr<SavestateHook> savestateHook = std::make_shared<SavestateHook>();
+			player->push_back(savestateHook);
+			for(FrameNum i = 0; i < firstPlayer->inputs->size(); i++) {
+				savestateHook->inputs->push_back(std::make_shared<ControllerData>());
+			}
+			savestateHook->dHash      = "";
+			savestateHook->screenshot = new wxBitmap();
+		}
+	}
+
 	setPlayer(allPlayers.size() - 1);
-	sendPlayerNum();
 }
 
 void DataProcessing::setPlayer(uint8_t playerIndex) {
 	viewingPlayerIndex = playerIndex;
+	inputsList         = allPlayers[playerIndex]->at(currentSavestateHook)->inputs;
 	// Make sure there are savestate hooks
 	if(allPlayers[viewingPlayerIndex]->size() != 0) {
 		FrameNum curFrame = currentFrame;
@@ -550,7 +571,7 @@ void DataProcessing::triggerButton(Btn button) {
 }
 
 // This includes joysticks, accel, gyro, etc...
-void DataProcessing::triggerNumberValues(ControllerNumberValues joystickId, int32_t value) {
+void DataProcessing::triggerNumberValues(ControllerNumberValues joystickId, int16_t value) {
 	// Trigger joystick, can occur over range
 	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if(firstSelectedItem != wxNOT_FOUND) {
@@ -584,7 +605,7 @@ void DataProcessing::clearAllButtons(FrameNum frame) {
 	RefreshItem(frame);
 }
 
-void DataProcessing::setNumberValues(FrameNum frame, ControllerNumberValues joystickId, int32_t value) {
+void DataProcessing::setNumberValues(FrameNum frame, ControllerNumberValues joystickId, int16_t value) {
 	switch(joystickId) {
 	case ControllerNumberValues::LEFT_X:
 		inputsList->at(frame)->LS_X = value;
@@ -623,7 +644,7 @@ void DataProcessing::setNumberValues(FrameNum frame, ControllerNumberValues joys
 	invalidateRun(frame);
 }
 
-int32_t DataProcessing::getNumberValues(FrameNum frame, ControllerNumberValues joystickId) const {
+int16_t DataProcessing::getNumberValues(FrameNum frame, ControllerNumberValues joystickId) const {
 	switch(joystickId) {
 	case ControllerNumberValues::LEFT_X:
 		return inputsList->at(frame)->LS_X;
@@ -658,7 +679,7 @@ int32_t DataProcessing::getNumberValues(FrameNum frame, ControllerNumberValues j
 	}
 }
 
-int32_t DataProcessing::getNumberValuesSpecific(FrameNum frame, ControllerNumberValues joystickId, SavestateBlockNum savestateHookNum, uint8_t player) const {
+int16_t DataProcessing::getNumberValuesSpecific(FrameNum frame, ControllerNumberValues joystickId, SavestateBlockNum savestateHookNum, uint8_t player) const {
 	switch(joystickId) {
 	case ControllerNumberValues::LEFT_X:
 		return inputsList->at(frame)->LS_X;
@@ -705,7 +726,7 @@ uint8_t DataProcessing::getButtonCurrent(Btn button) const {
 	return getButton(currentFrame, button);
 }
 
-int32_t DataProcessing::getNumberValueCurrent(ControllerNumberValues joystickId) const {
+int16_t DataProcessing::getNumberValueCurrent(ControllerNumberValues joystickId) const {
 	return getNumberValues(currentFrame, joystickId);
 }
 
@@ -845,8 +866,8 @@ std::size_t DataProcessing::getFramesSize() const {
 }
 
 DataProcessing::~DataProcessing() {
-	for(auto& itemAttribute : itemAttributes) {
-		// Free the sucker
-		// free(itemAttribute.second);
-	}
+	// for(auto& itemAttribute : itemAttributes) {
+	// Free the sucker
+	// free(itemAttribute.second);
+	//}
 }

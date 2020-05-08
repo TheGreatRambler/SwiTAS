@@ -156,8 +156,8 @@ void JoystickCanvas::draw(wxDC& dc) {
 
 	dc.DrawCircle(approximateMiddle, approximateMiddle.x);
 
-	int32_t joyX;
-	int32_t joyY;
+	int16_t joyX;
+	int16_t joyY;
 
 	if(isLeftJoystick) {
 		joyX = inputInstance->getNumberValueCurrent(ControllerNumberValues::LEFT_X);
@@ -251,9 +251,9 @@ void JoystickCanvas::onMouseClick(wxMouseEvent& event) {
 	int height;
 	GetSize(&width, &height);
 
-	int32_t scaledX = ((float)loc.x / width) * 60000 - ButtonData::axisMax;
+	int16_t scaledX = ((float)loc.x / width) * 60000 - ButtonData::axisMax;
 	// Y is flipped
-	int32_t scaledY = (((float)loc.y / height) * 60000 - ButtonData::axisMax) * -1;
+	int16_t scaledY = (((float)loc.y / height) * 60000 - ButtonData::axisMax) * -1;
 
 	// Mutiply by twice the radius and then subtract the radius to get the middle
 	if(isLeftJoystick) {
@@ -316,7 +316,7 @@ void JoystickCanvas::yValueSet(wxSpinEvent& event) {
 	}
 }
 
-void JoystickCanvas::setXValue(int32_t x) {
+void JoystickCanvas::setXValue(int16_t x) {
 	if(isLeftJoystick) {
 		inputInstance->triggerNumberValues(ControllerNumberValues::LEFT_X, x);
 		correctForCircleLock();
@@ -327,7 +327,7 @@ void JoystickCanvas::setXValue(int32_t x) {
 	Refresh();
 }
 
-void JoystickCanvas::setYValue(int32_t y) {
+void JoystickCanvas::setYValue(int16_t y) {
 	if(isLeftJoystick) {
 		inputInstance->triggerNumberValues(ControllerNumberValues::LEFT_Y, y);
 		correctForCircleLock();
@@ -642,7 +642,7 @@ void BottomUI::onLeftJoystickLock(wxCommandEvent& event) {
 			int axisValue  = currentJoy->GetPosition(i);
 
 			// Normalize to 1, then multiply by the range
-			int32_t normalizedAxisValue = ((float)(axisValue - axisMiddle) / (float)(axisMax - axisMiddle)) * ButtonData::axisMax;
+			int16_t normalizedAxisValue = ((float)(axisValue - axisMiddle) / (float)(axisMax - axisMiddle)) * ButtonData::axisMax;
 
 			// Flip if needed
 			if(!axisDirection[i]) {
@@ -676,7 +676,7 @@ void BottomUI::onRightJoystickLock(wxCommandEvent& event) {
 			int axisValue  = currentJoy->GetPosition(i);
 
 			// Normalize to 1, then multiply by the range
-			int32_t normalizedAxisValue = ((float)(axisValue - axisMiddle) / (float)(axisMax - axisMiddle)) * ButtonData::axisMax;
+			int16_t normalizedAxisValue = ((float)(axisValue - axisMiddle) / (float)(axisMax - axisMiddle)) * ButtonData::axisMax;
 
 			// Flip if needed
 			if(!axisDirection[i]) {

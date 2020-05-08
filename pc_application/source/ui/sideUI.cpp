@@ -138,7 +138,7 @@ void SideUI::setPlayerInfo(uint8_t size, uint8_t selected) {
 	playerSelect->SetSelection(wxNOT_FOUND);
 	playerSelect->Clear();
 	for(uint8_t i = 0; i < size; i++) {
-		playerSelect->Append(wxString::Format("Player %d", i));
+		playerSelect->Append(wxString::Format("Player %d", i + 1));
 	}
 	setPlayerFromHere = true;
 	playerSelect->SetSelection(selected);
@@ -231,6 +231,7 @@ bool SideUI::loadSavestateHook(int block) {
 		if(savestateSelection.getOperationSuccessful()) {
 			inputData->setSavestateHook(block);
 			tether();
+			inputData->sendPlayerNum();
 			return true;
 		} else {
 			untether();
