@@ -1,0 +1,247 @@
+{
+	"buttons": {
+		"A": {
+			"normalName": "A",
+			"scriptName": "KEY_A",
+			"viewName": "A Button",
+			"onIconImage": "share/icons/nxtas/inputs/Aon.png",
+			"offIconImage": "share/icons/nxtas/inputs/Aoff.png",
+			"triggerKeybind": "A",
+			"gridX": 10,
+			"gridY": 2
+		},
+		"B": {
+			"normalName": "B",
+			"scriptName": "KEY_B",
+			"viewName": "B Button",
+			"onIconImage": "share/icons/nxtas/inputs/Bon.png",
+			"offIconImage": "share/icons/nxtas/inputs/Boff.png",
+			"triggerKeybind": "B",
+			"gridX": 9,
+			"gridY": 3
+		},
+		"X": {
+			"normalName": "X",
+			"scriptName": "KEY_X",
+			"viewName": "X Button",
+			"onIconImage": "share/icons/nxtas/inputs/Xon.png",
+			"offIconImage": "share/icons/nxtas/inputs/Xoff.png",
+			"triggerKeybind": "X",
+			"gridX": 9,
+			"gridY": 1
+		},
+		"Y": {
+			"normalName": "Y",
+			"scriptName": "KEY_Y",
+			"viewName": "Y Button",
+			"onIconImage": "share/icons/nxtas/inputs/Yon.png",
+			"offIconImage": "share/icons/nxtas/inputs/Yoff.png",
+			"triggerKeybind": "Y",
+			"gridX": 8,
+			"gridY": 2
+		},
+		"L": {
+			"normalName": "L",
+			"scriptName": "KEY_L",
+			"viewName": "L Button",
+			"onIconImage": "share/icons/nxtas/inputs/Lon.png",
+			"offIconImage": "share/icons/nxtas/inputs/Loff.png",
+			"triggerKeybind": "T",
+			"gridX": 3,
+			"gridY": 0
+		},
+		"R": {
+			"normalName": "R",
+			"scriptName": "KEY_R",
+			"viewName": "R Button",
+			"onIconImage": "share/icons/nxtas/inputs/Ron.png",
+			"offIconImage": "share/icons/nxtas/inputs/Roff.png",
+			"triggerKeybind": "R",
+			"gridX": 7,
+			"gridY": 0
+		},
+		"ZL": {
+			"normalName": "ZL",
+			"scriptName": "KEY_ZL",
+			"viewName": "ZL Trigger",
+			"onIconImage": "share/icons/nxtas/inputs/ZLon.png",
+			"offIconImage": "share/icons/nxtas/inputs/ZLoff.png",
+			"triggerKeybind": "O",
+			"gridX": 2,
+			"gridY": 0
+		},
+		"ZR": {
+			"normalName": "ZR",
+			"scriptName": "KEY_ZR",
+			"viewName": "ZR Trigger",
+			"onIconImage": "share/icons/nxtas/inputs/ZRon.png",
+			"offIconImage": "share/icons/nxtas/inputs/ZRoff.png",
+			"triggerKeybind": "P",
+			"gridX": 8,
+			"gridY": 0
+		},
+		"SL": {
+			"normalName": "SL",
+			"scriptName": "KEY_SL",
+			"viewName": "SL Trigger",
+			"onIconImage": "share/icons/nxtas/inputs/SLon.png",
+			"offIconImage": "share/icons/nxtas/inputs/SLoff.png",
+			"triggerKeybind": "Q",
+			"gridX": 4,
+			"gridY": 0
+		},
+		"SR": {
+			"normalName": "SR",
+			"scriptName": "KEY_SR",
+			"viewName": "SR Trigger",
+			"onIconImage": "share/icons/nxtas/inputs/SRon.png",
+			"offIconImage": "share/icons/nxtas/inputs/SRoff.png",
+			"triggerKeybind": "E",
+			"gridX": 6,
+			"gridY": 0
+		},
+		"DUP": {
+			"normalName": "Dup",
+			"scriptName": "KEY_DUP",
+			"viewName": "Up on Dpad",
+			"onIconImage": "share/icons/nxtas/inputs/UPon.png",
+			"offIconImage": "share/icons/nxtas/inputs/UPoff.png",
+			"triggerKeybind": "I",
+			"gridX": 1,
+			"gridY": 1
+		},
+		"DDOWN": {
+			"normalName": "Ddown",
+			"scriptName": "KEY_DDOWN",
+			"viewName": "Down on Dpad",
+			"onIconImage": "share/icons/nxtas/inputs/DOWNon.png",
+			"offIconImage": "share/icons/nxtas/inputs/DOWNoff.png",
+			"triggerKeybind": "K",
+			"gridX": 1,
+			"gridY": 3
+		},
+		"DLEFT": {
+			"normalName": "Dleft",
+			"scriptName": "KEY_DLEFT",
+			"viewName": "Left on Dpad",
+			"onIconImage": "share/icons/nxtas/inputs/LEFTon.png",
+			"offIconImage": "share/icons/nxtas/inputs/LEFToff.png",
+			"triggerKeybind": "J",
+			"gridX": 0,
+			"gridY": 2
+		},
+		"DRIGHT": {
+			"normalName": "Dright",
+			"scriptName": "KEY_DRIGHT",
+			"viewName": "Right on Dpad",
+			"onIconImage": "share/icons/nxtas/inputs/RIGHTon.png",
+			"offIconImage": "share/icons/nxtas/inputs/RIGHToff.png",
+			"triggerKeybind": "L",
+			"gridX": 2,
+			"gridY": 2
+		},
+		"PLUS": {
+			"normalName": "Plus",
+			"scriptName": "KEY_PLUS",
+			"viewName": "Plus Button",
+			"onIconImage": "share/icons/nxtas/inputs/PLUSon.png",
+			"offIconImage": "share/icons/nxtas/inputs/PLUSoff.png",
+			"triggerKeybind": "=",
+			"gridX": 7,
+			"gridY": 1
+		},
+		"MINUS": {
+			"normalName": "Minus",
+			"scriptName": "KEY_MINUS",
+			"viewName": "Minus Button",
+			"onIconImage": "share/icons/nxtas/inputs/MINUSon.png",
+			"offIconImage": "share/icons/nxtas/inputs/MINUSoff.png",
+			"triggerKeybind": "-",
+			"gridX": 3,
+			"gridY": 1
+		},
+		"HOME": {
+			"normalName": "Home",
+			"scriptName": "KEY_HOME",
+			"viewName": "Home Button",
+			"onIconImage": "share/icons/nxtas/inputs/HOMEon.png",
+			"offIconImage": "share/icons/nxtas/inputs/HOMEoff.png",
+			"triggerKeybind": "H",
+			"gridX": 6,
+			"gridY": 2
+		},
+		"CAPT": {
+			"normalName": "Capt",
+			"scriptName": "KEY_CAPT",
+			"viewName": "Capture Button",
+			"onIconImage": "share/icons/nxtas/inputs/CAPTon.png",
+			"offIconImage": "share/icons/nxtas/inputs/CAPToff.png",
+			"triggerKeybind": "G",
+			"gridX": 4,
+			"gridY": 2
+		},
+		"LS": {
+			"normalName": "LS",
+			"scriptName": "KEY_LS",
+			"viewName": "Left Stick Press",
+			"onIconImage": "share/icons/nxtas/inputs/LSTICKon.png",
+			"offIconImage": "share/icons/nxtas/inputs/LSTICKoff.png",
+			"triggerKeybind": "N",
+			"gridX": 0,
+			"gridY": 0
+		},
+		"RS": {
+			"normalName": "RS",
+			"scriptName": "KEY_RS",
+			"viewName": "Right Stick Press",
+			"onIconImage": "share/icons/nxtas/inputs/RSTICKoff.png",
+			"offIconImage": "share/icons/nxtas/inputs/RSTICKon.png",
+			"triggerKeybind": "U",
+			"gridX": 3,
+			"gridY": 3
+		}
+	},
+	"iconTransparent": "rgb(48, 0, 77)",
+	"inputsList": {
+		"imageWidth": 30,
+		"imageHeight": 30
+	},
+	"buttonGrid": {
+		"imageWidth": 65,
+		"imageHeight": 65
+	},
+	"joystickMappings": {
+		"0x45E,0x28E": "A:b2,B:b1,X:b4,Y:b3,L:b5,R:b6,PLUS:b8,MINUS:b7,LS:b9,RS:b10,DUP:h0.1,DDOWN:h0.4,DLEFT:h0.8,DRIGHT:h0.2,LSX:a0+,LSY:a1-,RSX:a4+,RSY:a3-,ZL:a2-,ZR:a2-"
+	},
+	"programIcon": "share/icons/nxtas/logo/main.png",
+	"videoViewerDefaultImage": "share/images/novideodefault.jpg",
+	"dhashWidth": 21,
+	"dhashHeight": 20,
+	"ui": {
+		"addFrameButton": "share/icons/nxtas/buttons/addFrameButton.png",
+		"frameAdvanceButton": "share/icons/nxtas/buttons/frameAdvanceButton.png",
+		"savestateHookCreateButton": "share/icons/nxtas/buttons/savestateHookCreateButton.png",
+		"savestateHookLoadButton": "share/icons/nxtas/buttons/savestateHookLoadButton.png",
+		"playerAddButton": "share/icons/nxtas/buttons/addPlayerButton.png",
+		"playerRemoveButton": "share/icons/nxtas/buttons/removePlayerButton.png",
+		"joystickLockButton": "share/icons/nxtas/buttons/joystickLockButton.png",
+		"playButton": "share/icons/nxtas/buttons/playButton.png",
+		"pauseButton": "share/icons/nxtas/buttons/pauseButton.png",
+		"okButton": "share/icons/nxtas/buttons/okButton.png",
+		"splashScreen": "share/icons/nxtas/logo/main.png",
+		"buttonWidth": 80,
+		"buttonHeight": 80,
+		"frameViewerColors": {
+			"notRan": "rgb(223, 227, 235)",
+			"ran": "rgb(144, 252, 189)",
+			"savestate": "rgb(252, 144, 169)"
+		},
+		"recentProjectsColors": {
+			"projectName": "rgb(12, 44, 112)",
+			"projectDir": "rgb(112, 89, 12)",
+			"newProject": "rgb(20, 110, 66)"
+		}
+	},
+	"recentProjects": [],
+	"recentVideos": []
+}

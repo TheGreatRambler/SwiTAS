@@ -1,0 +1,71 @@
+{
+	"version": "2.0.0",
+	"tasks": [{
+			"label": "Build PC Application",
+			"type": "shell",
+			"command": "make",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			},
+			"problemMatcher": [{
+				"base": "$gcc",
+				"fileLocation": ["autoDetect", "${workspaceFolder}"]
+			}],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"label": "Force Build PC Application",
+			"type": "shell",
+			"command": "make -B",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			},
+			"problemMatcher": [{
+				"base": "$gcc",
+				"fileLocation": ["autoDetect", "${workspaceFolder}"]
+			}],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		/*{
+			"label": "Build network test Application",
+			"type": "shell",
+			"command": "make -j 4 -C '${workspaceFolder}/network_test'",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			},
+			"problemMatcher": [{
+				"base": "$gcc",
+				"fileLocation": ["autoDetect", "${workspaceFolder}/network_test"]
+			}],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		}, {
+			"label": "Force build network test Application",
+			"type": "shell",
+			"command": "make -B -j 4 -C '${workspaceFolder}/network_test'",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			},
+			"problemMatcher": [{
+				"base": "$gcc",
+				"fileLocation": ["autoDetect", "${workspaceFolder}/network_test"]
+			}],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},*/
+	]
+}

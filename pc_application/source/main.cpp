@@ -1,11 +1,30 @@
-#include "main.hpp"
+#include <atomic>
+#include <cstdio>
+#include <memory>
+#include <thread>
+#include <wx/wx.h>
 
-// Note to self for later: https://stackoverflow.com/questions/49092784/how-to-distribute-a-gtk-application-on-windows
-// https://www.lucidarme.me/gtkmm/
-int main (int argc, char* argv[]) {
-	// Initialize gtkmm
-	MainApplication* main = new MainApplication (argc, argv);
+#include "ui/mainWindow.hpp"
 
-	// Finish
-	return main->run ();
-}
+class MainApp : public wxApp {
+private:
+	MainWindow* window;
+
+public:
+	virtual bool OnInit() {
+		window = new MainWindow();
+
+		puts("App starting");
+		window->Show(true);
+		puts("Window opened");
+		window->onStart();
+		return true;
+	}
+
+	int OnExit() {
+		// No errors, return 0
+		return 0;
+	}
+};
+
+IMPLEMENT_APP(MainApp);
