@@ -175,7 +175,7 @@ public:
 	BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid, DataProcessing* input);
 
 	void addJoystickMenu(wxMenu* parent) {
-		parent->AppendSubMenu(joystickSubMenu, "&List Joysticks");
+		parent->AppendSubMenu(joystickSubMenu, "&List Joysticks\tCtrl+G");
 	}
 
 	// Just a random large number, apparently can't be larger than 76
