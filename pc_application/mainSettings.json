@@ -242,9 +242,11 @@
 			"newProject": "rgb(20, 110, 66)"
 		}
 	},
-	"recentProjects": [{
-		"projectDirectory": "C:\\Users\\aehar\\Desktop\\EPIC\\",
-		"projectName": "Unnamed"
-	}],
+	"recentProjects": [
+		{
+			"projectDirectory": "C:\\Users\\aehar\\Desktop\\EPIC\\",
+			"projectName": "Unnamed"
+		}
+	],
 	"recentVideos": []
 }

@@ -237,7 +237,7 @@ public:
 	void invalidateRun(FrameNum frame);
 	void invalidateRunSpecific(FrameNum frame, SavestateBlockNum savestateHookNum, uint8_t player);
 
-	void addFrame(FrameNum afterFrame, int player);
+	void addFrame(FrameNum afterFrame);
 	void addFrameHere();
 	void removeFrames(FrameNum start, FrameNum end);
 

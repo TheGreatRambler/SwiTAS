@@ -72,7 +72,7 @@ void ButtonData::setupButtonMapping(rapidjson::Document* mainSettings) {
 	}
 }
 
-void ButtonData::textToFrames(DataProcessing* dataProcessing, int player, std::string text, FrameNum startLoc, bool insertPaste, bool placePaste) {
+FrameNum ButtonData::textToFrames(DataProcessing* dataProcessing, std::string text, FrameNum startLoc, bool insertPaste, bool placePaste) {
 	std::vector<std::string> frameParts = HELPERS::splitString(text, '\n');
 	bool haveSetFirstFrame              = false;
 	FrameNum firstFrame;
@@ -99,16 +99,12 @@ void ButtonData::textToFrames(DataProcessing* dataProcessing, int player, std::s
 		// The actual index
 		FrameNum actualIndex = startLoc + (frameNum - firstFrame);
 
-		if(actualIndex >= dataProcessing->getFramesSize()) {
-			// Add a frame onto the end, not insert paste
-			// This will allow a normal paste to exceed the end
-			dataProcessing->addFrame(actualIndex - 1, player);
-			return;
-		}
-
 		FrameNum thisDataIndex;
 
-		if(insertPaste) {
+		if(insertPaste || actualIndex >= dataProcessing->getFramesSize()) {
+			if(actualIndex >= dataProcessing->getFramesSize()) {
+				actualIndex--;
+			}
 			// It's a new one
 			// Loop through and add frames to keep the right offset between this frame
 			// And the last one
@@ -116,12 +112,12 @@ void ButtonData::textToFrames(DataProcessing* dataProcessing, int player, std::s
 				// Can use expected indexing
 				for(FrameNum i = lastReadFrame + 1; i < actualIndex; i++) {
 					// Add a blank frame for buffer
-					dataProcessing->addFrame(i - 1, player);
+					dataProcessing->addFrame(i - 1);
 				}
 				// Now can easily add the frame later
 			}
 			// Insert it now, it's just a pointer
-			dataProcessing->addFrame(actualIndex, player);
+			dataProcessing->addFrame(actualIndex);
 			thisDataIndex = actualIndex + 1;
 			// If it's the first frame, no need for padding
 		} else {
@@ -205,6 +201,8 @@ void ButtonData::textToFrames(DataProcessing* dataProcessing, int player, std::s
 			continue;
 		}
 	}
+
+	return lastReadFrame;
 }
 
 std::string ButtonData::framesToText(DataProcessing* dataProcessing, FrameNum startLoc, FrameNum endLoc, int playerIndex) {
