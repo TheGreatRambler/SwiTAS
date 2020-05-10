@@ -55,23 +55,25 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	pasteInsertID  = wxNewId();
 	pastePlaceID   = wxNewId();
 	addFrameID     = wxNewId();
+	removeFrameID  = wxNewId();
 	frameAdvanceID = wxNewId();
 	savestateID    = wxNewId();
 
 	insertPaste = false;
 	placePaste  = false;
 
-	entries[0].Set(wxACCEL_CTRL, (int)'C', wxID_COPY, editMenu.Append(wxID_COPY, wxT("&Copy\tCtrl+C")));
-	entries[1].Set(wxACCEL_CTRL, (int)'X', wxID_CUT, editMenu.Append(wxID_CUT, wxT("&Cut\tCtrl+X")));
-	entries[2].Set(wxACCEL_CTRL, (int)'V', wxID_PASTE, editMenu.Append(wxID_PASTE, wxT("&Paste\tCtrl+V")));
-	entries[3].Set(wxACCEL_CTRL | wxACCEL_SHIFT, (int)'V', pasteInsertID, editMenu.Append(pasteInsertID, wxT("&Paste Insert\tCtrl+Shift+V")));
-	entries[4].Set(wxACCEL_CTRL | wxACCEL_ALT, (int)'V', pastePlaceID, editMenu.Append(pastePlaceID, wxT("&Paste Place\tCtrl+Alt+V")));
+	entries[0].Set(wxACCEL_CTRL, (int)'C', wxID_COPY, editMenu.Append(wxID_COPY, wxT("Copy\tCtrl+C")));
+	entries[1].Set(wxACCEL_CTRL, (int)'X', wxID_CUT, editMenu.Append(wxID_CUT, wxT("Cut\tCtrl+X")));
+	entries[2].Set(wxACCEL_CTRL, (int)'V', wxID_PASTE, editMenu.Append(wxID_PASTE, wxT("Paste\tCtrl+V")));
+	entries[3].Set(wxACCEL_CTRL | wxACCEL_SHIFT, (int)'V', pasteInsertID, editMenu.Append(pasteInsertID, wxT("Paste Insert\tCtrl+Shift+V")));
+	entries[4].Set(wxACCEL_CTRL | wxACCEL_ALT, (int)'V', pastePlaceID, editMenu.Append(pastePlaceID, wxT("Paste Place\tCtrl+Alt+V")));
 
-	entries[5].Set(wxACCEL_CTRL, (int)'=', addFrameID, editMenu.Append(addFrameID, wxT("&Add Frame\tCtrl+Plus")));
-	entries[6].Set(wxACCEL_CTRL, WXK_RIGHT, frameAdvanceID, editMenu.Append(frameAdvanceID, wxT("&Frame Advance\tCtrl+Right")));
-	entries[7].Set(wxACCEL_CTRL, (int)'H', savestateID, editMenu.Append(savestateID, wxT("&Add Savestate\tCtrl+H")));
+	entries[5].Set(wxACCEL_CTRL, (int)'=', addFrameID, editMenu.Append(addFrameID, wxT("Add Frame\tCtrl+Plus")));
+	entries[6].Set(wxACCEL_CTRL, (int)'-', removeFrameID, editMenu.Append(removeFrameID, wxT("Remove Frame\tCtrl+Minus")));
+	entries[7].Set(wxACCEL_CTRL, WXK_RIGHT, frameAdvanceID, editMenu.Append(frameAdvanceID, wxT("Frame Advance\tCtrl+Right")));
+	entries[8].Set(wxACCEL_CTRL, (int)'H', savestateID, editMenu.Append(savestateID, wxT("Add Savestate\tCtrl+H")));
 
-	wxAcceleratorTable accel(8, entries);
+	wxAcceleratorTable accel(9, entries);
 	SetAcceleratorTable(accel);
 
 	// Bind each to a handler, both menu and button events
@@ -81,6 +83,7 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	Bind(wxEVT_MENU, &DataProcessing::onInsertPaste, this, pasteInsertID);
 	Bind(wxEVT_MENU, &DataProcessing::onPlacePaste, this, pastePlaceID);
 	Bind(wxEVT_MENU, &DataProcessing::onAddFrame, this, addFrameID);
+	Bind(wxEVT_MENU, &DataProcessing::onRemoveFrame, this, removeFrameID);
 	Bind(wxEVT_MENU, &DataProcessing::onFrameAdvance, this, frameAdvanceID);
 	Bind(wxEVT_MENU, &DataProcessing::onAddSavestate, this, savestateID);
 }
@@ -130,6 +133,56 @@ void DataProcessing::exportCurrentPlayerToFile(wxFileName exportTarget) {
 		std::string exported = buttonData->framesToText(this, 0, 0, viewingPlayerIndex);
 		file.Write(wxString::FromUTF8(exported));
 		file.Close();
+	}
+}
+
+void DataProcessing::importFromFile(wxFileName importTarget) {
+	wxFile file(importTarget.GetFullPath(), wxFile::read);
+
+	if(file.IsOpened()) {
+		wxString fileContents;
+		bool successful = file.ReadAll(&fileContents);
+		file.Close();
+
+		if(successful) {
+			inputsList->clear();
+			// Get to the meaty stuff, this is it
+
+			/*
+			buttonData->textToFrames(this, true, fileContents.ToStdString(), currentFrame, insertPaste, placePaste);
+
+			if(allPlayers.size() != 1) {
+				FrameNum sizeOfOtherPlayer;
+				if(viewingPlayerIndex != 0) {
+					sizeOfOtherPlayer = sizeOfOtherPlayer = allPlayers[0]->at(currentSavestateHook)->inputs->size();
+				} else {
+					sizeOfOtherPlayer = sizeOfOtherPlayer = allPlayers[1]->at(currentSavestateHook)->inputs->size();
+				}
+
+			if (inputsList->size() < sizeOfOtherPlayer)
+			}
+
+			uint8_t playerIndex = 0;
+			for(auto& player : allPlayers) {
+				std::shared_ptr<ControllerData> newControllerData = std::make_shared<ControllerData>();
+
+				if(player->at(currentSavestateHook)->inputs->size() == 0) {
+					player->at(currentSavestateHook)->inputs->push_back(newControllerData);
+				} else {
+					auto begin = player->at(currentSavestateHook)->inputs->begin();
+					player->at(currentSavestateHook)->inputs->insert(begin + afterFrame + 1, newControllerData);
+				}
+
+				setFramestateInfoSpecific(afterFrame + 1, FrameState::RAN, false, currentSavestateHook, playerIndex);
+				setFramestateInfoSpecific(afterFrame + 1, FrameState::SAVESTATE, false, currentSavestateHook, playerIndex);
+
+				// Invalidate run for the data immidiently after this frame
+				invalidateRunSpecific(afterFrame + 2, currentSavestateHook, playerIndex);
+
+				playerIndex++;
+			}
+			*/
+		}
 	}
 }
 
@@ -307,7 +360,11 @@ void DataProcessing::onCut(wxCommandEvent& event) {
 	// Copy the elements, then delete
 	onCopy(event);
 	// Erase the frames
-	removeFrames(currentFrame, currentFrame + GetSelectedItemCount() - 1);
+	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if(firstSelectedItem != wxNOT_FOUND) {
+		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
+		removeFrames(firstSelectedItem, lastSelectedItem);
+	}
 }
 
 void DataProcessing::onPaste(wxCommandEvent& event) {
@@ -319,7 +376,7 @@ void DataProcessing::onPaste(wxCommandEvent& event) {
 			std::string clipboardText = data.GetText().ToStdString();
 
 			// Get to the meaty stuff, this is it
-			buttonData->textToFrames(this, clipboardText, currentFrame, insertPaste, placePaste);
+			buttonData->textToFrames(this, false, clipboardText, currentFrame, insertPaste, placePaste);
 		}
 		wxTheClipboard->Close();
 	}
@@ -338,8 +395,15 @@ void DataProcessing::onPlacePaste(wxCommandEvent& event) {
 }
 
 void DataProcessing::onAddFrame(wxCommandEvent& event) {
-	// These are 1-to-1 from sideUI.cpp
-	addFrame(currentFrame);
+	addFrame(currentFrame, false);
+}
+
+void DataProcessing::onRemoveFrame(wxCommandEvent& event) {
+	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if(firstSelectedItem != wxNOT_FOUND) {
+		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
+		removeFrames(firstSelectedItem, lastSelectedItem);
+	}
 }
 
 void DataProcessing::onFrameAdvance(wxCommandEvent& event) {
@@ -445,8 +509,6 @@ wxRect DataProcessing::getFirstItemRect() {
 	return itemRect;
 }
 
-// The class itself is the list control
-// std::shared_ptr<wxGenericListCtrl> getWidget();
 void DataProcessing::onCacheHint(wxListEvent& event) {
 	if(viewableInputsCallback) {
 		long numOfRowsVisible = GetCountPerPage();
@@ -455,7 +517,9 @@ void DataProcessing::onCacheHint(wxListEvent& event) {
 			long first = GetTopItem();
 			long last  = first + numOfRowsVisible;
 
-			viewableInputsCallback(first, last);
+			if(viewableInputsCallback) {
+				viewableInputsCallback(first, last);
+			}
 		}
 	}
 }
@@ -497,9 +561,7 @@ void DataProcessing::addNewPlayer() {
 	std::shared_ptr<std::vector<std::shared_ptr<SavestateHook>>> player = std::make_shared<std::vector<std::shared_ptr<SavestateHook>>>();
 
 	if(allPlayers.size() != 0) {
-		// Running it so early on boot seems to break networking
 		sendPlayerNum();
-
 		// Match this player to the number of savestate hooks as the first player
 		for(auto const& firstPlayer : *allPlayers[0]) {
 			std::shared_ptr<SavestateHook> savestateHook = std::make_shared<SavestateHook>();
@@ -813,26 +875,43 @@ void DataProcessing::invalidateRunSpecific(FrameNum frame, SavestateBlockNum sav
 	}
 }
 
-void DataProcessing::addFrame(FrameNum afterFrame) {
+void DataProcessing::addFrame(FrameNum afterFrame, uint8_t onlyForCurrentPlayer) {
 	// Add this to the vector right after the selected frame
-	uint8_t playerIndex = 0;
-	for(auto& player : allPlayers) {
+	if(onlyForCurrentPlayer) {
 		std::shared_ptr<ControllerData> newControllerData = std::make_shared<ControllerData>();
 
-		if(player->at(currentSavestateHook)->inputs->size() == 0) {
-			player->at(currentSavestateHook)->inputs->push_back(newControllerData);
+		if(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs->size() == 0) {
+			allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs->push_back(newControllerData);
 		} else {
-			auto begin = player->at(currentSavestateHook)->inputs->begin();
-			player->at(currentSavestateHook)->inputs->insert(begin + afterFrame + 1, newControllerData);
+			auto begin = allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs->begin();
+			allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs->insert(begin + afterFrame + 1, newControllerData);
 		}
 
-		setFramestateInfoSpecific(afterFrame + 1, FrameState::RAN, false, currentSavestateHook, playerIndex);
-		setFramestateInfoSpecific(afterFrame + 1, FrameState::SAVESTATE, false, currentSavestateHook, playerIndex);
+		setFramestateInfoSpecific(afterFrame + 1, FrameState::RAN, false, currentSavestateHook, viewingPlayerIndex);
+		setFramestateInfoSpecific(afterFrame + 1, FrameState::SAVESTATE, false, currentSavestateHook, viewingPlayerIndex);
 
 		// Invalidate run for the data immidiently after this frame
-		invalidateRunSpecific(afterFrame + 2, currentSavestateHook, playerIndex);
+		invalidateRunSpecific(afterFrame + 2, currentSavestateHook, viewingPlayerIndex);
+	} else {
+		uint8_t playerIndex = 0;
+		for(auto& player : allPlayers) {
+			std::shared_ptr<ControllerData> newControllerData = std::make_shared<ControllerData>();
 
-		playerIndex++;
+			if(player->at(currentSavestateHook)->inputs->size() == 0) {
+				player->at(currentSavestateHook)->inputs->push_back(newControllerData);
+			} else {
+				auto begin = player->at(currentSavestateHook)->inputs->begin();
+				player->at(currentSavestateHook)->inputs->insert(begin + afterFrame + 1, newControllerData);
+			}
+
+			setFramestateInfoSpecific(afterFrame + 1, FrameState::RAN, false, currentSavestateHook, playerIndex);
+			setFramestateInfoSpecific(afterFrame + 1, FrameState::SAVESTATE, false, currentSavestateHook, playerIndex);
+
+			// Invalidate run for the data immidiently after this frame
+			invalidateRunSpecific(afterFrame + 2, currentSavestateHook, playerIndex);
+
+			playerIndex++;
+		}
 	}
 
 	// Because of the usability of virtual list controls, just update the length
@@ -847,29 +926,34 @@ void DataProcessing::addFrame(FrameNum afterFrame) {
 }
 
 void DataProcessing::addFrameHere() {
-	addFrame(currentFrame);
+	addFrame(currentFrame, false);
 }
 
 void DataProcessing::removeFrames(FrameNum start, FrameNum end) {
-	uint8_t playerIndex = 0;
-	for(auto& player : allPlayers) {
-		auto beginning = player->at(currentSavestateHook)->inputs->begin();
-		player->at(currentSavestateHook)->inputs->erase(beginning + start, beginning + end + 1);
+	// Since only selected frames will ever be selected, this just makes sure
+	// One frame is left over
+	if(end - start != (getFramesSize() - 1)) {
+		uint8_t playerIndex = 0;
+		for(auto& player : allPlayers) {
+			auto beginning = player->at(currentSavestateHook)->inputs->begin();
+			player->at(currentSavestateHook)->inputs->erase(beginning + start, beginning + end + 1);
 
-		// Invalidate run for the data immidiently after this frame
-		invalidateRunSpecific(start, currentSavestateHook, playerIndex);
+			// Invalidate run for the data immidiently after this frame
+			invalidateRunSpecific(start, currentSavestateHook, playerIndex);
 
-		playerIndex++;
+			playerIndex++;
+		}
+
+		// Because of the usability of virtual list controls, just update the length
+		SetItemCount(inputsList->size());
+
+		if(currentFrame > (getFramesSize() - 1)) {
+			setCurrentFrame(getFramesSize() - 1);
+		} else {
+			modifyCurrentFrameViews(currentFrame);
+			Refresh();
+		}
 	}
-
-	// Because of the usability of virtual list controls, just update the length
-	SetItemCount(inputsList->size());
-
-	for(FrameNum s = start; s <= end; s++) {
-		modifyCurrentFrameViews(s);
-	}
-
-	Refresh();
 }
 
 std::size_t DataProcessing::getFramesSize() const {

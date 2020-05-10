@@ -99,6 +99,7 @@ private:
 	int pasteInsertID;
 	int pastePlaceID;
 	int addFrameID;
+	int removeFrameID;
 	int frameAdvanceID;
 	int savestateID;
 
@@ -118,6 +119,7 @@ private:
 	void onPlacePaste(wxCommandEvent& event);
 
 	void onAddFrame(wxCommandEvent& event);
+	void onRemoveFrame(wxCommandEvent& event);
 	void onFrameAdvance(wxCommandEvent& event);
 	void onAddSavestate(wxCommandEvent& event);
 
@@ -135,6 +137,7 @@ public:
 	void triggerCurrentFrameChanges();
 
 	void exportCurrentPlayerToFile(wxFileName exportTarget);
+	void importFromFile(wxFileName importTarget);
 
 	AllSavestateHookBlocks& getAllSavestateHookBlocks() {
 		return *allPlayers[viewingPlayerIndex];
@@ -234,7 +237,7 @@ public:
 	void invalidateRun(FrameNum frame);
 	void invalidateRunSpecific(FrameNum frame, SavestateBlockNum savestateHookNum, uint8_t player);
 
-	void addFrame(FrameNum afterFrame);
+	void addFrame(FrameNum afterFrame, uint8_t onlyForCurrentPlayer);
 	void addFrameHere();
 	void removeFrames(FrameNum start, FrameNum end);
 

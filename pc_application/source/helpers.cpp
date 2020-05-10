@@ -58,7 +58,7 @@ rapidjson::Document HELPERS::getSettingsFromString(std::string jsonString) {
 wxBitmapButton* HELPERS::getBitmapButton(wxWindow* parentFrame, rapidjson::Document* settings, const char* name) {
 	wxImage resizedImage(HELPERS::resolvePath((*settings)["ui"][name].GetString()));
 	resizedImage.Rescale((*settings)["ui"]["buttonWidth"].GetInt(), (*settings)["ui"]["buttonHeight"].GetInt());
-	return new wxBitmapButton(parentFrame, wxID_ANY, *(new wxBitmap(resizedImage)));
+	return new wxBitmapButton(parentFrame, wxID_ANY, wxBitmap(resizedImage));
 }
 
 wxBitmapButton* HELPERS::getSystemBitmapButton(wxWindow* parentFrame, wxArtID id) {

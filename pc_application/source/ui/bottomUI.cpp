@@ -121,6 +121,16 @@ JoystickCanvas::JoystickCanvas(rapidjson::Document* settings, wxFrame* parent, D
 	yInput                     = new wxSpinCtrl(parent, wxID_ANY, "y", wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
 	canGoOutsideCircleCheckbox = new wxCheckBox(parent, wxID_ANY, "Clamp");
 
+	if(leftJoy) {
+		xInput->SetToolTip("Edit X value for left joystick");
+		yInput->SetToolTip("Edit Y value for left joystick");
+	} else {
+		xInput->SetToolTip("Edit X value for right joystick");
+		yInput->SetToolTip("Edit Y value for right joystick");
+	}
+
+	canGoOutsideCircleCheckbox->SetToolTip("Lock joystick value to within circle");
+
 	lockButton = HELPERS::getBitmapButton(parent, mainSettings, "joystickLockButton");
 
 	xInput->Bind(wxEVT_COMMAND_SPINCTRL_UPDATED, &JoystickCanvas::xValueSet, this);
@@ -151,7 +161,7 @@ void JoystickCanvas::draw(wxDC& dc) {
 
 	wxPoint approximateMiddle((float)width / 2, (float)height / 2);
 
-	dc.SetPen(*wxGREEN_PEN);
+	dc.SetPen(*wxBLACK_PEN);
 	dc.SetBrush(*wxLIGHT_GREY_BRUSH);
 
 	dc.DrawCircle(approximateMiddle, approximateMiddle.x);
@@ -357,19 +367,29 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 	rightJoystickDrawer = new JoystickCanvas(settings, parentFrame, inputInstance, false);
 	rightJoystickDrawer->setBackgroundColor(*wxWHITE);
 
+	leftJoystickDrawer->SetToolTip("Edit left joystick value");
+	rightJoystickDrawer->SetToolTip("Edit right joystick value");
+
 	leftJoystickDrawer->getLockButton()->Bind(wxEVT_BUTTON, &BottomUI::onLeftJoystickLock, this);
 	rightJoystickDrawer->getLockButton()->Bind(wxEVT_BUTTON, &BottomUI::onRightJoystickLock, this);
 
+	leftJoystickDrawer->getLockButton()->SetToolTip("Set current value of left gamepad joystick to frame");
+	rightJoystickDrawer->getLockButton()->SetToolTip("Set current value of right gamepad joystick to frame");
+
 	wxSize gridSize;
 	// Just to get a rough estimate
-	int w = buttonData->KeyWidth * buttonData->buttonMapping[Btn::A]->resizedGridOffBitmap->GetWidth();
-	int h = buttonData->KeyHeight * buttonData->buttonMapping[Btn::A]->resizedGridOffBitmap->GetHeight();
+	int w = ButtonData::KeyWidth * buttonData->buttonMapping[Btn::A]->resizedGridOffBitmap->GetWidth();
+	int h = ButtonData::KeyHeight * buttonData->buttonMapping[Btn::A]->resizedGridOffBitmap->GetHeight();
 	gridSize.SetWidth(w);
 	gridSize.SetHeight(h);
 
 	buttonGrid = new ButtonGrid(parentFrame, gridSize, buttonData, inputInstance);
 
+	buttonGrid->SetToolTip("Toggle buttons for frames with mouse");
+
 	frameViewerCanvas = new FrameViewerCanvas(parentFrame, new wxBitmap(HELPERS::resolvePath((*mainSettings)["videoViewerDefaultImage"].GetString()), wxBITMAP_TYPE_JPEG));
+
+	frameViewerCanvas->SetToolTip("View current frame's screenshot");
 
 	inputInstance->setInputCallback(std::bind(&BottomUI::refreshDataViews, this));
 
@@ -383,7 +403,7 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 	horizontalBoxSizer->Add(leftJoystickDrawer->getSizer(), 0);
 	horizontalBoxSizer->Add(rightJoystickDrawer->getSizer(), 0);
 
-	horizontalBoxSizer->Add(buttonGrid, 0, wxSHAPED | wxALIGN_CENTER);
+	horizontalBoxSizer->Add(buttonGrid, 0, wxSHAPED | wxEXPAND);
 
 	frameViewerCanvas->SetMinSize(wxSize(0, 0));
 

@@ -47,13 +47,13 @@ void ButtonData::setupButtonMapping(rapidjson::Document* mainSettings) {
 
 		int listWidth  = (*mainSettings)["inputsList"]["imageWidth"].GetInt();
 		int listHeight = (*mainSettings)["inputsList"]["imageHeight"].GetInt();
-		int gridWidth  = (*mainSettings)["buttonGrid"]["imageWidth"].GetInt();
-		int gridHeight = (*mainSettings)["buttonGrid"]["imageHeight"].GetInt();
+		// int gridWidth  = (*mainSettings)["buttonGrid"]["imageWidth"].GetInt();
+		// int gridHeight = (*mainSettings)["buttonGrid"]["imageHeight"].GetInt();
 
 		thisButtonInfo->resizedListOnBitmap  = new wxBitmap(thisButtonInfo->onIcon->Rescale(listWidth, listHeight));
 		thisButtonInfo->resizedListOffBitmap = new wxBitmap(thisButtonInfo->offIcon->Rescale(listWidth, listHeight));
-		thisButtonInfo->resizedGridOnBitmap  = new wxBitmap(thisButtonInfo->onIcon->Rescale(gridWidth, gridHeight));
-		thisButtonInfo->resizedGridOffBitmap = new wxBitmap(thisButtonInfo->offIcon->Rescale(gridWidth, gridHeight));
+		thisButtonInfo->resizedGridOnBitmap  = new wxBitmap(*thisButtonInfo->onIcon);
+		thisButtonInfo->resizedGridOffBitmap = new wxBitmap(*thisButtonInfo->offIcon);
 
 		maskifyBitmap(thisButtonInfo->resizedListOnBitmap, maskColor);
 		maskifyBitmap(thisButtonInfo->resizedListOffBitmap, maskColor);
@@ -72,7 +72,7 @@ void ButtonData::setupButtonMapping(rapidjson::Document* mainSettings) {
 	}
 }
 
-void ButtonData::textToFrames(DataProcessing* dataProcessing, std::string text, FrameNum startLoc, bool insertPaste, bool placePaste) {
+void ButtonData::textToFrames(DataProcessing* dataProcessing, uint8_t onlyForOne, std::string text, FrameNum startLoc, bool insertPaste, bool placePaste) {
 	std::vector<std::string> frameParts = HELPERS::splitString(text, '\n');
 	bool haveSetFirstFrame              = false;
 	FrameNum firstFrame;
@@ -114,12 +114,12 @@ void ButtonData::textToFrames(DataProcessing* dataProcessing, std::string text, 
 				// Can use expected indexing
 				for(FrameNum i = lastReadFrame + 1; i < actualIndex; i++) {
 					// Add a blank frame for buffer
-					dataProcessing->addFrame(i - 1);
+					dataProcessing->addFrame(i - 1, onlyForOne);
 				}
 				// Now can easily add the frame later
 			}
 			// Insert it now, it's just a pointer
-			dataProcessing->addFrame(actualIndex);
+			dataProcessing->addFrame(actualIndex, onlyForOne);
 			thisDataIndex = actualIndex + 1;
 			// If it's the first frame, no need for padding
 		} else {

@@ -327,6 +327,11 @@ void ProjectHandler::saveProject() {
 	}
 }
 
+void ProjectHandler::newProjectWasCreated() {
+	// For now
+	dataProcessing->sendPlayerNum();
+}
+
 void ProjectHandler::openUpVideoComparisonViewer(int index) {
 	wxString projDir              = projectDir.GetName();
 	VideoComparisonViewer* viewer = new VideoComparisonViewer(parentFrame, std::bind(&ProjectHandler::closeVideoComparisonViewer, this, std::placeholders::_1), mainSettings, videoComparisonEntries, projDir);
@@ -454,6 +459,7 @@ void ProjectHandlerWindow::onClickProject(wxCommandEvent& event) {
 			projectHandler->setProjectDir(dlg.GetPath());
 			projectHandler->setRecentProjectChoice(-1);
 			projectHandler->setProjectName("Unnamed");
+			projectHandler->newProjectWasCreated();
 			projectChosen       = true;
 			wasClosedForcefully = false;
 

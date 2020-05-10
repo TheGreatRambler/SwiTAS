@@ -61,14 +61,14 @@ public:
 	static constexpr int16_t axisMin = -30000;
 	static constexpr int16_t axisMax = 30000;
 
-	const uint8_t KeyWidth  = 11;
-	const uint8_t KeyHeight = 4;
+	static constexpr uint8_t KeyWidth  = 11;
+	static constexpr uint8_t KeyHeight = 4;
 
 	std::map<Btn, std::shared_ptr<ButtonInfo>> buttonMapping;
 
 	void setupButtonMapping(rapidjson::Document* mainSettings);
 
-	void textToFrames(DataProcessing* dataProcessing, std::string text, FrameNum startLoc, bool insertPaste, bool placePaste);
+	void textToFrames(DataProcessing* dataProcessing, uint8_t onlyForOne, std::string text, FrameNum startLoc, bool insertPaste, bool placePaste);
 	std::string framesToText(DataProcessing* dataProcessing, FrameNum startLoc, FrameNum endLoc, int playerIndex);
 
 	void transferControllerData(std::shared_ptr<ControllerData> src, std::shared_ptr<ControllerData> dest, bool placePaste);

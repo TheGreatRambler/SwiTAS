@@ -56,6 +56,7 @@ private:
 	// Menubar menus
 	wxWindowID selectIPID;
 	wxWindowID exportAsText;
+	wxWindowID importAsText;
 	wxWindowID setNameID;
 	wxWindowID toggleLoggingID;
 	wxWindowID toggleDebugMenuID;

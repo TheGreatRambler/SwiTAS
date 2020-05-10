@@ -90,6 +90,9 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	frameDrawer = new FrameCanvas(parentFrame, inputData);
 	frameDrawer->setBackgroundColor(*wxBLACK);
 
+	frameDrawer->SetToolTip("View selected frame");
+	inputData->SetToolTip("Edit frames");
+
 	addFrameButton            = HELPERS::getBitmapButton(parentFrame, mainSettings, "addFrameButton");
 	frameAdvanceButton        = HELPERS::getBitmapButton(parentFrame, mainSettings, "frameAdvanceButton");
 	savestateHookCreateButton = HELPERS::getBitmapButton(parentFrame, mainSettings, "savestateHookCreateButton");
@@ -97,9 +100,17 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	playerAddButton           = HELPERS::getBitmapButton(parentFrame, mainSettings, "playerAddButton");
 	playerRemoveButton        = HELPERS::getBitmapButton(parentFrame, mainSettings, "playerRemoveButton");
 
+	addFrameButton->SetToolTip("Add frame");
+	frameAdvanceButton->SetToolTip("Advance frame");
+	savestateHookCreateButton->SetToolTip("Create savestate hook");
+	savestateHookLoadButton->SetToolTip("Load savestate hook");
+	playerAddButton->SetToolTip("Add player");
+	playerRemoveButton->SetToolTip("Remove current player");
+
 	playerSelect = new wxComboBox(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_DROPDOWN | wxCB_READONLY);
 	inputData->setPlayerInfoCallback(std::bind(&SideUI::setPlayerInfo, this, std::placeholders::_1, std::placeholders::_2));
 	playerSelect->Bind(wxEVT_COMBOBOX, &SideUI::playerSelected, this);
+	playerSelect->SetToolTip("Set player");
 
 	untether();
 
@@ -111,8 +122,6 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	playerAddButton->Bind(wxEVT_BUTTON, &SideUI::onPlayerAddPressed, this);
 	playerRemoveButton->Bind(wxEVT_BUTTON, &SideUI::onPlayerRemovePressed, this);
 
-	// TODO all these expands and all seem suspect
-
 	buttonSizer->Add(addFrameButton, 1);
 	buttonSizer->Add(frameAdvanceButton, 1);
 	buttonSizer->Add(savestateHookCreateButton, 1);
@@ -120,14 +129,13 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	buttonSizer->Add(playerAddButton, 1);
 	buttonSizer->Add(playerRemoveButton, 1);
 
-	// Not wxEXPAND
 	verticalBoxSizer->Add(buttonSizer, 0, wxEXPAND);
 	verticalBoxSizer->Add(playerSelect, 0, wxEXPAND);
 
 	inputsViewSizer->Add(frameDrawer, 1, wxEXPAND | wxALL);
 
 	inputData->SetMinSize(wxSize(0, 0));
-	// HELPERS::addDarkmodeWindows(inputData);
+
 	inputsViewSizer->Add(inputData, 5, wxEXPAND | wxALL);
 
 	verticalBoxSizer->Add(inputsViewSizer, 1, wxEXPAND | wxALL);

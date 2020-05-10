@@ -16,7 +16,7 @@
 			"viewName": "B Button",
 			"onIconImage": "share/icons/nxtas/inputs/Bon.png",
 			"offIconImage": "share/icons/nxtas/inputs/Boff.png",
-			"triggerKeybind": "B",
+			"triggerKeybind": "S",
 			"gridX": 9,
 			"gridY": 3
 		},
@@ -26,7 +26,7 @@
 			"viewName": "X Button",
 			"onIconImage": "share/icons/nxtas/inputs/Xon.png",
 			"offIconImage": "share/icons/nxtas/inputs/Xoff.png",
-			"triggerKeybind": "X",
+			"triggerKeybind": "Z",
 			"gridX": 9,
 			"gridY": 1
 		},
@@ -36,7 +36,7 @@
 			"viewName": "Y Button",
 			"onIconImage": "share/icons/nxtas/inputs/Yon.png",
 			"offIconImage": "share/icons/nxtas/inputs/Yoff.png",
-			"triggerKeybind": "Y",
+			"triggerKeybind": "X",
 			"gridX": 8,
 			"gridY": 2
 		},
@@ -46,7 +46,7 @@
 			"viewName": "L Button",
 			"onIconImage": "share/icons/nxtas/inputs/Lon.png",
 			"offIconImage": "share/icons/nxtas/inputs/Loff.png",
-			"triggerKeybind": "T",
+			"triggerKeybind": "Q",
 			"gridX": 3,
 			"gridY": 0
 		},
@@ -56,7 +56,7 @@
 			"viewName": "R Button",
 			"onIconImage": "share/icons/nxtas/inputs/Ron.png",
 			"offIconImage": "share/icons/nxtas/inputs/Roff.png",
-			"triggerKeybind": "R",
+			"triggerKeybind": "W",
 			"gridX": 7,
 			"gridY": 0
 		},
@@ -66,7 +66,7 @@
 			"viewName": "ZL Trigger",
 			"onIconImage": "share/icons/nxtas/inputs/ZLon.png",
 			"offIconImage": "share/icons/nxtas/inputs/ZLoff.png",
-			"triggerKeybind": "O",
+			"triggerKeybind": "1",
 			"gridX": 2,
 			"gridY": 0
 		},
@@ -76,7 +76,7 @@
 			"viewName": "ZR Trigger",
 			"onIconImage": "share/icons/nxtas/inputs/ZRon.png",
 			"offIconImage": "share/icons/nxtas/inputs/ZRoff.png",
-			"triggerKeybind": "P",
+			"triggerKeybind": "2",
 			"gridX": 8,
 			"gridY": 0
 		},
@@ -86,7 +86,7 @@
 			"viewName": "SL Trigger",
 			"onIconImage": "share/icons/nxtas/inputs/SLon.png",
 			"offIconImage": "share/icons/nxtas/inputs/SLoff.png",
-			"triggerKeybind": "Q",
+			"triggerKeybind": "E",
 			"gridX": 4,
 			"gridY": 0
 		},
@@ -96,7 +96,7 @@
 			"viewName": "SR Trigger",
 			"onIconImage": "share/icons/nxtas/inputs/SRon.png",
 			"offIconImage": "share/icons/nxtas/inputs/SRoff.png",
-			"triggerKeybind": "E",
+			"triggerKeybind": "R",
 			"gridX": 6,
 			"gridY": 0
 		},
@@ -106,7 +106,7 @@
 			"viewName": "Up on Dpad",
 			"onIconImage": "share/icons/nxtas/inputs/UPon.png",
 			"offIconImage": "share/icons/nxtas/inputs/UPoff.png",
-			"triggerKeybind": "I",
+			"triggerKeybind": "T",
 			"gridX": 1,
 			"gridY": 1
 		},
@@ -116,7 +116,7 @@
 			"viewName": "Down on Dpad",
 			"onIconImage": "share/icons/nxtas/inputs/DOWNon.png",
 			"offIconImage": "share/icons/nxtas/inputs/DOWNoff.png",
-			"triggerKeybind": "K",
+			"triggerKeybind": "G",
 			"gridX": 1,
 			"gridY": 3
 		},
@@ -126,7 +126,7 @@
 			"viewName": "Left on Dpad",
 			"onIconImage": "share/icons/nxtas/inputs/LEFTon.png",
 			"offIconImage": "share/icons/nxtas/inputs/LEFToff.png",
-			"triggerKeybind": "J",
+			"triggerKeybind": "F",
 			"gridX": 0,
 			"gridY": 2
 		},
@@ -136,7 +136,7 @@
 			"viewName": "Right on Dpad",
 			"onIconImage": "share/icons/nxtas/inputs/RIGHTon.png",
 			"offIconImage": "share/icons/nxtas/inputs/RIGHToff.png",
-			"triggerKeybind": "L",
+			"triggerKeybind": "H",
 			"gridX": 2,
 			"gridY": 2
 		},
@@ -146,7 +146,7 @@
 			"viewName": "Plus Button",
 			"onIconImage": "share/icons/nxtas/inputs/PLUSon.png",
 			"offIconImage": "share/icons/nxtas/inputs/PLUSoff.png",
-			"triggerKeybind": "=",
+			"triggerKeybind": "N",
 			"gridX": 7,
 			"gridY": 1
 		},
@@ -156,7 +156,7 @@
 			"viewName": "Minus Button",
 			"onIconImage": "share/icons/nxtas/inputs/MINUSon.png",
 			"offIconImage": "share/icons/nxtas/inputs/MINUSoff.png",
-			"triggerKeybind": "-",
+			"triggerKeybind": "M",
 			"gridX": 3,
 			"gridY": 1
 		},
@@ -166,7 +166,7 @@
 			"viewName": "Home Button",
 			"onIconImage": "share/icons/nxtas/inputs/HOMEon.png",
 			"offIconImage": "share/icons/nxtas/inputs/HOMEoff.png",
-			"triggerKeybind": "H",
+			"triggerKeybind": "B",
 			"gridX": 6,
 			"gridY": 2
 		},
@@ -176,7 +176,7 @@
 			"viewName": "Capture Button",
 			"onIconImage": "share/icons/nxtas/inputs/CAPTon.png",
 			"offIconImage": "share/icons/nxtas/inputs/CAPToff.png",
-			"triggerKeybind": "G",
+			"triggerKeybind": "V",
 			"gridX": 4,
 			"gridY": 2
 		},
@@ -186,7 +186,7 @@
 			"viewName": "Left Stick Press",
 			"onIconImage": "share/icons/nxtas/inputs/LSTICKon.png",
 			"offIconImage": "share/icons/nxtas/inputs/LSTICKoff.png",
-			"triggerKeybind": "N",
+			"triggerKeybind": "3",
 			"gridX": 0,
 			"gridY": 0
 		},
@@ -196,7 +196,7 @@
 			"viewName": "Right Stick Press",
 			"onIconImage": "share/icons/nxtas/inputs/RSTICKoff.png",
 			"offIconImage": "share/icons/nxtas/inputs/RSTICKon.png",
-			"triggerKeybind": "U",
+			"triggerKeybind": "4",
 			"gridX": 3,
 			"gridY": 3
 		}
@@ -242,6 +242,9 @@
 			"newProject": "rgb(20, 110, 66)"
 		}
 	},
-	"recentProjects": [],
+	"recentProjects": [{
+		"projectDirectory": "C:\\Users\\aehar\\Desktop\\EPIC\\",
+		"projectName": "Unnamed"
+	}],
 	"recentVideos": []
 }

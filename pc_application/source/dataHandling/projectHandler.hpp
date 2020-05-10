@@ -95,6 +95,8 @@ public:
 	void loadProject();
 	void saveProject();
 
+	void newProjectWasCreated();
+
 	wxFileName getProjectStart() {
 		return wxFileName::DirName(projectDir.GetNameWithSep());
 	}

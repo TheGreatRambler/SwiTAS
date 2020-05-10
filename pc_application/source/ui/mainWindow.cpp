@@ -181,12 +181,14 @@ void MainWindow::addMenuBar() {
 
 	selectIPID        = NewControlId();
 	exportAsText      = NewControlId();
+	importAsText      = NewControlId();
 	setNameID         = NewControlId();
 	toggleLoggingID   = NewControlId();
 	toggleDebugMenuID = NewControlId();
 	openGameCorruptor = NewControlId();
 
 	fileMenu->Append(exportAsText, "Export To Text Format\tCtrl+Alt+E");
+	fileMenu->Append(importAsText, "Import From Text Format\tCtrl+Alt+I");
 	fileMenu->Append(setNameID, "Set Name\tCtrl+Alt+N");
 
 	// Add joystick submenu
@@ -251,6 +253,8 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 			exportedText.SetExt("ssctf");
 
 			dataProcessingInstance->exportCurrentPlayerToFile(exportedText);
+		} else if (id == importAsText) {
+			
 		}
 	}
 }
