@@ -253,8 +253,14 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 			exportedText.SetExt("ssctf");
 
 			dataProcessingInstance->exportCurrentPlayerToFile(exportedText);
-		} else if (id == importAsText) {
-			
+		} else if(id == importAsText) {
+			wxFileDialog openFileDialog(NULL, _("Open Script file"), "", "", "Text files (*.txt)|*.txt|nx-TAS script files (*.ssctf)|*.ssctf", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+
+			if(openFileDialog.ShowModal() == wxID_OK) {
+				wxFileName importPath(openFileDialog.GetPath());
+
+				dataProcessingInstance->importFromFile(importPath);
+			}
 		}
 	}
 }

@@ -72,7 +72,7 @@ void ButtonData::setupButtonMapping(rapidjson::Document* mainSettings) {
 	}
 }
 
-void ButtonData::textToFrames(DataProcessing* dataProcessing, uint8_t onlyForOne, std::string text, FrameNum startLoc, bool insertPaste, bool placePaste) {
+void ButtonData::textToFrames(DataProcessing* dataProcessing, int player, std::string text, FrameNum startLoc, bool insertPaste, bool placePaste) {
 	std::vector<std::string> frameParts = HELPERS::splitString(text, '\n');
 	bool haveSetFirstFrame              = false;
 	FrameNum firstFrame;
@@ -100,7 +100,9 @@ void ButtonData::textToFrames(DataProcessing* dataProcessing, uint8_t onlyForOne
 		FrameNum actualIndex = startLoc + (frameNum - firstFrame);
 
 		if(actualIndex >= dataProcessing->getFramesSize()) {
-			// Have to return, there are too many frames to paste
+			// Add a frame onto the end, not insert paste
+			// This will allow a normal paste to exceed the end
+			dataProcessing->addFrame(actualIndex - 1, player);
 			return;
 		}
 
@@ -114,12 +116,12 @@ void ButtonData::textToFrames(DataProcessing* dataProcessing, uint8_t onlyForOne
 				// Can use expected indexing
 				for(FrameNum i = lastReadFrame + 1; i < actualIndex; i++) {
 					// Add a blank frame for buffer
-					dataProcessing->addFrame(i - 1, onlyForOne);
+					dataProcessing->addFrame(i - 1, player);
 				}
 				// Now can easily add the frame later
 			}
 			// Insert it now, it's just a pointer
-			dataProcessing->addFrame(actualIndex, onlyForOne);
+			dataProcessing->addFrame(actualIndex, player);
 			thisDataIndex = actualIndex + 1;
 			// If it's the first frame, no need for padding
 		} else {

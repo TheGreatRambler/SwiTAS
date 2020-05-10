@@ -32,7 +32,7 @@ public:
 	// Some of this is defined in network code
 
 	// To convert names
-	std::map<std::string, Btn> stringToButton {
+	std::map<std::string, Btn> stringToButton{
 		{ "A", Btn::A },
 		{ "B", Btn::B },
 		{ "X", Btn::X },
@@ -68,7 +68,7 @@ public:
 
 	void setupButtonMapping(rapidjson::Document* mainSettings);
 
-	void textToFrames(DataProcessing* dataProcessing, uint8_t onlyForOne, std::string text, FrameNum startLoc, bool insertPaste, bool placePaste);
+	void textToFrames(DataProcessing* dataProcessing, int player, std::string text, FrameNum startLoc, bool insertPaste, bool placePaste);
 	std::string framesToText(DataProcessing* dataProcessing, FrameNum startLoc, FrameNum endLoc, int playerIndex);
 
 	void transferControllerData(std::shared_ptr<ControllerData> src, std::shared_ptr<ControllerData> dest, bool placePaste);

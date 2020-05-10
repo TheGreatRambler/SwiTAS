@@ -146,42 +146,24 @@ void DataProcessing::importFromFile(wxFileName importTarget) {
 
 		if(successful) {
 			inputsList->clear();
-			// Get to the meaty stuff, this is it
-
-			/*
-			buttonData->textToFrames(this, true, fileContents.ToStdString(), currentFrame, insertPaste, placePaste);
-
-			if(allPlayers.size() != 1) {
-				FrameNum sizeOfOtherPlayer;
-				if(viewingPlayerIndex != 0) {
-					sizeOfOtherPlayer = sizeOfOtherPlayer = allPlayers[0]->at(currentSavestateHook)->inputs->size();
-				} else {
-					sizeOfOtherPlayer = sizeOfOtherPlayer = allPlayers[1]->at(currentSavestateHook)->inputs->size();
-				}
-
-			if (inputsList->size() < sizeOfOtherPlayer)
-			}
+			buttonData->textToFrames(this, viewingPlayerIndex, fileContents.ToStdString(), 0, true, false);
+			FrameNum sizeToMatch = inputsList->size();
 
 			uint8_t playerIndex = 0;
 			for(auto& player : allPlayers) {
-				std::shared_ptr<ControllerData> newControllerData = std::make_shared<ControllerData>();
-
-				if(player->at(currentSavestateHook)->inputs->size() == 0) {
-					player->at(currentSavestateHook)->inputs->push_back(newControllerData);
-				} else {
+				std::size_t size = player->at(currentSavestateHook)->inputs->size();
+				if(size > sizeToMatch) {
+					// Remove extra frames to match the import
 					auto begin = player->at(currentSavestateHook)->inputs->begin();
-					player->at(currentSavestateHook)->inputs->insert(begin + afterFrame + 1, newControllerData);
+					player->at(currentSavestateHook)->inputs->erase(begin + sizeToMatch, begin + size - 1);
+				} else if(size < sizeToMatch) {
+					// Add frames to match the import
+					for(FrameNum i = 0; i < (sizeToMatch - size); i++) {
+						addFrame(size - 1 + i, playerIndex);
+					}
 				}
-
-				setFramestateInfoSpecific(afterFrame + 1, FrameState::RAN, false, currentSavestateHook, playerIndex);
-				setFramestateInfoSpecific(afterFrame + 1, FrameState::SAVESTATE, false, currentSavestateHook, playerIndex);
-
-				// Invalidate run for the data immidiently after this frame
-				invalidateRunSpecific(afterFrame + 2, currentSavestateHook, playerIndex);
-
 				playerIndex++;
 			}
-			*/
 		}
 	}
 }
@@ -376,7 +358,7 @@ void DataProcessing::onPaste(wxCommandEvent& event) {
 			std::string clipboardText = data.GetText().ToStdString();
 
 			// Get to the meaty stuff, this is it
-			buttonData->textToFrames(this, false, clipboardText, currentFrame, insertPaste, placePaste);
+			buttonData->textToFrames(this, -1, clipboardText, currentFrame, insertPaste, placePaste);
 		}
 		wxTheClipboard->Close();
 	}
@@ -395,7 +377,7 @@ void DataProcessing::onPlacePaste(wxCommandEvent& event) {
 }
 
 void DataProcessing::onAddFrame(wxCommandEvent& event) {
-	addFrame(currentFrame, false);
+	addFrame(currentFrame, -1);
 }
 
 void DataProcessing::onRemoveFrame(wxCommandEvent& event) {
@@ -875,23 +857,23 @@ void DataProcessing::invalidateRunSpecific(FrameNum frame, SavestateBlockNum sav
 	}
 }
 
-void DataProcessing::addFrame(FrameNum afterFrame, uint8_t onlyForCurrentPlayer) {
+void DataProcessing::addFrame(FrameNum afterFrame, int player) {
 	// Add this to the vector right after the selected frame
-	if(onlyForCurrentPlayer) {
+	if(player != -1) {
 		std::shared_ptr<ControllerData> newControllerData = std::make_shared<ControllerData>();
 
-		if(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs->size() == 0) {
-			allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs->push_back(newControllerData);
+		if(allPlayers[player]->at(currentSavestateHook)->inputs->size() == 0) {
+			allPlayers[player]->at(currentSavestateHook)->inputs->push_back(newControllerData);
 		} else {
-			auto begin = allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs->begin();
-			allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs->insert(begin + afterFrame + 1, newControllerData);
+			auto begin = allPlayers[player]->at(currentSavestateHook)->inputs->begin();
+			allPlayers[player]->at(currentSavestateHook)->inputs->insert(begin + afterFrame + 1, newControllerData);
 		}
 
-		setFramestateInfoSpecific(afterFrame + 1, FrameState::RAN, false, currentSavestateHook, viewingPlayerIndex);
-		setFramestateInfoSpecific(afterFrame + 1, FrameState::SAVESTATE, false, currentSavestateHook, viewingPlayerIndex);
+		setFramestateInfoSpecific(afterFrame + 1, FrameState::RAN, false, currentSavestateHook, player);
+		setFramestateInfoSpecific(afterFrame + 1, FrameState::SAVESTATE, false, currentSavestateHook, player);
 
 		// Invalidate run for the data immidiently after this frame
-		invalidateRunSpecific(afterFrame + 2, currentSavestateHook, viewingPlayerIndex);
+		invalidateRunSpecific(afterFrame + 2, currentSavestateHook, player);
 	} else {
 		uint8_t playerIndex = 0;
 		for(auto& player : allPlayers) {
@@ -926,7 +908,7 @@ void DataProcessing::addFrame(FrameNum afterFrame, uint8_t onlyForCurrentPlayer)
 }
 
 void DataProcessing::addFrameHere() {
-	addFrame(currentFrame, false);
+	addFrame(currentFrame, -1);
 }
 
 void DataProcessing::removeFrames(FrameNum start, FrameNum end) {
