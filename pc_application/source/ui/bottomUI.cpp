@@ -403,7 +403,7 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 	horizontalBoxSizer->Add(leftJoystickDrawer->getSizer(), 0);
 	horizontalBoxSizer->Add(rightJoystickDrawer->getSizer(), 0);
 
-	horizontalBoxSizer->Add(buttonGrid, 0, wxSHAPED | wxEXPAND);
+	horizontalBoxSizer->Add(buttonGrid, 0, wxSHAPED | wxEXPAND | wxALIGN_CENTER_VERTICAL);
 
 	frameViewerCanvas->SetMinSize(wxSize(0, 0));
 
@@ -411,7 +411,7 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 	mainSizer->Add(frameViewerCanvas, 0, wxSHAPED | wxEXPAND | wxALIGN_CENTER_HORIZONTAL);
 	mainSizer->Add(horizontalBoxSizer, 0, wxEXPAND | wxALL);
 
-	theGrid->Add(mainSizer, 3, wxEXPAND | wxALL);
+	theGrid->Add(mainSizer, 0, wxEXPAND | wxALL);
 }
 
 void BottomUI::refreshDataViews() {

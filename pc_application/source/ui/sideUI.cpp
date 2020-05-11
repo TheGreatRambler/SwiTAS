@@ -140,7 +140,7 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 
 	verticalBoxSizer->Add(inputsViewSizer, 1, wxEXPAND | wxALL);
 
-	sizer->Add(verticalBoxSizer, 2, wxEXPAND | wxALL);
+	sizer->Add(verticalBoxSizer, 0, wxEXPAND | wxALL);
 }
 
 void SideUI::setPlayerInfo(uint8_t size, uint8_t selected) {

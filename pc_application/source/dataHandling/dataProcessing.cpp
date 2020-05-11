@@ -11,6 +11,7 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 
 	// This can't handle it :(
 	SetDoubleBuffered(false);
+	DragAcceptFiles(true);
 	// Inherit from list control
 	// Use this specific ID in order to do things
 	buttonData      = buttons;
@@ -50,7 +51,7 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 
 	// Create keyboard handlers
 	// Each menu item is added here
-	wxAcceleratorEntry entries[8];
+	wxAcceleratorEntry entries[9];
 
 	pasteInsertID  = wxNewId();
 	pastePlaceID   = wxNewId();
@@ -96,6 +97,7 @@ BEGIN_EVENT_TABLE(DataProcessing, wxListCtrl)
 	EVT_LIST_ITEM_ACTIVATED(DataProcessing::LIST_CTRL_ID, DataProcessing::onActivate)
 	EVT_CONTEXT_MENU(DataProcessing::onRightClick)
 	EVT_ERASE_BACKGROUND(DataProcessing::OnEraseBackground)
+	EVT_DROP_FILES(DataProcessing::onDropFiles)
 END_EVENT_TABLE()
 // clang-format on
 
@@ -129,7 +131,9 @@ void DataProcessing::exportCurrentPlayerToFile(wxFileName exportTarget) {
 	wxFile file(exportTarget.GetFullPath(), wxFile::write);
 
 	if(file.IsOpened()) {
-		// This will block FOR AGES, no way around it
+		wxBusyCursor busyCursor;
+		wxWindowDisabler disabler;
+
 		std::string exported = buttonData->framesToText(this, 0, 0, viewingPlayerIndex);
 		file.Write(wxString::FromUTF8(exported));
 		file.Close();
@@ -145,6 +149,9 @@ void DataProcessing::importFromFile(wxFileName importTarget) {
 		file.Close();
 
 		if(successful) {
+			wxBusyCursor busyCursor;
+			wxWindowDisabler disabler;
+
 			Freeze();
 			FrameNum lastFrame = buttonData->textToFrames(this, fileContents.ToStdString(), 0, false, false);
 			// Remove all frames after the data
@@ -152,6 +159,17 @@ void DataProcessing::importFromFile(wxFileName importTarget) {
 			Thaw();
 			setCurrentFrame(0);
 			Refresh();
+		}
+	}
+}
+
+void DataProcessing::onDropFiles(wxDropFilesEvent& event) {
+	if(event.GetNumberOfFiles() == 1) {
+		wxString dropped = event.GetFiles()[0];
+		wxFileName file(dropped);
+
+		if(file.FileExists()) {
+			importFromFile(file);
 		}
 	}
 }
@@ -303,6 +321,10 @@ void DataProcessing::onCopy(wxCommandEvent& event) {
 		long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 		if(firstSelectedItem != wxNOT_FOUND) {
 			long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
+
+			wxBusyCursor busyCursor;
+			wxWindowDisabler disabler;
+
 			// There is a selected item
 			if(currentFrame >= firstSelectedItem && currentFrame <= lastSelectedItem) {
 				// Add these items to the clipboard
@@ -344,8 +366,11 @@ void DataProcessing::onPaste(wxCommandEvent& event) {
 		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
 
 		if(wxTheClipboard->Open()) {
-			wxTextDataObject data;
 			if(wxTheClipboard->IsSupported(wxDF_TEXT)) {
+				wxBusyCursor busyCursor;
+				wxWindowDisabler disabler;
+
+				wxTextDataObject data;
 				wxTheClipboard->GetData(data);
 				wxTheClipboard->Close();
 
@@ -354,31 +379,12 @@ void DataProcessing::onPaste(wxCommandEvent& event) {
 				Freeze();
 				FrameNum lastItem = buttonData->textToFrames(this, clipboardText, firstSelectedItem, insertPaste, placePaste);
 				if(!insertPaste) {
-					// The clipboard is one frame long
 					for(long i = firstSelectedItem; i <= lastSelectedItem; i += (lastItem - firstSelectedItem + 1)) {
 						buttonData->textToFrames(this, clipboardText, i, insertPaste, placePaste);
 					}
 				}
 				Thaw();
 				Refresh();
-			} else if(wxTheClipboard->IsSupported(wxDF_FILENAME)) {
-				wxTheClipboard->GetData(data);
-				wxTheClipboard->Close();
-
-				wxFile file(data.GetText(), wxFile::read);
-
-				if(file.IsOpened()) {
-					wxString fileContents;
-					bool successful = file.ReadAll(&fileContents);
-					file.Close();
-
-					if(successful) {
-						Freeze();
-						buttonData->textToFrames(this, fileContents.ToStdString(), currentFrame, insertPaste, placePaste);
-						Thaw();
-						Refresh();
-					}
-				}
 			}
 		}
 	}

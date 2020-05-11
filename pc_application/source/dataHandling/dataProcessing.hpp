@@ -4,6 +4,7 @@
 #include <Windows.h>
 #include <uxtheme.h>
 #endif
+
 #include <bitset>
 #include <cstdint>
 #include <cstdio>
@@ -108,6 +109,8 @@ private:
 
 	// Menu popup
 	wxMenu editMenu;
+
+	void onDropFiles(wxDropFilesEvent& event);
 
 	void onRightClick(wxContextMenuEvent& event);
 	void onSelect(wxListEvent& event);

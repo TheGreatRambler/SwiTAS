@@ -99,6 +99,11 @@ FrameNum ButtonData::textToFrames(DataProcessing* dataProcessing, std::string te
 		// The actual index
 		FrameNum actualIndex = startLoc + (frameNum - firstFrame);
 
+		// Just to keep the app running
+		if(actualIndex % 50 == 0) {
+			wxTheApp->Yield();
+		}
+
 		FrameNum thisDataIndex;
 
 		if(insertPaste || actualIndex >= dataProcessing->getFramesSize()) {
@@ -227,6 +232,11 @@ std::string ButtonData::framesToText(DataProcessing* dataProcessing, FrameNum st
 		}
 
 		for(FrameNum i = startLoc; i <= endLoc; i++) {
+			// Just to keep the app running
+			if(i % 50 == 0) {
+				wxTheApp->Yield();
+			}
+
 			// Keeping empty ones there clutters things
 			if(!isEmptyControllerData(dataProcessing->getFrame(i))) {
 				std::vector<std::string> parts;
