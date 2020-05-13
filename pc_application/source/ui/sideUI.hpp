@@ -65,6 +65,13 @@ private:
 
 	FrameCanvas* frameDrawer;
 
+	wxTimer autoTimer;
+	int timerID;
+	wxBoxSizer* autoFrameSizer;
+	wxBitmapButton* autoFrameStart;
+	wxBitmapButton* autoFrameEnd;
+	wxSpinCtrl* autoRunFramesPerSecond;
+
 	// Minimum size of this widget (it just gets too small normally)
 	static constexpr float minimumSize = 1 / 4;
 
@@ -80,6 +87,8 @@ private:
 	void onSavestateHookLoadPressed(wxCommandEvent& event);
 	void onPlayerAddPressed(wxCommandEvent& event);
 	void onPlayerRemovePressed(wxCommandEvent& event);
+	void onStartAutoFramePressed(wxCommandEvent& event);
+	void onEndAutoFramePressed(wxCommandEvent& event);
 
 public:
 	SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ProjectHandler> projHandler, wxBoxSizer* sizer, DataProcessing* input, std::shared_ptr<CommunicateWithNetwork> networkImp);
@@ -88,6 +97,12 @@ public:
 
 	bool createSavestateHook();
 	bool loadSavestateHook(int block);
+
+	void triggerAutoRun();
+
+	int getAutoRunTimerID() {
+		return timerID;
+	}
 
 	void untether();
 	void tether();

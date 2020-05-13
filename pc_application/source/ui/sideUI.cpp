@@ -141,13 +141,28 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	verticalBoxSizer->Add(buttonSizer, 0, wxEXPAND);
 	verticalBoxSizer->Add(playerSelect, 0, wxEXPAND);
 
-	inputsViewSizer->Add(frameDrawer, 1, wxEXPAND | wxALL);
-
 	inputData->SetMinSize(wxSize(0, 0));
-
+	inputsViewSizer->Add(frameDrawer, 1, wxEXPAND | wxALL);
 	inputsViewSizer->Add(inputData, 5, wxEXPAND | wxALL);
 
 	verticalBoxSizer->Add(inputsViewSizer, 1, wxEXPAND | wxALL);
+
+	autoFrameSizer = new wxBoxSizer(wxHORIZONTAL);
+
+	timerID = wxNewId();
+	autoTimer.SetOwner(parentFrame, timerID);
+
+	// TODO add these images
+	autoFrameStart = HELPERS::getBitmapButton(parentFrame, mainSettings, "autoFrameStartButton");
+	autoFrameEnd   = HELPERS::getBitmapButton(parentFrame, mainSettings, "autoFrameEndButton");
+
+	autoFrameStart->SetToolTip("Start auto frame advance");
+	autoFrameEnd->SetToolTip("Stop auto frame advance");
+
+	autoFrameStart->Bind(wxEVT_BUTTON, &SideUI::onStartAutoFramePressed, this);
+	autoFrameEnd->Bind(wxEVT_BUTTON, &SideUI::onEndAutoFramePressed, this);
+
+	autoRunFramesPerSecond = new wxSpinCtrl(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 60, 1);
 
 	sizer->Add(verticalBoxSizer, 0, wxEXPAND | wxALL);
 }
@@ -297,4 +312,16 @@ void SideUI::tether() {
 	frameAdvanceButton->Enable(true);
 	inputData->setTethered(true);
 	tethered = true;
+}
+
+void SideUI::onStartAutoFramePressed(wxCommandEvent& event) {
+	autoTimer.Start(1000 / (float)autoRunFramesPerSecond->GetValue(), wxTIMER_CONTINUOUS);
+}
+
+void SideUI::onEndAutoFramePressed(wxCommandEvent& event) {
+	autoTimer.Stop();
+}
+
+void SideUI::triggerAutoRun() {
+	// Do a thing
 }

@@ -79,6 +79,7 @@ private:
 	void OnSize(wxSizeEvent& event);
 	void onClose(wxCloseEvent& event);
 	void onIdle(wxIdleEvent& event);
+	void onTimer(wxTimerEvent& event);
 
 	bool askForIP();
 	void handleNetworkQueues();
