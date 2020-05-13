@@ -138,7 +138,7 @@ public:
 	SerializeProtocol serializingProtocol;
 	CActiveSocket* networkConnection;
 
-	ADD_QUEUE(SendRunFrame)
+	ADD_QUEUE(SendFrameData)
 	ADD_QUEUE(RecieveGameFramebuffer)
 	ADD_QUEUE(RecieveGameInfo)
 	ADD_QUEUE(SendFlag)

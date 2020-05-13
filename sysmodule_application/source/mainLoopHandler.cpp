@@ -14,7 +14,7 @@ MainLoop::MainLoop() {
 		},
 		[](CommunicateWithNetwork* self) {
 			RECIEVE_QUEUE_DATA(SendFlag)
-			RECIEVE_QUEUE_DATA(SendRunFrame)
+			RECIEVE_QUEUE_DATA(SendFrameData)
 			RECIEVE_QUEUE_DATA(SendLogging)
 			RECIEVE_QUEUE_DATA(SendTrackMemoryRegion)
 			RECIEVE_QUEUE_DATA(SendSetNumControllers)
@@ -102,14 +102,11 @@ void MainLoop::mainLoopHandler() {
 }
 
 void MainLoop::handleNetworkUpdates() {
-	CHECK_QUEUE(networkInstance, SendRunFrame, {
-		LOGD << "Running frame";
-		controller[0]->runFrame(data.controllerData);
-		unpauseApp();
-		screenshotHandler.writeFramebuffer(networkInstance);
-		waitForVsync();
-		pauseApp();
+	// clang-format off
+	CHECK_QUEUE(networkInstance, SendFrameData, {
+		controllers[data.playerIndex]->setFrame(data.controllerData);
 	})
+	// clang-format on
 
 	CHECK_QUEUE(networkInstance, SendTrackMemoryRegion, {
 		LOGD << "Track memory region";
@@ -135,9 +132,13 @@ void MainLoop::handleNetworkUpdates() {
 				screenshotHandler.writeFramebuffer(networkInstance);
 			}
 		} else if(data.actFlag == SendInfo::RUN_BLANK_FRAME) {
+			matchFirstControllerToTASController();
+			runSingleFrame();
 		} else if(data.actFlag == SendInfo::START_TAS_MODE) {
 			LOGD << "Start TAS mode";
 			pauseApp();
+		} else if(data.actFlag == SendInfo::RUN_FRAME) {
+			runSingleFrame();
 		}
 	})
 
@@ -196,9 +197,22 @@ char* MainLoop::getAppName(u64 application_id) {
 
 void MainLoop::setControllerNumber(uint8_t numOfControllers) {
 	controllers.clear();
-	for(uint8_t i = 0l i < numOfControllers; i++) {
+	// Wait for all controllers to be disconnected
+	while(true) {
+		// User had to disconnect controllers
+		if(getNumControllers() == 0) {
+			break;
+		}
+		std::this_thread::yield();
+	}
+	for(uint8_t i = 0; i < numOfControllers; i++) {
 		controllers.push_back(std::make_unique<ControllerHandler>(networkInstance));
 	}
+	// clang-format off
+	ADD_TO_QUEUE(RecieveFlag, networkInstance, {
+		data.actFlag = RecieveInfo::CONTROLLERS_CONNECTED;
+	})
+	// clang-format on
 	// Now, user is required to reconnect any controllers manually
 }
 
@@ -217,8 +231,10 @@ GameMemoryInfo MainLoop::getGameMemoryInfo(MemoryInfo memInfo) {
 
 void MainLoop::runSingleFrame() {
 	if(isPaused) {
+		LOGD << "Running frame";
 		unpauseApp();
 		waitForVsync();
+		screenshotHandler.writeFramebuffer(networkInstance);
 		pauseApp();
 	}
 }
@@ -247,7 +263,19 @@ void MainLoop::pauseApp() {
 	}
 }
 
-void MainLoop::matchFirstControllerToTASController() { }
+void MainLoop::matchFirstControllerToTASController() {
+	if(getNumControllers() > controllers.size()) {
+		HidControllerID id = (HidControllerID)(controllers.size() + 1);
+
+		u64 buttons = hidKeysHeld(id);
+		JoystickPosition left;
+		JoystickPosition right;
+		hidJoystickRead(&left, id, JOYSTICK_LEFT);
+		hidJoystickRead(&right, id, JOYSTICK_RIGHT);
+
+		controllers[0]->setFrame(buttons, left, right);
+	}
+}
 
 MainLoop::~MainLoop() {
 	LOGD << "Exiting app";

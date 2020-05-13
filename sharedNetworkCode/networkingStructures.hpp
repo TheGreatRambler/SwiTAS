@@ -18,7 +18,7 @@
 // clang-format on
 
 enum DataFlag : uint8_t {
-	SendRunFrame,
+	SendFrameData,
 	RecieveGameFramebuffer,
 	RecieveGameInfo,
 	SendFlag,
@@ -37,6 +37,7 @@ enum RecieveInfo : uint8_t {
 	RUN_FRAME_DONE,
 	FRAMEBUFFER_DONE,
 	APPLICATION_DISCONNECTED,
+	CONTROLLERS_CONNECTED,
 };
 
 enum SendInfo : uint8_t {
@@ -50,12 +51,13 @@ enum SendInfo : uint8_t {
 	PAUSE,
 	UNPAUSE,
 	RUN_BLANK_FRAME,
+	RUN_FRAME,
 };
 
 // clang-format off
 namespace Protocol {
 	// Run a single frame and return when done
-	DEFINE_STRUCT(SendRunFrame,
+	DEFINE_STRUCT(SendFrameData,
 		ControllerData controllerData;
 		// This is the frame of this frame, the framebuffer
 		// sent back will be one more than this frame

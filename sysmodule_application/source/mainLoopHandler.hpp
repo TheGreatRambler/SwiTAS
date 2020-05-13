@@ -71,6 +71,19 @@ private:
 	// Deletes all controllers upon being started, hid:dbg as well as normal
 	// controllers. Otherwise, it sets the number of hid:dbg controllers
 	void setControllerNumber(uint8_t numOfControllers);
+	uint8_t getNumControllers() {
+		uint8_t num = 0;
+		for(uint8_t i = 0; i < 8; i++) {
+			// Handheld controller is separate
+			if(!hidIsControllerConnected((HidControllerID)i)) {
+				num = i;
+			}
+		}
+		if(hidIsControllerConnected(CONTROLLER_HANDHELD)) {
+			num++;
+		}
+		return num;
+	}
 
 public:
 	MainLoop();

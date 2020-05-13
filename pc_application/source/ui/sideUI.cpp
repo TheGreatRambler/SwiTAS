@@ -77,6 +77,7 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	inputData        = input;
 	networkInterface = networkImp;
 	projectHandler   = projHandler;
+	parent           = parentFrame;
 
 	// Holds everything
 	verticalBoxSizer = new wxBoxSizer(wxVERTICAL);
@@ -112,6 +113,14 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	playerSelect->Bind(wxEVT_COMBOBOX, &SideUI::playerSelected, this);
 	playerSelect->SetToolTip("Set player");
 
+	// clang-format off
+	ADD_NETWORK_CALLBACK(RecieveFlag, {
+		if (data.actFlag == RecieveInfo::CONTROLLERS_CONNECTED) {
+			controllerEventRecieved = true;
+		}
+	})
+	// clang-format on
+
 	untether();
 
 	// Button handlers
@@ -146,12 +155,37 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 void SideUI::setPlayerInfo(uint8_t size, uint8_t selected) {
 	// Deselect
 	playerSelect->SetSelection(wxNOT_FOUND);
-	playerSelect->Clear();
-	for(uint8_t i = 0; i < size; i++) {
-		playerSelect->Append(wxString::Format("Player %d", i + 1));
+
+	if(playerSelect->GetCount() != size) {
+		// Size has changed, time to inform the sysmodule
+		if(networkInterface->isConnected()) {
+			// Now, user has to disconnect their controllers and don't allow continuing until done
+			while(true) {
+				wxMessageDialog removeControllersDialog(parent, "Remove controllers", "Remove all controllers from the switch, can connect them afterwards", wxOK | wxICON_INFORMATION);
+				removeControllersDialog.ShowModal();
+
+				PROCESS_NETWORK_CALLBACKS(networkInterface, RecieveFlag)
+
+				if(controllerEventRecieved) {
+					controllerEventRecieved = false;
+					break;
+				}
+			}
+		}
+
+		playerSelect->Clear();
+		for(uint8_t i = 0; i < size; i++) {
+			playerSelect->Append(wxString::Format("Player %d", i + 1));
+		}
 	}
+
 	playerSelect->SetSelection(selected);
 	playerSelect->Refresh();
+}
+
+void SideUI::onIdle(wxIdleEvent& event) {
+	// Called by MainWindow
+	PROCESS_NETWORK_CALLBACKS(networkInterface, RecieveFlag)
 }
 
 void SideUI::playerSelected(wxCommandEvent& event) {
@@ -246,4 +280,21 @@ bool SideUI::loadSavestateHook(int block) {
 		inputData->setSavestateHook(block);
 		return true;
 	}
+}
+
+void SideUI::untether() {
+	// Will need more indication
+	// TODO have switch itself notify the PC when fishy buisness is going on
+	// So it can untether itself
+	// wxLogMessage("Untether Switch");
+	frameAdvanceButton->Enable(false);
+	inputData->setTethered(false);
+	tethered = false;
+}
+
+void SideUI::tether() {
+	// wxLogMessage("Tether Switch");
+	frameAdvanceButton->Enable(true);
+	inputData->setTethered(true);
+	tethered = true;
 }

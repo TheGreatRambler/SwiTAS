@@ -489,12 +489,19 @@ void DataProcessing::runFrame() {
 		// Send to switch to run for each player
 		for(uint8_t playerIndex = 0; playerIndex < allPlayers.size(); playerIndex++) {
 			std::shared_ptr<ControllerData> controllerDatas = allPlayers[playerIndex]->at(currentSavestateHook)->inputs->at(currentRunFrame);
-			ADD_TO_QUEUE(SendRunFrame, networkInstance, {
+			ADD_TO_QUEUE(SendFrameData, networkInstance, {
 				data.controllerData = *controllerDatas;
 				data.frame          = currentRunFrame;
 				data.playerIndex    = playerIndex;
 			})
 		}
+
+		// Finally, run the frame
+		// clang-format off
+		ADD_TO_QUEUE(SendFlag, networkInstance, {
+			data.actFlag = SendInfo::RUN_FRAME;
+		})
+		// clang-format on
 	}
 }
 

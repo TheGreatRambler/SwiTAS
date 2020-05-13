@@ -54,7 +54,7 @@ void ControllerHandler::setFrame(ControllerData controllerData) {
 	setInput();
 }
 
-void ControllerHandler::setFrame(u64 buttons, JoystickPosition left, JoystickPosition right) {
+void ControllerHandler::setFrame(u64 buttons, JoystickPosition& left, JoystickPosition& right) {
 	clearState();
 
 	state.buttons                      = buttons;

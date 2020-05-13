@@ -37,13 +37,17 @@ public:
 
 class SideUI {
 private:
+	const uint8_t NETWORK_CALLBACK_ID = 3;
+
 	rapidjson::Document* mainSettings;
 	std::shared_ptr<CommunicateWithNetwork> networkInterface;
 	std::shared_ptr<ProjectHandler> projectHandler;
+	wxFrame* parent;
 
 	wxBoxSizer* verticalBoxSizer;
 
-	bool tethered = false;
+	uint8_t tethered                = false;
+	uint8_t controllerEventRecieved = false;
 
 	wxBitmapButton* addFrameButton;
 	wxBitmapButton* frameAdvanceButton;
@@ -80,22 +84,11 @@ private:
 public:
 	SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ProjectHandler> projHandler, wxBoxSizer* sizer, DataProcessing* input, std::shared_ptr<CommunicateWithNetwork> networkImp);
 
+	void onIdle(wxIdleEvent& event);
+
 	bool createSavestateHook();
 	bool loadSavestateHook(int block);
 
-	void untether() {
-		// Will need more indication
-		// TODO have switch itself notify the PC when fishy buisness is going on
-		// So it can untether itself
-		// wxLogMessage("Untether Switch");
-		frameAdvanceButton->Enable(false);
-		inputData->setTethered(false);
-		tethered = false;
-	}
-	void tether() {
-		// wxLogMessage("Tether Switch");
-		frameAdvanceButton->Enable(true);
-		inputData->setTethered(true);
-		tethered = true;
-	}
+	void untether();
+	void tether();
 };

@@ -34,7 +34,7 @@ MainWindow::MainWindow()
 	networkInstance = std::make_shared<CommunicateWithNetwork>(
 		[](CommunicateWithNetwork* self) {
 			SEND_QUEUE_DATA(SendFlag)
-			SEND_QUEUE_DATA(SendRunFrame)
+			SEND_QUEUE_DATA(SendFrameData)
 			SEND_QUEUE_DATA(SendLogging)
 			SEND_QUEUE_DATA(SendTrackMemoryRegion)
 			SEND_QUEUE_DATA(SendSetNumControllers)
@@ -142,6 +142,8 @@ void MainWindow::onIdle(wxIdleEvent& event) {
 		// Listen to joystick
 		bottomUI->listenToJoystick();
 	}
+
+	sideUI->onIdle(event);
 
 	// This handles callbacks for all different classes
 	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveFlag)
