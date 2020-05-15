@@ -228,6 +228,8 @@
 		"playButton": "share/icons/nxtas/buttons/playButton.png",
 		"pauseButton": "share/icons/nxtas/buttons/pauseButton.png",
 		"okButton": "share/icons/nxtas/buttons/okButton.png",
+		"autoFrameStartButton": "share/icons/nxtas/buttons/autoFrameStartButton.png",
+		"autoFrameEndButton": "share/icons/nxtas/buttons/autoFrameEndButton.png",
 		"splashScreen": "share/icons/nxtas/logo/main.png",
 		"buttonWidth": 80,
 		"buttonHeight": 80,

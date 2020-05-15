@@ -427,7 +427,7 @@ void DataProcessing::onAddSavestate(wxCommandEvent& event) {
 
 void DataProcessing::setCurrentFrame(FrameNum frameNum) {
 	// Must be a frame that has already been written, else, raise error
-	if(frameNum < inputsList->size()) {
+	if(frameNum < getFramesSize()) {
 		// Set the current frame to this frame
 		// Shared pointer so this can be done
 		currentData = inputsList->at(frameNum);
@@ -466,7 +466,7 @@ void DataProcessing::createSavestateHere() {
 
 void DataProcessing::runFrame() {
 	if(currentRunFrame != inputsList->size()) {
-		// Technically, should handle for entering next savetstae hook block, but TODO
+		// Technically, should handle for entering next savetstate hook block, but TODO
 		std::shared_ptr<ControllerData> controllerData = inputsList->at(currentRunFrame);
 
 		setFramestateInfo(currentRunFrame, FrameState::RAN, true);
@@ -493,15 +493,14 @@ void DataProcessing::runFrame() {
 				data.controllerData = *controllerDatas;
 				data.frame          = currentRunFrame;
 				data.playerIndex    = playerIndex;
+				if(playerIndex == allPlayers.size() - 1) {
+					// Last frame, start the frame
+					data.incrementFrame = true;
+				} else {
+					data.incrementFrame = false;
+				}
 			})
 		}
-
-		// Finally, run the frame
-		// clang-format off
-		ADD_TO_QUEUE(SendFlag, networkInstance, {
-			data.actFlag = SendInfo::RUN_FRAME;
-		})
-		// clang-format on
 	}
 }
 
@@ -811,6 +810,17 @@ uint8_t DataProcessing::getButtonSpecific(FrameNum frame, Btn button, SavestateB
 
 uint8_t DataProcessing::getButtonCurrent(Btn button) const {
 	return getButton(currentFrame, button);
+}
+
+void DataProcessing::setControllerDataForAutoRun(std::shared_ptr<ControllerData> controllerData) {
+	if(currentFrame == getFramesSize() - 1) {
+		addFrameHere();
+	}
+
+	// Set controller data manually
+	inputsList->at(currentFrame + 1) = controllerData;
+
+	setCurrentFrame(currentFrame + 1);
 }
 
 int16_t DataProcessing::getNumberValueCurrent(ControllerNumberValues joystickId) const {

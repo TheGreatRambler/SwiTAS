@@ -41,6 +41,7 @@ enum RecieveInfo : uint8_t {
 	FRAMEBUFFER_DONE,
 	APPLICATION_DISCONNECTED,
 	CONTROLLERS_CONNECTED,
+	UNEXPECTED_CONTROLLER_SIZE,
 };
 
 enum SendInfo : uint8_t {
@@ -54,7 +55,6 @@ enum SendInfo : uint8_t {
 	PAUSE,
 	UNPAUSE,
 	RUN_BLANK_FRAME,
-	RUN_FRAME,
 };
 
 // clang-format off
@@ -66,7 +66,8 @@ namespace Protocol {
 		// sent back will be one more than this frame
 		uint32_t frame;
 		uint8_t playerIndex;
-	, self.controllerData)
+		uint8_t incrementFrame;
+	, self.controllerData, self.frame, self.playerIndex, self.incrementFrame)
 
 	// Recieve all of the game's framebuffer
 	DEFINE_STRUCT(RecieveGameFramebuffer,

@@ -34,13 +34,13 @@ private:
 		}
 	}
 
-	std::shared_ptr<ControllerData> getControllerData();
-
 public:
 	ControllerHandler(std::shared_ptr<CommunicateWithNetwork> networkImp);
 
 	void setFrame(ControllerData controllerData);
 	void setFrame(u64 buttons, JoystickPosition& left, JoystickPosition& right);
+
+	std::shared_ptr<ControllerData> getControllerData();
 
 	~ControllerHandler();
 };

@@ -91,6 +91,7 @@ public:
 	ADD_NETWORK_CALLBACK_MAP(RecieveApplicationConnected)
 	ADD_NETWORK_CALLBACK_MAP(RecieveLogging)
 	ADD_NETWORK_CALLBACK_MAP(RecieveMemoryRegion)
+	ADD_NETWORK_CALLBACK_MAP(RecieveAutoRunControllerData)
 
 	void loadProject();
 	void saveProject();

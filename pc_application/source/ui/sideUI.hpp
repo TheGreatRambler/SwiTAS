@@ -99,7 +99,8 @@ public:
 	bool createSavestateHook();
 	bool loadSavestateHook(int block);
 
-	void triggerAutoRun();
+	void recieveAutoRunData(std::shared_ptr<ControllerData> controllerData);
+	void handleUnexpectedControllerSize();
 
 	void untether();
 	void tether();

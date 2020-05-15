@@ -220,6 +220,8 @@ public:
 	uint8_t getButtonSpecific(FrameNum frame, Btn button, SavestateBlockNum savestateHookNum, uint8_t player) const;
 	uint8_t getButtonCurrent(Btn button) const;
 
+	void setControllerDataForAutoRun(std::shared_ptr<ControllerData> controllerData);
+
 	// This includes joysticks, accel, gyro, etc...
 	void triggerNumberValues(ControllerNumberValues joystickId, int16_t value);
 	void setNumberValues(FrameNum frame, ControllerNumberValues joystickId, int16_t value);

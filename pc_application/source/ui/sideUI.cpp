@@ -171,6 +171,10 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	sizer->Add(verticalBoxSizer, 0, wxEXPAND | wxALL);
 }
 
+void SideUI::handleUnexpectedControllerSize() {
+	setPlayerInfo(inputData->getAllPlayers().size(), inputData->getCurrentPlayer());
+}
+
 void SideUI::setPlayerInfo(uint8_t size, uint8_t selected) {
 	// Deselect
 	playerSelect->SetSelection(wxNOT_FOUND);
@@ -307,6 +311,7 @@ void SideUI::untether() {
 	// So it can untether itself
 	// wxLogMessage("Untether Switch");
 	frameAdvanceButton->Enable(false);
+	autoFrameStart->Enable(false);
 	inputData->setTethered(false);
 	tethered = false;
 }
@@ -314,6 +319,7 @@ void SideUI::untether() {
 void SideUI::tether() {
 	// wxLogMessage("Tether Switch");
 	frameAdvanceButton->Enable(true);
+	autoFrameStart->Enable(true);
 	inputData->setTethered(true);
 	tethered = true;
 }
@@ -347,6 +353,6 @@ void SideUI::onEndAutoFramePressed(wxCommandEvent& event) {
 	})
 }
 
-void SideUI::triggerAutoRun() {
-	// Do a thing
+void SideUI::recieveAutoRunData(std::shared_ptr<ControllerData> controllerData) {
+	inputData->setControllerDataForAutoRun(controllerData);
 }

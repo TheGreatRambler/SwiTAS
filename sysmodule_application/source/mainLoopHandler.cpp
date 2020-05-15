@@ -101,7 +101,7 @@ void MainLoop::mainLoopHandler() {
 	handleNetworkUpdates();
 
 	// Check auto run
-	if(autoRunOn) {
+	if(autoRunOn && networkInstance->isConnected()) {
 		u64 currentTime = armTicksToNs(armGetSystemTick());
 		if(lastAutorunTime == 0 || (currentTime - lastAutorunTime) > nanosecondsBetweenAutorun) {
 			// TODO handle for any controller
@@ -109,7 +109,7 @@ void MainLoop::mainLoopHandler() {
 
 			// clang-format off
 			ADD_TO_QUEUE(RecieveAutoRunControllerData, networkInstance, {
-				data.controllerData = controller[0]->getControllerData();
+				data.controllerData = controllers[0]->getControllerData();
 			})
 			// clang-format on
 
@@ -125,11 +125,15 @@ void MainLoop::mainLoopHandler() {
 }
 
 void MainLoop::handleNetworkUpdates() {
-	// clang-format off
 	CHECK_QUEUE(networkInstance, SendFrameData, {
+		if(data.playerIndex > controllers.size()) {
+			setControllerNumber(data.playerIndex + 1);
+		}
 		controllers[data.playerIndex]->setFrame(data.controllerData);
+		if(data.incrementFrame) {
+			runSingleFrame();
+		}
 	})
-	// clang-format on
 
 	CHECK_QUEUE(networkInstance, SendTrackMemoryRegion, {
 		LOGD << "Track memory region";
@@ -160,8 +164,6 @@ void MainLoop::handleNetworkUpdates() {
 		} else if(data.actFlag == SendInfo::START_TAS_MODE) {
 			LOGD << "Start TAS mode";
 			pauseApp();
-		} else if(data.actFlag == SendInfo::RUN_FRAME) {
-			runSingleFrame();
 		}
 	})
 

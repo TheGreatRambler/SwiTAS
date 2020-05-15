@@ -154,6 +154,7 @@ void MainWindow::onIdle(wxIdleEvent& event) {
 	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveApplicationConnected)
 	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveLogging)
 	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveMemoryRegion)
+	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveAutoRunControllerData)
 }
 
 void MainWindow::handleNetworkQueues() {
@@ -167,6 +168,15 @@ void MainWindow::handleNetworkQueues() {
 	ADD_NETWORK_CALLBACK(RecieveGameFramebuffer, {
 		wxLogMessage("Framebuffer recieved");
 		bottomUI->recieveGameFramebuffer(data.buf);
+	})
+	ADD_NETWORK_CALLBACK(RecieveAutoRunControllerData, {
+		sideUI->recieveAutoRunData(data.controllerData);
+	})
+	ADD_NETWORK_CALLBACK(RecieveFlag, {
+		if (data.actFlag == RecieveInfo::UNEXPECTED_CONTROLLER_SIZE) {
+			// Switch is not in touch with required amount of controllers
+			sideUI->handleUnexpectedControllerSize();
+		}
 	})
 
 	// clang-format on
@@ -299,6 +309,8 @@ void MainWindow::onClose(wxCloseEvent& event) {
 	REMOVE_NETWORK_CALLBACK(RecieveApplicationConnected)
 	REMOVE_NETWORK_CALLBACK(RecieveLogging)
 	REMOVE_NETWORK_CALLBACK(RecieveGameFramebuffer)
+	REMOVE_NETWORK_CALLBACK(RecieveAutoRunControllerData)
+	REMOVE_NETWORK_CALLBACK(RecieveFlag)
 
 	// Close project dialog and save
 	projectHandler->saveProject();
