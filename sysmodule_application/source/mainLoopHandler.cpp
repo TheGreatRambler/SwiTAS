@@ -11,6 +11,7 @@ MainLoop::MainLoop() {
 			SEND_QUEUE_DATA(RecieveApplicationConnected)
 			SEND_QUEUE_DATA(RecieveLogging)
 			SEND_QUEUE_DATA(RecieveMemoryRegion)
+			SEND_QUEUE_DATA(RecieveAutoRunControllerData)
 		},
 		[](CommunicateWithNetwork* self) {
 			RECIEVE_QUEUE_DATA(SendFlag)
@@ -18,6 +19,7 @@ MainLoop::MainLoop() {
 			RECIEVE_QUEUE_DATA(SendLogging)
 			RECIEVE_QUEUE_DATA(SendTrackMemoryRegion)
 			RECIEVE_QUEUE_DATA(SendSetNumControllers)
+			RECIEVE_QUEUE_DATA(SendAutoRun)
 		});
 
 	LOGD << "Open display";
@@ -98,6 +100,27 @@ void MainLoop::mainLoopHandler() {
 	// handle network updates always, they are stored in the queue regardless of the internet
 	handleNetworkUpdates();
 
+	// Check auto run
+	if(autoRunOn) {
+		u64 currentTime = armTicksToNs(armGetSystemTick());
+		if(lastAutorunTime == 0 || (currentTime - lastAutorunTime) > nanosecondsBetweenAutorun) {
+			// TODO handle for any controller
+			matchFirstControllerToTASController(0);
+
+			// clang-format off
+			ADD_TO_QUEUE(RecieveAutoRunControllerData, networkInstance, {
+				data.controllerData = controller[0]->getControllerData();
+			})
+			// clang-format on
+
+			runSingleFrame();
+
+			lastAutorunTime = currentTime;
+		}
+		// Get nanosecond time
+		// Check if
+	}
+
 	std::this_thread::yield();
 }
 
@@ -132,7 +155,7 @@ void MainLoop::handleNetworkUpdates() {
 				screenshotHandler.writeFramebuffer(networkInstance);
 			}
 		} else if(data.actFlag == SendInfo::RUN_BLANK_FRAME) {
-			matchFirstControllerToTASController();
+			matchFirstControllerToTASController(0);
 			runSingleFrame();
 		} else if(data.actFlag == SendInfo::START_TAS_MODE) {
 			LOGD << "Start TAS mode";
@@ -147,6 +170,13 @@ void MainLoop::handleNetworkUpdates() {
 		setControllerNumber(data.size);
 	})
 	// clang-format on
+
+	CHECK_QUEUE(networkInstance, SendAutoRun, {
+		autoRunOn = data.start;
+		if(data.start) {
+			nanosecondsBetweenAutorun = (1000 / (float)data.fps) * 1000000;
+		}
+	})
 }
 
 void MainLoop::sendGameInfo() {
@@ -263,9 +293,10 @@ void MainLoop::pauseApp() {
 	}
 }
 
-void MainLoop::matchFirstControllerToTASController() {
+void MainLoop::matchFirstControllerToTASController(uint8_t player) {
 	if(getNumControllers() > controllers.size()) {
-		HidControllerID id = (HidControllerID)(controllers.size() + 1);
+		// This should get the first non-TAS controller
+		HidControllerID id = (HidControllerID)controllers.size();
 
 		u64 buttons = hidKeysHeld(id);
 		JoystickPosition left;
@@ -273,7 +304,7 @@ void MainLoop::matchFirstControllerToTASController() {
 		hidJoystickRead(&left, id, JOYSTICK_LEFT);
 		hidJoystickRead(&right, id, JOYSTICK_RIGHT);
 
-		controllers[0]->setFrame(buttons, left, right);
+		controllers[player]->setFrame(buttons, left, right);
 	}
 }
 

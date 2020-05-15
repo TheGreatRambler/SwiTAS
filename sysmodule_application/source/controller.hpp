@@ -34,6 +34,8 @@ private:
 		}
 	}
 
+	std::shared_ptr<ControllerData> getControllerData();
+
 public:
 	ControllerHandler(std::shared_ptr<CommunicateWithNetwork> networkImp);
 

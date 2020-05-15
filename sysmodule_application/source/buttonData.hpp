@@ -28,3 +28,28 @@ const std::unordered_map<Btn, HidControllerKeys> btnToHidKeys{
 	{ Btn::LS, KEY_LSTICK },
 	{ Btn::RS, KEY_RSTICK },
 };
+
+/*
+const std::unordered_map<HidControllerKeys, Btn> hidKeysToBtn{
+	{ KEY_A, Btn::A },
+	{ KEY_B, Btn::B },
+	{ KEY_X, Btn::X },
+	{ KEY_Y, Btn::Y },
+	{ KEY_L, Btn::L },
+	{ KEY_R, Btn::R },
+	{ KEY_ZL, Btn::ZL },
+	{ KEY_ZR, Btn::ZR },
+	{ KEY_SL, Btn::SL },
+	{ KEY_SR, Btn::SR },
+	{ KEY_DUP, Btn::DUP },
+	{ KEY_DDOWN, Btn::DDOWN },
+	{ KEY_DLEFT, Btn::DLEFT },
+	{ KEY_DRIGHT, Btn::DRIGHT },
+	{ KEY_PLUS, Btn::PLUS },
+	{ KEY_MINUS, Btn::MINUS },
+	{ KEY_HOME, Btn::HOME },
+	{ KEY_CAPTURE, Btn::CAPT },
+	{ KEY_LSTICK, Btn::LS },
+	{ KEY_RSTICK, Btn::RS },
+};
+*/

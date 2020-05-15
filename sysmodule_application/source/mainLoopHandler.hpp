@@ -20,6 +20,10 @@ private:
 	uint8_t isInTASMode       = false;
 	Handle applicationDebug;
 
+	uint8_t autoRunOn = false;
+	u64 nanosecondsBetweenAutorun;
+	u64 lastAutorunTime = 0;
+
 	Event vsyncEvent;
 
 	// WILL BE MORE
@@ -66,7 +70,7 @@ private:
 
 	// This allows you to use the inputs in a real controller
 	// to match a TAS controller, so you don't get stuck while in TAS mode
-	void matchFirstControllerToTASController();
+	void matchFirstControllerToTASController(uint8_t player);
 
 	// Deletes all controllers upon being started, hid:dbg as well as normal
 	// controllers. Otherwise, it sets the number of hid:dbg controllers

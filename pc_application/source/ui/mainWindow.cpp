@@ -38,6 +38,7 @@ MainWindow::MainWindow()
 			SEND_QUEUE_DATA(SendLogging)
 			SEND_QUEUE_DATA(SendTrackMemoryRegion)
 			SEND_QUEUE_DATA(SendSetNumControllers)
+			SEND_QUEUE_DATA(SendAutoRun)
 		},
 		[](CommunicateWithNetwork* self) {
 			RECIEVE_QUEUE_DATA(RecieveFlag)
@@ -46,6 +47,7 @@ MainWindow::MainWindow()
 			RECIEVE_QUEUE_DATA(RecieveApplicationConnected)
 			RECIEVE_QUEUE_DATA(RecieveLogging)
 			RECIEVE_QUEUE_DATA(RecieveMemoryRegion)
+			RECIEVE_QUEUE_DATA(RecieveAutoRunControllerData)
 		});
 
 	// DataProcessing can now start with the networking instance
@@ -54,8 +56,6 @@ MainWindow::MainWindow()
 	// UI instances
 	sideUI   = std::make_shared<SideUI>(this, &mainSettings, projectHandler, mainSizer, dataProcessingInstance, networkInstance);
 	bottomUI = std::make_shared<BottomUI>(this, &mainSettings, buttonData, mainSizer, dataProcessingInstance);
-
-	Bind(wxEVT_TIMER, &MainWindow::onTimer, this);
 
 	projectHandler = std::make_shared<ProjectHandler>(this, dataProcessingInstance, &mainSettings);
 
@@ -136,12 +136,6 @@ void MainWindow::OnSize(wxSizeEvent& event) {
 	// https://forums.wxwidgets.org/viewtopic.php?t=28894
 	if(GetAutoLayout()) {
 		Layout();
-	}
-}
-
-void MainWindow::onTimer(wxTimerEvent& event) {
-	if (event.GetId() == sideUI->getAutoRunTimerID()) {
-		// Direct to sideUI
 	}
 }
 

@@ -66,6 +66,29 @@ void ControllerHandler::setFrame(u64 buttons, JoystickPosition& left, JoystickPo
 	setInput();
 }
 
+std::shared_ptr<ControllerData> ControllerHandler::getControllerData() {
+	std::shared_ptr<ControllerData> newControllerData = std::make_shared<ControllerData>();
+
+	for(auto const& button : btnToHidKeys) {
+		if(state.buttons & hidButton.second) {
+			SET_BIT(newControllerData->buttons, true, button.first);
+		} else {
+			SET_BIT(newControllerData->buttons, false, button.first);
+		}
+	}
+
+	newControllerData->LS_X = state.joysticks[JOYSTICK_LEFT].dx;
+	newControllerData->LS_Y = state.joysticks[JOYSTICK_LEFT].dy;
+	newControllerData->RS_X = state.joysticks[JOYSTICK_RIGHT].dx;
+	newControllerData->RS_Y = state.joysticks[JOYSTICK_RIGHT].dy;
+
+	// Accel TODO
+
+	newControllerData->frameState = 0;
+
+	return newControllerData;
+}
+
 ControllerHandler::~ControllerHandler() {
 	// Detatch Controller
 	rc = hiddbgDetachHdlsVirtualDevice(HdlsHandle);

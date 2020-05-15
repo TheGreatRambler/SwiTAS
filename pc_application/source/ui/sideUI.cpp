@@ -149,9 +149,6 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 
 	autoFrameSizer = new wxBoxSizer(wxHORIZONTAL);
 
-	timerID = wxNewId();
-	autoTimer.SetOwner(parentFrame, timerID);
-
 	// TODO add these images
 	autoFrameStart = HELPERS::getBitmapButton(parentFrame, mainSettings, "autoFrameStartButton");
 	autoFrameEnd   = HELPERS::getBitmapButton(parentFrame, mainSettings, "autoFrameEndButton");
@@ -163,6 +160,13 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	autoFrameEnd->Bind(wxEVT_BUTTON, &SideUI::onEndAutoFramePressed, this);
 
 	autoRunFramesPerSecond = new wxSpinCtrl(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 60, 1);
+	autoRunFramesPerSecond->Bind(wxEVT_SPINCTRL, &SideUI::autoRunIntervalChanged, this);
+
+	autoFrameSizer->Add(autoFrameStart, 0, wxEXPAND | wxALL);
+	autoFrameSizer->Add(autoFrameEnd, 0, wxEXPAND | wxALL);
+
+	verticalBoxSizer->Add(autoFrameSizer, 0, wxEXPAND | wxALL);
+	verticalBoxSizer->Add(autoRunFramesPerSecond, 0, wxEXPAND | wxALL);
 
 	sizer->Add(verticalBoxSizer, 0, wxEXPAND | wxALL);
 }
@@ -314,12 +318,33 @@ void SideUI::tether() {
 	tethered = true;
 }
 
+void SideUI::autoRunIntervalChanged(wxSpinEvent& event) {
+	/*
+	if(autoTimer.IsRunning()) {
+		autoTimer.Stop();
+		autoTimer.Start(1000 / (float)autoRunFramesPerSecond->GetValue(), wxTIMER_CONTINUOUS);
+	}
+	*/
+	sendAutoRunData();
+}
+
 void SideUI::onStartAutoFramePressed(wxCommandEvent& event) {
-	autoTimer.Start(1000 / (float)autoRunFramesPerSecond->GetValue(), wxTIMER_CONTINUOUS);
+	// autoTimer.Start(1000 / (float)autoRunFramesPerSecond->GetValue(), wxTIMER_CONTINUOUS);
+	sendAutoRunData();
+}
+
+void SideUI::sendAutoRunData() {
+	ADD_TO_QUEUE(SendAutoRun, networkInterface, {
+		data.fps   = autoRunFramesPerSecond->GetValue();
+		data.start = true;
+	})
 }
 
 void SideUI::onEndAutoFramePressed(wxCommandEvent& event) {
-	autoTimer.Stop();
+	ADD_TO_QUEUE(SendAutoRun, networkInterface, {
+		data.fps   = 0;
+		data.start = false;
+	})
 }
 
 void SideUI::triggerAutoRun() {

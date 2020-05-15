@@ -2,6 +2,7 @@
 
 #include "include/zpp.hpp"
 #include <cstdint>
+#include <memory>
 
 #include "buttonData.hpp"
 
@@ -22,6 +23,7 @@ enum DataFlag : uint8_t {
 	RecieveGameFramebuffer,
 	RecieveGameInfo,
 	SendFlag,
+	SendAutoRun,
 	SendLogging,
 	SendTrackMemoryRegion,
 	SendSetNumControllers,
@@ -30,6 +32,7 @@ enum DataFlag : uint8_t {
 	RecieveFlag,
 	RecieveApplicationConnected,
 	RecieveGameMemoryInfo,
+	RecieveAutoRunControllerData,
 	NUM_OF_FLAGS,
 };
 
@@ -85,6 +88,12 @@ namespace Protocol {
 		SendInfo actFlag;
 	, self.actFlag)
 
+	DEFINE_STRUCT(SendAutoRun,
+		uint8_t fps;
+		// This is a bool
+		uint8_t start;
+	, self.fps, self.start)
+
 	DEFINE_STRUCT(SendLogging,
 		std::string log;
 	, self.log)
@@ -118,5 +127,9 @@ namespace Protocol {
 		uint64_t applicationProgramId;
 		uint64_t applicationProcessId;
 	, self.applicationName, self.applicationProgramId, self.applicationProcessId)
+
+	DEFINE_STRUCT(RecieveAutoRunControllerData,
+		std::shared_ptr<ControllerData> controllerData;
+	, self.controllerData)
 };
 // clang-format on

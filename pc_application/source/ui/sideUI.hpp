@@ -65,8 +65,6 @@ private:
 
 	FrameCanvas* frameDrawer;
 
-	wxTimer autoTimer;
-	int timerID;
 	wxBoxSizer* autoFrameSizer;
 	wxBitmapButton* autoFrameStart;
 	wxBitmapButton* autoFrameEnd;
@@ -80,6 +78,9 @@ private:
 
 	void setPlayerInfo(uint8_t size, uint8_t selected);
 	void playerSelected(wxCommandEvent& event);
+
+	void autoRunIntervalChanged(wxSpinEvent& event);
+	void sendAutoRunData();
 
 	void onAddFramePressed(wxCommandEvent& event);
 	void onFrameAdvancePressed(wxCommandEvent& event);
@@ -99,10 +100,6 @@ public:
 	bool loadSavestateHook(int block);
 
 	void triggerAutoRun();
-
-	int getAutoRunTimerID() {
-		return timerID;
-	}
 
 	void untether();
 	void tether();

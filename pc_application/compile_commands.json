@@ -161,11 +161,11 @@
    "-I/usr/include/luajit-2.1", 
    "-I./include", 
    "-c", 
-   "../sharedNetworkCode/thirdParty/clsocket/PassiveSocket.cpp", 
+   "source/ui/savestateSelection.cpp", 
    "-o", 
-   "bin/../sharedNetworkCode/thirdParty/clsocket/PassiveSocket.cpp.o"
+   "bin/./source/ui/savestateSelection.cpp.o"
   ], 
-  "file": "../sharedNetworkCode/thirdParty/clsocket/PassiveSocket.cpp"
+  "file": "source/ui/savestateSelection.cpp"
  }, 
  {
   "directory": "/home/thegreatrambler/Desktop/projects/NX-TAS-UI/pc_application", 
@@ -217,11 +217,11 @@
    "-I/usr/include/luajit-2.1", 
    "-I./include", 
    "-c", 
-   "source/dataHandling/runLuaScript.cpp", 
+   "source/ui/drawingCanvas.cpp", 
    "-o", 
-   "bin/./source/dataHandling/runLuaScript.cpp.o"
+   "bin/./source/ui/drawingCanvas.cpp.o"
   ], 
-  "file": "source/dataHandling/runLuaScript.cpp"
+  "file": "source/ui/drawingCanvas.cpp"
  }, 
  {
   "directory": "/home/thegreatrambler/Desktop/projects/NX-TAS-UI/pc_application", 
@@ -329,39 +329,11 @@
    "-I/usr/include/luajit-2.1", 
    "-I./include", 
    "-c", 
-   "source/ui/drawingCanvas.cpp", 
+   "source/dataHandling/runLuaScript.cpp", 
    "-o", 
-   "bin/./source/ui/drawingCanvas.cpp.o"
+   "bin/./source/dataHandling/runLuaScript.cpp.o"
   ], 
-  "file": "source/ui/drawingCanvas.cpp"
- }, 
- {
-  "directory": "/home/thegreatrambler/Desktop/projects/NX-TAS-UI/pc_application", 
-  "arguments": [
-   "g++", 
-   "-Wall", 
-   "-Wno-maybe-uninitialized", 
-   "-ggdb", 
-   "-m64", 
-   "-DCLIENT_IMP", 
-   "-Og", 
-   "-g", 
-   "-std=gnu++17", 
-   "-I/usr/lib/x86_64-linux-gnu/wx/include/gtk3-unicode-3.1-unofficial3", 
-   "-I/usr/include/wx-3.1-unofficial", 
-   "-D_FILE_OFFSET_BITS=64", 
-   "-DWXUSINGDLL", 
-   "-D__WXGTK__", 
-   "-pthread", 
-   "-I/usr/include/x86_64-linux-gnu", 
-   "-I/usr/include/luajit-2.1", 
-   "-I./include", 
-   "-c", 
-   "source/ui/savestateSelection.cpp", 
-   "-o", 
-   "bin/./source/ui/savestateSelection.cpp.o"
-  ], 
-  "file": "source/ui/savestateSelection.cpp"
+  "file": "source/dataHandling/runLuaScript.cpp"
  }, 
  {
   "directory": "/home/thegreatrambler/Desktop/projects/NX-TAS-UI/pc_application", 
@@ -474,6 +446,34 @@
    "bin/../sharedNetworkCode/thirdParty/clsocket/ActiveSocket.cpp.o"
   ], 
   "file": "../sharedNetworkCode/thirdParty/clsocket/ActiveSocket.cpp"
+ }, 
+ {
+  "directory": "/home/thegreatrambler/Desktop/projects/NX-TAS-UI/pc_application", 
+  "arguments": [
+   "g++", 
+   "-Wall", 
+   "-Wno-maybe-uninitialized", 
+   "-ggdb", 
+   "-m64", 
+   "-DCLIENT_IMP", 
+   "-Og", 
+   "-g", 
+   "-std=gnu++17", 
+   "-I/usr/lib/x86_64-linux-gnu/wx/include/gtk3-unicode-3.1-unofficial3", 
+   "-I/usr/include/wx-3.1-unofficial", 
+   "-D_FILE_OFFSET_BITS=64", 
+   "-DWXUSINGDLL", 
+   "-D__WXGTK__", 
+   "-pthread", 
+   "-I/usr/include/x86_64-linux-gnu", 
+   "-I/usr/include/luajit-2.1", 
+   "-I./include", 
+   "-c", 
+   "../sharedNetworkCode/thirdParty/clsocket/PassiveSocket.cpp", 
+   "-o", 
+   "bin/../sharedNetworkCode/thirdParty/clsocket/PassiveSocket.cpp.o"
+  ], 
+  "file": "../sharedNetworkCode/thirdParty/clsocket/PassiveSocket.cpp"
  }, 
  {
   "directory": "/home/thegreatrambler/Desktop/projects/NX-TAS-UI/pc_application", 
