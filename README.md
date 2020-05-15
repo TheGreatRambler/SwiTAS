@@ -27,88 +27,88 @@ This editor is intended to most closely resemble the [FCEUX TAS Editor](http://w
 
 <div align=”center”><img src="screenshots/pianoroll.png"></div>
 
-* To allow for seamless usage, button inputs support both keyboards and gamepads. The keyboard bindings are as follows:
+* To allow for seamless usage, button inputs support keyboards, gamepads, and selecting the corresponding button in the bottom right. The keyboard bindings (which mirror that of [Yuzu](https://yuzu-emu.org/)) are as follows:
 ```json
 "buttons": {
 	"A": {
 		"viewName": "A Button",
-		"triggerKeybind": "A"
+		"triggerKeybind": "A",
 	},
 	"B": {
 		"viewName": "B Button",
-		"triggerKeybind": "B"
+		"triggerKeybind": "S",
 	},
 	"X": {
 		"viewName": "X Button",
-		"triggerKeybind": "X"
+		"triggerKeybind": "Z",
 	},
 	"Y": {
 		"viewName": "Y Button",
-		"triggerKeybind": "Y"
+		"triggerKeybind": "X",
 	},
 	"L": {
 		"viewName": "L Button",
-		"triggerKeybind": "T"
+		"triggerKeybind": "Q",
 	},
 	"R": {
 		"viewName": "R Button",
-		"triggerKeybind": "R"
+		"triggerKeybind": "W",
 	},
 	"ZL": {
 		"viewName": "ZL Trigger",
-		"triggerKeybind": "O"
+		"triggerKeybind": "1",
 	},
 	"ZR": {
 		"viewName": "ZR Trigger",
-		"triggerKeybind": "P"
+		"triggerKeybind": "2",
 	},
 	"SL": {
 		"viewName": "SL Trigger",
-		"triggerKeybind": "Q"
+		"triggerKeybind": "E",
 	},
 	"SR": {
 		"viewName": "SR Trigger",
-		"triggerKeybind": "E"
+		"triggerKeybind": "R",
 	},
 	"DUP": {
 		"viewName": "Up on Dpad",
-		"triggerKeybind": "I"
+		"triggerKeybind": "T",
 	},
 	"DDOWN": {
 		"viewName": "Down on Dpad",
-		"triggerKeybind": "K"
+		"triggerKeybind": "G",
 	},
 	"DLEFT": {
 		"viewName": "Left on Dpad",
-		"triggerKeybind": "J"
+		"triggerKeybind": "F",
 	},
 	"DRIGHT": {
 		"viewName": "Right on Dpad",
-		"triggerKeybind": "L"
+		"triggerKeybind": "H",
 	},
 	"PLUS": {
 		"viewName": "Plus Button",
-		"triggerKeybind": "="
+		"triggerKeybind": "N",
 	},
 	"MINUS": {
 		"viewName": "Minus Button",
-		"triggerKeybind": "-"
+		"triggerKeybind": "M",
 	},
 	"HOME": {
 		"viewName": "Home Button",
-		"triggerKeybind": "H"
+		"triggerKeybind": "B",
 	},
 	"CAPT": {
 		"viewName": "Capture Button",
-		"triggerKeybind": "G"
+		"triggerKeybind": "V",
 	},
 	"LS": {
 		"viewName": "Left Stick Press",
-		"triggerKeybind": "N"
+		"triggerKeybind": "3",
 	},
 	"RS": {
 		"viewName": "Right Stick Press",
-		"triggerKeybind": "U"
+		"triggerKeybind": "4",
 	}
 }
 ```
