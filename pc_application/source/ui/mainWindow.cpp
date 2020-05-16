@@ -53,11 +53,11 @@ MainWindow::MainWindow()
 	// DataProcessing can now start with the networking instance
 	dataProcessingInstance = new DataProcessing(&mainSettings, buttonData, networkInstance, this);
 
+	projectHandler = std::make_shared<ProjectHandler>(this, dataProcessingInstance, &mainSettings);
+
 	// UI instances
 	sideUI   = std::make_shared<SideUI>(this, &mainSettings, projectHandler, mainSizer, dataProcessingInstance, networkInstance);
 	bottomUI = std::make_shared<BottomUI>(this, &mainSettings, buttonData, mainSizer, dataProcessingInstance);
-
-	projectHandler = std::make_shared<ProjectHandler>(this, dataProcessingInstance, &mainSettings);
 
 	handleNetworkQueues();
 

@@ -121,8 +121,6 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	})
 	// clang-format on
 
-	untether();
-
 	// Button handlers
 	addFrameButton->Bind(wxEVT_BUTTON, &SideUI::onAddFramePressed, this);
 	frameAdvanceButton->Bind(wxEVT_BUTTON, &SideUI::onFrameAdvancePressed, this);
@@ -169,6 +167,8 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	verticalBoxSizer->Add(autoRunFramesPerSecond, 0, wxEXPAND | wxALL);
 
 	sizer->Add(verticalBoxSizer, 0, wxEXPAND | wxALL);
+
+	untether();
 }
 
 void SideUI::handleUnexpectedControllerSize() {

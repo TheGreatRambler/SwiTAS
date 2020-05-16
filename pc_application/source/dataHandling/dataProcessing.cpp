@@ -131,9 +131,6 @@ void DataProcessing::exportCurrentPlayerToFile(wxFileName exportTarget) {
 	wxFile file(exportTarget.GetFullPath(), wxFile::write);
 
 	if(file.IsOpened()) {
-		wxBusyCursor busyCursor;
-		wxWindowDisabler disabler;
-
 		std::string exported = buttonData->framesToText(this, 0, 0, viewingPlayerIndex);
 		file.Write(wxString::FromUTF8(exported));
 		file.Close();
@@ -149,9 +146,6 @@ void DataProcessing::importFromFile(wxFileName importTarget) {
 		file.Close();
 
 		if(successful) {
-			wxBusyCursor busyCursor;
-			wxWindowDisabler disabler;
-
 			Freeze();
 			FrameNum lastFrame = buttonData->textToFrames(this, fileContents.ToStdString(), 0, false, false);
 			// Remove all frames after the data
@@ -322,9 +316,6 @@ void DataProcessing::onCopy(wxCommandEvent& event) {
 		if(firstSelectedItem != wxNOT_FOUND) {
 			long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
 
-			wxBusyCursor busyCursor;
-			wxWindowDisabler disabler;
-
 			// There is a selected item
 			if(currentFrame >= firstSelectedItem && currentFrame <= lastSelectedItem) {
 				// Add these items to the clipboard
@@ -367,9 +358,6 @@ void DataProcessing::onPaste(wxCommandEvent& event) {
 
 		if(wxTheClipboard->Open()) {
 			if(wxTheClipboard->IsSupported(wxDF_TEXT)) {
-				wxBusyCursor busyCursor;
-				wxWindowDisabler disabler;
-
 				wxTextDataObject data;
 				wxTheClipboard->GetData(data);
 				wxTheClipboard->Close();
@@ -383,6 +371,7 @@ void DataProcessing::onPaste(wxCommandEvent& event) {
 						buttonData->textToFrames(this, clipboardText, i, insertPaste, placePaste);
 					}
 				}
+				setCurrentFrame(currentFrame);
 				Thaw();
 				Refresh();
 			}

@@ -257,28 +257,30 @@ void JoystickCanvas::correctForCircleLock() {
 
 void JoystickCanvas::onMouseClick(wxMouseEvent& event) {
 	wxPoint loc = event.GetPosition();
-	int width;
-	int height;
-	GetSize(&width, &height);
+	if(GetScreenRect().Contains(ClientToScreen(loc))) {
+		int width;
+		int height;
+		GetSize(&width, &height);
 
-	int16_t scaledX = ((float)loc.x / width) * 60000 - ButtonData::axisMax;
-	// Y is flipped
-	int16_t scaledY = (((float)loc.y / height) * 60000 - ButtonData::axisMax) * -1;
+		int16_t scaledX = ((float)loc.x / width) * ButtonData::axisMax * 2 - ButtonData::axisMax;
+		// Y is flipped
+		int16_t scaledY = (((float)loc.y / height) * ButtonData::axisMax * 2 - ButtonData::axisMax) * -1;
 
-	// Mutiply by twice the radius and then subtract the radius to get the middle
-	if(isLeftJoystick) {
-		inputInstance->triggerNumberValues(ControllerNumberValues::LEFT_X, scaledX);
-		inputInstance->triggerNumberValues(ControllerNumberValues::LEFT_Y, scaledY);
-	} else {
-		inputInstance->triggerNumberValues(ControllerNumberValues::RIGHT_X, scaledX);
-		inputInstance->triggerNumberValues(ControllerNumberValues::RIGHT_Y, scaledY);
+		// Mutiply by twice the radius and then subtract the radius to get the middle
+		if(isLeftJoystick) {
+			inputInstance->triggerNumberValues(ControllerNumberValues::LEFT_X, scaledX);
+			inputInstance->triggerNumberValues(ControllerNumberValues::LEFT_Y, scaledY);
+		} else {
+			inputInstance->triggerNumberValues(ControllerNumberValues::RIGHT_X, scaledX);
+			inputInstance->triggerNumberValues(ControllerNumberValues::RIGHT_Y, scaledY);
+		}
+
+		correctForCircleLock();
+
+		event.Skip();
+
+		Refresh();
 	}
-
-	correctForCircleLock();
-
-	event.Skip();
-
-	Refresh();
 }
 
 void JoystickCanvas::onMouseDrag(wxMouseEvent& event) {
