@@ -160,6 +160,8 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	autoRunFramesPerSecond = new wxSpinCtrl(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 60, 1);
 	autoRunFramesPerSecond->Bind(wxEVT_SPINCTRL, &SideUI::autoRunIntervalChanged, this);
 
+	autoRunFramesPerSecond->SetToolTip("Set frames per second during auto frame advance");
+
 	autoFrameSizer->Add(autoFrameStart, 0, wxEXPAND | wxALL);
 	autoFrameSizer->Add(autoFrameEnd, 0, wxEXPAND | wxALL);
 

@@ -413,7 +413,7 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 	mainSizer->Add(frameViewerCanvas, 0, wxSHAPED | wxEXPAND | wxALIGN_CENTER_HORIZONTAL);
 	mainSizer->Add(horizontalBoxSizer, 0, wxEXPAND | wxALL);
 
-	theGrid->Add(mainSizer, 0, wxEXPAND | wxALL);
+	theGrid->Add(mainSizer, 1, wxEXPAND | wxALL);
 }
 
 void BottomUI::refreshDataViews() {
