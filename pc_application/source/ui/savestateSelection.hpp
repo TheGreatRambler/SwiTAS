@@ -101,6 +101,8 @@ private:
 		Close(true);
 	}
 
+	void registerFramebufferCallback();
+
 	void onIdle(wxIdleEvent& event);
 
 	void onPlay(wxCommandEvent& event);

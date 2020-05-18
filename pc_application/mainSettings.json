@@ -66,7 +66,7 @@
 			"viewName": "ZL Trigger",
 			"onIconImage": "share/icons/nxtas/inputs/ZLon.png",
 			"offIconImage": "share/icons/nxtas/inputs/ZLoff.png",
-			"triggerKeybind": "1",
+			"triggerKeybind": "I",
 			"gridX": 2,
 			"gridY": 0
 		},
@@ -76,7 +76,7 @@
 			"viewName": "ZR Trigger",
 			"onIconImage": "share/icons/nxtas/inputs/ZRon.png",
 			"offIconImage": "share/icons/nxtas/inputs/ZRoff.png",
-			"triggerKeybind": "2",
+			"triggerKeybind": "O",
 			"gridX": 8,
 			"gridY": 0
 		},
@@ -186,7 +186,7 @@
 			"viewName": "Left Stick Press",
 			"onIconImage": "share/icons/nxtas/inputs/LSTICKon.png",
 			"offIconImage": "share/icons/nxtas/inputs/LSTICKoff.png",
-			"triggerKeybind": "3",
+			"triggerKeybind": "K",
 			"gridX": 0,
 			"gridY": 0
 		},
@@ -196,7 +196,7 @@
 			"viewName": "Right Stick Press",
 			"onIconImage": "share/icons/nxtas/inputs/RSTICKoff.png",
 			"offIconImage": "share/icons/nxtas/inputs/RSTICKon.png",
-			"triggerKeybind": "4",
+			"triggerKeybind": "L",
 			"gridX": 3,
 			"gridY": 3
 		}
@@ -244,9 +244,15 @@
 			"newProject": "rgb(20, 110, 66)"
 		}
 	},
-	"recentProjects": [{
-		"projectDirectory": "/home/thegreatrambler/Desktop/bob/",
-		"projectName": "Unnamed"
-	}],
+	"recentProjects": [
+		{
+			"projectDirectory": "/home/thegreatrambler/Desktop/bob/",
+			"projectName": "Unnamed"
+		},
+		{
+			"projectDirectory": "C:\\Users\\aehar\\Desktop\\EPIC\\",
+			"projectName": "Unnamed"
+		}
+	],
 	"recentVideos": []
 }

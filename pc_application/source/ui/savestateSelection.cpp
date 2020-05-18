@@ -149,6 +149,8 @@ SavestateSelection::SavestateSelection(rapidjson::Document* settings, std::share
 	})
 	// clang-format on
 
+	registerFramebufferCallback();
+
 	// When done with all the stuff, close with Close(true);
 }
 
@@ -166,8 +168,11 @@ void SavestateSelection::setTargetFrame(wxBitmap* targetBitmap, std::string targ
 }
 
 void SavestateSelection::onIdle(wxIdleEvent& event) {
-	/*
-	CHECK_QUEUE(networkInstance, RecieveGameFramebuffer, {
+	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveGameFramebuffer)
+}
+
+void SavestateSelection::registerFramebufferCallback() {
+	ADD_NETWORK_CALLBACK(RecieveGameFramebuffer, {
 		wxImage screenshot = HELPERS::getImageFromJPEGData(data.buf);
 		currentFrame->setBitmap(new wxBitmap(screenshot));
 		leftDHash->SetLabel(HELPERS::calculateDhash(screenshot, dhashWidth, dhashHeight));
@@ -186,7 +191,6 @@ void SavestateSelection::onIdle(wxIdleEvent& event) {
 			}
 		}
 	})
-	*/
 }
 
 void SavestateSelection::onPlay(wxCommandEvent& event) {
@@ -223,4 +227,6 @@ void SavestateSelection::onOk(wxCommandEvent& event) {
 	callOk();
 }
 
-void SavestateSelection::onClose(wxCloseEvent& event) { }
+void SavestateSelection::onClose(wxCloseEvent& event) {
+	REMOVE_NETWORK_CALLBACK(RecieveGameFramebuffer)
+}
