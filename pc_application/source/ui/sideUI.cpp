@@ -171,6 +171,7 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	sizer->Add(verticalBoxSizer, 0, wxEXPAND | wxALL);
 
 	untether();
+	setPlayerInfo(1, 0);
 }
 
 void SideUI::handleUnexpectedControllerSize() {
@@ -184,6 +185,11 @@ void SideUI::setPlayerInfo(uint8_t size, uint8_t selected) {
 	if(playerSelect->GetCount() != size) {
 		// Size has changed, time to inform the sysmodule
 		if(networkInterface->isConnected()) {
+			// clang-format off
+			ADD_TO_QUEUE(SendSetNumControllers, networkInterface, {
+				data.size = size;
+			})
+			// clang-format on
 			// Now, user has to disconnect their controllers and don't allow continuing until done
 			while(true) {
 				wxMessageDialog removeControllersDialog(parent, "Remove controllers", "Remove all controllers from the switch, can connect them afterwards", wxOK | wxICON_INFORMATION);
@@ -309,7 +315,7 @@ bool SideUI::loadSavestateHook(int block) {
 
 void SideUI::untether() {
 	// Will need more indication
-	// TODO have switch itself notify the PC when fishy buisness is going on
+	// TODO have switch itself notify the PC when fishy business is going on
 	// So it can untether itself
 	// wxLogMessage("Untether Switch");
 	frameAdvanceButton->Enable(false);
@@ -323,6 +329,16 @@ void SideUI::tether() {
 	frameAdvanceButton->Enable(true);
 	autoFrameStart->Enable(true);
 	inputData->setTethered(true);
+
+	// Convenient place for this, set the player count sysmodule-side
+	// When tethering
+	int selection = playerSelect->GetSelection();
+	if(selection == wxNOT_FOUND) {
+		setPlayerInfo(playerSelect->GetCount(), 0);
+	} else {
+		setPlayerInfo(playerSelect->GetCount(), selection);
+	}
+
 	tethered = true;
 }
 

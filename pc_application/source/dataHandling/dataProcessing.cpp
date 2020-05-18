@@ -611,11 +611,6 @@ void DataProcessing::removeThisPlayer() {
 
 void DataProcessing::sendPlayerNum() {
 	uint8_t size = allPlayers.size();
-	// clang-format off
-	ADD_TO_QUEUE(SendSetNumControllers, networkInstance, {
-		data.size = size;
-	})
-	// clang-format on
 	// Also sends to SideUI
 	if(playerInfoCallback) {
 		playerInfoCallback(size, viewingPlayerIndex);
@@ -664,8 +659,9 @@ void DataProcessing::modifyButton(FrameNum frame, Btn button, uint8_t isPressed)
 	SET_BIT(inputsList->at(frame)->buttons, isPressed, button);
 
 	invalidateRun(frame);
-	modifyCurrentFrameViews(frame);
+
 	RefreshItem(frame);
+	modifyCurrentFrameViews(frame);
 }
 
 void DataProcessing::toggleButton(FrameNum frame, Btn button) {

@@ -166,7 +166,7 @@ void MainWindow::handleNetworkQueues() {
 		wxLogMessage(wxString("SWITCH: " + data.log));
 	})
 	ADD_NETWORK_CALLBACK(RecieveGameFramebuffer, {
-		wxLogMessage("Framebuffer recieved");
+		wxLogMessage("Framebuffer received");
 		bottomUI->recieveGameFramebuffer(data.buf);
 	})
 	ADD_NETWORK_CALLBACK(RecieveAutoRunControllerData, {
@@ -183,7 +183,7 @@ void MainWindow::handleNetworkQueues() {
 	if(networkInstance->hasOtherSideJustDisconnected()) {
 		wxLogMessage("Server disconnected, required to re-enter IP");
 		SetStatusText("", 0);
-		// Show the dialog immidently
+		// Show the dialog
 		askForIP();
 	}
 }
@@ -216,7 +216,8 @@ void MainWindow::addMenuBar() {
 	fileMenu->Append(selectIPID, "Set Switch IP\tCtrl+I");
 	fileMenu->Append(toggleLoggingID, "Toggle Logging\tCtrl+Shift+L");
 	fileMenu->Append(toggleDebugMenuID, "Toggle Debug Menu\tCtrl+D");
-	fileMenu->Append(openGameCorruptor, "Open Game Corruptor\tCtrl+B");
+	// Not finished as of now
+	// fileMenu->Append(openGameCorruptor, "Open Game Corruptor\tCtrl+B");
 
 	menuBar->Append(fileMenu, "&File");
 

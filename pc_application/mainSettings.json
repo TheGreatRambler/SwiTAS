@@ -244,11 +244,9 @@
 			"newProject": "rgb(20, 110, 66)"
 		}
 	},
-	"recentProjects": [
-		{
-			"projectDirectory": "/home/thegreatrambler/Desktop/bob/",
-			"projectName": "Unnamed"
-		}
-	],
+	"recentProjects": [{
+		"projectDirectory": "/home/thegreatrambler/Desktop/bob/",
+		"projectName": "Unnamed"
+	}],
 	"recentVideos": []
 }
