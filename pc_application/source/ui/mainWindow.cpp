@@ -3,7 +3,7 @@
 #include "mainWindow.hpp"
 
 MainWindow::MainWindow()
-	: wxFrame(NULL, wxID_ANY, "nx-TAS-UI | Unnamed", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE | wxMAXIMIZE) {
+	: wxFrame(NULL, wxID_ANY, "SwiTAS | Unnamed", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE | wxMAXIMIZE) {
 	wxImage::AddHandler(new wxPNGHandler());
 	wxImage::AddHandler(new wxJPEGHandler());
 

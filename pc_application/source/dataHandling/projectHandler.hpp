@@ -104,7 +104,7 @@ public:
 
 	void setProjectName(std::string name) {
 		projectName = name;
-		parentFrame->SetTitle("nx-TAS-UI | " + wxString::FromUTF8(name));
+		parentFrame->SetTitle("SwiTAS | " + wxString::FromUTF8(name));
 	}
 
 	void setRecentProjectChoice(int projectChoice) {

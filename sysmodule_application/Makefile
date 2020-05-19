@@ -38,7 +38,7 @@ include $(DEVKITPRO)/libnx/switch_rules
 #   NACP building is skipped as well.
 #---------------------------------------------------------------------------------
 
-TARGET		:=	nx-TAS-PC
+TARGET		:=	SwiTAS
 BUILD		:=	build
 SOURCES		:=	source ../sharedNetworkCode ../sharedNetworkCode/thirdParty/clsocket
 DATA		:=	data
@@ -168,10 +168,10 @@ $(BUILD):
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 	# Copy files into a ready-made directory structure
 	# Custom stuff, will need to be changed later if need be
-	mkdir -p 0100000000000BAC/flags
-	cp nx-TAS-PC.nsp 0100000000000BAC/exefs.nsp
-	cp toolbox.json 0100000000000BAC/toolbox.json
-	touch 0100000000000BAC/flags/boot2.flag
+	mkdir -p 4200000000000BAC/flags
+	cp SwiTAS.nsp 4200000000000BAC/exefs.nsp
+	cp toolbox.json 4200000000000BAC/toolbox.json
+	touch 4200000000000BAC/flags/boot2.flag
 
 #---------------------------------------------------------------------------------
 clean:

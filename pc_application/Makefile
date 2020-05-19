@@ -1,9 +1,9 @@
 UNAME := $(shell uname -o)
 
 ifeq ($(UNAME),Msys)
-	TARGET_EXEC ?= nxtasui.exe
+	TARGET_EXEC ?= switas.exe
 else
-	TARGET_EXEC ?= nxtasui
+	TARGET_EXEC ?= switas
 endif
 
 BUILD_DIR ?= ./bin

@@ -1,7 +1,7 @@
-# NX TAS UI
-A PC frontend for the Nintendo Switch homebrew [Nx-TAS](https://github.com/hamhub7/nx-TAS).
+# SwiTAS
+A TAS toolkit for the Nintendo Switch. Usuable via hardware, homebrew and emulator.
 
-# [RELEASES HERE](https://github.com/TheGreatRambler/NX-TAS-UI/releases)
+# [RELEASES HERE](https://github.com/TheGreatRambler/SwiTAS/releases)
 
 ## Why this?
 You have probably heard of the [TASBOT Nintendo Switch setup](https://www.youtube.com/watch?v=VXRL7dUVT-M), [Switch Fightstick](https://github.com/shinyquagsire23/Switch-Fightstick) or even the macros of [JoyCon Droid](https://play.google.com/store/apps/details?id=com.rdapps.gamepad&hl=en_US). This program was created to address the shortcomings of these other, similar, projects.

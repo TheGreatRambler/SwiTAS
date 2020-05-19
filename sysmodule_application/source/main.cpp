@@ -142,8 +142,8 @@ void __attribute__((weak)) __appExit(void) {
 
 // Main program entrypoint
 int main(int argc, char* argv[]) {
-	remove("/NX-TAS-PC.log");
-	plog::init(plog::debug, "/NX-TAS-PC.log");
+	remove("/SwiTAS.log");
+	plog::init(plog::debug, "/SwiTAS.log");
 	LOGD << "Started logging";
 
 	MainLoop mainLoop;

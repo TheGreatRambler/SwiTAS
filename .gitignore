@@ -5,9 +5,9 @@ pc_application/sharedNetworkCode
 pc_application/compile_commands.json
 pc_application/mainSettings.json
 
-sysmodule_application/nx-TAS-PC.elf
-sysmodule_application/nx-TAS-PC.npdm
-sysmodule_application/nx-TAS-PC.nso
-sysmodule_application/nx-TAS-PC.nsp
+sysmodule_application/SwiTAS.elf
+sysmodule_application/SwiTAS.npdm
+sysmodule_application/SwiTAS.nso
+sysmodule_application/SwiTAS.nsp
 sysmodule_application/build
 sysmodule_application/sharedNetworkCode
