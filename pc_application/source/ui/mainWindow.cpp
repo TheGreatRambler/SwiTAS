@@ -3,7 +3,7 @@
 #include "mainWindow.hpp"
 
 MainWindow::MainWindow()
-	: wxFrame(NULL, wxID_ANY, "NX TAS UI", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE | wxMAXIMIZE) {
+	: wxFrame(NULL, wxID_ANY, "nx-TAS-UI | Unnamed", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE | wxMAXIMIZE) {
 	wxImage::AddHandler(new wxPNGHandler());
 	wxImage::AddHandler(new wxJPEGHandler());
 
@@ -118,12 +118,9 @@ END_EVENT_TABLE()
 // Override default signal handler:
 void MainWindow::keyDownHandler(wxKeyEvent& event) {
 	// Only handle keybard input if control is not held down
-	if(!event.ControlDown()) {
-		dataProcessingInstance->handleKeyboardInput(event.GetUnicodeKey());
+	if(event.ControlDown() || !dataProcessingInstance->handleKeyboardInput(event.GetUnicodeKey())) {
+		event.Skip();
 	}
-
-	// Always skip the event
-	event.Skip();
 }
 
 void MainWindow::handlePreviousWindowTransform() {
@@ -206,7 +203,7 @@ void MainWindow::addMenuBar() {
 	fileMenu->Append(setNameID, "Set Name\tCtrl+Alt+N");
 
 	// Add joystick submenu
-	bottomUI->addJoystickMenu(fileMenu);
+	fileMenu->AppendSubMenu(bottomUI->getJoystickMenu(), "&List Joysticks\tCtrl+G");
 	fileMenu->AppendSubMenu(projectHandler->getVideoSubmenu(), "List Recent Comparison Videos\tCtrl+Alt+L");
 
 	projectHandler->getVideoSubmenu()->Bind(wxEVT_MENU_OPEN, &MainWindow::onRecentVideosMenuOpen, this);

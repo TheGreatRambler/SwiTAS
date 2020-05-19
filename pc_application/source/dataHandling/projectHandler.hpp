@@ -8,7 +8,7 @@
 // clang-format off
 // https://stackoverflow.com/a/20583578/9329945
 #define ADD_NETWORK_CALLBACK(Flag, callbackBody) { \
-	projectHandler->Callbacks_##Flag.emplace(NETWORK_CALLBACK_ID, [=] (const Protocol::Struct_##Flag& data) { \
+	projectHandler->Callbacks_##Flag.emplace(NETWORK_CALLBACK_ID, [this] (const Protocol::Struct_##Flag& data) { \
 		callbackBody \
 	}); \
 }
@@ -104,6 +104,7 @@ public:
 
 	void setProjectName(std::string name) {
 		projectName = name;
+		parentFrame->SetTitle("nx-TAS-UI | " + wxString::FromUTF8(name));
 	}
 
 	void setRecentProjectChoice(int projectChoice) {

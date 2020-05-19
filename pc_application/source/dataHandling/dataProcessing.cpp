@@ -196,12 +196,12 @@ wxString DataProcessing::OnGetItemText(long row, long column) const {
 	// Returns when text is needed
 	if(column == 0) {
 		// This is the frame, which is just the row number
-		return wxString::Format(wxT("%ld"), row);
+		return wxString::Format(wxT("%ld"), row + 1);
 	} else {
 		// Fallback for every other column
 		return "";
 	}
-	// This function shouldn't recieve any other column
+	// This function shouldn't receive any other column
 }
 
 // EXCUSE ME, WUT TODO

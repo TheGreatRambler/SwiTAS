@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="100mm"
+   height="100mm"
+   viewBox="0 0 100 100"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
+   sodipodi:docname="Yoff.svg"
+   inkscape:export-xdpi="500"
+   inkscape:export-ydpi="500">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.94035341"
+     inkscape:cx="-5.7957951"
+     inkscape:cy="262.45504"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     inkscape:document-rotation="0"
+     showgrid="false"
+     inkscape:window-width="1440"
+     inkscape:window-height="829"
+     inkscape:window-x="65"
+     inkscape:window-y="23"
+     inkscape:window-maximized="0" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="BG"
+     style="display:none">
+    <image
+       y="2.8775251"
+       x="-0.40721703"
+       width="113.06448"
+       height="100.0186"
+       preserveAspectRatio="none"
+       xlink:href="data:image/png;base64,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 "
+       id="image986" />
+  </g>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     style="display:inline">
+    <circle
+       style="fill:#ffffff;fill-opacity:1;stroke-width:3;stroke:#000000;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       id="path833"
+       cx="50"
+       cy="50"
+       r="50" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:70.5556px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="26.675999"
+       y="75.641342"
+       id="text882"><tspan
+         sodipodi:role="line"
+         id="tspan880"
+         x="26.675999"
+         y="75.641342"
+         style="stroke-width:0.264583">Y</tspan></text>
+  </g>
+</svg>

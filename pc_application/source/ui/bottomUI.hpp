@@ -140,7 +140,7 @@ private:
 	uint8_t currentJoyDefined;
 	int lastButtonState;
 
-	std::map<std::string, int> stringToButtonExtended {
+	std::map<std::string, int> stringToButtonExtended{
 		{ "LSX", 0 },
 		{ "LSY", 1 },
 		{ "RSX", 2 },
@@ -174,8 +174,8 @@ private:
 public:
 	BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid, DataProcessing* input);
 
-	void addJoystickMenu(wxMenu* parent) {
-		parent->AppendSubMenu(joystickSubMenu, "&List Joysticks\tCtrl+G");
+	wxMenu* getJoystickMenu() {
+		return joystickSubMenu;
 	}
 
 	// Just a random large number, apparently can't be larger than 76

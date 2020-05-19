@@ -1,0 +1,61 @@
+name: nx-tas-ui
+base: core18 # the base snap is the execution environment for this snap
+version: '0.0.1' # just for humans, typically '1.2+git' or '1.3.2'
+summary: A TAS toolkit for the Nintendo Switch # 79 char long summary
+description: |
+  A TAS toolkit, taking advantage of hardware, homebrew, and emulators,
+  designed for the Nintendo Switch
+
+grade: devel # must be 'stable' to release into candidate/stable channels
+confinement: devmode # use 'strict' once you have the right plugs and slots
+architectures:
+  - build-on: amd64
+    run-on: amd64
+    
+  - build-on: i386
+    run-on: i386
+
+  - build-on: armhf
+    run-on: armhf
+    
+  - build-on: arm64
+    run-on: arm64
+
+parts:
+  nx-tas-ui:
+    plugin: make
+    makefile: Makefile
+    source: .
+    make-parameters: ["-B", "BUILD=release"]
+    artifacts:
+      - bin/nxtasui
+      - share/*
+      - mainSettings.json
+    # organize:
+    #   release/bspinfo: bin/bspinfo3
+    #   release/qbsp3: bin/
+    #   release/qdata: bin/
+    #   release/qrad3: bin/
+    #   release/qvis3: bin/
+    # Need some of this lol https://forum.snapcraft.io/t/building-a-snap/13556/13
+    # https://gist.github.com/ZachBacon/b4c76c3111c5dcb3c166c27ed1912aec
+    stage-packages:
+      - zlib1g
+      - libgtk-3-0
+      - libwxbase3.1-0-unofficial3
+      - libwxgtk3.1-0-unofficial3
+      - wx-common
+    build-packages:
+      - make
+      - build-essential
+      - pkg-config
+      - libwxbase3.1-0-unofficial3
+      - libwxgtk3.1-0-unofficial3
+      - libwxbase3.1unofficial3-dev
+      - libwxgtk3.1unofficial3-dev
+      - wx-common
+
+
+apps:
+  nxtasui:
+    command: bin/nxtasui
