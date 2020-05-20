@@ -183,8 +183,7 @@ void SavestateSelection::registerFramebufferCallback() {
 			if(hamming <= selectFrameAutomatically->GetValue()) {
 				// This frame might be identical, ask user if they want to use this frame
 				wxMessageDialog useFrameDialog(this, "This frame is very similar to the target frame, use it?", "Use this frame", wxYES_NO | wxCANCEL | wxYES_DEFAULT);
-				int res = useFrameDialog.ShowModal();
-				if(res == wxID_YES) {
+				if(useFrameDialog.ShowModal() == wxID_YES) {
 					// Use the frame
 					callOk();
 				}

@@ -222,6 +222,7 @@
 		"frameAdvanceButton": "share/icons/switas/buttons/frameAdvanceButton.png",
 		"savestateHookCreateButton": "share/icons/switas/buttons/savestateHookCreateButton.png",
 		"savestateHookLoadButton": "share/icons/switas/buttons/savestateHookLoadButton.png",
+		"savestateHookModifyButton": "share/icons/switas/buttons/savestateHookModifyButton.png",
 		"playerAddButton": "share/icons/switas/buttons/addPlayerButton.png",
 		"playerRemoveButton": "share/icons/switas/buttons/removePlayerButton.png",
 		"joystickLockButton": "share/icons/switas/buttons/joystickLockButton.png",

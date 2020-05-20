@@ -53,6 +53,7 @@ private:
 	wxBitmapButton* frameAdvanceButton;
 	wxBitmapButton* savestateHookCreateButton;
 	wxBitmapButton* savestateHookLoadButton;
+	wxBitmapButton* savestateHookModifyButton;
 	wxBitmapButton* playerAddButton;
 	wxBitmapButton* playerRemoveButton;
 
@@ -86,6 +87,7 @@ private:
 	void onFrameAdvancePressed(wxCommandEvent& event);
 	void onSavestateHookCreatePressed(wxCommandEvent& event);
 	void onSavestateHookLoadPressed(wxCommandEvent& event);
+	void onSavestateHookModifyPressed(wxCommandEvent& event);
 	void onPlayerAddPressed(wxCommandEvent& event);
 	void onPlayerRemovePressed(wxCommandEvent& event);
 	void onStartAutoFramePressed(wxCommandEvent& event);

@@ -59,3 +59,8 @@ parts:
 apps:
   switas:
     command: bin/switas
+
+package-management:
+  repositories:
+    - source: deb http://apt.wxwidgets.org/ bionic-wx main
+    - source: deb http://repos.codelite.org/wx3.1.3/ubuntu/ bionic universe

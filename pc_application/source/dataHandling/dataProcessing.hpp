@@ -192,8 +192,6 @@ public:
 	wxRect getFirstItemRect();
 
 	bool handleKeyboardInput(wxChar key);
-	// The class itself is the list control
-	// std::shared_ptr<wxGenericListCtrl> getWidget();
 
 	void onCacheHint(wxListEvent& event);
 

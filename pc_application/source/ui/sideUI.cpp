@@ -98,6 +98,7 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	frameAdvanceButton        = HELPERS::getBitmapButton(parentFrame, mainSettings, "frameAdvanceButton");
 	savestateHookCreateButton = HELPERS::getBitmapButton(parentFrame, mainSettings, "savestateHookCreateButton");
 	savestateHookLoadButton   = HELPERS::getBitmapButton(parentFrame, mainSettings, "savestateHookLoadButton");
+	savestateHookModifyButton = HELPERS::getBitmapButton(parentFrame, mainSettings, "savestateHookModifyButton");
 	playerAddButton           = HELPERS::getBitmapButton(parentFrame, mainSettings, "playerAddButton");
 	playerRemoveButton        = HELPERS::getBitmapButton(parentFrame, mainSettings, "playerRemoveButton");
 
@@ -105,6 +106,7 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	frameAdvanceButton->SetToolTip("Advance frame");
 	savestateHookCreateButton->SetToolTip("Create savestate hook");
 	savestateHookLoadButton->SetToolTip("Load savestate hook");
+	savestateHookModifyButton->SetToolTip("Modify current savestate hook");
 	playerAddButton->SetToolTip("Add player");
 	playerRemoveButton->SetToolTip("Remove current player");
 
@@ -126,6 +128,7 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	frameAdvanceButton->Bind(wxEVT_BUTTON, &SideUI::onFrameAdvancePressed, this);
 	savestateHookCreateButton->Bind(wxEVT_BUTTON, &SideUI::onSavestateHookCreatePressed, this);
 	savestateHookLoadButton->Bind(wxEVT_BUTTON, &SideUI::onSavestateHookLoadPressed, this);
+	savestateHookModifyButton->Bind(wxEVT_BUTTON, &SideUI::onSavestateHookModifyPressed, this);
 	playerAddButton->Bind(wxEVT_BUTTON, &SideUI::onPlayerAddPressed, this);
 	playerRemoveButton->Bind(wxEVT_BUTTON, &SideUI::onPlayerRemovePressed, this);
 
@@ -133,6 +136,7 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	buttonSizer->Add(frameAdvanceButton, 1);
 	buttonSizer->Add(savestateHookCreateButton, 1);
 	buttonSizer->Add(savestateHookLoadButton, 1);
+	buttonSizer->Add(savestateHookModifyButton, 1);
 	buttonSizer->Add(playerAddButton, 1);
 	buttonSizer->Add(playerRemoveButton, 1);
 
@@ -250,6 +254,22 @@ void SideUI::onSavestateHookLoadPressed(wxCommandEvent& event) {
 	}
 }
 
+void SideUI::onSavestateHookModifyPressed(wxCommandEvent& event) {
+	if(networkInterface->isConnected()) {
+		// Open create dialog but copy the properties
+		// Onto the current hook
+		SavestateSelection createSavestateSelection(mainSettings, projectHandler, false, networkInterface);
+		createSavestateSelection.ShowModal();
+
+		if(createSavestateSelection.getOperationSuccessful()) {
+			auto hook = inputData->getAllSavestateHookBlocks()[inputData->getCurrentSavestateHook()];
+
+			hook->dHash      = savestateSelection.getNewDhash();
+			hook->screenshot = savestateSelection.getNewScreenshot();
+		}
+	}
+}
+
 void SideUI::onPlayerAddPressed(wxCommandEvent& event) {
 	inputData->addNewPlayer();
 }
@@ -292,6 +312,14 @@ bool SideUI::createSavestateHook() {
 bool SideUI::loadSavestateHook(int block) {
 	if(networkInterface->isConnected()) {
 		std::shared_ptr<SavestateHook> savestateHook = inputData->getAllSavestateHookBlocks()[block];
+
+		if(savestateHook->dHash == "") {
+			// This is an empty savestate hook made without internet
+			// Allow it
+			inputData->setSavestateHook(block);
+			inputData->sendPlayerNum();
+			return true;
+		}
 
 		SavestateSelection savestateSelection(mainSettings, projectHandler, true, networkInterface);
 		savestateSelection.setTargetFrame(savestateHook->screenshot, savestateHook->dHash);
