@@ -7,7 +7,7 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	// All savestate hook blocks
 	// Start with default, will get cleared later
 	addNewPlayer();
-	addNewSavestateHook("", new wxBitmap());
+	addNewSavestateHook("", HELPERS::getDefaultSavestateScreenshot());
 
 	// This can't handle it :(
 	SetDoubleBuffered(false);
@@ -574,7 +574,7 @@ void DataProcessing::addNewPlayer() {
 				savestateHook->inputs->push_back(std::make_shared<ControllerData>());
 			}
 			savestateHook->dHash      = "";
-			savestateHook->screenshot = new wxBitmap();
+			savestateHook->screenshot = HELPERS::getDefaultSavestateScreenshot();
 			player->push_back(savestateHook);
 		}
 	}

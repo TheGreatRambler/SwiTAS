@@ -127,6 +127,13 @@ const int HELPERS::getHammingDistance(wxString string1, wxString string2) {
 	return counter;
 }
 
+wxBitmap* HELPERS::getDefaultSavestateScreenshot() {
+	wxImage defaultImg(1280, 720);
+	// Set all of it to a pretty grey
+	defaultImg.SetRGB(wxRect(0, 0, 1280, 720), 76, 82, 92);
+	return new wxBitmap(defaultImg);
+}
+
 std::string HELPERS::makeRelative(std::string path, std::string rootDir) {
 	wxFileName newPath(wxString::FromUTF8(path));
 	newPath.MakeRelativeTo(wxString::FromUTF8(rootDir));

@@ -48,6 +48,7 @@ private:
 
 	uint8_t tethered                = false;
 	uint8_t controllerEventRecieved = false;
+	uint8_t autoRunActive           = false;
 
 	wxBitmapButton* addFrameButton;
 	wxBitmapButton* frameAdvanceButton;

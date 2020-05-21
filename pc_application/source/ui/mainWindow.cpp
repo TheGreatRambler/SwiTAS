@@ -151,7 +151,7 @@ void MainWindow::onIdle(wxIdleEvent& event) {
 	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveApplicationConnected)
 	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveLogging)
 	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveMemoryRegion)
-	// PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveAutoRunControllerData)
+	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveAutoRunControllerData)
 }
 
 void MainWindow::handleNetworkQueues() {

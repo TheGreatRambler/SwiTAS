@@ -258,14 +258,18 @@ void SideUI::onSavestateHookModifyPressed(wxCommandEvent& event) {
 	if(networkInterface->isConnected()) {
 		// Open create dialog but copy the properties
 		// Onto the current hook
-		SavestateSelection createSavestateSelection(mainSettings, projectHandler, false, networkInterface);
-		createSavestateSelection.ShowModal();
+		SavestateSelection modifySavestateSelection(mainSettings, projectHandler, false, networkInterface);
+		modifySavestateSelection.ShowModal();
 
-		if(createSavestateSelection.getOperationSuccessful()) {
+		if(modifySavestateSelection.getOperationSuccessful()) {
 			auto hook = inputData->getAllSavestateHookBlocks()[inputData->getCurrentSavestateHook()];
 
-			hook->dHash      = savestateSelection.getNewDhash();
-			hook->screenshot = savestateSelection.getNewScreenshot();
+			if(hook->screenshot != nullptr) {
+				delete hook->screenshot;
+			}
+
+			hook->dHash      = modifySavestateSelection.getNewDhash();
+			hook->screenshot = modifySavestateSelection.getNewScreenshot();
 		}
 	}
 }
@@ -283,7 +287,7 @@ bool SideUI::createSavestateHook() {
 	AllSavestateHookBlocks& blocks = inputData->getAllSavestateHookBlocks();
 	if(blocks.size() != 1 && blocks[0]->inputs->size() != 1) {
 		// Not a new project, add the savestate hook before continuing
-		inputData->addNewSavestateHook("", new wxBitmap());
+		inputData->addNewSavestateHook("", HELPERS::getDefaultSavestateScreenshot());
 	}
 	// Open up the savestate viewer
 	if(networkInterface->isConnected()) {
@@ -291,6 +295,10 @@ bool SideUI::createSavestateHook() {
 		savestateSelection.ShowModal();
 
 		if(savestateSelection.getOperationSuccessful()) {
+			if(blocks[blocks.size() - 1]->screenshot != nullptr) {
+				delete blocks[blocks.size() - 1]->screenshot;
+			}
+
 			blocks[blocks.size() - 1]->dHash      = savestateSelection.getNewDhash();
 			blocks[blocks.size() - 1]->screenshot = savestateSelection.getNewScreenshot();
 
@@ -377,7 +385,9 @@ void SideUI::autoRunIntervalChanged(wxSpinEvent& event) {
 		autoTimer.Start(1000 / (float)autoRunFramesPerSecond->GetValue(), wxTIMER_CONTINUOUS);
 	}
 	*/
-	sendAutoRunData();
+	if(autoRunActive) {
+		sendAutoRunData();
+	}
 }
 
 void SideUI::onStartAutoFramePressed(wxCommandEvent& event) {
@@ -386,6 +396,7 @@ void SideUI::onStartAutoFramePressed(wxCommandEvent& event) {
 }
 
 void SideUI::sendAutoRunData() {
+	autoRunActive = true;
 	ADD_TO_QUEUE(SendAutoRun, networkInterface, {
 		data.fps   = autoRunFramesPerSecond->GetValue();
 		data.start = true;
@@ -393,6 +404,7 @@ void SideUI::sendAutoRunData() {
 }
 
 void SideUI::onEndAutoFramePressed(wxCommandEvent& event) {
+	autoRunActive = false;
 	ADD_TO_QUEUE(SendAutoRun, networkInterface, {
 		data.fps   = 0;
 		data.start = false;

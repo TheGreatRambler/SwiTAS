@@ -49,6 +49,8 @@ namespace HELPERS {
 
 	const int getHammingDistance(wxString string1, wxString string2);
 
+	wxBitmap* getDefaultSavestateScreenshot();
+
 	std::string makeRelative(std::string path, std::string rootDir);
 	std::string makeFromRelative(std::string path, std::string rootDir);
 }

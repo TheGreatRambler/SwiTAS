@@ -43,8 +43,6 @@ MainLoop::MainLoop() {
 void MainLoop::mainLoopHandler() {
 	rc = pmdmntGetApplicationProcessId(&applicationProcessId);
 
-	LOGD << "Main loop";
-
 	// Lifted from switchPresense-Rewritten
 	if(R_SUCCEEDED(rc)) {
 		// Application connected
