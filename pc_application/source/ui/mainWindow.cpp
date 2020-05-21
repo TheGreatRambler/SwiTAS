@@ -86,7 +86,7 @@ void MainWindow::onStart() {
 
 	debugWindow = new DebugWindow(this, networkInstance);
 
-	ProjectHandlerWindow projectHandlerWindow(projectHandler, &mainSettings);
+	ProjectHandlerWindow projectHandlerWindow(this, projectHandler, &mainSettings);
 
 	projectHandlerWindow.ShowModal();
 

@@ -377,8 +377,8 @@ void ProjectHandlerWindow::createTempProjectDir() {
 	projectHandler->setProjectDir(dir.GetFullPath());
 }
 
-ProjectHandlerWindow::ProjectHandlerWindow(std::shared_ptr<ProjectHandler> projHandler, rapidjson::Document* settings)
-	: wxDialog(NULL, wxID_ANY, "Select Project", wxDefaultPosition, wxDefaultSize) {
+ProjectHandlerWindow::ProjectHandlerWindow(wxFrame* parent, std::shared_ptr<ProjectHandler> projHandler, rapidjson::Document* settings)
+	: wxDialog(parent, wxID_ANY, "Select Project", wxDefaultPosition, wxDefaultSize) {
 	projectHandler = projHandler;
 	mainSettings   = settings;
 

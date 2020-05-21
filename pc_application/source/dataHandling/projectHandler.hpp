@@ -174,7 +174,7 @@ private:
 	void onClickProject(wxCommandEvent& event);
 
 public:
-	ProjectHandlerWindow(std::shared_ptr<ProjectHandler> projHandler, rapidjson::Document* settings);
+	ProjectHandlerWindow(wxFrame* parent, std::shared_ptr<ProjectHandler> projHandler, rapidjson::Document* settings);
 
 	uint8_t wasDialogClosedForcefully() {
 		return wasClosedForcefully;

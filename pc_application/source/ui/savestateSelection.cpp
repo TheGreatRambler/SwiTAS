@@ -18,7 +18,7 @@ SavestateLister::SavestateLister(DataProcessing* input)
 
 		wxBitmap* screenshot = savestateHook->screenshot;
 		// Size is reduced by 4 so the bitmap isn't massive
-		DrawingCanvasBitmap* drawingCanvas = new DrawingCanvasBitmap(this, wxSize(1280 / 4, 720 / 4));
+		DrawingCanvasBitmap* drawingCanvas = new DrawingCanvasBitmap(this, wxSize(1280 / 8, 720 / 8));
 		drawingCanvas->setBitmap(screenshot);
 
 		savestateScreenshots.push_back(drawingCanvas);
@@ -100,10 +100,10 @@ SavestateSelection::SavestateSelection(rapidjson::Document* settings, std::share
 	okButton->Bind(wxEVT_BUTTON, &SavestateSelection::onOk, this);
 
 	// Divide by two because it's usually too big
-	currentFrame = new DrawingCanvasBitmap(this, wxSize(1280 / 2, 720 / 2));
+	currentFrame = new DrawingCanvasBitmap(this, wxSize(1280 / 8, 720 / 8));
 	if(savestateLoadDialog) {
 		// Otherwise, just show the frame to save on
-		goalFrame = new DrawingCanvasBitmap(this, wxSize(1280 / 2, 720 / 2));
+		goalFrame = new DrawingCanvasBitmap(this, wxSize(1280 / 8, 720 / 8));
 	}
 
 	leftImageSizer->Add(currentFrame, 0, wxSHAPED);

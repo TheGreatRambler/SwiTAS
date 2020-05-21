@@ -6,6 +6,7 @@
 #include "dataProcessing.hpp"
 #include "projectHandler.hpp"
 
+// MAKE THIS INTO A DIALOG
 class RunLuaScript {
 private:
 	std::string scriptPath;

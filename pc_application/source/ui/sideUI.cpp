@@ -270,6 +270,8 @@ void SideUI::onSavestateHookModifyPressed(wxCommandEvent& event) {
 
 			hook->dHash      = modifySavestateSelection.getNewDhash();
 			hook->screenshot = modifySavestateSelection.getNewScreenshot();
+
+			inputData->invalidateRun(0);
 		}
 	}
 }

@@ -129,6 +129,7 @@ void MainLoop::handleNetworkUpdates() {
 		}
 		controllers[data.playerIndex]->setFrame(data.controllerData);
 		if(data.incrementFrame) {
+			LOGD << "Increment frame";
 			runSingleFrame();
 		}
 	})
@@ -157,6 +158,7 @@ void MainLoop::handleNetworkUpdates() {
 				screenshotHandler.writeFramebuffer(networkInstance);
 			}
 		} else if(data.actFlag == SendInfo::RUN_BLANK_FRAME) {
+			LOGD << "Run blank frame";
 			matchFirstControllerToTASController(0);
 			runSingleFrame();
 		} else if(data.actFlag == SendInfo::START_TAS_MODE) {
@@ -167,6 +169,7 @@ void MainLoop::handleNetworkUpdates() {
 
 	// clang-format off
 	CHECK_QUEUE(networkInstance, SendSetNumControllers, {
+		LOGD << "Set controller number";
 		setControllerNumber(data.size);
 	})
 	// clang-format on
@@ -229,7 +232,8 @@ void MainLoop::setControllerNumber(uint8_t numOfControllers) {
 	controllers.clear();
 	// Wait for all controllers to be disconnected
 	while(true) {
-		// User had to disconnect controllers
+		// User has to disconnect controllers
+		// Before this loop is unblocked
 		if(getNumControllers() == 0) {
 			break;
 		}
