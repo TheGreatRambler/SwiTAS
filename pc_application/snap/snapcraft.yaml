@@ -6,6 +6,8 @@ description: |
   A TAS toolkit, taking advantage of hardware, homebrew, and emulators,
   designed for the Nintendo Switch
 
+# To build the snap, run `sudo snapcraft --use-lxd --enable-experimental-package-repositories`
+
 grade: devel # must be 'stable' to release into candidate/stable channels
 confinement: devmode # use 'strict' once you have the right plugs and slots
 architectures:
@@ -60,7 +62,10 @@ apps:
   switas:
     command: bin/switas
 
-package-management:
-  repositories:
-    - source: deb http://apt.wxwidgets.org/ bionic-wx main
-    - source: deb http://repos.codelite.org/wx3.1.3/ubuntu/ bionic universe
+package-repositories:
+  - type: apt
+    deb-types: [deb]
+    components: [universe]
+    suites: [$SNAPCRAFT_APT_RELEASE]
+    url: http://repos.codelite.org/wx3.1.3/ubuntu/
+    key-id: CodeLite
