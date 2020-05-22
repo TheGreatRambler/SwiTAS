@@ -50,7 +50,7 @@
 #include <wx/wx.h>
 #include <wx/zstream.h>
 
-#include "../../sharedNetworkCode/serializeUnserializeData.hpp"
+#include "../sharedNetworkCode/serializeUnserializeData.hpp"
 #include "../ui/drawingCanvas.hpp"
 #include "../ui/videoComparisonViewer.hpp"
 #include "dataProcessing.hpp"

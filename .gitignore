@@ -4,6 +4,7 @@ pc_application/bin
 pc_application/sharedNetworkCode
 pc_application/compile_commands.json
 pc_application/mainSettings.json
+pc_application/*.snap
 
 sysmodule_application/SwiTAS.elf
 sysmodule_application/SwiTAS.npdm

@@ -2,7 +2,7 @@
 
 #include <sol.hpp>
 
-#include "../../sharedNetworkCode/networkInterface.hpp"
+#include "../sharedNetworkCode/networkInterface.hpp"
 #include "dataProcessing.hpp"
 #include "projectHandler.hpp"
 

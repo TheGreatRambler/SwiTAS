@@ -7,9 +7,9 @@
 #include <wx/notebook.h>
 #include <wx/wx.h>
 
-#include "../../sharedNetworkCode/networkInterface.hpp"
 #include "../dataHandling/dataProcessing.hpp"
 #include "../helpers.hpp"
+#include "../sharedNetworkCode/networkInterface.hpp"
 #include "drawingCanvas.hpp"
 #include "savestateSelection.hpp"
 

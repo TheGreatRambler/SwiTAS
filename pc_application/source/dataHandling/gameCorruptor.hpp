@@ -2,7 +2,7 @@
 
 #include <wx/wx.h>
 
-#include "../../sharedNetworkCode/networkInterface.hpp"
+#include "../sharedNetworkCode/networkInterface.hpp"
 #include "../ui/drawingCanvas.hpp"
 #include "dataProcessing.hpp"
 #include "projectHandler.hpp"

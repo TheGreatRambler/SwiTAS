@@ -11,7 +11,7 @@
 #include <wx/msgdlg.h>
 #include <wx/wx.h>
 
-#include "../../sharedNetworkCode/networkInterface.hpp"
+#include "../sharedNetworkCode/networkInterface.hpp"
 
 #include "../dataHandling/buttonData.hpp"
 #include "../dataHandling/dataProcessing.hpp"

@@ -8,10 +8,10 @@
 #include <wx/wrapsizer.h>
 #include <wx/wx.h>
 
-#include "../../sharedNetworkCode/networkInterface.hpp"
 #include "../dataHandling/dataProcessing.hpp"
 #include "../dataHandling/projectHandler.hpp"
 #include "../helpers.hpp"
+#include "../sharedNetworkCode/networkInterface.hpp"
 #include "drawingCanvas.hpp"
 
 // Class listing out the savestates in a grid so they can be selected

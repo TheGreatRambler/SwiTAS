@@ -8,7 +8,7 @@ endif
 
 BUILD_DIR ?= ./bin
 
-SRC_DIRS ?= ./source ../sharedNetworkCode
+SRC_DIRS ?= ./source
 
 ifeq ($(UNAME),Msys)
 # Set compilers to MinGW64 compilers
@@ -69,8 +69,18 @@ CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 # WxGTK packages
 # sudo apt-get install libwxbase3.1-0-unofficial3 libwxbase3.1unofficial3-dev libwxgtk3.1-0-unofficial3 libwxgtk3.1unofficial3-dev wx3.1-headers wx-common
 
-# To build for linux, use snap:
-# sudo snapcraft --use-lxd
+all: pre-build $(BUILD_DIR)/$(TARGET_EXEC)
+
+ifeq ($(SNAPCRAFT_PROJECT_NAME),)
+pre-build:
+	# This runs before anything happens
+	# Copy in sharedNetworkCode
+	# https://stackoverflow.com/a/1622186/9329945
+	rm -r -f ./source/sharedNetworkCode
+	cp -p -r ../sharedNetworkCode ./source/sharedNetworkCode
+else
+pre-build: ;
+endif
 
 ifeq ($(UNAME),Msys)
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
@@ -102,7 +112,7 @@ $(BUILD_DIR)/%.cpp.o: %.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
 
-.PHONY: clean
+.PHONY: all clean
 
 clean:
 	$(RM) -r $(BUILD_DIR)

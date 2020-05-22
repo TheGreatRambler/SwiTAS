@@ -2,7 +2,7 @@
 
 #include <wx/wx.h>
 
-#include "../../sharedNetworkCode/networkInterface.hpp"
+#include "../sharedNetworkCode/networkInterface.hpp"
 #include "buttonConstants.hpp"
 #include "buttonData.hpp"
 #include "dataProcessing.hpp"

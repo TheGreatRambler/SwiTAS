@@ -29,8 +29,8 @@
 #include <wx/utils.h>
 #include <wx/wx.h>
 
-#include "../../sharedNetworkCode/networkInterface.hpp"
 #include "../helpers.hpp"
+#include "../sharedNetworkCode/networkInterface.hpp"
 #include "drawingCanvas.hpp"
 
 struct VideoEntry {

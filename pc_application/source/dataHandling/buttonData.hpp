@@ -15,8 +15,8 @@
 #include <vector>
 #include <wx/wx.h>
 
-#include "../../sharedNetworkCode/buttonData.hpp"
 #include "../helpers.hpp"
+#include "../sharedNetworkCode/buttonData.hpp"
 #include "buttonConstants.hpp"
 #include "dataProcessing.hpp"
 
