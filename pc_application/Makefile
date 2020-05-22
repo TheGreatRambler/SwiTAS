@@ -62,7 +62,7 @@ CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 
 # Custom DLLs explanation
 # To save filesize on the ffmpeg dlls, I used this configure line:
-# ./configure --disable-static --enable-shared --disable-doc --disable-programs --disable-network --disable-avfilter --disable-avdevice --enable-small --disable-bsfs --disable-protocol=pipe --disable-bzlib --disable-devices --disable-filters --disable-iconv --disable-debug --disable-hwaccels --disable-encoders --enable-encoder=mpeg4 --extra-cflags="-arch i386" --extra-ldflags='-arch i386' --arch=x86_32
+# ./configure --disable-static --enable-shared --disable-doc --disable-programs --disable-network --disable-avfilter --disable-avdevice --enable-small --disable-bsfs --disable-protocol=pipe --disable-devices --disable-filters --disable-iconv --disable-debug --disable-hwaccels --disable-encoders --enable-encoder=mpeg4 --enable-libvpx --enable-libvorbis
 # At some point, should manually include only the decoders I need, the ones most common to youtube
 # Notice: Build the DLLs for 32 bit
 

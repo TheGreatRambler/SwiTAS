@@ -119,14 +119,11 @@ void MainLoop::mainLoopHandler() {
 		// Check if
 	}
 
-	std::this_thread::yield();
+	std::this_thread::sleep_for(std::chrono::milliseconds(1));
 }
 
 void MainLoop::handleNetworkUpdates() {
 	CHECK_QUEUE(networkInstance, SendFrameData, {
-		if(data.playerIndex > controllers.size()) {
-			setControllerNumber(data.playerIndex + 1);
-		}
 		controllers[data.playerIndex]->setFrame(data.controllerData);
 		if(data.incrementFrame) {
 			LOGD << "Increment frame";
@@ -237,7 +234,8 @@ void MainLoop::setControllerNumber(uint8_t numOfControllers) {
 		if(getNumControllers() == 0) {
 			break;
 		}
-		std::this_thread::yield();
+		LOGD << "Waiting for disconnect controllers";
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
 	for(uint8_t i = 0; i < numOfControllers; i++) {
 		controllers.push_back(std::make_unique<ControllerHandler>(networkInstance));
