@@ -77,10 +77,11 @@ private:
 	void setControllerNumber(uint8_t numOfControllers);
 	uint8_t getNumControllers() {
 		uint8_t num = 0;
-		for(uint8_t i = 0; i < 8; i++) {
+		for(int i = 0; i < 8; i++) {
 			// Handheld controller is separate
 			if(!hidIsControllerConnected((HidControllerID)i)) {
 				num = i;
+				break;
 			}
 		}
 		if(hidIsControllerConnected(CONTROLLER_HANDHELD)) {

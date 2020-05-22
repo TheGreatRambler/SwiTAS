@@ -234,9 +234,10 @@ void MainLoop::setControllerNumber(uint8_t numOfControllers) {
 		if(getNumControllers() == 0) {
 			break;
 		}
-		LOGD << "Waiting for disconnect controllers";
+		LOGD << "Waiting for disconnect controllers: " << (int)getNumControllers();
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
+	LOGD << "All controllers disconnected";
 	for(uint8_t i = 0; i < numOfControllers; i++) {
 		controllers.push_back(std::make_unique<ControllerHandler>(networkInstance));
 	}
@@ -298,7 +299,7 @@ void MainLoop::pauseApp() {
 void MainLoop::matchFirstControllerToTASController(uint8_t player) {
 	if(getNumControllers() > controllers.size()) {
 		// This should get the first non-TAS controller
-		HidControllerID id = (HidControllerID)controllers.size();
+		HidControllerID id = (HidControllerID)((int)controllers.size());
 
 		u64 buttons = hidKeysHeld(id);
 		JoystickPosition left;
