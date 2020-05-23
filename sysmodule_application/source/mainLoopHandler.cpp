@@ -225,15 +225,25 @@ char* MainLoop::getAppName(u64 application_id) {
 	return (char*)"Game Not Defined";
 }
 
+uint8_t MainLoop::getNumControllers() {
+	uint8_t num = 0;
+
+	for(int i = 0; i < 10; i++) {
+		if(hidIsControllerConnected((HidControllerID)i)) {
+			num++;
+		}
+	}
+
+	return num;
+}
+
 void MainLoop::setControllerNumber(uint8_t numOfControllers) {
 	controllers.clear();
 	// Wait for all controllers to be disconnected
-	while(true) {
+	LOGD << (int)getNumControllers();
+	while(getNumControllers() != 0) {
 		// User has to disconnect controllers
 		// Before this loop is unblocked
-		if(getNumControllers() == 0) {
-			break;
-		}
 		LOGD << "Waiting for disconnect controllers: " << (int)getNumControllers();
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
