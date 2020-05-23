@@ -129,7 +129,9 @@ parts:
 
 apps:
   switas:
-    command: bin/switas
+    # desktop-launch /snap/bin/switas
+    command: desktop-launch /snap/bin/switas
+    extensions: [gnome-3-28]
 
 package-repositories:
   - type: apt
