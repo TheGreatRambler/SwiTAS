@@ -78,7 +78,7 @@ private:
 	// Input instance to get inputs and such
 	DataProcessing* inputData;
 
-	void setPlayerInfo(uint8_t size, uint8_t selected);
+	void setPlayerInfo(uint8_t size, uint8_t selected, bool force);
 	void playerSelected(wxCommandEvent& event);
 
 	void autoRunIntervalChanged(wxSpinEvent& event);

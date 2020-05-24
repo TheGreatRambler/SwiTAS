@@ -170,10 +170,10 @@ void MainWindow::handleNetworkQueues() {
 		sideUI->recieveAutoRunData(data.controllerData);
 	})
 	ADD_NETWORK_CALLBACK(RecieveFlag, {
-		if (data.actFlag == RecieveInfo::UNEXPECTED_CONTROLLER_SIZE) {
+		/*if (data.actFlag == RecieveInfo::UNEXPECTED_CONTROLLER_SIZE) {
 			// Switch is not in touch with required amount of controllers
 			sideUI->handleUnexpectedControllerSize();
-		}
+		}*/
 	})
 
 	// clang-format on
@@ -284,6 +284,8 @@ bool MainWindow::askForIP() {
 			if(!ipAddress.empty()) {
 				// IP address entered
 				if(networkInstance->attemptConnectionToServer(ipAddress.ToStdString())) {
+					// Make sure Switch is good
+					sideUI->handleUnexpectedControllerSize();
 					SetStatusText(ipAddress + ":" + std::to_string(SERVER_PORT), 0);
 					return true;
 				} else {

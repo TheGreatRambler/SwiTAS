@@ -117,7 +117,7 @@ void DataProcessing::setChangingSelectedFrameCallback(std::function<void(FrameNu
 	changingSelectedFrameCallback = callback;
 }
 
-void DataProcessing::setPlayerInfoCallback(std::function<void(uint8_t, uint8_t)> callback) {
+void DataProcessing::setPlayerInfoCallback(std::function<void(uint8_t, uint8_t, bool)> callback) {
 	playerInfoCallback = callback;
 }
 
@@ -593,7 +593,7 @@ void DataProcessing::setPlayer(uint8_t playerIndex) {
 		setCurrentFrame(curFrame);
 	}
 	if(playerInfoCallback) {
-		playerInfoCallback(allPlayers.size(), viewingPlayerIndex);
+		playerInfoCallback(allPlayers.size(), viewingPlayerIndex, false);
 	}
 }
 
@@ -613,7 +613,7 @@ void DataProcessing::sendPlayerNum() {
 	uint8_t size = allPlayers.size();
 	// Also sends to SideUI
 	if(playerInfoCallback) {
-		playerInfoCallback(size, viewingPlayerIndex);
+		playerInfoCallback(size, viewingPlayerIndex, false);
 	}
 }
 

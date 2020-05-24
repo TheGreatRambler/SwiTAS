@@ -69,7 +69,7 @@ private:
 	std::function<void(FrameNum)> selectedFrameCallbackVideoViewer;
 	std::function<void(FrameNum, FrameNum)> viewableInputsCallback;
 	std::function<void(FrameNum, FrameNum, FrameNum)> changingSelectedFrameCallback;
-	std::function<void(uint8_t, uint8_t)> playerInfoCallback;
+	std::function<void(uint8_t, uint8_t, bool)> playerInfoCallback;
 
 	// Network instance for sending to switch
 	std::shared_ptr<CommunicateWithNetwork> networkInstance;
@@ -136,7 +136,7 @@ public:
 	void setSelectedFrameCallbackVideoViewer(std::function<void(int)> callback);
 	void setViewableInputsCallback(std::function<void(FrameNum, FrameNum)> callback);
 	void setChangingSelectedFrameCallback(std::function<void(FrameNum, FrameNum, FrameNum)> callback);
-	void setPlayerInfoCallback(std::function<void(uint8_t, uint8_t)> callback);
+	void setPlayerInfoCallback(std::function<void(uint8_t, uint8_t, bool)> callback);
 	void triggerCurrentFrameChanges();
 
 	void exportCurrentPlayerToFile(wxFileName exportTarget);

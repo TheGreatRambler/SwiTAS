@@ -228,9 +228,9 @@ char* MainLoop::getAppName(u64 application_id) {
 uint8_t MainLoop::getNumControllers() {
 	uint8_t num = 0;
 
-	for(uint32_t i = 0; i < 10; i++) {
-		if(hidIsControllerConnected(i)) {
-			LOGD << (int)i << " controller is connected";
+	hidScanInput();
+	for(int i = 0; i < 10; i++) {
+		if(hidIsControllerConnected((HidControllerID)i)) {
 			num++;
 		}
 	}
@@ -243,12 +243,8 @@ void MainLoop::setControllerNumber(uint8_t numOfControllers) {
 	// Wait for all controllers to be disconnected
 	LOGD << (int)getNumControllers();
 	while(getNumControllers() != 0) {
-		// User has to disconnect controllers
-		// Before this loop is unblocked
-		LOGD << "Waiting for disconnect controllers: " << (int)getNumControllers();
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
-	LOGD << "All controllers disconnected";
 	for(uint8_t i = 0; i < numOfControllers; i++) {
 		controllers.push_back(std::make_unique<ControllerHandler>(networkInstance));
 	}

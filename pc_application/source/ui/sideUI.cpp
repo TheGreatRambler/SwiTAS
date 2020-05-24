@@ -111,7 +111,7 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	playerRemoveButton->SetToolTip("Remove current player");
 
 	playerSelect = new wxComboBox(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_DROPDOWN | wxCB_READONLY);
-	inputData->setPlayerInfoCallback(std::bind(&SideUI::setPlayerInfo, this, std::placeholders::_1, std::placeholders::_2));
+	inputData->setPlayerInfoCallback(std::bind(&SideUI::setPlayerInfo, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	playerSelect->Bind(wxEVT_COMBOBOX, &SideUI::playerSelected, this);
 	playerSelect->SetToolTip("Set player");
 
@@ -175,18 +175,18 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	sizer->Add(verticalBoxSizer, 0, wxEXPAND | wxALL);
 
 	untether();
-	setPlayerInfo(1, 0);
+	setPlayerInfo(1, 0, false);
 }
 
 void SideUI::handleUnexpectedControllerSize() {
-	setPlayerInfo(inputData->getAllPlayers().size(), inputData->getCurrentPlayer());
+	setPlayerInfo(inputData->getAllPlayers().size(), inputData->getCurrentPlayer(), true);
 }
 
-void SideUI::setPlayerInfo(uint8_t size, uint8_t selected) {
+void SideUI::setPlayerInfo(uint8_t size, uint8_t selected, bool force) {
 	// Deselect
 	playerSelect->SetSelection(wxNOT_FOUND);
 
-	if(playerSelect->GetCount() != size) {
+	if(playerSelect->GetCount() != size || force) {
 		// Size has changed, time to inform the sysmodule
 		if(networkInterface->isConnected()) {
 			// clang-format off
@@ -367,15 +367,6 @@ void SideUI::tether() {
 	frameAdvanceButton->Enable(true);
 	autoFrameStart->Enable(true);
 	inputData->setTethered(true);
-
-	// Convenient place for this, set the player count sysmodule-side
-	// When tethering
-	int selection = playerSelect->GetSelection();
-	if(selection == wxNOT_FOUND) {
-		setPlayerInfo(playerSelect->GetCount(), 0);
-	} else {
-		setPlayerInfo(playerSelect->GetCount(), selection);
-	}
 
 	tethered = true;
 }
