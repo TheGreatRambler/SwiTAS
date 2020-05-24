@@ -1,7 +1,9 @@
 #pragma once
 
+#include <wx/spinctrl.h>
 #include <wx/wx.h>
 
+#include "../helpers.hpp"
 #include "../sharedNetworkCode/networkInterface.hpp"
 #include "buttonConstants.hpp"
 #include "buttonData.hpp"
@@ -23,12 +25,14 @@ private:
 	wxBitmapButton* startTasArduino;
 	// More will be added as needed
 
-	wxBitmapButton* pauseTas;
+	// wxBitmapButton* pauseTas;
 	// Stopping will also close the dialog
 	wxBitmapButton* stopTas;
 
 	void onStartTasHomebrewPressed(wxCommandEvent& event);
 	void onStartTasArduinoPressed(wxCommandEvent& event);
+
+	void onStopTasPressed(wxCommandEvent& event);
 
 public:
 	TasRunner(wxFrame* parent, std::shared_ptr<CommunicateWithNetwork> networkImp, rapidjson::Document* settings, DataProcessing* inputData);

@@ -228,8 +228,9 @@ char* MainLoop::getAppName(u64 application_id) {
 uint8_t MainLoop::getNumControllers() {
 	uint8_t num = 0;
 
-	for(int i = 0; i < 10; i++) {
-		if(hidIsControllerConnected((HidControllerID)i)) {
+	for(uint32_t i = 0; i < 10; i++) {
+		if(hidIsControllerConnected(i)) {
+			LOGD << (int)i << " controller is connected";
 			num++;
 		}
 	}

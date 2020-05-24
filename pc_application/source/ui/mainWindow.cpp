@@ -287,7 +287,7 @@ bool MainWindow::askForIP() {
 					SetStatusText(ipAddress + ":" + std::to_string(SERVER_PORT), 0);
 					return true;
 				} else {
-					wxMessageDialog addressInvalidDialog(this, wxString::Format("This IP address is invalid: %s", networkInstance->getLastErrorMessage().c_str()), "Invalid IP", wxOK);
+					wxMessageDialog addressInvalidDialog(this, wxString::Format("This IP address is invalid: %s", networkInstance->getLastErrorMessage().c_str()), "Invalid IP", wxOK | wxICON_ERROR);
 					addressInvalidDialog.ShowModal();
 					// Run again
 					continue;
