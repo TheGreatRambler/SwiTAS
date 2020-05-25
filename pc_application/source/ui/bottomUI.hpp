@@ -140,7 +140,7 @@ private:
 	uint8_t currentJoyDefined;
 	int lastButtonState;
 
-	std::map<std::string, int> stringToButtonExtended{
+	std::map<std::string, int> stringToButtonExtended {
 		{ "LSX", 0 },
 		{ "LSY", 1 },
 		{ "RSX", 2 },
@@ -169,8 +169,6 @@ private:
 
 	wxString getJoyHexString(wxJoystick* joy);
 
-	void refreshDataViews();
-
 public:
 	BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid, DataProcessing* input);
 
@@ -182,6 +180,8 @@ public:
 	static constexpr int joystickSubmenuIDBase = 23;
 
 	void recieveGameFramebuffer(std::vector<uint8_t> jpegBuffer);
+
+	void refreshDataViews();
 
 	void listenToJoystick();
 

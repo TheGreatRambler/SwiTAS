@@ -185,13 +185,13 @@ public:
 	wxFileName getFramebufferPath(uint8_t player, SavestateBlockNum savestateHookNum, FrameNum frame) {
 		wxFileName framebufferFileName = projectStart;
 		framebufferFileName.AppendDir("framebuffers");
-		framebufferFileName.SetName(wxString::Format("frame_%llu_savestate_block_%hu_player_%u_screenshot", frame, avestateHookNum, player));
+		framebufferFileName.SetName(wxString::Format("frame_%lu_savestate_block_%hu_player_%hhu_screenshot", frame, savestateHookNum, player));
 		framebufferFileName.SetExt("jpeg");
 		return framebufferFileName;
 	}
 
 	wxFileName getFramebufferPathForCurrent() {
-		return getFramebufferPath(viewablePlayerIndex, currentSavestateHook, currentFrame);
+		return getFramebufferPath(viewingPlayerIndex, currentSavestateHook, currentFrame);
 	}
 
 	void setTethered(bool flag) {

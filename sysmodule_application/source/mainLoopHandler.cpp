@@ -102,7 +102,7 @@ void MainLoop::mainLoopHandler() {
 	if(autoRunOn && networkInstance->isConnected()) {
 		u64 currentTime = armTicksToNs(armGetSystemTick());
 		if(lastAutorunTime == 0 || (currentTime - lastAutorunTime) > nanosecondsBetweenAutorun) {
-			// TODO handle for any controller
+			// TODO handle for any controller and handle increasing frames
 			matchFirstControllerToTASController(0);
 
 			// clang-format off
@@ -112,7 +112,7 @@ void MainLoop::mainLoopHandler() {
 			// clang-format on
 
 			// TODO autorun sends frame advance linked framebuffers
-			runSingleFrame(false);
+			runSingleFrame(false, 0, 0, 0);
 
 			lastAutorunTime = currentTime;
 		}
@@ -143,7 +143,7 @@ void MainLoop::handleNetworkUpdates() {
 			// User able to unpause it
 			if(applicationOpened && internetConnected) {
 				LOGD << "Pause app";
-				pauseApp();
+				pauseApp(false, 0, 0, 0);
 			}
 		} else if(data.actFlag == SendInfo::UNPAUSE_DEBUG) {
 			if(applicationOpened) {
@@ -153,7 +153,7 @@ void MainLoop::handleNetworkUpdates() {
 		} else if(data.actFlag == SendInfo::GET_FRAMEBUFFER) {
 			if(applicationOpened) {
 				LOGD << "Get framebuffer";
-				screenshotHandler.writeFramebuffer(networkInstance);
+				screenshotHandler.writeFramebuffer(networkInstance, false, 0, 0, 0);
 			}
 		} else if(data.actFlag == SendInfo::RUN_BLANK_FRAME) {
 			LOGD << "Run blank frame";
@@ -161,9 +161,9 @@ void MainLoop::handleNetworkUpdates() {
 			runSingleFrame(false, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::START_TAS_MODE) {
 			LOGD << "Start TAS mode";
-			pauseApp();
+			pauseApp(false, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::PAUSE) {
-			pauseApp();
+			pauseApp(false, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::UNPAUSE) {
 			unpauseApp();
 		}
@@ -193,7 +193,7 @@ void MainLoop::sendGameInfo() {
 		// https://github.com/switchbrew/switch-examples/blob/master/account/source/main.c
 
 		uint64_t addr = 0;
-		pauseApp();
+		pauseApp(false, 0, 0, 0);
 		while(true) {
 			MemoryInfo info = { 0 };
 			uint32_t pageinfo;
@@ -279,12 +279,11 @@ void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint32_t frame, ui
 		LOGD << "Running frame";
 		unpauseApp();
 		waitForVsync();
-		screenshotHandler.writeFramebuffer(networkInstance, linkedWithFrameAdvance, frame, savestateHookNum, playerIndex);
-		pauseApp();
+		pauseApp(linkedWithFrameAdvance, frame, savestateHookNum, playerIndex);
 	}
 }
 
-void MainLoop::pauseApp() {
+void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint32_t frame, uint16_t savestateHookNum, uint8_t playerIndex) {
 	if(!isPaused) {
 		// Debug application again
 		LOGD << "Pausing";
@@ -292,23 +291,26 @@ void MainLoop::pauseApp() {
 		rc       = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
 		isPaused = true;
 
-		screenshotHandler.writeFramebuffer(networkInstance);
+		if(networkInstance->isConnected()) {
+			screenshotHandler.writeFramebuffer(networkInstance, linkedWithFrameAdvance, frame, savestateHookNum, playerIndex);
 
-		for(auto const& memoryRegion : memoryRegions) {
-			std::vector<uint8_t> buf(memoryRegion.second);
-			svcReadDebugProcessMemory(buf.data(), applicationDebug, memoryRegion.first, memoryRegion.second);
+			for(auto const& memoryRegion : memoryRegions) {
+				std::vector<uint8_t> buf(memoryRegion.second);
+				svcReadDebugProcessMemory(buf.data(), applicationDebug, memoryRegion.first, memoryRegion.second);
 
-			ADD_TO_QUEUE(RecieveMemoryRegion, networkInstance, {
-				data.startByte = memoryRegion.first;
-				data.size      = memoryRegion.second;
-				data.memory    = buf;
-			})
+				ADD_TO_QUEUE(RecieveMemoryRegion, networkInstance, {
+					data.startByte = memoryRegion.first;
+					data.size      = memoryRegion.second;
+					data.memory    = buf;
+				})
+			}
 		}
 	}
 }
 
 void MainLoop::matchFirstControllerToTASController(uint8_t player) {
 	if(getNumControllers() > controllers.size()) {
+		hidScanInput();
 		// This should get the first non-TAS controller
 		HidControllerID id = (HidControllerID)((int)controllers.size());
 

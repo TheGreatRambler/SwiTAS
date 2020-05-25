@@ -869,7 +869,7 @@ void DataProcessing::invalidateRun(FrameNum frame) {
 		// Set bit
 		setFramestateInfo(frame, FrameState::RAN, false);
 		// Also delete framebuffer from filesystem if neccessary
-		wxFileName framebufferFileName = getFramebufferPath(viewablePlayerIndex, currentSavestateHook, frame);
+		wxFileName framebufferFileName = getFramebufferPath(viewingPlayerIndex, currentSavestateHook, frame);
 		if(framebufferFileName.FileExists()) {
 			// Delete file from filesystem
 			remove(framebufferFileName.GetFullPath().c_str());

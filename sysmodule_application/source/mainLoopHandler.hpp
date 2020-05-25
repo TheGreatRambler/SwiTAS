@@ -21,9 +21,8 @@ private:
 	Handle applicationDebug;
 
 	uint8_t autoRunOn = false;
-	uint32_t frame;
-	uint16_t savestateHookNum;
-	uint8_t playerIndex;
+	uint32_t autoRunFrameframe;
+	uint16_t auroRunSavestateHookNum;
 	u64 nanosecondsBetweenAutorun;
 	u64 lastAutorunTime = 0;
 
@@ -47,7 +46,7 @@ private:
 
 	GameMemoryInfo getGameMemoryInfo(MemoryInfo memInfo);
 
-	void pauseApp();
+	void pauseApp(uint8_t linkedWithFrameAdvance, uint32_t frame, uint16_t savestateHookNum, uint8_t playerIndex);
 
 	void waitForVsync() {
 		rc = eventWait(&vsyncEvent, UINT64_MAX);
