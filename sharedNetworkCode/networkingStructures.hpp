@@ -65,6 +65,7 @@ namespace Protocol {
 		// This is the frame of this frame, the framebuffer
 		// sent back will be one more than this frame
 		uint32_t frame;
+		uint16_t savestateHookNum;
 		uint8_t playerIndex;
 		uint8_t incrementFrame;
 	, self.controllerData, self.frame, self.playerIndex, self.incrementFrame)
@@ -72,7 +73,10 @@ namespace Protocol {
 	// Recieve all of the game's framebuffer
 	DEFINE_STRUCT(RecieveGameFramebuffer,
 		std::vector<uint8_t> buf;
+		uint8_t fromFrameAdvance;
 		uint32_t frame;
+		uint16_t savestateHookNum;
+		uint8_t playerIndex;
 	, self.buf)
 
 	// Recieve a ton of game and user info
@@ -93,6 +97,9 @@ namespace Protocol {
 		uint8_t fps;
 		// This is a bool
 		uint8_t start;
+		uint32_t frameStart;
+		uint16_t savestateHookNum;
+		uint8_t playerIndex;
 	, self.fps, self.start)
 
 	DEFINE_STRUCT(SendLogging,

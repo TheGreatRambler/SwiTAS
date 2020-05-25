@@ -111,7 +111,8 @@ void MainLoop::mainLoopHandler() {
 			})
 			// clang-format on
 
-			runSingleFrame();
+			// TODO autorun sends frame advance linked framebuffers
+			runSingleFrame(false);
 
 			lastAutorunTime = currentTime;
 		}
@@ -127,7 +128,7 @@ void MainLoop::handleNetworkUpdates() {
 		controllers[data.playerIndex]->setFrame(data.controllerData);
 		if(data.incrementFrame) {
 			LOGD << "Increment frame";
-			runSingleFrame();
+			runSingleFrame(true, data.frame, data.savestateHookNum, data.playerIndex);
 		}
 	})
 
@@ -157,10 +158,14 @@ void MainLoop::handleNetworkUpdates() {
 		} else if(data.actFlag == SendInfo::RUN_BLANK_FRAME) {
 			LOGD << "Run blank frame";
 			matchFirstControllerToTASController(0);
-			runSingleFrame();
+			runSingleFrame(false, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::START_TAS_MODE) {
 			LOGD << "Start TAS mode";
 			pauseApp();
+		} else if(data.actFlag == SendInfo::PAUSE) {
+			pauseApp();
+		} else if(data.actFlag == SendInfo::UNPAUSE) {
+			unpauseApp();
 		}
 	})
 
@@ -269,12 +274,12 @@ GameMemoryInfo MainLoop::getGameMemoryInfo(MemoryInfo memInfo) {
 	return info;
 }
 
-void MainLoop::runSingleFrame() {
+void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint32_t frame, uint16_t savestateHookNum, uint8_t playerIndex) {
 	if(isPaused) {
 		LOGD << "Running frame";
 		unpauseApp();
 		waitForVsync();
-		screenshotHandler.writeFramebuffer(networkInstance);
+		screenshotHandler.writeFramebuffer(networkInstance, linkedWithFrameAdvance, frame, savestateHookNum, playerIndex);
 		pauseApp();
 	}
 }
@@ -288,18 +293,17 @@ void MainLoop::pauseApp() {
 		isPaused = true;
 
 		screenshotHandler.writeFramebuffer(networkInstance);
-		/*
-				for(auto const& memoryRegion : memoryRegions) {
-					std::vector<uint8_t> buf(memoryRegion.second);
-					svcReadDebugProcessMemory(buf.data(), applicationDebug, memoryRegion.first, memoryRegion.second);
 
-					ADD_TO_QUEUE(RecieveMemoryRegion, networkInstance, {
-						data.startByte = memoryRegion.first;
-						data.size      = memoryRegion.second;
-						data.memory    = buf;
-					})
-				}
-				*/
+		for(auto const& memoryRegion : memoryRegions) {
+			std::vector<uint8_t> buf(memoryRegion.second);
+			svcReadDebugProcessMemory(buf.data(), applicationDebug, memoryRegion.first, memoryRegion.second);
+
+			ADD_TO_QUEUE(RecieveMemoryRegion, networkInstance, {
+				data.startByte = memoryRegion.first;
+				data.size      = memoryRegion.second;
+				data.memory    = buf;
+			})
+		}
 	}
 }
 

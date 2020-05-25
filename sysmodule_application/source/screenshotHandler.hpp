@@ -9,9 +9,6 @@
 #include <cstdio>
 #include <cstring>
 #include <iterator>
-extern "C" {
-#include <jpeglib.h>
-}
 #include <plog/Log.h>
 #include <string>
 #include <switch.h>
@@ -28,7 +25,7 @@ public:
 	ScreenshotHandler();
 
 	// Returns a dHash (to determine similarity) and a jpegBuffer to actually view
-	void writeFramebuffer(std::shared_ptr<CommunicateWithNetwork> networkInstance);
+	void writeFramebuffer(std::shared_ptr<CommunicateWithNetwork> networkInstance, uint8_t linkedWithFrameAdvance, uint32_t frame, uint16_t savestateHookNum, uint8_t playerIndex);
 
 	~ScreenshotHandler();
 };

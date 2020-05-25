@@ -106,13 +106,13 @@ SavestateSelection::SavestateSelection(rapidjson::Document* settings, std::share
 		goalFrame = new DrawingCanvasBitmap(this, wxSize(1280 / 8, 720 / 8));
 	}
 
-	leftImageSizer->Add(currentFrame, 0, wxSHAPED);
+	leftImageSizer->Add(currentFrame, 1, wxSHAPED);
 
 	if(savestateLoadDialog) {
 		// Dhashes are only used in loading, not creating the first one
 		leftImageSizer->Add(leftDHash, 1, wxEXPAND | wxALL);
 
-		rightImageSizer->Add(goalFrame, 0, wxSHAPED);
+		rightImageSizer->Add(goalFrame, 1, wxSHAPED);
 		rightImageSizer->Add(rightDHash, 1, wxEXPAND | wxALL);
 	}
 

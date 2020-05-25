@@ -48,6 +48,8 @@ private:
 	// Is a vector of the players as well
 	AllPlayers allPlayers;
 
+	wxFileName projectStart;
+
 	bool tethered = false;
 
 	// Current frames (all relative to the start of the savestate hook block)
@@ -142,6 +144,10 @@ public:
 	void exportCurrentPlayerToFile(wxFileName exportTarget);
 	void importFromFile(wxFileName importTarget);
 
+	void setProjectStart(wxFileName start) {
+		projectStart = start;
+	}
+
 	AllSavestateHookBlocks& getAllSavestateHookBlocks() {
 		return *allPlayers[viewingPlayerIndex];
 	}
@@ -174,6 +180,18 @@ public:
 	}
 	FrameNum getNumOfFramesInSavestateHook(SavestateBlockNum i, uint8_t player) {
 		return allPlayers[player]->at(i)->inputs->size();
+	}
+
+	wxFileName getFramebufferPath(uint8_t player, SavestateBlockNum savestateHookNum, FrameNum frame) {
+		wxFileName framebufferFileName = projectStart;
+		framebufferFileName.AppendDir("framebuffers");
+		framebufferFileName.SetName(wxString::Format("frame_%llu_savestate_block_%hu_player_%u_screenshot", frame, avestateHookNum, player));
+		framebufferFileName.SetExt("jpeg");
+		return framebufferFileName;
+	}
+
+	wxFileName getFramebufferPathForCurrent() {
+		return getFramebufferPath(viewablePlayerIndex, currentSavestateHook, currentFrame);
 	}
 
 	void setTethered(bool flag) {

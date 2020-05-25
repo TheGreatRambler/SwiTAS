@@ -115,9 +115,7 @@ public:
 		projectDir.Open(dirPath);
 		// Just in case
 		wxFileName dir(dirPath);
-		if(!dir.DirExists()) {
-			dir.Mkdir();
-		}
+		dir.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
 	}
 
 	void setProjectWasLoaded(bool wasLoaded) {

@@ -21,6 +21,9 @@ private:
 	Handle applicationDebug;
 
 	uint8_t autoRunOn = false;
+	uint32_t frame;
+	uint16_t savestateHookNum;
+	uint8_t playerIndex;
 	u64 nanosecondsBetweenAutorun;
 	u64 lastAutorunTime = 0;
 
@@ -61,7 +64,7 @@ private:
 	}
 
 	// This assumes that the app is paused
-	void runSingleFrame();
+	void runSingleFrame(uint8_t linkedWithFrameAdvance, uint32_t frame, uint16_t savestateHookNum, uint8_t playerIndex);
 
 	void reset() {
 		// For now, just this

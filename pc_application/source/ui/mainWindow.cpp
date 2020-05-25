@@ -102,6 +102,8 @@ void MainWindow::onStart() {
 		projectHandlerWindow.createTempProjectDir();
 	}
 
+	dataProcessing->setProjectStart(projectHandler->getProjectStart());
+
 	// Ask for internet connection to get started
 	askForIP();
 }
@@ -165,6 +167,18 @@ void MainWindow::handleNetworkQueues() {
 	ADD_NETWORK_CALLBACK(RecieveGameFramebuffer, {
 		wxLogMessage("Framebuffer received");
 		bottomUI->recieveGameFramebuffer(data.buf);
+		if (data.fromFrameAdvance) {
+			// Store framebuffer in the filesystem because it would take too much memory otherwise
+			wxFileName framebufferFileName = dataProcessing->getFramebufferPath(data.playerIndex, data.savestateHookNum, data.frame);
+			framebufferFileName.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+
+			wxFile file(framebufferFileName.GetFullPath(), wxFile::write);
+			file.Write(data.buf.data(), data.buf.size());
+		file.Close();
+
+			// To refresh framebuf if need be
+		bottomUI->refreshDataViews();
+		}
 	})
 	ADD_NETWORK_CALLBACK(RecieveAutoRunControllerData, {
 		sideUI->recieveAutoRunData(data.controllerData);

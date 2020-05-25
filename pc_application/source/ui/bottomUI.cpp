@@ -421,6 +421,15 @@ void BottomUI::refreshDataViews() {
 	leftJoystickDrawer->Refresh();
 	rightJoystickDrawer->Refresh();
 	buttonGrid->Refresh();
+	// Check to see if framebuffer is avaliable to draw
+	wxFileName framebufferFileName = inputInstance->getFramebufferPathForCurrent();
+	if(framebufferFileName.FileExists()) {
+		wxImage framebuf(framebufferFileName.GetFullPath(), wxBITMAP_TYPE_JPEG);
+		frameViewerCanvas->setPrimaryBitmap(new wxBitmap(framebuf));
+	} else {
+		// Go back to default
+		frameViewerCanvas->setPrimaryBitmap(nullptr);
+	}
 }
 
 void BottomUI::recieveGameFramebuffer(std::vector<uint8_t> jpegBuffer) {

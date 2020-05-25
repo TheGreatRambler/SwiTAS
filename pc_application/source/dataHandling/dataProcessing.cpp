@@ -196,7 +196,7 @@ wxString DataProcessing::OnGetItemText(long row, long column) const {
 	// Returns when text is needed
 	if(column == 0) {
 		// This is the frame, which is just the row number
-		return wxString::Format(wxT("%ld"), row + 1);
+		return wxString::Format(wxT("%ld"), row);
 	} else {
 		// Fallback for every other column
 		return "";
@@ -479,9 +479,10 @@ void DataProcessing::runFrame() {
 		for(uint8_t playerIndex = 0; playerIndex < allPlayers.size(); playerIndex++) {
 			std::shared_ptr<ControllerData> controllerDatas = allPlayers[playerIndex]->at(currentSavestateHook)->inputs->at(currentRunFrame);
 			ADD_TO_QUEUE(SendFrameData, networkInstance, {
-				data.controllerData = *controllerDatas;
-				data.frame          = currentRunFrame;
-				data.playerIndex    = playerIndex;
+				data.controllerData   = *controllerDatas;
+				data.frame            = currentRunFrame;
+				data.savestateHookNum = currentSavestateHook;
+				data.playerIndex      = playerIndex;
 				if(playerIndex == allPlayers.size() - 1) {
 					// Last frame, start the frame
 					data.incrementFrame = true;
@@ -867,6 +868,12 @@ void DataProcessing::invalidateRun(FrameNum frame) {
 		}
 		// Set bit
 		setFramestateInfo(frame, FrameState::RAN, false);
+		// Also delete framebuffer from filesystem if neccessary
+		wxFileName framebufferFileName = getFramebufferPath(viewablePlayerIndex, currentSavestateHook, frame);
+		if(framebufferFileName.FileExists()) {
+			// Delete file from filesystem
+			remove(framebufferFileName.GetFullPath().c_str());
+		}
 		frame++;
 	}
 }
