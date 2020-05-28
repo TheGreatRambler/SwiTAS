@@ -57,7 +57,7 @@ void SavestateLister::onSavestateHookSelect(wxMouseEvent& event) {
 }
 
 SavestateSelection::SavestateSelection(rapidjson::Document* settings, std::shared_ptr<ProjectHandler> projHandler, bool isSavestateLoadDialog, std::shared_ptr<CommunicateWithNetwork> networkImp)
-	: wxDialog(NULL, wxID_ANY, "Savestate Selection", wxDefaultPosition, wxDefaultSize) {
+	: wxDialog(NULL, wxID_ANY, "Savestate Selection", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE | wxMAXIMIZE) {
 	// Parent is specifically null because this is a separate window that opens
 	savestateLoadDialog = isSavestateLoadDialog;
 	mainSettings        = settings;

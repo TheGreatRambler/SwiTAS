@@ -3,6 +3,7 @@
 #define wxHAS_HUGE_FILES
 #include <cstdint>
 #include <cstring>
+#include <inttypes.h>
 #include <mio.hpp>
 #include <system_error>
 #include <unordered_map>

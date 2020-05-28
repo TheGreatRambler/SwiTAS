@@ -10,6 +10,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <functional>
+#include <inttypes.h>
 #include <map>
 #include <memory>
 #include <rapidjson/document.h>
@@ -185,7 +186,8 @@ public:
 	wxFileName getFramebufferPath(uint8_t player, SavestateBlockNum savestateHookNum, FrameNum frame) {
 		wxFileName framebufferFileName = projectStart;
 		framebufferFileName.AppendDir("framebuffers");
-		framebufferFileName.SetName(wxString::Format("frame_%lu_savestate_block_%hu_player_%hhu_screenshot", frame, savestateHookNum, player));
+		wxString name = "frame_%lu_savestate_block_%u_player_%u_screenshot";
+		framebufferFileName.SetName(wxString::Format(name, frame, savestateHookNum, player));
 		framebufferFileName.SetExt("jpeg");
 		return framebufferFileName;
 	}
