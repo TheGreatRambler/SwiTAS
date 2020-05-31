@@ -19,6 +19,12 @@ private:
 
 	std::shared_ptr<CommunicateWithNetwork> networkInstance;
 
+public:
+	ControllerHandler(std::shared_ptr<CommunicateWithNetwork> networkImp);
+
+	void setFrame(ControllerData controllerData);
+	void setFrame(u64 buttons, JoystickPosition& left, JoystickPosition& right);
+
 	void clearState() {
 		state.buttons                      = 0;
 		state.joysticks[JOYSTICK_LEFT].dx  = 0;
@@ -33,12 +39,6 @@ private:
 			fatalThrow(rc);
 		}
 	}
-
-public:
-	ControllerHandler(std::shared_ptr<CommunicateWithNetwork> networkImp);
-
-	void setFrame(ControllerData controllerData);
-	void setFrame(u64 buttons, JoystickPosition& left, JoystickPosition& right);
 
 	std::shared_ptr<ControllerData> getControllerData();
 

@@ -120,6 +120,12 @@ void MainLoop::mainLoopHandler() {
 		// Check if
 	}
 
+	// Match first controller inputs as often as possible
+	if(!isPaused) {
+		// TODO handle when running final TAS
+		matchFirstControllerToTASController(0);
+	}
+
 	std::this_thread::sleep_for(std::chrono::milliseconds(1));
 }
 
@@ -148,6 +154,7 @@ void MainLoop::handleNetworkUpdates() {
 		} else if(data.actFlag == SendInfo::UNPAUSE_DEBUG) {
 			if(applicationOpened) {
 				LOGD << "Unpause app";
+				clearEveryController();
 				unpauseApp();
 			}
 		} else if(data.actFlag == SendInfo::GET_FRAMEBUFFER) {
@@ -165,6 +172,7 @@ void MainLoop::handleNetworkUpdates() {
 		} else if(data.actFlag == SendInfo::PAUSE) {
 			pauseApp(false, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::UNPAUSE) {
+			clearEveryController();
 			unpauseApp();
 		}
 	})
@@ -283,6 +291,13 @@ void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint32_t frame, ui
 	}
 }
 
+void MainLoop::clearEveryController() {
+	for(uint8_t i = 0; i < controllers.size(); i++) {
+		controllers[i]->clearState();
+		controllers[i]->setInput();
+	}
+}
+
 void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint32_t frame, uint16_t savestateHookNum, uint8_t playerIndex) {
 	if(!isPaused) {
 		// Debug application again
@@ -309,12 +324,12 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint32_t frame, uint16_t
 }
 
 void MainLoop::matchFirstControllerToTASController(uint8_t player) {
-	if(getNumControllers() > controllers.size()) {
+	if(getNumControllers() > controllers.size() && controllers.size() != 0) {
 		hidScanInput();
 		// This should get the first non-TAS controller
 		HidControllerID id = (HidControllerID)((int)controllers.size());
 
-		u64 buttons = hidKeysHeld(id);
+		u64 buttons = hidKeysHeld(id) & 65535;
 		JoystickPosition left;
 		JoystickPosition right;
 		hidJoystickRead(&left, id, JOYSTICK_LEFT);

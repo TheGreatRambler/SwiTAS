@@ -174,10 +174,10 @@ void MainWindow::handleNetworkQueues() {
 
 			wxFile file(framebufferFileName.GetFullPath(), wxFile::write);
 			file.Write(data.buf.data(), data.buf.size());
-		file.Close();
+			file.Close();
 
 			// To refresh framebuf if need be
-		bottomUI->refreshDataViews();
+			bottomUI->refreshDataViews();
 		}
 	})
 	ADD_NETWORK_CALLBACK(RecieveAutoRunControllerData, {

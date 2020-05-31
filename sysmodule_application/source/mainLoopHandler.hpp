@@ -65,6 +65,8 @@ private:
 	// This assumes that the app is paused
 	void runSingleFrame(uint8_t linkedWithFrameAdvance, uint32_t frame, uint16_t savestateHookNum, uint8_t playerIndex);
 
+	void clearEveryController();
+
 	void reset() {
 		// For now, just this
 		unpauseApp();

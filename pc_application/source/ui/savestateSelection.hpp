@@ -111,6 +111,7 @@ private:
 	void onOk(wxCommandEvent& event);
 
 	void onClose(wxCloseEvent& event);
+	void onResize(wxSizeEvent& event);
 
 public:
 	SavestateSelection(rapidjson::Document* settings, std::shared_ptr<ProjectHandler> projHandler, bool isSavestateLoadDialog, std::shared_ptr<CommunicateWithNetwork> networkImp);
