@@ -107,9 +107,9 @@ void MainLoop::mainLoopHandler() {
 				matchFirstControllerToTASController(0);
 
 				// clang-format off
-			ADD_TO_QUEUE(RecieveAutoRunControllerData, networkInstance, {
-				data.controllerData = controllers[0]->getControllerData();
-			})
+				ADD_TO_QUEUE(RecieveAutoRunControllerData, networkInstance, {
+					data.controllerData = controllers[0]->getControllerData();
+				})
 				// clang-format on
 
 				// TODO autorun sends frame advance linked framebuffers
@@ -172,8 +172,10 @@ void MainLoop::handleNetworkUpdates() {
 			LOGD << "Start TAS mode";
 			pauseApp(false, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::PAUSE) {
+			LOGD << "Pause";
 			pauseApp(false, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::UNPAUSE) {
+			LOGD << "Unpause";
 			clearEveryController();
 			unpauseApp();
 		}

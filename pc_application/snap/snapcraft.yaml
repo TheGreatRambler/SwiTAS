@@ -9,6 +9,7 @@ description: |
   designed for the Nintendo Switch
 
 # To build the snap, run `sudo snapcraft --use-lxd --enable-experimental-package-repositories`
+# Some more info https://ubuntu.com/tutorials/create-your-first-snap#3-building-a-snap-is-easy
 
 grade: devel # must be 'stable' to release into candidate/stable channels
 confinement: devmode # use 'strict' once you have the right plugs and slots
@@ -130,7 +131,7 @@ parts:
 apps:
   switas:
     # desktop-launch /snap/bin/switas
-    command: desktop-launch /snap/bin/switas
+    command: /snap/bin/switas
     extensions: [gnome-3-28]
 
 package-repositories:
