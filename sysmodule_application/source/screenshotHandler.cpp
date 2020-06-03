@@ -3,6 +3,7 @@
 ScreenshotHandler::ScreenshotHandler() {}
 
 void ScreenshotHandler::writeFramebuffer(std::shared_ptr<CommunicateWithNetwork> networkInstance, uint8_t linkedWithFrameAdvance, uint32_t frame, uint16_t savestateHookNum, uint8_t playerIndex) {
+	LOGD << "Linked with frame advance: " << (int)linkedWithFrameAdvance;
 	uint64_t outSize;
 	std::vector<uint8_t> buf(JPEG_BUF_SIZE);
 	rc = capsscCaptureJpegScreenShot(&outSize, buf.data(), JPEG_BUF_SIZE, ViLayerStack::ViLayerStack_ApplicationForDebug, 100000000);
@@ -18,6 +19,7 @@ void ScreenshotHandler::writeFramebuffer(std::shared_ptr<CommunicateWithNetwork>
 			data.playerIndex = playerIndex;
 		})
 		// clang-format on
+		LOGD << "Screenshot queued";
 	}
 	// Technically this can fail, TODO handle that case
 }

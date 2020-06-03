@@ -95,29 +95,31 @@ void MainLoop::mainLoopHandler() {
 		}
 	}
 
-	// handle network updates always, they are stored in the queue regardless of the internet
-	handleNetworkUpdates();
+	if(applicationOpened) {
+		// handle network updates always, they are stored in the queue regardless of the internet
+		handleNetworkUpdates();
 
-	// Check auto run
-	if(autoRunOn && networkInstance->isConnected()) {
-		u64 currentTime = armTicksToNs(armGetSystemTick());
-		if(lastAutorunTime == 0 || (currentTime - lastAutorunTime) > nanosecondsBetweenAutorun) {
-			// TODO handle for any controller and handle increasing frames
-			matchFirstControllerToTASController(0);
+		// Check auto run
+		if(autoRunOn && networkInstance->isConnected()) {
+			u64 currentTime = armTicksToNs(armGetSystemTick());
+			if(lastAutorunTime == 0 || (currentTime - lastAutorunTime) > nanosecondsBetweenAutorun) {
+				// TODO handle for any controller and handle increasing frames
+				matchFirstControllerToTASController(0);
 
-			// clang-format off
+				// clang-format off
 			ADD_TO_QUEUE(RecieveAutoRunControllerData, networkInstance, {
 				data.controllerData = controllers[0]->getControllerData();
 			})
-			// clang-format on
+				// clang-format on
 
-			// TODO autorun sends frame advance linked framebuffers
-			runSingleFrame(false, 0, 0, 0);
+				// TODO autorun sends frame advance linked framebuffers
+				runSingleFrame(false, 0, 0, 0);
 
-			lastAutorunTime = currentTime;
+				lastAutorunTime = currentTime;
+			}
+			// Get nanosecond time
+			// Check if
 		}
-		// Get nanosecond time
-		// Check if
 	}
 
 	// Match first controller inputs as often as possible
@@ -299,6 +301,7 @@ void MainLoop::clearEveryController() {
 }
 
 void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint32_t frame, uint16_t savestateHookNum, uint8_t playerIndex) {
+	// This is aborting for some reason
 	if(!isPaused) {
 		// Debug application again
 		LOGD << "Pausing";
@@ -307,18 +310,20 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint32_t frame, uint16_t
 		isPaused = true;
 
 		if(networkInstance->isConnected()) {
+			// Framebuffers should not be stored in memory unless they will be sent over internet
 			screenshotHandler.writeFramebuffer(networkInstance, linkedWithFrameAdvance, frame, savestateHookNum, playerIndex);
+			/*
+						for(auto const& memoryRegion : memoryRegions) {
+							std::vector<uint8_t> buf(memoryRegion.second);
+							svcReadDebugProcessMemory(buf.data(), applicationDebug, memoryRegion.first, memoryRegion.second);
 
-			for(auto const& memoryRegion : memoryRegions) {
-				std::vector<uint8_t> buf(memoryRegion.second);
-				svcReadDebugProcessMemory(buf.data(), applicationDebug, memoryRegion.first, memoryRegion.second);
-
-				ADD_TO_QUEUE(RecieveMemoryRegion, networkInstance, {
-					data.startByte = memoryRegion.first;
-					data.size      = memoryRegion.second;
-					data.memory    = buf;
-				})
-			}
+							ADD_TO_QUEUE(RecieveMemoryRegion, networkInstance, {
+								data.startByte = memoryRegion.first;
+								data.size      = memoryRegion.second;
+								data.memory    = buf;
+							})
+						}
+						*/
 		}
 	}
 }

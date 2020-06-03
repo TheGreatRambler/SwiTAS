@@ -63,6 +63,8 @@ private:
 	int dhashWidth;
 	int dhashHeight;
 
+	uint8_t paused = true;
+
 	rapidjson::Document* mainSettings;
 	std::shared_ptr<ProjectHandler> projectHandler;
 

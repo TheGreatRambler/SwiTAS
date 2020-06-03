@@ -127,6 +127,7 @@ SavestateSelection::SavestateSelection(rapidjson::Document* settings, std::share
 
 	if(savestateLoadDialog) {
 		fullSizer->Add(hammingDistance, 0);
+		fullSizer->Add(selectFrameAutomatically, 1);
 	}
 
 	buttonSizer->Add(playButton, 1);
@@ -210,6 +211,7 @@ void SavestateSelection::onPlay(wxCommandEvent& event) {
 		data.actFlag = SendInfo::UNPAUSE;
 	})
 	// clang-format on
+	paused = false;
 }
 
 void SavestateSelection::onPause(wxCommandEvent& event) {
@@ -220,6 +222,7 @@ void SavestateSelection::onPause(wxCommandEvent& event) {
 		data.actFlag = SendInfo::PAUSE;
 	})
 	// clang-format on
+	paused = true;
 }
 
 void SavestateSelection::onFrameAdvance(wxCommandEvent& event) {
@@ -227,12 +230,14 @@ void SavestateSelection::onFrameAdvance(wxCommandEvent& event) {
 	// Blank input in this case is input that matches the inputs of the controller on the switch
 	// Set the dHash for the currentFrame and calc the hamming distance
 	// Also, disable the window to prevent spam clicking
-	Disable();
-	// clang-format off
-	ADD_TO_QUEUE(SendFlag, networkInstance, {
-		data.actFlag = SendInfo::RUN_BLANK_FRAME;
-	})
-	// clang-format on
+	if(paused) {
+		Disable();
+		// clang-format off
+		ADD_TO_QUEUE(SendFlag, networkInstance, {
+			data.actFlag = SendInfo::RUN_BLANK_FRAME;
+		})
+		// clang-format on
+	}
 }
 
 void SavestateSelection::onOk(wxCommandEvent& event) {
