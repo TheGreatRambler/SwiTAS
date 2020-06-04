@@ -433,7 +433,7 @@ void ProjectHandlerWindow::onClickProject(wxCommandEvent& event) {
 	if(selectedProject == recentProjectsArray.Size()) {
 		// Open up a load project dialog
 		wxDirDialog dlg(NULL, "Choose Project Directory", "", wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
-		if(dlg.ShowModal() == wxID_OK) {
+		if(dlg.ShowModal() == wxID_OK && wxFileName(dlg.GetPath()).DirExists()) {
 			projectHandler->setProjectDir(dlg.GetPath());
 			projectHandler->setRecentProjectChoice(-1);
 			projectHandler->setProjectName("Unnamed");
@@ -448,7 +448,7 @@ void ProjectHandlerWindow::onClickProject(wxCommandEvent& event) {
 	} else if(selectedProject == recentProjectsArray.Size() + 1) {
 		// Open up a new project dialog
 		wxDirDialog dlg(NULL, "Choose Project Directory", "", wxDD_DEFAULT_STYLE);
-		if(dlg.ShowModal() == wxID_OK) {
+		if(dlg.ShowModal() == wxID_OK && wxFileName(dlg.GetPath()).DirExists()) {
 			projectHandler->setProjectDir(dlg.GetPath());
 			projectHandler->setRecentProjectChoice(-1);
 			projectHandler->setProjectName("Unnamed");

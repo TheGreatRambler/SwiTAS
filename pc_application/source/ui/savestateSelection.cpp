@@ -176,12 +176,22 @@ void SavestateSelection::setTargetFrame(wxBitmap* targetBitmap, std::string targ
 }
 
 void SavestateSelection::onIdle(wxIdleEvent& event) {
-	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveGameFramebuffer)
+	{
+		Protocol::Struct_RecieveGameFramebuffer data;
+		while(networkInstance->Queue_RecieveGameFramebuffer.try_dequeue(data)) {
+			for(auto const& callback : projectHandler->Callbacks_RecieveGameFramebuffer) {
+				callback.second(data);
+			}
+		}
+	}
 }
 
 void SavestateSelection::registerFramebufferCallback() {
 	ADD_NETWORK_CALLBACK(RecieveGameFramebuffer, {
-		Enable();
+		playButton->Enable();
+		pauseButton->Enable();
+		frameAdvanceButton->Enable();
+		okButton->Enable();
 
 		wxImage screenshot = HELPERS::getImageFromJPEGData(data.buf);
 		currentFrame->setBitmap(new wxBitmap(screenshot));
@@ -231,7 +241,11 @@ void SavestateSelection::onFrameAdvance(wxCommandEvent& event) {
 	// Set the dHash for the currentFrame and calc the hamming distance
 	// Also, disable the window to prevent spam clicking
 	if(paused) {
-		Disable();
+		playButton->Disable();
+		pauseButton->Disable();
+		frameAdvanceButton->Disable();
+		okButton->Disable();
+
 		// clang-format off
 		ADD_TO_QUEUE(SendFlag, networkInstance, {
 			data.actFlag = SendInfo::RUN_BLANK_FRAME;
