@@ -41,42 +41,45 @@ MainLoop::MainLoop() {
 }
 
 void MainLoop::mainLoopHandler() {
-	rc = pmdmntGetApplicationProcessId(&applicationProcessId);
+	if(!isPaused) {
+		// Being debugged might break this application
+		rc = pmdmntGetApplicationProcessId(&applicationProcessId);
 
-	// Lifted from switchPresense-Rewritten
-	if(R_SUCCEEDED(rc)) {
-		// Application connected
-		// Get application info
-		rc = pminfoGetProgramId(&applicationProgramId, applicationProcessId);
+		// Lifted from switchPresense-Rewritten
 		if(R_SUCCEEDED(rc)) {
-			if(!applicationOpened) {
-				gameName = std::string(getAppName(applicationProgramId));
-				LOGD << "Application " + gameName + " opened";
-				ADD_TO_QUEUE(RecieveApplicationConnected, networkInstance, {
-					data.applicationName      = gameName;
-					data.applicationProgramId = applicationProgramId;
-					data.applicationProcessId = applicationProcessId;
-				})
+			// Application connected
+			// Get application info
+			rc = pminfoGetProgramId(&applicationProgramId, applicationProcessId);
+			if(R_SUCCEEDED(rc)) {
+				if(!applicationOpened) {
+					gameName = std::string(getAppName(applicationProgramId));
+					LOGD << "Application " + gameName + " opened";
+					ADD_TO_QUEUE(RecieveApplicationConnected, networkInstance, {
+						data.applicationName      = gameName;
+						data.applicationProgramId = applicationProgramId;
+						data.applicationProcessId = applicationProcessId;
+					})
 
-				applicationOpened = true;
+					applicationOpened = true;
 
-				// Start the whole main loop
-				// Set the application for the controller
-				// LOGD << "Start controllers";
-				// pauseApp();
+					// Start the whole main loop
+					// Set the application for the controller
+					// LOGD << "Start controllers";
+					// pauseApp();
+				}
 			}
-		}
-	} else {
-		// I believe this means that there is no application running
-		// If there was just an application open, let the PC know
-		if(applicationOpened) {
-			LOGD << "Application closed";
-			// clang-format off
+		} else {
+			// I believe this means that there is no application running
+			// If there was just an application open, let the PC know
+			if(applicationOpened) {
+				LOGD << "Application closed";
+				// clang-format off
 			ADD_TO_QUEUE(RecieveFlag, networkInstance, {
 				data.actFlag = RecieveInfo::APPLICATION_DISCONNECTED;
 			})
-			// clang-format on
-			applicationOpened = false;
+				// clang-format on
+				applicationOpened = false;
+			}
 		}
 	}
 
@@ -168,12 +171,14 @@ void MainLoop::handleNetworkUpdates() {
 			LOGD << "Run blank frame";
 			matchFirstControllerToTASController(0);
 			runSingleFrame(false, 0, 0, 0);
+			LOGD << "Done with that";
 		} else if(data.actFlag == SendInfo::START_TAS_MODE) {
 			LOGD << "Start TAS mode";
 			pauseApp(false, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::PAUSE) {
 			LOGD << "Pause";
 			pauseApp(false, 0, 0, 0);
+			LOGD << "Epic";
 		} else if(data.actFlag == SendInfo::UNPAUSE) {
 			LOGD << "Unpause";
 			clearEveryController();
