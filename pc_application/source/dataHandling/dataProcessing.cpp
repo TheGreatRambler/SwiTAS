@@ -130,7 +130,8 @@ void DataProcessing::triggerCurrentFrameChanges() {
 	}
 }
 
-void DataProcessing::exportCurrentPlayerToFile(wxFileName exportTarget) {
+std::string DataProcessing::getExportedCurrentPlayer() {
+	/*
 	wxFile file(exportTarget.GetFullPath(), wxFile::write);
 
 	if(file.IsOpened()) {
@@ -138,6 +139,10 @@ void DataProcessing::exportCurrentPlayerToFile(wxFileName exportTarget) {
 		file.Write(wxString::FromUTF8(exported));
 		file.Close();
 	}
+	*/
+
+	// This blocks for a long time
+	return buttonData->framesToText(this, 0, 0, viewingPlayerIndex);
 }
 
 void DataProcessing::importFromFile(wxFileName importTarget) {
@@ -559,6 +564,10 @@ void DataProcessing::setSavestateHook(SavestateBlockNum index) {
 	currentRunFrame      = 0;
 	currentImageFrame    = 0;
 	currentSavestateHook = index;
+
+	if(changingSelectedFrameCallback) {
+		changingSelectedFrameCallback(currentFrame, currentRunFrame, currentImageFrame);
+	}
 
 	Refresh();
 }

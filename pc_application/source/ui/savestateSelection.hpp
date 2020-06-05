@@ -30,7 +30,7 @@ private:
 	void onSavestateHookSelect(wxMouseEvent& event);
 
 public:
-	SavestateLister(DataProcessing* input);
+	SavestateLister(wxFrame* parent, DataProcessing* input);
 
 	bool getOperationSuccessful() {
 		return operationSuccessful;
@@ -91,16 +91,7 @@ private:
 	// Only use with savestate loading
 	DrawingCanvasBitmap* savestateFrameTarget;
 
-	void callOk() {
-		// Use this frame as the savestate
-		operationSuccessful = true;
-		// clang-format off
-	    ADD_TO_QUEUE(SendFlag, networkInstance, {
-		    data.actFlag = SendInfo::START_TAS_MODE;
-	    })
-		// clang-format on
-		Close(true);
-	}
+	void callOk();
 
 	void registerFramebufferCallback();
 
@@ -115,7 +106,7 @@ private:
 	void onResize(wxSizeEvent& event);
 
 public:
-	SavestateSelection(rapidjson::Document* settings, std::shared_ptr<ProjectHandler> projHandler, bool isSavestateLoadDialog, std::shared_ptr<CommunicateWithNetwork> networkImp);
+	SavestateSelection(wxFrame* parent, rapidjson::Document* settings, std::shared_ptr<ProjectHandler> projHandler, bool isSavestateLoadDialog, std::shared_ptr<CommunicateWithNetwork> networkImp);
 
 	// Will use ShowModel for this, act like a normal wxDialog
 

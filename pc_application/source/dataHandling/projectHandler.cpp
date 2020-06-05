@@ -7,6 +7,9 @@ ProjectHandler::ProjectHandler(wxFrame* parent, DataProcessing* dataProcessingIn
 	// TODO this is simiar to the joysticks submenu
 	videoComparisonEntriesMenu = new wxMenu();
 
+	// Initialize it as empty
+	lastEnteredFtpPath = "";
+
 	dataProcessing->setSelectedFrameCallbackVideoViewer(std::bind(&ProjectHandler::updateVideoComparisonViewers, this, std::placeholders::_1));
 }
 
@@ -106,6 +109,8 @@ void ProjectHandler::loadProject() {
 	dataProcessing->setAllPlayers(players);
 	dataProcessing->sendPlayerNum();
 	dataProcessing->scrollToSpecific(jsonSettings["currentPlayer"].GetUint64(), jsonSettings["currentSavestateBlock"].GetUint(), jsonSettings["currentFrame"].GetUint());
+
+	lastEnteredFtpPath = std::string(jsonSettings["defaultFtpPathForExport"].GetString());
 
 	for(auto const& videoEntryJson : jsonSettings["videos"].GetArray()) {
 		std::shared_ptr<VideoEntry> videoEntry = std::make_shared<VideoEntry>();
@@ -225,6 +230,11 @@ void ProjectHandler::saveProject() {
 		settingsJSON.AddMember("currentPlayer", lastPlayerIndex, settingsJSON.GetAllocator());
 		settingsJSON.AddMember("currentSavestateBlock", lastSavestateHookIndex, settingsJSON.GetAllocator());
 		settingsJSON.AddMember("currentFrame", lastFrame, settingsJSON.GetAllocator());
+
+		rapidjson::Value defaultFtpPathForExport;
+		defaultFtpPathForExport.SetString(lastEnteredFtpPath.c_str(), lastEnteredFtpPath.size(), settingsJSON.GetAllocator());
+
+		settingsJSON.AddMember("defaultFtpPathForExport", defaultFtpPathForExport, settingsJSON.GetAllocator());
 
 		rapidjson::Value recentVideoEntries(rapidjson::kArrayType);
 		for(auto const& videoEntry : videoComparisonEntries) {

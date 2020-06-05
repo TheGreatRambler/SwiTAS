@@ -20,6 +20,7 @@
 #include "../helpers.hpp"
 #include "bottomUI.hpp"
 #include "debugWindow.hpp"
+#include "scriptExporter.hpp"
 #include "sideUI.hpp"
 
 class MainWindow : public wxFrame {

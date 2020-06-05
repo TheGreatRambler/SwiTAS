@@ -144,7 +144,7 @@ public:
 	void setPlayerInfoCallback(std::function<void(uint8_t, uint8_t, bool)> callback);
 	void triggerCurrentFrameChanges();
 
-	void exportCurrentPlayerToFile(wxFileName exportTarget);
+	std::string getExportedCurrentPlayer();
 	void importFromFile(wxFileName importTarget);
 
 	void setProjectStart(wxFileName start) {

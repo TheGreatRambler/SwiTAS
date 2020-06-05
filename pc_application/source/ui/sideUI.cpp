@@ -245,7 +245,7 @@ void SideUI::onSavestateHookCreatePressed(wxCommandEvent& event) {
 
 void SideUI::onSavestateHookLoadPressed(wxCommandEvent& event) {
 	// Open up the savestate viewer
-	SavestateLister savestateSelection(inputData);
+	SavestateLister savestateSelection(parent, inputData);
 
 	savestateSelection.ShowModal();
 
@@ -258,7 +258,7 @@ void SideUI::onSavestateHookModifyPressed(wxCommandEvent& event) {
 	if(networkInterface->isConnected()) {
 		// Open create dialog but copy the properties
 		// Onto the current hook
-		SavestateSelection modifySavestateSelection(mainSettings, projectHandler, false, networkInterface);
+		SavestateSelection modifySavestateSelection(parent, mainSettings, projectHandler, false, networkInterface);
 		modifySavestateSelection.ShowModal();
 
 		if(modifySavestateSelection.getOperationSuccessful()) {
@@ -272,6 +272,10 @@ void SideUI::onSavestateHookModifyPressed(wxCommandEvent& event) {
 			hook->screenshot = modifySavestateSelection.getNewScreenshot();
 
 			inputData->invalidateRun(0);
+			inputData->setSavestateHook(inputData->getCurrentSavestateHook());
+			tether();
+		} else {
+			untether();
 		}
 	}
 }
@@ -293,7 +297,7 @@ bool SideUI::createSavestateHook() {
 	}
 	// Open up the savestate viewer
 	if(networkInterface->isConnected()) {
-		SavestateSelection savestateSelection(mainSettings, projectHandler, false, networkInterface);
+		SavestateSelection savestateSelection(parent, mainSettings, projectHandler, false, networkInterface);
 		savestateSelection.ShowModal();
 
 		if(savestateSelection.getOperationSuccessful()) {
@@ -331,15 +335,15 @@ bool SideUI::loadSavestateHook(int block) {
 			return true;
 		}
 
-		SavestateSelection savestateSelection(mainSettings, projectHandler, true, networkInterface);
+		SavestateSelection savestateSelection(parent, mainSettings, projectHandler, true, networkInterface);
 		savestateSelection.setTargetFrame(savestateHook->screenshot, savestateHook->dHash);
 
 		savestateSelection.ShowModal();
 
 		if(savestateSelection.getOperationSuccessful()) {
 			inputData->setSavestateHook(block);
-			tether();
 			inputData->sendPlayerNum();
+			tether();
 			return true;
 		} else {
 			untether();

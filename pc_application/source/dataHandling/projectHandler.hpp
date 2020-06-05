@@ -68,6 +68,9 @@ private:
 
 	int recentProjectChoice;
 
+	// For file exporting
+	std::string lastEnteredFtpPath;
+
 	static constexpr int compressionLevel = 7;
 
 	// Main settings variable
@@ -100,6 +103,14 @@ public:
 
 	wxFileName getProjectStart() {
 		return wxFileName::DirName(projectDir.GetNameWithSep());
+	}
+
+	std::string getLastEnteredFtpPath() {
+		return lastEnteredFtpPath;
+	}
+
+	void setLastEnteredFtpPath(std::string path) {
+		lastEnteredFtpPath = path;
 	}
 
 	void setProjectName(std::string name) {

@@ -518,5 +518,31 @@
    "bin/./source/ui/videoComparisonViewer.cpp.o"
   ],
   "file": "source/ui/videoComparisonViewer.cpp"
+ },
+ {
+  "directory": "C:\\Users\\aehar\\Desktop\\projects\\VSC_Projects\\SwiTAS\\pc_application",
+  "arguments": [
+   "x86_64-w64-mingw32-g++",
+   "-Wall",
+   "-Wno-maybe-uninitialized",
+   "-DCLIENT_IMP",
+   "-Og",
+   "-g",
+   "-ggdb",
+   "-m64",
+   "-std=gnu++17",
+   "-IC:/msys2/mingw64/lib/wx/include/msw-unicode-static-3.1",
+   "-IC:/msys2/mingw64/include/wx-3.1",
+   "-D_FILE_OFFSET_BITS=64",
+   "-D__WXMSW__",
+   "-IC:/msys2/mingw64/include",
+   "-IC:/msys2/mingw64/include/luajit-2.0",
+   "-I./include",
+   "-c",
+   "source/ui/scriptExporter.cpp",
+   "-o",
+   "bin/./source/ui/scriptExporter.cpp.o"
+  ],
+  "file": "source/ui/scriptExporter.cpp"
  }
 ]

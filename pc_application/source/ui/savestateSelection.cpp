@@ -1,7 +1,7 @@
 #include "savestateSelection.hpp"
 
-SavestateLister::SavestateLister(DataProcessing* input)
-	: wxDialog(NULL, wxID_ANY, "Savestate Listing", wxDefaultPosition, wxDefaultSize) {
+SavestateLister::SavestateLister(wxFrame* parent, DataProcessing* input)
+	: wxDialog(parent, wxID_ANY, "Savestate Listing", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE | wxMAXIMIZE) {
 	inputInstance = input;
 
 	mainSizer = new wxBoxSizer(wxVERTICAL);
@@ -50,14 +50,14 @@ void SavestateLister::onSavestateHookSelect(wxMouseEvent& event) {
 		if(drawingCanvas == savestateScreenshots[i]) {
 			selectedSavestate   = i;
 			operationSuccessful = true;
-			Close(true);
+			EndModal(wxID_OK);
 			break;
 		}
 	}
 }
 
-SavestateSelection::SavestateSelection(rapidjson::Document* settings, std::shared_ptr<ProjectHandler> projHandler, bool isSavestateLoadDialog, std::shared_ptr<CommunicateWithNetwork> networkImp)
-	: wxDialog(NULL, wxID_ANY, "Savestate Selection", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE | wxMAXIMIZE) {
+SavestateSelection::SavestateSelection(wxFrame* parent, rapidjson::Document* settings, std::shared_ptr<ProjectHandler> projHandler, bool isSavestateLoadDialog, std::shared_ptr<CommunicateWithNetwork> networkImp)
+	: wxDialog(parent, wxID_ANY, "Savestate Selection", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE | wxMAXIMIZE) {
 	// Parent is specifically null because this is a separate window that opens
 	savestateLoadDialog = isSavestateLoadDialog;
 	mainSettings        = settings;
@@ -153,8 +153,6 @@ SavestateSelection::SavestateSelection(rapidjson::Document* settings, std::share
 	// clang-format on
 
 	registerFramebufferCallback();
-
-	// When done with all the stuff, close with Close(true);
 }
 
 // clang-format off
@@ -176,14 +174,7 @@ void SavestateSelection::setTargetFrame(wxBitmap* targetBitmap, std::string targ
 }
 
 void SavestateSelection::onIdle(wxIdleEvent& event) {
-	{
-		Protocol::Struct_RecieveGameFramebuffer data;
-		while(networkInstance->Queue_RecieveGameFramebuffer.try_dequeue(data)) {
-			for(auto const& callback : projectHandler->Callbacks_RecieveGameFramebuffer) {
-				callback.second(data);
-			}
-		}
-	}
+	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveGameFramebuffer)
 }
 
 void SavestateSelection::registerFramebufferCallback() {
@@ -256,6 +247,17 @@ void SavestateSelection::onFrameAdvance(wxCommandEvent& event) {
 
 void SavestateSelection::onOk(wxCommandEvent& event) {
 	callOk();
+}
+
+void SavestateSelection::callOk() {
+	// Use this frame as the savestate
+	operationSuccessful = true;
+	// clang-format off
+	ADD_TO_QUEUE(SendFlag, networkInstance, {
+		data.actFlag = SendInfo::START_TAS_MODE;
+	})
+	// clang-format on
+	EndModal(wxID_OK);
 }
 
 void SavestateSelection::onClose(wxCloseEvent& event) {

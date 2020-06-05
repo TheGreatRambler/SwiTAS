@@ -71,7 +71,6 @@ MainWindow::MainWindow()
 	SetSizer(mainSizer);
 	mainSizer->SetSizeHints(this);
 	Layout();
-	Fit();
 	Center(wxBOTH);
 
 	// Override the keypress handler
@@ -274,13 +273,18 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 			gameCorruptor.ShowModal();
 			Show(true);
 		} else if(id == exportAsText) {
+			/*
 			wxFileName exportedText = projectHandler->getProjectStart();
 			exportedText.SetName(wxString::Format("player_%u_exported", dataProcessingInstance->getCurrentPlayer() + 1));
 			exportedText.SetExt("ssctf");
+			*/
 
-			dataProcessingInstance->exportCurrentPlayerToFile(exportedText);
+			// User sets their own name
+			ScriptExporter scriptExporter(this, projectHandler, dataProcessingInstance->getExportedCurrentPlayer());
+			scriptExporter.ShowModal();
+
 		} else if(id == importAsText) {
-			wxFileDialog openFileDialog(NULL, _("Open Script file"), "", "", "Text files (*.txt)|*.txt|nx-TAS script files (*.ssctf)|*.ssctf", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+			wxFileDialog openFileDialog(this, _("Open Script file"), "", "", "Text files (*.txt)|*.txt|nx-TAS script files (*.ssctf)|*.ssctf", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 
 			if(openFileDialog.ShowModal() == wxID_OK) {
 				wxFileName importPath(openFileDialog.GetPath());
