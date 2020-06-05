@@ -103,6 +103,7 @@ private:
 	int pasteInsertID;
 	int pastePlaceID;
 	int addFrameID;
+	int add10FramesID;
 	int removeFrameID;
 	int frameAdvanceID;
 	int savestateID;
@@ -125,6 +126,7 @@ private:
 	void onPlacePaste(wxCommandEvent& event);
 
 	void onAddFrame(wxCommandEvent& event);
+	void onAdd10Frames(wxCommandEvent& event);
 	void onRemoveFrame(wxCommandEvent& event);
 	void onFrameAdvance(wxCommandEvent& event);
 	void onAddSavestate(wxCommandEvent& event);

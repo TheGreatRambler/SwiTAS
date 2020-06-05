@@ -51,11 +51,12 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 
 	// Create keyboard handlers
 	// Each menu item is added here
-	wxAcceleratorEntry entries[9];
+	wxAcceleratorEntry entries[10];
 
 	pasteInsertID  = wxNewId();
 	pastePlaceID   = wxNewId();
 	addFrameID     = wxNewId();
+	add10FramesID  = wxNewId();
 	removeFrameID  = wxNewId();
 	frameAdvanceID = wxNewId();
 	savestateID    = wxNewId();
@@ -70,11 +71,12 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	entries[4].Set(wxACCEL_CTRL | wxACCEL_ALT, (int)'V', pastePlaceID, editMenu.Append(pastePlaceID, wxT("Paste Place\tCtrl+Alt+V")));
 
 	entries[5].Set(wxACCEL_CTRL, (int)'=', addFrameID, editMenu.Append(addFrameID, wxT("Add Frame\tCtrl+Plus")));
-	entries[6].Set(wxACCEL_CTRL, (int)'-', removeFrameID, editMenu.Append(removeFrameID, wxT("Remove Frame\tCtrl+Minus")));
-	entries[7].Set(wxACCEL_CTRL, WXK_RIGHT, frameAdvanceID, editMenu.Append(frameAdvanceID, wxT("Frame Advance\tCtrl+Right")));
-	entries[8].Set(wxACCEL_CTRL, (int)'H', savestateID, editMenu.Append(savestateID, wxT("Add Savestate\tCtrl+H")));
+	entries[6].Set(wxACCEL_CTRL | wxACCEL_SHIFT, (int)'=', add10FramesID, editMenu.Append(add10FramesID, wxT("Add 10 Frames\tCtrl+Plus")));
+	entries[7].Set(wxACCEL_CTRL, (int)'-', removeFrameID, editMenu.Append(removeFrameID, wxT("Remove Frame\tCtrl+Minus")));
+	entries[8].Set(wxACCEL_CTRL, WXK_RIGHT, frameAdvanceID, editMenu.Append(frameAdvanceID, wxT("Frame Advance\tCtrl+Right")));
+	entries[9].Set(wxACCEL_CTRL, (int)'H', savestateID, editMenu.Append(savestateID, wxT("Add Savestate\tCtrl+H")));
 
-	wxAcceleratorTable accel(9, entries);
+	wxAcceleratorTable accel(10, entries);
 	SetAcceleratorTable(accel);
 
 	// Bind each to a handler, both menu and button events
@@ -84,6 +86,7 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	Bind(wxEVT_MENU, &DataProcessing::onInsertPaste, this, pasteInsertID);
 	Bind(wxEVT_MENU, &DataProcessing::onPlacePaste, this, pastePlaceID);
 	Bind(wxEVT_MENU, &DataProcessing::onAddFrame, this, addFrameID);
+	Bind(wxEVT_MENU, &DataProcessing::onAdd10Frames, this, add10FramesID);
 	Bind(wxEVT_MENU, &DataProcessing::onRemoveFrame, this, removeFrameID);
 	Bind(wxEVT_MENU, &DataProcessing::onFrameAdvance, this, frameAdvanceID);
 	Bind(wxEVT_MENU, &DataProcessing::onAddSavestate, this, savestateID);
@@ -393,6 +396,12 @@ void DataProcessing::onPlacePaste(wxCommandEvent& event) {
 
 void DataProcessing::onAddFrame(wxCommandEvent& event) {
 	addFrame(currentFrame);
+}
+
+void DataProcessing::onAdd10Frames(wxCommandEvent& event) {
+	for(uint8_t i = 0; i < 10; i++) {
+		addFrame(currentFrame);
+	}
 }
 
 void DataProcessing::onRemoveFrame(wxCommandEvent& event) {

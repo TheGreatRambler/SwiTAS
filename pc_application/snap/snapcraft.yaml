@@ -1,4 +1,5 @@
 name: switas
+publisher: TheGreatRambler
 base: core18
 version: '0.0.1'
 icon: share/icons/switas/logo/main.png
@@ -10,6 +11,9 @@ description: |
 
 # To build the snap, run `sudo snapcraft --use-lxd --enable-experimental-package-repositories`
 # Some more info https://ubuntu.com/tutorials/create-your-first-snap#3-building-a-snap-is-easy
+# sudo snap install --devmode switas_0.0.1_amd64.snap
+# sudo snap list switas
+# sudo snap remove switas
 
 grade: devel # must be 'stable' to release into candidate/stable channels
 confinement: devmode # use 'strict' once you have the right plugs and slots
@@ -131,7 +135,7 @@ parts:
 apps:
   switas:
     # desktop-launch /snap/bin/switas
-    command: /snap/bin/switas
+    command: bin/switas
     extensions: [gnome-3-28]
 
 package-repositories:

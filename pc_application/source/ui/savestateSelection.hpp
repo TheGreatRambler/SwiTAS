@@ -14,7 +14,6 @@
 #include "../sharedNetworkCode/networkInterface.hpp"
 #include "drawingCanvas.hpp"
 
-// Class listing out the savestates in a grid so they can be selected
 class SavestateLister : public wxDialog {
 private:
 	wxBoxSizer* mainSizer;
