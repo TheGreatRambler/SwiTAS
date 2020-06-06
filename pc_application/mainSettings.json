@@ -220,6 +220,7 @@
 	"ui": {
 		"addFrameButton": "share/icons/switas/buttons/addFrameButton.png",
 		"frameAdvanceButton": "share/icons/switas/buttons/frameAdvanceButton.png",
+		"autoFrameAdvanceButton": "share/icons/switas/buttons/autoFrameAdvanceButton.png",
 		"savestateHookCreateButton": "share/icons/switas/buttons/savestateHookCreateButton.png",
 		"savestateHookLoadButton": "share/icons/switas/buttons/savestateHookLoadButton.png",
 		"savestateHookModifyButton": "share/icons/switas/buttons/savestateHookModifyButton.png",
@@ -245,8 +246,7 @@
 			"newProject": "rgb(20, 110, 66)"
 		}
 	},
-	"recentProjects": [
-		{
+	"recentProjects": [{
 			"projectDirectory": "/home/thegreatrambler/Desktop/bob/",
 			"projectName": "Unnamed"
 		},

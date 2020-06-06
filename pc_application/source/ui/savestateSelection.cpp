@@ -57,7 +57,8 @@ void SavestateLister::onSavestateHookSelect(wxMouseEvent& event) {
 }
 
 SavestateSelection::SavestateSelection(wxFrame* parent, rapidjson::Document* settings, std::shared_ptr<ProjectHandler> projHandler, bool isSavestateLoadDialog, std::shared_ptr<CommunicateWithNetwork> networkImp)
-	: wxDialog(parent, wxID_ANY, "Savestate Selection", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE | wxMAXIMIZE) {
+	: wxDialog(parent, wxID_ANY, "Savestate Selection", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE | wxMAXIMIZE)
+	: autoFrameAdvanceTimer(this) {
 	// Parent is specifically null because this is a separate window that opens
 	savestateLoadDialog = isSavestateLoadDialog;
 	mainSettings        = settings;
@@ -71,13 +72,18 @@ SavestateSelection::SavestateSelection(wxFrame* parent, rapidjson::Document* set
 	buttonSizer = new wxBoxSizer(wxHORIZONTAL);
 	fullSizer   = new wxBoxSizer(wxVERTICAL);
 
-	leftImageSizer  = new wxBoxSizer(wxVERTICAL);
-	rightImageSizer = new wxBoxSizer(wxVERTICAL);
+	leftImageSizer = new wxBoxSizer(wxVERTICAL);
 
-	leftDHash  = new wxStaticText(this, wxID_ANY, "null", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
-	rightDHash = new wxStaticText(this, wxID_ANY, "null", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
+	if(savestateLoadDialog) {
+		rightImageSizer = new wxBoxSizer(wxVERTICAL);
+	}
 
-	hammingDistance = new wxStaticText(this, wxID_ANY, "null", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
+	if(savestateLoadDialog) {
+		leftDHash  = new wxStaticText(this, wxID_ANY, "null", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
+		rightDHash = new wxStaticText(this, wxID_ANY, "null", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
+
+		hammingDistance = new wxStaticText(this, wxID_ANY, "null", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
+	}
 
 	// To set the text, just use:
 	// leftDHash->SetLabelText(aString);
@@ -87,17 +93,25 @@ SavestateSelection::SavestateSelection(wxFrame* parent, rapidjson::Document* set
 	// Look to mainWindow for setting sizers
 	// Gonna go a roundabout way for adding buttons, every button will be visible, but certain ones will be disabled as needed
 
-	playButton         = HELPERS::getBitmapButton(this, mainSettings, "playButton");
-	pauseButton        = HELPERS::getBitmapButton(this, mainSettings, "pauseButton");
-	frameAdvanceButton = HELPERS::getBitmapButton(this, mainSettings, "frameAdvanceButton");
-	okButton           = HELPERS::getBitmapButton(this, mainSettings, "okButton");
+	playButton             = HELPERS::getBitmapButton(this, mainSettings, "playButton");
+	pauseButton            = HELPERS::getBitmapButton(this, mainSettings, "pauseButton");
+	frameAdvanceButton     = HELPERS::getBitmapButton(this, mainSettings, "frameAdvanceButton");
+	autoFrameAdvanceButton = HELPERS::getBitmapButton(this, mainSettings, "autoFrameAdvanceButton");
+	okButton               = HELPERS::getBitmapButton(this, mainSettings, "okButton");
 
-	selectFrameAutomatically = new wxSpinCtrl(this, wxID_ANY, "Select automatically at or below this hamming distance: ", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0);
+	if(savestateLoadDialog) {
+		selectFrameAutomatically = new wxSpinCtrl(this, wxID_ANY, "Select automatically at or below this hamming distance: ", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0);
+	}
+
+	autoIncrementDelay = new wxSpinCtrl(this, wxID_ANY, "Delay in mlliseconds for automatically incrementing frame: ", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 5000, 0);
 
 	playButton->Bind(wxEVT_BUTTON, &SavestateSelection::onPlay, this);
 	pauseButton->Bind(wxEVT_BUTTON, &SavestateSelection::onPause, this);
 	frameAdvanceButton->Bind(wxEVT_BUTTON, &SavestateSelection::onFrameAdvance, this);
+	autoFrameAdvanceButton->Bind(wxEVT_BUTTON, &SavestateSelection::onAutoFrameAdvance, this);
 	okButton->Bind(wxEVT_BUTTON, &SavestateSelection::onOk, this);
+
+	Bind(wxEVT_TIMER, &SavestateSelection::onAutoFrameAdvanceTimer, this);
 
 	Bind(wxEVT_SIZE, &SavestateSelection::onResize, this);
 
@@ -130,9 +144,12 @@ SavestateSelection::SavestateSelection(wxFrame* parent, rapidjson::Document* set
 		fullSizer->Add(selectFrameAutomatically, 1);
 	}
 
+	fullSizer->Add(autoIncrementDelay, 1);
+
 	buttonSizer->Add(playButton, 1);
 	buttonSizer->Add(pauseButton, 1);
 	buttonSizer->Add(frameAdvanceButton, 1);
+	buttonSizer->Add(autoFrameAdvanceButton, 1);
 	buttonSizer->Add(okButton, 1);
 
 	fullSizer->Add(buttonSizer, 0);
@@ -173,6 +190,13 @@ void SavestateSelection::setTargetFrame(wxBitmap* targetBitmap, std::string targ
 	rightDHash->SetLabel(wxString::FromUTF8(targetDhash));
 }
 
+void SavestateSelection::onAutoFrameAdvanceTimer(wxTimerEvent& event) {
+	if(autoFrameEnabled) {
+		// Run another frame
+		frameAdvance();
+	}
+}
+
 void SavestateSelection::onIdle(wxIdleEvent& event) {
 	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveGameFramebuffer)
 }
@@ -202,6 +226,10 @@ void SavestateSelection::registerFramebufferCallback() {
 				}
 			}
 		}
+
+		if(autoFrameEnabled) {
+			autoFrameAdvanceTimer.StartOnce(autoIncrementDelay->GetValue());
+		}
 	})
 }
 
@@ -216,6 +244,7 @@ void SavestateSelection::onPlay(wxCommandEvent& event) {
 }
 
 void SavestateSelection::onPause(wxCommandEvent& event) {
+	autoFrameEnabled = false;
 	// Stop automatic playing
 	// Do the same stuff as frameAdvance
 	// clang-format off
@@ -226,22 +255,34 @@ void SavestateSelection::onPause(wxCommandEvent& event) {
 	paused = true;
 }
 
+void SavestateSelection::frameAdvance() {
+	playButton->Disable();
+	pauseButton->Disable();
+	frameAdvanceButton->Disable();
+	okButton->Disable();
+
+	// clang-format off
+	ADD_TO_QUEUE(SendFlag, networkInstance, {
+		data.actFlag = SendInfo::RUN_BLANK_FRAME;
+	})
+	// clang-format on
+}
+
 void SavestateSelection::onFrameAdvance(wxCommandEvent& event) {
 	// Send blank input for a single frame then recieve JPEG buffer
 	// Blank input in this case is input that matches the inputs of the controller on the switch
 	// Set the dHash for the currentFrame and calc the hamming distance
 	// Also, disable the window to prevent spam clicking
 	if(paused) {
-		playButton->Disable();
-		pauseButton->Disable();
-		frameAdvanceButton->Disable();
-		okButton->Disable();
+		frameAdvance();
+	}
+}
 
-		// clang-format off
-		ADD_TO_QUEUE(SendFlag, networkInstance, {
-			data.actFlag = SendInfo::RUN_BLANK_FRAME;
-		})
-		// clang-format on
+void SavestateSelection::onAutoFrameAdvance(wxCommandEvent& event) {
+	if(paused) {
+		autoFrameEnabled = true;
+
+		frameAdvance();
 	}
 }
 

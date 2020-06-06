@@ -57,7 +57,7 @@ CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -D__BSD_VISIBLE -DSERVER_IMP
 
 # Need Cpp11 for certain features
 # It has to be c++14 because of zpp
-CXXFLAGS	:= $(CFLAGS) -std=gnu++14
+CXXFLAGS	:= $(CFLAGS) -std=gnu++17 -DSOL_USING_CXX_LUA
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)

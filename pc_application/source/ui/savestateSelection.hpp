@@ -73,6 +73,7 @@ private:
 	wxBitmapButton* playButton;
 	wxBitmapButton* pauseButton;
 	wxBitmapButton* frameAdvanceButton;
+	wxBitmapButton* autoFrameAdvanceButton;
 	wxBitmapButton* okButton;
 
 	// Canvases for showing the frames
@@ -83,8 +84,12 @@ private:
 	bool savestateLoadDialog;
 
 	bool operationSuccessful = false;
+	bool autoFrameEnabled    = false;
+
+	wxTimer autoFrameAdvanceTimer;
 
 	wxSpinCtrl* selectFrameAutomatically;
+	wxSpinCtrl* autoIncrementDelay;
 
 	// To view the frames, will use if needed
 	DrawingCanvasBitmap* currentScreen;
@@ -96,14 +101,18 @@ private:
 	void registerFramebufferCallback();
 
 	void onIdle(wxIdleEvent& event);
+	void onAutoFrameAdvanceTimer(wxTimerEvent& event);
 
 	void onPlay(wxCommandEvent& event);
 	void onPause(wxCommandEvent& event);
 	void onFrameAdvance(wxCommandEvent& event);
+	void onAutoFrameAdvance(wxCommandEvent& event);
 	void onOk(wxCommandEvent& event);
 
 	void onClose(wxCloseEvent& event);
 	void onResize(wxSizeEvent& event);
+
+	void frameAdvance();
 
 public:
 	SavestateSelection(wxFrame* parent, rapidjson::Document* settings, std::shared_ptr<ProjectHandler> projHandler, bool isSavestateLoadDialog, std::shared_ptr<CommunicateWithNetwork> networkImp);

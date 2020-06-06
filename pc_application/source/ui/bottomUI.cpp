@@ -433,7 +433,6 @@ void BottomUI::refreshDataViews() {
 }
 
 void BottomUI::recieveGameFramebuffer(std::vector<uint8_t> jpegBuffer) {
-	wxLogMessage("Recieved framebuffer from switch");
 	frameViewerCanvas->setPrimaryBitmap(new wxBitmap(HELPERS::getImageFromJPEGData(jpegBuffer)));
 }
 

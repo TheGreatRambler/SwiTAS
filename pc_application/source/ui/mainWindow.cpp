@@ -164,9 +164,8 @@ void MainWindow::handleNetworkQueues() {
 		wxLogMessage(wxString("SWITCH: " + data.log));
 	})
 	ADD_NETWORK_CALLBACK(RecieveGameFramebuffer, {
-		wxLogMessage("Framebuffer received");
 		bottomUI->recieveGameFramebuffer(data.buf);
-		if (data.fromFrameAdvance) {
+		if (data.fromFrameAdvance == 1) {
 			// Store framebuffer in the filesystem because it would take too much memory otherwise
 			wxFileName framebufferFileName = dataProcessingInstance->getFramebufferPath(data.playerIndex, data.savestateHookNum, data.frame);
 			framebufferFileName.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);

@@ -13,7 +13,7 @@
 			],
 			"compilerPath": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc",
 			"cStandard": "c11",
-			"cppStandard": "c++14",
+			"cppStandard": "gnu++17",
 			"intelliSenseMode": "gcc-x64"
 		},
 		{
@@ -30,7 +30,7 @@
 			],
 			"compilerPath": "C:/msys2/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc",
 			"cStandard": "c11",
-			"cppStandard": "c++14",
+			"cppStandard": "gnu++17",
 			"intelliSenseMode": "gcc-x64"
 		}
 	],
