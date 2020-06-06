@@ -193,6 +193,8 @@ void MainLoop::handleNetworkUpdates() {
 	})
 	// clang-format on
 
+	// TODO add logic to handle lua scripting
+
 	CHECK_QUEUE(networkInstance, SendAutoRun, {
 		autoRunOn = data.start;
 		if(data.start) {
