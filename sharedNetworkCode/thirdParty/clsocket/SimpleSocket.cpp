@@ -89,7 +89,7 @@ CSimpleSocket::CSimpleSocket(CSocketType nType)
 	// Declare socket type raw Ethernet - Ethernet
 	//----------------------------------------------------------------------
 	case CSimpleSocket::SocketTypeRaw: {
-#if defined(__linux__) && !defined(_DARWIN)
+#if defined(__linux__) && !defined(__APPLE__)
 		m_nSocketDomain = AF_PACKET;
 		m_nSocketType   = CSimpleSocket::SocketTypeRaw;
 #endif
@@ -821,7 +821,7 @@ int32 CSimpleSocket::SendFile(int32 nOutFd, int32 nInFd, off_t* pOffset, int32 n
 //
 //------------------------------------------------------------------------------
 void CSimpleSocket::TranslateSocketError(void) {
-#if defined(__linux__) || defined(_DARWIN)
+#if defined(__linux__) || defined(__APPLE__)
 	switch(errno) {
 	case EXIT_SUCCESS:
 		SetSocketError(CSimpleSocket::SocketSuccess);
