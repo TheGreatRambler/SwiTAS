@@ -11,9 +11,6 @@
 		},
 		{
 			"path": "sharedNetworkCode"
-		},
-		{
-			"path": "sharedScriptingCode"
 		}
 	],
 	"settings": {

@@ -1,8 +1,6 @@
 #include "gui.hpp"
 
-Gui::Gui(int screenWidth, int screenHeight) {
-	width  = screenWidth;
-	height = screenHeight;
+Gui::Gui() {
 
 #ifdef __SWITCH__
 	// https://github.com/averne/dvdnx/blob/master/src/screen.cpp
@@ -44,7 +42,7 @@ Gui::Gui(int screenWidth, int screenHeight) {
 	}
 	// These might not be screenWidth and screenHeight TODO
 	// They are smaller in the source
-	rc = viSetLayerSize(&layer, screenWidth, screenHeight);
+	rc = viSetLayerSize(&layer, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
 	if(R_FAILED(rc)) {
 		viDestroyManagedLayer(&layer);
 		fatalThrow(rc);
@@ -63,7 +61,7 @@ Gui::Gui(int screenWidth, int screenHeight) {
 	// PIXEL_FORMAT_RGBA_8888  defined in LibNX (based on Android)
 	// Not PIXEL_FORMAT_RGBA_8888 in source, but I don't care
 	// Upscaling and downscaling will happen so that the Layer Size and the FB size match
-	rc = framebufferCreate(&framebuf, &window, screenWidth, screenHeight, PIXEL_FORMAT_RGBA_4444, 1);
+	rc = framebufferCreate(&framebuf, &window, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT, PIXEL_FORMAT_RGBA_4444, 1);
 	if(R_FAILED(rc)) {
 		nwindowClose(&window);
 		fatalThrow(rc);
@@ -81,16 +79,28 @@ Gui::Gui(int screenWidth, int screenHeight) {
 	static PlFontData stdFontData, extFontData;
 
 	// Nintendo's default font
-	R_TRY(plGetSharedFontByType(&stdFontData, PlSharedFontType_Standard));
+	rc = plGetSharedFontByType(&stdFontData, PlSharedFontType_Standard);
+
+	if(R_FAILED(rc)) {
+		nwindowClose(&window);
+		fatalThrow(rc);
+	}
 
 	u8* fontBuffer = reinterpret_cast<u8*>(stdFontData.address);
 	stbtt_InitFont(&stdNintendoFont, fontBuffer, stbtt_GetFontOffsetForIndex(fontBuffer, 0));
 
 	// Nintendo's extended font containing a bunch of icons
-	R_TRY(plGetSharedFontByType(&extFontData, PlSharedFontType_NintendoExt));
+	rc = plGetSharedFontByType(&extFontData, PlSharedFontType_NintendoExt);
+
+	if(R_FAILED(rc)) {
+		nwindowClose(&window);
+		fatalThrow(rc);
+	}
 
 	fontBuffer = reinterpret_cast<u8*>(extFontData.address);
 	stbtt_InitFont(&extNintendoFont, fontBuffer, stbtt_GetFontOffsetForIndex(fontBuffer, 0));
+
+	savedJpegFramebuffer = (uint8_t*)malloc(JPEG_BUF_SIZE);
 #endif
 }
 
@@ -119,11 +129,10 @@ void Gui::setPixel(uint32_t x, uint32_t y, Color color) {
 void Gui::takeScreenshot(std::string path) {
 #ifdef __SWITCH__
 	uint64_t outSize;
-	std::vector<uint8_t> buf(JPEG_BUF_SIZE);
-	rc = capsscCaptureJpegScreenShot(&outSize, buf.data(), JPEG_BUF_SIZE, ViLayerStack::ViLayerStack_ApplicationForDebug, 100000000);
+	rc = capsscCaptureJpegScreenShot(&outSize, savedJpegFramebuffer, JPEG_BUF_SIZE, ViLayerStack::ViLayerStack_ApplicationForDebug, 100000000);
 	if(R_SUCCEEDED(rc)) {
-		FILE* jpegFile = fopen(path.c_str(), “wb +”);
-		fwrite(buf.data(), outSize, 1, jpegFile);
+		FILE* jpegFile = fopen(path.c_str(), "wb+");
+		fwrite(savedJpegFramebuffer, outSize, 1, jpegFile);
 		fclose(jpegFile);
 	}
 #endif
@@ -132,6 +141,8 @@ void Gui::takeScreenshot(std::string path) {
 Gui::~Gui() {
 // Close everything
 #ifdef __SWITCH__
+	free(savedJpegFramebuffer);
+
 	framebufferClose(&framebuf);
 	nwindowClose(&window);
 	viDestroyManagedLayer(&layer);

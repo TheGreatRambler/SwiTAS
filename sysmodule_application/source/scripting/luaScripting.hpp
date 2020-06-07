@@ -1,6 +1,6 @@
 #pragma once
 
-#include "include/sol.hpp"
+#include <sol.hpp>
 #include <string>
 
 #ifdef __SWITCH__

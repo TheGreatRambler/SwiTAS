@@ -163,10 +163,12 @@ void MainWindow::handleNetworkQueues() {
 	ADD_NETWORK_CALLBACK(RecieveLogging, {
 		wxLogMessage(wxString("SWITCH: " + data.log));
 	})
+	ADD_NETWORK_CALLBACK(RecieveAutoRunControllerData, {
+		sideUI->recieveAutoRunData(data.controllerData);
+	})
 	ADD_NETWORK_CALLBACK(RecieveGameFramebuffer, {
 		bottomUI->recieveGameFramebuffer(data.buf);
 		if (data.fromFrameAdvance == 1) {
-			// Store framebuffer in the filesystem because it would take too much memory otherwise
 			wxFileName framebufferFileName = dataProcessingInstance->getFramebufferPath(data.playerIndex, data.savestateHookNum, data.frame);
 			framebufferFileName.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
 
@@ -174,13 +176,9 @@ void MainWindow::handleNetworkQueues() {
 			file.Write(data.buf.data(), data.buf.size());
 			file.Close();
 
-			// To refresh framebuf if need be
-			bottomUI->refreshDataViews();
+			bottomUI->refreshDataViews(); 
 		}
-	})
-	ADD_NETWORK_CALLBACK(RecieveAutoRunControllerData, {
-		sideUI->recieveAutoRunData(data.controllerData);
-	})
+	}) 
 	ADD_NETWORK_CALLBACK(RecieveFlag, {
 		/*if (data.actFlag == RecieveInfo::UNEXPECTED_CONTROLLER_SIZE) {
 			// Switch is not in touch with required amount of controllers

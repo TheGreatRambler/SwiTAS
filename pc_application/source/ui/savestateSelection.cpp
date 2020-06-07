@@ -204,7 +204,6 @@ void SavestateSelection::onIdle(wxIdleEvent& event) {
 void SavestateSelection::registerFramebufferCallback() {
 	ADD_NETWORK_CALLBACK(RecieveGameFramebuffer, {
 		playButton->Enable();
-		pauseButton->Enable();
 		frameAdvanceButton->Enable();
 		okButton->Enable();
 
@@ -257,7 +256,6 @@ void SavestateSelection::onPause(wxCommandEvent& event) {
 
 void SavestateSelection::frameAdvance() {
 	playButton->Disable();
-	pauseButton->Disable();
 	frameAdvanceButton->Disable();
 	okButton->Disable();
 
