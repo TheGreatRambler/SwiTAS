@@ -57,13 +57,13 @@ void SavestateLister::onSavestateHookSelect(wxMouseEvent& event) {
 }
 
 SavestateSelection::SavestateSelection(wxFrame* parent, rapidjson::Document* settings, std::shared_ptr<ProjectHandler> projHandler, bool isSavestateLoadDialog, std::shared_ptr<CommunicateWithNetwork> networkImp)
-	: wxDialog(parent, wxID_ANY, "Savestate Selection", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE | wxMAXIMIZE)
-	: autoFrameAdvanceTimer(this) {
+	: wxDialog(parent, wxID_ANY, "Savestate Selection", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE | wxMAXIMIZE) {
 	// Parent is specifically null because this is a separate window that opens
-	savestateLoadDialog = isSavestateLoadDialog;
-	mainSettings        = settings;
-	networkInstance     = networkImp;
-	projectHandler      = projHandler;
+	savestateLoadDialog   = isSavestateLoadDialog;
+	mainSettings          = settings;
+	networkInstance       = networkImp;
+	projectHandler        = projHandler;
+	autoFrameAdvanceTimer = new wxTimer(this);
 
 	dhashWidth  = (*mainSettings)["dhashWidth"].GetInt();
 	dhashHeight = (*mainSettings)["dhashHeight"].GetInt();
@@ -300,5 +300,6 @@ void SavestateSelection::callOk() {
 }
 
 void SavestateSelection::onClose(wxCloseEvent& event) {
+	delete autoFrameAdvanceTimer;
 	REMOVE_NETWORK_CALLBACK(RecieveGameFramebuffer)
 }

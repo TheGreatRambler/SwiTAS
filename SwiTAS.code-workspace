@@ -81,6 +81,7 @@
 			"typeinfo": "cpp",
 			"variant": "cpp",
 			"bit": "cpp"
-		}
+		},
+		"cSpell.enabled": false
 	}
 }

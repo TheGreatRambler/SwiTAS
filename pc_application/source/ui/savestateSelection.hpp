@@ -86,7 +86,7 @@ private:
 	bool operationSuccessful = false;
 	bool autoFrameEnabled    = false;
 
-	wxTimer autoFrameAdvanceTimer;
+	wxTimer* autoFrameAdvanceTimer;
 
 	wxSpinCtrl* selectFrameAutomatically;
 	wxSpinCtrl* autoIncrementDelay;

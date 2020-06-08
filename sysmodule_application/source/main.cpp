@@ -1,8 +1,8 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <map>
 #include <plog/Log.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <string>
 #include <switch.h>
 #include <vector>
@@ -10,6 +10,7 @@
 #include "controller.hpp"
 #include "mainLoopHandler.hpp"
 
+#ifdef __SWITCH__
 extern "C" {
 // Sysmodules should not use applet*.
 u32 __nx_applet_type = AppletType_None;
@@ -139,8 +140,10 @@ void __attribute__((weak)) __appExit(void) {
 	fsExit();
 	smExit();
 }
+#endif
 
 // Main program entrypoint
+#ifdef __SWITCH__
 int main(int argc, char* argv[]) {
 	remove("/SwiTAS.log");
 	plog::init(plog::debug, "/SwiTAS.log");
@@ -156,3 +159,17 @@ int main(int argc, char* argv[]) {
 
 	return 0;
 }
+#endif
+
+// Leaving the possibility open for a standalone exe later
+// http://www.equestionanswers.com/c/c-explicit-linking.php
+// http://anadoxin.org/blog/control-over-symbol-exports-in-mingw-linker.html
+#ifdef YUZU
+MainLoop mainLoop;
+
+DLL_EXPORT void startPlugin(void* wrapperInstance) {
+	// Do anything here that needs to be done
+	// Wrapper instance needs to be saved by MainLoop to pass back to yuzu
+	// This is because cross-module function calls are c functions
+}
+#endif
