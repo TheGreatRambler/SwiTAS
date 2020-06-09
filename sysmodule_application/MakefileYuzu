@@ -26,7 +26,7 @@ CFLAGS := -std=gnu17
 CXXFLAGS := -std=gnu++17 -I./include
 
 # C/C++ flags
-CPPFLAGS := -Wall -Wno-maybe-uninitialized -D__BSD_VISIBLE -DSERVER_IMP -DSOL_USING_CXX_LUA -DYUZU
+CPPFLAGS := -Wall -Wno-maybe-uninitialized -D__BSD_VISIBLE -DSERVER_IMP -DYUZU
 
 ifeq ($(BUILD),release)
 	# "Release" build - optimization, and no debug symbols

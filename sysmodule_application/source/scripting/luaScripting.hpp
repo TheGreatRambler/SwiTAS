@@ -1,5 +1,7 @@
 #pragma once
 
+#define SOL_USING_CXX_LUA
+
 #include <sol.hpp>
 #include <string>
 

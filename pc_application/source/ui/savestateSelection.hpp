@@ -80,6 +80,8 @@ private:
 	DrawingCanvasBitmap* currentFrame;
 	DrawingCanvasBitmap* goalFrame;
 
+	std::string leftDhashString;
+
 	// Will be set if the dialog is supposed to load savestates, not create the first one
 	bool savestateLoadDialog;
 

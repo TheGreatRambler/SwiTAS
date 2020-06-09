@@ -144,7 +144,7 @@ SavestateSelection::SavestateSelection(wxFrame* parent, rapidjson::Document* set
 		fullSizer->Add(selectFrameAutomatically, 1);
 	}
 
-	fullSizer->Add(autoIncrementDelay, 1);
+	fullSizer->Add(autoIncrementDelay, 0);
 
 	buttonSizer->Add(playButton, 1);
 	buttonSizer->Add(pauseButton, 1);
@@ -209,9 +209,10 @@ void SavestateSelection::registerFramebufferCallback() {
 
 		wxImage screenshot = HELPERS::getImageFromJPEGData(data.buf);
 		currentFrame->setBitmap(new wxBitmap(screenshot));
+		wxString hash   = HELPERS::calculateDhash(screenshot, dhashWidth, dhashHeight);
+		leftDhashString = hash.ToStdString();
 
 		if(savestateLoadDialog) {
-			wxString hash = HELPERS::calculateDhash(screenshot, dhashWidth, dhashHeight);
 			leftDHash->SetLabel(hash);
 
 			uint16_t hamming = HELPERS::getHammingDistance(hash, rightDHash->GetLabel());
@@ -227,7 +228,7 @@ void SavestateSelection::registerFramebufferCallback() {
 		}
 
 		if(autoFrameEnabled) {
-			autoFrameAdvanceTimer.StartOnce(autoIncrementDelay->GetValue());
+			autoFrameAdvanceTimer->StartOnce(autoIncrementDelay->GetValue());
 		}
 	})
 }

@@ -27,7 +27,7 @@ CXXFLAGS := -std=gnu++17 $(shell wx-config --cxxflags base,core,net) $(shell pkg
 
 # C/C++ flags
 # For some reason, the CLIENT_IMP doesn't seem to be passing down, oh well
-CPPFLAGS := -Wall -Wno-maybe-uninitialized -DCLIENT_IMP
+CPPFLAGS := -Wall -Wno-maybe-uninitialized -Wsign-compare -DCLIENT_IMP
 
 ifeq ($(BUILD),release)
 	# "Release" build - optimization, and no debug symbols

@@ -1,5 +1,5 @@
 sysmodule:
-  make -f MakefileSysmodule
+	make -f MakefileSysmodule
 
 yuzu:
-  make -f MakefileYuzu
+	make -f MakefileYuzu
