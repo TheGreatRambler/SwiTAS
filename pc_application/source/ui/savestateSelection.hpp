@@ -126,7 +126,7 @@ public:
 	}
 
 	std::string getNewDhash() {
-		return leftDHash->GetLabel().ToStdString();
+		return leftDhashString;
 	}
 
 	wxBitmap* getNewScreenshot() {

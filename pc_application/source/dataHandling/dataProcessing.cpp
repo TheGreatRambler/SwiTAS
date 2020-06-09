@@ -437,7 +437,10 @@ void DataProcessing::setCurrentFrame(FrameNum frameNum) {
 		// Set the current frame to this number
 		// Focus to this specific row now
 		// This essentially scrolls to it
-		EnsureVisible(frameNum);
+
+		if(GetItemCount() != 1) {
+			EnsureVisible(frameNum);
+		}
 
 		currentFrame = frameNum;
 
@@ -468,7 +471,7 @@ void DataProcessing::createSavestateHere() {
 }
 
 void DataProcessing::runFrame() {
-	if(currentRunFrame != inputsList->size()) {
+	if(currentRunFrame != inputsList->size() - 1) {
 		// Technically, should handle for entering next savetstate hook block, but TODO
 		std::shared_ptr<ControllerData> controllerData = inputsList->at(currentRunFrame);
 
@@ -558,8 +561,9 @@ void DataProcessing::addNewSavestateHook(std::string dHash, wxBitmap* screenshot
 }
 
 void DataProcessing::setSavestateHook(SavestateBlockNum index) {
-	inputsList = allPlayers[viewingPlayerIndex]->at(index)->inputs;
-	SetItemCount(inputsList->size());
+	inputsList           = allPlayers[viewingPlayerIndex]->at(index)->inputs;
+	std::size_t itemSize = inputsList->size();
+	SetItemCount(itemSize);
 	setCurrentFrame(0);
 	currentRunFrame      = 0;
 	currentImageFrame    = 0;

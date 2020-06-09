@@ -43,68 +43,25 @@ void ScriptExporter::onFtpSelect(wxCommandEvent& event) {
 	// wxFTP ftp;
 	ftpAddress = ftpEntry->GetLineText(0).ToStdString();
 
-	// https://github.com/embeddedmz/ftpclient-cpp
-	embeddedmz::CFTPClient FTPClient([](const std::string& strLogMsg) {});
+	wxString tempPath = wxFileName::CreateTempFileName("script");
+	wxFile file(tempPath, wxFile::write);
+	file.Write(wxString::FromUTF8(dataToSave));
+	file.Close();
 
-	// First, test ftp with user and password
-	// http://jkorpela.fi/ftpurl.html
-	char user[16];
-	char password[100];
-	char host[50];
-	int port;
-	char path[1024];
+	std::string output = HELPERS::exec(wxString::Format("curl -T %s -m 10 --connect-timeout 3 --verbose %s", tempPath, ftpAddress).c_str());
 
-	uint8_t userSet     = false;
-	uint8_t passwordSet = false;
-	uint8_t portSet     = false;
+	wxRemoveFile(tempPath);
 
-	uint8_t successful = false;
+	if(output.find("is not recognized") != std::string::npos || output.find("command not found") != std::string::npos) {
+		wxMessageDialog errorDialog(this, "Curl Not Found", "The Curl executable was not found", wxOK | wxICON_ERROR);
+		errorDialog.ShowModal();
+	} else if(output.find("Closing connection 0") != std::string::npos) {
+		std::vector<std::string> lines = HELPERS::splitString(output, '\n');
 
-	if(sscanf(ftpAddress.c_str(), "ftp://%[^:]:%[^@]@%[^:]:%d%s", user, password, host, &port, path) == 5) {
-		userSet     = true;
-		passwordSet = true;
-		portSet     = true;
-
-		successful = true;
+		wxMessageDialog errorDialog(this, "Curl Error", wxString::FromUTF8(lines[lines.size() - 1]), wxOK | wxICON_ERROR);
+		errorDialog.ShowModal();
 	} else {
-		if(sscanf(ftpAddress.c_str(), "ftp://%[^:]:%d%s", host, &port, path) == 3) {
-			portSet = true;
-
-			successful = true;
-		} else {
-			if(sscanf(ftpAddress.c_str(), "ftp://%[^/]%s", host, path) == 2) {
-				successful = true;
-			}
-		}
-	}
-
-	if(successful) {
-		if(portSet && userSet && passwordSet) {
-			FTPClient.InitSession(std::string("ftp://") + host, port, std::string(user), std::string(password));
-		} else if(portSet) {
-			FTPClient.InitSession(std::string("ftp://") + host, port, "anonymous", "guest");
-		} else {
-			FTPClient.InitSession(std::string("ftp://") + host, 21, "anonymous", "guest");
-		}
-
-		std::string fullPath(path);
-
-		FTPClient.RemoveFile(fullPath);
-
-		wxString tempPath = wxFileName::CreateTempFileName("script");
-		wxFile file(tempPath, wxFile::write);
-		file.Write(wxString::FromUTF8(dataToSave));
-		file.Close();
-
-		if (!FTPClient.UploadFile(tempPath.ToStdString(), fullPath, true)) {
-			wxMessageDialog fileNotSentDialog(this, "File Not Sent", "The file was not sent to the FTP server", wxOK | wxICON_ERROR);
-		fileNotSentDialog.ShowModal();
-		}
-
-		wxRemoveFile(tempPath);
-	} else {
-		wxMessageDialog addressInvalidDialog(this, "This URL is invalid", "Invalid URL", wxOK | wxICON_ERROR);
-		addressInvalidDialog.ShowModal();
+		EndModal(wxID_OK);
 	}
 }
 

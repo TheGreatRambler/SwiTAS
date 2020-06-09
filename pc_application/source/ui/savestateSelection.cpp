@@ -50,6 +50,7 @@ void SavestateLister::onSavestateHookSelect(wxMouseEvent& event) {
 		if(drawingCanvas == savestateScreenshots[i]) {
 			selectedSavestate   = i;
 			operationSuccessful = true;
+			Close(true);
 			EndModal(wxID_OK);
 			break;
 		}
@@ -297,10 +298,11 @@ void SavestateSelection::callOk() {
 		data.actFlag = SendInfo::START_TAS_MODE;
 	})
 	// clang-format on
+	Close(true);
 	EndModal(wxID_OK);
 }
 
 void SavestateSelection::onClose(wxCloseEvent& event) {
 	delete autoFrameAdvanceTimer;
-	REMOVE_NETWORK_CALLBACK(RecieveGameFramebuffer)
+	projectHandler->Callbacks_RecieveGameFramebuffer.erase(NETWORK_CALLBACK_ID);
 }

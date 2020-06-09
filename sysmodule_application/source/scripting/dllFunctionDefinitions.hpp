@@ -1,54 +1,56 @@
 #pragma once
 
 // http://www.fceux.com/web/help/fceux.html?LuaFunctionsList.html
+// Bools become uint8_t due to portability issues
+// Everu function is preceded by a pointer to the Yuzu context
 
-#include <cstdio>
+#include <cstdint>
 
 // Emu library
 
 // emu.poweron() ignored
 // emu.softreset() ignored
-typedef void(emu_speedmode)(char* mode);
-typedef void(emu_frameadvance)();
-typedef void(emu_pause)();
-typedef void(emu_unpause)();
+typedef void(emu_speedmode)(void* ctx, char* mode);
+typedef void(emu_frameadvance)(void* ctx);
+typedef void(emu_pause)(void* ctx);
+typedef void(emu_unpause)(void* ctx);
 // emu.exec_count(int count, function func) ignored
 // emu.exec_time(int time, function func) ignored
 // emu.setrenderplanes(bool sprites, bool background) ignored
-typedef void(emu_message)(char* mode);
-typedef int(emu_framecount)();
+typedef void(emu_message)(void* ctx, char* mode);
+typedef int(emu_framecount)(void* ctx);
 // int emu.lagcount() ignored
 // bool emu.lagged()
 // emu.setlagflag(bool value) ignored
-typedef bool(emu_emulating)();
-typedef bool(emu_paused)();
+typedef uint8_t(emu_emulating)(void* ctx);
+typedef uint8_t(emu_paused)(void* ctx);
 // bool emu.readonly() ignored
 // emu.setreadonly(bool state) ignored
-typedef char*(emu_getdir)();
-typedef void(emu_loadrom)(char* filename);
+typedef char*(emu_getdir)(void* ctx);
+typedef void(emu_loadrom)(void* ctx, char* filename);
 // emu.registerbefore(function func) handled outside of Yuzu
 // emu.registerafter(function func) handled outside of Yuzu
 // emu.registerexit(function func) handled outside of Yuzu
 // bool emu.addgamegenie(string str) ignored
 // bool emu.delgamegenie(string str) ignored
-typedef void(emu_print)(char* mode);
-typedef uint8_t*(emu_getscreenpixel)(int x, int y, bool getemuscreen);
+typedef void(emu_print)(void* ctx, uint8_t mode);
+typedef uint8_t*(emu_getscreenpixel)(void* ctx, int x, int y, bool getemuscreen);
 
 // ROM Library (handled differently since the games are bigger)
 
-typedef uint8_t(rom_readbyteunsigned)(uint64_t address);
-typedef int8_t(rom_readbytesigned)(uint64_t address);
-typedef void(rom_writebyte)(uint64_t address, uint8_t byte);
+typedef uint8_t(rom_readbyteunsigned)(void* ctx, uint64_t address);
+typedef int8_t(rom_readbytesigned)(void* ctx, uint64_t address);
+typedef void(rom_writebyte)(void* ctx, uint64_t address, uint8_t byte);
 
 // Memory Library
 
-typedef uint8_t(memory_readbyteunsigned)(uint64_t address);
-typedef uint8_t*(memory_readbyterange)(uint64_t address, uint64_t length);
-typedef int8_t(memory_readbytesigned)(uint64_t address);
+typedef uint8_t(memory_readbyteunsigned)(void* ctx, uint64_t address);
+typedef uint8_t*(memory_readbyterange)(void* ctx, uint64_t address, uint64_t length);
+typedef int8_t(memory_readbytesigned)(void* ctx, uint64_t address);
 // memory.readword(int addressLow, [int addressHigh]) ignored
 // memory.readwordunsigned(int addressLow, [int addressHigh]) ignored
 // memory.readwordsigned(int addressLow, [int addressHigh]) ignored
-typedef void(memory_writebyte)(uint64_t address, uint8_t byte);
+typedef void(memory_writebyte)(void* ctx, uint64_t address, uint8_t byte);
 // int memory.getregister(cpuregistername) ignored, believe the name is different
 // memory.setregister(string cpuregistername, int value) ignored, same as above
 // memory.register(int address, [int size,] function func) ignored
@@ -59,28 +61,64 @@ typedef void(memory_writebyte)(uint64_t address, uint8_t byte);
 
 // Debugger Library
 
-typedef void(debugger_hitbreakpoint)();
-typedef uint64_t(debugger_getcyclescount)();
-typedef uint64_t(debugger_getinstructionscount)();
-typedef void(debugger_resetcyclescount)();
-typedef void(debugger_resetinstructionscount)();
+typedef void(debugger_hitbreakpoint)(void* ctx);
+typedef uint64_t(debugger_getcyclescount)(void* ctx);
+typedef uint64_t(debugger_getinstructionscount)(void* ctx);
+typedef void(debugger_resetcyclescount)(void* ctx);
+typedef void(debugger_resetinstructionscount)(void* ctx);
 
 // Joypad Library (Modified, based on libnx standards)
 
-typedef uint64_t(joypad_read)(uint8_t player);
-typedef uint64_t(joypad_immediate)(uint8_t player);
+typedef uint64_t(joypad_read)(void* ctx, uint8_t player);
+typedef uint64_t(joypad_immediate)(void* ctx, uint8_t player);
 // table joypad.getdown(int player) ignored
 // table joypad.readdown(int player) ignored
 // table joypad.getup(int player) ignored
 // table joypad.readup(int player) ignored
-typedef void(joypad_set)(uint8_t player, uint64_t input);
+typedef void(joypad_set)(void* ctx, uint8_t player, uint64_t input);
 
-// TODO add joystick and accel and gyro
+// Joystick, accel and gyro based on enums
+typedef int16_t(joypad_readjoystick)(void* ctx, uint8_t player, uint8_t type);
+// Disable input entering from Yuzu, this allows the script to set input without interruption
+typedef void(joypad_enable)(void* ctx, uint8_t enable);
 
 // Input Library
 
 // table input.get() ignored
 // table input.read() ignored
-typedef char*(input_popup)();
+// string input.popup ignored
 
-// TODO add keyboard mechanism based on enums
+// Keyboard machanism based on enums
+typedef uint8_t(input_ispressed)(void* ctx, uint8_t key);
+
+// Savestate Library implemented in dll
+
+// Movie Library implemented in dll
+
+// GUI Library (Most functions handled DLL side, even text handling)
+
+typedef void(gui_drawpixel)(void* ctx, int x, int y, uint8_t alpha, uint8_t red, uint8_t green, uint8_t blue);
+// gui.getpixel(int x, int y) ignored
+// gui.box(int x1, int y1, int x2, int y2 [, fillcolor [, outlinecolor]]))
+// gui.drawbox(int x1, int y1, int x2, int y2 [, fillcolor [, outlinecolor]]))
+// gui.rect(int x1, int y1, int x2, int y2 [, fillcolor [, outlinecolor]]))
+// gui.drawrect(int x1, int y1, int x2, int y2 [, fillcolor [, outlinecolor]]))
+// gui.text(int x, int y, string str [, textcolor [, backcolor]])
+// gui.drawtext(int x, int y, string str [, textcolor [, backcolor]])
+// gui.parsecolor(color) ignored
+typedef char*(gui_savescreenshot)(void* ctx);
+typedef void(gui_savescreenshotas)(void* ctx, char* path);
+typedef void(gui_drawimage)(void* ctx, int dx, int dy, char* path, int sx, int sy, int sw, int sh, float alphamul);
+// gui.opacity(int alpha) ignored
+// gui.transparency(int trans) ignored
+// function gui.register(function func) ignored
+typedef void(gui_popup)(void* ctx, char* message, char* type, char* icon);
+
+// Saves screenshot into byte array as raw framebuffer
+typedef uint8_t*(gui_savescreenshotmemory)(void* ctx, uint64_t* size);
+
+// Sound Library ignored
+
+// TAS Editor Library implemented in DLL
+
+// Bitwise Operations implemented in DLL

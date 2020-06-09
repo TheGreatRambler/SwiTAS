@@ -80,7 +80,8 @@
 			"cinttypes": "cpp",
 			"typeinfo": "cpp",
 			"variant": "cpp",
-			"bit": "cpp"
+			"bit": "cpp",
+			"typeindex": "cpp"
 		},
 		"cSpell.enabled": false
 	}

@@ -13,7 +13,6 @@
 #include "../dataHandling/projectHandler.hpp"
 #include "../helpers.hpp"
 #include "../sharedNetworkCode/networkInterface.hpp"
-#include "../thirdParty/FTP/FTPClient.h"
 
 class ScriptExporter : public wxDialog {
 private:
