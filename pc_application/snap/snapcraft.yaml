@@ -121,6 +121,7 @@ parts:
       - libwxgtk3.1-0-unofficial3
       - libwxbase3.1unofficial3-dev
       - libwxgtk3.1unofficial3-dev
+      - libcurl4-gnutls-dev
       - wx-common
       - libsm6
       - libnotify4

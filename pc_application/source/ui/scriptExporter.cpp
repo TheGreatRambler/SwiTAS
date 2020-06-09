@@ -40,8 +40,11 @@ ScriptExporter::ScriptExporter(wxFrame* parent, std::shared_ptr<ProjectHandler> 
 
 void ScriptExporter::onFtpSelect(wxCommandEvent& event) {
 	// The thing passed is a ftp address, parse it
-	wxFTP ftp;
+	// wxFTP ftp;
 	ftpAddress = ftpEntry->GetLineText(0).ToStdString();
+
+	// https://github.com/embeddedmz/ftpclient-cpp
+	embeddedmz::CFTPClient FTPClient([](const std::string& strLogMsg) {});
 
 	// First, test ftp with user and password
 	// http://jkorpela.fi/ftpurl.html
@@ -57,103 +60,52 @@ void ScriptExporter::onFtpSelect(wxCommandEvent& event) {
 
 	uint8_t successful = false;
 
-	if(sscanf(ftpAddress.c_str(), "ftp://%[^:]:%[^@]@%[^:]:%d/%s", user, password, host, &port, path) == 5) {
+	if(sscanf(ftpAddress.c_str(), "ftp://%[^:]:%[^@]@%[^:]:%d%s", user, password, host, &port, path) == 5) {
 		userSet     = true;
 		passwordSet = true;
 		portSet     = true;
 
 		successful = true;
 	} else {
-		if(sscanf(ftpAddress.c_str(), "ftp://%[^:]:%d/%s", host, &port, path) == 3) {
+		if(sscanf(ftpAddress.c_str(), "ftp://%[^:]:%d%s", host, &port, path) == 3) {
 			portSet = true;
 
 			successful = true;
 		} else {
-			if(sscanf(ftpAddress.c_str(), "ftp://%[^/]/%s", host, path) == 2) {
+			if(sscanf(ftpAddress.c_str(), "ftp://%[^/]%s", host, path) == 2) {
 				successful = true;
 			}
 		}
 	}
 
 	if(successful) {
-		if(userSet)
-			ftp.SetUser(wxString::FromUTF8(user));
-		if(passwordSet)
-			ftp.SetPassword(wxString::FromUTF8(password));
-
-		uint8_t ftpConnectionSuccessful;
-		if(portSet) {
-			ftpConnectionSuccessful = ftp.Connect(wxString::FromUTF8(host), port);
+		if(portSet && userSet && passwordSet) {
+			FTPClient.InitSession(std::string("ftp://") + host, port, std::string(user), std::string(password));
+		} else if(portSet) {
+			FTPClient.InitSession(std::string("ftp://") + host, port, "anonymous", "guest");
 		} else {
-			ftpConnectionSuccessful = ftp.Connect(wxString::FromUTF8(host));
+			FTPClient.InitSession(std::string("ftp://") + host, 21, "anonymous", "guest");
 		}
 
-		if(ftpConnectionSuccessful) {
-			std::vector<std::string> pathParts = HELPERS::splitString(std::string(path), '/');
+		std::string fullPath(path);
 
-			ftp.ChDir("/");
-			ftp.SetAscii();
+		FTPClient.RemoveFile(fullPath);
 
-			for(int i = 0; i < pathParts.size() - 1; i++) {
-				std::string currentPath = "/";
-				for(int j = 0; j < i; j++) {
-					currentPath += (pathParts[j] + "/");
-				}
+		wxString tempPath = wxFileName::CreateTempFileName("script");
+		wxFile file(tempPath, wxFile::write);
+		file.Write(wxString::FromUTF8(dataToSave));
+		file.Close();
 
-				if(!ftp.ChDir(wxString::FromUTF8(currentPath))) {
-					// Create the directory
-					if(!ftp.MkDir(wxString::FromUTF8(pathParts[i]))) {
-						wxMessageDialog ftpDirectoryError(this, "Could not create directory", "Invalid Directory", wxOK | wxICON_ERROR);
-						ftpDirectoryError.ShowModal();
-
-						ftp.Close();
-
-						return;
-					}
-				}
-			}
-
-			wxString filename = wxString::FromUTF8(pathParts[pathParts.size() - 1]);
-
-			if(ftp.FileExists(filename)) {
-				// Do twice in case of firewall issues
-				if(!ftp.RmFile(filename)) {
-					ftp.RmFile(filename);
-				}
-			}
-
-			// ftp.SetPassive(false);
-			wxOutputStream* out = ftp.GetOutputStream(filename);
-
-			// Just in case of firewall issues, try one more time
-			if(!out) {
-				out = ftp.GetOutputStream(filename);
-			}
-
-			if(out) {
-				wxStringInputStream stringStream(wxString::FromUTF8(dataToSave));
-				out->Write(stringStream);
-				delete out;
-
-				// To allow quick exporting later
-				projectHandler->setLastEnteredFtpPath(ftpAddress);
-
-				EndModal(wxID_OK);
-			} else {
-				wxMessageDialog fileErrorDialog(this, "Error when writing file", "File Writing Error", wxOK | wxICON_ERROR);
-				fileErrorDialog.ShowModal();
-			}
-
-		} else {
-			wxMessageDialog hostErrorDialog(this, wxString::Format("Could not log into %s", wxString::FromUTF8(ftpAddress)), "Invalid Host Or Port", wxOK | wxICON_ERROR);
-			hostErrorDialog.ShowModal();
+		if (!FTPClient.UploadFile(tempPath.ToStdString(), fullPath, true)) {
+			wxMessageDialog fileNotSentDialog(this, "File Not Sent", "The file was not sent to the FTP server", wxOK | wxICON_ERROR);
+		fileNotSentDialog.ShowModal();
 		}
+
+		wxRemoveFile(tempPath);
 	} else {
 		wxMessageDialog addressInvalidDialog(this, "This URL is invalid", "Invalid URL", wxOK | wxICON_ERROR);
 		addressInvalidDialog.ShowModal();
 	}
-
-	ftp.Close();
 }
 
 void ScriptExporter::onFilesystemOpen(wxCommandEvent& event) {

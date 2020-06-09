@@ -890,7 +890,7 @@ void DataProcessing::invalidateRun(FrameNum frame) {
 		wxFileName framebufferFileName = getFramebufferPath(viewingPlayerIndex, currentSavestateHook, frame);
 		if(framebufferFileName.FileExists()) {
 			// Delete file from filesystem
-			remove(framebufferFileName.GetFullPath().c_str());
+			wxRemoveFile(framebufferFileName.GetFullPath());
 		}
 		frame++;
 	}
