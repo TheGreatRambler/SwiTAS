@@ -79,7 +79,7 @@ std::shared_ptr<ControllerData> ControllerHandler::getControllerData() {
 	std::shared_ptr<ControllerData> newControllerData = std::make_shared<ControllerData>();
 
 	for(auto const& button : btnToHidKeys) {
-#ifdef __SWITCH
+#ifdef __SWITCH__
 		if(state.buttons & button.second) {
 			SET_BIT(newControllerData->buttons, true, button.first);
 		} else {

@@ -1,6 +1,7 @@
 # Build for 32 bit and then 64 bit
 # TODO
 
+make clean
 make -B BUILD=release ARCH=64
 
 mkdir release
@@ -17,6 +18,7 @@ strip -s release/bin/switas.exe
 zip -r switas-windows-64bit.zip release
 rm -r release
 
+make clean
 make -B BUILD=release ARCH=32
 
 mkdir release

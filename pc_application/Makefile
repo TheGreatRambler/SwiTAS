@@ -37,18 +37,20 @@ else
 	CPPFLAGS += -Og -g -ggdb
 endif
 
-ifeq ($(ARCH),32)
-	CPPFLAGS += -m32
-else
-	CPPFLAGS += -m64
-endif
-
 # Linker flags (-lpthread needed for threads)
 # Includes some neccessary linker flags for win32-darkmode (will add in the future)
 LDFLAGS := $(shell wx-config --libs base,core) $(shell pkg-config --libs ffms2) -lpthread
 ifeq ($(UNAME),Msys)
 	# Needed for sockets on windows
 	LDFLAGS += -lws2_32
+endif
+
+ifeq ($(ARCH),32)
+	CPPFLAGS += -m32
+	LDFLAGS += -m32
+else
+	CPPFLAGS += -m64
+	LDFLAGS += -m64
 endif
 
 SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)

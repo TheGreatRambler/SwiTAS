@@ -40,10 +40,12 @@ include $(DEVKITPRO)/libnx/switch_rules
 
 TARGET		:=	SwiTAS
 BUILD		:=	buildSysmodule
-SOURCES		:=	source ../sharedNetworkCode ../sharedNetworkCode/thirdParty/clsocket
+SOURCES		:=	source
 DATA		:=	data
-INCLUDES	:=	include source/thirdParty/lua-5.1
+INCLUDES	:=	include source/thirdParty/lua-5.3.5
 #ROMFS	:=	romfs
+
+SOURCES := $(shell find $(SOURCES) -print)
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -53,7 +55,7 @@ ARCH	:=	-march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE
 CFLAGS	:=	-g -Wall -ffunction-sections \
 			$(ARCH) $(DEFINES)
 
-CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -D__BSD_VISIBLE -DSERVER_IMP
+CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -D__BSD_VISIBLE -DSERVER_IMP -DLUA_32BITS
 
 # Need Cpp11 for certain features
 # It has to be c++14 because of zpp
@@ -172,6 +174,8 @@ endif
 all: $(BUILD)
 
 $(BUILD):
+	rm -r -f ./source/sharedNetworkCode
+	cp -p -r ../sharedNetworkCode ./source/sharedNetworkCode
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/MakefileSysmodule
 	# Copy files into a ready-made directory structure

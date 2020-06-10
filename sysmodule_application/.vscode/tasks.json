@@ -22,7 +22,7 @@
 			"label": "Build Sysmodule Release",
 			"type": "shell",
 			"promptOnClose": true,
-			"command": "make sysmodule BUILD=release",
+			"command": "make sysmodule BUILD_TYPE=release",
 			"presentation": {
 				"reveal": "always",
 				"panel": "dedicated"
