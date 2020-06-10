@@ -373,13 +373,14 @@ void DataProcessing::onPaste(wxCommandEvent& event) {
 				std::string clipboardText = data.GetText().ToStdString();
 
 				Freeze();
-				FrameNum lastItem = buttonData->textToFrames(this, clipboardText, firstSelectedItem, insertPaste, placePaste);
+				FrameNum lastItem    = buttonData->textToFrames(this, clipboardText, firstSelectedItem, insertPaste, placePaste);
+				FrameNum sizeOfPaste = lastItem - firstSelectedItem + 1;
 				if(!insertPaste) {
-					for(long i = firstSelectedItem; i <= lastSelectedItem; i += (lastItem - firstSelectedItem + 1)) {
+					for(long i = firstSelectedItem; i <= lastSelectedItem; i += sizeOfPaste) {
 						buttonData->textToFrames(this, clipboardText, i, insertPaste, placePaste);
 					}
 				}
-				setCurrentFrame(currentFrame);
+				setCurrentFrame(firstSelectedItem + sizeOfPaste - 1);
 				Thaw();
 				Refresh();
 			}

@@ -4,8 +4,11 @@
 #include <map>
 #include <plog/Log.h>
 #include <string>
-#include <switch.h>
 #include <vector>
+
+#ifdef __SWITCH__
+#include <switch.h>
+#endif
 
 #include "controller.hpp"
 #include "mainLoopHandler.hpp"

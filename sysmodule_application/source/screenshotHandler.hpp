@@ -11,15 +11,18 @@
 #include <iterator>
 #include <plog/Log.h>
 #include <string>
+#ifdef __SWITCH__
 #include <switch.h>
+#endif
 #include <vector>
 
 #include "../../sharedNetworkCode/networkInterface.hpp"
 
-// Many thanks to 黯然的饭#8969 on Discord for the framebuffer implementation
 class ScreenshotHandler {
 private:
+#ifdef __SWITCH__
 	Result rc;
+#endif
 
 public:
 	ScreenshotHandler();

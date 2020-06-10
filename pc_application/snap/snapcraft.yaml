@@ -75,7 +75,6 @@ parts:
       - libgomp1
       - libgsm1
       - libice6
-      - libluajit-5.1-2
       - libmp3lame0
       - libmpg123-0
       - libnotify4
@@ -121,13 +120,11 @@ parts:
       - libwxgtk3.1-0-unofficial3
       - libwxbase3.1unofficial3-dev
       - libwxgtk3.1unofficial3-dev
-      - libcurl4-gnutls-dev
       - wx-common
       - libsm6
       - libnotify4
       - libxtst6
       - libffms2-dev
-      - libluajit-5.1-dev
     # Install gcc-9
     override-build: |
       sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9

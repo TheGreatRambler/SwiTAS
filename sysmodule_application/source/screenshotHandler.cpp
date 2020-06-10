@@ -6,8 +6,15 @@ void ScreenshotHandler::writeFramebuffer(std::shared_ptr<CommunicateWithNetwork>
 	LOGD << "Linked with frame advance: " << (int)linkedWithFrameAdvance;
 	uint64_t outSize;
 	std::vector<uint8_t> buf(JPEG_BUF_SIZE);
-	rc = capsscCaptureJpegScreenShot(&outSize, buf.data(), JPEG_BUF_SIZE, ViLayerStack::ViLayerStack_ApplicationForDebug, 100000000);
-	if(R_SUCCEEDED(rc)) {
+
+#ifdef __SWITCH__
+	rc                = capsscCaptureJpegScreenShot(&outSize, buf.data(), JPEG_BUF_SIZE, ViLayerStack::ViLayerStack_ApplicationForDebug, 100000000);
+	uint8_t succeeded = R_SUCCEEDED(rc);
+#else
+	uint8_t succeeded = true;
+#endif
+
+	if(succeeded) {
 		LOGD << "Screenshot size: " << outSize;
 		buf.resize(outSize);
 		// clang-format off

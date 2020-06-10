@@ -22,6 +22,7 @@ MainLoop::MainLoop() {
 			RECIEVE_QUEUE_DATA(SendAutoRun)
 		});
 
+#ifdef __SWITCH__
 	LOGD << "Open display";
 	ViDisplay disp;
 	rc = viOpenDefaultDisplay(&disp);
@@ -38,17 +39,24 @@ MainLoop::MainLoop() {
 	rc = hiddbgAttachHdlsWorkBuffer();
 	if(R_FAILED(rc))
 		fatalThrow(rc);
+#endif
 }
 
 void MainLoop::mainLoopHandler() {
 	if(!isPaused) {
+#ifdef __SWITCH__
 		// Being debugged might break this application
 		rc = pmdmntGetApplicationProcessId(&applicationProcessId);
-
 		// Lifted from switchPresense-Rewritten
-		if(R_SUCCEEDED(rc)) {
-			// Application connected
-			// Get application info
+		uint8_t succeeded = R_SUCCEEDED(rc);
+#else
+		uint8_t succeeded = true;
+#endif
+
+		if(succeeded) {
+// Application connected
+// Get application info
+#ifdef __SWITCH__
 			rc = pminfoGetProgramId(&applicationProgramId, applicationProcessId);
 			if(R_SUCCEEDED(rc)) {
 				if(!applicationOpened) {
@@ -68,6 +76,7 @@ void MainLoop::mainLoopHandler() {
 					// pauseApp();
 				}
 			}
+#endif
 		} else {
 			// I believe this means that there is no application running
 			// If there was just an application open, let the PC know
@@ -102,6 +111,7 @@ void MainLoop::mainLoopHandler() {
 		// handle network updates always, they are stored in the queue regardless of the internet
 		handleNetworkUpdates();
 
+#ifdef __SWITCH__
 		// Check auto run
 		if(autoRunOn && networkInstance->isConnected()) {
 			u64 currentTime = armTicksToNs(armGetSystemTick());
@@ -123,6 +133,7 @@ void MainLoop::mainLoopHandler() {
 			// Get nanosecond time
 			// Check if
 		}
+#endif
 	}
 
 	// Match first controller inputs as often as possible
@@ -213,6 +224,7 @@ void MainLoop::sendGameInfo() {
 
 		uint64_t addr = 0;
 		pauseApp(false, 0, 0, 0);
+#ifdef __SWITCH__
 		while(true) {
 			MemoryInfo info = { 0 };
 			uint32_t pageinfo;
@@ -224,6 +236,7 @@ void MainLoop::sendGameInfo() {
 				break;
 			}
 		}
+#endif
 		unpauseApp();
 
 		ADD_TO_QUEUE(RecieveGameInfo, networkInstance, {
@@ -235,7 +248,9 @@ void MainLoop::sendGameInfo() {
 	}
 }
 
+#ifdef __SWITCH__
 char* MainLoop::getAppName(u64 application_id) {
+#ifdef __SWITCH__
 	static NsApplicationControlData appControlData = { 0 };
 	size_t appControlDataSize                      = 0;
 	NacpLanguageEntry* languageEntry               = nullptr;
@@ -246,10 +261,13 @@ char* MainLoop::getAppName(u64 application_id) {
 				return languageEntry->name;
 		}
 	}
+#endif
 	return (char*)"Game Not Defined";
 }
+#endif
 
 uint8_t MainLoop::getNumControllers() {
+#ifdef __SWITCH__
 	uint8_t num = 0;
 
 	hidScanInput();
@@ -260,9 +278,11 @@ uint8_t MainLoop::getNumControllers() {
 	}
 
 	return num;
+#endif
 }
 
 void MainLoop::setControllerNumber(uint8_t numOfControllers) {
+#ifdef __SWITCH__
 	controllers.clear();
 	// Wait for all controllers to be disconnected
 	LOGD << (int)getNumControllers();
@@ -278,8 +298,10 @@ void MainLoop::setControllerNumber(uint8_t numOfControllers) {
 	})
 	// clang-format on
 	// Now, user is required to reconnect any controllers manually
+#endif
 }
 
+#ifdef __SWITCH__
 GameMemoryInfo MainLoop::getGameMemoryInfo(MemoryInfo memInfo) {
 	GameMemoryInfo info;
 	info.addr            = memInfo.addr;
@@ -292,6 +314,7 @@ GameMemoryInfo MainLoop::getGameMemoryInfo(MemoryInfo memInfo) {
 	info.padding         = memInfo.padding;
 	return info;
 }
+#endif
 
 void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint32_t frame, uint16_t savestateHookNum, uint8_t playerIndex) {
 	if(isPaused) {
@@ -315,8 +338,10 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint32_t frame, uint16_t
 		// Debug application again
 		LOGD << "Pausing";
 
+#ifdef __SWITCH__
 		rc       = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
 		isPaused = true;
+#endif
 
 		if(networkInstance->isConnected()) {
 			// Framebuffers should not be stored in memory unless they will be sent over internet
@@ -338,6 +363,7 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint32_t frame, uint16_t
 }
 
 void MainLoop::matchFirstControllerToTASController(uint8_t player) {
+#ifdef __SWITCH__
 	if(getNumControllers() > controllers.size() && controllers.size() != 0) {
 		hidScanInput();
 		// This should get the first non-TAS controller
@@ -351,14 +377,16 @@ void MainLoop::matchFirstControllerToTASController(uint8_t player) {
 
 		controllers[player]->setFrame(buttons, left, right);
 	}
+#endif
 }
 
 MainLoop::~MainLoop() {
 	LOGD << "Exiting app";
+#ifdef __SWITCH__
 	rc = hiddbgReleaseHdlsWorkBuffer();
+	hiddbgExit();
+#endif
 
 	// Make absolutely sure the app is unpaused on close
 	reset();
-
-	hiddbgExit();
 }

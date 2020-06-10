@@ -3,7 +3,9 @@
 #include <cstring>
 #include <memory>
 #include <plog/Log.h>
+#ifdef __SWITCH__
 #include <switch.h>
+#endif
 #include <vector>
 
 #include "../../sharedNetworkCode/networkInterface.hpp"
@@ -11,54 +13,64 @@
 
 class MainLoop {
 private:
-	Result rc;
-	u64 applicationProcessId = 0;
-	u64 applicationProgramId = 0;
+	uint64_t applicationProcessId = 0;
+	uint64_t applicationProgramId = 0;
 	std::string gameName;
 	uint8_t applicationOpened = false;
 	uint8_t internetConnected = false;
 	uint8_t isInTASMode       = false;
+
+#ifdef __SWITCH__
+	Result rc;
 	Handle applicationDebug;
+#endif
 
 	uint8_t autoRunOn = false;
 	uint32_t autoRunFrameframe;
 	uint16_t auroRunSavestateHookNum;
-	u64 nanosecondsBetweenAutorun;
-	u64 lastAutorunTime = 0;
+	uint64_t nanosecondsBetweenAutorun;
+	uint64_t lastAutorunTime = 0;
 
+#ifdef __SWITCH__
 	Event vsyncEvent;
+#endif
 
-	// WILL BE MORE
 	std::vector<std::unique_ptr<ControllerHandler>> controllers;
-
 	std::shared_ptr<CommunicateWithNetwork> networkInstance;
-
 	std::vector<std::pair<uint64_t, uint64_t>> memoryRegions;
 
 	ScreenshotHandler screenshotHandler;
 
 	uint8_t isPaused = false;
 
+#ifdef __SWITCH__
 	static char* getAppName(u64 application_id);
+#endif
 
 	void handleNetworkUpdates();
 	void sendGameInfo();
 
+#ifdef __SWITCH__
 	GameMemoryInfo getGameMemoryInfo(MemoryInfo memInfo);
+#endif
 
 	void pauseApp(uint8_t linkedWithFrameAdvance, uint32_t frame, uint16_t savestateHookNum, uint8_t playerIndex);
 
 	void waitForVsync() {
+#ifdef __SWITCH__
 		rc = eventWait(&vsyncEvent, UINT64_MAX);
 		if(R_FAILED(rc))
 			fatalThrow(rc);
+#endif
 	}
 
 	void unpauseApp() {
 		if(isPaused) {
+#ifdef __SWITCH__
 			// Unpause application
 			svcCloseHandle(applicationDebug);
 			isPaused = false;
+#endif
 		}
 	}
 

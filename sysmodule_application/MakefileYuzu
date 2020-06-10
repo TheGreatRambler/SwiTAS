@@ -43,9 +43,9 @@ else
 endif
 
 ifeq ($(UNAME),Msys)
-	CPPFLAGS += -DDLL_EXPORT="__declspec(dllexport)"
+	CPPFLAGS += -DDLL_EXPORT='extern "C" __declspec(dllexport)'
 else
-	CPPFLAGS += -fPIC -DDLL_EXPORT="__attribute__((visibility("default")))"
+	CPPFLAGS += -fPIC -DDLL_EXPORT='extern "C" __attribute__((visibility("default")))'
 endif
 
 # Linker flags
