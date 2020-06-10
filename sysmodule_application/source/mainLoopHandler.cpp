@@ -126,7 +126,7 @@ void MainLoop::mainLoopHandler() {
 				// clang-format on
 
 				// TODO autorun sends frame advance linked framebuffers
-				runSingleFrame(false, 0, 0, 0);
+				runSingleFrame(0, 0, 0, 0);
 
 				lastAutorunTime = currentTime;
 			}
@@ -150,7 +150,7 @@ void MainLoop::handleNetworkUpdates() {
 		controllers[data.playerIndex]->setFrame(data.controllerData);
 		if(data.incrementFrame) {
 			LOGD << "Increment frame";
-			runSingleFrame(true, data.frame, data.savestateHookNum, data.playerIndex);
+			runSingleFrame(1, data.frame, data.savestateHookNum, data.playerIndex);
 		}
 	})
 
@@ -165,7 +165,7 @@ void MainLoop::handleNetworkUpdates() {
 			// User able to unpause it
 			if(applicationOpened && internetConnected) {
 				LOGD << "Pause app";
-				pauseApp(false, 0, 0, 0);
+				pauseApp(0, 0, 0, 0);
 			}
 		} else if(data.actFlag == SendInfo::UNPAUSE_DEBUG) {
 			if(applicationOpened) {
@@ -176,19 +176,19 @@ void MainLoop::handleNetworkUpdates() {
 		} else if(data.actFlag == SendInfo::GET_FRAMEBUFFER) {
 			if(applicationOpened) {
 				LOGD << "Get framebuffer";
-				screenshotHandler.writeFramebuffer(networkInstance, false, 0, 0, 0);
+				screenshotHandler.writeFramebuffer(networkInstance, 0, 0, 0, 0);
 			}
 		} else if(data.actFlag == SendInfo::RUN_BLANK_FRAME) {
 			LOGD << "Run blank frame";
 			matchFirstControllerToTASController(0);
-			runSingleFrame(false, 0, 0, 0);
+			runSingleFrame(0, 0, 0, 0);
 			LOGD << "Done with that";
 		} else if(data.actFlag == SendInfo::START_TAS_MODE) {
 			LOGD << "Start TAS mode";
-			pauseApp(false, 0, 0, 0);
+			pauseApp(0, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::PAUSE) {
 			LOGD << "Pause";
-			pauseApp(false, 0, 0, 0);
+			pauseApp(0, 0, 0, 0);
 			LOGD << "Epic";
 		} else if(data.actFlag == SendInfo::UNPAUSE) {
 			LOGD << "Unpause";
@@ -223,7 +223,7 @@ void MainLoop::sendGameInfo() {
 		// https://github.com/switchbrew/switch-examples/blob/master/account/source/main.c
 
 		uint64_t addr = 0;
-		pauseApp(false, 0, 0, 0);
+		pauseApp(0, 0, 0, 0);
 #ifdef __SWITCH__
 		while(true) {
 			MemoryInfo info = { 0 };

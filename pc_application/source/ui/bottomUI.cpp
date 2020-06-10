@@ -422,7 +422,7 @@ void BottomUI::refreshDataViews() {
 	rightJoystickDrawer->Refresh();
 	buttonGrid->Refresh();
 	// Check to see if framebuffer is avaliable to draw
-	wxFileName framebufferFileName = inputInstance->getFramebufferPathForCurrent();
+	wxFileName framebufferFileName = inputInstance->getFramebufferPathForCurrentFramebuf();
 	if(framebufferFileName.FileExists()) {
 		wxImage framebuf(framebufferFileName.GetFullPath(), wxBITMAP_TYPE_JPEG);
 		frameViewerCanvas->setPrimaryBitmap(new wxBitmap(framebuf));

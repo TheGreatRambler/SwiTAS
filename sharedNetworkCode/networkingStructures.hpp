@@ -68,7 +68,7 @@ namespace Protocol {
 		uint16_t savestateHookNum;
 		uint8_t playerIndex;
 		uint8_t incrementFrame;
-	, self.controllerData, self.frame, self.playerIndex, self.incrementFrame)
+	, self.controllerData, self.frame, self.playerIndex, self.incrementFrame, self.savestateHookNum)
 
 	// Recieve all of the game's framebuffer
 	DEFINE_STRUCT(RecieveGameFramebuffer,
@@ -77,7 +77,7 @@ namespace Protocol {
 		uint32_t frame;
 		uint16_t savestateHookNum;
 		uint8_t playerIndex;
-	, self.buf)
+	, self.buf, self.fromFrameAdvance, self.frame, self.savestateHookNum, self.playerIndex)
 
 	// Recieve a ton of game and user info
 	DEFINE_STRUCT(RecieveGameInfo,
@@ -100,7 +100,7 @@ namespace Protocol {
 		uint32_t frameStart;
 		uint16_t savestateHookNum;
 		uint8_t playerIndex;
-	, self.fps, self.start)
+	, self.fps, self.start, self.frameStart, self.savestateHookNum, self.playerIndex)
 
 	DEFINE_STRUCT(SendLogging,
 		std::string log;

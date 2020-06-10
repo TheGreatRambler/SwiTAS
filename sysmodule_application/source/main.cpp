@@ -166,6 +166,7 @@ int main(int argc, char* argv[]) {
 
 // Leaving the possibility open for a standalone exe later
 // http://www.equestionanswers.com/c/c-explicit-linking.php
+// https://stackoverflow.com/a/13256146/9329945
 // http://anadoxin.org/blog/control-over-symbol-exports-in-mingw-linker.html
 #ifdef YUZU
 MainLoop mainLoop;
