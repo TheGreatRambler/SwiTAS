@@ -42,7 +42,7 @@ TARGET		:=	SwiTAS
 BUILD		:=	buildSysmodule
 SOURCES		:=	source ../sharedNetworkCode ../sharedNetworkCode/thirdParty/clsocket
 DATA		:=	data
-INCLUDES	:=	include
+INCLUDES	:=	include source/thirdParty/lua-5.1
 #ROMFS	:=	romfs
 
 #---------------------------------------------------------------------------------

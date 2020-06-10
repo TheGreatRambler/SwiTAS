@@ -23,7 +23,7 @@ endif
 CFLAGS := -std=gnu17
 
 # C++ flags
-CXXFLAGS := -std=gnu++17 -I./include
+CXXFLAGS := -std=gnu++17 -I./include -I./source/thirdParty/lua-5.1
 
 # C/C++ flags
 CPPFLAGS := -Wall -Wno-maybe-uninitialized -D__BSD_VISIBLE -DSERVER_IMP -DYUZU
