@@ -20,7 +20,7 @@ CXX := g++
 endif
 
 # C flags
-CFLAGS := -std=gnu17
+CFLAGS := -std=c11
 
 # C++ flags
 CXXFLAGS := -std=gnu++17 $(shell wx-config --cxxflags base,core) $(shell pkg-config --cflags ffms2) -I./include

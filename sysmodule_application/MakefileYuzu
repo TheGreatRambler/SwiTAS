@@ -20,13 +20,13 @@ CXX := g++
 endif
 
 # C flags
-CFLAGS := -std=gnu17
+CFLAGS := -std=c11
 
 # C++ flags
 CXXFLAGS := -std=gnu++17
 
 # C/C++ flags
-CPPFLAGS := -I./include -I./source/thirdParty/lua-5.3.5
+CPPFLAGS := -I./include -I./source/thirdParty/lua-5.1
 CPPFLAGS += -Wall -Wno-maybe-uninitialized -D__BSD_VISIBLE -DSERVER_IMP -DYUZU
 
 ifeq ($(BUILD),release)
@@ -44,7 +44,7 @@ else
 endif
 
 # Linker flags
-LDFLAGS := -lpthread
+LDFLAGS := -lpthread  -shared
 ifeq ($(UNAME),Msys)
 	# Needed for sockets on windows
 	LDFLAGS += -lws2_32

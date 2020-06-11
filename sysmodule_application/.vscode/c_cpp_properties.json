@@ -9,6 +9,7 @@
 			],
 			"defines": [
 				"__SWITCH__",
+				"YUZU",
 				"SERVER_IMP"
 			],
 			"compilerPath": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc",
@@ -26,6 +27,7 @@
 			],
 			"defines": [
 				"__SWITCH__",
+				"YUZU",
 				"SERVER_IMP"
 			],
 			"compilerPath": "C:/msys2/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc",
