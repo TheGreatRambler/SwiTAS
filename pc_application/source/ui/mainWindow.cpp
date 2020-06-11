@@ -167,17 +167,22 @@ void MainWindow::handleNetworkQueues() {
 		sideUI->recieveAutoRunData(data.controllerData);
 	})
 	// clang-format on
-	ADD_NETWORK_CALLBACK(RecieveGameFramebuffer, {
-		bottomUI->recieveGameFramebuffer(data.buf);
-		if(data.fromFrameAdvance == 1) {
-			wxFileName framebufferFileName = dataProcessingInstance->getFramebufferPath(data.playerIndex, data.savestateHookNum, data.frame);
-			framebufferFileName.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
-			wxFile file(framebufferFileName.GetFullPath(), wxFile::write);
-			file.Write(data.buf.data(), data.buf.size());
-			file.Close();
-			bottomUI->refreshDataViews();
-		}
-	})
+	{
+		projectHandler->Callbacks_RecieveGameFramebuffer.emplace(NETWORK_CALLBACK_ID, [this](const Protocol::Struct_RecieveGameFramebuffer& data) {
+			{
+				bottomUI->recieveGameFramebuffer(data.buf);
+				if(data.fromFrameAdvance == 1) {
+					wxFileName framebufferFileName = dataProcessingInstance->getFramebufferPath(data.playerIndex, data.savestateHookNum, data.frame);
+					framebufferFileName.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+					wxFile file(framebufferFileName.GetFullPath(), wxFile::write);
+					file.Write(data.buf.data(), data.buf.size());
+					file.Close();
+					bottomUI->refreshDataViews();
+				}
+			}
+		});
+	}
+
 	// clang-format off
 	ADD_NETWORK_CALLBACK(RecieveFlag, {
 		/*if (data.actFlag == RecieveInfo::UNEXPECTED_CONTROLLER_SIZE) {

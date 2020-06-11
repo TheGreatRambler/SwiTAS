@@ -26,7 +26,7 @@ CFLAGS := -std=gnu17
 CXXFLAGS := -std=gnu++17
 
 # C/C++ flags
-CPPFLAGS := -I./include -I./source/thirdParty/lua-5.1
+CPPFLAGS := -I./include -I./source/thirdParty/lua-5.3.5
 CPPFLAGS += -Wall -Wno-maybe-uninitialized -D__BSD_VISIBLE -DSERVER_IMP -DYUZU
 
 ifeq ($(BUILD),release)
@@ -35,12 +35,6 @@ ifeq ($(BUILD),release)
 else
 	# "Debug" build - no optimization, and debugging symbols
 	CPPFLAGS += -Og -g -ggdb
-endif
-
-ifeq ($(ARCH),32)
-	CPPFLAGS += -m32
-else
-	CPPFLAGS += -m64
 endif
 
 ifeq ($(UNAME),Msys)
@@ -56,12 +50,20 @@ ifeq ($(UNAME),Msys)
 	LDFLAGS += -lws2_32
 endif
 
+ifeq ($(ARCH),32)
+	CPPFLAGS += -m32
+	LDFLAGS += -m32
+else
+	CPPFLAGS += -m64
+	LDFLAGS += -m64
+endif
+
 # Dll flags
 # http://anadoxin.org/blog/control-over-symbol-exports-in-mingw-linker.html
 # http://www.equestionanswers.com/c/c-explicit-linking.php
 # http://anadoxin.org/blog/control-over-symbol-exports-in-mingw-linker.html
 ifeq ($(UNAME),Msys)
-DLLFLAGS := -Wl,--enable-auto-import -Wl,--out-implib,$(BUILD_DIR)/$(TARGET_EXEC).a -Wl,--exclude-all-symbols -shared
+DLLFLAGS := -Wl,--enable-auto-import -Wl,--exclude-all-symbols -shared
 else
 DLLFLAGS := -Wl,--enable-auto-import -Wl,--exclude-all-symbols -shared -fPIC
 endif
@@ -75,7 +77,14 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 
-all: $(BUILD_DIR)/$(TARGET_EXEC)
+all: pre-build $(BUILD_DIR)/$(TARGET_EXEC)
+
+pre-build:
+	# This runs before anything happens
+	# Copy in sharedNetworkCode
+	# https://stackoverflow.com/a/1622186/9329945
+	rm -r -f ./source/sharedNetworkCode
+	cp -p -r ../sharedNetworkCode ./source/sharedNetworkCode
 
 ifeq ($(UNAME),Msys)
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)

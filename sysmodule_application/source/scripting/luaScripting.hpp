@@ -1,8 +1,6 @@
 #pragma once
 
-#define SOL_USING_CXX_LUA 1
-
-#include <sol.hpp>
+#include <sol/sol.hpp>
 #include <string>
 
 #ifdef __SWITCH__

@@ -198,6 +198,10 @@ public:
 		return getFramebufferPath(viewingPlayerIndex, currentSavestateHook, currentFrame);
 	}
 
+	wxFileName getFramebufferPathForCurrentFramebuf() {
+		return getFramebufferPath(viewingPlayerIndex, currentSavestateHook, currentImageFrame);
+	}
+
 	void setTethered(bool flag) {
 		tethered = flag;
 	}

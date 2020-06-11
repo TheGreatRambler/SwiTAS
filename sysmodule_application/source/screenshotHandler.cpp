@@ -3,9 +3,6 @@
 ScreenshotHandler::ScreenshotHandler() {}
 
 void ScreenshotHandler::writeFramebuffer(std::shared_ptr<CommunicateWithNetwork> networkInstance, uint8_t linkedWithFrameAdvance, uint32_t frame, uint16_t savestateHookNum, uint8_t playerIndex) {
-#ifdef __SWITCH__
-	LOGD << "Linked with frame advance: " << (int)linkedWithFrameAdvance;
-#endif
 	uint64_t outSize;
 	std::vector<uint8_t> buf(JPEG_BUF_SIZE);
 
