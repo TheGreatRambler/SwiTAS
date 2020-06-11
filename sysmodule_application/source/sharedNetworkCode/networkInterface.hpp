@@ -65,7 +65,8 @@
 #include <functional>
 #include <unistd.h>
 #include <unordered_map>
-#ifdef SERVER_IMP
+
+#ifdef __SWITCH__
 #include <plog/Log.h>
 #endif
 #ifdef CLIENT_IMP

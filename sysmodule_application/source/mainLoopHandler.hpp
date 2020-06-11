@@ -2,11 +2,16 @@
 
 #include <cstring>
 #include <memory>
-#include <plog/Log.h>
+#include <vector>
+
 #ifdef __SWITCH__
+#include <plog/Log.h>
 #include <switch.h>
 #endif
-#include <vector>
+
+#ifdef YUZU
+#include "scripting/dllFunctionDefinitions.hpp"
+#endif
 
 #include "../../sharedNetworkCode/networkInterface.hpp"
 #include "controller.hpp"
@@ -33,6 +38,10 @@ private:
 
 #ifdef __SWITCH__
 	Event vsyncEvent;
+#endif
+
+#ifdef YUZU
+	void* yuzuInstance;
 #endif
 
 	std::vector<std::unique_ptr<ControllerHandler>> controllers;
@@ -94,7 +103,24 @@ private:
 	uint8_t getNumControllers();
 
 public:
+#ifdef YUZU
+	YUZU_FUNC(emu_speedmode)
+	YUZU_FUNC(emu_frameadvance)
+	YUZU_FUNC(emu_pause)
+	YUZU_FUNC(emu_unpause)
+	YUZU_FUNC(emu_message)
+	YUZU_FUNC(emu_framecount)
+	YUZU_FUNC(emu_emulating)
+// Etc...
+#endif
+
 	MainLoop();
+
+#ifdef YUZU
+	void setYuzuInstance(void* instance) {
+		yuzuInstance = instance;
+	}
+#endif
 
 	void mainLoopHandler();
 

@@ -2,12 +2,16 @@
 #include <cstdlib>
 #include <cstring>
 #include <map>
-#include <plog/Log.h>
 #include <string>
 #include <vector>
 
 #ifdef __SWITCH__
+#include <plog/Log.h>
 #include <switch.h>
+#endif
+
+#ifdef YUZU
+#include "scripting/dllFunctionDefinitions.hpp"
 #endif
 
 #include "controller.hpp"
@@ -172,8 +176,100 @@ int main(int argc, char* argv[]) {
 MainLoop mainLoop;
 
 DLL_EXPORT void startPlugin(void* wrapperInstance) {
-	// Do anything here that needs to be done
-	// Wrapper instance needs to be saved by MainLoop to pass back to yuzu
-	// This is because cross-module function calls are c functions
+	mainLoop.setYuzuInstance(wrapperInstance);
 }
+
+// Possibly pass delta
+DLL_EXPORT void handleMainLoop() {
+	mainLoop.mainLoopHandler();
+}
+
+// clang-format off
+DLL_EXPORT SET_YUZU_FUNC(mainLoop, emu_speedmode)
+DLL_EXPORT SET_YUZU_FUNC(mainLoop, emu_frameadvance)
+DLL_EXPORT SET_YUZU_FUNC(mainLoop, emu_pause)
+DLL_EXPORT SET_YUZU_FUNC(mainLoop, emu_unpause)
+DLL_EXPORT SET_YUZU_FUNC(mainLoop, emu_message)
+DLL_EXPORT SET_YUZU_FUNC(mainLoop, emu_framecount)
+DLL_EXPORT SET_YUZU_FUNC(mainLoop, emu_emulating)
+// clang-format on
+// Etc...
 #endif
+
+	// Code on Yuzu side later
+	/*
+	#ifdef _WIN32
+	#include <Windows.h>
+	#endif
+
+	#ifdef __linux__
+	#include<dlfcn.h>
+	#endif
+
+	#ifdef _WIN32
+	std::string GetLastErrorAsString()
+{
+	//Get the error message, if any.
+	DWORD errorMessageID = ::GetLastError();
+	if(errorMessageID == 0)
+		return std::string(); //No error message has been recorded
+
+	LPSTR messageBuffer = nullptr;
+	size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+								 NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
+
+	std::string message(messageBuffer, size);
+
+	//Free the buffer.
+	LocalFree(messageBuffer);
+
+	return message;
+}
+	#endif
+
+	std::string sharedLibraryPath = ...;
+	std::string sharedLibraryDirectory = ...;
+
+	#ifdef _WIN32
+	DLL_DIRECTORY_COOKIE directoryHandle = AddDllDirectory(sharedLibraryDirectory.c_str());
+	if (!directoryHandle) {
+		LOG(GetLastErrorAsString());
+		return;
+	}
+
+	HMODULE sharedLibHandle = LoadLibraryEx(sharedLibraryPath.c_str(), NULL, LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
+	if (sharedLibHandle == NULL) {
+		LOG(GetLastErrorAsString());
+		return;
+	}
+
+	// Do things
+
+	FreeLibrary(sharedLibHandle);
+
+	if (!RemoveDllDirectory(directoryHandle)) {
+		LOG(GetLastErrorAsString());
+		return;
+	}
+	#endif
+
+	#ifdef __linux__
+	// Write to ` /etc/ld.so.conf`, save original file in string
+	// Run `sudo ldconfig`, request sudo
+	// It's also worth setting `LD_LIBRARY_PATH` to add the folder
+
+	void* sharedLibHandle = (void *)dlopen(sharedLibraryPath.c_str(), RTLD_LAZY);
+	if (!sharedLibHandle) {
+		LOG(std::string(dlerror()));
+		return;
+	}
+
+	// Do things
+
+	dlclose(sharedLibHandle);
+
+	// Write to ` /etc/ld.so.conf` with original string
+	// Run `sudo ldconfig`, request sudo
+	// Also, set `LD_LIBRARY_PATH` with original string
+	#endif
+	*/

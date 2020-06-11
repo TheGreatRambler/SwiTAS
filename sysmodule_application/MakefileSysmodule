@@ -55,7 +55,7 @@ ARCH	:=	-march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE
 CFLAGS	:=	-g -Wall -ffunction-sections \
 			$(ARCH) $(DEFINES)
 
-CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -D__BSD_VISIBLE -DSERVER_IMP -DLUA_32BITS
+CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -D__BSD_VISIBLE -DSERVER_IMP -DLLONG_MAX
 
 # Need Cpp11 for certain features
 # It has to be c++14 because of zpp
@@ -70,7 +70,7 @@ else
 endif
 
 ASFLAGS	:=	-g $(ARCH)
-LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map) $(shell pkg-config --libs luajit)
+LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
 LIBS	:= -lnx
 

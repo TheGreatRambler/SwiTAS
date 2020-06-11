@@ -14,7 +14,9 @@ void ScreenshotHandler::writeFramebuffer(std::shared_ptr<CommunicateWithNetwork>
 #endif
 
 	if(succeeded) {
+#ifdef __SWITCH__
 		LOGD << "Screenshot size: " << outSize;
+#endif
 		buf.resize(outSize);
 		// clang-format off
 		ADD_TO_QUEUE(RecieveGameFramebuffer, networkInstance, {
@@ -25,7 +27,6 @@ void ScreenshotHandler::writeFramebuffer(std::shared_ptr<CommunicateWithNetwork>
 			data.playerIndex = playerIndex;
 		})
 		// clang-format on
-		LOGD << "Screenshot queued";
 	}
 	// Technically this can fail, TODO handle that case
 }

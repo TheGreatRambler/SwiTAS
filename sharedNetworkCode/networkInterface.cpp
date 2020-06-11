@@ -51,7 +51,7 @@ bool CommunicateWithNetwork::sendData(void* data, uint32_t sizeToSend) {
 }
 
 void CommunicateWithNetwork::handleFatalError() {
-#ifdef SERVER_IMP
+#ifdef __SWITCH__
 	LOGD << "Network fataled";
 #endif
 #ifdef CLIENT_IMP
@@ -95,14 +95,12 @@ void CommunicateWithNetwork::initNetwork() {
 
 #ifdef SERVER_IMP
 	listeningServer.Initialize();
-	LOGD << "Server initialized";
 
 	listeningServer.SetBlocking();
 	listeningServer.SetReceiveTimeout(SOCKET_TIMEOUT_SECONDS, SOCKET_TIMEOUT_MICROSECONDS);
 
 	// Listen on localhost
 	listeningServer.Listen(NULL, SERVER_PORT);
-	LOGD << "Server listening";
 
 	waitForNetworkConnection();
 #endif
@@ -144,13 +142,11 @@ void CommunicateWithNetwork::waitForNetworkConnection() {
 	// Literally nothing can happen until this finishes
 	networkConnection = NULL;
 	while(keepReading) {
-		LOGD << "Waiting for connection";
 		// This will block until an error or otherwise
 		networkConnection = listeningServer.Accept();
 		// We only care about the first connection
 		if(networkConnection != NULL) {
 			// Connection established, stop while looping
-			LOGD << "Client connected";
 			connectedToSocket = true;
 			break;
 		} else {
@@ -212,7 +208,7 @@ bool CommunicateWithNetwork::handleSocketError(const char* extraMessage) {
 		// clang-format on
 		return false;
 	} else {
-#ifdef SERVER_IMP
+#ifdef __SWITCH__
 		LOGD << std::string(networkConnection->DescribeError(e)) << " " << std::string(extraMessage);
 #endif
 #ifdef CLIENT_IMP
@@ -254,10 +250,6 @@ uint8_t CommunicateWithNetwork::attemptConnectionToServer(std::string ip) {
 #endif
 
 void CommunicateWithNetwork::listenForCommands() {
-#ifdef SERVER_IMP
-	LOGD << "Client has connected";
-#endif
-
 	networkError = false;
 
 	readThread = std::make_shared<std::thread>(&CommunicateWithNetwork::readFunc, this);
