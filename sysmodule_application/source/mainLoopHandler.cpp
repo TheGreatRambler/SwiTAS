@@ -1,7 +1,9 @@
 #include "mainLoopHandler.hpp"
 
 MainLoop::MainLoop() {
+#ifdef __SWITCH__
 	LOGD << "Start networking";
+#endif
 	// Start networking with set queues
 	networkInstance = std::make_shared<CommunicateWithNetwork>(
 		[](CommunicateWithNetwork* self) {
@@ -81,7 +83,9 @@ void MainLoop::mainLoopHandler() {
 			// I believe this means that there is no application running
 			// If there was just an application open, let the PC know
 			if(applicationOpened) {
+#ifdef __SWITCH__
 				LOGD << "Application closed";
+#endif
 				// clang-format off
 			ADD_TO_QUEUE(RecieveFlag, networkInstance, {
 				data.actFlag = RecieveInfo::APPLICATION_DISCONNECTED;
@@ -94,12 +98,16 @@ void MainLoop::mainLoopHandler() {
 
 	if(networkInstance->isConnected()) {
 		if(!internetConnected) {
+#ifdef __SWITCH__
 			LOGD << "Internet connected";
+#endif
 			internetConnected = true;
 		}
 	} else {
 		if(internetConnected) {
+#ifdef __SWITCH__
 			LOGD << "Internet disconnected";
+#endif
 			internetConnected = false;
 
 			// Force unpause to not get user stuck if network cuts out
@@ -149,13 +157,17 @@ void MainLoop::handleNetworkUpdates() {
 	CHECK_QUEUE(networkInstance, SendFrameData, {
 		controllers[data.playerIndex]->setFrame(data.controllerData);
 		if(data.incrementFrame) {
+#ifdef __SWITCH__
 			LOGD << "Increment frame";
+#endif
 			runSingleFrame(true, data.frame, data.savestateHookNum, data.playerIndex);
 		}
 	})
 
 	CHECK_QUEUE(networkInstance, SendTrackMemoryRegion, {
+#ifdef __SWITCH__
 		LOGD << "Track memory region";
+#endif
 		memoryRegions.push_back(std::pair<uint64_t, uint64_t>(data.startByte, data.size));
 	})
 
@@ -164,34 +176,34 @@ void MainLoop::handleNetworkUpdates() {
 			// Precaution to prevent the app getting stuck without the
 			// User able to unpause it
 			if(applicationOpened && internetConnected) {
+#ifdef __SWITCH__
 				LOGD << "Pause app";
+#endif
 				pauseApp(false, 0, 0, 0);
 			}
 		} else if(data.actFlag == SendInfo::UNPAUSE_DEBUG) {
 			if(applicationOpened) {
+#ifdef __SWITCH__
 				LOGD << "Unpause app";
+#endif
 				clearEveryController();
 				unpauseApp();
 			}
 		} else if(data.actFlag == SendInfo::GET_FRAMEBUFFER) {
 			if(applicationOpened) {
+#ifdef __SWITCH__
 				LOGD << "Get framebuffer";
+#endif
 				screenshotHandler.writeFramebuffer(networkInstance, false, 0, 0, 0);
 			}
 		} else if(data.actFlag == SendInfo::RUN_BLANK_FRAME) {
-			LOGD << "Run blank frame";
 			matchFirstControllerToTASController(0);
 			runSingleFrame(false, 0, 0, 0);
-			LOGD << "Done with that";
 		} else if(data.actFlag == SendInfo::START_TAS_MODE) {
-			LOGD << "Start TAS mode";
 			pauseApp(false, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::PAUSE) {
-			LOGD << "Pause";
 			pauseApp(false, 0, 0, 0);
-			LOGD << "Epic";
 		} else if(data.actFlag == SendInfo::UNPAUSE) {
-			LOGD << "Unpause";
 			clearEveryController();
 			unpauseApp();
 		}
@@ -199,7 +211,9 @@ void MainLoop::handleNetworkUpdates() {
 
 	// clang-format off
 	CHECK_QUEUE(networkInstance, SendSetNumControllers, {
+		#ifdef __SWITCH__
 		LOGD << "Set controller number";
+		#endif
 		setControllerNumber(data.size);
 	})
 	// clang-format on
@@ -318,7 +332,9 @@ GameMemoryInfo MainLoop::getGameMemoryInfo(MemoryInfo memInfo) {
 
 void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint32_t frame, uint16_t savestateHookNum, uint8_t playerIndex) {
 	if(isPaused) {
+#ifdef __SWITCH__
 		LOGD << "Running frame";
+#endif
 		unpauseApp();
 		waitForVsync();
 		pauseApp(linkedWithFrameAdvance, frame, savestateHookNum, playerIndex);
@@ -336,9 +352,9 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint32_t frame, uint16_t
 	// This is aborting for some reason
 	if(!isPaused) {
 		// Debug application again
-		LOGD << "Pausing";
 
 #ifdef __SWITCH__
+		LOGD << "Pausing";
 		rc       = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
 		isPaused = true;
 #endif
@@ -381,8 +397,8 @@ void MainLoop::matchFirstControllerToTASController(uint8_t player) {
 }
 
 MainLoop::~MainLoop() {
-	LOGD << "Exiting app";
 #ifdef __SWITCH__
+	LOGD << "Exiting app";
 	rc = hiddbgReleaseHdlsWorkBuffer();
 	hiddbgExit();
 #endif

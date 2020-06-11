@@ -3,7 +3,9 @@
 ScreenshotHandler::ScreenshotHandler() {}
 
 void ScreenshotHandler::writeFramebuffer(std::shared_ptr<CommunicateWithNetwork> networkInstance, uint8_t linkedWithFrameAdvance, uint32_t frame, uint16_t savestateHookNum, uint8_t playerIndex) {
+#ifdef __SWITCH__
 	LOGD << "Linked with frame advance: " << (int)linkedWithFrameAdvance;
+#endif
 	uint64_t outSize;
 	std::vector<uint8_t> buf(JPEG_BUF_SIZE);
 
@@ -15,7 +17,9 @@ void ScreenshotHandler::writeFramebuffer(std::shared_ptr<CommunicateWithNetwork>
 #endif
 
 	if(succeeded) {
+#ifdef __SWITCH__
 		LOGD << "Screenshot size: " << outSize;
+#endif
 		buf.resize(outSize);
 		// clang-format off
 		ADD_TO_QUEUE(RecieveGameFramebuffer, networkInstance, {
@@ -26,7 +30,6 @@ void ScreenshotHandler::writeFramebuffer(std::shared_ptr<CommunicateWithNetwork>
 			data.playerIndex = playerIndex;
 		})
 		// clang-format on
-		LOGD << "Screenshot queued";
 	}
 	// Technically this can fail, TODO handle that case
 }

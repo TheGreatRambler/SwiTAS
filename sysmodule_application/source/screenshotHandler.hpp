@@ -9,12 +9,13 @@
 #include <cstdio>
 #include <cstring>
 #include <iterator>
-#include <plog/Log.h>
 #include <string>
+#include <vector>
+
 #ifdef __SWITCH__
+#include <plog/Log.h>
 #include <switch.h>
 #endif
-#include <vector>
 
 #include "../../sharedNetworkCode/networkInterface.hpp"
 

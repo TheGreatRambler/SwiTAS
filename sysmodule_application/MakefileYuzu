@@ -23,10 +23,11 @@ endif
 CFLAGS := -std=gnu17
 
 # C++ flags
-CXXFLAGS := -std=gnu++17 -I./include -I./source/thirdParty/lua-5.1
+CXXFLAGS := -std=gnu++17
 
 # C/C++ flags
-CPPFLAGS := -Wall -Wno-maybe-uninitialized -D__BSD_VISIBLE -DSERVER_IMP -DYUZU
+CPPFLAGS := -I./include -I./source/thirdParty/lua-5.1
+CPPFLAGS += -Wall -Wno-maybe-uninitialized -D__BSD_VISIBLE -DSERVER_IMP -DYUZU
 
 ifeq ($(BUILD),release)
 	# "Release" build - optimization, and no debug symbols

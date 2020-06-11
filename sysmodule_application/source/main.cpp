@@ -2,11 +2,11 @@
 #include <cstdlib>
 #include <cstring>
 #include <map>
-#include <plog/Log.h>
 #include <string>
 #include <vector>
 
 #ifdef __SWITCH__
+#include <plog/Log.h>
 #include <switch.h>
 #endif
 

@@ -2,11 +2,12 @@
 
 #include <cstring>
 #include <memory>
-#include <plog/Log.h>
+#include <vector>
+
 #ifdef __SWITCH__
+#include <plog/Log.h>
 #include <switch.h>
 #endif
-#include <vector>
 
 #include "../../sharedNetworkCode/networkInterface.hpp"
 #include "controller.hpp"
