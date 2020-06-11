@@ -190,7 +190,7 @@ public:
 		framebufferFileName.AppendDir("framebuffers");
 		wxString name = "frame_%lu_savestate_block_%u_player_%u_screenshot";
 		framebufferFileName.SetName(wxString::Format(name, frame, savestateHookNum, player));
-		framebufferFileName.SetExt("jpeg");
+		framebufferFileName.SetExt("jpg");
 		return framebufferFileName;
 	}
 
@@ -199,7 +199,15 @@ public:
 	}
 
 	wxFileName getFramebufferPathForCurrentFramebuf() {
-		return getFramebufferPath(viewingPlayerIndex, currentSavestateHook, currentImageFrame);
+		if(currentImageFrame == 0) {
+			wxFileName framebufferFileName = projectStart;
+			wxString name                  = "savestate_block_%u_player_%u_screenshot";
+			framebufferFileName.SetName(wxString::Format(name, currentSavestateHook, viewingPlayerIndex + 1));
+			framebufferFileName.SetExt("jpg");
+			return framebufferFileName;
+		} else {
+			return getFramebufferPath(viewingPlayerIndex, currentSavestateHook, currentImageFrame);
+		}
 	}
 
 	void setTethered(bool flag) {
