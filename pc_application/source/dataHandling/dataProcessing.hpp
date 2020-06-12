@@ -200,6 +200,7 @@ public:
 
 	wxFileName getFramebufferPathForCurrentFramebuf() {
 		if(currentImageFrame == 0) {
+			// Display the image linked with the savestate hook
 			wxFileName framebufferFileName = projectStart;
 			wxString name                  = "savestate_block_%u_player_%u_screenshot";
 			framebufferFileName.SetName(wxString::Format(name, currentSavestateHook, viewingPlayerIndex + 1));

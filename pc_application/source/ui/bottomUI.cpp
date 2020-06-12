@@ -57,10 +57,7 @@ void ButtonGrid::onGridClick(wxMouseEvent& event) {
 	int X = (int)(((float)windowCoord.x / width) * buttonData->KeyWidth);
 	int Y = (int)(((float)windowCoord.y / height) * buttonData->KeyHeight);
 
-	char buf[5];
-	sprintf(buf, "%u-%u", X, Y);
-	std::string key(buf);
-
+	std::string key = wxString::Format("%u-%u", X, Y).ToStdString();
 	if(locToButton.count(key)) {
 		// Element exists, time to trigger the click
 		inputInstance->triggerButton(locToButton[key]);

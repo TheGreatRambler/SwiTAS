@@ -184,13 +184,12 @@ void CommunicateWithNetwork::endNetwork() {
 
 	if(networkConnection != nullptr) {
 		networkConnection->Close();
+		delete networkConnection;
 	}
 
 #ifdef SERVER_IMP
 	listeningServer.Close();
 #endif
-
-	delete networkConnection;
 }
 
 bool CommunicateWithNetwork::handleSocketError(const char* extraMessage) {

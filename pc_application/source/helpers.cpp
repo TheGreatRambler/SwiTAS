@@ -106,12 +106,14 @@ wxString HELPERS::calculateDhash(wxImage image, int dhashWidth, int dhashHeight)
 	copy.Rescale(dhashWidth, dhashHeight, wxIMAGE_QUALITY_NORMAL);
 	char dhash[(dhashWidth - 1) * dhashHeight];
 	unsigned char* imagePointer = copy.GetData();
+	int dhashIndex              = 0;
 	for(int y = 0; y < dhashHeight; y++) {
 		for(int x = 1; x < dhashWidth; x++) {
-			int thisPixelPointer              = ((y * dhashWidth) + x) * 4;
-			unsigned char leftPixel           = imagePointer[thisPixelPointer - 4];
-			unsigned char rightPixel          = imagePointer[thisPixelPointer];
-			dhash[(y * (dhashWidth - 1)) + x] = leftPixel > rightPixel ? '1' : '0';
+			int thisPixelPointer     = ((y * dhashWidth) + x) * 4;
+			unsigned char leftPixel  = imagePointer[thisPixelPointer - 4];
+			unsigned char rightPixel = imagePointer[thisPixelPointer];
+			dhash[dhashIndex]        = leftPixel > rightPixel ? '1' : '0';
+			dhashIndex++;
 		}
 	}
 	return wxString(dhash, sizeof(dhash));

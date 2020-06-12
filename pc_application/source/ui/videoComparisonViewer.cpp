@@ -130,7 +130,10 @@ void VideoComparisonViewer::displayVideoFormats(wxCommandEvent& event) {
 
 	// All these commands will block, which could be a problem for bad internet connections
 	std::string videoCheck = HELPERS::exec(("youtube-dl --get-filename \"" + url + "\"").c_str());
-	if(videoCheck.size() != 0) {
+	if(videoCheck.find("is not recognized") != std::string::npos || videoCheck.find("command not found") != std::string::npos) {
+		wxMessageDialog errorDialog(this, "Youtube-DL Not Found", "The Youtube-DL executable was not found", wxOK | wxICON_ERROR);
+		errorDialog.ShowModal();
+	} else if(videoCheck.size() != 0) {
 		formatsArray.clear();
 		formatsMetadataArray.clear();
 		// Due to this https://forums.wxwidgets.org/viewtopic.php?t=20321
@@ -165,7 +168,7 @@ void VideoComparisonViewer::displayVideoFormats(wxCommandEvent& event) {
 						continue;
 					}
 
-					// Assume fps is 30 if it is not present
+					// Assume fps is 60 if it is not present
 					int fps                    = (format.HasMember("fps") && format["fps"].IsInt()) ? format["fps"].GetInt() : 60;
 					wxString formatItem        = wxString::Format("%dx%d, %d fps", width, height, fps);
 					wxString compactFormatItem = wxString::Format("%dx%d-%dfps", width, height, fps);

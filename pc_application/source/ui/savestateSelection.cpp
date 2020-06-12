@@ -1,7 +1,7 @@
 #include "savestateSelection.hpp"
 
 SavestateLister::SavestateLister(wxFrame* parent, DataProcessing* input)
-	: wxDialog(parent, wxID_ANY, "Savestate Listing", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE | wxMAXIMIZE) {
+	: wxDialog(parent, wxID_ANY, "Savestate Listing", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE) {
 	inputInstance = input;
 
 	mainSizer = new wxBoxSizer(wxVERTICAL);
@@ -11,25 +11,26 @@ SavestateLister::SavestateLister(wxFrame* parent, DataProcessing* input)
 	projectListHolder = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize);
 
 	// Add each individual savestate hook for viewing
+	SavestateBlockNum block = 0;
 	for(auto const& savestateHook : inputInstance->getAllSavestateHookBlocks()) {
-		wxBoxSizer* dataSizer = new wxBoxSizer(wxVERTICAL);
+		wxBoxSizer* itemSizer = new wxBoxSizer(wxVERTICAL);
 
-		wxStaticText* dHash = new wxStaticText(this, wxID_ANY, wxString::FromUTF8(savestateHook->dHash), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
-
-		wxBitmap* screenshot = savestateHook->screenshot;
 		// Size is reduced by 4 so the bitmap isn't massive
-		DrawingCanvasBitmap* drawingCanvas = new DrawingCanvasBitmap(this, wxSize(1280 / 8, 720 / 8));
-		drawingCanvas->setBitmap(screenshot);
+		DrawingCanvasBitmap* drawingCanvas = new DrawingCanvasBitmap(this, wxSize(1280 / 4, 720 / 4));
+		drawingCanvas->setBitmap(savestateHook->screenshot);
+		drawingCanvas->SetToolTip(wxString::FromUTF8(savestateHook->dHash));
 
 		savestateScreenshots.push_back(drawingCanvas);
 
-		drawingCanvas->Bind(wxEVT_LEFT_DOWN, &SavestateLister::onSavestateHookSelect, this);
+		itemSizer->Add(new wxStaticText(this, wxID_ANY, wxString::Format("Savestate Hook %u", block), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL), 0);
+		itemSizer->Add(drawingCanvas, 0, wxSHAPED);
 
-		dataSizer->Add(dHash, 1);
-		dataSizer->Add(drawingCanvas, 0, wxSHAPED);
+		projectList->Add(itemSizer);
 
-		projectList->Add(dataSizer, 1);
+		block++;
 	}
+
+	projectListHolder->Bind(wxEVT_LEFT_DOWN, &SavestateLister::onSavestateHookSelect, this);
 
 	projectListHolder->SetSizer(projectList);
 
@@ -45,12 +46,12 @@ SavestateLister::SavestateLister(wxFrame* parent, DataProcessing* input)
 }
 
 void SavestateLister::onSavestateHookSelect(wxMouseEvent& event) {
-	DrawingCanvasBitmap* drawingCanvas = (DrawingCanvasBitmap*)event.GetEventObject();
+	// Get mouse location in scrolled window and compare to each screenshot
+	wxPoint positionOnScreen = projectListHolder->ClientToScreen(event.GetPosition());
 	for(std::size_t i = 0; i < savestateScreenshots.size(); i++) {
-		if(drawingCanvas == savestateScreenshots[i]) {
+		if(savestateScreenshots[i]->GetScreenRect().Contains(positionOnScreen)) {
 			selectedSavestate   = i;
 			operationSuccessful = true;
-			Close(true);
 			EndModal(wxID_OK);
 			break;
 		}
@@ -100,11 +101,19 @@ SavestateSelection::SavestateSelection(wxFrame* parent, rapidjson::Document* set
 	autoFrameAdvanceButton = HELPERS::getBitmapButton(this, mainSettings, "autoFrameAdvanceButton");
 	okButton               = HELPERS::getBitmapButton(this, mainSettings, "okButton");
 
+	playButton->SetToolTip("Start realtime game playback");
+	pauseButton->SetToolTip("Pause realtime game playback");
+	frameAdvanceButton->SetToolTip("Advance game by one frame");
+	autoFrameAdvanceButton->SetToolTip("Start automatic frame advancing");
+	okButton->SetToolTip("Select this frame as the savestate hook");
+
 	if(savestateLoadDialog) {
-		selectFrameAutomatically = new wxSpinCtrl(this, wxID_ANY, "Select automatically at or below this hamming distance: ", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0);
+		selectFrameAutomatically = new wxSpinCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0);
+		selectFrameAutomatically->SetToolTip("Select frame automatically at or below this hamming distance");
 	}
 
-	autoIncrementDelay = new wxSpinCtrl(this, wxID_ANY, "Delay in mlliseconds for automatically incrementing frame: ", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 5000, 0);
+	autoIncrementDelay = new wxSpinCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 5000, 0);
+	autoIncrementDelay->SetToolTip("Delay in mlliseconds for automatically incrementing frame: ");
 
 	playButton->Bind(wxEVT_BUTTON, &SavestateSelection::onPlay, this);
 	pauseButton->Bind(wxEVT_BUTTON, &SavestateSelection::onPause, this);
@@ -117,10 +126,10 @@ SavestateSelection::SavestateSelection(wxFrame* parent, rapidjson::Document* set
 	Bind(wxEVT_SIZE, &SavestateSelection::onResize, this);
 
 	// Divide by two because it's usually too big
-	currentFrame = new DrawingCanvasBitmap(this, wxSize(1280 / 4, 720 / 4));
+	currentFrame = new DrawingCanvasBitmap(this, wxSize(1280 / 2, 720 / 2));
 	if(savestateLoadDialog) {
 		// Otherwise, just show the frame to save on
-		goalFrame = new DrawingCanvasBitmap(this, wxSize(1280 / 4, 720 / 4));
+		goalFrame = new DrawingCanvasBitmap(this, wxSize(1280 / 2, 720 / 2));
 	}
 
 	leftImageSizer->Add(currentFrame, 0, wxSHAPED | wxEXPAND | wxALIGN_CENTER_HORIZONTAL);
@@ -145,7 +154,7 @@ SavestateSelection::SavestateSelection(wxFrame* parent, rapidjson::Document* set
 		fullSizer->Add(selectFrameAutomatically, 1);
 	}
 
-	fullSizer->Add(autoIncrementDelay, 0);
+	fullSizer->Add(autoIncrementDelay, 1);
 
 	buttonSizer->Add(playButton, 1);
 	buttonSizer->Add(pauseButton, 1);
