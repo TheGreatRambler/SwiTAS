@@ -254,9 +254,7 @@ DLL_EXPORT SET_YUZU_FUNC(mainLoop, emu_emulating)
 	#endif
 
 	#ifdef __linux__
-	// Write to ` /etc/ld.so.conf`, save original file in string
-	// Run `sudo ldconfig`, request sudo
-	// It's also worth setting `LD_LIBRARY_PATH` to add the folder
+	// Set `LD_LIBRARY_PATH` (`DYLD_LIBRARY_PATH` on OSX) to add the folder. Save original value
 
 	void* sharedLibHandle = (void *)dlopen(sharedLibraryPath.c_str(), RTLD_LAZY);
 	if (!sharedLibHandle) {
@@ -268,8 +266,6 @@ DLL_EXPORT SET_YUZU_FUNC(mainLoop, emu_emulating)
 
 	dlclose(sharedLibHandle);
 
-	// Write to ` /etc/ld.so.conf` with original string
-	// Run `sudo ldconfig`, request sudo
-	// Also, set `LD_LIBRARY_PATH` with original string
+	// Restore original value to the ld path
 	#endif
 	*/

@@ -93,8 +93,10 @@ typedef void(joypad_set)(void* ctx, uint8_t player, uint64_t input);
 
 // Joystick, accel and gyro based on enums
 typedef int16_t(joypad_readjoystick)(void* ctx, uint8_t player, uint8_t type);
-// Disable input entering from Yuzu, this allows the script to set input without interruption
-typedef void(joypad_enable)(void* ctx, uint8_t enable);
+// Disable input entering from outside the script, this allows the script to set input without interruption
+typedef void(joypad_enableoutsideinput)(void* ctx, uint8_t enable);
+// Set number of joysticks in use
+typedef void(joypad_setnumjoypads)(void* ctx, uint8_t numofplayers);
 
 // Input Library
 

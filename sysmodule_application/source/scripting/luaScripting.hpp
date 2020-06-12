@@ -10,7 +10,14 @@
 class LuaScripting {
 private:
 	sol::state luaState;
+	uint8_t scriptLoaded = false;
 
 public:
 	LuaScripting();
+
+	void loadScript(std::string path);
+
+	void endScript();
+
+	void callLuaMainloop();
 };
