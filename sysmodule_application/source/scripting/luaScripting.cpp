@@ -31,6 +31,20 @@ void LuaScripting::luaThread() {
 	sol::protected_function_result currentScriptResult = currentScript();
 }
 
+void LuaScripting::sendSyscall(std::function<void()> func) {
+	syscallReady = true;
+	std::unique_lock<std::mutex> lk(syscallMutex);
+	syscallCv.wait(lk, [this] { return ready; });
+
+	// Run the syscalls provided by yuzu or otherwise
+	func();
+	processed    = true;
+	syscallReady = false;
+
+	lk.unlock();
+	syscallCv.notify_one();
+}
+
 void LuaScripting::callMainloop() {
 	// https://en.cppreference.com/w/cpp/thread/condition_variable
 	// 10 syscalls handled a time
@@ -38,5 +52,21 @@ void LuaScripting::callMainloop() {
 		// Somehow, inform syscall (if a syscall is waiting at the moment) through the condition variabke
 		// Continue if a syscall is avalible at the beginning of this loop and break otherwise
 		// A max of 10 syscalls will be handled at a time
+		if(syscallReady) {
+			{
+				std::lock_guard<std::mutex> lk(syscallMutex);
+				ready = true;
+			}
+			syscallCv.notify_one();
+			// wait for lua to run syscalls
+
+			{
+				// Gain back control
+				std::unique_lock<std::mutex> lk(syscallMutex);
+				syscallCv.wait(lk, [this] { return processed; });
+			}
+		} else {
+			break;
+		}
 	}
 }

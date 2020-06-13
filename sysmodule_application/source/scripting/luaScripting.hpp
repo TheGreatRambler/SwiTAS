@@ -12,6 +12,8 @@
 #include <switch.h>
 #endif
 
+#include "dllFunctionDefinitions.hpp"
+
 class LuaScripting {
 private:
 	sol::state luaState;
@@ -20,18 +22,33 @@ private:
 
 	std::string luaPath;
 
-	uint8_t syscallReady             = false;
+	std::atomic_bool syscallReady = false;
+	uint8_t ready                 = false;
+	uint8_t processed             = false;
 	std::mutex syscallMutex;
 	std::condition_variable syscallCv;
 
+	void sendSyscall(std::function<void()> func);
+
+	void luaThread();
+
 public:
+#ifdef YUZU
+	YUZU_FUNC(emu_speedmode)
+	YUZU_FUNC(emu_frameadvance)
+	YUZU_FUNC(emu_pause)
+	YUZU_FUNC(emu_unpause)
+	YUZU_FUNC(emu_message)
+	YUZU_FUNC(emu_framecount)
+	YUZU_FUNC(emu_emulating)
+// Etc...
+#endif
+
 	LuaScripting();
 
 	void loadScript(std::string path);
 
 	void endScript();
-
-	void luaThread();
 
 	void callMainloop();
 };

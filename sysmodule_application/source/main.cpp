@@ -185,13 +185,13 @@ DLL_EXPORT void handleMainLoop() {
 }
 
 // clang-format off
-DLL_EXPORT SET_YUZU_FUNC(mainLoop, emu_speedmode)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop, emu_frameadvance)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop, emu_pause)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop, emu_unpause)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop, emu_message)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop, emu_framecount)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop, emu_emulating)
+DLL_EXPORT SET_YUZU_FUNC(mainLoop.getLuaScripting(), emu_speedmode)
+DLL_EXPORT SET_YUZU_FUNC(mainLoop.getLuaScripting(), emu_frameadvance)
+DLL_EXPORT SET_YUZU_FUNC(mainLoop.getLuaScripting(), emu_pause)
+DLL_EXPORT SET_YUZU_FUNC(mainLoop.getLuaScripting(), emu_unpause)
+DLL_EXPORT SET_YUZU_FUNC(mainLoop.getLuaScripting(), emu_message)
+DLL_EXPORT SET_YUZU_FUNC(mainLoop.getLuaScripting(), emu_framecount)
+DLL_EXPORT SET_YUZU_FUNC(mainLoop.getLuaScripting(), emu_emulating)
 // clang-format on
 // Etc...
 #endif
@@ -208,7 +208,7 @@ DLL_EXPORT SET_YUZU_FUNC(mainLoop, emu_emulating)
 
 	#ifdef _WIN32
 	std::string GetLastErrorAsString()
-{
+	{
 	//Get the error message, if any.
 	DWORD errorMessageID = ::GetLastError();
 	if(errorMessageID == 0)
@@ -224,7 +224,7 @@ DLL_EXPORT SET_YUZU_FUNC(mainLoop, emu_emulating)
 	LocalFree(messageBuffer);
 
 	return message;
-}
+	}
 	#endif
 
 	std::string sharedLibraryPath = ...;

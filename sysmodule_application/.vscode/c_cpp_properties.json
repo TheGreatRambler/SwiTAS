@@ -10,6 +10,7 @@
 			"defines": [
 				"__SWITCH__",
 				"YUZU",
+				"DLL_EXPORT=extern \"C\" __attribute__((visibility(\"default\")))",
 				"SERVER_IMP"
 			],
 			"compilerPath": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc",
@@ -28,6 +29,7 @@
 			"defines": [
 				"__SWITCH__",
 				"YUZU",
+				"DLL_EXPORT=extern \"C\" __declspec(dllexport)",
 				"SERVER_IMP"
 			],
 			"compilerPath": "C:/msys2/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc",

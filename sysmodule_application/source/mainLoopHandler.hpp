@@ -15,6 +15,7 @@
 
 #include "../../sharedNetworkCode/networkInterface.hpp"
 #include "controller.hpp"
+#include "scripting/luaScripting.hpp"
 
 class MainLoop {
 private:
@@ -49,6 +50,7 @@ private:
 	std::vector<std::pair<uint64_t, uint64_t>> memoryRegions;
 
 	ScreenshotHandler screenshotHandler;
+	LuaScripting luaScripting;
 
 	uint8_t isPaused = false;
 
@@ -103,17 +105,6 @@ private:
 	uint8_t getNumControllers();
 
 public:
-#ifdef YUZU
-	YUZU_FUNC(emu_speedmode)
-	YUZU_FUNC(emu_frameadvance)
-	YUZU_FUNC(emu_pause)
-	YUZU_FUNC(emu_unpause)
-	YUZU_FUNC(emu_message)
-	YUZU_FUNC(emu_framecount)
-	YUZU_FUNC(emu_emulating)
-// Etc...
-#endif
-
 	MainLoop();
 
 #ifdef YUZU
@@ -123,6 +114,8 @@ public:
 #endif
 
 	void mainLoopHandler();
+
+	LuaScripting& getLuaScripting();
 
 	~MainLoop();
 };
