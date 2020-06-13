@@ -9,7 +9,17 @@ LuaScripting::LuaScripting() {
 }
 
 void LuaScripting::loadScript(std::string path) {
-	sol::load_result currentScript = luaState.load_file(path);
+	luaPath = path;
+
+	luaExecutionThread = std::make_unique<std::thread>(&LuaScripting::luaThread, this);
+}
+
+void LuaScripting::endScript() {
+	scriptLoaded = false;
+}
+
+void LuaScripting::luaThread() {
+	sol::load_result currentScript = luaState.load_file(luaPath);
 	if(!currentScript.valid()) {
 		/*
 		sol::error err = currentScript;
@@ -21,10 +31,12 @@ void LuaScripting::loadScript(std::string path) {
 	sol::protected_function_result currentScriptResult = currentScript();
 }
 
-void LuaScripting::endScript() {
-	scriptLoaded = false;
-}
-
-void LuaScripting::callLuaMainloop() {
-	// TODO how to handle the main loop
+void LuaScripting::callMainloop() {
+	// https://en.cppreference.com/w/cpp/thread/condition_variable
+	// 10 syscalls handled a time
+	for(uint8_t i = 0; i < 10; i++) {
+		// Somehow, inform syscall (if a syscall is waiting at the moment) through the condition variabke
+		// Continue if a syscall is avalible at the beginning of this loop and break otherwise
+		// A max of 10 syscalls will be handled at a time
+	}
 }

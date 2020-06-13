@@ -81,7 +81,11 @@
 			"typeinfo": "cpp",
 			"variant": "cpp",
 			"bit": "cpp",
-			"typeindex": "cpp"
+			"typeindex": "cpp",
+			"compare": "cpp",
+			"concepts": "cpp",
+			"ranges": "cpp",
+			"stop_token": "cpp"
 		},
 		"cSpell.enabled": false
 	}
