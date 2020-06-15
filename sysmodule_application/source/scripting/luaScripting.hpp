@@ -33,16 +33,6 @@ private:
 	void luaThread();
 
 public:
-#ifdef YUZU
-	YUZU_FUNC(emu_speedmode)
-	YUZU_FUNC(emu_frameadvance)
-	YUZU_FUNC(emu_pause)
-	YUZU_FUNC(emu_unpause)
-	YUZU_FUNC(emu_message)
-	YUZU_FUNC(emu_framecount)
-	YUZU_FUNC(emu_emulating)
-// Etc...
-#endif
 
 	LuaScripting();
 

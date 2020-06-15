@@ -1,12 +1,13 @@
 #pragma once
 
 // clang-format off
-#define YUZU_FUNC(func) \
+#define YUZU_FUNC(func, returntype, arguments) \
 	func* function_##func = nullptr; \
 	void set_##func(func* function) { \
 		function_##func = function; \
 	}
 // clang-format on
+// The calling has to be done manually
 
 // clang-format off
 #define SET_YUZU_FUNC(class, func) void set_##func(func* function) { \
