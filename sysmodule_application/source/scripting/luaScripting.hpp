@@ -12,7 +12,9 @@
 #include <switch.h>
 #endif
 
+#ifdef YUZU
 #include "../yuzuSyscalls.hpp"
+#endif
 
 class LuaScripting {
 private:
@@ -21,6 +23,8 @@ private:
 	std::unique_ptr<std::thread> luaExecutionThread;
 
 	std::string luaPath;
+
+	std::shared_ptr<Syscalls> yuzuSyscalls;
 
 	std::atomic_bool syscallReady = false;
 	uint8_t ready                 = false;
@@ -33,7 +37,7 @@ private:
 	void luaThread();
 
 public:
-	LuaScripting();
+	LuaScripting(std::shared_ptr<Syscalls> syscalls);
 
 	void loadScript(std::string path);
 
