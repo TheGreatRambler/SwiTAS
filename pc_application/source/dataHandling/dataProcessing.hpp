@@ -144,6 +144,8 @@ public:
 	void setPlayerInfoCallback(std::function<void(uint8_t, uint8_t, bool)> callback);
 	void triggerCurrentFrameChanges();
 
+	void sendAutoAdvance();
+
 	std::string getExportedCurrentPlayer();
 	void importFromFile(wxFileName importTarget);
 
@@ -221,6 +223,7 @@ public:
 
 	void createSavestateHere();
 	void runFrame();
+	void runFrameForAutoFrame();
 
 	std::shared_ptr<std::vector<std::shared_ptr<ControllerData>>> getInputsList();
 

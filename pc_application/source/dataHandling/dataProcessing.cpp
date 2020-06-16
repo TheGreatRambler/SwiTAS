@@ -130,6 +130,16 @@ void DataProcessing::triggerCurrentFrameChanges() {
 	}
 }
 
+void DataProcessing::sendAutoAdvance() {
+	// clang-format off
+	ADD_TO_QUEUE(SendAutoRun, networkInstance, {
+		data.frameReturn = currentFrame + 1;
+		data.savestateHookNum = currentSavestateHook;
+		data.playerIndex = viewingPlayerIndex;
+	})
+	// clang-format on
+}
+
 std::string DataProcessing::getExportedCurrentPlayer() {
 	/*
 	wxFile file(exportTarget.GetFullPath(), wxFile::write);
@@ -472,7 +482,7 @@ void DataProcessing::createSavestateHere() {
 }
 
 void DataProcessing::runFrame() {
-	if(currentRunFrame != inputsList->size() - 1) {
+	if(currentRunFrame < inputsList->size() - 1) {
 		// Technically, should handle for entering next savetstate hook block, but TODO
 		std::shared_ptr<ControllerData> controllerData = inputsList->at(currentRunFrame);
 
@@ -509,6 +519,30 @@ void DataProcessing::runFrame() {
 				}
 			})
 		}
+	}
+}
+
+void DataProcessing::runFrameForAutoFrame() {
+	if(currentRunFrame < inputsList->size() - 1) {
+		// Technically, should handle for entering next savetstate hook block, but TODO
+		std::shared_ptr<ControllerData> controllerData = inputsList->at(currentRunFrame);
+
+		setFramestateInfo(currentRunFrame, FrameState::RAN, true);
+
+		// If possible, make current frame this frame
+		if(currentRunFrame < inputsList->size()) {
+			// Set to this frame
+			setCurrentFrame(currentRunFrame + 1);
+		}
+
+		// Increment run frame
+		currentRunFrame++;
+		// Set image frame to this too
+		currentImageFrame = currentRunFrame;
+
+		modifyCurrentFrameViews(currentRunFrame);
+
+		Refresh();
 	}
 }
 
@@ -822,14 +856,9 @@ uint8_t DataProcessing::getButtonCurrent(Btn button) const {
 }
 
 void DataProcessing::setControllerDataForAutoRun(std::shared_ptr<ControllerData> controllerData) {
-	if(currentFrame == getFramesSize() - 1) {
-		addFrameHere();
-	}
-
 	// Set controller data manually
-	inputsList->at(currentFrame + 1) = controllerData;
-
-	setCurrentFrame(currentFrame + 1);
+	inputsList->at(currentFrame) = controllerData;
+	modifyCurrentFrameViews(currentFrame);
 }
 
 int16_t DataProcessing::getNumberValueCurrent(ControllerNumberValues joystickId) const {

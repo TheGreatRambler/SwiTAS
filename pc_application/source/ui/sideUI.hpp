@@ -102,8 +102,15 @@ public:
 	bool createSavestateHook();
 	bool loadSavestateHook(int block);
 
-	void recieveAutoRunData(std::shared_ptr<ControllerData> controllerData);
 	void handleUnexpectedControllerSize();
+
+	uint8_t getAutoRunActive() {
+		return autoRunActive;
+	}
+
+	int getAutoRunDelay() {
+		return autoRunFramesPerSecond->GetValue();
+	}
 
 	void untether();
 	void tether();

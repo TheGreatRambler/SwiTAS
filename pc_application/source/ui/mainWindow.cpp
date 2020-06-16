@@ -47,7 +47,6 @@ MainWindow::MainWindow()
 			RECIEVE_QUEUE_DATA(RecieveApplicationConnected)
 			RECIEVE_QUEUE_DATA(RecieveLogging)
 			RECIEVE_QUEUE_DATA(RecieveMemoryRegion)
-			RECIEVE_QUEUE_DATA(RecieveAutoRunControllerData)
 		});
 
 	// DataProcessing can now start with the networking instance
@@ -58,6 +57,9 @@ MainWindow::MainWindow()
 	// UI instances
 	sideUI   = std::make_shared<SideUI>(this, &mainSettings, projectHandler, mainSizer, dataProcessingInstance, networkInstance);
 	bottomUI = std::make_shared<BottomUI>(this, &mainSettings, buttonData, mainSizer, dataProcessingInstance);
+
+	autoFrameAdvanceTimer = new wxTimer(this);
+	Bind(wxEVT_TIMER, &MainWindow::onAutoFrameAdvanceTimer, this);
 
 	handleNetworkQueues();
 
@@ -124,6 +126,8 @@ void MainWindow::keyDownHandler(wxKeyEvent& event) {
 	}
 }
 
+void MainWindow::onAutoFrameAdvanceTimer(wxTimerEvent& event) {}
+
 void MainWindow::handlePreviousWindowTransform() {
 	// Resize and maximize as needed
 	// TODO
@@ -152,7 +156,6 @@ void MainWindow::onIdle(wxIdleEvent& event) {
 	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveApplicationConnected)
 	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveLogging)
 	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveMemoryRegion)
-	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveAutoRunControllerData)
 }
 
 void MainWindow::handleNetworkQueues() {
@@ -163,33 +166,40 @@ void MainWindow::handleNetworkQueues() {
 	ADD_NETWORK_CALLBACK(RecieveLogging, {
 		wxLogMessage(wxString("SWITCH: " + data.log));
 	})
-	ADD_NETWORK_CALLBACK(RecieveAutoRunControllerData, {
-		sideUI->recieveAutoRunData(data.controllerData);
-	})
 	// clang-format on
-	{
-		projectHandler->Callbacks_RecieveGameFramebuffer.emplace(NETWORK_CALLBACK_ID, [this](const Protocol::Struct_RecieveGameFramebuffer& data) {
-			{
-				bottomUI->recieveGameFramebuffer(data.buf);
-				if(data.fromFrameAdvance == 1) {
-					wxFileName framebufferFileName = dataProcessingInstance->getFramebufferPath(data.playerIndex, data.savestateHookNum, data.frame);
-					framebufferFileName.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
-					wxFile file(framebufferFileName.GetFullPath(), wxFile::write);
-					file.Write(data.buf.data(), data.buf.size());
-					file.Close();
-					bottomUI->refreshDataViews();
+
+	ADD_NETWORK_CALLBACK(RecieveGameFramebuffer, {
+		bottomUI->recieveGameFramebuffer(data.buf);
+		if(data.fromFrameAdvance == 1) {
+			wxFileName framebufferFileName = dataProcessingInstance->getFramebufferPath(data.playerIndex, data.savestateHookNum, data.frame);
+			framebufferFileName.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+			wxFile file(framebufferFileName.GetFullPath(), wxFile::write);
+			file.Write(data.buf.data(), data.buf.size());
+			file.Close();
+
+			if(dataProcessingInstance->getNumOfFramesInSavestateHook(data.savestateHookNum, data.playerIndex) == data.frame) {
+				dataProcessingInstance->addFrameHere();
+			}
+
+			dataProcessingInstance->runFrameForAutoFrame();
+
+			if(data.controllerData.get() != nullptr) {
+				dataProcessingInstance->setControllerDataForAutoRun(data.controllerData);
+				if(sideUI->getAutoRunActive()) {
+					autoFrameAdvanceTimer->StartOnce(sideUI->getAutoRunDelay());
 				}
 			}
-		});
-	}
+		}
+	})
 
-	// clang-format off
+	/*
 	ADD_NETWORK_CALLBACK(RecieveFlag, {
-		/*if (data.actFlag == RecieveInfo::UNEXPECTED_CONTROLLER_SIZE) {
+		if(data.actFlag == RecieveInfo::UNEXPECTED_CONTROLLER_SIZE) {
 			// Switch is not in touch with required amount of controllers
 			sideUI->handleUnexpectedControllerSize();
-		}*/
+		}
 	})
+	*/
 
 	// clang-format on
 	if(networkInstance->hasOtherSideJustDisconnected()) {
@@ -307,6 +317,7 @@ bool MainWindow::askForIP() {
 					// Make sure Switch is good
 					sideUI->handleUnexpectedControllerSize();
 					SetStatusText(ipAddress + ":" + std::to_string(SERVER_PORT), 0);
+					Refresh();
 					return true;
 				} else {
 					wxMessageDialog addressInvalidDialog(this, wxString::Format("This IP address is invalid: %s", networkInstance->getLastErrorMessage().c_str()), "Invalid IP", wxOK | wxICON_ERROR);
@@ -329,7 +340,6 @@ void MainWindow::onClose(wxCloseEvent& event) {
 	REMOVE_NETWORK_CALLBACK(RecieveApplicationConnected)
 	REMOVE_NETWORK_CALLBACK(RecieveLogging)
 	REMOVE_NETWORK_CALLBACK(RecieveGameFramebuffer)
-	REMOVE_NETWORK_CALLBACK(RecieveAutoRunControllerData)
 	REMOVE_NETWORK_CALLBACK(RecieveFlag)
 
 	// Close project dialog and save
@@ -337,6 +347,7 @@ void MainWindow::onClose(wxCloseEvent& event) {
 	networkInstance->endNetwork();
 
 	delete wxLog::SetActiveTarget(NULL);
+	delete autoFrameAdvanceTimer;
 
 	// TODO, this raises errors for some reason
 	// FFMS_Deinit();

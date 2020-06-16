@@ -1,12 +1,10 @@
 #include "luaScripting.hpp"
 
-LuaScripting::LuaScripting(std::shared_ptr<Syscalls> syscalls) {
+LuaScripting::LuaScripting() {
 	// http://www.fceux.com/web/help/fceux.html?LuaFunctionsList.html
 	// https://github.com/yuzu-emu/yuzu/wiki/Building-for-Windows
 	// https://sol2.readthedocs.io/en/latest/api/function.html
 	// https://sol2.readthedocs.io/en/latest/tutorial/all-the-things.html
-	yuzuSyscalls = syscalls;
-
 	luaState.open_libraries(sol::lib::base, sol::lib::package, sol::lib::coroutine, sol::lib::string, sol::lib::os, sol::lib::math, sol::lib::table, sol::lib::bit32, sol::lib::io, sol::lib::utf8);
 }
 

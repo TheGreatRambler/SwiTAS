@@ -54,7 +54,7 @@ enum SendInfo : uint8_t {
 	// These methods aren't debug because they are called by savestateHandler
 	PAUSE,
 	UNPAUSE,
-	RUN_BLANK_FRAME,
+	RUN_BLANK_FRAME
 };
 
 // clang-format off
@@ -77,7 +77,9 @@ namespace Protocol {
 		uint32_t frame;
 		uint16_t savestateHookNum;
 		uint8_t playerIndex;
-	, self.buf, self.fromFrameAdvance, self.frame, self.savestateHookNum, self.playerIndex)
+		// Set by auto advance
+		std::shared_ptr<ControllerData> controllerData;
+	, self.buf, self.fromFrameAdvance, self.frame, self.savestateHookNum, self.playerIndex, self.controllerData)
 
 	// Recieve a ton of game and user info
 	DEFINE_STRUCT(RecieveGameInfo,
@@ -94,13 +96,10 @@ namespace Protocol {
 	, self.actFlag)
 
 	DEFINE_STRUCT(SendAutoRun,
-		uint8_t fps;
-		// This is a bool
-		uint8_t start;
-		uint32_t frameStart;
+		uint32_t frameReturn;
 		uint16_t savestateHookNum;
 		uint8_t playerIndex;
-	, self.fps, self.start, self.frameStart, self.savestateHookNum, self.playerIndex)
+	, self.frameReturn, self.savestateHookNum, self.playerIndex)
 
 	DEFINE_STRUCT(SendLogging,
 		std::string log;
@@ -135,9 +134,5 @@ namespace Protocol {
 		uint64_t applicationProgramId;
 		uint64_t applicationProcessId;
 	, self.applicationName, self.applicationProgramId, self.applicationProcessId)
-
-	DEFINE_STRUCT(RecieveAutoRunControllerData,
-		std::shared_ptr<ControllerData> controllerData;
-	, self.controllerData)
 };
 // clang-format on

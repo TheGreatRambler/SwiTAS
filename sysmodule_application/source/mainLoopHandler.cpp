@@ -13,7 +13,6 @@ MainLoop::MainLoop() {
 			SEND_QUEUE_DATA(RecieveApplicationConnected)
 			SEND_QUEUE_DATA(RecieveLogging)
 			SEND_QUEUE_DATA(RecieveMemoryRegion)
-			SEND_QUEUE_DATA(RecieveAutoRunControllerData)
 		},
 		[](CommunicateWithNetwork* self) {
 			RECIEVE_QUEUE_DATA(SendFlag)
@@ -118,30 +117,6 @@ void MainLoop::mainLoopHandler() {
 	if(applicationOpened) {
 		// handle network updates always, they are stored in the queue regardless of the internet
 		handleNetworkUpdates();
-
-#ifdef __SWITCH__
-		// Check auto run
-		if(autoRunOn && networkInstance->isConnected()) {
-			u64 currentTime = armTicksToNs(armGetSystemTick());
-			if(lastAutorunTime == 0 || (currentTime - lastAutorunTime) > nanosecondsBetweenAutorun) {
-				// TODO handle for any controller and handle increasing frames
-				matchFirstControllerToTASController(0);
-
-				// TODO autorun sends frame advance linked framebuffers
-				runSingleFrame(0, 0, 0, 0);
-
-				// clang-format off
-				ADD_TO_QUEUE(RecieveAutoRunControllerData, networkInstance, {
-					data.controllerData = controllers[0]->getControllerData();
-				})
-				// clang-format on
-
-				lastAutorunTime = currentTime;
-			}
-			// Get nanosecond time
-			// Check if
-		}
-#endif
 	}
 
 	// Match first controller inputs as often as possible
@@ -157,10 +132,7 @@ void MainLoop::handleNetworkUpdates() {
 	CHECK_QUEUE(networkInstance, SendFrameData, {
 		controllers[data.playerIndex]->setFrame(data.controllerData);
 		if(data.incrementFrame) {
-#ifdef __SWITCH__
-			LOGD << "Increment frame";
-#endif
-			runSingleFrame(1, data.frame, data.savestateHookNum, data.playerIndex);
+			runSingleFrame(true, false, data.frame, data.savestateHookNum, data.playerIndex);
 		}
 	})
 
@@ -176,42 +148,25 @@ void MainLoop::handleNetworkUpdates() {
 			// Precaution to prevent the app getting stuck without the
 			// User able to unpause it
 			if(applicationOpened && internetConnected) {
-#ifdef __SWITCH__
-				LOGD << "Pause app";
-#endif
-				pauseApp(0, 0, 0, 0);
+				pauseApp(false, false, 0, 0, 0);
 			}
 		} else if(data.actFlag == SendInfo::UNPAUSE_DEBUG) {
 			if(applicationOpened) {
-#ifdef __SWITCH__
-				LOGD << "Unpause app";
-#endif
 				clearEveryController();
 				unpauseApp();
 			}
 		} else if(data.actFlag == SendInfo::GET_FRAMEBUFFER) {
 			if(applicationOpened) {
-#ifdef __SWITCH__
-				LOGD << "Get framebuffer";
-#endif
-				screenshotHandler.writeFramebuffer(networkInstance, 0, 0, 0, 0);
+				// For now, unsupported
+				// screenshotHandler.writeFramebuffer(networkInstance, 0, 0, 0, 0);
 			}
 		} else if(data.actFlag == SendInfo::RUN_BLANK_FRAME) {
 			matchFirstControllerToTASController(0);
-			runSingleFrame(0, 0, 0, 0);
-#ifdef __SWITCH__
-			LOGD << "Done with that";
-#endif
+			runSingleFrame(false, false, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::START_TAS_MODE) {
-#ifdef __SWITCH__
-			LOGD << "Start TAS mode";
-#endif
-			pauseApp(0, 0, 0, 0);
+			pauseApp(false, false, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::PAUSE) {
-#ifdef __SWITCH__
-			LOGD << "Pause";
-#endif
-			pauseApp(0, 0, 0, 0);
+			pauseApp(false, false, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::UNPAUSE) {
 			clearEveryController();
 			unpauseApp();
@@ -229,11 +184,10 @@ void MainLoop::handleNetworkUpdates() {
 
 	// TODO add logic to handle lua scripting
 
+	// This is essentially auto advance but with frame linked framebuffers
 	CHECK_QUEUE(networkInstance, SendAutoRun, {
-		autoRunOn = data.start;
-		if(data.start) {
-			nanosecondsBetweenAutorun = (1000 / (float)data.fps) * 1000000;
-		}
+		matchFirstControllerToTASController(0);
+		runSingleFrame(true, true, data.frameReturn, data.savestateHookNum, data.playerIndex);
 	})
 }
 
@@ -246,7 +200,7 @@ void MainLoop::sendGameInfo() {
 		// https://github.com/switchbrew/switch-examples/blob/master/account/source/main.c
 
 		uint64_t addr = 0;
-		pauseApp(0, 0, 0, 0);
+		pauseApp(false, false, 0, 0, 0);
 #ifdef __SWITCH__
 		while(true) {
 			MemoryInfo info = { 0 };
@@ -339,14 +293,14 @@ GameMemoryInfo MainLoop::getGameMemoryInfo(MemoryInfo memInfo) {
 }
 #endif
 
-void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint32_t frame, uint16_t savestateHookNum, uint8_t playerIndex) {
+void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t autoAdvance, uint32_t frame, uint16_t savestateHookNum, uint8_t playerIndex) {
 	if(isPaused) {
 #ifdef __SWITCH__
 		LOGD << "Running frame";
 #endif
 		unpauseApp();
 		waitForVsync();
-		pauseApp(linkedWithFrameAdvance, frame, savestateHookNum, playerIndex);
+		pauseApp(linkedWithFrameAdvance, autoAdvance, frame, savestateHookNum, playerIndex);
 	}
 }
 
@@ -357,7 +311,7 @@ void MainLoop::clearEveryController() {
 	}
 }
 
-void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint32_t frame, uint16_t savestateHookNum, uint8_t playerIndex) {
+void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t autoAdvance, uint32_t frame, uint16_t savestateHookNum, uint8_t playerIndex) {
 	// This is aborting for some reason
 	if(!isPaused) {
 		// Debug application again
@@ -370,7 +324,21 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint32_t frame, uint16_t
 
 		if(networkInstance->isConnected()) {
 			// Framebuffers should not be stored in memory unless they will be sent over internet
-			screenshotHandler.writeFramebuffer(networkInstance, linkedWithFrameAdvance, frame, savestateHookNum, playerIndex);
+			controllers[0]->getControllerData();
+			std::vector<uint8_t> jpegBuf(JPEG_BUF_SIZE);
+			screenshotHandler.writeFramebuffer(&jpegBuf);
+			ADD_TO_QUEUE(RecieveGameFramebuffer, networkInstance, {
+				data.buf              = jpegBuf;
+				data.fromFrameAdvance = linkedWithFrameAdvance;
+				data.frame            = frame;
+				data.savestateHookNum = savestateHookNum;
+				data.playerIndex      = playerIndex;
+				if(autoAdvance) {
+					data.controllerData = controllers[0]->getControllerData();
+				} else {
+					data.controllerData = nullptr;
+				}
+			})
 			/*
 						for(auto const& memoryRegion : memoryRegions) {
 							std::vector<uint8_t> buf(memoryRegion.second);

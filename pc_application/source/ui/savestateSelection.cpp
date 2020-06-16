@@ -113,7 +113,7 @@ SavestateSelection::SavestateSelection(wxFrame* parent, rapidjson::Document* set
 	}
 
 	autoIncrementDelay = new wxSpinCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 5000, 0);
-	autoIncrementDelay->SetToolTip("Delay in mlliseconds for automatically incrementing frame: ");
+	autoIncrementDelay->SetToolTip("Delay in mlliseconds for automatically incrementing frame");
 
 	playButton->Bind(wxEVT_BUTTON, &SavestateSelection::onPlay, this);
 	pauseButton->Bind(wxEVT_BUTTON, &SavestateSelection::onPause, this);

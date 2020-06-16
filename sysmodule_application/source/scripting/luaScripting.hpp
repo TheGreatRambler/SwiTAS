@@ -24,7 +24,9 @@ private:
 
 	std::string luaPath;
 
+#ifdef YUZU
 	std::shared_ptr<Syscalls> yuzuSyscalls;
+#endif
 
 	std::atomic_bool syscallReady = false;
 	uint8_t ready                 = false;
@@ -37,8 +39,13 @@ private:
 	void luaThread();
 
 public:
-	LuaScripting(std::shared_ptr<Syscalls> syscalls);
+	LuaScripting();
 
+#ifdef YUZU
+	void setYuzuSyscalls(std::shared_ptr<Syscalls> syscalls) {
+		yuzuSyscalls = syscalls;
+	}
+#endif
 	void loadScript(std::string path);
 
 	void endScript();

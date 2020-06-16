@@ -36,12 +36,6 @@ private:
 	std::shared_ptr<Syscalls> yuzuSyscalls;
 #endif
 
-	uint8_t autoRunOn = false;
-	uint32_t autoRunFrameframe;
-	uint16_t auroRunSavestateHookNum;
-	uint64_t nanosecondsBetweenAutorun;
-	uint64_t lastAutorunTime = 0;
-
 #ifdef __SWITCH__
 	Event vsyncEvent;
 #endif
@@ -51,7 +45,7 @@ private:
 	std::vector<std::pair<uint64_t, uint64_t>> memoryRegions;
 
 	ScreenshotHandler screenshotHandler;
-	LuaScripting luaScripting;
+	std::shared_ptr<LuaScripting> luaScripting;
 
 	uint8_t isPaused = false;
 
@@ -66,7 +60,7 @@ private:
 	GameMemoryInfo getGameMemoryInfo(MemoryInfo memInfo);
 #endif
 
-	void pauseApp(uint8_t linkedWithFrameAdvance, uint32_t frame, uint16_t savestateHookNum, uint8_t playerIndex);
+	void pauseApp(uint8_t linkedWithFrameAdvance, uint8_t autoAdvance, uint32_t frame, uint16_t savestateHookNum, uint8_t playerIndex);
 
 	void waitForVsync() {
 #ifdef __SWITCH__
@@ -87,7 +81,7 @@ private:
 	}
 
 	// This assumes that the app is paused
-	void runSingleFrame(uint8_t linkedWithFrameAdvance, uint32_t frame, uint16_t savestateHookNum, uint8_t playerIndex);
+	void runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t autoAdvance, uint32_t frame, uint16_t savestateHookNum, uint8_t playerIndex);
 
 	void clearEveryController();
 
@@ -115,8 +109,6 @@ public:
 #endif
 
 	void mainLoopHandler();
-
-	LuaScripting& getLuaScripting();
 
 	~MainLoop();
 };

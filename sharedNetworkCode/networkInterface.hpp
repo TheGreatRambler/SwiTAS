@@ -68,8 +68,8 @@
 
 #ifdef __SWITCH__
 #include <plog/Log.h>
-#include <switch.h>
 #endif
+
 #ifdef CLIENT_IMP
 #include <wx/wx.h>
 #endif
@@ -152,7 +152,6 @@ public:
 	ADD_QUEUE(SendSetNumControllers)
 	ADD_QUEUE(RecieveMemoryRegion)
 	ADD_QUEUE(SendAutoRun)
-	ADD_QUEUE(RecieveAutoRunControllerData)
 
 	CommunicateWithNetwork(std::function<void(CommunicateWithNetwork*)> sendCallback, std::function<void(CommunicateWithNetwork*)> recieveCallback);
 

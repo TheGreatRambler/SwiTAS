@@ -150,10 +150,8 @@ void ProjectHandler::saveProject() {
 				inputsFilename.SetExt("bin");
 
 				wxFileName screenshotFileName = getProjectStart();
-				screenshotFileName.SetName(wxString::Format("savestate_block_%hu_player_%u_screenshot", savestateHookIndexNum, playerIndexNum + 1));
+				screenshotFileName.SetName(wxString::Format("savestate_block_%hu_screenshot", savestateHookIndexNum, playerIndexNum + 1));
 				screenshotFileName.SetExt("jpg");
-
-				savestateHookBlock->screenshot->SaveFile(screenshotFileName.GetFullPath(), wxBITMAP_TYPE_JPEG);
 
 				// Delete file if already present and use binary mode
 				wxFFileOutputStream inputsFileStream(inputsFilename.GetFullPath(), "wb");

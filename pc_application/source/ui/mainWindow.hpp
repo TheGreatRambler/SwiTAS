@@ -47,6 +47,9 @@ private:
 	// Networking stuff
 	std::shared_ptr<CommunicateWithNetwork> networkInstance;
 
+	// For sideUI
+	wxTimer* autoFrameAdvanceTimer;
+
 	// Main logging window
 	wxLogWindow* logWindow;
 	// Main debug command window
@@ -80,6 +83,8 @@ private:
 	void OnSize(wxSizeEvent& event);
 	void onClose(wxCloseEvent& event);
 	void onIdle(wxIdleEvent& event);
+
+	void onAutoFrameAdvanceTimer(wxTimerEvent& event);
 
 	bool askForIP();
 	void handleNetworkQueues();

@@ -152,8 +152,8 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	autoFrameSizer = new wxBoxSizer(wxHORIZONTAL);
 
 	// TODO add these images
-	autoFrameStart = HELPERS::getBitmapButton(parentFrame, mainSettings, "autoFrameStartButton");
-	autoFrameEnd   = HELPERS::getBitmapButton(parentFrame, mainSettings, "autoFrameEndButton");
+	autoFrameStart = HELPERS::getBitmapButton(parentFrame, mainSettings, "autoFrameAdvanceButton");
+	autoFrameEnd   = HELPERS::getBitmapButton(parentFrame, mainSettings, "pauseButton");
 
 	autoFrameStart->SetToolTip("Start auto frame advance");
 	autoFrameEnd->SetToolTip("Stop auto frame advance");
@@ -161,10 +161,11 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	autoFrameStart->Bind(wxEVT_BUTTON, &SideUI::onStartAutoFramePressed, this);
 	autoFrameEnd->Bind(wxEVT_BUTTON, &SideUI::onEndAutoFramePressed, this);
 
-	autoRunFramesPerSecond = new wxSpinCtrl(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 60, 1);
+	// Name is a misnomer
+	autoRunFramesPerSecond = new wxSpinCtrl(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 5000, 0);
 	autoRunFramesPerSecond->Bind(wxEVT_SPINCTRL, &SideUI::autoRunIntervalChanged, this);
 
-	autoRunFramesPerSecond->SetToolTip("Set frames per second during auto frame advance");
+	autoRunFramesPerSecond->SetToolTip("Delay in mlliseconds for automatically incrementing frame");
 
 	autoFrameSizer->Add(autoFrameStart, 0, wxEXPAND | wxALL);
 	autoFrameSizer->Add(autoFrameEnd, 0, wxEXPAND | wxALL);
@@ -313,6 +314,8 @@ bool SideUI::createSavestateHook() {
 
 			inputData->setSavestateHook(blocks.size() - 1);
 
+			savestateSelection.getNewScreenshot()->SaveFile(inputData->getFramebufferPathForCurrentFramebuf().GetFullPath(), wxBITMAP_TYPE_JPEG);
+
 			tether();
 			return true;
 		} else {
@@ -397,20 +400,11 @@ void SideUI::onStartAutoFramePressed(wxCommandEvent& event) {
 
 void SideUI::sendAutoRunData() {
 	autoRunActive = true;
-	ADD_TO_QUEUE(SendAutoRun, networkInterface, {
-		data.fps   = autoRunFramesPerSecond->GetValue();
-		data.start = true;
-	})
+	inputData->sendAutoAdvance();
+	autoFrameStart->Disable();
 }
 
 void SideUI::onEndAutoFramePressed(wxCommandEvent& event) {
 	autoRunActive = false;
-	ADD_TO_QUEUE(SendAutoRun, networkInterface, {
-		data.fps   = 0;
-		data.start = false;
-	})
-}
-
-void SideUI::recieveAutoRunData(std::shared_ptr<ControllerData> controllerData) {
-	inputData->setControllerDataForAutoRun(controllerData);
+	autoFrameStart->Enable();
 }
