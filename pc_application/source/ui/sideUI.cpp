@@ -273,6 +273,9 @@ void SideUI::onSavestateHookModifyPressed(wxCommandEvent& event) {
 
 			inputData->invalidateRun(0);
 			inputData->setSavestateHook(inputData->getCurrentSavestateHook());
+
+			modifySavestateSelection.getNewScreenshot()->SaveFile(inputData->getFramebufferPathForCurrentFramebuf().GetFullPath(), wxBITMAP_TYPE_JPEG);
+
 			tether();
 		} else {
 			untether();

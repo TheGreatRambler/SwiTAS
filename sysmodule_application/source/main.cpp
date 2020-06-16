@@ -11,7 +11,7 @@
 #endif
 
 #ifdef YUZU
-#include "scripting/dllFunctionDefinitions.hpp"
+#include "dllFunctionDefinitions.hpp"
 #endif
 
 #include "controller.hpp"
@@ -176,7 +176,7 @@ int main(int argc, char* argv[]) {
 MainLoop mainLoop;
 
 DLL_EXPORT void startPlugin(void* wrapperInstance) {
-	mainLoop.setYuzuInstance(wrapperInstance);
+	mainLoop.getYuzuSyscalls()->setYuzuInstance(wrapperInstance);
 }
 
 // Possibly pass delta
@@ -185,13 +185,13 @@ DLL_EXPORT void handleMainLoop() {
 }
 
 // clang-format off
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getLuaScripting(), emu_speedmode)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getLuaScripting(), emu_frameadvance)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getLuaScripting(), emu_pause)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getLuaScripting(), emu_unpause)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getLuaScripting(), emu_message)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getLuaScripting(), emu_framecount)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getLuaScripting(), emu_emulating)
+DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), emu_speedmode)
+DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), emu_frameadvance)
+DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), emu_pause)
+DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), emu_unpause)
+DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), emu_message)
+DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), emu_framecount)
+DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), emu_emulating)
 // clang-format on
 // Etc...
 #endif

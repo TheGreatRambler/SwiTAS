@@ -127,14 +127,14 @@ void MainLoop::mainLoopHandler() {
 				// TODO handle for any controller and handle increasing frames
 				matchFirstControllerToTASController(0);
 
+				// TODO autorun sends frame advance linked framebuffers
+				runSingleFrame(0, 0, 0, 0);
+
 				// clang-format off
 				ADD_TO_QUEUE(RecieveAutoRunControllerData, networkInstance, {
 					data.controllerData = controllers[0]->getControllerData();
 				})
 				// clang-format on
-
-				// TODO autorun sends frame advance linked framebuffers
-				runSingleFrame(0, 0, 0, 0);
 
 				lastAutorunTime = currentTime;
 			}

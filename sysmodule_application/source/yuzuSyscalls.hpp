@@ -10,6 +10,8 @@
 
 class Syscalls {
 private:
+	void* yuzuInstance;
+
 public:
 #ifdef YUZU
 	YUZU_FUNC(emu_speedmode)
@@ -23,4 +25,8 @@ public:
 #endif
 
 	Syscalls();
+
+	void setYuzuInstance(void* instance) {
+		yuzuInstance = instance;
+	}
 };

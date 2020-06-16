@@ -10,7 +10,8 @@
 #endif
 
 #ifdef YUZU
-#include "scripting/dllFunctionDefinitions.hpp"
+#include "dllFunctionDefinitions.hpp"
+#include "yuzuSyscalls.hpp"
 #endif
 
 #include "../../sharedNetworkCode/networkInterface.hpp"
@@ -31,6 +32,10 @@ private:
 	Handle applicationDebug;
 #endif
 
+#ifdef YUZU
+	std::shared_ptr<Syscalls> yuzuSyscalls;
+#endif
+
 	uint8_t autoRunOn = false;
 	uint32_t autoRunFrameframe;
 	uint16_t auroRunSavestateHookNum;
@@ -39,10 +44,6 @@ private:
 
 #ifdef __SWITCH__
 	Event vsyncEvent;
-#endif
-
-#ifdef YUZU
-	void* yuzuInstance;
 #endif
 
 	std::vector<std::unique_ptr<ControllerHandler>> controllers;
@@ -108,8 +109,8 @@ public:
 	MainLoop();
 
 #ifdef YUZU
-	void setYuzuInstance(void* instance) {
-		yuzuInstance = instance;
+	std::shared_ptr<Syscalls> getYuzuSyscalls() {
+		return yuzuSyscalls;
 	}
 #endif
 

@@ -132,13 +132,13 @@ SavestateSelection::SavestateSelection(wxFrame* parent, rapidjson::Document* set
 		goalFrame = new DrawingCanvasBitmap(this, wxSize(1280 / 2, 720 / 2));
 	}
 
-	leftImageSizer->Add(currentFrame, 0, wxSHAPED | wxEXPAND | wxALIGN_CENTER_HORIZONTAL);
+	leftImageSizer->Add(currentFrame, 0, wxSHAPED | wxEXPAND);
 
 	if(savestateLoadDialog) {
 		// Dhashes are only used in loading, not creating the first one
 		leftImageSizer->Add(leftDHash, 1, wxEXPAND | wxALL);
 
-		rightImageSizer->Add(goalFrame, 0, wxSHAPED | wxEXPAND | wxALIGN_CENTER_HORIZONTAL);
+		rightImageSizer->Add(goalFrame, 0, wxSHAPED | wxEXPAND);
 		rightImageSizer->Add(rightDHash, 1, wxEXPAND | wxALL);
 	}
 
@@ -150,11 +150,11 @@ SavestateSelection::SavestateSelection(wxFrame* parent, rapidjson::Document* set
 	fullSizer->Add(imageSizer, 1, wxEXPAND | wxALL);
 
 	if(savestateLoadDialog) {
-		fullSizer->Add(hammingDistance, 0);
-		fullSizer->Add(selectFrameAutomatically, 1);
+		fullSizer->Add(hammingDistance, 0, wxEXPAND);
+		fullSizer->Add(selectFrameAutomatically, 0, wxEXPAND);
 	}
 
-	fullSizer->Add(autoIncrementDelay, 1);
+	fullSizer->Add(autoIncrementDelay, 0, wxEXPAND);
 
 	buttonSizer->Add(playButton, 1);
 	buttonSizer->Add(pauseButton, 1);

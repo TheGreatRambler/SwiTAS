@@ -12,7 +12,7 @@
 #include <switch.h>
 #endif
 
-#include "dllFunctionDefinitions.hpp"
+#include "../yuzuSyscalls.hpp"
 
 class LuaScripting {
 private:
@@ -33,7 +33,6 @@ private:
 	void luaThread();
 
 public:
-
 	LuaScripting();
 
 	void loadScript(std::string path);

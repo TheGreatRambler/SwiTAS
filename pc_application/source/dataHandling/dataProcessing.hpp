@@ -188,8 +188,8 @@ public:
 	wxFileName getFramebufferPath(uint8_t player, SavestateBlockNum savestateHookNum, FrameNum frame) {
 		wxFileName framebufferFileName = projectStart;
 		framebufferFileName.AppendDir("framebuffers");
-		wxString name = "frame_%lu_savestate_block_%u_player_%u_screenshot";
-		framebufferFileName.SetName(wxString::Format(name, frame, savestateHookNum, player));
+		wxString name = "frame_%lu_savestate_block_%u_screenshot";
+		framebufferFileName.SetName(wxString::Format(name, frame, savestateHookNum));
 		framebufferFileName.SetExt("jpg");
 		return framebufferFileName;
 	}
@@ -202,8 +202,8 @@ public:
 		if(currentImageFrame == 0) {
 			// Display the image linked with the savestate hook
 			wxFileName framebufferFileName = projectStart;
-			wxString name                  = "savestate_block_%u_player_%u_screenshot";
-			framebufferFileName.SetName(wxString::Format(name, currentSavestateHook, viewingPlayerIndex + 1));
+			wxString name                  = "savestate_block_%u_screenshot";
+			framebufferFileName.SetName(wxString::Format(name, currentSavestateHook));
 			framebufferFileName.SetExt("jpg");
 			return framebufferFileName;
 		} else {

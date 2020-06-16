@@ -68,6 +68,7 @@
 
 #ifdef __SWITCH__
 #include <plog/Log.h>
+#include <switch.h>
 #endif
 #ifdef CLIENT_IMP
 #include <wx/wx.h>
@@ -85,7 +86,7 @@
 #include "networkingStructures.hpp"
 
 #define SERVER_PORT 6978
-// Random number to define the beginning of packets, just in case of errors
+
 #define SOCKET_TIMEOUT_SECONDS 2
 #define SOCKET_TIMEOUT_MICROSECONDS 0
 
