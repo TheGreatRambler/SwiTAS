@@ -324,9 +324,10 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t autoAdvance, uin
 
 		if(networkInstance->isConnected()) {
 			// Framebuffers should not be stored in memory unless they will be sent over internet
-			controllers[0]->getControllerData();
+			LOGD << "Oh no";
 			std::vector<uint8_t> jpegBuf(JPEG_BUF_SIZE);
-			screenshotHandler.writeFramebuffer(&jpegBuf);
+			screenshotHandler.writeFramebuffer(jpegBuf);
+			LOGD << "Written";
 			ADD_TO_QUEUE(RecieveGameFramebuffer, networkInstance, {
 				data.buf              = jpegBuf;
 				data.fromFrameAdvance = linkedWithFrameAdvance;
@@ -339,6 +340,7 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t autoAdvance, uin
 					data.controllerData = nullptr;
 				}
 			})
+			LOGD << "Sent";
 			/*
 						for(auto const& memoryRegion : memoryRegions) {
 							std::vector<uint8_t> buf(memoryRegion.second);

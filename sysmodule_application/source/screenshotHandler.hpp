@@ -28,7 +28,7 @@ private:
 public:
 	ScreenshotHandler();
 
-	void writeFramebuffer(std::vector<uint8_t>* buf);
+	void writeFramebuffer(std::vector<uint8_t>& buf);
 
 	~ScreenshotHandler();
 };
