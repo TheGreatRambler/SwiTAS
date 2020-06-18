@@ -183,7 +183,7 @@ void MainWindow::handleNetworkQueues() {
 
 			dataProcessingInstance->runFrameForAutoFrame();
 
-			if(data.controllerData.get() != nullptr) {
+			if(data.controllerDataIncluded) {
 				dataProcessingInstance->setControllerDataForAutoRun(data.controllerData);
 				if(sideUI->getAutoRunActive()) {
 					autoFrameAdvanceTimer->StartOnce(sideUI->getAutoRunDelay());

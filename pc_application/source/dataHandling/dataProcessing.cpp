@@ -855,9 +855,11 @@ uint8_t DataProcessing::getButtonCurrent(Btn button) const {
 	return getButton(currentFrame, button);
 }
 
-void DataProcessing::setControllerDataForAutoRun(std::shared_ptr<ControllerData> controllerData) {
+void DataProcessing::setControllerDataForAutoRun(ControllerData controllerData) {
 	// Set controller data manually
-	inputsList->at(currentFrame) = controllerData;
+	std::shared_ptr<ControllerData> newData = std::make_shared<ControllerData>();
+	buttonData->transferControllerData(controllerData, newData, false);
+	inputsList->at(currentFrame) = newData;
 	modifyCurrentFrameViews(currentFrame);
 }
 

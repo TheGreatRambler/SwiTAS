@@ -78,8 +78,9 @@ namespace Protocol {
 		uint16_t savestateHookNum;
 		uint8_t playerIndex;
 		// Set by auto advance
-		std::shared_ptr<ControllerData> controllerData;
-	, self.buf, self.fromFrameAdvance, self.frame, self.savestateHookNum, self.playerIndex, self.controllerData)
+		uint8_t controllerDataIncluded;
+		ControllerData controllerData;
+	, self.buf, self.fromFrameAdvance, self.frame, self.savestateHookNum, self.playerIndex, self.controllerDataIncluded, self.controllerData)
 
 	// Recieve a ton of game and user info
 	DEFINE_STRUCT(RecieveGameInfo,

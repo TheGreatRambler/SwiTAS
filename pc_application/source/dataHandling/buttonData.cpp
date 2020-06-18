@@ -295,27 +295,27 @@ std::string ButtonData::framesToText(DataProcessing* dataProcessing, FrameNum st
 	return HELPERS::joinString(textVector, "\n");
 }
 
-void ButtonData::transferControllerData(std::shared_ptr<ControllerData> src, std::shared_ptr<ControllerData> dest, bool placePaste) {
+void ButtonData::transferControllerData(ControllerData src, std::shared_ptr<ControllerData> dest, bool placePaste) {
 	// Transfer all over
 
 	if(placePaste) {
 		// Add them together, not replace (bitwise or)
-		dest->buttons |= src->buttons;
+		dest->buttons |= src.buttons;
 	} else {
 		// Just replace
-		dest->buttons = src->buttons;
+		dest->buttons = src.buttons;
 	}
-	dest->LS_X       = src->LS_X;
-	dest->LS_Y       = src->LS_Y;
-	dest->RS_X       = src->RS_X;
-	dest->RS_Y       = src->RS_Y;
-	dest->ACCEL_X    = src->ACCEL_X;
-	dest->ACCEL_Y    = src->ACCEL_Y;
-	dest->ACCEL_Z    = src->ACCEL_Z;
-	dest->GYRO_1     = src->GYRO_1;
-	dest->GYRO_2     = src->GYRO_2;
-	dest->GYRO_3     = src->GYRO_3;
-	dest->frameState = src->frameState;
+	dest->LS_X       = src.LS_X;
+	dest->LS_Y       = src.LS_Y;
+	dest->RS_X       = src.RS_X;
+	dest->RS_Y       = src.RS_Y;
+	dest->ACCEL_X    = src.ACCEL_X;
+	dest->ACCEL_Y    = src.ACCEL_Y;
+	dest->ACCEL_Z    = src.ACCEL_Z;
+	dest->GYRO_1     = src.GYRO_1;
+	dest->GYRO_2     = src.GYRO_2;
+	dest->GYRO_3     = src.GYRO_3;
+	dest->frameState = src.frameState;
 }
 
 bool ButtonData::isEmptyControllerData(std::shared_ptr<ControllerData> data) {
