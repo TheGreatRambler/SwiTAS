@@ -152,6 +152,7 @@ public:
 	ADD_QUEUE(SendSetNumControllers)
 	ADD_QUEUE(RecieveMemoryRegion)
 	ADD_QUEUE(SendAutoRun)
+	ADD_QUEUE(SendAddMemoryRegion)
 
 	CommunicateWithNetwork(std::function<void(CommunicateWithNetwork*)> sendCallback, std::function<void(CommunicateWithNetwork*)> recieveCallback);
 

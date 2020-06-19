@@ -1,7 +1,7 @@
 #include "videoComparisonViewer.hpp"
 
 VideoComparisonViewer::VideoComparisonViewer(wxFrame* parent, std::function<void(VideoComparisonViewer*)> callback, rapidjson::Document* settings, std::vector<std::shared_ptr<VideoEntry>>& entries, wxString projectDirectory)
-	: wxFrame(parent, wxID_ANY, "Video Comparison Viewer", wxDefaultPosition, wxSize(300, 200), wxDEFAULT_FRAME_STYLE | wxFRAME_FLOAT_ON_PARENT)
+	: wxFrame(parent, wxID_ANY, "Video Comparison Viewer", wxDefaultPosition, wxSize(600, 400), wxDEFAULT_FRAME_STYLE | wxFRAME_FLOAT_ON_PARENT)
 	, videoEntries(entries) {
 	// https://www.youtube.com/watch?v=su61pXgmJcw
 	mainSettings  = settings;

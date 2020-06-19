@@ -39,6 +39,7 @@ MainWindow::MainWindow()
 			SEND_QUEUE_DATA(SendTrackMemoryRegion)
 			SEND_QUEUE_DATA(SendSetNumControllers)
 			SEND_QUEUE_DATA(SendAutoRun)
+			SEND_QUEUE_DATA(SendAddMemoryRegion)
 		},
 		[](CommunicateWithNetwork* self) {
 			RECIEVE_QUEUE_DATA(RecieveFlag)

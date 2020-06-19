@@ -21,6 +21,7 @@ MainLoop::MainLoop() {
 			RECIEVE_QUEUE_DATA(SendTrackMemoryRegion)
 			RECIEVE_QUEUE_DATA(SendSetNumControllers)
 			RECIEVE_QUEUE_DATA(SendAutoRun)
+			RECIEVE_QUEUE_DATA(SendAddMemoryRegion)
 		});
 
 #ifdef __SWITCH__
