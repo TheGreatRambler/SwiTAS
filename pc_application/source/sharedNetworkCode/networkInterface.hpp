@@ -87,7 +87,7 @@
 
 #define SERVER_PORT 6978
 
-#define SOCKET_TIMEOUT_SECONDS 2
+#define SOCKET_TIMEOUT_SECONDS 1
 #define SOCKET_TIMEOUT_MICROSECONDS 0
 
 class CommunicateWithNetwork {
