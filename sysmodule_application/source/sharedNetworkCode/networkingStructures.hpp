@@ -27,6 +27,7 @@ enum DataFlag : uint8_t {
 	SendLogging,
 	SendTrackMemoryRegion,
 	SendSetNumControllers,
+	SendAddMemoryRegion,
 	RecieveMemoryRegion,
 	RecieveLogging,
 	RecieveFlag,
@@ -54,7 +55,20 @@ enum SendInfo : uint8_t {
 	// These methods aren't debug because they are called by savestateHandler
 	PAUSE,
 	UNPAUSE,
-	RUN_BLANK_FRAME
+	RUN_BLANK_FRAME,
+};
+
+// This is used by the switch to determine size, a vector is always send back enyway
+enum MemoryRegionTypes : uint8_t {
+	Bit8 = 0,
+	Bit16,
+	Bit32,
+	Bit64,
+	Float,
+	Double,
+	CharPointer,
+	ByteArray,
+	NUM_OF_TYPES,
 };
 
 // clang-format off
@@ -111,15 +125,22 @@ namespace Protocol {
 		uint64_t size;
 	, self.startByte, self.size)
 
+	DEFINE_STRUCT(SendAddMemoryRegion,
+		std::string pointerDefinition;
+		MemoryRegionTypes type;
+		uint8_t clearAllRegions;
+		uint16_t index;
+	, self.pointerDefinition, self.type, self.clearAllRegions, self.index)
+
 	DEFINE_STRUCT(SendSetNumControllers,
 		uint8_t size;
 	, self.size)
 
 	DEFINE_STRUCT(RecieveMemoryRegion,
-		uint64_t startByte;
-		uint64_t size;
 		std::vector<uint8_t> memory;
-	, self.startByte, self.size, self.memory)
+		std::string stringRepresentation; // This is provided for all types but the byte array
+		uint16_t index;
+	, self.memory, self.stringRepresentation, self.index)
 
 	DEFINE_STRUCT(RecieveLogging,
 		std::string log;

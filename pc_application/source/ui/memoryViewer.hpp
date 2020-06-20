@@ -4,6 +4,7 @@
 #include <memory>
 #include <mio.hpp>
 #include <system_error>
+#include <wx/filepicker.h>
 #include <wx/wx.h>
 
 #include "../dataHandling/projectHandler.hpp"
@@ -33,9 +34,9 @@ private:
 	wxButton* updateEntry;
 	wxButton* addEntry;
 
-	void typeChanged(wxCommandEvent& event)
+	void typeChanged(wxCommandEvent& event);
 
-		void onUpdateEntry(wxCommandEvent& event);
+	void onUpdateEntry(wxCommandEvent& event);
 	void onAddEntry(wxCommandEvent& event);
 
 public:
