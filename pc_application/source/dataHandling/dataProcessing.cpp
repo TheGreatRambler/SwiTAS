@@ -596,13 +596,14 @@ void DataProcessing::addNewSavestateHook(std::string dHash, wxBitmap* screenshot
 }
 
 void DataProcessing::setSavestateHook(SavestateBlockNum index) {
+	currentSavestateHook = index;
+
 	inputsList           = allPlayers[viewingPlayerIndex]->at(index)->inputs;
 	std::size_t itemSize = inputsList->size();
 	SetItemCount(itemSize);
 	setCurrentFrame(0);
-	currentRunFrame      = 0;
-	currentImageFrame    = 0;
-	currentSavestateHook = index;
+	currentRunFrame   = 0;
+	currentImageFrame = 0;
 
 	if(changingSelectedFrameCallback) {
 		changingSelectedFrameCallback(currentFrame, currentRunFrame, currentImageFrame);

@@ -299,6 +299,7 @@ void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t autoAdvanc
 #ifdef __SWITCH__
 		LOGD << "Running frame";
 #endif
+		waitForVsync();
 		unpauseApp();
 		waitForVsync();
 		pauseApp(linkedWithFrameAdvance, autoAdvance, frame, savestateHookNum, playerIndex);

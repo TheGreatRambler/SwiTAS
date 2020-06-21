@@ -132,13 +132,17 @@ SavestateSelection::SavestateSelection(wxFrame* parent, rapidjson::Document* set
 		goalFrame = new DrawingCanvasBitmap(this, wxSize(1280 / 2, 720 / 2));
 	}
 
-	leftImageSizer->Add(currentFrame, 0, wxSHAPED | wxEXPAND);
+	if(!savestateLoadDialog) {
+		leftImageSizer->Add(currentFrame, 0, wxSHAPED | wxEXPAND | wxALIGN_CENTER_HORIZONTAL);
+	} else {
+		leftImageSizer->Add(currentFrame, 0, wxSHAPED);
+	}
 
 	if(savestateLoadDialog) {
 		// Dhashes are only used in loading, not creating the first one
 		leftImageSizer->Add(leftDHash, 1, wxEXPAND | wxALL);
 
-		rightImageSizer->Add(goalFrame, 0, wxSHAPED | wxEXPAND);
+		rightImageSizer->Add(goalFrame, 0, wxSHAPED);
 		rightImageSizer->Add(rightDHash, 1, wxEXPAND | wxALL);
 	}
 

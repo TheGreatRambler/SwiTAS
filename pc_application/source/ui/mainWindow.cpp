@@ -56,7 +56,7 @@ MainWindow::MainWindow()
 	projectHandler = std::make_shared<ProjectHandler>(this, dataProcessingInstance, &mainSettings);
 
 	// UI instances
-	sideUI   = std::make_shared<SideUI>(this, &mainSettings, projectHandler, mainSizer, dataProcessingInstance, networkInstance);
+	sideUI   = std::make_shared<SideUI>(this, &mainSettings, projectHandler, mainSizer, dataProcessingInstance, networkInstance, std::bind(&MainWindow::startedIncrementFrame, this));
 	bottomUI = std::make_shared<BottomUI>(this, &mainSettings, buttonData, mainSizer, dataProcessingInstance);
 
 	autoFrameAdvanceTimer = new wxTimer(this);
@@ -192,6 +192,8 @@ void MainWindow::handleNetworkQueues() {
 			}
 
 			bottomUI->refreshDataViews();
+
+			bottomUI->getFrameViewerCanvas()->Thaw();
 		}
 	})
 
@@ -211,6 +213,10 @@ void MainWindow::handleNetworkQueues() {
 		// Show the dialog
 		askForIP();
 	}
+}
+
+void MainWindow::startedIncrementFrame() {
+	bottomUI->getFrameViewerCanvas()->Freeze();
 }
 
 void MainWindow::addMenuBar() {

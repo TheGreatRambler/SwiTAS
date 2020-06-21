@@ -72,12 +72,13 @@ void FrameCanvas::draw(wxDC& dc) {
 	}
 };
 
-SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ProjectHandler> projHandler, wxBoxSizer* sizer, DataProcessing* input, std::shared_ptr<CommunicateWithNetwork> networkImp) {
-	mainSettings     = settings;
-	inputData        = input;
-	networkInterface = networkImp;
-	projectHandler   = projHandler;
-	parent           = parentFrame;
+SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ProjectHandler> projHandler, wxBoxSizer* sizer, DataProcessing* input, std::shared_ptr<CommunicateWithNetwork> networkImp, std::function<void()> runFrameCallback) {
+	mainSettings           = settings;
+	inputData              = input;
+	networkInterface       = networkImp;
+	projectHandler         = projHandler;
+	parent                 = parentFrame;
+	incrementFrameCallback = runFrameCallback;
 
 	// Holds everything
 	verticalBoxSizer = new wxBoxSizer(wxVERTICAL);
@@ -236,6 +237,7 @@ void SideUI::onAddFramePressed(wxCommandEvent& event) {
 void SideUI::onFrameAdvancePressed(wxCommandEvent& event) {
 	// MUST be tethered
 	if(tethered) {
+		incrementFrameCallback();
 		inputData->runFrame();
 	}
 }

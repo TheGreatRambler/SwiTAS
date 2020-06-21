@@ -89,6 +89,9 @@ private:
 	bool askForIP();
 	void handleNetworkQueues();
 
+	// Used to freeze the current frame view to make it look good
+	void startedIncrementFrame();
+
 public:
 	MainWindow();
 

@@ -176,6 +176,10 @@ public:
 		return joystickSubMenu;
 	}
 
+	FrameViewerCanvas* getFrameViewerCanvas() {
+		return frameViewerCanvas;
+	}
+
 	// Just a random large number, apparently can't be larger than 76
 	static constexpr int joystickSubmenuIDBase = 23;
 

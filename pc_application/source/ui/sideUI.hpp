@@ -67,6 +67,8 @@ private:
 
 	FrameCanvas* frameDrawer;
 
+	std::function<void()> incrementFrameCallback;
+
 	wxBoxSizer* autoFrameSizer;
 	wxBitmapButton* autoFrameStart;
 	wxBitmapButton* autoFrameEnd;
@@ -95,7 +97,7 @@ private:
 	void onEndAutoFramePressed(wxCommandEvent& event);
 
 public:
-	SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ProjectHandler> projHandler, wxBoxSizer* sizer, DataProcessing* input, std::shared_ptr<CommunicateWithNetwork> networkImp);
+	SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ProjectHandler> projHandler, wxBoxSizer* sizer, DataProcessing* input, std::shared_ptr<CommunicateWithNetwork> networkImp, std::function<void()> runFrameCallback);
 
 	void onIdle(wxIdleEvent& event);
 
