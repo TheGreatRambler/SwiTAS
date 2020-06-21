@@ -130,7 +130,8 @@ namespace Protocol {
 		MemoryRegionTypes type;
 		uint8_t clearAllRegions;
 		uint8_t u;
-	, self.pointerDefinition, self.type, self.clearAllRegions, self.u)
+		uint64_t dataSize;
+	, self.pointerDefinition, self.type, self.clearAllRegions, self.u, self.dataSize)
 
 	DEFINE_STRUCT(SendSetNumControllers,
 		uint8_t size;
@@ -138,7 +139,7 @@ namespace Protocol {
 
 	DEFINE_STRUCT(RecieveMemoryRegion,
 		std::vector<uint8_t> memory;
-		std::string stringRepresentation; // This is provided for all types but the byte array
+		std::string stringRepresentation;
 		uint16_t index;
 	, self.memory, self.stringRepresentation, self.index)
 

@@ -42,6 +42,8 @@ MainLoop::MainLoop() {
 	if(R_FAILED(rc))
 		fatalThrow(rc);
 #endif
+
+	prepareMemoryRegionMath();
 }
 
 void MainLoop::mainLoopHandler() {
@@ -137,12 +139,14 @@ void MainLoop::handleNetworkUpdates() {
 		}
 	})
 
-	CHECK_QUEUE(networkInstance, SendTrackMemoryRegion, {
-#ifdef __SWITCH__
-		LOGD << "Track memory region";
-#endif
-		memoryRegions.push_back(std::pair<uint64_t, uint64_t>(data.startByte, data.size));
-	})
+	/*
+		CHECK_QUEUE(networkInstance, SendTrackMemoryRegion, {
+	#ifdef __SWITCH__
+			LOGD << "Track memory region";
+	#endif
+			memoryRegions.push_back(std::pair<uint64_t, uint64_t>(data.startByte, data.size));
+		})
+		*/
 
 	CHECK_QUEUE(networkInstance, SendFlag, {
 		if(data.actFlag == SendInfo::PAUSE_DEBUG) {
@@ -183,26 +187,24 @@ void MainLoop::handleNetworkUpdates() {
 	})
 	// clang-format on
 
-	// clang-format off
-	CHECK_QUEUE(networkInstance, SendAddMemoryRegion, {
-		if (data.clearAllRegions) {
-currentMemoryFunctions.clear();
-		} else {
-			MemoryRegionInfo info;
+	{
+		Protocol::Struct_SendAddMemoryRegion data;
+		while(networkInstance->Queue_SendAddMemoryRegion.try_dequeue(data)) {
+			{
+				if(data.clearAllRegions) {
+					currentMemoryRegions.clear();
+				} else {
+					MemoryRegionInfo info;
 
-		std::string functionString = data.pointerDefinition.substr(1, data.pointerDefinition.size()-2);
-		functionString = ReplaceAll(functionString, "[", "pointer(");
-		functionString = ReplaceAll(functionString, "]", ")");
-
-// Remove outer pointer definition
-			info.func = memoryRegionCompiler.build<uint64_t>(functionString);
-			info.type = data.type;
-			info.u = data.u;
-
-			currentMemoryFunctions.push_back(info);
+					info.func = buildPointerFunction(data.pointerDefinition);
+					info.type = data.type;
+					info.u    = data.u;
+					info.size = data.dataSize;
+					currentMemoryRegions.push_back(info);
+				}
+			}
 		}
-	})
-	// clang-format on
+	}
 
 	// TODO add logic to handle lua scripting
 
@@ -248,9 +250,12 @@ void MainLoop::sendGameInfo() {
 }
 
 void MainLoop::prepareMemoryRegionMath() {
-	memoryRegionCompiler = metl::makeCompiler<uint64_t>(metl::intConverter([](std::string s) { return std::stoull(s); }));
+	auto memoryRegionCompiler = metl::makeCompiler<uint64_t>(metl::makeIntConverter([](std::string s) { return std::stoul(s); }));
 
-	memoryRegionCompiler.setOperator<uint64_t, uint64_t>("+", [](auto left, auto right) { return left + right; });
+	metl::setDefaultOperatorPrecedences(memoryRegionCompiler);
+	metl::addDefaultOperators<uint64_t, uint64_t>(memoryRegionCompiler);
+	metl::addDefaultOperators<uint64_t>(memoryRegionCompiler);
+	metl::addBasicFunctions<uint64_t>(memoryRegionCompiler);
 
 	// The outer pointer set is sanitized to return the correct type, this function exists for nested ones
 	memoryRegionCompiler.setFunction<uint64_t>("pointer", [this](auto loc) {
@@ -261,6 +266,13 @@ void MainLoop::prepareMemoryRegionMath() {
 	});
 
 	memoryRegionCompiler.setVariable("main", &mainLocation);
+
+	buildPointerFunction = [this, &memoryRegionCompiler](std::string pointerFunc) {
+		std::string functionString = pointerFunc.substr(1, pointerFunc.size() - 2);
+		functionString             = ReplaceAll(functionString, "[", "pointer(");
+		functionString             = ReplaceAll(functionString, "]", ")");
+		return memoryRegionCompiler.build<uint64_t>(functionString);
+	};
 }
 
 #ifdef __SWITCH__
@@ -378,23 +390,74 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t autoAdvance, uin
 			})
 
 			// TODO set main and handle types correctly
-			for(std::size_t i = 0; i < currentMemoryFunctions.size(); i++) {
-				uint64_t addr      = currentMemoryFunctions.func();
-				uint8_t isUnsigned = currentMemoryFunctions.u;
+			// Put data into a vector<uint_t> first
+			for(uint16_t i = 0; i < currentMemoryRegions.size(); i++) {
+				uint64_t addr      = currentMemoryRegions[i].func();
+				uint8_t isUnsigned = currentMemoryRegions[i].u;
 
-				MemoryRegionTypes type = currentMemoryFunctions[i].type;
+				MemoryRegionTypes type = currentMemoryRegions[i].type;
+				std::vector<uint8_t> bytes;
+				std::string stringVersion;
+
 				switch(type) {
 				case MemoryRegionTypes::Bit8:
-
+					bytes = getMemory(addr, sizeof(uint8_t));
+					if(isUnsigned) {
+						stringVersion = std::to_string(*(uint8_t*)bytes.data());
+					} else {
+						stringVersion = std::to_string(*(int8_t*)bytes.data());
+					}
+					break;
 				case MemoryRegionTypes::Bit16:
+					bytes = getMemory(addr, sizeof(uint16_t));
+					if(isUnsigned) {
+						stringVersion = std::to_string(*(uint16_t*)bytes.data());
+					} else {
+						stringVersion = std::to_string(*(int16_t*)bytes.data());
+					}
+					break;
 				case MemoryRegionTypes::Bit32:
+					bytes = getMemory(addr, sizeof(uint32_t));
+					if(isUnsigned) {
+						stringVersion = std::to_string(*(uint32_t*)bytes.data());
+					} else {
+						stringVersion = std::to_string(*(int32_t*)bytes.data());
+					}
+					break;
 				case MemoryRegionTypes::Bit64:
+					bytes = getMemory(addr, sizeof(uint64_t));
+					if(isUnsigned) {
+						stringVersion = std::to_string(*(uint64_t*)bytes.data());
+					} else {
+						stringVersion = std::to_string(*(int64_t*)bytes.data());
+					}
+					break;
 				case MemoryRegionTypes::Float:
+					bytes         = getMemory(addr, sizeof(float));
+					stringVersion = std::to_string(*(float*)bytes.data());
+					break;
 				case MemoryRegionTypes::Double:
+					bytes         = getMemory(addr, sizeof(double));
+					stringVersion = std::to_string(*(double*)bytes.data());
+					break;
 				case MemoryRegionTypes::CharPointer:
+					bytes         = getMemory(addr, currentMemoryRegions[i].size);
+					stringVersion = std::string((const char*)bytes.data(), bytes.size());
+					break;
 				case MemoryRegionTypes::ByteArray:
+					bytes = getMemory(addr, currentMemoryRegions[i].size);
+					// Unused
+					stringVersion = "";
+					break;
 				}
+
+				ADD_TO_QUEUE(RecieveMemoryRegion, networkInstance, {
+					data.memory               = bytes;
+					data.stringRepresentation = stringVersion;
+					data.index                = i;
+				})
 			}
+
 			/*
 						for(auto const& memoryRegion : memoryRegions) {
 							std::vector<uint8_t> buf(memoryRegion.second);

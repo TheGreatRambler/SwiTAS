@@ -16,6 +16,8 @@
 	"settings": {
 		"files.associations": {
 			"*.json": "jsonc",
+			"MakefileSysmodule": "makefile",
+			"MakefileYuzu": "makefile",
 			"array": "cpp",
 			"atomic": "cpp",
 			"hash_map": "cpp",
@@ -85,7 +87,12 @@
 			"compare": "cpp",
 			"concepts": "cpp",
 			"ranges": "cpp",
-			"stop_token": "cpp"
+			"stop_token": "cpp",
+			"strstream": "cpp",
+			"codecvt": "cpp",
+			"cfenv": "cpp",
+			"valarray": "cpp",
+			"*.ipp": "cpp"
 		},
 		"cSpell.enabled": false
 	}

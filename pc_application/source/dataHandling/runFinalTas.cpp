@@ -54,9 +54,7 @@ void TasRunner::onStartTasHomebrewPressed(wxCommandEvent& event) {
 		wxMessageDialog invalidRangeMessage(this, "Invalid savestate hook range", "Invalid Range", wxOK | wxICON_ERROR);
 		invalidRangeMessage.ShowModal();
 	} else {
-		// Send frames in a agreed-upon amount, likely around 10 seconds of inputs
-		// Switch asks for more inputs when it has only 5 seconds left, unless the PC has send a response
-		// saying the last of the inputs have been sent
+		// TODO uncompress the data and send the big binary blob over ftp with curl
 	}
 }
 
@@ -68,6 +66,7 @@ void TasRunner::onStartTasArduinoPressed(wxCommandEvent& event) {
 		wxMessageDialog invalidRangeMessage(this, "Invalid savestate hook range", "Invalid Range", wxOK | wxICON_ERROR);
 		invalidRangeMessage.ShowModal();
 	} else {
+		// TODO use arduino TAS
 	}
 }
 

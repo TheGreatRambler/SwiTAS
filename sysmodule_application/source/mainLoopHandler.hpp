@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <cstring>
 #include <functional>
 #include <memory>
@@ -20,11 +21,14 @@
 #include "controller.hpp"
 #include "scripting/luaScripting.hpp"
 
+typedef std::function<uint64_t()> mathPointerFunction;
+
 struct MemoryRegionInfo {
-	std::function<type(uint64_t)> func;
+	mathPointerFunction func;
 	MemoryRegionTypes type;
 	uint8_t u;
-}
+	uint64_t size;
+};
 
 class MainLoop {
 private:
@@ -50,14 +54,14 @@ private:
 
 	std::vector<std::unique_ptr<ControllerHandler>> controllers;
 	std::shared_ptr<CommunicateWithNetwork> networkInstance;
-	std::vector<std::pair<uint64_t, uint64_t>> memoryRegions;
 
 	ScreenshotHandler screenshotHandler;
 	std::shared_ptr<LuaScripting> luaScripting;
 
-	metl::CompilerApi<uint64_t> memoryRegionCompiler;
-	std::vector<> currentMemoryFunctions;
+	// int memoryRegionCompiler;
+	std::vector<MemoryRegionInfo> currentMemoryRegions;
 	uint64_t mainLocation;
+	std::function<mathPointerFunction(std::string)> buildPointerFunction;
 
 	uint8_t isPaused = false;
 
@@ -79,6 +83,12 @@ private:
 	void sendGameInfo();
 
 	void prepareMemoryRegionMath();
+
+	std::vector<uint8_t> getMemory(uint64_t addr, uint64_t size) {
+		std::vector<uint8_t> region(size);
+		svcReadDebugProcessMemory(region.data(), applicationDebug, addr, size);
+		return region;
+	}
 
 #ifdef __SWITCH__
 	GameMemoryInfo getGameMemoryInfo(MemoryInfo memInfo);
