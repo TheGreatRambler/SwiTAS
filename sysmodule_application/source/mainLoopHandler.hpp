@@ -1,7 +1,9 @@
 #pragma once
 
 #include <cstring>
+#include <functional>
 #include <memory>
+#include <metl/metl.h>
 #include <vector>
 
 #ifdef __SWITCH__
@@ -17,6 +19,12 @@
 #include "../../sharedNetworkCode/networkInterface.hpp"
 #include "controller.hpp"
 #include "scripting/luaScripting.hpp"
+
+struct MemoryRegionInfo {
+	std::function<type(uint64_t)> func;
+	MemoryRegionTypes type;
+	uint8_t u;
+}
 
 class MainLoop {
 private:
@@ -47,14 +55,30 @@ private:
 	ScreenshotHandler screenshotHandler;
 	std::shared_ptr<LuaScripting> luaScripting;
 
+	metl::CompilerApi<uint64_t> memoryRegionCompiler;
+	std::vector<> currentMemoryFunctions;
+	uint64_t mainLocation;
+
 	uint8_t isPaused = false;
 
 #ifdef __SWITCH__
 	static char* getAppName(u64 application_id);
 #endif
 
+	// https://stackoverflow.com/questions/2896600/how-to-replace-all-occurrences-of-a-character-in-string
+	std::string ReplaceAll(std::string str, const std::string& from, const std::string& to) {
+		size_t start_pos = 0;
+		while((start_pos = str.find(from, start_pos)) != std::string::npos) {
+			str.replace(start_pos, from.length(), to);
+			start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
+		}
+		return str;
+	}
+
 	void handleNetworkUpdates();
 	void sendGameInfo();
+
+	void prepareMemoryRegionMath();
 
 #ifdef __SWITCH__
 	GameMemoryInfo getGameMemoryInfo(MemoryInfo memInfo);

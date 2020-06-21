@@ -129,8 +129,8 @@ namespace Protocol {
 		std::string pointerDefinition;
 		MemoryRegionTypes type;
 		uint8_t clearAllRegions;
-		uint16_t index;
-	, self.pointerDefinition, self.type, self.clearAllRegions, self.index)
+		uint8_t u;
+	, self.pointerDefinition, self.type, self.clearAllRegions, self.u)
 
 	DEFINE_STRUCT(SendSetNumControllers,
 		uint8_t size;

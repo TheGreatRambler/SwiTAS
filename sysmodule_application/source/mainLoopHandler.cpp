@@ -183,6 +183,27 @@ void MainLoop::handleNetworkUpdates() {
 	})
 	// clang-format on
 
+	// clang-format off
+	CHECK_QUEUE(networkInstance, SendAddMemoryRegion, {
+		if (data.clearAllRegions) {
+currentMemoryFunctions.clear();
+		} else {
+			MemoryRegionInfo info;
+
+		std::string functionString = data.pointerDefinition.substr(1, data.pointerDefinition.size()-2);
+		functionString = ReplaceAll(functionString, "[", "pointer(");
+		functionString = ReplaceAll(functionString, "]", ")");
+
+// Remove outer pointer definition
+			info.func = memoryRegionCompiler.build<uint64_t>(functionString);
+			info.type = data.type;
+			info.u = data.u;
+
+			currentMemoryFunctions.push_back(info);
+		}
+	})
+	// clang-format on
+
 	// TODO add logic to handle lua scripting
 
 	// This is essentially auto advance but with frame linked framebuffers
@@ -224,6 +245,22 @@ void MainLoop::sendGameInfo() {
 			data.memoryInfo           = memoryInfo;
 		})
 	}
+}
+
+void MainLoop::prepareMemoryRegionMath() {
+	memoryRegionCompiler = metl::makeCompiler<uint64_t>(metl::intConverter([](std::string s) { return std::stoull(s); }));
+
+	memoryRegionCompiler.setOperator<uint64_t, uint64_t>("+", [](auto left, auto right) { return left + right; });
+
+	// The outer pointer set is sanitized to return the correct type, this function exists for nested ones
+	memoryRegionCompiler.setFunction<uint64_t>("pointer", [this](auto loc) {
+		// Returns value at pointer
+		uint64_t pointer;
+		svcReadDebugProcessMemory(&pointer, applicationDebug, loc, sizeof(pointer));
+		return pointer;
+	});
+
+	memoryRegionCompiler.setVariable("main", &mainLocation);
 }
 
 #ifdef __SWITCH__
@@ -339,6 +376,25 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t autoAdvance, uin
 					data.controllerData = *controllers[0]->getControllerData();
 				}
 			})
+
+			// TODO set main and handle types correctly
+			for(std::size_t i = 0; i < currentMemoryFunctions.size(); i++) {
+				uint64_t addr      = currentMemoryFunctions.func();
+				uint8_t isUnsigned = currentMemoryFunctions.u;
+
+				MemoryRegionTypes type = currentMemoryFunctions[i].type;
+				switch(type) {
+				case MemoryRegionTypes::Bit8:
+
+				case MemoryRegionTypes::Bit16:
+				case MemoryRegionTypes::Bit32:
+				case MemoryRegionTypes::Bit64:
+				case MemoryRegionTypes::Float:
+				case MemoryRegionTypes::Double:
+				case MemoryRegionTypes::CharPointer:
+				case MemoryRegionTypes::ByteArray:
+				}
+			}
 			/*
 						for(auto const& memoryRegion : memoryRegions) {
 							std::vector<uint8_t> buf(memoryRegion.second);
