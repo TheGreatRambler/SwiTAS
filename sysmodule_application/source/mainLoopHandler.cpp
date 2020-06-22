@@ -196,7 +196,15 @@ void MainLoop::handleNetworkUpdates() {
 				} else {
 					MemoryRegionInfo info;
 
-					info.func = buildPointerFunction(data.pointerDefinition);
+					std::string functionString = data.pointerDefinition.substr(1, data.pointerDefinition.size() - 2);
+					functionString             = ReplaceAll(functionString, "[", "pointer(");
+					functionString             = ReplaceAll(functionString, "]", ")");
+
+					info.func.register_symbol_table(exprtkSymbolTable);
+
+					exprtk::parser<uint64_t> parser;
+					parser.compile(functionString, info.func);
+
 					info.type = data.type;
 					info.u    = data.u;
 					info.size = data.dataSize;
@@ -250,29 +258,14 @@ void MainLoop::sendGameInfo() {
 }
 
 void MainLoop::prepareMemoryRegionMath() {
-	auto memoryRegionCompiler = metl::makeCompiler<uint64_t>(metl::makeIntConverter([](std::string s) { return std::stoul(s); }));
-
-	metl::setDefaultOperatorPrecedences(memoryRegionCompiler);
-	metl::addDefaultOperators<uint64_t, uint64_t>(memoryRegionCompiler);
-	metl::addDefaultOperators<uint64_t>(memoryRegionCompiler);
-	metl::addBasicFunctions<uint64_t>(memoryRegionCompiler);
-
-	// The outer pointer set is sanitized to return the correct type, this function exists for nested ones
-	memoryRegionCompiler.setFunction<uint64_t>("pointer", [this](auto loc) {
-		// Returns value at pointer
+	exprtkSymbolTable.add_function("pointer", [this](uint64_t addr) -> uint64_t {
 		uint64_t pointer;
-		svcReadDebugProcessMemory(&pointer, applicationDebug, loc, sizeof(pointer));
+		svcReadDebugProcessMemory(&pointer, applicationDebug, addr, sizeof(pointer));
 		return pointer;
 	});
 
-	memoryRegionCompiler.setVariable("main", &mainLocation);
-
-	buildPointerFunction = [this, &memoryRegionCompiler](std::string pointerFunc) {
-		std::string functionString = pointerFunc.substr(1, pointerFunc.size() - 2);
-		functionString             = ReplaceAll(functionString, "[", "pointer(");
-		functionString             = ReplaceAll(functionString, "]", ")");
-		return memoryRegionCompiler.build<uint64_t>(functionString);
-	};
+	exprtkSymbolTable.add_variable("main", mainLocation);
+	exprtkSymbolTable.add_constants();
 }
 
 #ifdef __SWITCH__
@@ -392,7 +385,7 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t autoAdvance, uin
 			// TODO set main and handle types correctly
 			// Put data into a vector<uint_t> first
 			for(uint16_t i = 0; i < currentMemoryRegions.size(); i++) {
-				uint64_t addr      = currentMemoryRegions[i].func();
+				uint64_t addr      = currentMemoryRegions[i].func.value();
 				uint8_t isUnsigned = currentMemoryRegions[i].u;
 
 				MemoryRegionTypes type = currentMemoryRegions[i].type;

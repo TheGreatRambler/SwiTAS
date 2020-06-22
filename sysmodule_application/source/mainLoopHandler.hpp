@@ -2,9 +2,9 @@
 
 #include <cstdint>
 #include <cstring>
+#include <exprtk.hpp>
 #include <functional>
 #include <memory>
-#include <metl/metl.h>
 #include <vector>
 
 #ifdef __SWITCH__
@@ -21,10 +21,8 @@
 #include "controller.hpp"
 #include "scripting/luaScripting.hpp"
 
-typedef std::function<uint64_t()> mathPointerFunction;
-
 struct MemoryRegionInfo {
-	mathPointerFunction func;
+	exprtk::expression<uint64_t> func;
 	MemoryRegionTypes type;
 	uint8_t u;
 	uint64_t size;
@@ -61,7 +59,7 @@ private:
 	// int memoryRegionCompiler;
 	std::vector<MemoryRegionInfo> currentMemoryRegions;
 	uint64_t mainLocation;
-	std::function<mathPointerFunction(std::string)> buildPointerFunction;
+	exprtk::symbol_table<uint64_t> exprtkSymbolTable;
 
 	uint8_t isPaused = false;
 
