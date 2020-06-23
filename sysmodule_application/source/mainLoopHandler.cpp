@@ -42,8 +42,6 @@ MainLoop::MainLoop() {
 	if(R_FAILED(rc))
 		fatalThrow(rc);
 #endif
-
-	prepareMemoryRegionMath();
 }
 
 void MainLoop::mainLoopHandler() {
@@ -196,14 +194,7 @@ void MainLoop::handleNetworkUpdates() {
 				} else {
 					MemoryRegionInfo info;
 
-					std::string functionString = data.pointerDefinition.substr(1, data.pointerDefinition.size() - 2);
-					functionString             = ReplaceAll(functionString, "[", "pointer(");
-					functionString             = ReplaceAll(functionString, "]", ")");
-
-					info.func.register_symbol_table(exprtkSymbolTable);
-
-					exprtk::parser<uint64_t> parser;
-					parser.compile(functionString, info.func);
+					// prepareMemoryRegionMath(info.func, data.pointerDefinition);
 
 					info.type = data.type;
 					info.u    = data.u;
@@ -255,17 +246,6 @@ void MainLoop::sendGameInfo() {
 			data.memoryInfo           = memoryInfo;
 		})
 	}
-}
-
-void MainLoop::prepareMemoryRegionMath() {
-	exprtkSymbolTable.add_function("pointer", [this](uint64_t addr) -> uint64_t {
-		uint64_t pointer;
-		svcReadDebugProcessMemory(&pointer, applicationDebug, addr, sizeof(pointer));
-		return pointer;
-	});
-
-	exprtkSymbolTable.add_variable("main", mainLocation);
-	exprtkSymbolTable.add_constants();
 }
 
 #ifdef __SWITCH__
@@ -385,7 +365,7 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t autoAdvance, uin
 			// TODO set main and handle types correctly
 			// Put data into a vector<uint_t> first
 			for(uint16_t i = 0; i < currentMemoryRegions.size(); i++) {
-				uint64_t addr      = currentMemoryRegions[i].func.value();
+				uint64_t addr      = 0; // currentMemoryRegions[i].func.Eval();
 				uint8_t isUnsigned = currentMemoryRegions[i].u;
 
 				MemoryRegionTypes type = currentMemoryRegions[i].type;

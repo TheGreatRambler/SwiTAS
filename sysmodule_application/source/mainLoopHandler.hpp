@@ -2,7 +2,6 @@
 
 #include <cstdint>
 #include <cstring>
-#include <exprtk.hpp>
 #include <functional>
 #include <memory>
 #include <vector>
@@ -22,7 +21,7 @@
 #include "scripting/luaScripting.hpp"
 
 struct MemoryRegionInfo {
-	exprtk::expression<uint64_t> func;
+	// mu::Parser func;
 	MemoryRegionTypes type;
 	uint8_t u;
 	uint64_t size;
@@ -59,7 +58,6 @@ private:
 	// int memoryRegionCompiler;
 	std::vector<MemoryRegionInfo> currentMemoryRegions;
 	uint64_t mainLocation;
-	exprtk::symbol_table<uint64_t> exprtkSymbolTable;
 
 	uint8_t isPaused = false;
 
@@ -80,7 +78,7 @@ private:
 	void handleNetworkUpdates();
 	void sendGameInfo();
 
-	void prepareMemoryRegionMath();
+	// void prepareMemoryRegionMath(mu::Parser& parser, std::string func);
 
 	std::vector<uint8_t> getMemory(uint64_t addr, uint64_t size) {
 		std::vector<uint8_t> region(size);
