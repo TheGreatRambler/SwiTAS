@@ -40,6 +40,7 @@ MainWindow::MainWindow()
 			SEND_QUEUE_DATA(SendSetNumControllers)
 			SEND_QUEUE_DATA(SendAutoRun)
 			SEND_QUEUE_DATA(SendAddMemoryRegion)
+			SEND_QUEUE_DATA(SendRunFullSpeed)
 		},
 		[](CommunicateWithNetwork* self) {
 			RECIEVE_QUEUE_DATA(RecieveFlag)
@@ -170,20 +171,25 @@ void MainWindow::handleNetworkQueues() {
 	// clang-format on
 
 	ADD_NETWORK_CALLBACK(RecieveGameFramebuffer, {
-		bottomUI->recieveGameFramebuffer(data.buf);
+		uint8_t framebufferIncluded = data.buf.size() == 0 ? false : true;
+		if(framebufferIncluded) {
+			bottomUI->recieveGameFramebuffer(data.buf);
+		}
 		if(data.fromFrameAdvance == 1) {
-			wxFileName framebufferFileName = dataProcessingInstance->getFramebufferPath(data.playerIndex, data.savestateHookNum, data.frame);
-			framebufferFileName.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
-			wxFile file(framebufferFileName.GetFullPath(), wxFile::write);
-			file.Write(data.buf.data(), data.buf.size());
-			file.Close();
+			if(framebufferIncluded) {
+				wxFileName framebufferFileName = dataProcessingInstance->getFramebufferPath(data.playerIndex, data.savestateHookNum, data.frame);
+				framebufferFileName.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+				wxFile file(framebufferFileName.GetFullPath(), wxFile::write);
+				file.Write(data.buf.data(), data.buf.size());
+				file.Close();
+			}
 
 			if(dataProcessingInstance->getNumOfFramesInSavestateHook(data.savestateHookNum, data.playerIndex) == data.frame) {
 				dataProcessingInstance->addFrameHere();
 			}
 
 			if(data.controllerDataIncluded) {
-				dataProcessingInstance->runFrameForAutoFrame();
+				dataProcessingInstance->runFrame(true, true);
 
 				dataProcessingInstance->setControllerDataForAutoRun(data.controllerData);
 				if(sideUI->getAutoRunActive()) {
@@ -192,8 +198,6 @@ void MainWindow::handleNetworkQueues() {
 			}
 
 			bottomUI->refreshDataViews();
-
-			bottomUI->getFrameViewerCanvas()->Thaw();
 		}
 	})
 
@@ -216,7 +220,7 @@ void MainWindow::handleNetworkQueues() {
 }
 
 void MainWindow::startedIncrementFrame() {
-	bottomUI->getFrameViewerCanvas()->Freeze();
+	// bottomUI->getFrameViewerCanvas()->Freeze();
 }
 
 void MainWindow::addMenuBar() {

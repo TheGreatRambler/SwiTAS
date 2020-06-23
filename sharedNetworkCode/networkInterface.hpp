@@ -153,6 +153,7 @@ public:
 	ADD_QUEUE(RecieveMemoryRegion)
 	ADD_QUEUE(SendAutoRun)
 	ADD_QUEUE(SendAddMemoryRegion)
+	ADD_QUEUE(SendRunFullSpeed)
 
 	CommunicateWithNetwork(std::function<void(CommunicateWithNetwork*)> sendCallback, std::function<void(CommunicateWithNetwork*)> recieveCallback);
 

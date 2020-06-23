@@ -390,7 +390,7 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 
 	frameViewerCanvas->SetToolTip("View current frame's screenshot");
 
-	inputInstance->setInputCallback(std::bind(&BottomUI::refreshDataViews, this));
+	inputInstance->setInputCallback(std::bind(&BottomUI::refreshDataViews, this, std::placeholders::_1));
 
 	// Add the joystick submenu
 	joystickSubMenu = new wxMenu();
@@ -413,19 +413,21 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 	theGrid->Add(mainSizer, 1, wxEXPAND | wxALL);
 }
 
-void BottomUI::refreshDataViews() {
+void BottomUI::refreshDataViews(uint8_t refreshFramebuffer) {
 	// Just refresh the grid and the joysticks
 	leftJoystickDrawer->Refresh();
 	rightJoystickDrawer->Refresh();
 	buttonGrid->Refresh();
-	// Check to see if framebuffer is avaliable to draw
-	wxFileName framebufferFileName = inputInstance->getFramebufferPathForCurrentFramebuf();
-	if(framebufferFileName.FileExists()) {
-		wxImage framebuf(framebufferFileName.GetFullPath(), wxBITMAP_TYPE_JPEG);
-		frameViewerCanvas->setPrimaryBitmap(new wxBitmap(framebuf));
-	} else {
-		// Go back to default
-		frameViewerCanvas->setPrimaryBitmap(nullptr);
+	if(refreshFramebuffer) {
+		// Check to see if framebuffer is avaliable to draw
+		wxFileName framebufferFileName = inputInstance->getFramebufferPathForCurrentFramebuf();
+		if(framebufferFileName.FileExists()) {
+			wxImage framebuf(framebufferFileName.GetFullPath(), wxBITMAP_TYPE_JPEG);
+			frameViewerCanvas->setPrimaryBitmap(new wxBitmap(framebuf));
+		} else {
+			// Go back to default
+			frameViewerCanvas->setPrimaryBitmap(nullptr);
+		}
 	}
 }
 

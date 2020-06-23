@@ -185,7 +185,7 @@ public:
 
 	void recieveGameFramebuffer(std::vector<uint8_t> jpegBuffer);
 
-	void refreshDataViews();
+	void refreshDataViews(uint8_t refreshFramebuffer);
 
 	void listenToJoystick();
 

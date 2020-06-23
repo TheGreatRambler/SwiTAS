@@ -104,7 +104,7 @@ BEGIN_EVENT_TABLE(DataProcessing, wxListCtrl)
 END_EVENT_TABLE()
 // clang-format on
 
-void DataProcessing::setInputCallback(std::function<void()> callback) {
+void DataProcessing::setInputCallback(std::function<void(uint8_t)> callback) {
 	inputCallback = callback;
 }
 
@@ -130,12 +130,13 @@ void DataProcessing::triggerCurrentFrameChanges() {
 	}
 }
 
-void DataProcessing::sendAutoAdvance() {
+void DataProcessing::sendAutoAdvance(uint8_t includeFramebuffer){
 	// clang-format off
 	ADD_TO_QUEUE(SendAutoRun, networkInstance, {
 		data.frameReturn = currentFrame + 1;
 		data.savestateHookNum = currentSavestateHook;
 		data.playerIndex = viewingPlayerIndex;
+		data.includeFramebuffer = includeFramebuffer;
 	})
 	// clang-format on
 }
@@ -481,7 +482,7 @@ void DataProcessing::createSavestateHere() {
 	RefreshItem(currentFrame);
 }
 
-void DataProcessing::runFrame() {
+void DataProcessing::runFrame(uint8_t forAutoFrame, uint8_t updateFramebuffer) {
 	if(currentRunFrame < inputsList->size() - 1) {
 		// Technically, should handle for entering next savetstate hook block, but TODO
 		std::shared_ptr<ControllerData> controllerData = inputsList->at(currentRunFrame);
@@ -501,48 +502,36 @@ void DataProcessing::runFrame() {
 
 		modifyCurrentFrameViews(currentRunFrame);
 
-		Refresh();
-
-		// Send to switch to run for each player
-		for(uint8_t playerIndex = 0; playerIndex < allPlayers.size(); playerIndex++) {
-			std::shared_ptr<ControllerData> controllerDatas = allPlayers[playerIndex]->at(currentSavestateHook)->inputs->at(currentRunFrame);
-			ADD_TO_QUEUE(SendFrameData, networkInstance, {
-				data.controllerData   = *controllerDatas;
-				data.frame            = currentRunFrame;
-				data.savestateHookNum = currentSavestateHook;
-				data.playerIndex      = playerIndex;
-				if(playerIndex == allPlayers.size() - 1) {
-					// Last frame, start the frame
-					data.incrementFrame = true;
-				} else {
-					data.incrementFrame = false;
-				}
-			})
+		// Refresh the grid
+		if(changingSelectedFrameCallback) {
+			changingSelectedFrameCallback(currentFrame, currentRunFrame, currentImageFrame);
 		}
-	}
-}
-
-void DataProcessing::runFrameForAutoFrame() {
-	if(currentRunFrame < inputsList->size() - 1) {
-		// Technically, should handle for entering next savetstate hook block, but TODO
-		std::shared_ptr<ControllerData> controllerData = inputsList->at(currentRunFrame);
-
-		setFramestateInfo(currentRunFrame, FrameState::RAN, true);
-
-		// If possible, make current frame this frame
-		if(currentRunFrame < inputsList->size()) {
-			// Set to this frame
-			setCurrentFrame(currentRunFrame + 1);
+		
+		if(inputCallback) {
+			// Doesn't matter what arguments
+			inputCallback(updateFramebuffer);
 		}
 
-		// Increment run frame
-		currentRunFrame++;
-		// Set image frame to this too
-		currentImageFrame = currentRunFrame;
-
-		modifyCurrentFrameViews(currentRunFrame);
-
 		Refresh();
+
+		if(!forAutoFrame) {
+			// Send to switch to run for each player
+			for(uint8_t playerIndex = 0; playerIndex < allPlayers.size(); playerIndex++) {
+				std::shared_ptr<ControllerData> controllerDatas = allPlayers[playerIndex]->at(currentSavestateHook)->inputs->at(currentRunFrame);
+				ADD_TO_QUEUE(SendFrameData, networkInstance, {
+					data.controllerData   = *controllerDatas;
+					data.frame            = currentRunFrame;
+					data.savestateHookNum = currentSavestateHook;
+					data.playerIndex      = playerIndex;
+					if(playerIndex == allPlayers.size() - 1) {
+						// Last frame, start the frame
+						data.incrementFrame = true;
+					} else {
+						data.incrementFrame = false;
+					}
+				})
+			}
+		}
 	}
 }
 
@@ -880,8 +869,7 @@ void DataProcessing::modifyCurrentFrameViews(FrameNum frame) {
 			changingSelectedFrameCallback(currentFrame, currentRunFrame, currentImageFrame);
 		}
 		if(inputCallback) {
-			// Doesn't matter what arguments
-			inputCallback();
+			inputCallback(true);
 		}
 	}
 }

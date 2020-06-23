@@ -168,11 +168,16 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 
 	autoRunFramesPerSecond->SetToolTip("Delay in mlliseconds for automatically incrementing frame");
 
+	autoRunWithFramebuffer = new wxCheckBox(parentFrame, wxID_ANY, "Include Screenshot");
+
+	autoRunWithFramebuffer->SetValue(true);
+
 	autoFrameSizer->Add(autoFrameStart, 0, wxEXPAND | wxALL);
 	autoFrameSizer->Add(autoFrameEnd, 0, wxEXPAND | wxALL);
 
 	verticalBoxSizer->Add(autoFrameSizer, 0, wxEXPAND | wxALL);
 	verticalBoxSizer->Add(autoRunFramesPerSecond, 0, wxEXPAND | wxALL);
+	verticalBoxSizer->Add(autoRunWithFramebuffer, 0, wxEXPAND | wxALL);
 
 	sizer->Add(verticalBoxSizer, 0, wxEXPAND | wxALL);
 
@@ -238,7 +243,7 @@ void SideUI::onFrameAdvancePressed(wxCommandEvent& event) {
 	// MUST be tethered
 	if(tethered) {
 		incrementFrameCallback();
-		inputData->runFrame();
+		inputData->runFrame(false, false);
 	}
 }
 
@@ -402,7 +407,7 @@ void SideUI::onStartAutoFramePressed(wxCommandEvent& event) {
 
 void SideUI::sendAutoRunData() {
 	autoRunActive = true;
-	inputData->sendAutoAdvance();
+	inputData->sendAutoAdvance(autoRunWithFramebuffer->GetValue());
 	autoFrameStart->Disable();
 }
 

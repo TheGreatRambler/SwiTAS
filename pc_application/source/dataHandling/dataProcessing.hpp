@@ -68,7 +68,7 @@ private:
 	wxImageList imageList;
 
 	// Using callbacks for inputs
-	std::function<void()> inputCallback;
+	std::function<void(uin8_t)> inputCallback;
 	std::function<void(FrameNum)> selectedFrameCallbackVideoViewer;
 	std::function<void(FrameNum, FrameNum)> viewableInputsCallback;
 	std::function<void(FrameNum, FrameNum, FrameNum)> changingSelectedFrameCallback;
@@ -137,14 +137,14 @@ public:
 	// All blocks loaded in by projectManager
 	DataProcessing(rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, std::shared_ptr<CommunicateWithNetwork> communicateWithNetwork, wxWindow* parent);
 
-	void setInputCallback(std::function<void()> callback);
+	void setInputCallback(std::function<void(uint8_t)> callback);
 	void setSelectedFrameCallbackVideoViewer(std::function<void(int)> callback);
 	void setViewableInputsCallback(std::function<void(FrameNum, FrameNum)> callback);
 	void setChangingSelectedFrameCallback(std::function<void(FrameNum, FrameNum, FrameNum)> callback);
 	void setPlayerInfoCallback(std::function<void(uint8_t, uint8_t, bool)> callback);
 	void triggerCurrentFrameChanges();
 
-	void sendAutoAdvance();
+	void sendAutoAdvance(uint8_t includeFramebuffer);
 
 	std::string getExportedCurrentPlayer();
 	void importFromFile(wxFileName importTarget);
@@ -222,8 +222,7 @@ public:
 	void setCurrentFrame(FrameNum frameNum);
 
 	void createSavestateHere();
-	void runFrame();
-	void runFrameForAutoFrame();
+	void runFrame(uint8_t forAutoFrame, uint8_t updateFramebuffer);
 
 	std::shared_ptr<std::vector<std::shared_ptr<ControllerData>>> getInputsList();
 

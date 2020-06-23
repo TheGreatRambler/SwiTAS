@@ -22,6 +22,7 @@ MainLoop::MainLoop() {
 			RECIEVE_QUEUE_DATA(SendSetNumControllers)
 			RECIEVE_QUEUE_DATA(SendAutoRun)
 			RECIEVE_QUEUE_DATA(SendAddMemoryRegion)
+			RECIEVE_QUEUE_DATA(SendRunFullSpeed)
 		});
 
 #ifdef __SWITCH__
@@ -151,7 +152,7 @@ void MainLoop::handleNetworkUpdates() {
 			// Precaution to prevent the app getting stuck without the
 			// User able to unpause it
 			if(applicationOpened && internetConnected) {
-				pauseApp(false, false, 0, 0, 0);
+				pauseApp(false, true, false, 0, 0, 0);
 			}
 		} else if(data.actFlag == SendInfo::UNPAUSE_DEBUG) {
 			if(applicationOpened) {
@@ -167,9 +168,9 @@ void MainLoop::handleNetworkUpdates() {
 			matchFirstControllerToTASController(0);
 			runSingleFrame(false, false, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::START_TAS_MODE) {
-			pauseApp(false, false, 0, 0, 0);
+			pauseApp(false, true, false, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::PAUSE) {
-			pauseApp(false, false, 0, 0, 0);
+			pauseApp(false, true, false, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::UNPAUSE) {
 			clearEveryController();
 			unpauseApp();
@@ -210,7 +211,7 @@ void MainLoop::handleNetworkUpdates() {
 	// This is essentially auto advance but with frame linked framebuffers
 	CHECK_QUEUE(networkInstance, SendAutoRun, {
 		matchFirstControllerToTASController(0);
-		runSingleFrame(true, true, data.frameReturn, data.savestateHookNum, data.playerIndex);
+		runSingleFrame(true, true, true, data.frameReturn, data.savestateHookNum, data.playerIndex);
 	})
 }
 
@@ -223,7 +224,7 @@ void MainLoop::sendGameInfo() {
 		// https://github.com/switchbrew/switch-examples/blob/master/account/source/main.c
 
 		uint64_t addr = 0;
-		pauseApp(false, false, 0, 0, 0);
+		pauseApp(false, true, false, 0, 0, 0);
 #ifdef __SWITCH__
 		while(true) {
 			MemoryInfo info = { 0 };
@@ -316,7 +317,7 @@ GameMemoryInfo MainLoop::getGameMemoryInfo(MemoryInfo memInfo) {
 }
 #endif
 
-void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t autoAdvance, uint32_t frame, uint16_t savestateHookNum, uint8_t playerIndex) {
+void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, uint8_t autoAdvance, uint32_t frame, uint16_t savestateHookNum, uint8_t playerIndex) {
 	if(isPaused) {
 #ifdef __SWITCH__
 		LOGD << "Running frame";
@@ -324,7 +325,7 @@ void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t autoAdvanc
 		waitForVsync();
 		unpauseApp();
 		waitForVsync();
-		pauseApp(linkedWithFrameAdvance, autoAdvance, frame, savestateHookNum, playerIndex);
+		pauseApp(linkedWithFrameAdvance, includeFramebuffer, autoAdvance, frame, savestateHookNum, playerIndex);
 	}
 }
 
@@ -335,7 +336,7 @@ void MainLoop::clearEveryController() {
 	}
 }
 
-void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t autoAdvance, uint32_t frame, uint16_t savestateHookNum, uint8_t playerIndex) {
+void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, uint8_t autoAdvance, uint32_t frame, uint16_t savestateHookNum, uint8_t playerIndex) {
 	// This is aborting for some reason
 	if(!isPaused) {
 		// Debug application again
@@ -348,8 +349,13 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t autoAdvance, uin
 
 		if(networkInstance->isConnected()) {
 			// Framebuffers should not be stored in memory unless they will be sent over internet
-			std::vector<uint8_t> jpegBuf(JPEG_BUF_SIZE);
-			screenshotHandler.writeFramebuffer(jpegBuf);
+			std::vector<uint8_t> jpegBuf;
+
+			if(includeFramebuffer) {
+				jpegBuf.reserve(JPEG_BUF_SIZE);
+				screenshotHandler.writeFramebuffer(jpegBuf);
+			}
+
 			ADD_TO_QUEUE(RecieveGameFramebuffer, networkInstance, {
 				data.buf                    = jpegBuf;
 				data.fromFrameAdvance       = linkedWithFrameAdvance;
