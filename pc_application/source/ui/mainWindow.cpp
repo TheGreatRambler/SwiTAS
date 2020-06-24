@@ -178,26 +178,21 @@ void MainWindow::handleNetworkQueues() {
 		if(data.fromFrameAdvance == 1) {
 			if(framebufferIncluded) {
 				wxFileName framebufferFileName = dataProcessingInstance->getFramebufferPath(data.playerIndex, data.savestateHookNum, data.frame);
-				framebufferFileName.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
 				wxFile file(framebufferFileName.GetFullPath(), wxFile::write);
 				file.Write(data.buf.data(), data.buf.size());
 				file.Close();
 			}
-
 			if(dataProcessingInstance->getNumOfFramesInSavestateHook(data.savestateHookNum, data.playerIndex) == data.frame) {
 				dataProcessingInstance->addFrameHere();
 			}
-
 			if(data.controllerDataIncluded) {
-				dataProcessingInstance->runFrame(true, true);
-
+				dataProcessingInstance->runFrame(true, true, true);
 				dataProcessingInstance->setControllerDataForAutoRun(data.controllerData);
 				if(sideUI->getAutoRunActive()) {
 					autoFrameAdvanceTimer->StartOnce(sideUI->getAutoRunDelay());
 				}
 			}
-
-			bottomUI->refreshDataViews();
+			bottomUI->refreshDataViews(true);
 		}
 	})
 
@@ -344,7 +339,7 @@ bool MainWindow::askForIP() {
 			}
 		}
 	} else {
-		wxMessageDialog addressInvalidDialog(this, wxString::Format("The server is already running"), "Server running", wxOK);
+		wxMessageDialog addressInvalidDialog(this, "The server is already running", "Server running", wxOK);
 		addressInvalidDialog.ShowModal();
 	}
 }

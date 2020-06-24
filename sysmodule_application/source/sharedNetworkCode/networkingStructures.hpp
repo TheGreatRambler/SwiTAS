@@ -24,6 +24,7 @@ enum DataFlag : uint8_t {
 	RecieveGameInfo,
 	SendFlag,
 	SendAutoRun,
+	SendRunFullSpeed,
 	SendLogging,
 	SendTrackMemoryRegion,
 	SendSetNumControllers,
@@ -56,6 +57,8 @@ enum SendInfo : uint8_t {
 	PAUSE,
 	UNPAUSE,
 	RUN_BLANK_FRAME,
+	STOP_FULL_SPEED,
+	PAUSE_FULL_SPEED,
 };
 
 // This is used by the switch to determine size, a vector is always send back enyway
@@ -82,7 +85,8 @@ namespace Protocol {
 		uint16_t savestateHookNum;
 		uint8_t playerIndex;
 		uint8_t incrementFrame;
-	, self.controllerData, self.frame, self.playerIndex, self.incrementFrame, self.savestateHookNum)
+		uint8_t includeFramebuffer;
+	, self.controllerData, self.frame, self.playerIndex, self.incrementFrame, self.savestateHookNum, self.includeFramebuffer)
 
 	// Recieve all of the game's framebuffer
 	DEFINE_STRUCT(RecieveGameFramebuffer,
@@ -114,7 +118,12 @@ namespace Protocol {
 		uint32_t frameReturn;
 		uint16_t savestateHookNum;
 		uint8_t playerIndex;
-	, self.frameReturn, self.savestateHookNum, self.playerIndex)
+		uint8_t includeFramebuffer;
+	, self.frameReturn, self.savestateHookNum, self.playerIndex, self.includeFramebuffer)
+
+	DEFINE_STRUCT(SendRunFullSpeed,
+		std::vector<ControllerData> inputs;
+	, self.inputs)
 
 	DEFINE_STRUCT(SendLogging,
 		std::string log;

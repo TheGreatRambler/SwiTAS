@@ -153,6 +153,7 @@ public:
 	ADD_QUEUE(RecieveMemoryRegion)
 	ADD_QUEUE(SendAutoRun)
 	ADD_QUEUE(SendAddMemoryRegion)
+	ADD_QUEUE(SendRunFullSpeed)
 
 	CommunicateWithNetwork(std::function<void(CommunicateWithNetwork*)> sendCallback, std::function<void(CommunicateWithNetwork*)> recieveCallback);
 
@@ -189,6 +190,10 @@ public:
 		CSimpleSocket::CSocketError error = networkConnection->GetSocketError();
 		return std::string(networkConnection->DescribeError(error));
 	}
+
+#ifdef CLIENT_IMP
+	std::string getSwitchIP() {}
+#endif
 
 	// This stuff needs to be global for callback reasons
 	uint32_t dataSize;

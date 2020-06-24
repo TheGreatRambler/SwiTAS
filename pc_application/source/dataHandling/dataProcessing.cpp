@@ -130,7 +130,7 @@ void DataProcessing::triggerCurrentFrameChanges() {
 	}
 }
 
-void DataProcessing::sendAutoAdvance(uint8_t includeFramebuffer){
+void DataProcessing::sendAutoAdvance(uint8_t includeFramebuffer) {
 	// clang-format off
 	ADD_TO_QUEUE(SendAutoRun, networkInstance, {
 		data.frameReturn = currentFrame + 1;
@@ -431,7 +431,7 @@ void DataProcessing::onRemoveFrame(wxCommandEvent& event) {
 
 void DataProcessing::onFrameAdvance(wxCommandEvent& event) {
 	if(tethered) {
-		runFrame();
+		runFrame(false, false, true);
 	}
 }
 
@@ -482,7 +482,7 @@ void DataProcessing::createSavestateHere() {
 	RefreshItem(currentFrame);
 }
 
-void DataProcessing::runFrame(uint8_t forAutoFrame, uint8_t updateFramebuffer) {
+void DataProcessing::runFrame(uint8_t forAutoFrame, uint8_t updateFramebuffer, uint8_t includeFramebuffer) {
 	if(currentRunFrame < inputsList->size() - 1) {
 		// Technically, should handle for entering next savetstate hook block, but TODO
 		std::shared_ptr<ControllerData> controllerData = inputsList->at(currentRunFrame);
@@ -506,7 +506,7 @@ void DataProcessing::runFrame(uint8_t forAutoFrame, uint8_t updateFramebuffer) {
 		if(changingSelectedFrameCallback) {
 			changingSelectedFrameCallback(currentFrame, currentRunFrame, currentImageFrame);
 		}
-		
+
 		if(inputCallback) {
 			// Doesn't matter what arguments
 			inputCallback(updateFramebuffer);
@@ -529,6 +529,7 @@ void DataProcessing::runFrame(uint8_t forAutoFrame, uint8_t updateFramebuffer) {
 					} else {
 						data.incrementFrame = false;
 					}
+					data.includeFramebuffer = includeFramebuffer;
 				})
 			}
 		}
@@ -604,7 +605,22 @@ void DataProcessing::setSavestateHook(SavestateBlockNum index) {
 void DataProcessing::removeSavestateHook(SavestateBlockNum index) {
 	if(allPlayers[viewingPlayerIndex]->size() > 1) {
 		allPlayers[viewingPlayerIndex]->erase(allPlayers[viewingPlayerIndex]->begin() + index);
-		setSavestateHook(allPlayers[viewingPlayerIndex]->size() - 1);
+		setSavestateHook(0);
+
+		// Move over all the framebuffer names
+		wxRemoveFile(getFramebufferPathForSavestateHook(index).GetFullPath());
+		getFramebufferPath(0, index, 0).Rmdir(wxPATH_RMDIR_RECURSIVE);
+		// Rename all ones following this hook
+		while(true) {
+			index++;
+			wxFileName savestateHookDir = getFramebufferPath(0, index, 0);
+			if(savestateHookDir.DirExists()) {
+				wxRenameFile(savestateHookDir.GetPath(), getFramebufferPath(0, index - 1, 0).GetPath());
+			} else {
+				// Have encountered last savestate hook, break loop
+				break;
+			}
+		}
 	}
 }
 

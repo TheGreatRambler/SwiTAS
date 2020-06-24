@@ -134,7 +134,7 @@ void MainLoop::handleNetworkUpdates() {
 	CHECK_QUEUE(networkInstance, SendFrameData, {
 		controllers[data.playerIndex]->setFrame(data.controllerData);
 		if(data.incrementFrame) {
-			runSingleFrame(true, false, data.frame, data.savestateHookNum, data.playerIndex);
+			runSingleFrame(true, data.includeFramebuffer, false, data.frame, data.savestateHookNum, data.playerIndex);
 		}
 	})
 
@@ -166,7 +166,7 @@ void MainLoop::handleNetworkUpdates() {
 			}
 		} else if(data.actFlag == SendInfo::RUN_BLANK_FRAME) {
 			matchFirstControllerToTASController(0);
-			runSingleFrame(false, false, 0, 0, 0);
+			runSingleFrame(false, true, false, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::START_TAS_MODE) {
 			pauseApp(false, true, false, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::PAUSE) {

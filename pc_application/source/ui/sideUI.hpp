@@ -75,6 +75,7 @@ private:
 	wxSpinCtrl* autoRunFramesPerSecond;
 
 	wxCheckBox* autoRunWithFramebuffer;
+	wxCheckBox* autoRunWithControllerData;
 
 	// Minimum size of this widget (it just gets too small normally)
 	static constexpr float minimumSize = 1 / 4;

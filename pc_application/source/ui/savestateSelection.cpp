@@ -108,7 +108,8 @@ SavestateSelection::SavestateSelection(wxFrame* parent, rapidjson::Document* set
 	okButton->SetToolTip("Select this frame as the savestate hook");
 
 	if(savestateLoadDialog) {
-		selectFrameAutomatically = new wxSpinCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0);
+		// Initial is 10
+		selectFrameAutomatically = new wxSpinCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 10);
 		selectFrameAutomatically->SetToolTip("Select frame automatically at or below this hamming distance");
 	}
 

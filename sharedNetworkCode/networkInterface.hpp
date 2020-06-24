@@ -191,6 +191,10 @@ public:
 		return std::string(networkConnection->DescribeError(error));
 	}
 
+#ifdef CLIENT_IMP
+	std::string getSwitchIP() {}
+#endif
+
 	// This stuff needs to be global for callback reasons
 	uint32_t dataSize;
 	DataFlag currentFlag;

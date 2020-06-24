@@ -85,7 +85,8 @@ namespace Protocol {
 		uint16_t savestateHookNum;
 		uint8_t playerIndex;
 		uint8_t incrementFrame;
-	, self.controllerData, self.frame, self.playerIndex, self.incrementFrame, self.savestateHookNum)
+		uint8_t includeFramebuffer;
+	, self.controllerData, self.frame, self.playerIndex, self.incrementFrame, self.savestateHookNum, self.includeFramebuffer)
 
 	// Recieve all of the game's framebuffer
 	DEFINE_STRUCT(RecieveGameFramebuffer,

@@ -1,10 +1,12 @@
 #pragma once
 
 #include <wx/spinctrl.h>
+#include <wx/wfstream.h>
 #include <wx/wx.h>
 
 #include "../helpers.hpp"
 #include "../sharedNetworkCode/networkInterface.hpp"
+#include "../sharedNetworkCode/serializeUnserializeData.hpp"
 #include "buttonConstants.hpp"
 #include "buttonData.hpp"
 #include "dataProcessing.hpp"
@@ -14,6 +16,8 @@ private:
 	std::shared_ptr<CommunicateWithNetwork> networkInstance;
 	rapidjson::Document* mainSettings;
 	DataProcessing* dataProcessing;
+
+	SerializeProtocol serializeProtocol;
 
 	wxBoxSizer* mainSizer;
 	wxBoxSizer* hookSelectionSizer;

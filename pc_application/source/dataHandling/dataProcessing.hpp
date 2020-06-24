@@ -68,7 +68,7 @@ private:
 	wxImageList imageList;
 
 	// Using callbacks for inputs
-	std::function<void(uin8_t)> inputCallback;
+	std::function<void(uint8_t)> inputCallback;
 	std::function<void(FrameNum)> selectedFrameCallbackVideoViewer;
 	std::function<void(FrameNum, FrameNum)> viewableInputsCallback;
 	std::function<void(FrameNum, FrameNum, FrameNum)> changingSelectedFrameCallback;
@@ -190,8 +190,12 @@ public:
 	wxFileName getFramebufferPath(uint8_t player, SavestateBlockNum savestateHookNum, FrameNum frame) {
 		wxFileName framebufferFileName = projectStart;
 		framebufferFileName.AppendDir("framebuffers");
-		wxString name = "frame_%lu_savestate_block_%u_screenshot";
-		framebufferFileName.SetName(wxString::Format(name, frame, savestateHookNum));
+		framebufferFileName.AppendDir(wxString::Format("savestate_block_%u", savestateHookNum));
+
+		framebufferFileName.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+
+		wxString name = "frame_%lu_screenshot";
+		framebufferFileName.SetName(wxString::Format(name, frame));
 		framebufferFileName.SetExt("jpg");
 		return framebufferFileName;
 	}
@@ -200,14 +204,22 @@ public:
 		return getFramebufferPath(viewingPlayerIndex, currentSavestateHook, currentFrame);
 	}
 
+	wxFileName getFramebufferPathForSavestateHook(SavestateBlockNum index) {
+		// Display the image linked with the savestate hook
+		wxFileName framebufferFileName = projectStart;
+		framebufferFileName.AppendDir("framebuffers");
+
+		framebufferFileName.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+
+		wxString name = "savestate_block_%u_screenshot";
+		framebufferFileName.SetName(wxString::Format(name, index));
+		framebufferFileName.SetExt("jpg");
+		return framebufferFileName;
+	}
+
 	wxFileName getFramebufferPathForCurrentFramebuf() {
 		if(currentImageFrame == 0) {
-			// Display the image linked with the savestate hook
-			wxFileName framebufferFileName = projectStart;
-			wxString name                  = "savestate_block_%u_screenshot";
-			framebufferFileName.SetName(wxString::Format(name, currentSavestateHook));
-			framebufferFileName.SetExt("jpg");
-			return framebufferFileName;
+			return getFramebufferPathForSavestateHook(currentSavestateHook);
 		} else {
 			return getFramebufferPath(viewingPlayerIndex, currentSavestateHook, currentImageFrame);
 		}
@@ -222,7 +234,7 @@ public:
 	void setCurrentFrame(FrameNum frameNum);
 
 	void createSavestateHere();
-	void runFrame(uint8_t forAutoFrame, uint8_t updateFramebuffer);
+	void runFrame(uint8_t forAutoFrame, uint8_t updateFramebuffer, uint8_t includeFramebuffer);
 
 	std::shared_ptr<std::vector<std::shared_ptr<ControllerData>>> getInputsList();
 

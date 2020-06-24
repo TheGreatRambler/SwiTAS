@@ -60,7 +60,7 @@ void ProjectHandler::loadProject() {
 
 				// Load up the inputs
 				wxFFileInputStream inputsFileStream(path, "rb");
-				wxZlibInputStream inputsDecompressStream(inputsFileStream, wxZLIB_ZLIB | wxZLIB_NO_HEADER);
+				wxZlibInputStream inputsDecompressStream(inputsFileStream, wxZLIB_ZLIB);
 
 				wxMemoryOutputStream dataStream;
 				dataStream.Write(inputsDecompressStream);
@@ -149,13 +149,11 @@ void ProjectHandler::saveProject() {
 				inputsFilename.SetName(wxString::Format("savestate_block_%hu_player_%u", savestateHookIndexNum, playerIndexNum + 1));
 				inputsFilename.SetExt("bin");
 
-				wxFileName screenshotFileName = getProjectStart();
-				screenshotFileName.SetName(wxString::Format("savestate_block_%hu_screenshot", savestateHookIndexNum, playerIndexNum + 1));
-				screenshotFileName.SetExt("jpg");
+				wxFileName screenshotFileName = dataProcessing->getFramebufferPathForSavestateHook(savestateHookIndexNum);
 
 				// Delete file if already present and use binary mode
 				wxFFileOutputStream inputsFileStream(inputsFilename.GetFullPath(), "wb");
-				wxZlibOutputStream inputsCompressStream(inputsFileStream, compressionLevel, wxZLIB_ZLIB | wxZLIB_NO_HEADER);
+				wxZlibOutputStream inputsCompressStream(inputsFileStream, compressionLevel, wxZLIB_ZLIB);
 
 				// Kinda annoying, but actually break up the vector and add each part with the size
 				for(auto const& controllerData : *(savestateHookBlock->inputs)) {

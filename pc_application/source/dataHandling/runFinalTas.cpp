@@ -54,7 +54,86 @@ void TasRunner::onStartTasHomebrewPressed(wxCommandEvent& event) {
 		wxMessageDialog invalidRangeMessage(this, "Invalid savestate hook range", "Invalid Range", wxOK | wxICON_ERROR);
 		invalidRangeMessage.ShowModal();
 	} else {
-		// TODO uncompress the data and send the big binary blob over ftp with curl
+		// Build a large binary blob with all the data
+		AllPlayers& allPlayers = dataProcessing->getAllPlayers();
+		// Create a different file for each player
+		std::vector<wxString> playerFiles;
+		uint8_t playerIndex = 1;
+		for(auto const& player : allPlayers) {
+			wxString tempPath = wxFileName::CreateTempFileName("script");
+			wxFFileOutputStream fileStream(tempPath, "wb");
+
+			for(SavestateBlockNum hook = firstHook; hook <= lastHook; hook++) {
+				for(auto const& controllerData : *(player->at(hook)->inputs)) {
+					// Continually write the savestate hook data in one unbroken stream
+					uint8_t* data;
+					uint32_t dataSize;
+					serializeProtocol.dataToBinary<ControllerData>(*controllerData, &data, &dataSize);
+					uint8_t sizeToPrint = (uint8_t)dataSize;
+					// Probably endian issues
+					fileStream.WriteAll(&sizeToPrint, sizeof(sizeToPrint));
+					fileStream.WriteAll(data, dataSize);
+				}
+			}
+
+			fileStream.Close();
+
+			playerFiles.push_back(tempPath);
+			playerIndex++;
+		}
+
+		uint8_t addressGood = false;
+		wxString address;
+
+		if(networkInstance->isConnected()) {
+			// Special case, ask again for custom if this fails for some reason
+			address     = wxString::FromUTF8(networkInstance->getSwitchIP());
+			addressGood = true;
+		}
+
+		uint8_t currentWorkingPlayer = 0;
+		while(true) {
+			if(currentWorkingPlayer == playerFiles.size()) {
+				// All players have been successfully dealt with, break the loop
+				break;
+			}
+
+			if(!addressGood) {
+				// Ask for it from the user
+				wxString ipAddress = wxGetTextFromUser("Please enter IP address of Nintendo Switch", "Server connect", wxEmptyString);
+				if(!ipAddress.empty()) {
+					address     = ipAddress;
+					addressGood = true;
+				} else {
+					// If canceled, just forget this and roll back
+					for(auto const& playerFile : playerFiles) {
+						wxRemoveFile(playerFile);
+					}
+					return;
+				}
+			}
+
+			std::string output = HELPERS::exec(wxString::Format("curl -T %s -m 10 --connect-timeout 3 --verbose %s", playerFiles[currentWorkingPlayer], address).c_str());
+
+			if(output.find("is not recognized") != std::string::npos || output.find("command not found") != std::string::npos) {
+				wxMessageDialog errorDialog(this, "The Curl executable was not found, please install it to PATH right now", "Curl Not Found", wxOK | wxICON_ERROR);
+				errorDialog.ShowModal();
+				// The user should install CURL while this dialog is open
+			} else if(output.find("Closing connection 0") != std::string::npos) {
+				std::vector<std::string> lines = HELPERS::splitString(output, '\n');
+
+				wxMessageDialog errorDialog(this, wxString::FromUTF8(lines[lines.size() - 1]), "Curl Error", wxOK | wxICON_ERROR);
+				errorDialog.ShowModal();
+
+				// The address appears to be faulty, ask the user to investigate
+				addressGood = false;
+			} else {
+				// Successful writing, go on
+				wxRemoveFile(playerFiles[currentWorkingPlayer]);
+				currentWorkingPlayer++;
+				// EndModal(wxID_OK);
+			}
+		}
 	}
 }
 

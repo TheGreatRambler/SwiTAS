@@ -168,9 +168,11 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 
 	autoRunFramesPerSecond->SetToolTip("Delay in mlliseconds for automatically incrementing frame");
 
-	autoRunWithFramebuffer = new wxCheckBox(parentFrame, wxID_ANY, "Include Screenshot");
+	autoRunWithFramebuffer    = new wxCheckBox(parentFrame, wxID_ANY, "Include Screenshot");
+	autoRunWithControllerData = new wxCheckBox(parentFrame, wxID_ANY, "Include Controller Data");
 
 	autoRunWithFramebuffer->SetValue(true);
+	autoRunWithControllerData->SetValue(true);
 
 	autoFrameSizer->Add(autoFrameStart, 0, wxEXPAND | wxALL);
 	autoFrameSizer->Add(autoFrameEnd, 0, wxEXPAND | wxALL);
@@ -178,6 +180,7 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	verticalBoxSizer->Add(autoFrameSizer, 0, wxEXPAND | wxALL);
 	verticalBoxSizer->Add(autoRunFramesPerSecond, 0, wxEXPAND | wxALL);
 	verticalBoxSizer->Add(autoRunWithFramebuffer, 0, wxEXPAND | wxALL);
+	verticalBoxSizer->Add(autoRunWithControllerData, 0, wxEXPAND | wxALL);
 
 	sizer->Add(verticalBoxSizer, 0, wxEXPAND | wxALL);
 
@@ -203,7 +206,7 @@ void SideUI::setPlayerInfo(uint8_t size, uint8_t selected, bool force) {
 			// clang-format on
 			// Now, user has to disconnect their controllers and don't allow continuing until done
 			while(true) {
-				wxMessageDialog removeControllersDialog(parent, "Remove controllers", "Remove all controllers from the switch, can connect them afterwards", wxOK | wxICON_INFORMATION);
+				wxMessageDialog removeControllersDialog(parent, "Remove all controllers from the switch, can connect them afterwards", "Remove controllers", wxOK | wxICON_INFORMATION);
 				removeControllersDialog.ShowModal();
 
 				PROCESS_NETWORK_CALLBACKS(networkInterface, RecieveFlag)
@@ -243,7 +246,7 @@ void SideUI::onFrameAdvancePressed(wxCommandEvent& event) {
 	// MUST be tethered
 	if(tethered) {
 		incrementFrameCallback();
-		inputData->runFrame(false, false);
+		inputData->runFrame(false, false, true);
 	}
 }
 
@@ -407,7 +410,11 @@ void SideUI::onStartAutoFramePressed(wxCommandEvent& event) {
 
 void SideUI::sendAutoRunData() {
 	autoRunActive = true;
-	inputData->sendAutoAdvance(autoRunWithFramebuffer->GetValue());
+	if(autoRunWithControllerData->GetValue()) {
+		inputData->sendAutoAdvance(autoRunWithFramebuffer->GetValue());
+	} else {
+		inputData->runFrame(false, false, autoRunWithFramebuffer->GetValue());
+	}
 	autoFrameStart->Disable();
 }
 
