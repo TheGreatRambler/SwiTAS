@@ -25,6 +25,10 @@ private:
 	Result rc;
 #endif
 
+#ifdef __SWITCH__
+	void readFullScreenshotStream(uint8_t* buf, uint64_t size, uint64 offset);
+#endif
+
 public:
 	ScreenshotHandler();
 
