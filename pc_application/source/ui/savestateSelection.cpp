@@ -312,11 +312,11 @@ void SavestateSelection::callOk() {
 		data.actFlag = SendInfo::START_TAS_MODE;
 	})
 	// clang-format on
-	Close(true);
 	EndModal(wxID_OK);
 }
-
+		
 void SavestateSelection::onClose(wxCloseEvent& event) {
 	delete autoFrameAdvanceTimer;
-	projectHandler->Callbacks_RecieveGameFramebuffer.erase(NETWORK_CALLBACK_ID);
+	REMOVE_NETWORK_CALLBACK(RecieveGameFramebuffer)
+	Destroy();
 }

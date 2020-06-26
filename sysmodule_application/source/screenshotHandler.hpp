@@ -27,7 +27,7 @@ private:
 #endif
 
 #ifdef __SWITCH__
-	void readFullScreenshotStream(uint8_t* buf, uint64_t size, uint64 offset);
+	void readFullScreenshotStream(uint8_t* buf, uint64_t size, uint64_t offset);
 #endif
 
 public:

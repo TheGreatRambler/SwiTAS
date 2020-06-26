@@ -24,11 +24,11 @@ enum DataFlag : uint8_t {
 	RecieveGameInfo,
 	SendFlag,
 	SendAutoRun,
-	SendRunFullSpeed,
 	SendLogging,
 	SendTrackMemoryRegion,
 	SendSetNumControllers,
 	SendAddMemoryRegion,
+	SendStartFinalTas,
 	RecieveMemoryRegion,
 	RecieveLogging,
 	RecieveFlag,
@@ -121,9 +121,10 @@ namespace Protocol {
 		uint8_t includeFramebuffer;
 	, self.frameReturn, self.savestateHookNum, self.playerIndex, self.includeFramebuffer)
 
-	DEFINE_STRUCT(SendRunFullSpeed,
-		std::vector<ControllerData> inputs;
-	, self.inputs)
+	// Needs to have number of controllers set right, TODO
+	DEFINE_STRUCT(SendStartFinalTas,
+		std::vector<std::string> scriptPaths;
+	, self.scriptPaths)
 
 	DEFINE_STRUCT(SendLogging,
 		std::string log;
