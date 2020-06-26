@@ -164,7 +164,6 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 
 	// Name is a misnomer
 	autoRunFramesPerSecond = new wxSpinCtrl(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 5000, 0);
-	autoRunFramesPerSecond->Bind(wxEVT_SPINCTRL, &SideUI::autoRunIntervalChanged, this);
 
 	autoRunFramesPerSecond->SetToolTip("Delay in mlliseconds for automatically incrementing frame");
 
@@ -391,31 +390,21 @@ void SideUI::tether() {
 	tethered = true;
 }
 
-void SideUI::autoRunIntervalChanged(wxSpinEvent& event) {
-	/*
-	if(autoTimer.IsRunning()) {
-		autoTimer.Stop();
-		autoTimer.Start(1000 / (float)autoRunFramesPerSecond->GetValue(), wxTIMER_CONTINUOUS);
-	}
-	*/
-	if(autoRunActive) {
-		sendAutoRunData();
-	}
-}
-
 void SideUI::onStartAutoFramePressed(wxCommandEvent& event) {
 	// autoTimer.Start(1000 / (float)autoRunFramesPerSecond->GetValue(), wxTIMER_CONTINUOUS);
+	autoRunActive = true;
+	autoFrameStart->Disable();
 	sendAutoRunData();
 }
 
 void SideUI::sendAutoRunData() {
-	autoRunActive = true;
-	if(autoRunWithControllerData->GetValue()) {
-		inputData->sendAutoAdvance(autoRunWithFramebuffer->GetValue());
-	} else {
-		inputData->runFrame(false, false, autoRunWithFramebuffer->GetValue());
+	if(autoRunActive) {
+		if(autoRunWithControllerData->GetValue()) {
+			inputData->sendAutoAdvance(autoRunWithFramebuffer->GetValue());
+		} else {
+			inputData->runFrame(false, false, autoRunWithFramebuffer->GetValue());
+		}
 	}
-	autoFrameStart->Disable();
 }
 
 void SideUI::onEndAutoFramePressed(wxCommandEvent& event) {

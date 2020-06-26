@@ -86,9 +86,6 @@ private:
 	void setPlayerInfo(uint8_t size, uint8_t selected, bool force);
 	void playerSelected(wxCommandEvent& event);
 
-	void autoRunIntervalChanged(wxSpinEvent& event);
-	void sendAutoRunData();
-
 	void onAddFramePressed(wxCommandEvent& event);
 	void onFrameAdvancePressed(wxCommandEvent& event);
 	void onSavestateHookCreatePressed(wxCommandEvent& event);
@@ -116,6 +113,8 @@ public:
 	int getAutoRunDelay() {
 		return autoRunFramesPerSecond->GetValue();
 	}
+
+	void sendAutoRunData();
 
 	void untether();
 	void tether();

@@ -350,10 +350,10 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 		if(networkInstance->isConnected()) {
 			// Framebuffers should not be stored in memory unless they will be sent over internet
 			std::vector<uint8_t> jpegBuf;
+			std::string dhash;
 
 			if(includeFramebuffer) {
-				jpegBuf.reserve(JPEG_BUF_SIZE);
-				screenshotHandler.writeFramebuffer(jpegBuf);
+				screenshotHandler.writeFramebuffer(jpegBuf, dhash);
 			}
 
 			ADD_TO_QUEUE(RecieveGameFramebuffer, networkInstance, {

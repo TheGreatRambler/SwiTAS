@@ -21,6 +21,9 @@
 
 class ScreenshotHandler {
 private:
+	const uint8_t dhashWidth  = 80;
+	const uint8_t dhashHeight = 45;
+
 #ifdef __SWITCH__
 	Result rc;
 #endif
@@ -32,7 +35,7 @@ private:
 public:
 	ScreenshotHandler();
 
-	void writeFramebuffer(std::vector<uint8_t>& buf);
+	void writeFramebuffer(std::vector<uint8_t>& buf, std::string& dhash);
 
 	~ScreenshotHandler();
 };

@@ -128,7 +128,9 @@ void MainWindow::keyDownHandler(wxKeyEvent& event) {
 	}
 }
 
-void MainWindow::onAutoFrameAdvanceTimer(wxTimerEvent& event) {}
+void MainWindow::onAutoFrameAdvanceTimer(wxTimerEvent& event) {
+	sideUI->sendAutoRunData();
+}
 
 void MainWindow::handlePreviousWindowTransform() {
 	// Resize and maximize as needed

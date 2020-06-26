@@ -192,7 +192,9 @@ public:
 	}
 
 #ifdef CLIENT_IMP
-	std::string getSwitchIP() {}
+	std::string getSwitchIP() {
+		return ipAddress;
+	}
 #endif
 
 	// This stuff needs to be global for callback reasons
