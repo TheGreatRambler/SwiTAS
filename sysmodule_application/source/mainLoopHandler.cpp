@@ -22,7 +22,7 @@ MainLoop::MainLoop() {
 			RECIEVE_QUEUE_DATA(SendSetNumControllers)
 			RECIEVE_QUEUE_DATA(SendAutoRun)
 			RECIEVE_QUEUE_DATA(SendAddMemoryRegion)
-			RECIEVE_QUEUE_DATA(SendRunFullSpeed)
+			RECIEVE_QUEUE_DATA(SendStartFinalTas)
 		});
 
 #ifdef __SWITCH__
@@ -186,25 +186,27 @@ void MainLoop::handleNetworkUpdates() {
 	})
 	// clang-format on
 
-	{
-		Protocol::Struct_SendAddMemoryRegion data;
-		while(networkInstance->Queue_SendAddMemoryRegion.try_dequeue(data)) {
-			{
-				if(data.clearAllRegions) {
-					currentMemoryRegions.clear();
-				} else {
-					MemoryRegionInfo info;
+	CHECK_QUEUE(networkInstance, SendAddMemoryRegion, {
+		if(data.clearAllRegions) {
+			currentMemoryRegions.clear();
+		} else {
+			MemoryRegionInfo info;
 
-					// prepareMemoryRegionMath(info.func, data.pointerDefinition);
+			// prepareMemoryRegionMath(info.func, data.pointerDefinition);
 
-					info.type = data.type;
-					info.u    = data.u;
-					info.size = data.dataSize;
-					currentMemoryRegions.push_back(info);
-				}
-			}
+			info.type = data.type;
+			info.u    = data.u;
+			info.size = data.dataSize;
+			currentMemoryRegions.push_back(info);
 		}
-	}
+	})
+
+	// clang-format off
+	CHECK_QUEUE(networkInstance, SendStartFinalTas, {
+		finalTasShouldRun = true;
+		runFinalTas(data.scriptPaths);
+	})
+	// clang-format on
 
 	// TODO add logic to handle lua scripting
 
@@ -300,6 +302,50 @@ void MainLoop::setControllerNumber(uint8_t numOfControllers) {
 	// clang-format on
 	// Now, user is required to reconnect any controllers manually
 #endif
+}
+
+void MainLoop::runFinalTas(std::vector<std::string> scriptPaths) {
+	std::vector<FILE*> files;
+	for(auto const& path : scriptPaths) {
+		files.push_back(fopen(path.c_str(), "rb"));
+	}
+
+	uint8_t filesSize = files.size();
+
+	unpauseApp();
+
+	while(true) {
+		// Run half a second of data before checking network
+		if(!finalTasShouldRun)
+			break;
+
+		for(uint8_t i = 0; i < 30; i++) {
+			// File reading can't slow down at all
+
+			for(uint8_t player = 0; player < filesSize; player++) {
+				// Based on code in project handler without compression
+				uint8_t controllerSize;
+				readFullFileData(files[player], &controllerSize, sizeof(controllerSize));
+
+				uint8_t controllerDataBuf[controllerSize];
+				readFullFileData(files[player], controllerDataBuf, sizeof(controllerDataBuf));
+
+				ControllerData data;
+				serializeProtocol.binaryToData<ControllerData>(data, controllerDataBuf, controllerSize);
+
+				controllers[player]->setFrame(data);
+			}
+
+			// Either put this before or after
+			waitForVsync();
+		}
+
+		handleNetworkUpdates();
+	}
+
+	for(auto const& file : files) {
+		fclose(file);
+	}
 }
 
 #ifdef __SWITCH__

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <cstdio>
 #include <cstring>
 #include <functional>
 #include <memory>
@@ -16,9 +17,10 @@
 #include "yuzuSyscalls.hpp"
 #endif
 
-#include "../../sharedNetworkCode/networkInterface.hpp"
 #include "controller.hpp"
 #include "scripting/luaScripting.hpp"
+#include "sharedNetworkCode/networkInterface.hpp"
+#include "sharedNetworkCode/serializeUnserializeData.hpp"
 
 struct MemoryRegionInfo {
 	// mu::Parser func;
@@ -35,6 +37,8 @@ private:
 	uint8_t applicationOpened = false;
 	uint8_t internetConnected = false;
 	uint8_t isInTASMode       = false;
+
+	SerializeProtocol serializeProtocol;
 
 #ifdef __SWITCH__
 	Result rc;
@@ -60,6 +64,16 @@ private:
 	uint64_t mainLocation;
 
 	uint8_t isPaused = false;
+
+	void readFullFileData(FILE* file, void* bufPtr, int size) {
+		int sizeActuallyRead = 0;
+		uint8_t* buf         = (uint8_t*)bufPtr;
+
+		while(sizeActuallyRead != size) {
+			int bytesRead = fread(&buf[sizeActuallyRead], size - sizeActuallyRead, 1, file);
+			sizeActuallyRead += bytesRead;
+		}
+	}
 
 #ifdef __SWITCH__
 	static char* getAppName(u64 application_id);
@@ -128,6 +142,9 @@ private:
 	// controllers. Otherwise, it sets the number of hid:dbg controllers
 	void setControllerNumber(uint8_t numOfControllers);
 	uint8_t getNumControllers();
+
+	uint8_t finalTasShouldRun;
+	void runFinalTas(std::vector<std::string> scriptPaths);
 
 public:
 	MainLoop();

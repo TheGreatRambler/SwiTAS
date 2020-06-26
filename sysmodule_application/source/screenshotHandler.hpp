@@ -17,8 +17,6 @@
 #include <switch.h>
 #endif
 
-#include "../../sharedNetworkCode/networkInterface.hpp"
-
 class ScreenshotHandler {
 private:
 	const uint8_t dhashWidth  = 80;

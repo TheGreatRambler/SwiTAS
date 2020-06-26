@@ -91,6 +91,8 @@ void TasRunner::onStartTasHomebrewPressed(wxCommandEvent& event) {
 			addressGood = true;
 		}
 
+		std::vector<std::string> scriptPaths;
+
 		uint8_t currentWorkingPlayer = 0;
 		while(true) {
 			if(currentWorkingPlayer == playerFiles.size()) {
@@ -113,7 +115,9 @@ void TasRunner::onStartTasHomebrewPressed(wxCommandEvent& event) {
 				}
 			}
 
-			std::string output = HELPERS::exec(wxString::Format("curl -T %s -m 10 --connect-timeout 3 --verbose %s", playerFiles[currentWorkingPlayer], address).c_str());
+			wxString ftpPath = wxString::Format("/switas-script-temp-%d.txt", currentWorkingPlayer);
+
+			std::string output = HELPERS::exec(wxString::Format("curl -T %s -m 10 --connect-timeout 3 --verbose %s", playerFiles[currentWorkingPlayer], wxString::Format("ftp://%s%s", address, ftpPath)).c_str());
 
 			if(output.find("is not recognized") != std::string::npos || output.find("command not found") != std::string::npos) {
 				wxMessageDialog errorDialog(this, "The Curl executable was not found, please install it to PATH right now", "Curl Not Found", wxOK | wxICON_ERROR);
@@ -130,10 +134,17 @@ void TasRunner::onStartTasHomebrewPressed(wxCommandEvent& event) {
 			} else {
 				// Successful writing, go on
 				wxRemoveFile(playerFiles[currentWorkingPlayer]);
+				scriptPaths.push_back(ftpPath.ToStdString());
 				currentWorkingPlayer++;
 				// EndModal(wxID_OK);
 			}
 		}
+
+		// clang-format off
+		ADD_TO_QUEUE(SendStartFinalTas, networkInstance, {
+			data.scriptPaths = scriptPaths;
+		})
+		// clang-format on
 	}
 }
 
