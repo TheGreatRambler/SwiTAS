@@ -63,7 +63,8 @@ private:
 	// Savestate hook number
 	SavestateBlockNum currentSavestateHook = 0;
 
-	uint8_t viewingPlayerIndex = 0;
+	uint8_t viewingPlayerIndex  = 0;
+	uint16_t viewingBranchIndex = 0;
 
 	wxImageList imageList;
 
@@ -73,6 +74,7 @@ private:
 	std::function<void(FrameNum, FrameNum)> viewableInputsCallback;
 	std::function<void(FrameNum, FrameNum, FrameNum)> changingSelectedFrameCallback;
 	std::function<void(uint8_t, uint8_t, bool)> playerInfoCallback;
+	std::function<void(uint16_t, uint16_t, bool)> branchInfoCallback;
 
 	// Network instance for sending to switch
 	std::shared_ptr<CommunicateWithNetwork> networkInstance;
@@ -142,6 +144,7 @@ public:
 	void setViewableInputsCallback(std::function<void(FrameNum, FrameNum)> callback);
 	void setChangingSelectedFrameCallback(std::function<void(FrameNum, FrameNum, FrameNum)> callback);
 	void setPlayerInfoCallback(std::function<void(uint8_t, uint8_t, bool)> callback);
+	void setBranchInfoCallback(std::function<void(uint16_t, uint16_t, bool)> callback);
 	void triggerCurrentFrameChanges();
 
 	void sendAutoAdvance(uint8_t includeFramebuffer);
@@ -180,17 +183,26 @@ public:
 	FrameNum getCurrentFrame() {
 		return currentFrame;
 	}
+	uint16_t getCurrentBranch() {
+		return viewingBranchIndex;
+	}
 	SavestateBlockNum getNumOfSavestateHooks(uint8_t player) {
 		return allPlayers[player]->size();
 	}
 	FrameNum getNumOfFramesInSavestateHook(SavestateBlockNum i, uint8_t player) {
-		return allPlayers[player]->at(i)->inputs->size();
+		return allPlayers[player]->at(i)->inputs[viewingBranchIndex]->size();
 	}
 
-	wxFileName getFramebufferPath(uint8_t player, SavestateBlockNum savestateHookNum, FrameNum frame) {
+	wxFileName getFramebufferPath(uint8_t player, SavestateBlockNum savestateHookNum, BranchNum branch, FrameNum frame) {
 		wxFileName framebufferFileName = projectStart;
 		framebufferFileName.AppendDir("framebuffers");
 		framebufferFileName.AppendDir(wxString::Format("savestate_block_%u", savestateHookNum));
+
+		if(branch == 0) {
+			framebufferFileName.AppendDir(wxString::Format("branch_main", branch));
+		} else {
+			framebufferFileName.AppendDir(wxString::Format("branch_%u", branch));
+		}
 
 		framebufferFileName.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
 
@@ -201,7 +213,7 @@ public:
 	}
 
 	wxFileName getFramebufferPathForCurrent() {
-		return getFramebufferPath(viewingPlayerIndex, currentSavestateHook, currentFrame);
+		return getFramebufferPath(viewingPlayerIndex, currentSavestateHook, viewingBranchIndex, currentFrame);
 	}
 
 	wxFileName getFramebufferPathForSavestateHook(SavestateBlockNum index) {
@@ -221,7 +233,7 @@ public:
 		if(currentImageFrame == 0) {
 			return getFramebufferPathForSavestateHook(currentSavestateHook);
 		} else {
-			return getFramebufferPath(viewingPlayerIndex, currentSavestateHook, currentImageFrame);
+			return getFramebufferPath(viewingPlayerIndex, currentSavestateHook, viewingBranchIndex, currentImageFrame);
 		}
 	}
 
@@ -229,14 +241,12 @@ public:
 		tethered = flag;
 	}
 
-	void modifySavestate() {}
-
 	void setCurrentFrame(FrameNum frameNum);
 
 	void createSavestateHere();
 	void runFrame(uint8_t forAutoFrame, uint8_t updateFramebuffer, uint8_t includeFramebuffer);
 
-	std::shared_ptr<std::vector<std::shared_ptr<ControllerData>>> getInputsList();
+	const std::shared_ptr<std::vector<std::shared_ptr<ControllerData>>> getInputsList();
 
 	wxRect getFirstItemRect();
 
@@ -254,9 +264,17 @@ public:
 	void removeThisPlayer();
 	void sendPlayerNum();
 
+	void addNewBranch();
+	void setBranch(uint16_t branchIndex);
+	void removeBranch(uint8_t branchIndex);
+	void removeThisBranch();
+	uint16_t getNumBranches() {
+		return inputsList.size();
+	}
+
 	std::shared_ptr<ControllerData> getFrame(FrameNum frame) const;
 
-	void scrollToSpecific(uint8_t player, SavestateBlockNum savestateHookNum, FrameNum frame);
+	void scrollToSpecific(uint8_t player, SavestateBlockNum savestateHookNum, BranchNum branch, FrameNum frame);
 
 	// New FANCY methods
 	void triggerButton(Btn button);
@@ -264,7 +282,7 @@ public:
 	void toggleButton(FrameNum frame, Btn button);
 	void clearAllButtons(FrameNum frame);
 	uint8_t getButton(FrameNum frame, Btn button) const;
-	uint8_t getButtonSpecific(FrameNum frame, Btn button, SavestateBlockNum savestateHookNum, uint8_t player) const;
+	uint8_t getButtonSpecific(FrameNum frame, Btn button, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
 	uint8_t getButtonCurrent(Btn button) const;
 
 	void setControllerDataForAutoRun(ControllerData controllerData);
@@ -273,7 +291,7 @@ public:
 	void triggerNumberValues(ControllerNumberValues joystickId, int16_t value);
 	void setNumberValues(FrameNum frame, ControllerNumberValues joystickId, int16_t value);
 	int16_t getNumberValues(FrameNum frame, ControllerNumberValues joystickId) const;
-	int16_t getNumberValuesSpecific(FrameNum frame, ControllerNumberValues joystickId, SavestateBlockNum savestateHookNum, uint8_t player) const;
+	int16_t getNumberValuesSpecific(FrameNum frame, ControllerNumberValues joystickId, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
 	int16_t getNumberValueCurrent(ControllerNumberValues joystickId) const;
 
 	// Updates how the current frame looks on the UI
@@ -281,13 +299,13 @@ public:
 	void modifyCurrentFrameViews(FrameNum frame);
 
 	void setFramestateInfo(FrameNum frame, FrameState id, uint8_t state);
-	void setFramestateInfoSpecific(FrameNum frame, FrameState id, uint8_t state, SavestateBlockNum savestateHookNum, uint8_t player);
+	void setFramestateInfoSpecific(FrameNum frame, FrameState id, uint8_t state, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player);
 	uint8_t getFramestateInfo(FrameNum frame, FrameState id) const;
 	// Without the id, just return the whole hog
 	uint8_t getFramestateInfo(FrameNum frame) const;
 
 	void invalidateRun(FrameNum frame);
-	void invalidateRunSpecific(FrameNum frame, SavestateBlockNum savestateHookNum, uint8_t player);
+	void invalidateRunSpecific(FrameNum frame, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player);
 
 	void addFrame(FrameNum afterFrame);
 	void addFrameHere();
