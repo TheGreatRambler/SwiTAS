@@ -64,7 +64,7 @@ void TasRunner::onStartTasHomebrewPressed(wxCommandEvent& event) {
 			wxFFileOutputStream fileStream(tempPath, "wb");
 
 			for(SavestateBlockNum hook = firstHook; hook <= lastHook; hook++) {
-				for(auto const& controllerData : *(player->at(hook)->inputs)) {
+				for(auto const& controllerData : *(player->at(hook)->inputs[0])) {
 					// Continually write the savestate hook data in one unbroken stream
 					uint8_t* data;
 					uint32_t dataSize;

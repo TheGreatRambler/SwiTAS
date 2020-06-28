@@ -20,7 +20,6 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	// Set the mask color via a css string
 	// https://docs.wxwidgets.org/3.0/classwx_colour.html#a08e9f56265647b8b5e1349b76eb728e3
 	maskColor.Set((*mainSettings)["iconTransparent"].GetString());
-	// scrolledWindow = std::make_shared<Gtk::ScrolledWindow>();
 	// This is cool, so set it
 	EnableAlternateRowColours(true);
 	// Resize images based on the settings file
@@ -53,13 +52,14 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	// Each menu item is added here
 	wxAcceleratorEntry entries[10];
 
-	pasteInsertID  = wxNewId();
-	pastePlaceID   = wxNewId();
-	addFrameID     = wxNewId();
-	add10FramesID  = wxNewId();
-	removeFrameID  = wxNewId();
-	frameAdvanceID = wxNewId();
-	savestateID    = wxNewId();
+	pasteInsertID         = wxNewId();
+	pastePlaceID          = wxNewId();
+	addFrameID            = wxNewId();
+	add10FramesID         = wxNewId();
+	removeFrameID         = wxNewId();
+	frameAdvanceID        = wxNewId();
+	savestateID           = wxNewId();
+	mergeIntoMainBranchID = wxNewId();
 
 	insertPaste = false;
 	placePaste  = false;
@@ -75,8 +75,9 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	entries[7].Set(wxACCEL_CTRL, (int)'-', removeFrameID, editMenu.Append(removeFrameID, wxT("Remove Frame\tCtrl+Minus")));
 	entries[8].Set(wxACCEL_CTRL, WXK_RIGHT, frameAdvanceID, editMenu.Append(frameAdvanceID, wxT("Frame Advance\tCtrl+Right")));
 	entries[9].Set(wxACCEL_CTRL, (int)'H', savestateID, editMenu.Append(savestateID, wxT("Add Savestate\tCtrl+H")));
+	entries[10].Set(wxACCEL_CTRL, (int)'M', mergeIntoMainBranchID, editMenu.Append(mergeIntoMainBranchID, wxT("Merge Frames into Main Branch\tCtrl+M")));
 
-	wxAcceleratorTable accel(10, entries);
+	wxAcceleratorTable accel(11, entries);
 	SetAcceleratorTable(accel);
 
 	// Bind each to a handler, both menu and button events
@@ -90,6 +91,7 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	Bind(wxEVT_MENU, &DataProcessing::onRemoveFrame, this, removeFrameID);
 	Bind(wxEVT_MENU, &DataProcessing::onFrameAdvance, this, frameAdvanceID);
 	Bind(wxEVT_MENU, &DataProcessing::onAddSavestate, this, savestateID);
+	Bind(wxEVT_MENU, &DataProcessing::onMergeIntoMainBranch, this, mergeIntoMainBranchID);
 }
 
 // clang-format off
@@ -134,11 +136,12 @@ void DataProcessing::triggerCurrentFrameChanges() {
 	}
 }
 
-void DataProcessing::sendAutoAdvance(uint8_t includeFramebuffer){
+void DataProcessing::sendAutoAdvance(uint8_t includeFramebuffer) {
 	// clang-format off
 	ADD_TO_QUEUE(SendAutoRun, networkInstance, {
 		data.frameReturn = currentFrame + 1;
 		data.savestateHookNum = currentSavestateHook;
+		data.branchIndex = viewingBranchIndex;
 		data.playerIndex = viewingPlayerIndex;
 		data.includeFramebuffer = includeFramebuffer;
 	})
@@ -157,7 +160,8 @@ std::string DataProcessing::getExportedCurrentPlayer() {
 	*/
 
 	// This blocks for a long time
-	return buttonData->framesToText(this, 0, 0, viewingPlayerIndex);
+	// Always export the main branch, MAY CHANGE
+	return buttonData->framesToText(this, 0, 0, 0, viewingPlayerIndex);
 }
 
 void DataProcessing::importFromFile(wxFileName importTarget) {
@@ -342,7 +346,7 @@ void DataProcessing::onCopy(wxCommandEvent& event) {
 			// There is a selected item
 			if(currentFrame >= firstSelectedItem && currentFrame <= lastSelectedItem) {
 				// Add these items to the clipboard
-				wxTheClipboard->SetData(new wxTextDataObject(buttonData->framesToText(this, firstSelectedItem, lastSelectedItem, -1)));
+				wxTheClipboard->SetData(new wxTextDataObject(buttonData->framesToText(this, firstSelectedItem, lastSelectedItem, viewingBranchIndex, -1)));
 			} else {
 				// Deselect the others
 				for(FrameNum i = firstSelectedItem; i <= lastSelectedItem; i++) {
@@ -351,7 +355,7 @@ void DataProcessing::onCopy(wxCommandEvent& event) {
 				// Select just the one
 				SetItemState(currentFrame, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 
-				wxTheClipboard->SetData(new wxTextDataObject(buttonData->framesToText(this, currentFrame, currentFrame, -1)));
+				wxTheClipboard->SetData(new wxTextDataObject(buttonData->framesToText(this, currentFrame, currentFrame, viewingBranchIndex, -1)));
 
 				// See the new selection
 				RefreshItem(currentFrame);
@@ -444,6 +448,19 @@ void DataProcessing::onAddSavestate(wxCommandEvent& event) {
 	createSavestateHere();
 }
 
+void DataProcessing::onMergeIntoMainBranch(wxCommandEvent& event) {
+	// Don't just convert into text format, merge by moving over frames
+	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if(firstSelectedItem != wxNOT_FOUND) {
+		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
+		for(FrameNum i = firstSelectedItem; i <= lastSelectedItem; i++) {
+			// Transfer directly
+			buttonData->transferControllerData(*(inputsList[viewingBranchIndex]->at(i)), inputsList[0]->at(i), false);
+		}
+	}
+	// It's up to the user to remove the frames in the other branch if they want
+}
+
 void DataProcessing::setCurrentFrame(FrameNum frameNum) {
 	// Must be a frame that has already been written, else, raise error
 	if(frameNum < getFramesSize()) {
@@ -526,6 +543,7 @@ void DataProcessing::runFrame(uint8_t forAutoFrame, uint8_t updateFramebuffer, u
 					data.controllerData   = *controllerDatas;
 					data.frame            = currentRunFrame;
 					data.savestateHookNum = currentSavestateHook;
+					data.branchIndex      = viewingBranchIndex;
 					data.playerIndex      = playerIndex;
 					if(playerIndex == allPlayers.size() - 1) {
 						// Last frame, start the frame
@@ -580,6 +598,7 @@ void DataProcessing::addNewSavestateHook(std::string dHash, wxBitmap* screenshot
 		std::shared_ptr<SavestateHook> savestateHook = std::make_shared<SavestateHook>();
 		savestateHook->dHash                         = dHash;
 		savestateHook->screenshot                    = screenshot;
+		// Add a single branch for default
 		savestateHook->inputs.push_back(std::make_shared<std::vector<FrameData>>());
 		allPlayers[i]->push_back(savestateHook);
 		allPlayers[i]->at(0)->inputs[0]->push_back(std::make_shared<ControllerData>());

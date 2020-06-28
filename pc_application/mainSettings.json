@@ -226,6 +226,8 @@
 		"savestateHookModifyButton": "share/icons/switas/buttons/savestateHookModifyButton.png",
 		"playerAddButton": "share/icons/switas/buttons/addPlayerButton.png",
 		"playerRemoveButton": "share/icons/switas/buttons/removePlayerButton.png",
+		"branchAddButton": "share/icons/switas/buttons/addBranchButton.png",
+		"branchRemoveButton": "share/icons/switas/buttons/removeBranchButton.png",
 		"joystickLockButton": "share/icons/switas/buttons/joystickLockButton.png",
 		"playButton": "share/icons/switas/buttons/playButton.png",
 		"pauseButton": "share/icons/switas/buttons/pauseButton.png",
@@ -233,8 +235,8 @@
 		"autoFrameStartButton": "share/icons/switas/buttons/autoFrameStartButton.png",
 		"autoFrameEndButton": "share/icons/switas/buttons/autoFrameEndButton.png",
 		"splashScreen": "share/icons/switas/logo/main.png",
-		"buttonWidth": 80,
-		"buttonHeight": 80,
+		"buttonWidth": 60,
+		"buttonHeight": 60,
 		"frameViewerColors": {
 			"notRan": "rgb(223, 227, 235)",
 			"ran": "rgb(144, 252, 189)",
@@ -246,23 +248,6 @@
 			"newProject": "rgb(20, 110, 66)"
 		}
 	},
-	"recentProjects": [
-		{
-			"projectDirectory": "/home/thegreatrambler/Desktop/bob/",
-			"projectName": "Unnamed"
-		},
-		{
-			"projectDirectory": "C:\\Users\\aehar\\Desktop\\EPIC\\",
-			"projectName": "Unnamed"
-		},
-		{
-			"projectDirectory": "",
-			"projectName": "Unnamed"
-		},
-		{
-			"projectDirectory": "C:\\Users\\aehar\\Desktop\\thing\\",
-			"projectName": "Unnamed"
-		}
-	],
+	"recentProjects": [],
 	"recentVideos": []
 }

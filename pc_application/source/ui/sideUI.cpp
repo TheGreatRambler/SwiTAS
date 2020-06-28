@@ -102,6 +102,8 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	savestateHookModifyButton = HELPERS::getBitmapButton(parentFrame, mainSettings, "savestateHookModifyButton");
 	playerAddButton           = HELPERS::getBitmapButton(parentFrame, mainSettings, "playerAddButton");
 	playerRemoveButton        = HELPERS::getBitmapButton(parentFrame, mainSettings, "playerRemoveButton");
+	branchAddButton           = HELPERS::getBitmapButton(parentFrame, mainSettings, "branchAddButton");
+	branchRemoveButton        = HELPERS::getBitmapButton(parentFrame, mainSettings, "branchRemoveButton");
 
 	addFrameButton->SetToolTip("Add frame");
 	frameAdvanceButton->SetToolTip("Advance frame");
@@ -110,6 +112,8 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	savestateHookModifyButton->SetToolTip("Modify current savestate hook");
 	playerAddButton->SetToolTip("Add player");
 	playerRemoveButton->SetToolTip("Remove current player");
+	branchAddButton->SetToolTip("Add branch");
+	branchRemoveButton->SetToolTip("Remove current branch");
 
 	playerSelect = new wxComboBox(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_DROPDOWN | wxCB_READONLY);
 	inputData->setPlayerInfoCallback(std::bind(&SideUI::setPlayerInfo, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
@@ -137,6 +141,8 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	savestateHookModifyButton->Bind(wxEVT_BUTTON, &SideUI::onSavestateHookModifyPressed, this);
 	playerAddButton->Bind(wxEVT_BUTTON, &SideUI::onPlayerAddPressed, this);
 	playerRemoveButton->Bind(wxEVT_BUTTON, &SideUI::onPlayerRemovePressed, this);
+	branchAddButton->Bind(wxEVT_BUTTON, &SideUI::onBranchAddPressed, this);
+	branchRemoveButton->Bind(wxEVT_BUTTON, &SideUI::onBranchRemovePressed, this);
 
 	buttonSizer->Add(addFrameButton, 1);
 	buttonSizer->Add(frameAdvanceButton, 1);
@@ -145,9 +151,12 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	buttonSizer->Add(savestateHookModifyButton, 1);
 	buttonSizer->Add(playerAddButton, 1);
 	buttonSizer->Add(playerRemoveButton, 1);
+	buttonSizer->Add(branchAddButton, 1);
+	buttonSizer->Add(branchRemoveButton, 1);
 
 	verticalBoxSizer->Add(buttonSizer, 0, wxEXPAND);
 	verticalBoxSizer->Add(playerSelect, 0, wxEXPAND);
+	verticalBoxSizer->Add(branchSelect, 0, wxEXPAND);
 
 	inputData->SetMinSize(wxSize(0, 0));
 	inputsViewSizer->Add(frameDrawer, 1, wxEXPAND | wxALL);
@@ -326,10 +335,18 @@ void SideUI::onPlayerRemovePressed(wxCommandEvent& event) {
 	inputData->removeThisPlayer();
 }
 
+void SideUI::onBranchAddPressed(wxCommandEvent& event) {
+	inputData->addNewBranch();
+}
+
+void SideUI::onBranchRemovePressed(wxCommandEvent& event) {
+	inputData->removeThisBranch();
+}
+
 bool SideUI::createSavestateHook() {
 	// Create savestate and push it onto dataProcessing
 	AllSavestateHookBlocks& blocks = inputData->getAllSavestateHookBlocks();
-	if(blocks.size() != 1 && blocks[0]->inputs->size() != 1) {
+	if(blocks.size() != 1 && blocks[0]->inputs[0]->size() != 1) {
 		// Not a new project, add the savestate hook before continuing
 		inputData->addNewSavestateHook("", HELPERS::getDefaultSavestateScreenshot());
 	}

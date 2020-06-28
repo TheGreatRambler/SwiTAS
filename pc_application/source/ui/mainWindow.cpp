@@ -16,9 +16,9 @@ MainWindow::MainWindow()
 	// Get the main settings
 	mainSettings = HELPERS::getSettingsFile("../mainSettings.json");
 
-	wxIcon mainicon;
-	mainicon.LoadFile(HELPERS::resolvePath(mainSettings["programIcon"].GetString()), wxBITMAP_TYPE_PNG);
-	SetIcon(mainicon);
+	wxIcon mainIcon;
+	mainIcon.LoadFile(HELPERS::resolvePath(mainSettings["programIcon"].GetString()), wxBITMAP_TYPE_PNG);
+	SetIcon(mainIcon);
 
 	// https://forums.wxwidgets.org/viewtopic.php?t=28894
 	// https://cboard.cprogramming.com/cplusplus-programming/92653-starting-wxwidgets-wxpanel-full-size-frame.html
@@ -179,7 +179,7 @@ void MainWindow::handleNetworkQueues() {
 		}
 		if(data.fromFrameAdvance == 1) {
 			if(framebufferIncluded) {
-				wxFileName framebufferFileName = dataProcessingInstance->getFramebufferPath(data.playerIndex, data.savestateHookNum, data.frame);
+				wxFileName framebufferFileName = dataProcessingInstance->getFramebufferPath(data.playerIndex, data.savestateHookNum, data.branchIndex, data.frame);
 				wxFile file(framebufferFileName.GetFullPath(), wxFile::write);
 				file.Write(data.buf.data(), data.buf.size());
 				file.Close();

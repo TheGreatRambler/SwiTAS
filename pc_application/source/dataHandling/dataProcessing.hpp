@@ -33,6 +33,7 @@
 typedef std::shared_ptr<ControllerData> FrameData;
 typedef std::vector<std::shared_ptr<std::vector<std::shared_ptr<SavestateHook>>>> AllPlayers;
 typedef std::vector<std::shared_ptr<SavestateHook>> AllSavestateHookBlocks;
+typedef std::shared_ptr<std::vector<FrameData>> BranchData;
 
 class ButtonData;
 
@@ -109,6 +110,7 @@ private:
 	int removeFrameID;
 	int frameAdvanceID;
 	int savestateID;
+	int mergeIntoMainBranchID;
 
 	int insertPaste;
 	bool placePaste;
@@ -132,6 +134,7 @@ private:
 	void onRemoveFrame(wxCommandEvent& event);
 	void onFrameAdvance(wxCommandEvent& event);
 	void onAddSavestate(wxCommandEvent& event);
+	void onMergeIntoMainBranch(wxCommandEvent& event);
 
 public:
 	static const int LIST_CTRL_ID = 1000;
@@ -194,12 +197,14 @@ public:
 	}
 
 	wxFileName getFramebufferPath(uint8_t player, SavestateBlockNum savestateHookNum, BranchNum branch, FrameNum frame) {
+		// The player does not matter in the path
 		wxFileName framebufferFileName = projectStart;
 		framebufferFileName.AppendDir("framebuffers");
 		framebufferFileName.AppendDir(wxString::Format("savestate_block_%u", savestateHookNum));
 
 		if(branch == 0) {
-			framebufferFileName.AppendDir(wxString::Format("branch_main", branch));
+			// Main branch gets a special name
+			framebufferFileName.AppendDir("branch_main");
 		} else {
 			framebufferFileName.AppendDir(wxString::Format("branch_%u", branch));
 		}
@@ -248,7 +253,7 @@ public:
 
 	std::shared_ptr<std::vector<std::shared_ptr<ControllerData>>> getInputsList() const;
 
-	std::shared_ptr<ControllerData> getControllerData(uint8_t player, SavestateBlockNum savestateHookNum, BranchNum branch, FrameNum frame) const{
+	std::shared_ptr<ControllerData> getControllerData(uint8_t player, SavestateBlockNum savestateHookNum, BranchNum branch, FrameNum frame) const {
 		return allPlayers[player]->at(savestateHookNum)->inputs[branch]->at(frame);
 	}
 

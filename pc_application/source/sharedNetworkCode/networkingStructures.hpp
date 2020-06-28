@@ -83,10 +83,11 @@ namespace Protocol {
 		// sent back will be one more than this frame
 		uint32_t frame;
 		uint16_t savestateHookNum;
+		uint16_t branchIndex;
 		uint8_t playerIndex;
 		uint8_t incrementFrame;
 		uint8_t includeFramebuffer;
-	, self.controllerData, self.frame, self.playerIndex, self.incrementFrame, self.savestateHookNum, self.includeFramebuffer)
+	, self.controllerData, self.frame, self.playerIndex, self.incrementFrame, self.branchIndex, self.savestateHookNum, self.includeFramebuffer)
 
 	// Recieve all of the game's framebuffer
 	DEFINE_STRUCT(RecieveGameFramebuffer,
@@ -94,11 +95,12 @@ namespace Protocol {
 		uint8_t fromFrameAdvance;
 		uint32_t frame;
 		uint16_t savestateHookNum;
+		uint16_t branchIndex;
 		uint8_t playerIndex;
 		// Set by auto advance
 		uint8_t controllerDataIncluded;
 		ControllerData controllerData;
-	, self.buf, self.fromFrameAdvance, self.frame, self.savestateHookNum, self.playerIndex, self.controllerDataIncluded, self.controllerData)
+	, self.buf, self.fromFrameAdvance, self.frame, self.savestateHookNum, self.branchIndex, self.playerIndex, self.controllerDataIncluded, self.controllerData)
 
 	// Recieve a ton of game and user info
 	DEFINE_STRUCT(RecieveGameInfo,
@@ -117,9 +119,10 @@ namespace Protocol {
 	DEFINE_STRUCT(SendAutoRun,
 		uint32_t frameReturn;
 		uint16_t savestateHookNum;
+		uint16_t branchIndex;
 		uint8_t playerIndex;
 		uint8_t includeFramebuffer;
-	, self.frameReturn, self.savestateHookNum, self.playerIndex, self.includeFramebuffer)
+	, self.frameReturn, self.savestateHookNum, self.branchIndex, self.playerIndex, self.includeFramebuffer)
 
 	// Needs to have number of controllers set right, TODO
 	DEFINE_STRUCT(SendStartFinalTas,

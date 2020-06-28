@@ -210,7 +210,7 @@ FrameNum ButtonData::textToFrames(DataProcessing* dataProcessing, std::string te
 	return lastReadFrame;
 }
 
-std::string ButtonData::framesToText(DataProcessing* dataProcessing, FrameNum startLoc, FrameNum endLoc, int playerIndex) {
+std::string ButtonData::framesToText(DataProcessing* dataProcessing, FrameNum startLoc, FrameNum endLoc, int playerIndex, BranchNum branch) {
 	// If the player index is provided, get every savestate hook in that player
 	std::vector<std::string> textVector;
 	// Loop through each frame and convert it
@@ -254,7 +254,7 @@ std::string ButtonData::framesToText(DataProcessing* dataProcessing, FrameNum st
 					if(playerIndex == -1) {
 						isSelected = dataProcessing->getButton(i, button);
 					} else {
-						isSelected = dataProcessing->getButtonSpecific(i, button, j, playerIndex);
+						isSelected = dataProcessing->getButtonSpecific(i, button, j, branch, playerIndex);
 					}
 					if(isSelected) {
 						// Add to the string
@@ -269,20 +269,22 @@ std::string ButtonData::framesToText(DataProcessing* dataProcessing, FrameNum st
 					parts.push_back(HELPERS::joinString(buttonParts, ";"));
 				}
 
+				typedef ControllerNumberValues CNV;
+
 				// clang-format off
-				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, ControllerNumberValues::LEFT_X, j, playerIndex)) + \
-					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, ControllerNumberValues::LEFT_Y, j, playerIndex)));
+				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::LEFT_X, j, branch, playerIndex)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::LEFT_Y, j, branch, playerIndex)));
 
-				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, ControllerNumberValues::RIGHT_X, j, playerIndex)) + \
-					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, ControllerNumberValues::RIGHT_Y, j, playerIndex)));
+				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::RIGHT_X, j, branch, playerIndex)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::RIGHT_Y, j,branch, playerIndex)));
 
-				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, ControllerNumberValues::ACCEL_X, j, playerIndex)) + \
-					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, ControllerNumberValues::ACCEL_Y, j, playerIndex)) + \
-					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, ControllerNumberValues::ACCEL_Z, j, playerIndex)));
+				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::ACCEL_X, j, branch, playerIndex)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::ACCEL_Y, j, branch, playerIndex)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::ACCEL_Z, j, branch, playerIndex)));
 
-				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, ControllerNumberValues::GYRO_1, j, playerIndex)) + \
-					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, ControllerNumberValues::GYRO_2, j, playerIndex)) + \
-					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, ControllerNumberValues::GYRO_3, j, playerIndex)));
+				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::GYRO_1, j,branch, playerIndex)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::GYRO_2, j, branch, playerIndex)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::GYRO_3, j, branch, playerIndex)));
 				// clang-format on
 
 				textVector.push_back(HELPERS::joinString(parts, " "));

@@ -104,7 +104,7 @@ private:
 	GameMemoryInfo getGameMemoryInfo(MemoryInfo memInfo);
 #endif
 
-	void pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, uint8_t autoAdvance, uint32_t frame, uint16_t savestateHookNum, uint8_t playerIndex);
+	void pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, uint8_t autoAdvance, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex);
 
 	void waitForVsync() {
 #ifdef __SWITCH__
@@ -125,7 +125,7 @@ private:
 	}
 
 	// This assumes that the app is paused
-	void runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, uint8_t autoAdvance, uint32_t frame, uint16_t savestateHookNum, uint8_t playerIndex);
+	void runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, uint8_t autoAdvance, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex);
 
 	void clearEveryController();
 

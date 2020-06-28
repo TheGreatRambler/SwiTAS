@@ -57,6 +57,8 @@ private:
 	wxBitmapButton* savestateHookModifyButton;
 	wxBitmapButton* playerAddButton;
 	wxBitmapButton* playerRemoveButton;
+	wxBitmapButton* branchAddButton;
+	wxBitmapButton* branchRemoveButton;
 
 	wxComboBox* playerSelect;
 	wxComboBox* branchSelect;
@@ -96,6 +98,8 @@ private:
 	void onSavestateHookModifyPressed(wxCommandEvent& event);
 	void onPlayerAddPressed(wxCommandEvent& event);
 	void onPlayerRemovePressed(wxCommandEvent& event);
+	void onBranchAddPressed(wxCommandEvent& event);
+	void onBranchRemovePressed(wxCommandEvent& event);
 	void onStartAutoFramePressed(wxCommandEvent& event);
 	void onEndAutoFramePressed(wxCommandEvent& event);
 

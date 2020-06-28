@@ -134,7 +134,7 @@ void MainLoop::handleNetworkUpdates() {
 	CHECK_QUEUE(networkInstance, SendFrameData, {
 		controllers[data.playerIndex]->setFrame(data.controllerData);
 		if(data.incrementFrame) {
-			runSingleFrame(true, data.includeFramebuffer, false, data.frame, data.savestateHookNum, data.playerIndex);
+			runSingleFrame(true, data.includeFramebuffer, false, data.frame, data.savestateHookNum, data.branchIndex, data.playerIndex);
 		}
 	})
 
@@ -152,7 +152,7 @@ void MainLoop::handleNetworkUpdates() {
 			// Precaution to prevent the app getting stuck without the
 			// User able to unpause it
 			if(applicationOpened && internetConnected) {
-				pauseApp(false, true, false, 0, 0, 0);
+				pauseApp(false, true, false, 0, 0, 0, 0);
 			}
 		} else if(data.actFlag == SendInfo::UNPAUSE_DEBUG) {
 			if(applicationOpened) {
@@ -166,11 +166,11 @@ void MainLoop::handleNetworkUpdates() {
 			}
 		} else if(data.actFlag == SendInfo::RUN_BLANK_FRAME) {
 			matchFirstControllerToTASController(0);
-			runSingleFrame(false, true, false, 0, 0, 0);
+			runSingleFrame(false, true, false, 0, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::START_TAS_MODE) {
-			pauseApp(false, true, false, 0, 0, 0);
+			pauseApp(false, true, false, 0, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::PAUSE) {
-			pauseApp(false, true, false, 0, 0, 0);
+			pauseApp(false, true, false, 0, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::UNPAUSE) {
 			clearEveryController();
 			unpauseApp();
@@ -213,7 +213,7 @@ void MainLoop::handleNetworkUpdates() {
 	// This is essentially auto advance but with frame linked framebuffers
 	CHECK_QUEUE(networkInstance, SendAutoRun, {
 		matchFirstControllerToTASController(0);
-		runSingleFrame(true, true, true, data.frameReturn, data.savestateHookNum, data.playerIndex);
+		runSingleFrame(true, true, true, data.frameReturn, data.savestateHookNum, data.branchIndex, data.playerIndex);
 	})
 }
 
@@ -226,7 +226,7 @@ void MainLoop::sendGameInfo() {
 		// https://github.com/switchbrew/switch-examples/blob/master/account/source/main.c
 
 		uint64_t addr = 0;
-		pauseApp(false, true, false, 0, 0, 0);
+		pauseApp(false, true, false, 0, 0, 0, 0);
 #ifdef __SWITCH__
 		while(true) {
 			MemoryInfo info = { 0 };
@@ -363,7 +363,7 @@ GameMemoryInfo MainLoop::getGameMemoryInfo(MemoryInfo memInfo) {
 }
 #endif
 
-void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, uint8_t autoAdvance, uint32_t frame, uint16_t savestateHookNum, uint8_t playerIndex) {
+void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, uint8_t autoAdvance, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex) {
 	if(isPaused) {
 #ifdef __SWITCH__
 		LOGD << "Running frame";
@@ -371,7 +371,7 @@ void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t includeFra
 		waitForVsync();
 		unpauseApp();
 		waitForVsync();
-		pauseApp(linkedWithFrameAdvance, includeFramebuffer, autoAdvance, frame, savestateHookNum, playerIndex);
+		pauseApp(linkedWithFrameAdvance, includeFramebuffer, autoAdvance, frame, savestateHookNum, branchIndex, playerIndex);
 	}
 }
 
@@ -382,7 +382,7 @@ void MainLoop::clearEveryController() {
 	}
 }
 
-void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, uint8_t autoAdvance, uint32_t frame, uint16_t savestateHookNum, uint8_t playerIndex) {
+void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, uint8_t autoAdvance, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex) {
 	// This is aborting for some reason
 	if(!isPaused) {
 		// Debug application again
@@ -407,6 +407,7 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 				data.fromFrameAdvance       = linkedWithFrameAdvance;
 				data.frame                  = frame;
 				data.savestateHookNum       = savestateHookNum;
+				data.branchIndex            = branchIndex;
 				data.playerIndex            = playerIndex;
 				data.controllerDataIncluded = autoAdvance;
 				if(autoAdvance) {
