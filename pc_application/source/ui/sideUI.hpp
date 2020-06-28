@@ -59,6 +59,7 @@ private:
 	wxBitmapButton* playerRemoveButton;
 
 	wxComboBox* playerSelect;
+	wxComboBox* branchSelect;
 
 	wxBoxSizer* buttonSizer;
 
@@ -85,6 +86,8 @@ private:
 
 	void setPlayerInfo(uint8_t size, uint8_t selected, bool force);
 	void playerSelected(wxCommandEvent& event);
+	void setBranchInfo(uint8_t size, uint8_t selected, bool force);
+	void branchSelected(wxCommandEvent& event);
 
 	void onAddFramePressed(wxCommandEvent& event);
 	void onFrameAdvancePressed(wxCommandEvent& event);

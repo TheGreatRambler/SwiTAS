@@ -116,6 +116,11 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	playerSelect->Bind(wxEVT_COMBOBOX, &SideUI::playerSelected, this);
 	playerSelect->SetToolTip("Set player");
 
+	branchSelect = new wxComboBox(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_DROPDOWN | wxCB_READONLY);
+	inputData->setBranchInfoCallback(std::bind(&SideUI::setBranchInfo, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	branchSelect->Bind(wxEVT_COMBOBOX, &SideUI::branchSelected, this);
+	branchSelect->SetToolTip("Set branch");
+
 	// clang-format off
 	ADD_NETWORK_CALLBACK(RecieveFlag, {
 		if (data.actFlag == RecieveInfo::CONTROLLERS_CONNECTED) {
@@ -227,13 +232,33 @@ void SideUI::setPlayerInfo(uint8_t size, uint8_t selected, bool force) {
 	playerSelect->Refresh();
 }
 
+void SideUI::playerSelected(wxCommandEvent& event) {
+	inputData->setPlayer(event.GetSelection());
+}
+
+void SideUI::setBranchInfo(uint8_t size, uint8_t selected, bool force) {
+	// Deselect
+	branchSelect->SetSelection(wxNOT_FOUND);
+
+	if(branchSelect->GetCount() != size || force) {
+		branchSelect->Clear();
+		branchSelect->Append("Main Branch");
+		for(BranchNum i = 1; i < size; i++) {
+			branchSelect->Append(wxString::Format("Branch %d", i));
+		}
+	}
+
+	branchSelect->SetSelection(selected);
+	branchSelect->Refresh();
+}
+
+void SideUI::branchSelected(wxCommandEvent& event) {
+	inputData->setBranch(event.GetSelection());
+}
+
 void SideUI::onIdle(wxIdleEvent& event) {
 	// Called by MainWindow
 	PROCESS_NETWORK_CALLBACKS(networkInterface, RecieveFlag)
-}
-
-void SideUI::playerSelected(wxCommandEvent& event) {
-	inputData->setPlayer(event.GetSelection());
 }
 
 void SideUI::onAddFramePressed(wxCommandEvent& event) {

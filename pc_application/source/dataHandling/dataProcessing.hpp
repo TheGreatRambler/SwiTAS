@@ -246,7 +246,11 @@ public:
 	void createSavestateHere();
 	void runFrame(uint8_t forAutoFrame, uint8_t updateFramebuffer, uint8_t includeFramebuffer);
 
-	const std::shared_ptr<std::vector<std::shared_ptr<ControllerData>>> getInputsList();
+	std::shared_ptr<std::vector<std::shared_ptr<ControllerData>>> getInputsList() const;
+
+	std::shared_ptr<ControllerData> getControllerData(uint8_t player, SavestateBlockNum savestateHookNum, BranchNum branch, FrameNum frame) const{
+		return allPlayers[player]->at(savestateHookNum)->inputs[branch]->at(frame);
+	}
 
 	wxRect getFirstItemRect();
 
