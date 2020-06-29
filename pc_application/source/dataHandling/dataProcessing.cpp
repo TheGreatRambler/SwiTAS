@@ -136,18 +136,9 @@ void DataProcessing::triggerCurrentFrameChanges() {
 	}
 }
 
-void DataProcessing::sendAutoAdvance(uint8_t includeFramebuffer){
-	// clang-format off
-	ADD_TO_QUEUE(SendAutoRun, networkInstance, {
-		data.frameReturn = currentFrame + 1;
-		data.savestateHookNum = currentSavestateHook;
-		data.branchIndex = viewingBranchIndex;
-		data.playerIndex = viewingPlayerIndex;
-		data.includeFramebuffer = includeFramebuffer;
-	})
-	// clang-format on
-
+void DataProcessing::sendAutoAdvance(uint8_t includeFramebuffer) {
 	for(uint8_t playerIndex = 0; playerIndex < allPlayers.size(); playerIndex++) {
+		// Set inputs of all other players correctly but not the current one
 		if(playerIndex != viewingPlayerIndex) {
 			std::shared_ptr<ControllerData> controllerDatas = getControllerData(playerIndex, currentSavestateHook, viewingBranchIndex, currentRunFrame);
 
@@ -581,7 +572,7 @@ void DataProcessing::runFrame(uint8_t forAutoFrame, uint8_t updateFramebuffer, u
 				data.frame              = currentRunFrame;
 				data.savestateHookNum   = currentSavestateHook;
 				data.branchIndex        = viewingBranchIndex;
-				data.playerIndex        = playerIndex;
+				data.playerIndex        = viewingPlayerIndex;
 				data.incrementFrame     = true;
 				data.includeFramebuffer = includeFramebuffer;
 				data.isAutoRun          = false;
@@ -644,8 +635,8 @@ void DataProcessing::addNewSavestateHook(std::string dHash, wxBitmap* screenshot
 void DataProcessing::setSavestateHook(SavestateBlockNum index) {
 	currentSavestateHook = index;
 
-	inputsList = allPlayers[0]->at(index)->inputs;
-	SetItemCount(inputsList[0]->size());
+	inputsList = allPlayers[viewingPlayerIndex]->at(index)->inputs;
+	SetItemCount(inputsList[viewingBranchIndex]->size());
 	setCurrentFrame(0);
 	currentRunFrame   = 0;
 	currentImageFrame = 0;
@@ -694,7 +685,7 @@ void DataProcessing::addNewPlayer() {
 			for(FrameNum i = 0; i < hook->inputs.size(); i++) {
 				newSavestateHook->inputs.push_back(std::make_shared<std::vector<std::shared_ptr<ControllerData>>>());
 				// Each of those branches have the same number of inputs
-				for(FrameNum j = 0; j < hook->inputs[i]->size(); i++) {
+				for(FrameNum j = 0; j < hook->inputs[i]->size(); j++) {
 					// Create empty frames to add
 					newSavestateHook->inputs[i]->push_back(std::make_shared<ControllerData>());
 				}
@@ -716,11 +707,18 @@ void DataProcessing::setPlayer(uint8_t playerIndex) {
 	// Make sure there are savestate hooks
 	if(allPlayers[viewingPlayerIndex]->size() != 0) {
 		FrameNum curFrame = currentFrame;
+		if(viewingBranchIndex >= allPlayers[playerIndex]->at(currentSavestateHook)->inputs.size()) {
+			// Switch to first branch if needed
+			viewingBranchIndex = 0;
+		}
 		setSavestateHook(currentSavestateHook);
 		setCurrentFrame(curFrame);
 	}
 	if(playerInfoCallback) {
 		playerInfoCallback(allPlayers.size(), viewingPlayerIndex, false);
+	}
+	if(branchInfoCallback) {
+		branchInfoCallback(getNumBranches(), viewingBranchIndex, true);
 	}
 }
 
@@ -749,6 +747,7 @@ std::shared_ptr<ControllerData> DataProcessing::getFrame(FrameNum frame) const {
 }
 
 void DataProcessing::addNewBranch() {
+	// Only add to this player
 	inputsList.push_back(std::make_shared<std::vector<std::shared_ptr<ControllerData>>>());
 	uint16_t lastElement = inputsList.size() - 1;
 	// Add number of frames as the first branch has

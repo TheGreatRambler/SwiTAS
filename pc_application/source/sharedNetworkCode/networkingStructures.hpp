@@ -87,7 +87,8 @@ namespace Protocol {
 		uint8_t playerIndex;
 		uint8_t incrementFrame;
 		uint8_t includeFramebuffer;
-	, self.controllerData, self.frame, self.playerIndex, self.incrementFrame, self.branchIndex, self.savestateHookNum, self.includeFramebuffer)
+		uint8_t isAutoRun;
+	, self.controllerData, self.frame, self.playerIndex, self.incrementFrame, self.branchIndex, self.savestateHookNum, self.includeFramebuffer, self.isAutoRun)
 
 	// Recieve all of the game's framebuffer
 	DEFINE_STRUCT(RecieveGameFramebuffer,
@@ -115,14 +116,6 @@ namespace Protocol {
 	DEFINE_STRUCT(SendFlag,
 		SendInfo actFlag;
 	, self.actFlag)
-
-	DEFINE_STRUCT(SendAutoRun,
-		uint32_t frameReturn;
-		uint16_t savestateHookNum;
-		uint16_t branchIndex;
-		uint8_t playerIndex;
-		uint8_t includeFramebuffer;
-	, self.frameReturn, self.savestateHookNum, self.branchIndex, self.playerIndex, self.includeFramebuffer)
 
 	// Needs to have number of controllers set right, TODO
 	DEFINE_STRUCT(SendStartFinalTas,

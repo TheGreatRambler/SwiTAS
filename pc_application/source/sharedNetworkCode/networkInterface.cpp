@@ -198,7 +198,6 @@ void CommunicateWithNetwork::endNetwork() {
 	CLEAN_QUEUE(SendTrackMemoryRegion)
 	CLEAN_QUEUE(SendSetNumControllers)
 	CLEAN_QUEUE(RecieveMemoryRegion)
-	CLEAN_QUEUE(SendAutoRun)
 	CLEAN_QUEUE(SendAddMemoryRegion)
 	CLEAN_QUEUE(SendStartFinalTas)
 

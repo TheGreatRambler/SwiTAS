@@ -212,12 +212,6 @@ void MainLoop::handleNetworkUpdates() {
 	// clang-format on
 
 	// TODO add logic to handle lua scripting
-
-	// This is essentially auto advance but with frame linked framebuffers
-	CHECK_QUEUE(networkInstance, SendAutoRun,
-		{
-
-		})
 }
 
 void MainLoop::sendGameInfo() {

@@ -159,7 +159,6 @@ public:
 	ADD_QUEUE(SendTrackMemoryRegion)
 	ADD_QUEUE(SendSetNumControllers)
 	ADD_QUEUE(RecieveMemoryRegion)
-	ADD_QUEUE(SendAutoRun)
 	ADD_QUEUE(SendAddMemoryRegion)
 	ADD_QUEUE(SendStartFinalTas)
 

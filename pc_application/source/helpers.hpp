@@ -24,6 +24,7 @@
 #include <wx/artprov.h>
 #include <wx/filename.h>
 #include <wx/mstream.h>
+#include <wx/stdpaths.h>
 #include <wx/wx.h>
 
 namespace HELPERS {

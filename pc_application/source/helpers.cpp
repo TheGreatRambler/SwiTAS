@@ -26,7 +26,7 @@ wxFileName HELPERS::getMainSettingsPath() {
 		return relativeToExecutable;
 	} else {
 		// Use the home folder as a backup
-		wxFileName inHomeFolder(wxStandardPaths::GetUserConfigDir());
+		wxFileName inHomeFolder(wxStandardPaths::Get().GetUserConfigDir());
 		inHomeFolder.SetName("switas_settings");
 		inHomeFolder.SetExt("json");
 		return inHomeFolder;

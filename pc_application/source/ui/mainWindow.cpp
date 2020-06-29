@@ -14,7 +14,7 @@ MainWindow::MainWindow()
 	FFMS_Init(0, 0);
 
 	// Get the main settings
-	mainSettings = HELPERS::getSettingsFile(HELPERS::getMainSettingsPath().GetFullPath());
+	mainSettings = HELPERS::getSettingsFile(HELPERS::getMainSettingsPath().GetFullPath().ToStdString());
 
 	wxIcon mainIcon;
 	mainIcon.LoadFile(HELPERS::resolvePath(mainSettings["programIcon"].GetString()), wxBITMAP_TYPE_PNG);
@@ -38,7 +38,6 @@ MainWindow::MainWindow()
 			SEND_QUEUE_DATA(SendLogging)
 			SEND_QUEUE_DATA(SendTrackMemoryRegion)
 			SEND_QUEUE_DATA(SendSetNumControllers)
-			SEND_QUEUE_DATA(SendAutoRun)
 			SEND_QUEUE_DATA(SendAddMemoryRegion)
 			SEND_QUEUE_DATA(SendStartFinalTas)
 		},
