@@ -20,7 +20,6 @@ MainLoop::MainLoop() {
 			RECIEVE_QUEUE_DATA(SendLogging)
 			RECIEVE_QUEUE_DATA(SendTrackMemoryRegion)
 			RECIEVE_QUEUE_DATA(SendSetNumControllers)
-			RECIEVE_QUEUE_DATA(SendAutoRun)
 			RECIEVE_QUEUE_DATA(SendAddMemoryRegion)
 			RECIEVE_QUEUE_DATA(SendStartFinalTas)
 		});
@@ -132,9 +131,13 @@ void MainLoop::mainLoopHandler() {
 
 void MainLoop::handleNetworkUpdates() {
 	CHECK_QUEUE(networkInstance, SendFrameData, {
-		controllers[data.playerIndex]->setFrame(data.controllerData);
 		if(data.incrementFrame) {
 			runSingleFrame(true, data.includeFramebuffer, false, data.frame, data.savestateHookNum, data.branchIndex, data.playerIndex);
+		} else if(data.isAutoRun) {
+			matchFirstControllerToTASController(data.playerIndex);
+			runSingleFrame(true, data.includeFramebuffer, true, data.frame, data.savestateHookNum, data.branchIndex, data.playerIndex);
+		} else {
+			controllers[data.playerIndex]->setFrame(data.controllerData);
 		}
 	})
 
@@ -211,10 +214,10 @@ void MainLoop::handleNetworkUpdates() {
 	// TODO add logic to handle lua scripting
 
 	// This is essentially auto advance but with frame linked framebuffers
-	CHECK_QUEUE(networkInstance, SendAutoRun, {
-		matchFirstControllerToTASController(0);
-		runSingleFrame(true, true, true, data.frameReturn, data.savestateHookNum, data.branchIndex, data.playerIndex);
-	})
+	CHECK_QUEUE(networkInstance, SendAutoRun,
+		{
+
+		})
 }
 
 void MainLoop::sendGameInfo() {

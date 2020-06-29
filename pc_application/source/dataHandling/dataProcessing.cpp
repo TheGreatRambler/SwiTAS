@@ -146,6 +146,33 @@ void DataProcessing::sendAutoAdvance(uint8_t includeFramebuffer) {
 		data.includeFramebuffer = includeFramebuffer;
 	})
 	// clang-format on
+
+	for(uint8_t playerIndex = 0; playerIndex < allPlayers.size(); playerIndex++) {
+		if(playerIndex != viewingPlayerIndex) {
+			std::shared_ptr<ControllerData> controllerDatas = getControllerData(playerIndex, currentSavestateHook, viewingBranchIndex, currentRunFrame);
+
+			ADD_TO_QUEUE(SendFrameData, networkInstance, {
+				data.controllerData     = *controllerDatas;
+				data.frame              = currentRunFrame;
+				data.savestateHookNum   = currentSavestateHook;
+				data.branchIndex        = viewingBranchIndex;
+				data.playerIndex        = playerIndex;
+				data.incrementFrame     = false;
+				data.includeFramebuffer = includeFramebuffer;
+				data.isAutoRun          = false;
+			})
+		}
+	}
+
+	ADD_TO_QUEUE(SendFrameData, networkInstance, {
+		data.frame              = currentFrame + 1;
+		data.savestateHookNum   = currentSavestateHook;
+		data.branchIndex        = viewingBranchIndex;
+		data.playerIndex        = viewingPlayerIndex;
+		data.incrementFrame     = false;
+		data.includeFramebuffer = includeFramebuffer;
+		data.isAutoRun          = true;
+	})
 }
 
 std::string DataProcessing::getExportedCurrentPlayer() {
@@ -538,22 +565,27 @@ void DataProcessing::runFrame(uint8_t forAutoFrame, uint8_t updateFramebuffer, u
 		if(!forAutoFrame) {
 			// Send to switch to run for each player
 			for(uint8_t playerIndex = 0; playerIndex < allPlayers.size(); playerIndex++) {
-				std::shared_ptr<ControllerData> controllerDatas = allPlayers[playerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->at(currentRunFrame);
+				std::shared_ptr<ControllerData> controllerDatas = getControllerData(playerIndex, currentSavestateHook, viewingBranchIndex, currentRunFrame);
 				ADD_TO_QUEUE(SendFrameData, networkInstance, {
-					data.controllerData   = *controllerDatas;
-					data.frame            = currentRunFrame;
-					data.savestateHookNum = currentSavestateHook;
-					data.branchIndex      = viewingBranchIndex;
-					data.playerIndex      = playerIndex;
-					if(playerIndex == allPlayers.size() - 1) {
-						// Last frame, start the frame
-						data.incrementFrame = true;
-					} else {
-						data.incrementFrame = false;
-					}
+					data.controllerData     = *controllerDatas;
+					data.frame              = currentRunFrame;
+					data.savestateHookNum   = currentSavestateHook;
+					data.branchIndex        = viewingBranchIndex;
+					data.playerIndex        = playerIndex;
+					data.incrementFrame     = false;
 					data.includeFramebuffer = includeFramebuffer;
+					data.isAutoRun          = false;
 				})
 			}
+			ADD_TO_QUEUE(SendFrameData, networkInstance, {
+				data.frame              = currentRunFrame;
+				data.savestateHookNum   = currentSavestateHook;
+				data.branchIndex        = viewingBranchIndex;
+				data.playerIndex        = playerIndex;
+				data.incrementFrame     = true;
+				data.includeFramebuffer = includeFramebuffer;
+				data.isAutoRun          = false;
+			})
 		}
 	}
 }
