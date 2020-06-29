@@ -50,7 +50,7 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 
 	// Create keyboard handlers
 	// Each menu item is added here
-	wxAcceleratorEntry entries[10];
+	wxAcceleratorEntry entries[11];
 
 	pasteInsertID         = wxNewId();
 	pastePlaceID          = wxNewId();
@@ -136,7 +136,7 @@ void DataProcessing::triggerCurrentFrameChanges() {
 	}
 }
 
-void DataProcessing::sendAutoAdvance(uint8_t includeFramebuffer) {
+void DataProcessing::sendAutoAdvance(uint8_t includeFramebuffer){
 	// clang-format off
 	ADD_TO_QUEUE(SendAutoRun, networkInstance, {
 		data.frameReturn = currentFrame + 1;
@@ -161,7 +161,7 @@ std::string DataProcessing::getExportedCurrentPlayer() {
 
 	// This blocks for a long time
 	// Always export the main branch, MAY CHANGE
-	return buttonData->framesToText(this, 0, 0, 0, viewingPlayerIndex);
+	return buttonData->framesToText(this, 0, 0, viewingPlayerIndex, 0);
 }
 
 void DataProcessing::importFromFile(wxFileName importTarget) {
@@ -346,7 +346,7 @@ void DataProcessing::onCopy(wxCommandEvent& event) {
 			// There is a selected item
 			if(currentFrame >= firstSelectedItem && currentFrame <= lastSelectedItem) {
 				// Add these items to the clipboard
-				wxTheClipboard->SetData(new wxTextDataObject(buttonData->framesToText(this, firstSelectedItem, lastSelectedItem, viewingBranchIndex, -1)));
+				wxTheClipboard->SetData(new wxTextDataObject(buttonData->framesToText(this, firstSelectedItem, lastSelectedItem, -1, viewingBranchIndex)));
 			} else {
 				// Deselect the others
 				for(FrameNum i = firstSelectedItem; i <= lastSelectedItem; i++) {
@@ -355,7 +355,7 @@ void DataProcessing::onCopy(wxCommandEvent& event) {
 				// Select just the one
 				SetItemState(currentFrame, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 
-				wxTheClipboard->SetData(new wxTextDataObject(buttonData->framesToText(this, currentFrame, currentFrame, viewingBranchIndex, -1)));
+				wxTheClipboard->SetData(new wxTextDataObject(buttonData->framesToText(this, currentFrame, currentFrame, -1, viewingBranchIndex)));
 
 				// See the new selection
 				RefreshItem(currentFrame);
@@ -723,6 +723,8 @@ void DataProcessing::addNewBranch() {
 	for(FrameNum i = 0; i < inputsList[0]->size(); i++) {
 		inputsList[lastElement]->push_back(std::make_shared<ControllerData>());
 	}
+
+	setBranch(inputsList.size() - 1);
 }
 
 void DataProcessing::setBranch(uint16_t branchIndex) {
@@ -1009,6 +1011,7 @@ void DataProcessing::invalidateRunSpecific(FrameNum frame, SavestateBlockNum sav
 		}
 		// Set bit
 		setFramestateInfoSpecific(frame, FrameState::RAN, false, savestateHookNum, branch, player);
+		setFramestateInfoSpecific(frame, FrameState::SAVESTATE, false, savestateHookNum, branch, player);
 		frame++;
 	}
 }
@@ -1028,11 +1031,8 @@ void DataProcessing::addFrame(FrameNum afterFrame) {
 				branch->insert(begin + afterFrame + 1, newControllerData);
 			}
 
-			setFramestateInfoSpecific(afterFrame + 1, FrameState::RAN, false, currentSavestateHook, branchIndex, playerIndex);
-			setFramestateInfoSpecific(afterFrame + 1, FrameState::SAVESTATE, false, currentSavestateHook, branchIndex, playerIndex);
-
 			// Invalidate run for the data immidiently after this frame
-			invalidateRunSpecific(afterFrame + 2, currentSavestateHook, branchIndex, playerIndex);
+			invalidateRunSpecific(afterFrame + 1, currentSavestateHook, branchIndex, playerIndex);
 
 			branchIndex++;
 		}
