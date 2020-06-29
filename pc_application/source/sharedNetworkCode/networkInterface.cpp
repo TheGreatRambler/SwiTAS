@@ -187,6 +187,21 @@ void CommunicateWithNetwork::endNetwork() {
 		delete networkConnection;
 	}
 
+	CLEAN_QUEUE(SendFrameData)
+	CLEAN_QUEUE(RecieveGameFramebuffer)
+	CLEAN_QUEUE(RecieveGameInfo)
+	CLEAN_QUEUE(SendFlag)
+	CLEAN_QUEUE(SendLogging)
+	CLEAN_QUEUE(RecieveLogging)
+	CLEAN_QUEUE(RecieveFlag)
+	CLEAN_QUEUE(RecieveApplicationConnected)
+	CLEAN_QUEUE(SendTrackMemoryRegion)
+	CLEAN_QUEUE(SendSetNumControllers)
+	CLEAN_QUEUE(RecieveMemoryRegion)
+	CLEAN_QUEUE(SendAutoRun)
+	CLEAN_QUEUE(SendAddMemoryRegion)
+	CLEAN_QUEUE(SendStartFinalTas)
+
 #ifdef SERVER_IMP
 	listeningServer.Close();
 #endif

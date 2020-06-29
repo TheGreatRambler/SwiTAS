@@ -32,7 +32,7 @@ public:
 	// Some of this is defined in network code
 
 	// To convert names
-	std::map<std::string, Btn> stringToButton {
+	std::map<std::string, Btn> stringToButton{
 		{ "A", Btn::A },
 		{ "B", Btn::B },
 		{ "X", Btn::X },

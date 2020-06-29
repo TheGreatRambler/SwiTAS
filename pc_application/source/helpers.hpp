@@ -40,6 +40,8 @@ namespace HELPERS {
 	rapidjson::Document getSettingsFile(std::string filename);
 	rapidjson::Document getSettingsFromString(std::string jsonString);
 
+	wxFileName getMainSettingsPath();
+
 	float normalizeRadian(float angle);
 
 	std::string exec(const char* cmd);

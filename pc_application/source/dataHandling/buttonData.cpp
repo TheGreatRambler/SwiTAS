@@ -271,20 +271,27 @@ std::string ButtonData::framesToText(DataProcessing* dataProcessing, FrameNum st
 
 				typedef ControllerNumberValues CNV;
 
+				uint8_t realPlayer;
+				if(playerIndex == -1) {
+					realPlayer = dataProcessing->getCurrentPlayer();
+				} else {
+					realPlayer = playerIndex;
+				}
+
 				// clang-format off
-				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::LEFT_X, j, branch, playerIndex)) + \
-					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::LEFT_Y, j, branch, playerIndex)));
+				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::LEFT_X, j, branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::LEFT_Y, j, branch, realPlayer)));
 
-				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::RIGHT_X, j, branch, playerIndex)) + \
-					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::RIGHT_Y, j,branch, playerIndex)));
+				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::RIGHT_X, j, branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::RIGHT_Y, j,branch, realPlayer)));
 
-				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::ACCEL_X, j, branch, playerIndex)) + \
-					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::ACCEL_Y, j, branch, playerIndex)) + \
-					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::ACCEL_Z, j, branch, playerIndex)));
+				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::ACCEL_X, j, branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::ACCEL_Y, j, branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::ACCEL_Z, j, branch, realPlayer)));
 
-				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::GYRO_1, j,branch, playerIndex)) + \
-					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::GYRO_2, j, branch, playerIndex)) + \
-					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::GYRO_3, j, branch, playerIndex)));
+				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::GYRO_1, j,branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::GYRO_2, j, branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::GYRO_3, j, branch, realPlayer)));
 				// clang-format on
 
 				textVector.push_back(HELPERS::joinString(parts, " "));
