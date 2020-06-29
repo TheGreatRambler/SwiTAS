@@ -19,6 +19,20 @@ std::vector<std::string> HELPERS::splitString(const std::string s, char delim) {
 	return result;
 }
 
+wxFileName HELPERS::getMainSettingsPath() {
+	wxFileName relativeToExecutable("../switas_settings.json");
+	if(relativeToExecutable.FileExists()) {
+		// Prefer relative to the executable
+		return relativeToExecutable;
+	} else {
+		// Use the home folder as a backup
+		wxFileName inHomeFolder(wxStandardPaths::GetUserConfigDir());
+		inHomeFolder.SetName("switas_settings");
+		inHomeFolder.SetExt("json");
+		return inHomeFolder;
+	}
+}
+
 std::string HELPERS::joinString(std::vector<std::string> vec, std::string delimiter) {
 	if(vec.size() != 0) {
 		// https://stackoverflow.com/a/40052831

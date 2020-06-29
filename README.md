@@ -10,7 +10,9 @@ In the case of the first two, there is a very important problem; they emulate a 
 
 In the spirit of TASBot, it is generally considered more prestigious to display the final product via unmodified console hardware. This is the approach taken by all of the above products. Dealing with unmodified hardware, however, imposes many limitations during TAS creation. Introducing... this project!
 
-Having access to the entire system via CFW introduces a lot of freedoms, so this project intends to place this functionality into a standard PC application, much like Bizhawk or other TAS creators. This power allows you to tas with the freedom of an emulator even though this is not an emulator. Yuzu can't TAS yet, to any dissenters out there :)
+Having access to the entire system via CFW introduces a lot of freedoms, so this project intends to place this functionality into a standard PC application, much like Bizhawk or other TAS creators. This power allows you to tas with the freedom of an emulator even though this is not an emulator.
+
+Yuzu support is planned and will be out soon, check back frequently.
 
 This editor is intended to most closely resemble the [FCEUX TAS Editor](http://www.fceux.com/web/help/taseditor/).
 

@@ -199,6 +199,7 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 
 	untether();
 	setPlayerInfo(1, 0, false);
+	setBranchInfo(1, 0, false);
 }
 
 void SideUI::handleUnexpectedControllerSize() {

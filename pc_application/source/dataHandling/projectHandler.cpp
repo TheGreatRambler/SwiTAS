@@ -339,7 +339,7 @@ void ProjectHandler::saveProject() {
 		}
 
 		// Additionally, save the mainSettings and overwrite
-		wxFFileOutputStream settingsFileStream("../mainSettings.json", "w");
+		wxFFileOutputStream settingsFileStream(HELPERS::getMainSettingsPath().GetFullPath(), "w");
 
 		rapidjson::StringBuffer sb;
 		rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);

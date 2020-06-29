@@ -52,6 +52,14 @@
 }
 // clang-format on
 
+// Empties the queue entirely to fix weird segfaults
+// clang-format off
+#define CLEAN_QUEUE(Flag) { \
+	Protocol::Struct_##Flag data; \
+	while (Queue_##Flag.try_dequeue(data)) {}; \
+}
+// clang-format on
+
 #include <atomic>
 #include <condition_variable>
 #include <errno.h>

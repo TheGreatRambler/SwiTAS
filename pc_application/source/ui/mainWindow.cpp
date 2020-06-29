@@ -14,7 +14,7 @@ MainWindow::MainWindow()
 	FFMS_Init(0, 0);
 
 	// Get the main settings
-	mainSettings = HELPERS::getSettingsFile("../mainSettings.json");
+	mainSettings = HELPERS::getSettingsFile(HELPERS::getMainSettingsPath().GetFullPath());
 
 	wxIcon mainIcon;
 	mainIcon.LoadFile(HELPERS::resolvePath(mainSettings["programIcon"].GetString()), wxBITMAP_TYPE_PNG);
