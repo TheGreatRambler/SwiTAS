@@ -20,7 +20,11 @@ std::vector<std::string> HELPERS::splitString(const std::string s, char delim) {
 }
 
 wxFileName HELPERS::getMainSettingsPath() {
-	wxFileName relativeToExecutable("../switas_settings.json");
+	wxFileName relativeToExecutable(wxStandardPaths::Get().GetExecutablePath());
+	// Go one folder back
+	relativeToExecutable.RemoveDir(relativeToExecutable.GetDirCount() - 1);
+	relativeToExecutable.SetName("switas_settings");
+	relativeToExecutable.SetExt("json");
 	if(relativeToExecutable.FileExists()) {
 		// Prefer relative to the executable
 		return relativeToExecutable;

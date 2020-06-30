@@ -1030,18 +1030,20 @@ void DataProcessing::invalidateRun(FrameNum frame) {
 }
 
 void DataProcessing::invalidateRunSpecific(FrameNum frame, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) {
-	auto list = allPlayers[player]->at(savestateHookNum)->inputs[branch];
+	auto& list    = allPlayers[player]->at(savestateHookNum)->inputs[branch];
+	FrameNum size = (FrameNum)list->size();
 	while(true) {
-		if(frame == list->size() || !getFramestateInfo(frame, FrameState::RAN)) {
+		if(frame >= size || !getFramestateInfo(frame, FrameState::RAN)) {
 			// Refresh all these items
 			// I don't care if it's way off the page, I think wxWidgets handles for this
 			Refresh();
 			break;
+		} else {
+			// Set bit
+			setFramestateInfoSpecific(frame, FrameState::RAN, false, savestateHookNum, branch, player);
+			setFramestateInfoSpecific(frame, FrameState::SAVESTATE, false, savestateHookNum, branch, player);
+			frame++;
 		}
-		// Set bit
-		setFramestateInfoSpecific(frame, FrameState::RAN, false, savestateHookNum, branch, player);
-		setFramestateInfoSpecific(frame, FrameState::SAVESTATE, false, savestateHookNum, branch, player);
-		frame++;
 	}
 }
 
