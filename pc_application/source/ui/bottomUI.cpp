@@ -347,10 +347,11 @@ void JoystickCanvas::setYValue(int16_t y) {
 	Refresh();
 }
 
-BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid, DataProcessing* input) {
+BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid, DataProcessing* input, std::shared_ptr<ProjectHandler> projHandler) {
 	// TODO set up joysticks
-	buttonData   = buttons;
-	mainSettings = settings;
+	buttonData     = buttons;
+	mainSettings   = settings;
+	projectHandler = projHandler;
 
 	inputInstance = input;
 
@@ -433,6 +434,35 @@ void BottomUI::refreshDataViews(uint8_t refreshFramebuffer) {
 
 void BottomUI::recieveGameFramebuffer(std::vector<uint8_t> jpegBuffer) {
 	frameViewerCanvas->setPrimaryBitmap(new wxBitmap(HELPERS::getImageFromJPEGData(jpegBuffer)));
+}
+
+void BottomUI::exportImageView() {
+	// https://forums.wxwidgets.org/viewtopic.php?p=32313#32313
+	// Save a screenshot of the frame view if the user wants to do something with it
+
+	wxClientDC dcWindow(frameViewerCanvas);
+
+	wxCoord windowWidth, windowHeight;
+	dcWindow.GetSize(&windowWidth, &windowHeight);
+
+	wxBitmap screenshot(windowWidth, windowHeight, wxBITMAP_SCREEN_DEPTH);
+
+	wxMemoryDC memDC;
+
+	memDC.SelectObject(screenshot);
+	memDC.Blit(0, 0, windowWidth, windowHeight, &dcWindow, 0, 0);
+	memDC.SelectObject(wxNullBitmap);
+
+	wxFileName imageLocation = projectHandler->getProjectStart();
+	imageLocation.AppendDir("exported_images");
+	imageLocation.SetName(wxString::Format("exported_image_%hu", projectHandler->getExportImageIndex()));
+	imageLocation.SetExt("png");
+
+	imageLocation.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+
+	screenshot.SaveFile(imageLocation.GetFullPath(), wxBITMAP_TYPE_PNG);
+
+	projectHandler->incrementExportImageIndex();
 }
 
 void BottomUI::onJoystickSelect(wxCommandEvent& event) {

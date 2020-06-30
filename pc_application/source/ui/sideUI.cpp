@@ -420,6 +420,7 @@ void SideUI::untether() {
 	// wxLogMessage("Untether Switch");
 	frameAdvanceButton->Enable(false);
 	autoFrameStart->Enable(false);
+	autoFrameEnd->Enable(false);
 	inputData->setTethered(false);
 	tethered = false;
 }
@@ -428,6 +429,7 @@ void SideUI::tether() {
 	// wxLogMessage("Tether Switch");
 	frameAdvanceButton->Enable(true);
 	autoFrameStart->Enable(true);
+	autoFrameEnd->Enable(true);
 	inputData->setTethered(true);
 
 	tethered = true;

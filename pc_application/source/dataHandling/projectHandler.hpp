@@ -60,11 +60,13 @@ private:
 	DataProcessing* dataProcessing;
 	wxFrame* parentFrame;
 
-	wxDir projectDir;
+	wxFileName projectDir;
 	SerializeProtocol serializeProtocol;
 
 	std::string projectName;
 	uint8_t projectWasLoaded = true;
+
+	uint16_t imageExportIndex = 0;
 
 	int recentProjectChoice;
 
@@ -101,7 +103,7 @@ public:
 	void newProjectWasCreated();
 
 	wxFileName getProjectStart() {
-		return wxFileName::DirName(projectDir.GetNameWithSep());
+		return wxFileName::DirName(projectDir.GetPathWithSep());
 	}
 
 	std::string getLastEnteredFtpPath() {
@@ -122,10 +124,9 @@ public:
 	}
 
 	void setProjectDir(wxString dirPath) {
-		projectDir.Open(dirPath);
+		projectDir = wxFileName(dirPath, "");
 		// Just in case
-		wxFileName dir(dirPath);
-		dir.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+		projectDir.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
 	}
 
 	void setProjectWasLoaded(bool wasLoaded) {
@@ -142,6 +143,14 @@ public:
 
 	wxMenu* getVideoSubmenu() {
 		return videoComparisonEntriesMenu;
+	}
+
+	uint16_t getExportImageIndex() {
+		return imageExportIndex;
+	}
+
+	void incrementExportImageIndex() {
+		imageExportIndex++;
 	}
 
 	void openUpVideoComparisonViewer(int index);

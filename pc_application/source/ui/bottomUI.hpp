@@ -18,6 +18,7 @@
 
 #include "../dataHandling/buttonData.hpp"
 #include "../dataHandling/dataProcessing.hpp"
+#include "../dataHandling/projectHandler.hpp"
 #include "../helpers.hpp"
 #include "drawingCanvas.hpp"
 
@@ -110,6 +111,7 @@ public:
 class BottomUI {
 private:
 	rapidjson::Document* mainSettings;
+	std::shared_ptr<ProjectHandler> projectHandler;
 
 	// Input instance to get inputs and such
 	DataProcessing* inputInstance;
@@ -169,8 +171,10 @@ private:
 
 	wxString getJoyHexString(wxJoystick* joy);
 
+	void exportImageView();
+
 public:
-	BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid, DataProcessing* input);
+	BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid, DataProcessing* input, std::shared_ptr<ProjectHandler> projHandler);
 
 	wxMenu* getJoystickMenu() {
 		return joystickSubMenu;

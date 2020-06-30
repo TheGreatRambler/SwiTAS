@@ -61,6 +61,7 @@ private:
 	wxWindowID selectIPID;
 	wxWindowID exportAsText;
 	wxWindowID importAsText;
+	wxWindowID saveProject;
 	wxWindowID setNameID;
 	wxWindowID toggleLoggingID;
 	wxWindowID toggleDebugMenuID;

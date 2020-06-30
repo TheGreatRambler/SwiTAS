@@ -42,7 +42,7 @@ void ProjectHandler::loadProject() {
 			std::shared_ptr<SavestateHook> savestateHook = std::make_shared<SavestateHook>();
 
 			for(auto const& branch : branchesArray) {
-				wxString path = projectDir.GetNameWithSep() + wxString::FromUTF8(savestate["filename"].GetString());
+				wxString path = projectDir.GetPathWithSep() + wxString::FromUTF8(branch["filename"].GetString());
 				if(wxFileName(path).FileExists()) {
 					// Load up the inputs
 					wxFFileInputStream inputsFileStream(path, "rb");
@@ -78,10 +78,10 @@ void ProjectHandler::loadProject() {
 				}
 			}
 
-			std::ifstream dhashFile(projectDir.GetNameWithSep().ToStdString() + savestate["dHash"].GetString());
+			std::ifstream dhashFile(projectDir.GetPathWithSep().ToStdString() + std::string(savestate["dHash"].GetString()));
 			savestateHook->dHash = std::string((std::istreambuf_iterator<char>(dhashFile)), (std::istreambuf_iterator<char>()));
 
-			wxImage screenshotImage(projectDir.GetNameWithSep() + wxString::FromUTF8(savestate["screenshot"].GetString()), wxBITMAP_TYPE_JPEG);
+			wxImage screenshotImage(projectDir.GetPathWithSep() + wxString::FromUTF8(savestate["screenshot"].GetString()), wxBITMAP_TYPE_JPEG);
 			savestateHook->screenshot = new wxBitmap(screenshotImage);
 
 			(*savestateHookBlocks)[savestateHookIndex] = savestateHook;
@@ -98,6 +98,8 @@ void ProjectHandler::loadProject() {
 	dataProcessing->setAllPlayers(players);
 	dataProcessing->sendPlayerNum();
 	dataProcessing->scrollToSpecific(jsonSettings["currentPlayer"].GetUint(), jsonSettings["currentSavestateBlock"].GetUint(), jsonSettings["currentBranch"].GetUint(), jsonSettings["currentFrame"].GetUint64());
+
+	imageExportIndex = jsonSettings["currentImageExportIndex"].GetUint();
 
 	lastEnteredFtpPath = std::string(jsonSettings["defaultFtpPathForExport"].GetString());
 
@@ -176,10 +178,10 @@ void ProjectHandler::saveProject() {
 					inputsFilename.MakeRelativeTo(getProjectStart().GetFullPath());
 
 					rapidjson::Value inputs;
-					wxString inputsPath = inputsFilename.GetFullPath();
+					wxString inputsPath = inputsFilename.GetFullPath(wxPATH_UNIX);
 					inputs.SetString(inputsPath.c_str(), inputsPath.size(), settingsJSON.GetAllocator());
 
-					branchJSON.AddMember("filename", branchJSON, settingsJSON.GetAllocator());
+					branchJSON.AddMember("filename", inputs, settingsJSON.GetAllocator());
 
 					branchesJSON.PushBack(branchJSON, settingsJSON.GetAllocator());
 
@@ -208,11 +210,11 @@ void ProjectHandler::saveProject() {
 				dhashFilename.MakeRelativeTo(getProjectStart().GetFullPath());
 
 				rapidjson::Value dHash;
-				wxString dhashPath = dhashFilename.GetFullPath();
+				wxString dhashPath = dhashFilename.GetFullPath(wxPATH_UNIX);
 				dHash.SetString(dhashPath.c_str(), dhashPath.size(), settingsJSON.GetAllocator());
 
 				rapidjson::Value screenshot;
-				wxString screenshotPath = screenshotFileName.GetFullPath();
+				wxString screenshotPath = screenshotFileName.GetFullPath(wxPATH_UNIX);
 				screenshot.SetString(screenshotPath.c_str(), screenshotPath.size(), settingsJSON.GetAllocator());
 
 				savestateHookJSON.AddMember("dHash", dHash, settingsJSON.GetAllocator());
@@ -241,6 +243,9 @@ void ProjectHandler::saveProject() {
 		rapidjson::Value lastSavestateHookIndex;
 		lastSavestateHookIndex.SetUint(dataProcessing->getCurrentSavestateHook());
 
+		rapidjson::Value lastExportImageIndex;
+		lastExportImageIndex.SetUint(imageExportIndex);
+
 		rapidjson::Value lastBranch;
 		lastBranch.SetUint64(dataProcessing->getCurrentBranch());
 
@@ -251,6 +256,7 @@ void ProjectHandler::saveProject() {
 		settingsJSON.AddMember("currentSavestateBlock", lastSavestateHookIndex, settingsJSON.GetAllocator());
 		settingsJSON.AddMember("currentBranch", lastBranch, settingsJSON.GetAllocator());
 		settingsJSON.AddMember("currentFrame", lastFrame, settingsJSON.GetAllocator());
+		settingsJSON.AddMember("currentImageExportIndex", lastExportImageIndex, settingsJSON.GetAllocator());
 
 		rapidjson::Value defaultFtpPathForExport;
 		defaultFtpPathForExport.SetString(lastEnteredFtpPath.c_str(), lastEnteredFtpPath.size(), settingsJSON.GetAllocator());
@@ -322,7 +328,7 @@ void ProjectHandler::saveProject() {
 			name.SetString(projectName.c_str(), strlen(projectName.c_str()), mainSettings->GetAllocator());
 
 			rapidjson::Value directory;
-			wxString dirString = projectDir.GetNameWithSep();
+			wxString dirString = projectDir.GetPathWithSep();
 			directory.SetString(dirString.mb_str(), dirString.length(), mainSettings->GetAllocator());
 
 			newRecentProject.AddMember("projectDirectory", directory, mainSettings->GetAllocator());
@@ -330,9 +336,10 @@ void ProjectHandler::saveProject() {
 
 			// I think it's a reference, not sure
 			recentProjectsArray.PushBack(newRecentProject, mainSettings->GetAllocator());
+			recentProjectChoice = recentProjectsArray.Size() - 1;
 		} else {
 			// Modify existing values
-			wxString dirString = projectDir.GetNameWithSep();
+			wxString dirString = projectDir.GetPathWithSep();
 			recentProjectsArray[recentProjectChoice]["projectDirectory"].SetString(dirString.c_str(), dirString.length(), mainSettings->GetAllocator());
 
 			recentProjectsArray[recentProjectChoice]["projectName"].SetString(projectName.c_str(), projectName.size(), mainSettings->GetAllocator());

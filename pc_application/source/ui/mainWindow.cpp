@@ -74,8 +74,8 @@ MainWindow::MainWindow()
 	// No fit for now
 	SetSizer(mainSizer);
 	mainSizer->SetSizeHints(this);
-	Layout();
-	Center(wxBOTH);
+
+	Maximize(true);
 
 	// Override the keypress handler
 	// add_events(Gdk::KEY_PRESS_MASK);
@@ -230,11 +230,13 @@ void MainWindow::addMenuBar() {
 	selectIPID        = NewControlId();
 	exportAsText      = NewControlId();
 	importAsText      = NewControlId();
+	saveProject       = NewControlId();
 	setNameID         = NewControlId();
 	toggleLoggingID   = NewControlId();
 	toggleDebugMenuID = NewControlId();
 	openGameCorruptor = NewControlId();
 
+	fileMenu->Append(saveProject, "Save Project\tCtrl+S");
 	fileMenu->Append(exportAsText, "Export To Text Format\tCtrl+Alt+E");
 	fileMenu->Append(importAsText, "Import From Text Format\tCtrl+Alt+I");
 	fileMenu->Append(setNameID, "Set Name\tCtrl+Alt+N");
@@ -278,6 +280,8 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 		// No switch statements for me
 		if(id == selectIPID) {
 			askForIP();
+		} else if(id == saveProject) {
+			projectHandler->saveProject();
 		} else if(id == setNameID) {
 			// Name needs to be selected
 			wxString projectName = wxGetTextFromUser("Please set the new name of the project", "Set name", projectHandler->getProjectName());
