@@ -108,6 +108,8 @@ void MainWindow::onStart() {
 
 	// Ask for internet connection to get started
 	askForIP();
+	// Then, create the savestate
+	sideUI->createSavestateHook();
 }
 
 // clang-format off

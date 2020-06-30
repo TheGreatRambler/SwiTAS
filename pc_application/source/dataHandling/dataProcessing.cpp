@@ -194,7 +194,7 @@ void DataProcessing::importFromFile(wxFileName importTarget) {
 			Freeze();
 			FrameNum lastFrame = buttonData->textToFrames(this, fileContents.ToStdString(), 0, false, false);
 			// Remove all frames after the data
-			removeFrames(lastFrame + 1, inputsList[viewingBranchIndex]->size() - 1);
+			removeFrames(lastFrame + 1, allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->size() - 1);
 			Thaw();
 			setCurrentFrame(0);
 			Refresh();
@@ -473,7 +473,7 @@ void DataProcessing::onMergeIntoMainBranch(wxCommandEvent& event) {
 		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
 		for(FrameNum i = firstSelectedItem; i <= lastSelectedItem; i++) {
 			// Transfer directly
-			buttonData->transferControllerData(*(inputsList[viewingBranchIndex]->at(i)), inputsList[0]->at(i), false);
+			buttonData->transferControllerData(*(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->at(i)), allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[0]->at(i), false);
 		}
 	}
 	// It's up to the user to remove the frames in the other branch if they want
@@ -484,7 +484,7 @@ void DataProcessing::setCurrentFrame(FrameNum frameNum) {
 	if(frameNum < getFramesSize()) {
 		// Set the current frame to this frame
 		// Shared pointer so this can be done
-		currentData = inputsList[viewingBranchIndex]->at(frameNum);
+		currentData = allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->at(frameNum);
 		// Set the current frame to this number
 		// Focus to this specific row now
 		// This essentially scrolls to it
@@ -522,14 +522,14 @@ void DataProcessing::createSavestateHere() {
 }
 
 void DataProcessing::runFrame(uint8_t forAutoFrame, uint8_t updateFramebuffer, uint8_t includeFramebuffer) {
-	if(currentRunFrame < inputsList[viewingBranchIndex]->size() - 1) {
+	if(currentRunFrame < allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->size() - 1) {
 		// Technically, should handle for entering next savetstate hook block, but TODO
-		std::shared_ptr<ControllerData> controllerData = inputsList[viewingBranchIndex]->at(currentRunFrame);
+		std::shared_ptr<ControllerData> controllerData = allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->at(currentRunFrame);
 
 		setFramestateInfo(currentRunFrame, FrameState::RAN, true);
 
 		// If possible, make current frame this frame
-		if(currentRunFrame < inputsList[viewingBranchIndex]->size()) {
+		if(currentRunFrame < allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->size()) {
 			// Set to this frame
 			setCurrentFrame(currentRunFrame + 1);
 		}
@@ -590,7 +590,7 @@ bool DataProcessing::handleKeyboardInput(wxChar key) {
 }
 
 std::shared_ptr<std::vector<std::shared_ptr<ControllerData>>> DataProcessing::getInputsList() const {
-	return inputsList[viewingBranchIndex];
+	return allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex];
 }
 
 wxRect DataProcessing::getFirstItemRect() {
@@ -635,8 +635,8 @@ void DataProcessing::addNewSavestateHook(std::string dHash, wxBitmap* screenshot
 void DataProcessing::setSavestateHook(SavestateBlockNum index) {
 	currentSavestateHook = index;
 
-	inputsList = allPlayers[viewingPlayerIndex]->at(index)->inputs;
-	SetItemCount(inputsList[viewingBranchIndex]->size());
+	allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs = allPlayers[viewingPlayerIndex]->at(index)->inputs;
+	SetItemCount(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->size());
 	setCurrentFrame(0);
 	currentRunFrame   = 0;
 	currentImageFrame = 0;
@@ -707,10 +707,6 @@ void DataProcessing::setPlayer(uint8_t playerIndex) {
 	// Make sure there are savestate hooks
 	if(allPlayers[viewingPlayerIndex]->size() != 0) {
 		FrameNum curFrame = currentFrame;
-		if(viewingBranchIndex >= allPlayers[playerIndex]->at(currentSavestateHook)->inputs.size()) {
-			// Switch to first branch if needed
-			viewingBranchIndex = 0;
-		}
 		setSavestateHook(currentSavestateHook);
 		setCurrentFrame(curFrame);
 	}
@@ -743,19 +739,21 @@ void DataProcessing::sendPlayerNum() {
 }
 
 std::shared_ptr<ControllerData> DataProcessing::getFrame(FrameNum frame) const {
-	return inputsList[viewingBranchIndex]->at(frame);
+	return allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->at(frame);
 }
 
 void DataProcessing::addNewBranch() {
 	// Only add to this player
-	inputsList.push_back(std::make_shared<std::vector<std::shared_ptr<ControllerData>>>());
-	uint16_t lastElement = inputsList.size() - 1;
-	// Add number of frames as the first branch has
-	for(FrameNum i = 0; i < inputsList[0]->size(); i++) {
-		inputsList[lastElement]->push_back(std::make_shared<ControllerData>());
+	for(auto& player : allPlayers) {
+		auto& list = player->at(currentSavestateHook)->inputs;
+		list.push_back(std::make_shared<std::vector<std::shared_ptr<ControllerData>>>());
+		uint16_t lastElement = list.size() - 1;
+		// Add number of frames as the first branch has
+		for(FrameNum j = 0; j < list[0]->size(); j++) {
+			list[lastElement]->push_back(std::make_shared<ControllerData>());
+		}
 	}
-
-	setBranch(inputsList.size() - 1);
+	setBranch(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs.size() - 1);
 }
 
 void DataProcessing::setBranch(uint16_t branchIndex) {
@@ -768,9 +766,9 @@ void DataProcessing::setBranch(uint16_t branchIndex) {
 }
 
 void DataProcessing::removeBranch(uint8_t branchIndex) {
-	if(inputsList.size() > 1) {
-		inputsList.erase(inputsList.begin() + branchIndex);
-		setBranch(inputsList.size() - 1);
+	if(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs.size() > 1) {
+		allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs.erase(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs.begin() + branchIndex);
+		setBranch(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs.size() - 1);
 	}
 }
 
@@ -807,14 +805,14 @@ void DataProcessing::triggerNumberValues(ControllerNumberValues joystickId, int1
 		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
 		for(FrameNum i = firstSelectedItem; i <= lastSelectedItem; i++) {
 			setNumberValues(i, joystickId, value);
-			// No refresh for now, as the joystick is not visible in the inputsList
+			// No refresh for now, as the joystick is not visible in the allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs
 		}
 	}
 }
 
 // New FANCY methods
 void DataProcessing::modifyButton(FrameNum frame, Btn button, uint8_t isPressed) {
-	SET_BIT(inputsList[viewingBranchIndex]->at(frame)->buttons, isPressed, button);
+	SET_BIT(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->at(frame)->buttons, isPressed, button);
 
 	invalidateRun(frame);
 
@@ -1052,6 +1050,7 @@ void DataProcessing::addFrame(FrameNum afterFrame) {
 	uint8_t playerIndex = 0;
 	for(auto& player : allPlayers) {
 		BranchNum branchIndex = 0;
+
 		for(auto& branch : player->at(currentSavestateHook)->inputs) {
 			std::shared_ptr<ControllerData> newControllerData = std::make_shared<ControllerData>();
 

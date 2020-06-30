@@ -41,7 +41,7 @@ class DataProcessing : public wxListCtrl {
 	// clang-format on
 private:
 	// Vector storing inputs for current savestate hook
-	SavestateHookBlock inputsList;
+	// SavestateHookBlock inputsList;
 	// Current input
 	FrameData currentData;
 	// Button data instance (never changes)
@@ -278,7 +278,7 @@ public:
 	void removeBranch(uint8_t branchIndex);
 	void removeThisBranch();
 	uint16_t getNumBranches() {
-		return inputsList.size();
+		return allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs.size();
 	}
 
 	std::shared_ptr<ControllerData> getFrame(FrameNum frame) const;
