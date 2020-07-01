@@ -250,6 +250,7 @@ public:
 	void createSavestateHere();
 	void runFrame(uint8_t forAutoFrame, uint8_t updateFramebuffer, uint8_t includeFramebuffer);
 
+	// TODO cache this
 	std::shared_ptr<std::vector<std::shared_ptr<ControllerData>>> getInputsList() const;
 
 	std::shared_ptr<ControllerData> getControllerData(uint8_t player, SavestateBlockNum savestateHookNum, BranchNum branch, FrameNum frame) const {
@@ -309,6 +310,7 @@ public:
 	void setFramestateInfo(FrameNum frame, FrameState id, uint8_t state);
 	void setFramestateInfoSpecific(FrameNum frame, FrameState id, uint8_t state, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player);
 	uint8_t getFramestateInfo(FrameNum frame, FrameState id) const;
+	uint8_t getFramestateInfoSpecific(FrameNum frame, FrameState id, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
 	// Without the id, just return the whole hog
 	uint8_t getFramestateInfo(FrameNum frame) const;
 

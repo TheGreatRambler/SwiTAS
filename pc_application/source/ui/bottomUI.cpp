@@ -8,7 +8,7 @@ ButtonGrid::ButtonGrid(wxFrame* parent, wxSize requiredSize, std::shared_ptr<But
 	totalCombinedImageSize = requiredSize;
 	inputInstance          = inputs;
 
-	setBackgroundColor(*wxWHITE);
+	setBackgroundColor(HELPERS::getDefaultWindowBackground());
 
 	// Handle grid clicking
 	Bind(wxEVT_LEFT_DOWN, &ButtonGrid::onGridClick, this);
@@ -113,6 +113,8 @@ JoystickCanvas::JoystickCanvas(rapidjson::Document* settings, wxFrame* parent, D
 	inputInstance  = inputData;
 	mainSettings   = settings;
 
+	setBackgroundColor(HELPERS::getDefaultWindowBackground());
+
 	// Create widgets
 	xInput                     = new wxSpinCtrl(parent, wxID_ANY, "x", wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
 	yInput                     = new wxSpinCtrl(parent, wxID_ANY, "y", wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
@@ -159,7 +161,7 @@ void JoystickCanvas::draw(wxDC& dc) {
 	wxPoint approximateMiddle((float)width / 2, (float)height / 2);
 
 	dc.SetPen(*wxBLACK_PEN);
-	dc.SetBrush(*wxLIGHT_GREY_BRUSH);
+	dc.SetBrush(*wxWHITE_BRUSH);
 
 	dc.DrawCircle(approximateMiddle, approximateMiddle.x);
 
@@ -362,10 +364,8 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 	mainSizer          = new wxBoxSizer(wxVERTICAL);
 	horizontalBoxSizer = new wxBoxSizer(wxHORIZONTAL);
 
-	leftJoystickDrawer = new JoystickCanvas(settings, parentFrame, inputInstance, true);
-	leftJoystickDrawer->setBackgroundColor(*wxWHITE);
+	leftJoystickDrawer  = new JoystickCanvas(settings, parentFrame, inputInstance, true);
 	rightJoystickDrawer = new JoystickCanvas(settings, parentFrame, inputInstance, false);
-	rightJoystickDrawer->setBackgroundColor(*wxWHITE);
 
 	leftJoystickDrawer->SetToolTip("Edit left joystick value");
 	rightJoystickDrawer->SetToolTip("Edit right joystick value");

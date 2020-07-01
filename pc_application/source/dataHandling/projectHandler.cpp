@@ -11,7 +11,7 @@ ProjectHandler::ProjectHandler(wxFrame* parent, DataProcessing* dataProcessingIn
 	lastEnteredFtpPath = "";
 
 	// Get recent settings
-	recentSettings = 
+	recentSettings = HELPERS::getSettingsFile(HELPERS::getMainSettingsPath("switas_recent").GetFullPath().ToStdString());
 
 	dataProcessing->setSelectedFrameCallbackVideoViewer(std::bind(&ProjectHandler::updateVideoComparisonViewers, this, std::placeholders::_1));
 }
@@ -338,7 +338,7 @@ void ProjectHandler::saveProject() {
 
 			// I think it's a reference, not sure
 			getRecentProjects().PushBack(newRecentProject, recentSettings.GetAllocator());
-			recentProjectChoice = recentProjectsArray.Size() - 1;
+			recentProjectChoice = getRecentProjects().Size() - 1;
 		} else {
 			// Modify existing values
 			wxString dirString = projectDir.GetPathWithSep();
@@ -377,7 +377,7 @@ void ProjectHandler::newProjectWasCreated() {
 
 void ProjectHandler::openUpVideoComparisonViewer(int index) {
 	wxString projDir              = projectDir.GetName();
-	VideoComparisonViewer* viewer = new VideoComparisonViewer(parentFrame, std::bind(&ProjectHandler::closeVideoComparisonViewer, this, std::placeholders::_1), mainSettings, videoComparisonEntries, projDir);
+	VideoComparisonViewer* viewer = new VideoComparisonViewer(parentFrame, std::bind(&ProjectHandler::closeVideoComparisonViewer, this, std::placeholders::_1), &recentSettings, videoComparisonEntries, projDir);
 	videoComparisonViewers.push_back(viewer);
 	if(index != videoComparisonEntries.size()) {
 		// Old video, load with the preset

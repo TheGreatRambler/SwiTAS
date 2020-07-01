@@ -263,7 +263,8 @@ void DataProcessing::setItemAttributes() {
 	// Default is nothing
 	SET_BIT(state, false, FrameState::RAN);
 	itemAttribute = new wxItemAttr();
-	itemAttribute->SetBackgroundColour(wxColor((*mainSettings)["ui"]["frameViewerColors"]["notRan"].GetString()));
+	// itemAttribute->SetBackgroundColour(wxColor((*mainSettings)["ui"]["frameViewerColors"]["notRan"].GetString()));
+	itemAttribute->SetBackgroundColour(GetBackgroundColour());
 	itemAttributes[state] = itemAttribute;
 
 	SET_BIT(state, true, FrameState::RAN);
@@ -1001,6 +1002,10 @@ uint8_t DataProcessing::getFramestateInfo(FrameNum frame, FrameState id) const {
 	return GET_BIT(getInputsList()->at(frame)->frameState, id);
 }
 
+uint8_t DataProcessing::getFramestateInfoSpecific(FrameNum frame, FrameState id, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
+	return GET_BIT(getControllerData(player, savestateHookNum, branch, frame)->frameState, id);
+}
+
 // Without the id, just return the whole hog
 uint8_t DataProcessing::getFramestateInfo(FrameNum frame) const {
 	return getInputsList()->at(frame)->frameState;
@@ -1027,10 +1032,10 @@ void DataProcessing::invalidateRun(FrameNum frame) {
 }
 
 void DataProcessing::invalidateRunSpecific(FrameNum frame, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) {
-	auto& list    = allPlayers[player]->at(savestateHookNum)->inputs[branch];
-	FrameNum size = (FrameNum)list->size();
+	auto& list       = allPlayers[player]->at(savestateHookNum)->inputs[branch];
+	std::size_t size = list->size();
 	while(true) {
-		if(frame >= size || !getFramestateInfo(frame, FrameState::RAN)) {
+		if(frame == size || !getFramestateInfoSpecific(frame, FrameState::RAN, savestateHookNum, branch, player)) {
 			// Refresh all these items
 			// I don't care if it's way off the page, I think wxWidgets handles for this
 			Refresh();

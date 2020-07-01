@@ -4,9 +4,9 @@ VideoComparisonViewer::VideoComparisonViewer(wxFrame* parent, std::function<void
 	: wxFrame(parent, wxID_ANY, "Video Comparison Viewer", wxDefaultPosition, wxSize(600, 400), wxDEFAULT_FRAME_STYLE | wxFRAME_FLOAT_ON_PARENT)
 	, videoEntries(entries) {
 	// https://www.youtube.com/watch?v=su61pXgmJcw
-	mainSettings  = settings;
-	projectDir    = projectDirectory;
-	closeCallback = callback;
+	recentSettings = settings;
+	projectDir     = projectDirectory;
+	closeCallback  = callback;
 
 	ffms2Errinfo.Buffer     = ffms2Errmsg;
 	ffms2Errinfo.BufferSize = sizeof(ffms2Errmsg);
@@ -210,7 +210,7 @@ void VideoComparisonViewer::onFormatSelection(wxCommandEvent& event) {
 		std::string selectedFormat = formatsArray[selectedFormatIndex];
 		std::string formatMetadata = formatsMetadataArray[selectedFormatIndex];
 
-		rapidjson::GenericArray<false, rapidjson::Value> recentProjectsArray = (*mainSettings)["recentVideos"].GetArray();
+		rapidjson::GenericArray<false, rapidjson::Value> recentProjectsArray = (*recentSettings)["recentVideos"].GetArray();
 
 		recentVideoIndex = -1;
 		for(std::size_t i = 0; i < videoEntries.size(); i++) {

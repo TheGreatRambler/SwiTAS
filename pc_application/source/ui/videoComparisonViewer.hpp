@@ -51,7 +51,7 @@ private:
 		DOWNLOAD_VIDEO,
 	};
 
-	std::unordered_map<int, int> widthFromHeight{
+	std::unordered_map<int, int> widthFromHeight {
 		// https://www.quora.com/What-are-these-240p-360p-480p-720p-1080p-units-for-videos-Whats-the-basic-idea-behind-it
 		{ 240, 352 },
 		{ 360, 480 },
@@ -61,7 +61,7 @@ private:
 		{ 2160, 3860 },
 	};
 
-	rapidjson::Document* mainSettings;
+	rapidjson::Document* recentSettings;
 
 	std::vector<std::shared_ptr<VideoEntry>>& videoEntries;
 

@@ -37,8 +37,8 @@ wxFileName HELPERS::getMainSettingsPath(std::string name) {
 	}
 }
 
-wxBrush HELPERS::getDefaultWindowBackground() {
-	return wxBrush(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
+wxColor HELPERS::getDefaultWindowBackground() {
+	return wxSystemSettings::GetColour(wxSYS_COLOUR_APPWORKSPACE);
 }
 
 std::string HELPERS::joinString(std::vector<std::string> vec, std::string delimiter) {

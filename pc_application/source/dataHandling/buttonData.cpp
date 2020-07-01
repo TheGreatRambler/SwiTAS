@@ -47,13 +47,13 @@ void ButtonData::setupButtonMapping(rapidjson::Document* mainSettings) {
 
 		int listWidth  = (*mainSettings)["inputsList"]["imageWidth"].GetInt();
 		int listHeight = (*mainSettings)["inputsList"]["imageHeight"].GetInt();
-		// int gridWidth  = (*mainSettings)["buttonGrid"]["imageWidth"].GetInt();
-		// int gridHeight = (*mainSettings)["buttonGrid"]["imageHeight"].GetInt();
+		int gridWidth  = (*mainSettings)["buttonGrid"]["imageWidth"].GetInt();
+		int gridHeight = (*mainSettings)["buttonGrid"]["imageHeight"].GetInt();
 
-		thisButtonInfo->resizedListOnBitmap  = new wxBitmap(thisButtonInfo->onIcon->Rescale(listWidth, listHeight));
-		thisButtonInfo->resizedListOffBitmap = new wxBitmap(thisButtonInfo->offIcon->Rescale(listWidth, listHeight));
-		thisButtonInfo->resizedGridOnBitmap  = new wxBitmap(*thisButtonInfo->onIcon);
-		thisButtonInfo->resizedGridOffBitmap = new wxBitmap(*thisButtonInfo->offIcon);
+		thisButtonInfo->resizedGridOnBitmap  = new wxBitmap(thisButtonInfo->onIcon->Copy().Rescale(gridWidth, gridHeight));
+		thisButtonInfo->resizedGridOffBitmap = new wxBitmap(thisButtonInfo->offIcon->Copy().Rescale(gridWidth, gridHeight));
+		thisButtonInfo->resizedListOnBitmap  = new wxBitmap(thisButtonInfo->onIcon->Copy().Rescale(listWidth, listHeight));
+		thisButtonInfo->resizedListOffBitmap = new wxBitmap(thisButtonInfo->offIcon->Copy().Rescale(listWidth, listHeight));
 
 		maskifyBitmap(thisButtonInfo->resizedListOnBitmap, maskColor);
 		maskifyBitmap(thisButtonInfo->resizedListOffBitmap, maskColor);
