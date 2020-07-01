@@ -207,8 +207,8 @@
 		"imageHeight": 30
 	},
 	"buttonGrid": {
-		"imageWidth": 65,
-		"imageHeight": 65
+		"imageWidth": 100,
+		"imageHeight": 100
 	},
 	"joystickMappings": {
 		"0x45E,0x28E": "A:b2,B:b1,X:b4,Y:b3,L:b5,R:b6,PLUS:b8,MINUS:b7,LS:b9,RS:b10,DUP:h0.1,DDOWN:h0.4,DLEFT:h0.8,DRIGHT:h0.2,LSX:a0+,LSY:a1-,RSX:a4+,RSY:a3-,ZL:a2-,ZR:a2-"
@@ -247,7 +247,5 @@
 			"projectDir": "rgb(112, 89, 12)",
 			"newProject": "rgb(20, 110, 66)"
 		}
-	},
-	"recentProjects": [],
-	"recentVideos": []
+	}
 }

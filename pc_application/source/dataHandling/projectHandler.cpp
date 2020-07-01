@@ -10,6 +10,9 @@ ProjectHandler::ProjectHandler(wxFrame* parent, DataProcessing* dataProcessingIn
 	// Initialize it as empty
 	lastEnteredFtpPath = "";
 
+	// Get recent settings
+	recentSettings = 
+
 	dataProcessing->setSelectedFrameCallbackVideoViewer(std::bind(&ProjectHandler::updateVideoComparisonViewers, this, std::placeholders::_1));
 }
 
@@ -318,43 +321,52 @@ void ProjectHandler::saveProject() {
 		normalSettings.WriteAll(settingsSb.GetString(), settingsSb.GetLength());
 		normalSettings.Close();
 
-		rapidjson::GenericArray<false, rapidjson::Value> recentProjectsArray = (*mainSettings)["recentProjects"].GetArray();
 		// Add to recent projects list if not yet there, otherwise modify
 		if(recentProjectChoice == -1) {
 			// Add new
 			rapidjson::Value newRecentProject(rapidjson::kObjectType);
 
 			rapidjson::Value name;
-			name.SetString(projectName.c_str(), strlen(projectName.c_str()), mainSettings->GetAllocator());
+			name.SetString(projectName.c_str(), strlen(projectName.c_str()), recentSettings.GetAllocator());
 
 			rapidjson::Value directory;
 			wxString dirString = projectDir.GetPathWithSep();
-			directory.SetString(dirString.mb_str(), dirString.length(), mainSettings->GetAllocator());
+			directory.SetString(dirString.mb_str(), dirString.length(), recentSettings.GetAllocator());
 
-			newRecentProject.AddMember("projectDirectory", directory, mainSettings->GetAllocator());
-			newRecentProject.AddMember("projectName", name, mainSettings->GetAllocator());
+			newRecentProject.AddMember("projectDirectory", directory, recentSettings.GetAllocator());
+			newRecentProject.AddMember("projectName", name, recentSettings.GetAllocator());
 
 			// I think it's a reference, not sure
-			recentProjectsArray.PushBack(newRecentProject, mainSettings->GetAllocator());
+			getRecentProjects().PushBack(newRecentProject, recentSettings.GetAllocator());
 			recentProjectChoice = recentProjectsArray.Size() - 1;
 		} else {
 			// Modify existing values
 			wxString dirString = projectDir.GetPathWithSep();
-			recentProjectsArray[recentProjectChoice]["projectDirectory"].SetString(dirString.c_str(), dirString.length(), mainSettings->GetAllocator());
+			getRecentProjects()[recentProjectChoice]["projectDirectory"].SetString(dirString.c_str(), dirString.length(), recentSettings.GetAllocator());
 
-			recentProjectsArray[recentProjectChoice]["projectName"].SetString(projectName.c_str(), projectName.size(), mainSettings->GetAllocator());
+			getRecentProjects()[recentProjectChoice]["projectName"].SetString(projectName.c_str(), projectName.size(), recentSettings.GetAllocator());
 		}
 
 		// Additionally, save the mainSettings and overwrite
-		wxFFileOutputStream settingsFileStream(HELPERS::getMainSettingsPath().GetFullPath(), "w");
+		// wxFFileOutputStream settingsFileStream(HELPERS::getMainSettingsPath("switas_settings").GetFullPath(), "w");
 
-		rapidjson::StringBuffer sb;
-		rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
-		writer.SetIndent('\t', 1);
-		mainSettings->Accept(writer);
+		// rapidjson::StringBuffer sb;
+		// rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
+		// writer.SetIndent('\t', 1);
+		// mainSettings->Accept(writer);
 
-		settingsFileStream.WriteAll(sb.GetString(), sb.GetLength());
-		settingsFileStream.Close();
+		// settingsFileStream.WriteAll(sb.GetString(), sb.GetLength());
+		// settingsFileStream.Close();
+
+		wxFFileOutputStream recentFileStream(HELPERS::getMainSettingsPath("switas_recent").GetFullPath(), "w");
+
+		rapidjson::StringBuffer sbRecent;
+		rapidjson::PrettyWriter<rapidjson::StringBuffer> writerRecent(sbRecent);
+		writerRecent.SetIndent('\t', 1);
+		recentSettings.Accept(writerRecent);
+
+		recentFileStream.WriteAll(sbRecent.GetString(), sbRecent.GetLength());
+		recentFileStream.Close();
 	}
 }
 

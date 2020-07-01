@@ -19,11 +19,11 @@ std::vector<std::string> HELPERS::splitString(const std::string s, char delim) {
 	return result;
 }
 
-wxFileName HELPERS::getMainSettingsPath() {
+wxFileName HELPERS::getMainSettingsPath(std::string name) {
 	wxFileName relativeToExecutable(wxStandardPaths::Get().GetExecutablePath());
 	// Go one folder back
 	relativeToExecutable.RemoveDir(relativeToExecutable.GetDirCount() - 1);
-	relativeToExecutable.SetName("switas_settings");
+	relativeToExecutable.SetName(wxString::FromUTF8(name));
 	relativeToExecutable.SetExt("json");
 	if(relativeToExecutable.FileExists()) {
 		// Prefer relative to the executable
@@ -31,10 +31,14 @@ wxFileName HELPERS::getMainSettingsPath() {
 	} else {
 		// Use the home folder as a backup
 		wxFileName inHomeFolder(wxStandardPaths::Get().GetUserConfigDir());
-		inHomeFolder.SetName("switas_settings");
+		inHomeFolder.SetName(wxString::FromUTF8(name));
 		inHomeFolder.SetExt("json");
 		return inHomeFolder;
 	}
+}
+
+wxBrush HELPERS::getDefaultWindowBackground() {
+	return wxBrush(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
 }
 
 std::string HELPERS::joinString(std::vector<std::string> vec, std::string delimiter) {
@@ -84,7 +88,7 @@ wxBitmapButton* HELPERS::getSystemBitmapButton(wxWindow* parentFrame, wxArtID id
 }
 
 void HELPERS::addDarkmodeWindows(wxWindow* window) {
-#ifdef _WIN32
+#ifdef __WXMSW__
 	// Enable dark mode, super experimential, apparently
 	// needs to be applied to every window, however
 	SetWindowTheme(window->GetHWND(), L"DarkMode_Explorer", NULL);

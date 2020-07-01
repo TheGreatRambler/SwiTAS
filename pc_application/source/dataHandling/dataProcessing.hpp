@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef _WIN32
+#ifdef __WXMSW__
 #include <Windows.h>
 #include <uxtheme.h>
 #endif
@@ -211,8 +211,7 @@ public:
 
 		framebufferFileName.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
 
-		wxString name = "frame_%lu_screenshot";
-		framebufferFileName.SetName(wxString::Format(name, frame));
+		framebufferFileName.SetName(wxString::Format("frame_%lu_screenshot", frame));
 		framebufferFileName.SetExt("jpg");
 		return framebufferFileName;
 	}

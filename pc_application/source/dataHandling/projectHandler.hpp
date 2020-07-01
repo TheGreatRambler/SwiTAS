@@ -77,6 +77,7 @@ private:
 
 	// Main settings variable
 	rapidjson::Document* mainSettings;
+	rapidjson::Document recentSettings;
 
 	std::vector<std::shared_ptr<VideoEntry>> videoComparisonEntries;
 	wxMenu* videoComparisonEntriesMenu;
@@ -134,7 +135,7 @@ public:
 	}
 
 	void removeRecentProject(int index) {
-		(*mainSettings)["recentProjects"].GetArray().Erase(&(*mainSettings)["recentProjects"].GetArray()[index]);
+		recentSettings["recentProjects"].GetArray().Erase(&recentSettings["recentProjects"].GetArray()[index]);
 	}
 
 	std::string getProjectName() {
@@ -158,7 +159,7 @@ public:
 	void onRecentVideosMenuOpen(wxMenuEvent& event);
 
 	rapidjson::GenericArray<false, rapidjson::Value> getRecentProjects() {
-		return (*mainSettings)["recentProjects"].GetArray();
+		return recentSettings["recentProjects"].GetArray();
 	}
 
 	// Just a random large number, apparently can't be larger than 76

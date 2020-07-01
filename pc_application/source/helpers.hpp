@@ -2,10 +2,11 @@
 
 #define _USE_MATH_DEFINES
 
-#ifdef _WIN32
+#ifdef __WXMSW__
 #include <Windows.h>
 #include <uxtheme.h>
 #endif
+
 #include <array>
 #include <cmath>
 #include <cstdint>
@@ -41,7 +42,9 @@ namespace HELPERS {
 	rapidjson::Document getSettingsFile(std::string filename);
 	rapidjson::Document getSettingsFromString(std::string jsonString);
 
-	wxFileName getMainSettingsPath();
+	wxBrush getDefaultWindowBackground();
+
+	wxFileName getMainSettingsPath(std::string name);
 
 	float normalizeRadian(float angle);
 

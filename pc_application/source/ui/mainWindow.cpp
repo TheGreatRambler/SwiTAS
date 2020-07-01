@@ -14,7 +14,7 @@ MainWindow::MainWindow()
 	FFMS_Init(0, 0);
 
 	// Get the main settings
-	std::string settingsFilePath = HELPERS::getMainSettingsPath().GetFullPath().ToStdString();
+	std::string settingsFilePath = HELPERS::getMainSettingsPath("switas_settings").GetFullPath().ToStdString();
 	mainSettings                 = HELPERS::getSettingsFile(settingsFilePath);
 
 	wxIcon mainIcon;
@@ -58,14 +58,14 @@ MainWindow::MainWindow()
 
 	// UI instances
 	sideUI   = std::make_shared<SideUI>(this, &mainSettings, projectHandler, mainSizer, dataProcessingInstance, networkInstance, std::bind(&MainWindow::startedIncrementFrame, this));
-	bottomUI = std::make_shared<BottomUI>(this, &mainSettings, buttonData, mainSizer, dataProcessingInstance);
+	bottomUI = std::make_shared<BottomUI>(this, &mainSettings, buttonData, mainSizer, dataProcessingInstance, projectHandler);
 
 	autoFrameAdvanceTimer = new wxTimer(this);
 	Bind(wxEVT_TIMER, &MainWindow::onAutoFrameAdvanceTimer, this);
 
 	handleNetworkQueues();
 
-	HELPERS::addDarkmodeWindows(this);
+	// HELPERS::addDarkmodeWindows(this);
 
 	// Add the top menubar and the bottom statusbar
 	addStatusBar();
