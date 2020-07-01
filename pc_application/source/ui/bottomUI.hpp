@@ -149,6 +149,12 @@ private:
 		{ "RSY", 3 },
 	};
 
+	// Custom accelerator IDs
+	int screenshotExportID;
+
+	// Menu popup
+	wxMenu editMenu;
+
 	// All of these kinda map to Btn values, there are just some extra Btn
 	// Values after the normal ones
 	std::unordered_map<int, int> joyButtonToSwitch;
@@ -171,7 +177,9 @@ private:
 
 	wxString getJoyHexString(wxJoystick* joy);
 
-	void exportImageView();
+	void onFrameViewerRightClick(wxContextMenuEvent& event);
+
+	void exportImageView(wxCommandEvent& event);
 
 public:
 	BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid, DataProcessing* input, std::shared_ptr<ProjectHandler> projHandler);

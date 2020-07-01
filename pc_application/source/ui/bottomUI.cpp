@@ -359,8 +359,6 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 
 	parent = parentFrame;
 
-	// Game frame viewer
-
 	mainSizer          = new wxBoxSizer(wxVERTICAL);
 	horizontalBoxSizer = new wxBoxSizer(wxHORIZONTAL);
 
@@ -412,6 +410,19 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 	mainSizer->Add(horizontalBoxSizer, 0, wxEXPAND | wxALL);
 
 	theGrid->Add(mainSizer, 1, wxEXPAND | wxALL);
+
+	wxAcceleratorEntry entries[1];
+
+	screenshotExportID = wxNewId();
+
+	entries[0].Set(wxACCEL_CTRL, (int)'E', screenshotExportID, editMenu.Append(screenshotExportID, wxT("Export Screenshot\tCtrl+E")));
+
+	wxAcceleratorTable accel(11, entries);
+	frameViewerCanvas->SetAcceleratorTable(accel);
+
+	frameViewerCanvas->Bind(wxEVT_CONTEXT_MENU, &BottomUI::onFrameViewerRightClick, this);
+
+	frameViewerCanvas->Bind(wxEVT_MENU, &BottomUI::exportImageView, this, screenshotExportID);
 }
 
 void BottomUI::refreshDataViews(uint8_t refreshFramebuffer) {
@@ -436,7 +447,13 @@ void BottomUI::recieveGameFramebuffer(std::vector<uint8_t> jpegBuffer) {
 	frameViewerCanvas->setPrimaryBitmap(new wxBitmap(HELPERS::getImageFromJPEGData(jpegBuffer)));
 }
 
-void BottomUI::exportImageView() {
+void BottomUI::onFrameViewerRightClick(wxContextMenuEvent& event) {
+	const wxPoint mousePosition = frameViewerCanvas->ScreenToClient(event.GetPosition());
+
+	frameViewerCanvas->PopupMenu(&editMenu, mousePosition);
+}
+
+void BottomUI::exportImageView(wxCommandEvent& event) {
 	// https://forums.wxwidgets.org/viewtopic.php?p=32313#32313
 	// Save a screenshot of the frame view if the user wants to do something with it
 

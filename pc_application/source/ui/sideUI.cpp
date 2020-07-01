@@ -90,7 +90,7 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	inputsViewSizer = new wxBoxSizer(wxHORIZONTAL);
 
 	frameDrawer = new FrameCanvas(parentFrame, inputData);
-	frameDrawer->setBackgroundColor(*wxBLACK);
+	frameDrawer->setBackgroundColor(inputData->GetBackgroundColour());
 
 	frameDrawer->SetToolTip("View selected frame");
 	inputData->SetToolTip("Edit frames");

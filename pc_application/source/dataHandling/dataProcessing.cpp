@@ -591,7 +591,7 @@ bool DataProcessing::handleKeyboardInput(wxChar key) {
 }
 
 std::shared_ptr<std::vector<std::shared_ptr<ControllerData>>> DataProcessing::getInputsList() const {
-	return allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex];
+	return currentBranchData;
 }
 
 wxRect DataProcessing::getFirstItemRect() {
@@ -630,12 +630,15 @@ void DataProcessing::addNewSavestateHook(std::string dHash, wxBitmap* screenshot
 		// NOTE: There must be at least one block with one input when this is loaded
 		// Automatically, the first block is always at index 0
 		setSavestateHook(allPlayers[i]->size() - 1);
+		setBranch(0);
 	}
 }
 
 void DataProcessing::setSavestateHook(SavestateBlockNum index) {
 	currentSavestateHook = index;
 
+	// Just in case, refresh branch here
+	setBranch(viewingBranchIndex);
 	SetItemCount(getInputsList()->size());
 	setCurrentFrame(0);
 	currentRunFrame   = 0;
@@ -655,13 +658,28 @@ void DataProcessing::removeSavestateHook(SavestateBlockNum index) {
 
 		// Move over all the framebuffer names
 		wxRemoveFile(getFramebufferPathForSavestateHook(index).GetFullPath());
-		getFramebufferPath(0, index, 0, 0).Rmdir(wxPATH_RMDIR_RECURSIVE);
-		// Rename all ones following this hook
+		HELPERS::popOffDirs(getFramebufferPath(0, index, 0, 0), 1).Rmdir(wxPATH_RMDIR_RECURSIVE);
+
+		// Rename all images following this hook
+		SavestateBlockNum temp1 = index;
 		while(true) {
-			index++;
-			wxFileName savestateHookDir = getFramebufferPath(0, index, 0, 0);
+			temp1++;
+			wxFileName savestateHookFile = getFramebufferPathForSavestateHook(temp1);
+			if(savestateHookFile.FileExists()) {
+				wxRenameFile(savestateHookFile.GetPath(), getFramebufferPathForSavestateHook(temp1).GetPath());
+			} else {
+				// Have encountered last savestate hook, break loop
+				break;
+			}
+		}
+
+		// Rename all folders following this hook
+		SavestateBlockNum temp2 = index;
+		while(true) {
+			temp2++;
+			wxFileName savestateHookDir = HELPERS::popOffDirs(getFramebufferPath(0, temp2, 0, 0), 1);
 			if(savestateHookDir.DirExists()) {
-				wxRenameFile(savestateHookDir.GetPath(), getFramebufferPath(0, index - 1, 0, 0).GetPath());
+				wxRenameFile(savestateHookDir.GetPath(), HELPERS::popOffDirs(getFramebufferPath(0, temp2 - 1, 0, 0), 1).GetPath());
 			} else {
 				// Have encountered last savestate hook, break loop
 				break;
@@ -722,6 +740,8 @@ void DataProcessing::removePlayer(uint8_t playerIndex) {
 		setPlayer(allPlayers.size() - 1);
 	}
 	sendPlayerNum();
+
+	// No framebuffer folders to remove because players dont have specific framebuffers
 }
 
 void DataProcessing::removeThisPlayer() {
@@ -756,6 +776,7 @@ void DataProcessing::addNewBranch() {
 
 void DataProcessing::setBranch(uint16_t branchIndex) {
 	viewingBranchIndex = branchIndex;
+	currentBranchData  = allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex];
 	if(branchInfoCallback) {
 		branchInfoCallback(getNumBranches(), branchIndex, true);
 	}
@@ -767,6 +788,20 @@ void DataProcessing::removeBranch(uint8_t branchIndex) {
 	if(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs.size() > 1) {
 		allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs.erase(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs.begin() + branchIndex);
 		setBranch(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs.size() - 1);
+
+		getFramebufferPath(0, currentSavestateHook, branchIndex, 0).Rmdir(wxPATH_RMDIR_RECURSIVE);
+
+		// Rename all images in this branch
+		while(true) {
+			branchIndex++;
+			wxFileName branchFolder = getFramebufferPath(0, currentSavestateHook, branchIndex, 0);
+			if(branchFolder.DirExists()) {
+				wxRenameFile(branchFolder.GetPath(), getFramebufferPath(0, currentSavestateHook, branchIndex - 1, 0).GetPath());
+			} else {
+				// Have encountered last savestate hook, break loop
+				break;
+			}
+		}
 	}
 }
 

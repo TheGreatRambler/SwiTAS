@@ -42,6 +42,8 @@ namespace HELPERS {
 	rapidjson::Document getSettingsFile(std::string filename);
 	rapidjson::Document getSettingsFromString(std::string jsonString);
 
+	wxFileName popOffDirs(wxFileName path, uint8_t num);
+
 	wxColor getDefaultWindowBackground();
 
 	wxFileName getMainSettingsPath(std::string name);

@@ -41,6 +41,13 @@ wxColor HELPERS::getDefaultWindowBackground() {
 	return wxSystemSettings::GetColour(wxSYS_COLOUR_APPWORKSPACE);
 }
 
+wxFileName HELPERS::popOffDirs(wxFileName path, uint8_t num) {
+	for(uint8_t i = 0; i < num; i++) {
+		path.RemoveDir(path.GetDirCount() - 1);
+	}
+	return path;
+}
+
 std::string HELPERS::joinString(std::vector<std::string> vec, std::string delimiter) {
 	if(vec.size() != 0) {
 		// https://stackoverflow.com/a/40052831

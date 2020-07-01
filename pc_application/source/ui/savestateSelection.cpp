@@ -313,8 +313,10 @@ void SavestateSelection::callOk() {
 	})
 	// clang-format on
 	EndModal(wxID_OK);
+	delete autoFrameAdvanceTimer;
+	REMOVE_NETWORK_CALLBACK(RecieveGameFramebuffer)
 }
-		
+
 void SavestateSelection::onClose(wxCloseEvent& event) {
 	delete autoFrameAdvanceTimer;
 	REMOVE_NETWORK_CALLBACK(RecieveGameFramebuffer)

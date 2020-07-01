@@ -44,6 +44,7 @@ private:
 	// SavestateHookBlock inputsList;
 	// Current input
 	FrameData currentData;
+	BranchData currentBranchData;
 	// Button data instance (never changes)
 	std::shared_ptr<ButtonData> buttonData;
 	// Vector holding the savestate hook blocks
