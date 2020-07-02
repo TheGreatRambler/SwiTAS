@@ -67,6 +67,7 @@ private:
 	uint8_t projectWasLoaded = true;
 
 	uint16_t imageExportIndex = 0;
+	uint16_t rerecordCount    = 0;
 
 	int recentProjectChoice;
 
@@ -152,6 +153,10 @@ public:
 
 	void incrementExportImageIndex() {
 		imageExportIndex++;
+	}
+
+	void incrementRerecordCount() {
+		rerecordCount++;
 	}
 
 	void openUpVideoComparisonViewer(int index);

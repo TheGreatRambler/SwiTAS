@@ -399,6 +399,7 @@ bool SideUI::loadSavestateHook(int block) {
 		savestateSelection.ShowModal();
 
 		if(savestateSelection.getOperationSuccessful()) {
+			projectHandler->incrementRerecordCount();
 			inputData->setSavestateHook(block);
 			inputData->sendPlayerNum();
 			tether();

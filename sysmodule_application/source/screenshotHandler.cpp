@@ -18,7 +18,6 @@ void ScreenshotHandler::writeFramebuffer(std::vector<uint8_t>& buf, std::string&
 		buf.resize(outSize);
 	}
 	// Technically this can fail, TODO handle that case
-	/*
 
 #ifdef __SWITCH__
 	capsscOpenRawScreenShotReadStream(&outSize, &outSize, &outSize, ViLayerStack::ViLayerStack_ApplicationForDebug, INT64_MAX);
@@ -75,7 +74,6 @@ void ScreenshotHandler::writeFramebuffer(std::vector<uint8_t>& buf, std::string&
 #else
 	succeeded = true;
 #endif
-*/
 }
 
 #ifdef __SWITCH__

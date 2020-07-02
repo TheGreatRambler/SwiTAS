@@ -103,6 +103,7 @@ void ProjectHandler::loadProject() {
 	dataProcessing->scrollToSpecific(jsonSettings["currentPlayer"].GetUint(), jsonSettings["currentSavestateBlock"].GetUint(), jsonSettings["currentBranch"].GetUint(), jsonSettings["currentFrame"].GetUint64());
 
 	imageExportIndex = jsonSettings["currentImageExportIndex"].GetUint();
+	rerecordCount    = jsonSettings["currentRerecordCount"].GetUint();
 
 	lastEnteredFtpPath = std::string(jsonSettings["defaultFtpPathForExport"].GetString());
 
@@ -249,6 +250,9 @@ void ProjectHandler::saveProject() {
 		rapidjson::Value lastExportImageIndex;
 		lastExportImageIndex.SetUint(imageExportIndex);
 
+		rapidjson::Value lastRerecordCount;
+		lastRerecordCount.SetUint(rerecordCount);
+
 		rapidjson::Value lastBranch;
 		lastBranch.SetUint64(dataProcessing->getCurrentBranch());
 
@@ -260,6 +264,7 @@ void ProjectHandler::saveProject() {
 		settingsJSON.AddMember("currentBranch", lastBranch, settingsJSON.GetAllocator());
 		settingsJSON.AddMember("currentFrame", lastFrame, settingsJSON.GetAllocator());
 		settingsJSON.AddMember("currentImageExportIndex", lastExportImageIndex, settingsJSON.GetAllocator());
+		settingsJSON.AddMember("currentRerecordCount", lastRerecordCount, settingsJSON.GetAllocator());
 
 		rapidjson::Value defaultFtpPathForExport;
 		defaultFtpPathForExport.SetString(lastEnteredFtpPath.c_str(), lastEnteredFtpPath.size(), settingsJSON.GetAllocator());

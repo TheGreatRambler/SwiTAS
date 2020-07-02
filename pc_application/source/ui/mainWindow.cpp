@@ -109,8 +109,10 @@ void MainWindow::onStart() {
 
 	// Ask for internet connection to get started
 	askForIP();
-	// Then, create the savestate
-	sideUI->createSavestateHook();
+	// Then, create the savestate if its a new project
+	if(projectHandlerWindow.loadedNewProject()) {
+		sideUI->createSavestateHook();
+	}
 }
 
 // clang-format off

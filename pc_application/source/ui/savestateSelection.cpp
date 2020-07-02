@@ -224,8 +224,8 @@ void SavestateSelection::registerFramebufferCallback() {
 
 		wxImage screenshot = HELPERS::getImageFromJPEGData(data.buf);
 		currentFrame->setBitmap(new wxBitmap(screenshot));
-		wxString hash   = HELPERS::calculateDhash(screenshot, dhashWidth, dhashHeight);
-		leftDhashString = hash.ToStdString();
+		wxString hash   = wxString::FromUTF8(data.dhash); // HELPERS::calculateDhash(screenshot, dhashWidth, dhashHeight);
+		leftDhashString = data.dhash;
 
 		if(savestateLoadDialog) {
 			leftDHash->SetLabel(hash);
@@ -308,9 +308,9 @@ void SavestateSelection::callOk() {
 	// Use this frame as the savestate
 	operationSuccessful = true;
 	// clang-format off
-	ADD_TO_QUEUE(SendFlag, networkInstance, {
-		data.actFlag = SendInfo::START_TAS_MODE;
-	})
+	//ADD_TO_QUEUE(SendFlag, networkInstance, {
+	//	data.actFlag = SendInfo::START_TAS_MODE;
+	//})
 	// clang-format on
 	EndModal(wxID_OK);
 	delete autoFrameAdvanceTimer;
