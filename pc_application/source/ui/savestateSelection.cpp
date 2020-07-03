@@ -206,6 +206,9 @@ void SavestateSelection::setTargetFrame(wxBitmap* targetBitmap, std::string targ
 }
 
 void SavestateSelection::onAutoFrameAdvanceTimer(wxTimerEvent& event) {
+	if(okCalled) {
+		callOk();
+	}
 	if(autoFrameEnabled) {
 		// Run another frame
 		frameAdvance();
@@ -233,7 +236,8 @@ void SavestateSelection::registerFramebufferCallback() {
 				if(hamming <= selectFrameAutomatically->GetValue()) {
 					wxMessageDialog useFrameDialog(this, "This frame is very similar to the target frame, use it?", "Use this frame", (0x00000002 | 0x00000008) | 0x00000010 | 0x00000000);
 					if(useFrameDialog.ShowModal() == wxID_YES) {
-						callOk();
+						okCalled = true;
+						autoFrameAdvanceTimer->StartOnce(0);
 						return;
 					}
 				}

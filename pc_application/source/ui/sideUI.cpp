@@ -317,9 +317,10 @@ void SideUI::onSavestateHookModifyPressed(wxCommandEvent& event) {
 			hook->screenshot = modifySavestateSelection.getNewScreenshot();
 
 			inputData->invalidateRun(0);
-			inputData->setSavestateHook(inputData->getCurrentSavestateHook());
 
 			modifySavestateSelection.getNewScreenshot()->SaveFile(inputData->getFramebufferPathForCurrentFramebuf().GetFullPath(), wxBITMAP_TYPE_JPEG);
+
+			inputData->setSavestateHook(inputData->getCurrentSavestateHook());
 
 			tether();
 		} else {
@@ -401,7 +402,7 @@ bool SideUI::loadSavestateHook(int block) {
 		if(savestateSelection.getOperationSuccessful()) {
 			projectHandler->incrementRerecordCount();
 			inputData->setSavestateHook(block);
-			inputData->sendPlayerNum();
+			// inputData->sendPlayerNum();
 			tether();
 			return true;
 		} else {

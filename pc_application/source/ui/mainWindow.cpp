@@ -194,9 +194,9 @@ void MainWindow::handleNetworkQueues() {
 			if(data.controllerDataIncluded) {
 				dataProcessingInstance->runFrame(true, true, true);
 				dataProcessingInstance->setControllerDataForAutoRun(data.controllerData);
-				if(sideUI->getAutoRunActive()) {
-					autoFrameAdvanceTimer->StartOnce(sideUI->getAutoRunDelay());
-				}
+			}
+			if(sideUI->getAutoRunActive()) {
+				autoFrameAdvanceTimer->StartOnce(sideUI->getAutoRunDelay());
 			}
 			bottomUI->refreshDataViews(true);
 		}

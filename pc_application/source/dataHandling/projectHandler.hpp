@@ -22,7 +22,9 @@
 	Protocol::Struct_##Flag data; \
 	while (networkInstance->Queue_##Flag.try_dequeue(data)) { \
 		for (auto const& callback : projectHandler->Callbacks_##Flag) { \
-			callback.second(data); \
+			if (callback.first < 10) { \
+				callback.second(data); \
+			} \
 		} \
 	} \
 }

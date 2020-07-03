@@ -365,7 +365,7 @@ void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t includeFra
 #ifdef __SWITCH__
 		LOGD << "Running frame";
 #endif
-		waitForVsync();
+		// waitForVsync();
 		unpauseApp();
 		waitForVsync();
 		pauseApp(linkedWithFrameAdvance, includeFramebuffer, autoAdvance, frame, savestateHookNum, branchIndex, playerIndex);

@@ -168,8 +168,6 @@ bool CommunicateWithNetwork::hasOtherSideJustDisconnected() {
 }
 
 void CommunicateWithNetwork::endNetwork() {
-	keepReading = false;
-
 #ifdef CLIENT_IMP
 	// This will automatically handle if the network has never been connected to
 	if(!isConnected()) {
@@ -178,6 +176,8 @@ void CommunicateWithNetwork::endNetwork() {
 		cv.notify_one();
 	}
 #endif
+
+	keepReading = false;
 
 	// Wait for thread to end
 	networkThread->join();
