@@ -401,9 +401,9 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 
 			ADD_TO_QUEUE(RecieveGameFramebuffer, networkInstance, {
 				data.buf = jpegBuf;
-				if(includeFramebuffer) {
-					data.dhash = dhash;
-				}
+				// if(includeFramebuffer) {
+				//	data.dhash = dhash;
+				//}
 				data.fromFrameAdvance       = linkedWithFrameAdvance;
 				data.frame                  = frame;
 				data.savestateHookNum       = savestateHookNum;

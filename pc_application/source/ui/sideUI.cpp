@@ -364,9 +364,9 @@ bool SideUI::createSavestateHook() {
 			blocks[blocks.size() - 1]->dHash      = savestateSelection.getNewDhash();
 			blocks[blocks.size() - 1]->screenshot = savestateSelection.getNewScreenshot();
 
-			inputData->setSavestateHook(blocks.size() - 1);
-
 			savestateSelection.getNewScreenshot()->SaveFile(inputData->getFramebufferPathForCurrentFramebuf().GetFullPath(), wxBITMAP_TYPE_JPEG);
+
+			inputData->setSavestateHook(blocks.size() - 1);
 
 			tether();
 			return true;

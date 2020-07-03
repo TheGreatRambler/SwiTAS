@@ -215,8 +215,8 @@
 	},
 	"programIcon": "share/icons/switas/logo/main.png",
 	"videoViewerDefaultImage": "share/images/novideodefault.jpg",
-	"dhashWidth": 31,
-	"dhashHeight": 30,
+	"dhashWidth": 80,
+	"dhashHeight": 45,
 	"ui": {
 		"addFrameButton": "share/icons/switas/buttons/addFrameButton.png",
 		"frameAdvanceButton": "share/icons/switas/buttons/frameAdvanceButton.png",

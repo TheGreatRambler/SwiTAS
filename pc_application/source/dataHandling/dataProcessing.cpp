@@ -644,6 +644,8 @@ void DataProcessing::setSavestateHook(SavestateBlockNum index) {
 	currentRunFrame   = 0;
 	currentImageFrame = 0;
 
+	modifyCurrentFrameViews(currentFrame);
+
 	if(changingSelectedFrameCallback) {
 		changingSelectedFrameCallback(currentFrame, currentRunFrame, currentImageFrame);
 	}

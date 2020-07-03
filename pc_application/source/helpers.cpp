@@ -138,7 +138,7 @@ wxString HELPERS::calculateDhash(wxImage image, int dhashWidth, int dhashHeight)
 	int dhashIndex              = 0;
 	for(int y = 0; y < dhashHeight; y++) {
 		for(int x = 1; x < dhashWidth; x++) {
-			int thisPixelPointer     = ((y * dhashWidth) + x) * 4;
+			int thisPixelPointer     = ((y * dhashWidth) + x) * 3;
 			unsigned char leftPixel  = imagePointer[thisPixelPointer - 4];
 			unsigned char rightPixel = imagePointer[thisPixelPointer];
 			dhash[dhashIndex]        = leftPixel > rightPixel ? '1' : '0';

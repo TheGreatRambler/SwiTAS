@@ -218,32 +218,29 @@ void SavestateSelection::onIdle(wxIdleEvent& event) {
 
 void SavestateSelection::registerFramebufferCallback() {
 	ADD_NETWORK_CALLBACK(RecieveGameFramebuffer, {
-		playButton->Enable();
-		frameAdvanceButton->Enable();
-		okButton->Enable();
-
-		wxImage screenshot = HELPERS::getImageFromJPEGData(data.buf);
-		currentFrame->setBitmap(new wxBitmap(screenshot));
-		wxString hash   = wxString::FromUTF8(data.dhash); // HELPERS::calculateDhash(screenshot, dhashWidth, dhashHeight);
-		leftDhashString = data.dhash;
-
-		if(savestateLoadDialog) {
-			leftDHash->SetLabel(hash);
-
-			uint16_t hamming = HELPERS::getHammingDistance(hash, rightDHash->GetLabel());
-			hammingDistance->SetLabel(wxString::Format("%d", hamming));
-			if(hamming <= selectFrameAutomatically->GetValue()) {
-				// This frame might be identical, ask user if they want to use this frame
-				wxMessageDialog useFrameDialog(this, "This frame is very similar to the target frame, use it?", "Use this frame", wxYES_NO | wxCANCEL | wxYES_DEFAULT);
-				if(useFrameDialog.ShowModal() == wxID_YES) {
-					// Use the frame
-					callOk();
+		if(!operationSuccessful) {
+			playButton->Enable();
+			frameAdvanceButton->Enable();
+			okButton->Enable();
+			wxImage screenshot = HELPERS::getImageFromJPEGData(data.buf);
+			currentFrame->setBitmap(new wxBitmap(screenshot));
+			wxString hash   = HELPERS::calculateDhash(screenshot, dhashWidth, dhashHeight);
+			leftDhashString = hash.ToStdString();
+			if(savestateLoadDialog) {
+				leftDHash->SetLabel(hash);
+				uint16_t hamming = HELPERS::getHammingDistance(hash, rightDHash->GetLabel());
+				hammingDistance->SetLabel(wxString::Format("%d", hamming));
+				if(hamming <= selectFrameAutomatically->GetValue()) {
+					wxMessageDialog useFrameDialog(this, "This frame is very similar to the target frame, use it?", "Use this frame", (0x00000002 | 0x00000008) | 0x00000010 | 0x00000000);
+					if(useFrameDialog.ShowModal() == wxID_YES) {
+						callOk();
+						return;
+					}
 				}
 			}
-		}
-
-		if(autoFrameEnabled) {
-			autoFrameAdvanceTimer->StartOnce(autoIncrementDelay->GetValue());
+			if(autoFrameEnabled) {
+				autoFrameAdvanceTimer->StartOnce(autoIncrementDelay->GetValue());
+			}
 		}
 	})
 }
@@ -312,9 +309,9 @@ void SavestateSelection::callOk() {
 	//	data.actFlag = SendInfo::START_TAS_MODE;
 	//})
 	// clang-format on
-	EndModal(wxID_OK);
 	delete autoFrameAdvanceTimer;
 	REMOVE_NETWORK_CALLBACK(RecieveGameFramebuffer)
+	EndModal(wxID_OK);
 }
 
 void SavestateSelection::onClose(wxCloseEvent& event) {

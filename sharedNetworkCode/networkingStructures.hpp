@@ -93,7 +93,6 @@ namespace Protocol {
 	// Recieve all of the game's framebuffer
 	DEFINE_STRUCT(RecieveGameFramebuffer,
 		std::vector<uint8_t> buf;
-		std::string dhash;
 		uint8_t fromFrameAdvance;
 		uint32_t frame;
 		uint16_t savestateHookNum;
