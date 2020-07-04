@@ -121,6 +121,14 @@ public:
 		return autoRunFramesPerSecond->GetValue();
 	}
 
+	void enableAdvance() {
+		frameAdvanceButton->Enable(true);
+	}
+
+	void disableAdvance() {
+		frameAdvanceButton->Enable(false);
+	}
+
 	void sendAutoRunData();
 
 	void untether();

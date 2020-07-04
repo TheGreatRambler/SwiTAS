@@ -182,6 +182,7 @@ void MainWindow::handleNetworkQueues() {
 			bottomUI->recieveGameFramebuffer(data.buf);
 		}
 		if(data.fromFrameAdvance == 1) {
+			sideUI->enableAdvance();
 			if(framebufferIncluded) {
 				wxFileName framebufferFileName = dataProcessingInstance->getFramebufferPath(data.playerIndex, data.savestateHookNum, data.branchIndex, data.frame);
 				wxFile file(framebufferFileName.GetFullPath(), wxFile::write);

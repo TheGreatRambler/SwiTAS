@@ -281,6 +281,7 @@ void SideUI::onFrameAdvancePressed(wxCommandEvent& event) {
 	if(tethered) {
 		incrementFrameCallback();
 		inputData->runFrame(false, false, true);
+		disableAdvance();
 	}
 }
 

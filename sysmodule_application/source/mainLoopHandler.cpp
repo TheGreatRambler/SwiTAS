@@ -171,7 +171,7 @@ void MainLoop::handleNetworkUpdates() {
 			matchFirstControllerToTASController(0);
 			runSingleFrame(false, true, false, 0, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::START_TAS_MODE) {
-			pauseApp(false, true, false, 0, 0, 0, 0);
+			// pauseApp(false, true, false, 0, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::PAUSE) {
 			pauseApp(false, true, false, 0, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::UNPAUSE) {
@@ -365,7 +365,7 @@ void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t includeFra
 #ifdef __SWITCH__
 		LOGD << "Running frame";
 #endif
-		// waitForVsync();
+		waitForVsync();
 		unpauseApp();
 		waitForVsync();
 		pauseApp(linkedWithFrameAdvance, includeFramebuffer, autoAdvance, frame, savestateHookNum, branchIndex, playerIndex);
