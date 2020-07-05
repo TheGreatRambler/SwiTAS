@@ -155,11 +155,13 @@ void MainLoop::handleNetworkUpdates() {
 			// Precaution to prevent the app getting stuck without the
 			// User able to unpause it
 			if(applicationOpened && internetConnected) {
+				waitForVsync();
 				pauseApp(false, true, false, 0, 0, 0, 0);
 			}
 		} else if(data.actFlag == SendInfo::UNPAUSE_DEBUG) {
 			if(applicationOpened) {
 				clearEveryController();
+				waitForVsync();
 				unpauseApp();
 			}
 		} else if(data.actFlag == SendInfo::GET_FRAMEBUFFER) {
@@ -173,9 +175,11 @@ void MainLoop::handleNetworkUpdates() {
 		} else if(data.actFlag == SendInfo::START_TAS_MODE) {
 			// pauseApp(false, true, false, 0, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::PAUSE) {
+			waitForVsync();
 			pauseApp(false, true, false, 0, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::UNPAUSE) {
 			clearEveryController();
+			waitForVsync();
 			unpauseApp();
 		}
 	})
@@ -386,6 +390,9 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 
 #ifdef __SWITCH__
 		LOGD << "Pausing";
+		if(lastNanoseconds != 0) {
+			LOGD << "Time taken between frames: " << (int)((armTicksToNs(armGetSystemTick()) - lastNanoseconds) / 1000000);
+		}
 		rc       = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
 		isPaused = true;
 #endif

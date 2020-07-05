@@ -43,6 +43,8 @@ private:
 #ifdef __SWITCH__
 	Result rc;
 	Handle applicationDebug;
+
+	uint64_t lastNanoseconds = 0;
 #endif
 
 #ifdef YUZU
@@ -111,6 +113,7 @@ private:
 		rc = eventWait(&vsyncEvent, UINT64_MAX);
 		if(R_FAILED(rc))
 			fatalThrow(rc);
+		svcSleepThread(1000000 * 1);
 #endif
 	}
 
@@ -119,7 +122,8 @@ private:
 #ifdef __SWITCH__
 			// Unpause application
 			svcCloseHandle(applicationDebug);
-			isPaused = false;
+			lastNanoseconds = armTicksToNs(armGetSystemTick());
+			isPaused        = false;
 #endif
 		}
 	}

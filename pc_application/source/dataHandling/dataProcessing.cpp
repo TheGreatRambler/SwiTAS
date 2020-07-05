@@ -529,8 +529,10 @@ void DataProcessing::runFrame(uint8_t forAutoFrame, uint8_t updateFramebuffer, u
 
 		setFramestateInfo(currentRunFrame, FrameState::RAN, true);
 
+		uint8_t withinFrames = currentRunFrame < allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->size();
+
 		// If possible, make current frame this frame
-		if(currentRunFrame < allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->size()) {
+		if(withinFrames) {
 			// Set to this frame
 			setCurrentFrame(currentRunFrame + 1);
 		}
@@ -540,7 +542,7 @@ void DataProcessing::runFrame(uint8_t forAutoFrame, uint8_t updateFramebuffer, u
 		// Set image frame to this too
 		currentImageFrame = currentRunFrame;
 
-		modifyCurrentFrameViews(currentRunFrame);
+		modifyCurrentFrameViews(currentFrame);
 
 		// Refresh the grid
 		if(changingSelectedFrameCallback) {
@@ -554,30 +556,32 @@ void DataProcessing::runFrame(uint8_t forAutoFrame, uint8_t updateFramebuffer, u
 
 		Refresh();
 
-		if(!forAutoFrame) {
-			// Send to switch to run for each player
-			for(uint8_t playerIndex = 0; playerIndex < allPlayers.size(); playerIndex++) {
-				std::shared_ptr<ControllerData> controllerDatas = getControllerData(playerIndex, currentSavestateHook, viewingBranchIndex, currentRunFrame);
+		if(currentRunFrame < allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->size()) {
+			if(!forAutoFrame) {
+				// Send to switch to run for each player
+				for(uint8_t playerIndex = 0; playerIndex < allPlayers.size(); playerIndex++) {
+					std::shared_ptr<ControllerData> controllerDatas = getControllerData(playerIndex, currentSavestateHook, viewingBranchIndex, currentRunFrame);
+					ADD_TO_QUEUE(SendFrameData, networkInstance, {
+						data.controllerData     = *controllerDatas;
+						data.frame              = currentRunFrame;
+						data.savestateHookNum   = currentSavestateHook;
+						data.branchIndex        = viewingBranchIndex;
+						data.playerIndex        = playerIndex;
+						data.incrementFrame     = false;
+						data.includeFramebuffer = includeFramebuffer;
+						data.isAutoRun          = false;
+					})
+				}
 				ADD_TO_QUEUE(SendFrameData, networkInstance, {
-					data.controllerData     = *controllerDatas;
 					data.frame              = currentRunFrame;
 					data.savestateHookNum   = currentSavestateHook;
 					data.branchIndex        = viewingBranchIndex;
-					data.playerIndex        = playerIndex;
-					data.incrementFrame     = false;
+					data.playerIndex        = viewingPlayerIndex;
+					data.incrementFrame     = true;
 					data.includeFramebuffer = includeFramebuffer;
 					data.isAutoRun          = false;
 				})
 			}
-			ADD_TO_QUEUE(SendFrameData, networkInstance, {
-				data.frame              = currentRunFrame;
-				data.savestateHookNum   = currentSavestateHook;
-				data.branchIndex        = viewingBranchIndex;
-				data.playerIndex        = viewingPlayerIndex;
-				data.incrementFrame     = true;
-				data.includeFramebuffer = includeFramebuffer;
-				data.isAutoRun          = false;
-			})
 		}
 	}
 }
