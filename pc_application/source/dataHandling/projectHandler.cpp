@@ -432,6 +432,12 @@ void ProjectHandler::promptForUpdate() {
 										newFilename.SetExt("exe");
 									}
 
+									if(newFilename.GetName() == "switas_recent" && newFilename.GetExt() == "json") {
+										// Ignored
+										delete entry;
+										continue;
+									}
+
 									zip.OpenEntry(*entry);
 
 									// Write binary might not work, I dunno
