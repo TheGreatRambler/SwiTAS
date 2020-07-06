@@ -380,6 +380,86 @@ void ProjectHandler::newProjectWasCreated() {
 	dataProcessing->sendPlayerNum();
 }
 
+void ProjectHandler::promptForUpdate() {
+	const wxString releaseUrl = "https://api.github.com/repos/thegreatrambler/switas/releases/latest";
+	wxURL url(releaseUrl);
+	if(url.GetError() == wxURL_NOERR) {
+		wxString jsonData;
+		wxInputStream* in = url.GetInputStream();
+
+		if(in && in->IsOk()) {
+			wxStringOutputStream jsonStream(&jsonData);
+			in->Read(jsonStream);
+
+			rapidjson::Document releaseInfo = HELPERS::getSettingsFromString(jsonData.ToStdString());
+			if(strcmp((*mainSettings)["version"].GetString(), releaseInfo["tag_name"].GetString()) != 0) {
+				// The release on Github does not match this version, prompt to download
+				wxMessageDialog installDialog(parentFrame, wxString::Format("A new release is available for download:\n\n%s", wxString::FromUTF8(releaseInfo["body"].GetString())), "Install new update", wxYES_NO | wxCANCEL | wxNO_DEFAULT | wxICON_QUESTION);
+				int res = installDialog.ShowModal();
+				if(res == wxID_YES) {
+					// Install the update, closes the app entirely
+
+					// Windows is index 0
+					int releaseIndex = 0;
+					wxURL updateUrl(wxString::FromUTF8(releaseInfo["assets"][releaseIndex]["browser_download_url"].GetString()));
+					if(updateUrl.GetError() == wxURL_NOERR) {
+						wxInputStream* updateIn = url.GetInputStream();
+
+						if(updateIn && updateIn->IsOk()) {
+							wxZipEntry* entry;
+
+							// Dont take control of the pointer
+							wxZipInputStream zip(*updateIn);
+							while(entry = zip.GetNextEntry(), entry != NULL) {
+								// The name is it's relative path within the archive
+								wxFileName filename(entry->GetName());
+
+								// Only handle files
+								if(!filename.IsDir()) {
+									wxFileName relativeToExecutable(wxStandardPaths::Get().GetExecutablePath());
+									// Go one folder back
+									relativeToExecutable.RemoveDir(relativeToExecutable.GetDirCount() - 1);
+									// Remove first folder, it's 'release', hope path is relative
+									filename.RemoveDir(0);
+
+									wxFileName newFilename(relativeToExecutable.GetPathWithSep() + filename.GetFullPath());
+									newFilename.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+
+									// Cant set executable directly, replace differently
+									// Also depends on OS
+									if(newFilename.GetName() == "switas" && newFilename.GetExt() == "exe") {
+										newFilename.SetName("switas_temp");
+										newFilename.SetExt("exe");
+									}
+
+									zip.OpenEntry(*entry);
+
+									// Write binary might not work, I dunno
+									wxFFileOutputStream file(relativeToExecutable.GetFullPath(), "wb");
+
+									if(!file) {
+										// File not created
+										delete entry;
+										continue;
+									}
+
+									zip.Read(file);
+
+									file.Close();
+								}
+
+								delete entry;
+							}
+						}
+						delete updateIn;
+					}
+				}
+			}
+		}
+		delete in;
+	}
+}
+
 void ProjectHandler::openUpVideoComparisonViewer(int index) {
 	wxString projDir              = projectDir.GetName();
 	VideoComparisonViewer* viewer = new VideoComparisonViewer(parentFrame, std::bind(&ProjectHandler::closeVideoComparisonViewer, this, std::placeholders::_1), &recentSettings, videoComparisonEntries, projDir);

@@ -36,9 +36,11 @@
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <wx/zipstrm.h>
 #include <unordered_map>
 #include <wx/dir.h>
 #include <wx/dirdlg.h>
+#include <cstring>
 #include <wx/filename.h>
 #include <wx/grid.h>
 #include <wx/listbox.h>
@@ -50,6 +52,7 @@
 #include <wx/string.h>
 #include <wx/wfstream.h>
 #include <wx/wx.h>
+#include <wx/sstream.h>
 #include <wx/zstream.h>
 
 #include "../sharedNetworkCode/serializeUnserializeData.hpp"
@@ -103,6 +106,8 @@ public:
 
 	void loadProject();
 	void saveProject();
+
+	void promptForUpdate();
 
 	void newProjectWasCreated();
 
