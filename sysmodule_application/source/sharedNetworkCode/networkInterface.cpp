@@ -11,6 +11,10 @@ bool CommunicateWithNetwork::readData(void* data, uint32_t sizeToRead) {
 		yieldThread();
 		// Have to read at the right index with the right num of bytes
 		int res = networkConnection->Receive(sizeToRead - numOfBytesSoFar, &dataPointer[numOfBytesSoFar]);
+		if(!keepReading) {
+			// Just exit now
+			return true;
+		}
 		if(res == 0) {
 			return true;
 		} else if(res == -1) {
@@ -35,6 +39,10 @@ bool CommunicateWithNetwork::sendData(void* data, uint32_t sizeToSend) {
 	while(numOfBytesSoFar != sizeToSend) {
 		yieldThread();
 		int res = networkConnection->Send(&dataPointer[numOfBytesSoFar], sizeToSend - numOfBytesSoFar);
+		if(!keepReading) {
+			// Just exit now
+			return true;
+		}
 		if(res == 0) {
 			return true;
 		} else if(res == -1) {
@@ -171,9 +179,9 @@ void CommunicateWithNetwork::endNetwork() {
 #ifdef CLIENT_IMP
 	// This will automatically handle if the network has never been connected to
 	if(!isConnected()) {
-		std::unique_lock<std::mutex> lk(ipMutex);
+		std::lock_guard<std::mutex> lk(ipMutex);
 		connectedToSocket = true;
-		cv.notify_one();
+		cv.notify_all();
 	}
 #endif
 

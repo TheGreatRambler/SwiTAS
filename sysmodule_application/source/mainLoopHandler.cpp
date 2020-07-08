@@ -155,14 +155,14 @@ void MainLoop::handleNetworkUpdates() {
 			// Precaution to prevent the app getting stuck without the
 			// User able to unpause it
 			if(applicationOpened && internetConnected) {
-				waitForVsync();
 				pauseApp(false, true, false, 0, 0, 0, 0);
+				lastNanoseconds = 0;
 			}
 		} else if(data.actFlag == SendInfo::UNPAUSE_DEBUG) {
 			if(applicationOpened) {
 				clearEveryController();
-				waitForVsync();
 				unpauseApp();
+				lastNanoseconds = 0;
 			}
 		} else if(data.actFlag == SendInfo::GET_FRAMEBUFFER) {
 			if(applicationOpened) {
@@ -177,6 +177,7 @@ void MainLoop::handleNetworkUpdates() {
 		} else if(data.actFlag == SendInfo::PAUSE) {
 			waitForVsync();
 			pauseApp(false, true, false, 0, 0, 0, 0);
+			lastNanoseconds = 0;
 		} else if(data.actFlag == SendInfo::UNPAUSE) {
 			clearEveryController();
 			waitForVsync();

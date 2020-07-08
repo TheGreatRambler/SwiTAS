@@ -141,10 +141,10 @@ SavestateSelection::SavestateSelection(wxFrame* parent, rapidjson::Document* set
 
 	if(savestateLoadDialog) {
 		// Dhashes are only used in loading, not creating the first one
-		leftImageSizer->Add(leftDHash, 1, wxEXPAND | wxALL);
+		leftImageSizer->Add(leftDHash, 0);
 
 		rightImageSizer->Add(goalFrame, 1, wxSHAPED);
-		rightImageSizer->Add(rightDHash, 1, wxEXPAND | wxALL);
+		rightImageSizer->Add(rightDHash, 0);
 	}
 
 	imageSizer->Add(leftImageSizer, 1, wxEXPAND | wxALL);
