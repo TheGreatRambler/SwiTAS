@@ -32,7 +32,7 @@ public:
 	// Some of this is defined in network code
 
 	// To convert names
-	std::map<std::string, Btn> stringToButton{
+	std::map<std::string, Btn> stringToButton {
 		{ "A", Btn::A },
 		{ "B", Btn::B },
 		{ "X", Btn::X },
@@ -58,8 +58,8 @@ public:
 	// To convert to Btn
 	std::unordered_map<std::string, Btn> scriptNameToButton;
 
-	static constexpr int16_t axisMin = -30000;
-	static constexpr int16_t axisMax = 30000;
+	static constexpr int16_t axisMin = -32767;
+	static constexpr int16_t axisMax = 32767;
 
 	static constexpr uint8_t KeyWidth  = 11;
 	static constexpr uint8_t KeyHeight = 4;
