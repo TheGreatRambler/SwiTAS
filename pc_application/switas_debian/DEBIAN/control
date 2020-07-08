@@ -5,7 +5,7 @@ Section: custom
 Priority: optional
 Architecture: all
 Essential: no
-Installed-Size: 1024
+Installed-Size: 20000
 Maintainer: TheGreatRambler
 Description: A TAS toolkit for the Nintendo Switch
 Depends: zlib1g,
