@@ -9,7 +9,8 @@ rm switas-windows-64bit.zip
 
 mkdir release/bin
 cp bin/* release/bin
-cp mainSettings.json release
+cp switas_settings.json release
+cp switas_recent.json release
 # https://unix.stackexchange.com/a/314823
 find share -name '*.png' -o -name '*.jpg' | xargs cp --parents -t release
 
@@ -26,7 +27,8 @@ rm -r release
 #
 #mkdir release/bin
 #cp bin/* release/bin
-#cp mainSettings.json release
+#cp switas_settings.json release
+#cp switas_recent.json release
 ## https://unix.stackexchange.com/a/314823
 #find share -name '*.png' -o -name '*.jpg' | xargs cp --parents -t release
 #

@@ -1,0 +1,16 @@
+Package: switas
+Homepage: tgrcode.com
+Version: 1.0.0
+Section: custom
+Priority: optional
+Architecture: all
+Essential: no
+Installed-Size: 1024
+Maintainer: TheGreatRambler
+Description: A TAS toolkit for the Nintendo Switch
+Depends: zlib1g,
+	libgtk-3-0,
+	libwxbase3.1-0-unofficial3,
+	libwxgtk3.1-0-unofficial3,
+	wx-common,
+	libffms2-4

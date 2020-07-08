@@ -1,7 +1,12 @@
 #include "helpers.hpp"
 
 std::string HELPERS::resolvePath(std::string path) {
+#ifdef __WXMSW__
 	wxFileName fullPath("../" + path, wxPATH_NATIVE);
+#endif
+#ifdef DEBIAN_SYSTEM
+	wxFileName fullPath("/usr/share/switas/" + path, wxPATH_NATIVE);
+#endif
 	fullPath.MakeAbsolute();
 	std::string res = fullPath.GetFullPath(wxPATH_NATIVE).ToStdString();
 	return res;
@@ -33,7 +38,15 @@ wxFileName HELPERS::getMainSettingsPath(std::string name) {
 		wxFileName inHomeFolder(wxStandardPaths::Get().GetUserConfigDir());
 		inHomeFolder.SetName(wxString::FromUTF8(name));
 		inHomeFolder.SetExt("json");
-		return inHomeFolder;
+		if(inHomeFolder.FileExists()) {
+			return inHomeFolder;
+		} else {
+			// Put in etc lol, needed for debian
+			wxFileName etcFolder("/etc/switas/");
+			etcFolder.SetName(wxString::FromUTF8(name));
+			etcFolder.SetExt("json");
+			return etcFolder;
+		}
 	}
 }
 

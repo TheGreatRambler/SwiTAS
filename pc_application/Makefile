@@ -36,6 +36,11 @@ else
 	CPPFLAGS += -Og -g -ggdb
 endif
 
+ifeq ($(SYSTEM),debian)
+	# "Release" build - optimization, and no debug symbols
+	CPPFLAGS += -DDEBIAN_SYSTEM
+endif
+
 # Linker flags (-lpthread needed for threads)
 # Includes some neccessary linker flags for win32-darkmode (will add in the future)
 LDFLAGS := $(shell wx-config --libs base,core,net) $(shell pkg-config --libs ffms2) -lpthread
