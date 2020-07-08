@@ -22,7 +22,7 @@ TasRunner::TasRunner(wxFrame* parent, std::shared_ptr<CommunicateWithNetwork> ne
 	startTasHomebrew = HELPERS::getBitmapButton(parent, mainSettings, "startTasHomebrewButton");
 	startTasArduino  = HELPERS::getBitmapButton(parent, mainSettings, "startTasArduinoButton");
 
-	stopTas = HELPERS::getBitmapButton(parent, mainSettings, "stopTasButton");
+	stopTas = HELPERS::getBitmapButton(parent, mainSettings, "stopButton");
 
 	startTasHomebrew->SetToolTip("Start TAS via homebrew");
 	startTasArduino->SetToolTip("Start TAS via arduino");
@@ -158,7 +158,14 @@ void TasRunner::onStartTasArduinoPressed(wxCommandEvent& event) {
 		invalidRangeMessage.ShowModal();
 	} else {
 		// TODO use arduino TAS
+		// UNIMPLEMENTED
 	}
 }
 
-void TasRunner::onStopTasPressed(wxCommandEvent& event) {}
+void TasRunner::onStopTasPressed(wxCommandEvent& event) {
+	// clang-format off
+	ADD_TO_QUEUE(SendFlag, networkInstance, {
+		data.actFlag = SendInfo::STOP_FINAL_TAS;
+	})
+	// clang-format on
+}

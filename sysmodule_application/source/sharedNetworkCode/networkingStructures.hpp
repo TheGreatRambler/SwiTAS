@@ -59,6 +59,7 @@ enum SendInfo : uint8_t {
 	RUN_BLANK_FRAME,
 	STOP_FULL_SPEED,
 	PAUSE_FULL_SPEED,
+	STOP_FINAL_TAS,
 };
 
 // This is used by the switch to determine size, a vector is always send back enyway

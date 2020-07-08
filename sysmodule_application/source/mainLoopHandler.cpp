@@ -182,6 +182,8 @@ void MainLoop::handleNetworkUpdates() {
 			clearEveryController();
 			waitForVsync();
 			unpauseApp();
+		} else if(data.actFlag == SendInfo::STOP_FINAL_TAS) {
+			finalTasShouldRun = false;
 		}
 	})
 
@@ -314,6 +316,7 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths) {
 
 	uint8_t filesSize = files.size();
 
+	// Just in case
 	unpauseApp();
 
 	while(true) {

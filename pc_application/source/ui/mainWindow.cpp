@@ -112,6 +112,9 @@ void MainWindow::onStart() {
 	// Then, create the savestate if its a new project
 	if(projectHandlerWindow.loadedNewProject()) {
 		sideUI->createSavestateHook();
+	} else {
+		// Just so image is displayed
+		bottomUI->refreshDataViews(true);
 	}
 }
 
@@ -230,19 +233,22 @@ void MainWindow::addMenuBar() {
 
 	wxMenu* fileMenu = new wxMenu();
 
-	selectIPID        = NewControlId();
-	exportAsText      = NewControlId();
-	importAsText      = NewControlId();
-	saveProject       = NewControlId();
-	setNameID         = NewControlId();
-	toggleLoggingID   = NewControlId();
-	toggleDebugMenuID = NewControlId();
-	openGameCorruptor = NewControlId();
+	selectIPID          = NewControlId();
+	exportAsText        = NewControlId();
+	importAsText        = NewControlId();
+	saveProject         = NewControlId();
+	setNameID           = NewControlId();
+	toggleLoggingID     = NewControlId();
+	toggleDebugMenuID   = NewControlId();
+	openGameCorruptorID = NewControlId();
+	runFinalTasID       = NewControlId();
 
 	fileMenu->Append(saveProject, "Save Project\tCtrl+S");
 	fileMenu->Append(exportAsText, "Export To Text Format\tCtrl+Alt+E");
 	fileMenu->Append(importAsText, "Import From Text Format\tCtrl+Alt+I");
 	fileMenu->Append(setNameID, "Set Name\tCtrl+Alt+N");
+	// Also not finished
+	// fileMenu->Append(runFinalTasID, "Run Final TAS\tCtrl+R");
 
 	// Add joystick submenu
 	fileMenu->AppendSubMenu(bottomUI->getJoystickMenu(), "&List Joysticks\tCtrl+G");
@@ -256,7 +262,7 @@ void MainWindow::addMenuBar() {
 	fileMenu->Append(toggleLoggingID, "Toggle Logging\tCtrl+Shift+L");
 	fileMenu->Append(toggleDebugMenuID, "Toggle Debug Menu\tCtrl+D");
 	// Not finished as of now
-	// fileMenu->Append(openGameCorruptor, "Open Game Corruptor\tCtrl+B");
+	// fileMenu->Append(openGameCorruptorID, "Open Game Corruptor\tCtrl+B");
 
 	menuBar->Append(fileMenu, "&File");
 
@@ -297,7 +303,7 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 		} else if(id == toggleDebugMenuID) {
 			debugWindow->Show(!debugWindow->IsShown());
 			wxLogMessage("Toggled debug window");
-		} else if(id == openGameCorruptor) {
+		} else if(id == openGameCorruptorID) {
 			Show(false);
 			sideUI->untether();
 			GameCorruptor gameCorruptor(this, projectHandler, networkInstance);
@@ -322,6 +328,11 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 
 				dataProcessingInstance->importFromFile(importPath);
 			}
+		} else if(id == runFinalTasID) {
+			// Open the run final TAS dialog and untether
+			sideUI->untether();
+			TasRunner tasRunner(this, networkInstance, &mainSettings, dataProcessingInstance);
+			tasRunner.ShowModal();
 		}
 	}
 }

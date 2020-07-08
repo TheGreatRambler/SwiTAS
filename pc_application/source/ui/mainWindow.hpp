@@ -17,6 +17,7 @@
 #include "../dataHandling/dataProcessing.hpp"
 #include "../dataHandling/gameCorruptor.hpp"
 #include "../dataHandling/projectHandler.hpp"
+#include "../dataHandling/runFinalTas.hpp"
 #include "../helpers.hpp"
 #include "bottomUI.hpp"
 #include "debugWindow.hpp"
@@ -65,7 +66,8 @@ private:
 	wxWindowID setNameID;
 	wxWindowID toggleLoggingID;
 	wxWindowID toggleDebugMenuID;
-	wxWindowID openGameCorruptor;
+	wxWindowID openGameCorruptorID;
+	wxWindowID runFinalTasID;
 
 	void handlePreviousWindowTransform();
 

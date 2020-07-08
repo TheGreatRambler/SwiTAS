@@ -57,7 +57,7 @@ else
 	LDFLAGS += -m64
 endif
 
-SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
+SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s -or -name *.rc)
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)
 
@@ -116,6 +116,11 @@ $(BUILD_DIR)/%.c.o: %.c
 $(BUILD_DIR)/%.cpp.o: %.cpp
 	$(MKDIR_P) $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+
+# Windows RES file
+$(BUILD_DIR)/%.rc.o: %.rc
+	$(MKDIR_P) $(dir $@)
+	windres $< $@
 
 
 .PHONY: all clean
