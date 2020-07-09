@@ -22,7 +22,5 @@
 	<integer>0</integer>
 	<key>IFMinorVersion</key>
 	<integer>1</integer>
-	<key>UIRequiresPersistentWiFi</key>
-<true/>
 </dict>
 </plist>
