@@ -60,7 +60,7 @@ extern "C" {
 #define __WORDSIZE 32
 #endif
 
-#if defined(__linux__) || defined(__DARWIN) || defined(__SWITCH__)
+#if defined(__linux__) || defined(__APPLE__) || defined(__SWITCH__)
 typedef unsigned char uint8;
 typedef char int8;
 typedef unsigned short uint16;
@@ -173,7 +173,7 @@ typedef long int int64;
 #define GETHOSTBYNAME(a) gethostbyname(a)
 #endif
 
-#if defined(__linux__) || defined(__DARWIN) || defined(__SWITCH__)
+#if defined(__linux__) || defined(__APPLE__) || defined(__SWITCH__)
 #define ACCEPT(a, b, c) accept(a, b, c)
 #define CONNECT(a, b, c) connect(a, b, c)
 #define CLOSE(a) close(a)
@@ -195,7 +195,7 @@ typedef long int int64;
 #define GETHOSTBYNAME(a) gethostbyname(a)
 #endif
 
-#if defined(__linux__) || defined(__DARWIN)
+#if defined(__linux__) || defined(__APPLE__)
 #define WRITEV(a, b, c) writev(a, b, c)
 #define FOPEN(x, y) fopen(x, y)
 #endif

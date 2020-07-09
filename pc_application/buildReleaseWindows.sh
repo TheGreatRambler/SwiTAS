@@ -1,21 +1,21 @@
-# Build for 32 bit and then 64 bit
-# TODO
-
 make clean
 make -B BUILD=release ARCH=64
 
-mkdir release
-rm switas-windows-64bit.zip
+rm -rf release
 
-mkdir release/bin
+mkdir -p release/bin
+rm release/bin/switas.exe
 cp bin/* release/bin
-cp switas_settings.json release
-cp switas_recent.json release
-# https://unix.stackexchange.com/a/314823
-find share -name '*.png' -o -name '*.jpg' | xargs cp --parents -t release
-
 strip -s release/bin/switas.exe
 
+cp switas_settings.json release
+cp switas_recent.json release
+
+rm -rf release/share
+mkdir -p release/share
+find share -name '*.png' -o -name '*.jpg' | xargs cp --parents -t release
+
+rm switas-windows-64bit.zip
 zip -r switas-windows-64bit.zip release
 rm -r release
 

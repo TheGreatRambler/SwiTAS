@@ -1,11 +1,17 @@
 #include "helpers.hpp"
 
 std::string HELPERS::resolvePath(std::string path) {
+	wxFileName relativeToExecutable(wxStandardPaths::Get().GetExecutablePath());
+	relativeToExecutable.RemoveDir(relativeToExecutable.GetDirCount() - 1);
+
 #ifdef __WXMSW__
-	wxFileName fullPath("../" + path, wxPATH_NATIVE);
+	wxFileName fullPath(relativeToExecutable.GetPathWithSep() + path, wxPATH_NATIVE);
 #endif
 #ifdef DEBIAN_SYSTEM
 	wxFileName fullPath("/usr/share/switas/" + path, wxPATH_NATIVE);
+#endif
+#ifdef __APPLE__
+	wxFileName fullPath(relativeToExecutable.GetPathWithSep() + path, wxPATH_NATIVE);
 #endif
 	fullPath.MakeAbsolute();
 	std::string res = fullPath.GetFullPath(wxPATH_NATIVE).ToStdString();
@@ -25,10 +31,13 @@ std::vector<std::string> HELPERS::splitString(const std::string s, char delim) {
 }
 
 wxFileName HELPERS::getMainSettingsPath(std::string name) {
+	wxString nameString = wxString::FromUTF8(name);
+
 	wxFileName relativeToExecutable(wxStandardPaths::Get().GetExecutablePath());
 	// Go one folder back
+	// This option is for Mac too
 	relativeToExecutable.RemoveDir(relativeToExecutable.GetDirCount() - 1);
-	relativeToExecutable.SetName(wxString::FromUTF8(name));
+	relativeToExecutable.SetName(nameString);
 	relativeToExecutable.SetExt("json");
 	if(relativeToExecutable.FileExists()) {
 		// Prefer relative to the executable
@@ -36,14 +45,14 @@ wxFileName HELPERS::getMainSettingsPath(std::string name) {
 	} else {
 		// Use the home folder as a backup
 		wxFileName inHomeFolder(wxStandardPaths::Get().GetUserConfigDir());
-		inHomeFolder.SetName(wxString::FromUTF8(name));
+		inHomeFolder.SetName(nameString);
 		inHomeFolder.SetExt("json");
 		if(inHomeFolder.FileExists()) {
 			return inHomeFolder;
 		} else {
 			// Put in etc lol, needed for debian
 			wxFileName etcFolder("/etc/switas/");
-			etcFolder.SetName(wxString::FromUTF8(name));
+			etcFolder.SetName(nameString);
 			etcFolder.SetExt("json");
 			return etcFolder;
 		}
@@ -120,7 +129,8 @@ void HELPERS::addDarkmodeWindows(wxWindow* window) {
 // Executes command and gets output
 std::string HELPERS::exec(const char* cmd) {
 	wxArrayString outputArray;
-	long resultCode = wxExecute(cmd, outputArray, wxEXEC_HIDE_CONSOLE);
+	// Technically returns result code
+	wxExecute(cmd, outputArray, wxEXEC_HIDE_CONSOLE);
 
 	std::size_t numOfLines = outputArray.GetCount();
 	if(numOfLines != 0) {

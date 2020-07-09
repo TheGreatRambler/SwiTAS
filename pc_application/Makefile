@@ -77,6 +77,9 @@ CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 # At some point, should manually include only the decoders I need, the ones most common to youtube
 # Notice: Build the DLLs for 32 bit
 
+# For assets
+# https://unix.stackexchange.com/a/314823
+
 # WxGTK packages
 # sudo apt-get install libwxbase3.1-0-unofficial3 libwxbase3.1unofficial3-dev libwxgtk3.1-0-unofficial3 libwxgtk3.1unofficial3-dev wx3.1-headers wx-common
 
