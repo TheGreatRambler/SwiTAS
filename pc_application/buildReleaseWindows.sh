@@ -13,7 +13,7 @@ cp switas_recent.json release
 
 rm -rf release/share
 mkdir -p release/share
-find share -name '*.png' -o -name '*.jpg' | xargs cp --parents -t release
+find share -name '*.png' -o -name '*.jpg' -o -name '*.ico' | xargs cp --parents -t release
 
 rm switas-windows-64bit.zip
 zip -r switas-windows-64bit.zip release
