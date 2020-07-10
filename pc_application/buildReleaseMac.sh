@@ -11,7 +11,8 @@ cp switas_recent.json switas_mac.app/Contents
 
 rm -rf switas_mac.app/Contents/share
 mkdir -p switas_mac.app/Contents/share
-find share -name '*.png' -o -name '*.jpg' | xargs /usr/local/opt/coreutils/libexec/gnubin/cp --parents -t switas_mac.app/Contents
+cp -r share switas_mac.app/Contents
+find switas_mac.app/Contents -name '*.svg' | xargs rm
 
 # Install dylibbundler for this
 dylibbundler -od -b -x switas_mac.app/Contents/MacOS/switas -d switas_mac.app/Contents/libs/
