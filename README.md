@@ -1,5 +1,5 @@
 # SwiTAS
-A TAS toolkit for the Nintendo Switch. Usuable via hardware, homebrew and emulator.
+A TAS toolkit for the Nintendo Switch. Usuable via hardware, homebrew and emulator. Join [the Discord](https://discord.gg/3zDmqpQ)!
 
 # [RELEASES HERE](https://github.com/TheGreatRambler/SwiTAS/releases)
 

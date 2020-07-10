@@ -8,9 +8,9 @@ Essential: no
 Installed-Size: 20000
 Maintainer: TheGreatRambler
 Description: A TAS toolkit for the Nintendo Switch
-Depends: zlib1g,
-	libgtk-3-0,
-	libwxbase3.1-0-unofficial3,
-	libwxgtk3.1-0-unofficial3,
-	wx-common,
-	libffms2-4
+Depends: zlib1g (= 1:1.2.11.dfsg-0ubuntu2),
+	libgtk-3-0 (= 3.22.30-1ubuntu4),
+	libwxbase3.1-0-unofficial3 (= 3.1.3-1.bionic),
+	libwxgtk3.1-0-unofficial3 (= 3.1.3-1.bionic),
+	wx-common (= 3.1.3-1.bionic),
+	libffms2-4 (= 2.23-2)
