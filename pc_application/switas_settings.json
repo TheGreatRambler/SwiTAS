@@ -1,0 +1,254 @@
+{
+	"buttons": {
+		"A": {
+			"normalName": "A",
+			"scriptName": "KEY_A",
+			"viewName": "A Button",
+			"onIconImage": "share/icons/switas/inputs/Aon.png",
+			"offIconImage": "share/icons/switas/inputs/Aoff.png",
+			"triggerKeybind": "A",
+			"gridX": 10,
+			"gridY": 2
+		},
+		"B": {
+			"normalName": "B",
+			"scriptName": "KEY_B",
+			"viewName": "B Button",
+			"onIconImage": "share/icons/switas/inputs/Bon.png",
+			"offIconImage": "share/icons/switas/inputs/Boff.png",
+			"triggerKeybind": "S",
+			"gridX": 9,
+			"gridY": 3
+		},
+		"X": {
+			"normalName": "X",
+			"scriptName": "KEY_X",
+			"viewName": "X Button",
+			"onIconImage": "share/icons/switas/inputs/Xon.png",
+			"offIconImage": "share/icons/switas/inputs/Xoff.png",
+			"triggerKeybind": "Z",
+			"gridX": 9,
+			"gridY": 1
+		},
+		"Y": {
+			"normalName": "Y",
+			"scriptName": "KEY_Y",
+			"viewName": "Y Button",
+			"onIconImage": "share/icons/switas/inputs/Yon.png",
+			"offIconImage": "share/icons/switas/inputs/Yoff.png",
+			"triggerKeybind": "X",
+			"gridX": 8,
+			"gridY": 2
+		},
+		"L": {
+			"normalName": "L",
+			"scriptName": "KEY_L",
+			"viewName": "L Button",
+			"onIconImage": "share/icons/switas/inputs/Lon.png",
+			"offIconImage": "share/icons/switas/inputs/Loff.png",
+			"triggerKeybind": "Q",
+			"gridX": 3,
+			"gridY": 0
+		},
+		"R": {
+			"normalName": "R",
+			"scriptName": "KEY_R",
+			"viewName": "R Button",
+			"onIconImage": "share/icons/switas/inputs/Ron.png",
+			"offIconImage": "share/icons/switas/inputs/Roff.png",
+			"triggerKeybind": "W",
+			"gridX": 7,
+			"gridY": 0
+		},
+		"ZL": {
+			"normalName": "ZL",
+			"scriptName": "KEY_ZL",
+			"viewName": "ZL Trigger",
+			"onIconImage": "share/icons/switas/inputs/ZLon.png",
+			"offIconImage": "share/icons/switas/inputs/ZLoff.png",
+			"triggerKeybind": "I",
+			"gridX": 2,
+			"gridY": 0
+		},
+		"ZR": {
+			"normalName": "ZR",
+			"scriptName": "KEY_ZR",
+			"viewName": "ZR Trigger",
+			"onIconImage": "share/icons/switas/inputs/ZRon.png",
+			"offIconImage": "share/icons/switas/inputs/ZRoff.png",
+			"triggerKeybind": "O",
+			"gridX": 8,
+			"gridY": 0
+		},
+		"SL": {
+			"normalName": "SL",
+			"scriptName": "KEY_SL",
+			"viewName": "SL Trigger",
+			"onIconImage": "share/icons/switas/inputs/SLon.png",
+			"offIconImage": "share/icons/switas/inputs/SLoff.png",
+			"triggerKeybind": "E",
+			"gridX": 4,
+			"gridY": 0
+		},
+		"SR": {
+			"normalName": "SR",
+			"scriptName": "KEY_SR",
+			"viewName": "SR Trigger",
+			"onIconImage": "share/icons/switas/inputs/SRon.png",
+			"offIconImage": "share/icons/switas/inputs/SRoff.png",
+			"triggerKeybind": "R",
+			"gridX": 6,
+			"gridY": 0
+		},
+		"DUP": {
+			"normalName": "Dup",
+			"scriptName": "KEY_DUP",
+			"viewName": "Up on Dpad",
+			"onIconImage": "share/icons/switas/inputs/UPon.png",
+			"offIconImage": "share/icons/switas/inputs/UPoff.png",
+			"triggerKeybind": "T",
+			"gridX": 1,
+			"gridY": 1
+		},
+		"DDOWN": {
+			"normalName": "Ddown",
+			"scriptName": "KEY_DDOWN",
+			"viewName": "Down on Dpad",
+			"onIconImage": "share/icons/switas/inputs/DOWNon.png",
+			"offIconImage": "share/icons/switas/inputs/DOWNoff.png",
+			"triggerKeybind": "G",
+			"gridX": 1,
+			"gridY": 3
+		},
+		"DLEFT": {
+			"normalName": "Dleft",
+			"scriptName": "KEY_DLEFT",
+			"viewName": "Left on Dpad",
+			"onIconImage": "share/icons/switas/inputs/LEFTon.png",
+			"offIconImage": "share/icons/switas/inputs/LEFToff.png",
+			"triggerKeybind": "F",
+			"gridX": 0,
+			"gridY": 2
+		},
+		"DRIGHT": {
+			"normalName": "Dright",
+			"scriptName": "KEY_DRIGHT",
+			"viewName": "Right on Dpad",
+			"onIconImage": "share/icons/switas/inputs/RIGHTon.png",
+			"offIconImage": "share/icons/switas/inputs/RIGHToff.png",
+			"triggerKeybind": "H",
+			"gridX": 2,
+			"gridY": 2
+		},
+		"PLUS": {
+			"normalName": "Plus",
+			"scriptName": "KEY_PLUS",
+			"viewName": "Plus Button",
+			"onIconImage": "share/icons/switas/inputs/PLUSon.png",
+			"offIconImage": "share/icons/switas/inputs/PLUSoff.png",
+			"triggerKeybind": "N",
+			"gridX": 7,
+			"gridY": 1
+		},
+		"MINUS": {
+			"normalName": "Minus",
+			"scriptName": "KEY_MINUS",
+			"viewName": "Minus Button",
+			"onIconImage": "share/icons/switas/inputs/MINUSon.png",
+			"offIconImage": "share/icons/switas/inputs/MINUSoff.png",
+			"triggerKeybind": "M",
+			"gridX": 3,
+			"gridY": 1
+		},
+		"HOME": {
+			"normalName": "Home",
+			"scriptName": "KEY_HOME",
+			"viewName": "Home Button",
+			"onIconImage": "share/icons/switas/inputs/HOMEon.png",
+			"offIconImage": "share/icons/switas/inputs/HOMEoff.png",
+			"triggerKeybind": "B",
+			"gridX": 6,
+			"gridY": 2
+		},
+		"CAPT": {
+			"normalName": "Capt",
+			"scriptName": "KEY_CAPT",
+			"viewName": "Capture Button",
+			"onIconImage": "share/icons/switas/inputs/CAPTon.png",
+			"offIconImage": "share/icons/switas/inputs/CAPToff.png",
+			"triggerKeybind": "V",
+			"gridX": 4,
+			"gridY": 2
+		},
+		"LS": {
+			"normalName": "LS",
+			"scriptName": "KEY_LS",
+			"viewName": "Left Stick Press",
+			"onIconImage": "share/icons/switas/inputs/LSTICKon.png",
+			"offIconImage": "share/icons/switas/inputs/LSTICKoff.png",
+			"triggerKeybind": "K",
+			"gridX": 0,
+			"gridY": 0
+		},
+		"RS": {
+			"normalName": "RS",
+			"scriptName": "KEY_RS",
+			"viewName": "Right Stick Press",
+			"onIconImage": "share/icons/switas/inputs/RSTICKoff.png",
+			"offIconImage": "share/icons/switas/inputs/RSTICKon.png",
+			"triggerKeybind": "L",
+			"gridX": 3,
+			"gridY": 3
+		}
+	},
+	"iconTransparent": "rgb(48, 0, 77)",
+	"inputsList": {
+		"imageWidth": 40,
+		"imageHeight": 40
+	},
+	"buttonGrid": {
+		"imageWidth": 80,
+		"imageHeight": 80
+	},
+	"joystickMappings": {
+		"0x45E,0x28E": "A:b2,B:b1,X:b4,Y:b3,L:b5,R:b6,PLUS:b8,MINUS:b7,LS:b9,RS:b10,DUP:h0.1,DDOWN:h0.4,DLEFT:h0.8,DRIGHT:h0.2,LSX:a0+,LSY:a1-,RSX:a4+,RSY:a3-,ZL:a2-,ZR:a2-"
+	},
+	"programIcon": "share/icons/switas/logo/main.png",
+	"version": "1.0.1",
+	"videoViewerDefaultImage": "share/images/novideodefault.jpg",
+	"dhashWidth": 80,
+	"dhashHeight": 45,
+	"ui": {
+		"addFrameButton": "share/icons/switas/buttons/addFrameButton.png",
+		"frameAdvanceButton": "share/icons/switas/buttons/frameAdvanceButton.png",
+		"autoFrameAdvanceButton": "share/icons/switas/buttons/autoFrameAdvanceButton.png",
+		"savestateHookCreateButton": "share/icons/switas/buttons/savestateHookCreateButton.png",
+		"savestateHookLoadButton": "share/icons/switas/buttons/savestateHookLoadButton.png",
+		"savestateHookModifyButton": "share/icons/switas/buttons/savestateHookModifyButton.png",
+		"playerAddButton": "share/icons/switas/buttons/addPlayerButton.png",
+		"playerRemoveButton": "share/icons/switas/buttons/removePlayerButton.png",
+		"branchAddButton": "share/icons/switas/buttons/addBranchButton.png",
+		"branchRemoveButton": "share/icons/switas/buttons/removeBranchButton.png",
+		"joystickLockButton": "share/icons/switas/buttons/joystickLockButton.png",
+		"playButton": "share/icons/switas/buttons/playButton.png",
+		"pauseButton": "share/icons/switas/buttons/pauseButton.png",
+		"okButton": "share/icons/switas/buttons/okButton.png",
+		"stopButton": "share/icons/switas/buttons/stopButton.png",
+		"startTasHomebrewButton": "share/icons/switas/buttons/startTasHomebrewButton.png",
+		"startTasArduinoButton": "share/icons/switas/buttons/startTasArduinoButton.png",
+		"autoFrameStartButton": "share/icons/switas/buttons/autoFrameStartButton.png",
+		"autoFrameEndButton": "share/icons/switas/buttons/autoFrameEndButton.png",
+		"splashScreen": "share/icons/switas/logo/main.png",
+		"buttonWidth": 60,
+		"buttonHeight": 60,
+		"frameViewerColors": {
+			"ran": "rgb(144, 252, 189)",
+			"savestate": "rgb(252, 144, 169)"
+		},
+		"recentProjectsColors": {
+			"projectName": "rgb(12, 44, 112)",
+			"projectDir": "rgb(112, 89, 12)",
+			"newProject": "rgb(20, 110, 66)"
+		}
+	}
+}

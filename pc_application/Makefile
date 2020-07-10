@@ -1,14 +1,14 @@
 UNAME := $(shell uname -o)
 
 ifeq ($(UNAME),Msys)
-	TARGET_EXEC ?= nxtas.exe
+	TARGET_EXEC ?= switas.exe
 else
-	TARGET_EXEC ?= nxtas
+	TARGET_EXEC ?= switas
 endif
 
 BUILD_DIR ?= ./bin
 
-SRC_DIRS ?= ./source ../sharedNetworkCode
+SRC_DIRS ?= ./source
 
 ifeq ($(UNAME),Msys)
 # Set compilers to MinGW64 compilers
@@ -20,32 +20,49 @@ CXX := g++
 endif
 
 # C flags
-CFLAGS := -std=gnu17
+CFLAGS := -std=c11
 
 # C++ flags
-CXXFLAGS := -std=gnu++17 $(shell wx-config --cxxflags base,core) $(shell pkg-config --cflags ffms2 luajit) -I./include
+CXXFLAGS := -std=gnu++17 $(shell wx-config --cxxflags base,core,net) $(shell pkg-config --cflags ffms2) -I./include
 
 # C/C++ flags
-# For some reason, the CLIENT_IMP doesn't seem to be passing down, oh well
-CPPFLAGS := -Wall -Wno-maybe-uninitialized -ggdb -m64 -DCLIENT_IMP
+CPPFLAGS := -Wall -Wno-maybe-uninitialized -Wno-sign-compare -DCLIENT_IMP
 
 ifeq ($(BUILD),release)
 	# "Release" build - optimization, and no debug symbols
 	CPPFLAGS += -O3 -s -DNDEBUG
 else
 	# "Debug" build - no optimization, and debugging symbols
-	CPPFLAGS += -Og -g
+	CPPFLAGS += -Og -g -ggdb
+endif
+
+ifeq ($(SYSTEM),debian)
+	# "Release" build - optimization, and no debug symbols
+	CPPFLAGS += -DDEBIAN_SYSTEM
 endif
 
 # Linker flags (-lpthread needed for threads)
 # Includes some neccessary linker flags for win32-darkmode (will add in the future)
-LDFLAGS := $(shell wx-config --libs base,core) $(shell pkg-config --libs ffms2 luajit) -lpthread
+LDFLAGS := $(shell wx-config --libs base,core,net) $(shell pkg-config --libs ffms2) -lpthread
 ifeq ($(UNAME),Msys)
 	# Needed for sockets on windows
 	LDFLAGS += -lws2_32
 endif
 
+ifeq ($(ARCH),32)
+	CPPFLAGS += -m32
+	LDFLAGS += -m32
+else
+	CPPFLAGS += -m64
+	LDFLAGS += -m64
+endif
+
+ifeq ($(UNAME),Msys)
+SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s -or -name *.rc)
+else
 SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
+endif
+
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)
 
@@ -56,8 +73,28 @@ CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 
 # Custom DLLs explanation
 # To save filesize on the ffmpeg dlls, I used this configure line:
-# ./configure --disable-static --enable-shared --disable-doc --disable-programs --disable-network --disable-avfilter --disable-avdevice --enable-small --disable-bsfs --disable-protocol=pipe --disable-bzlib --disable-devices --disable-filters --disable-iconv --disable-debug --disable-hwaccels --disable-encoders --enable-encoder=mpeg4
+# ./configure --disable-static --enable-shared --disable-doc --disable-programs --disable-network --disable-avfilter --disable-avdevice --enable-small --disable-bsfs --disable-protocol=pipe --disable-devices --disable-filters --disable-iconv --disable-debug --disable-hwaccels --disable-encoders --enable-encoder=mpeg4 --enable-libvpx --enable-libvorbis
 # At some point, should manually include only the decoders I need, the ones most common to youtube
+# Notice: Build the DLLs for 32 bit
+
+# For assets
+# https://unix.stackexchange.com/a/314823
+
+# WxGTK packages
+# sudo apt-get install libwxbase3.1-0-unofficial3 libwxbase3.1unofficial3-dev libwxgtk3.1-0-unofficial3 libwxgtk3.1unofficial3-dev wx3.1-headers wx-common
+
+all: pre-build $(BUILD_DIR)/$(TARGET_EXEC)
+
+ifeq ($(SNAPCRAFT_PROJECT_NAME),)
+pre-build:
+	# This runs before anything happens
+	# Copy in sharedNetworkCode
+	# https://stackoverflow.com/a/1622186/9329945
+	rm -r -f ./source/sharedNetworkCode
+	cp -p -r ../sharedNetworkCode ./source/sharedNetworkCode
+else
+pre-build: ;
+endif
 
 ifeq ($(UNAME),Msys)
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
@@ -88,8 +125,15 @@ $(BUILD_DIR)/%.cpp.o: %.cpp
 	$(MKDIR_P) $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
+ifeq ($(UNAME),Msys)
+# Windows RES file
+$(BUILD_DIR)/%.rc.o: %.rc
+	$(MKDIR_P) $(dir $@)
+	windres $< $@
+endif
 
-.PHONY: clean
+
+.PHONY: all clean
 
 clean:
 	$(RM) -r $(BUILD_DIR)

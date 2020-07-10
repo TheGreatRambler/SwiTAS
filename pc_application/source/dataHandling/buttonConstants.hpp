@@ -12,11 +12,12 @@
 #include <vector>
 #include <wx/wx.h>
 
-#include "../../sharedNetworkCode/buttonData.hpp"
+#include "../sharedNetworkCode/buttonData.hpp"
 
 // So that types are somewhat unified
 typedef uint32_t FrameNum;
 typedef uint16_t SavestateBlockNum;
+typedef uint16_t BranchNum;
 
 // Struct containing button info
 struct ButtonInfo {
@@ -44,7 +45,7 @@ struct Savestate {
 	uint32_t frame;
 };
 
-typedef std::shared_ptr<std::vector<std::shared_ptr<ControllerData>>> SavestateHookBlock;
+typedef std::vector<std::shared_ptr<std::vector<std::shared_ptr<ControllerData>>>> SavestateHookBlock;
 struct SavestateHook {
 	std::string dHash;
 	wxBitmap* screenshot;

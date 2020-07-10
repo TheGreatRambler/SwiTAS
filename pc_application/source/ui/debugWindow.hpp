@@ -3,7 +3,7 @@
 #include <memory>
 #include <wx/wx.h>
 
-#include "../../sharedNetworkCode/networkInterface.hpp"
+#include "../sharedNetworkCode/networkInterface.hpp"
 
 // Has a bunch of buttons for debugging purposes
 class DebugWindow : public wxFrame {

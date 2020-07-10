@@ -1,7 +1,7 @@
 #include "savestateSelection.hpp"
 
-SavestateLister::SavestateLister(DataProcessing* input)
-	: wxDialog(NULL, wxID_ANY, "Savestate Listing", wxDefaultPosition, wxDefaultSize) {
+SavestateLister::SavestateLister(wxFrame* parent, DataProcessing* input)
+	: wxDialog(parent, wxID_ANY, "Savestate Listing", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE) {
 	inputInstance = input;
 
 	mainSizer = new wxBoxSizer(wxVERTICAL);
@@ -11,25 +11,26 @@ SavestateLister::SavestateLister(DataProcessing* input)
 	projectListHolder = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize);
 
 	// Add each individual savestate hook for viewing
+	SavestateBlockNum block = 0;
 	for(auto const& savestateHook : inputInstance->getAllSavestateHookBlocks()) {
-		wxBoxSizer* dataSizer = new wxBoxSizer(wxVERTICAL);
+		wxBoxSizer* itemSizer = new wxBoxSizer(wxVERTICAL);
 
-		wxStaticText* dHash = new wxStaticText(this, wxID_ANY, wxString::FromUTF8(savestateHook->dHash), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
-
-		wxBitmap* screenshot = savestateHook->screenshot;
 		// Size is reduced by 4 so the bitmap isn't massive
 		DrawingCanvasBitmap* drawingCanvas = new DrawingCanvasBitmap(this, wxSize(1280 / 4, 720 / 4));
-		drawingCanvas->setBitmap(screenshot);
+		drawingCanvas->setBitmap(savestateHook->screenshot);
+		drawingCanvas->SetToolTip(wxString::FromUTF8(savestateHook->dHash));
 
 		savestateScreenshots.push_back(drawingCanvas);
 
-		drawingCanvas->Bind(wxEVT_LEFT_DOWN, &SavestateLister::onSavestateHookSelect, this);
+		itemSizer->Add(new wxStaticText(this, wxID_ANY, wxString::Format("Savestate Hook %u", block), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL), 0);
+		itemSizer->Add(drawingCanvas, 0, wxSHAPED);
 
-		dataSizer->Add(dHash, 1);
-		dataSizer->Add(drawingCanvas, 0, wxSHAPED);
+		projectList->Add(itemSizer);
 
-		projectList->Add(dataSizer, 1);
+		block++;
 	}
+
+	projectListHolder->Bind(wxEVT_LEFT_DOWN, &SavestateLister::onSavestateHookSelect, this);
 
 	projectListHolder->SetSizer(projectList);
 
@@ -45,24 +46,26 @@ SavestateLister::SavestateLister(DataProcessing* input)
 }
 
 void SavestateLister::onSavestateHookSelect(wxMouseEvent& event) {
-	DrawingCanvasBitmap* drawingCanvas = (DrawingCanvasBitmap*)event.GetEventObject();
+	// Get mouse location in scrolled window and compare to each screenshot
+	wxPoint positionOnScreen = projectListHolder->ClientToScreen(event.GetPosition());
 	for(std::size_t i = 0; i < savestateScreenshots.size(); i++) {
-		if(drawingCanvas == savestateScreenshots[i]) {
+		if(savestateScreenshots[i]->GetScreenRect().Contains(positionOnScreen)) {
 			selectedSavestate   = i;
 			operationSuccessful = true;
-			Close(true);
+			EndModal(wxID_OK);
 			break;
 		}
 	}
 }
 
-SavestateSelection::SavestateSelection(rapidjson::Document* settings, std::shared_ptr<ProjectHandler> projHandler, bool isSavestateLoadDialog, std::shared_ptr<CommunicateWithNetwork> networkImp)
-	: wxDialog(NULL, wxID_ANY, "Savestate Selection", wxDefaultPosition, wxDefaultSize) {
+SavestateSelection::SavestateSelection(wxFrame* parent, rapidjson::Document* settings, std::shared_ptr<ProjectHandler> projHandler, bool isSavestateLoadDialog, std::shared_ptr<CommunicateWithNetwork> networkImp)
+	: wxDialog(parent, wxID_ANY, "Savestate Selection", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE | wxMAXIMIZE) {
 	// Parent is specifically null because this is a separate window that opens
-	savestateLoadDialog = isSavestateLoadDialog;
-	mainSettings        = settings;
-	networkInstance     = networkImp;
-	projectHandler      = projHandler;
+	savestateLoadDialog   = isSavestateLoadDialog;
+	mainSettings          = settings;
+	networkInstance       = networkImp;
+	projectHandler        = projHandler;
+	autoFrameAdvanceTimer = new wxTimer(this);
 
 	dhashWidth  = (*mainSettings)["dhashWidth"].GetInt();
 	dhashHeight = (*mainSettings)["dhashHeight"].GetInt();
@@ -71,13 +74,18 @@ SavestateSelection::SavestateSelection(rapidjson::Document* settings, std::share
 	buttonSizer = new wxBoxSizer(wxHORIZONTAL);
 	fullSizer   = new wxBoxSizer(wxVERTICAL);
 
-	leftImageSizer  = new wxBoxSizer(wxVERTICAL);
-	rightImageSizer = new wxBoxSizer(wxVERTICAL);
+	leftImageSizer = new wxBoxSizer(wxVERTICAL);
 
-	leftDHash  = new wxStaticText(this, wxID_ANY, "null", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
-	rightDHash = new wxStaticText(this, wxID_ANY, "null", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
+	if(savestateLoadDialog) {
+		rightImageSizer = new wxBoxSizer(wxVERTICAL);
+	}
 
-	hammingDistance = new wxStaticText(this, wxID_ANY, "null", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
+	if(savestateLoadDialog) {
+		leftDHash  = new wxStaticText(this, wxID_ANY, "null", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
+		rightDHash = new wxStaticText(this, wxID_ANY, "null", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
+
+		hammingDistance = new wxStaticText(this, wxID_ANY, "null", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
+	}
 
 	// To set the text, just use:
 	// leftDHash->SetLabelText(aString);
@@ -87,17 +95,36 @@ SavestateSelection::SavestateSelection(rapidjson::Document* settings, std::share
 	// Look to mainWindow for setting sizers
 	// Gonna go a roundabout way for adding buttons, every button will be visible, but certain ones will be disabled as needed
 
-	playButton         = HELPERS::getBitmapButton(this, mainSettings, "playButton");
-	pauseButton        = HELPERS::getBitmapButton(this, mainSettings, "pauseButton");
-	frameAdvanceButton = HELPERS::getBitmapButton(this, mainSettings, "frameAdvanceButton");
-	okButton           = HELPERS::getBitmapButton(this, mainSettings, "okButton");
+	playButton             = HELPERS::getBitmapButton(this, mainSettings, "playButton");
+	pauseButton            = HELPERS::getBitmapButton(this, mainSettings, "pauseButton");
+	frameAdvanceButton     = HELPERS::getBitmapButton(this, mainSettings, "frameAdvanceButton");
+	autoFrameAdvanceButton = HELPERS::getBitmapButton(this, mainSettings, "autoFrameAdvanceButton");
+	okButton               = HELPERS::getBitmapButton(this, mainSettings, "okButton");
 
-	selectFrameAutomatically = new wxSpinCtrl(this, wxID_ANY, "Select automatically at or below this hamming distance: ", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0);
+	playButton->SetToolTip("Start realtime game playback");
+	pauseButton->SetToolTip("Pause realtime game playback");
+	frameAdvanceButton->SetToolTip("Advance game by one frame");
+	autoFrameAdvanceButton->SetToolTip("Start automatic frame advancing");
+	okButton->SetToolTip("Select this frame as the savestate hook");
+
+	if(savestateLoadDialog) {
+		// Initial is 10
+		selectFrameAutomatically = new wxSpinCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 10);
+		selectFrameAutomatically->SetToolTip("Select frame automatically at or below this hamming distance");
+	}
+
+	autoIncrementDelay = new wxSpinCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 5000, 0);
+	autoIncrementDelay->SetToolTip("Delay in mlliseconds for automatically incrementing frame");
 
 	playButton->Bind(wxEVT_BUTTON, &SavestateSelection::onPlay, this);
 	pauseButton->Bind(wxEVT_BUTTON, &SavestateSelection::onPause, this);
 	frameAdvanceButton->Bind(wxEVT_BUTTON, &SavestateSelection::onFrameAdvance, this);
+	autoFrameAdvanceButton->Bind(wxEVT_BUTTON, &SavestateSelection::onAutoFrameAdvance, this);
 	okButton->Bind(wxEVT_BUTTON, &SavestateSelection::onOk, this);
+
+	Bind(wxEVT_TIMER, &SavestateSelection::onAutoFrameAdvanceTimer, this);
+
+	Bind(wxEVT_SIZE, &SavestateSelection::onResize, this);
 
 	// Divide by two because it's usually too big
 	currentFrame = new DrawingCanvasBitmap(this, wxSize(1280 / 2, 720 / 2));
@@ -106,14 +133,18 @@ SavestateSelection::SavestateSelection(rapidjson::Document* settings, std::share
 		goalFrame = new DrawingCanvasBitmap(this, wxSize(1280 / 2, 720 / 2));
 	}
 
-	leftImageSizer->Add(currentFrame, 0, wxSHAPED);
+	if(!savestateLoadDialog) {
+		leftImageSizer->Add(currentFrame, 0, wxSHAPED | wxEXPAND | wxALIGN_CENTER_HORIZONTAL);
+	} else {
+		leftImageSizer->Add(currentFrame, 1, wxSHAPED);
+	}
 
 	if(savestateLoadDialog) {
 		// Dhashes are only used in loading, not creating the first one
-		leftImageSizer->Add(leftDHash, 1, wxEXPAND | wxALL);
+		leftImageSizer->Add(leftDHash, 0);
 
-		rightImageSizer->Add(goalFrame, 0, wxSHAPED);
-		rightImageSizer->Add(rightDHash, 1, wxEXPAND | wxALL);
+		rightImageSizer->Add(goalFrame, 1, wxSHAPED);
+		rightImageSizer->Add(rightDHash, 0);
 	}
 
 	imageSizer->Add(leftImageSizer, 1, wxEXPAND | wxALL);
@@ -124,15 +155,19 @@ SavestateSelection::SavestateSelection(rapidjson::Document* settings, std::share
 	fullSizer->Add(imageSizer, 1, wxEXPAND | wxALL);
 
 	if(savestateLoadDialog) {
-		fullSizer->Add(hammingDistance, 1, wxEXPAND | wxALL);
+		fullSizer->Add(hammingDistance, 0, wxEXPAND);
+		fullSizer->Add(selectFrameAutomatically, 0, wxEXPAND);
 	}
+
+	fullSizer->Add(autoIncrementDelay, 0, wxEXPAND);
 
 	buttonSizer->Add(playButton, 1);
 	buttonSizer->Add(pauseButton, 1);
 	buttonSizer->Add(frameAdvanceButton, 1);
+	buttonSizer->Add(autoFrameAdvanceButton, 1);
 	buttonSizer->Add(okButton, 1);
 
-	fullSizer->Add(buttonSizer, 1, wxEXPAND | wxALL);
+	fullSizer->Add(buttonSizer, 0);
 
 	SetSizer(fullSizer);
 	fullSizer->SetSizeHints(this);
@@ -149,7 +184,7 @@ SavestateSelection::SavestateSelection(rapidjson::Document* settings, std::share
 	})
 	// clang-format on
 
-	// When done with all the stuff, close with Close(true);
+	registerFramebufferCallback();
 }
 
 // clang-format off
@@ -159,34 +194,59 @@ BEGIN_EVENT_TABLE(SavestateSelection, wxDialog)
 END_EVENT_TABLE()
 // clang-format on
 
+void SavestateSelection::onResize(wxSizeEvent& event) {
+	Layout();
+	event.Skip();
+}
+
 void SavestateSelection::setTargetFrame(wxBitmap* targetBitmap, std::string targetDhash) {
 	// Called when it's a load dialog
 	goalFrame->setBitmap(targetBitmap);
 	rightDHash->SetLabel(wxString::FromUTF8(targetDhash));
 }
 
-void SavestateSelection::onIdle(wxIdleEvent& event) {
-	/*
-	CHECK_QUEUE(networkInstance, RecieveGameFramebuffer, {
-		wxImage screenshot = HELPERS::getImageFromJPEGData(data.buf);
-		currentFrame->setBitmap(new wxBitmap(screenshot));
-		leftDHash->SetLabel(HELPERS::calculateDhash(screenshot, dhashWidth, dhashHeight));
+void SavestateSelection::onAutoFrameAdvanceTimer(wxTimerEvent& event) {
+	if(okCalled) {
+		callOk();
+	}
+	if(autoFrameEnabled) {
+		// Run another frame
+		frameAdvance();
+	}
+}
 
-		if(savestateLoadDialog) {
-			uint16_t hamming = HELPERS::getHammingDistance(leftDHash->GetLabel(), rightDHash->GetLabel());
-			hammingDistance->SetLabel(wxString::Format("%d", hamming));
-			if(hamming <= selectFrameAutomatically->GetValue()) {
-				// This frame might be identical, ask user if they want to use this frame
-				wxMessageDialog useFrameDialog(this, "This frame is very similar to the target frame, use it?", "Use this frame", wxYES_NO | wxCANCEL | wxYES_DEFAULT);
-				int res = useFrameDialog.ShowModal();
-				if(res == wxID_YES) {
-					// Use the frame
-					callOk();
+void SavestateSelection::onIdle(wxIdleEvent& event) {
+	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveGameFramebuffer)
+}
+
+void SavestateSelection::registerFramebufferCallback() {
+	ADD_NETWORK_CALLBACK(RecieveGameFramebuffer, {
+		if(!operationSuccessful) {
+			playButton->Enable();
+			frameAdvanceButton->Enable();
+			okButton->Enable();
+			wxImage screenshot = HELPERS::getImageFromJPEGData(data.buf);
+			currentFrame->setBitmap(new wxBitmap(screenshot));
+			wxString hash   = HELPERS::calculateDhash(screenshot, dhashWidth, dhashHeight);
+			leftDhashString = hash.ToStdString();
+			if(savestateLoadDialog) {
+				leftDHash->SetLabel(hash);
+				uint16_t hamming = HELPERS::getHammingDistance(hash, rightDHash->GetLabel());
+				hammingDistance->SetLabel(wxString::Format("%d", hamming));
+				if(hamming <= selectFrameAutomatically->GetValue()) {
+					wxMessageDialog useFrameDialog(this, "This frame is very similar to the target frame, use it?", "Use this frame", (0x00000002 | 0x00000008) | 0x00000010 | 0x00000000);
+					if(useFrameDialog.ShowModal() == wxID_YES) {
+						okCalled = true;
+						autoFrameAdvanceTimer->StartOnce(0);
+						return;
+					}
 				}
+			}
+			if(autoFrameEnabled) {
+				autoFrameAdvanceTimer->StartOnce(autoIncrementDelay->GetValue());
 			}
 		}
 	})
-	*/
 }
 
 void SavestateSelection::onPlay(wxCommandEvent& event) {
@@ -196,14 +256,29 @@ void SavestateSelection::onPlay(wxCommandEvent& event) {
 		data.actFlag = SendInfo::UNPAUSE;
 	})
 	// clang-format on
+	paused = false;
 }
 
 void SavestateSelection::onPause(wxCommandEvent& event) {
+	autoFrameEnabled = false;
 	// Stop automatic playing
 	// Do the same stuff as frameAdvance
 	// clang-format off
 	ADD_TO_QUEUE(SendFlag, networkInstance, {
 		data.actFlag = SendInfo::PAUSE;
+	})
+	// clang-format on
+	paused = true;
+}
+
+void SavestateSelection::frameAdvance() {
+	playButton->Disable();
+	frameAdvanceButton->Disable();
+	okButton->Disable();
+
+	// clang-format off
+	ADD_TO_QUEUE(SendFlag, networkInstance, {
+		data.actFlag = SendInfo::RUN_BLANK_FRAME;
 	})
 	// clang-format on
 }
@@ -212,15 +287,39 @@ void SavestateSelection::onFrameAdvance(wxCommandEvent& event) {
 	// Send blank input for a single frame then recieve JPEG buffer
 	// Blank input in this case is input that matches the inputs of the controller on the switch
 	// Set the dHash for the currentFrame and calc the hamming distance
-	// clang-format off
-	ADD_TO_QUEUE(SendFlag, networkInstance, {
-		data.actFlag = SendInfo::RUN_BLANK_FRAME;
-	})
-	// clang-format on
+	// Also, disable the window to prevent spam clicking
+	if(paused) {
+		frameAdvance();
+	}
+}
+
+void SavestateSelection::onAutoFrameAdvance(wxCommandEvent& event) {
+	if(paused) {
+		autoFrameEnabled = true;
+
+		frameAdvance();
+	}
 }
 
 void SavestateSelection::onOk(wxCommandEvent& event) {
 	callOk();
 }
 
-void SavestateSelection::onClose(wxCloseEvent& event) { }
+void SavestateSelection::callOk() {
+	// Use this frame as the savestate
+	operationSuccessful = true;
+	// clang-format off
+	//ADD_TO_QUEUE(SendFlag, networkInstance, {
+	//	data.actFlag = SendInfo::START_TAS_MODE;
+	//})
+	// clang-format on
+	delete autoFrameAdvanceTimer;
+	REMOVE_NETWORK_CALLBACK(RecieveGameFramebuffer)
+	EndModal(wxID_OK);
+}
+
+void SavestateSelection::onClose(wxCloseEvent& event) {
+	delete autoFrameAdvanceTimer;
+	REMOVE_NETWORK_CALLBACK(RecieveGameFramebuffer)
+	Destroy();
+}

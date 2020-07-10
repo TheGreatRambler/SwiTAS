@@ -8,7 +8,7 @@
 // clang-format off
 // https://stackoverflow.com/a/20583578/9329945
 #define ADD_NETWORK_CALLBACK(Flag, callbackBody) { \
-	projectHandler->Callbacks_##Flag.emplace(NETWORK_CALLBACK_ID, [&] (const Protocol::Struct_##Flag& data) { \
+	projectHandler->Callbacks_##Flag.emplace(NETWORK_CALLBACK_ID, [this] (const Protocol::Struct_##Flag& data) { \
 		callbackBody \
 	}); \
 }
@@ -22,7 +22,9 @@
 	Protocol::Struct_##Flag data; \
 	while (networkInstance->Queue_##Flag.try_dequeue(data)) { \
 		for (auto const& callback : projectHandler->Callbacks_##Flag) { \
-			callback.second(data); \
+			if (callback.first < 10) { \
+				callback.second(data); \
+			} \
 		} \
 	} \
 }
@@ -34,9 +36,11 @@
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <wx/zipstrm.h>
 #include <unordered_map>
 #include <wx/dir.h>
 #include <wx/dirdlg.h>
+#include <cstring>
 #include <wx/filename.h>
 #include <wx/grid.h>
 #include <wx/listbox.h>
@@ -48,9 +52,10 @@
 #include <wx/string.h>
 #include <wx/wfstream.h>
 #include <wx/wx.h>
+#include <wx/sstream.h>
 #include <wx/zstream.h>
 
-#include "../../sharedNetworkCode/serializeUnserializeData.hpp"
+#include "../sharedNetworkCode/serializeUnserializeData.hpp"
 #include "../ui/drawingCanvas.hpp"
 #include "../ui/videoComparisonViewer.hpp"
 #include "dataProcessing.hpp"
@@ -60,18 +65,25 @@ private:
 	DataProcessing* dataProcessing;
 	wxFrame* parentFrame;
 
-	wxDir projectDir;
+	wxFileName projectDir;
 	SerializeProtocol serializeProtocol;
 
 	std::string projectName;
 	uint8_t projectWasLoaded = true;
 
+	uint16_t imageExportIndex = 0;
+	uint16_t rerecordCount    = 0;
+
 	int recentProjectChoice;
+
+	// For file exporting
+	std::string lastEnteredFtpPath;
 
 	static constexpr int compressionLevel = 7;
 
 	// Main settings variable
 	rapidjson::Document* mainSettings;
+	rapidjson::Document recentSettings;
 
 	std::vector<std::shared_ptr<VideoEntry>> videoComparisonEntries;
 	wxMenu* videoComparisonEntriesMenu;
@@ -95,12 +107,25 @@ public:
 	void loadProject();
 	void saveProject();
 
+	void promptForUpdate();
+
+	void newProjectWasCreated();
+
 	wxFileName getProjectStart() {
-		return wxFileName::DirName(projectDir.GetNameWithSep());
+		return wxFileName::DirName(projectDir.GetPathWithSep());
+	}
+
+	std::string getLastEnteredFtpPath() {
+		return lastEnteredFtpPath;
+	}
+
+	void setLastEnteredFtpPath(std::string path) {
+		lastEnteredFtpPath = path;
 	}
 
 	void setProjectName(std::string name) {
 		projectName = name;
+		parentFrame->SetTitle("SwiTAS | " + wxString::FromUTF8(name));
 	}
 
 	void setRecentProjectChoice(int projectChoice) {
@@ -108,12 +133,9 @@ public:
 	}
 
 	void setProjectDir(wxString dirPath) {
-		projectDir.Open(dirPath);
+		projectDir = wxFileName(dirPath, "");
 		// Just in case
-		wxFileName dir(dirPath);
-		if(!dir.DirExists()) {
-			dir.Mkdir();
-		}
+		projectDir.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
 	}
 
 	void setProjectWasLoaded(bool wasLoaded) {
@@ -121,7 +143,7 @@ public:
 	}
 
 	void removeRecentProject(int index) {
-		(*mainSettings)["recentProjects"].GetArray().Erase(&(*mainSettings)["recentProjects"].GetArray()[index]);
+		recentSettings["recentProjects"].GetArray().Erase(&recentSettings["recentProjects"].GetArray()[index]);
 	}
 
 	std::string getProjectName() {
@@ -132,12 +154,24 @@ public:
 		return videoComparisonEntriesMenu;
 	}
 
+	uint16_t getExportImageIndex() {
+		return imageExportIndex;
+	}
+
+	void incrementExportImageIndex() {
+		imageExportIndex++;
+	}
+
+	void incrementRerecordCount() {
+		rerecordCount++;
+	}
+
 	void openUpVideoComparisonViewer(int index);
 
 	void onRecentVideosMenuOpen(wxMenuEvent& event);
 
 	rapidjson::GenericArray<false, rapidjson::Value> getRecentProjects() {
-		return (*mainSettings)["recentProjects"].GetArray();
+		return recentSettings["recentProjects"].GetArray();
 	}
 
 	// Just a random large number, apparently can't be larger than 76
@@ -170,7 +204,7 @@ private:
 	void onClickProject(wxCommandEvent& event);
 
 public:
-	ProjectHandlerWindow(std::shared_ptr<ProjectHandler> projHandler, rapidjson::Document* settings);
+	ProjectHandlerWindow(wxFrame* parent, std::shared_ptr<ProjectHandler> projHandler, rapidjson::Document* settings);
 
 	uint8_t wasDialogClosedForcefully() {
 		return wasClosedForcefully;

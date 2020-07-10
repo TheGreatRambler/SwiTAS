@@ -12,7 +12,7 @@
 1. This method only saves three things within the savestate, the frame of the savestate, the *hash* of the screenshot of that frame and some other miscellaneous data such as the current time
 2. There is a mode called the *savestate searching* mode. When this is activated, each frame is checked to see if the *hash* of its screenshot matches that of the savestate
 3. Once it is found, the user is asked if the frame is correct and they would like to load this frame
-4. If no is selected, nothing happens. If yes is selected, nx-TAS jumps to the frame of the savestate in the frame history, essentially rewinding your input history
+4. If no is selected, nothing happens. If yes is selected, SwiTAS jumps to the frame of the savestate in the frame history, essentially rewinding your input history
 5. The frames that are edited then overwrite the other frames, normal stuff
 6. If you wish to have a savestate somewhere else, a more interesting setup is used
 7. Proceed to obtain the savestate as usual, but then set the intended goal of the savestate by choosing a frame after the savestate

@@ -11,15 +11,17 @@
 #include <wx/msgdlg.h>
 #include <wx/wx.h>
 
-#include "../../sharedNetworkCode/networkInterface.hpp"
+#include "../sharedNetworkCode/networkInterface.hpp"
 
 #include "../dataHandling/buttonData.hpp"
 #include "../dataHandling/dataProcessing.hpp"
 #include "../dataHandling/gameCorruptor.hpp"
 #include "../dataHandling/projectHandler.hpp"
+#include "../dataHandling/runFinalTas.hpp"
 #include "../helpers.hpp"
 #include "bottomUI.hpp"
 #include "debugWindow.hpp"
+#include "scriptExporter.hpp"
 #include "sideUI.hpp"
 
 class MainWindow : public wxFrame {
@@ -46,6 +48,9 @@ private:
 	// Networking stuff
 	std::shared_ptr<CommunicateWithNetwork> networkInstance;
 
+	// For sideUI
+	wxTimer* autoFrameAdvanceTimer;
+
 	// Main logging window
 	wxLogWindow* logWindow;
 	// Main debug command window
@@ -56,10 +61,13 @@ private:
 	// Menubar menus
 	wxWindowID selectIPID;
 	wxWindowID exportAsText;
+	wxWindowID importAsText;
+	wxWindowID saveProject;
 	wxWindowID setNameID;
 	wxWindowID toggleLoggingID;
 	wxWindowID toggleDebugMenuID;
-	wxWindowID openGameCorruptor;
+	wxWindowID openGameCorruptorID;
+	wxWindowID runFinalTasID;
 
 	void handlePreviousWindowTransform();
 
@@ -79,8 +87,13 @@ private:
 	void onClose(wxCloseEvent& event);
 	void onIdle(wxIdleEvent& event);
 
+	void onAutoFrameAdvanceTimer(wxTimerEvent& event);
+
 	bool askForIP();
 	void handleNetworkQueues();
+
+	// Used to freeze the current frame view to make it look good
+	void startedIncrementFrame();
 
 public:
 	MainWindow();

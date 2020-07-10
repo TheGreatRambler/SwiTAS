@@ -15,8 +15,8 @@
 #include <vector>
 #include <wx/wx.h>
 
-#include "../../sharedNetworkCode/buttonData.hpp"
 #include "../helpers.hpp"
+#include "../sharedNetworkCode/buttonData.hpp"
 #include "buttonConstants.hpp"
 #include "dataProcessing.hpp"
 
@@ -58,20 +58,20 @@ public:
 	// To convert to Btn
 	std::unordered_map<std::string, Btn> scriptNameToButton;
 
-	static constexpr int16_t axisMin = -30000;
-	static constexpr int16_t axisMax = 30000;
+	static constexpr int16_t axisMin = -32767;
+	static constexpr int16_t axisMax = 32767;
 
-	const uint8_t KeyWidth  = 11;
-	const uint8_t KeyHeight = 4;
+	static constexpr uint8_t KeyWidth  = 11;
+	static constexpr uint8_t KeyHeight = 4;
 
 	std::map<Btn, std::shared_ptr<ButtonInfo>> buttonMapping;
 
 	void setupButtonMapping(rapidjson::Document* mainSettings);
 
-	void textToFrames(DataProcessing* dataProcessing, std::string text, FrameNum startLoc, bool insertPaste, bool placePaste);
-	std::string framesToText(DataProcessing* dataProcessing, FrameNum startLoc, FrameNum endLoc, int playerIndex);
+	FrameNum textToFrames(DataProcessing* dataProcessing, std::string text, FrameNum startLoc, bool insertPaste, bool placePaste);
+	std::string framesToText(DataProcessing* dataProcessing, FrameNum startLoc, FrameNum endLoc, int playerIndex, BranchNum branch);
 
-	void transferControllerData(std::shared_ptr<ControllerData> src, std::shared_ptr<ControllerData> dest, bool placePaste);
+	void transferControllerData(ControllerData src, std::shared_ptr<ControllerData> dest, bool placePaste);
 
 	bool isEmptyControllerData(std::shared_ptr<ControllerData> data);
 };

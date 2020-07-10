@@ -7,9 +7,9 @@
 #include <wx/notebook.h>
 #include <wx/wx.h>
 
-#include "../../sharedNetworkCode/networkInterface.hpp"
 #include "../dataHandling/dataProcessing.hpp"
 #include "../helpers.hpp"
+#include "../sharedNetworkCode/networkInterface.hpp"
 #include "drawingCanvas.hpp"
 #include "savestateSelection.hpp"
 
@@ -37,22 +37,31 @@ public:
 
 class SideUI {
 private:
+	const uint8_t NETWORK_CALLBACK_ID = 3;
+
 	rapidjson::Document* mainSettings;
 	std::shared_ptr<CommunicateWithNetwork> networkInterface;
 	std::shared_ptr<ProjectHandler> projectHandler;
+	wxFrame* parent;
 
 	wxBoxSizer* verticalBoxSizer;
 
-	bool tethered = false;
+	uint8_t tethered                = false;
+	uint8_t controllerEventRecieved = false;
+	uint8_t autoRunActive           = false;
 
 	wxBitmapButton* addFrameButton;
 	wxBitmapButton* frameAdvanceButton;
 	wxBitmapButton* savestateHookCreateButton;
 	wxBitmapButton* savestateHookLoadButton;
+	wxBitmapButton* savestateHookModifyButton;
 	wxBitmapButton* playerAddButton;
 	wxBitmapButton* playerRemoveButton;
+	wxBitmapButton* branchAddButton;
+	wxBitmapButton* branchRemoveButton;
 
 	wxComboBox* playerSelect;
+	wxComboBox* branchSelect;
 
 	wxBoxSizer* buttonSizer;
 
@@ -61,41 +70,67 @@ private:
 
 	FrameCanvas* frameDrawer;
 
+	std::function<void()> incrementFrameCallback;
+
+	wxBoxSizer* autoFrameSizer;
+	wxBitmapButton* autoFrameStart;
+	wxBitmapButton* autoFrameEnd;
+	wxSpinCtrl* autoRunFramesPerSecond;
+
+	wxCheckBox* autoRunWithFramebuffer;
+	wxCheckBox* autoRunWithControllerData;
+
 	// Minimum size of this widget (it just gets too small normally)
 	static constexpr float minimumSize = 1 / 4;
 
 	// Input instance to get inputs and such
 	DataProcessing* inputData;
 
-	void setPlayerInfo(uint8_t size, uint8_t selected);
+	void setPlayerInfo(uint8_t size, uint8_t selected, bool force);
 	void playerSelected(wxCommandEvent& event);
+	void setBranchInfo(uint8_t size, uint8_t selected, bool force);
+	void branchSelected(wxCommandEvent& event);
 
 	void onAddFramePressed(wxCommandEvent& event);
 	void onFrameAdvancePressed(wxCommandEvent& event);
 	void onSavestateHookCreatePressed(wxCommandEvent& event);
 	void onSavestateHookLoadPressed(wxCommandEvent& event);
+	void onSavestateHookModifyPressed(wxCommandEvent& event);
 	void onPlayerAddPressed(wxCommandEvent& event);
 	void onPlayerRemovePressed(wxCommandEvent& event);
+	void onBranchAddPressed(wxCommandEvent& event);
+	void onBranchRemovePressed(wxCommandEvent& event);
+	void onStartAutoFramePressed(wxCommandEvent& event);
+	void onEndAutoFramePressed(wxCommandEvent& event);
 
 public:
-	SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ProjectHandler> projHandler, wxBoxSizer* sizer, DataProcessing* input, std::shared_ptr<CommunicateWithNetwork> networkImp);
+	SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ProjectHandler> projHandler, wxBoxSizer* sizer, DataProcessing* input, std::shared_ptr<CommunicateWithNetwork> networkImp, std::function<void()> runFrameCallback);
+
+	void onIdle(wxIdleEvent& event);
 
 	bool createSavestateHook();
 	bool loadSavestateHook(int block);
 
-	void untether() {
-		// Will need more indication
-		// TODO have switch itself notify the PC when fishy buisness is going on
-		// So it can untether itself
-		// wxLogMessage("Untether Switch");
-		frameAdvanceButton->Enable(false);
-		inputData->setTethered(false);
-		tethered = false;
+	void handleUnexpectedControllerSize();
+
+	uint8_t getAutoRunActive() {
+		return autoRunActive;
 	}
-	void tether() {
-		// wxLogMessage("Tether Switch");
+
+	int getAutoRunDelay() {
+		return autoRunFramesPerSecond->GetValue();
+	}
+
+	void enableAdvance() {
 		frameAdvanceButton->Enable(true);
-		inputData->setTethered(true);
-		tethered = true;
 	}
+
+	void disableAdvance() {
+		frameAdvanceButton->Enable(false);
+	}
+
+	void sendAutoRunData();
+
+	void untether();
+	void tether();
 };

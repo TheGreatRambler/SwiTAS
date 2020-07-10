@@ -1,0 +1,127 @@
+UNAME := $(shell uname -o)
+
+ifeq ($(UNAME),Msys)
+	TARGET_EXEC ?= libswitas.dll
+else
+	TARGET_EXEC ?= libswitas.so
+endif
+
+BUILD_DIR ?= ./buildYuzu
+
+SRC_DIRS ?= ./source
+
+ifeq ($(UNAME),Msys)
+# Set compilers to MinGW64 compilers
+CC := x86_64-w64-mingw32-gcc
+CXX := x86_64-w64-mingw32-g++
+else
+CC := gcc
+CXX := g++
+endif
+
+# C flags
+CFLAGS := -std=c11
+
+# C++ flags
+CXXFLAGS := -std=gnu++17
+
+# C/C++ flags
+CPPFLAGS := -I./include -I./source/thirdParty/lua-5.3.5
+CPPFLAGS += -Wall -Wno-maybe-uninitialized -D__BSD_VISIBLE -DSERVER_IMP -DYUZU
+
+ifeq ($(BUILD),release)
+	# "Release" build - optimization, and no debug symbols
+	CPPFLAGS += -O3 -s -DNDEBUG
+else
+	# "Debug" build - no optimization, and debugging symbols
+	CPPFLAGS += -Og -g -ggdb
+endif
+
+ifeq ($(UNAME),Msys)
+	CPPFLAGS += -DDLL_EXPORT='extern "C" __declspec(dllexport)'
+else
+	CPPFLAGS += -fPIC -DDLL_EXPORT='extern "C" __attribute__((visibility("default")))'
+endif
+
+# Linker flags
+LDFLAGS := -lpthread  -shared
+ifeq ($(UNAME),Msys)
+	# Needed for sockets on windows
+	LDFLAGS += -lws2_32
+endif
+
+ifeq ($(ARCH),32)
+	CPPFLAGS += -m32
+	LDFLAGS += -m32
+else
+	CPPFLAGS += -m64
+	LDFLAGS += -m64
+endif
+
+# Dll flags
+# http://anadoxin.org/blog/control-over-symbol-exports-in-mingw-linker.html
+# http://www.equestionanswers.com/c/c-explicit-linking.php
+# http://anadoxin.org/blog/control-over-symbol-exports-in-mingw-linker.html
+ifeq ($(UNAME),Msys)
+DLLFLAGS := -Wl,--enable-auto-import -Wl,--exclude-all-symbols -shared
+else
+DLLFLAGS := -Wl,--enable-auto-import -Wl,--exclude-all-symbols -shared -fPIC
+endif
+
+SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
+OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
+DEPS := $(OBJS:.o=.d)
+
+INC_DIRS := $(shell find $(SRC_DIRS) -type d)
+INC_FLAGS := $(addprefix -I,$(INC_DIRS))
+
+CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
+
+all: pre-build $(BUILD_DIR)/$(TARGET_EXEC)
+
+pre-build:
+	# This runs before anything happens
+	# Copy in sharedNetworkCode
+	# https://stackoverflow.com/a/1622186/9329945
+	rm -r -f ./source/sharedNetworkCode
+	cp -p -r ../sharedNetworkCode ./source/sharedNetworkCode
+
+ifeq ($(UNAME),Msys)
+$(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
+	# Delete all DLLs already there
+	find . -type f -iwholename $(BUILD_DIR)\*.dll -delete
+	# Add my own
+	$(CXX) $(DLLFLAGS) $(OBJS) -o $@ $(LDFLAGS)
+	# Add custom DLLs
+	cp -a customDlls/. $(BUILD_DIR)
+	# Copy required DLLs to folder, not copying the ones that are custom
+	ldd $(BUILD_DIR)/$(TARGET_EXEC) | grep '\/mingw.*\.dll' -o | xargs -I{} cp -n "{}" $(BUILD_DIR)
+else
+$(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
+	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
+endif
+
+# assembly
+$(BUILD_DIR)/%.s.o: %.s
+	$(MKDIR_P) $(dir $@)
+	$(AS) $(ASFLAGS) -c $< -o $@
+
+# c source
+$(BUILD_DIR)/%.c.o: %.c
+	$(MKDIR_P) $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
+# c++ source
+$(BUILD_DIR)/%.cpp.o: %.cpp
+	$(MKDIR_P) $(dir $@)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+
+
+.PHONY: all clean
+
+clean:
+	$(RM) -r $(BUILD_DIR)
+
+-include $(DEPS)
+
+MKDIR_P ?= mkdir -p

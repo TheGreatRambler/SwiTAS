@@ -50,10 +50,10 @@ void ButtonData::setupButtonMapping(rapidjson::Document* mainSettings) {
 		int gridWidth  = (*mainSettings)["buttonGrid"]["imageWidth"].GetInt();
 		int gridHeight = (*mainSettings)["buttonGrid"]["imageHeight"].GetInt();
 
-		thisButtonInfo->resizedListOnBitmap  = new wxBitmap(thisButtonInfo->onIcon->Rescale(listWidth, listHeight));
-		thisButtonInfo->resizedListOffBitmap = new wxBitmap(thisButtonInfo->offIcon->Rescale(listWidth, listHeight));
-		thisButtonInfo->resizedGridOnBitmap  = new wxBitmap(thisButtonInfo->onIcon->Rescale(gridWidth, gridHeight));
-		thisButtonInfo->resizedGridOffBitmap = new wxBitmap(thisButtonInfo->offIcon->Rescale(gridWidth, gridHeight));
+		thisButtonInfo->resizedGridOnBitmap  = new wxBitmap(thisButtonInfo->onIcon->Copy().Rescale(gridWidth, gridHeight));
+		thisButtonInfo->resizedGridOffBitmap = new wxBitmap(thisButtonInfo->offIcon->Copy().Rescale(gridWidth, gridHeight));
+		thisButtonInfo->resizedListOnBitmap  = new wxBitmap(thisButtonInfo->onIcon->Copy().Rescale(listWidth, listHeight));
+		thisButtonInfo->resizedListOffBitmap = new wxBitmap(thisButtonInfo->offIcon->Copy().Rescale(listWidth, listHeight));
 
 		maskifyBitmap(thisButtonInfo->resizedListOnBitmap, maskColor);
 		maskifyBitmap(thisButtonInfo->resizedListOffBitmap, maskColor);
@@ -72,7 +72,7 @@ void ButtonData::setupButtonMapping(rapidjson::Document* mainSettings) {
 	}
 }
 
-void ButtonData::textToFrames(DataProcessing* dataProcessing, std::string text, FrameNum startLoc, bool insertPaste, bool placePaste) {
+FrameNum ButtonData::textToFrames(DataProcessing* dataProcessing, std::string text, FrameNum startLoc, bool insertPaste, bool placePaste) {
 	std::vector<std::string> frameParts = HELPERS::splitString(text, '\n');
 	bool haveSetFirstFrame              = false;
 	FrameNum firstFrame;
@@ -99,14 +99,17 @@ void ButtonData::textToFrames(DataProcessing* dataProcessing, std::string text, 
 		// The actual index
 		FrameNum actualIndex = startLoc + (frameNum - firstFrame);
 
-		if(actualIndex >= dataProcessing->getFramesSize()) {
-			// Have to return, there are too many frames to paste
-			return;
+		// Just to keep the app running
+		if(actualIndex % 50 == 0) {
+			wxTheApp->Yield();
 		}
 
 		FrameNum thisDataIndex;
 
-		if(insertPaste) {
+		if(insertPaste || actualIndex >= dataProcessing->getFramesSize()) {
+			if(actualIndex >= dataProcessing->getFramesSize()) {
+				actualIndex--;
+			}
 			// It's a new one
 			// Loop through and add frames to keep the right offset between this frame
 			// And the last one
@@ -203,9 +206,11 @@ void ButtonData::textToFrames(DataProcessing* dataProcessing, std::string text, 
 			continue;
 		}
 	}
+
+	return lastReadFrame;
 }
 
-std::string ButtonData::framesToText(DataProcessing* dataProcessing, FrameNum startLoc, FrameNum endLoc, int playerIndex) {
+std::string ButtonData::framesToText(DataProcessing* dataProcessing, FrameNum startLoc, FrameNum endLoc, int playerIndex, BranchNum branch) {
 	// If the player index is provided, get every savestate hook in that player
 	std::vector<std::string> textVector;
 	// Loop through each frame and convert it
@@ -227,6 +232,11 @@ std::string ButtonData::framesToText(DataProcessing* dataProcessing, FrameNum st
 		}
 
 		for(FrameNum i = startLoc; i <= endLoc; i++) {
+			// Just to keep the app running
+			if(i % 50 == 0) {
+				wxTheApp->Yield();
+			}
+
 			// Keeping empty ones there clutters things
 			if(!isEmptyControllerData(dataProcessing->getFrame(i))) {
 				std::vector<std::string> parts;
@@ -244,7 +254,7 @@ std::string ButtonData::framesToText(DataProcessing* dataProcessing, FrameNum st
 					if(playerIndex == -1) {
 						isSelected = dataProcessing->getButton(i, button);
 					} else {
-						isSelected = dataProcessing->getButtonSpecific(i, button, j, playerIndex);
+						isSelected = dataProcessing->getButtonSpecific(i, button, j, branch, playerIndex);
 					}
 					if(isSelected) {
 						// Add to the string
@@ -259,20 +269,29 @@ std::string ButtonData::framesToText(DataProcessing* dataProcessing, FrameNum st
 					parts.push_back(HELPERS::joinString(buttonParts, ";"));
 				}
 
+				typedef ControllerNumberValues CNV;
+
+				uint8_t realPlayer;
+				if(playerIndex == -1) {
+					realPlayer = dataProcessing->getCurrentPlayer();
+				} else {
+					realPlayer = playerIndex;
+				}
+
 				// clang-format off
-				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, ControllerNumberValues::LEFT_X, j, playerIndex)) + \
-					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, ControllerNumberValues::LEFT_Y, j, playerIndex)));
+				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::LEFT_X, j, branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::LEFT_Y, j, branch, realPlayer)));
 
-				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, ControllerNumberValues::RIGHT_X, j, playerIndex)) + \
-					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, ControllerNumberValues::RIGHT_Y, j, playerIndex)));
+				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::RIGHT_X, j, branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::RIGHT_Y, j,branch, realPlayer)));
 
-				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, ControllerNumberValues::ACCEL_X, j, playerIndex)) + \
-					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, ControllerNumberValues::ACCEL_Y, j, playerIndex)) + \
-					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, ControllerNumberValues::ACCEL_Z, j, playerIndex)));
+				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::ACCEL_X, j, branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::ACCEL_Y, j, branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::ACCEL_Z, j, branch, realPlayer)));
 
-				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, ControllerNumberValues::GYRO_1, j, playerIndex)) + \
-					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, ControllerNumberValues::GYRO_2, j, playerIndex)) + \
-					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, ControllerNumberValues::GYRO_3, j, playerIndex)));
+				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::GYRO_1, j,branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::GYRO_2, j, branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::GYRO_3, j, branch, realPlayer)));
 				// clang-format on
 
 				textVector.push_back(HELPERS::joinString(parts, " "));
@@ -285,27 +304,27 @@ std::string ButtonData::framesToText(DataProcessing* dataProcessing, FrameNum st
 	return HELPERS::joinString(textVector, "\n");
 }
 
-void ButtonData::transferControllerData(std::shared_ptr<ControllerData> src, std::shared_ptr<ControllerData> dest, bool placePaste) {
+void ButtonData::transferControllerData(ControllerData src, std::shared_ptr<ControllerData> dest, bool placePaste) {
 	// Transfer all over
 
 	if(placePaste) {
 		// Add them together, not replace (bitwise or)
-		dest->buttons |= src->buttons;
+		dest->buttons |= src.buttons;
 	} else {
 		// Just replace
-		dest->buttons = src->buttons;
+		dest->buttons = src.buttons;
 	}
-	dest->LS_X       = src->LS_X;
-	dest->LS_Y       = src->LS_Y;
-	dest->RS_X       = src->RS_X;
-	dest->RS_Y       = src->RS_Y;
-	dest->ACCEL_X    = src->ACCEL_X;
-	dest->ACCEL_Y    = src->ACCEL_Y;
-	dest->ACCEL_Z    = src->ACCEL_Z;
-	dest->GYRO_1     = src->GYRO_1;
-	dest->GYRO_2     = src->GYRO_2;
-	dest->GYRO_3     = src->GYRO_3;
-	dest->frameState = src->frameState;
+	dest->LS_X       = src.LS_X;
+	dest->LS_Y       = src.LS_Y;
+	dest->RS_X       = src.RS_X;
+	dest->RS_Y       = src.RS_Y;
+	dest->ACCEL_X    = src.ACCEL_X;
+	dest->ACCEL_Y    = src.ACCEL_Y;
+	dest->ACCEL_Z    = src.ACCEL_Z;
+	dest->GYRO_1     = src.GYRO_1;
+	dest->GYRO_2     = src.GYRO_2;
+	dest->GYRO_3     = src.GYRO_3;
+	dest->frameState = src.frameState;
 }
 
 bool ButtonData::isEmptyControllerData(std::shared_ptr<ControllerData> data) {

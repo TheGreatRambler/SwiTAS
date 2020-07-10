@@ -4,10 +4,14 @@ pc_application/bin
 pc_application/sharedNetworkCode
 pc_application/compile_commands.json
 pc_application/mainSettings.json
+pc_application/*.snap
+pc_application/*.zip
 
-sysmodule_application/nx-TAS-PC.elf
-sysmodule_application/nx-TAS-PC.npdm
-sysmodule_application/nx-TAS-PC.nso
-sysmodule_application/nx-TAS-PC.nsp
-sysmodule_application/build
+sysmodule_application/SwiTAS.elf
+sysmodule_application/SwiTAS.npdm
+sysmodule_application/SwiTAS.nso
+sysmodule_application/SwiTAS.nsp
+sysmodule_application/buildYuzu
+sysmodule_application/buildSysmodule
 sysmodule_application/sharedNetworkCode
+sysmodule_application/*.zip

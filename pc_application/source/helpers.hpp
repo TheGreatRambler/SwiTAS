@@ -2,10 +2,11 @@
 
 #define _USE_MATH_DEFINES
 
-#ifdef _WIN32
+#ifdef __WXMSW__
 #include <Windows.h>
 #include <uxtheme.h>
 #endif
+
 #include <array>
 #include <cmath>
 #include <cstdint>
@@ -24,6 +25,7 @@
 #include <wx/artprov.h>
 #include <wx/filename.h>
 #include <wx/mstream.h>
+#include <wx/stdpaths.h>
 #include <wx/wx.h>
 
 namespace HELPERS {
@@ -40,6 +42,12 @@ namespace HELPERS {
 	rapidjson::Document getSettingsFile(std::string filename);
 	rapidjson::Document getSettingsFromString(std::string jsonString);
 
+	wxFileName popOffDirs(wxFileName path, uint8_t num);
+
+	wxColor getDefaultWindowBackground();
+
+	wxFileName getMainSettingsPath(std::string name);
+
 	float normalizeRadian(float angle);
 
 	std::string exec(const char* cmd);
@@ -48,6 +56,8 @@ namespace HELPERS {
 	wxString calculateDhash(wxImage image, int dhashWidth, int dhashHeight);
 
 	const int getHammingDistance(wxString string1, wxString string2);
+
+	wxBitmap* getDefaultSavestateScreenshot();
 
 	std::string makeRelative(std::string path, std::string rootDir);
 	std::string makeFromRelative(std::string path, std::string rootDir);

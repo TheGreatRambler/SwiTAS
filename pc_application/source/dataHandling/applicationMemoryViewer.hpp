@@ -3,6 +3,7 @@
 #define wxHAS_HUGE_FILES
 #include <cstdint>
 #include <cstring>
+#include <inttypes.h>
 #include <mio.hpp>
 #include <system_error>
 #include <unordered_map>
@@ -12,7 +13,7 @@
 #include <wx/longlong.h>
 #include <wx/string.h>
 
-#include "../../sharedNetworkCode/networkInterface.hpp"
+#include "../sharedNetworkCode/networkInterface.hpp"
 
 struct MemorySection {
 	uint64_t startByte;

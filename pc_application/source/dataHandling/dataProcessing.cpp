@@ -7,10 +7,11 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	// All savestate hook blocks
 	// Start with default, will get cleared later
 	addNewPlayer();
-	addNewSavestateHook("", new wxBitmap());
+	addNewSavestateHook("", HELPERS::getDefaultSavestateScreenshot());
 
 	// This can't handle it :(
 	SetDoubleBuffered(false);
+	DragAcceptFiles(true);
 	// Inherit from list control
 	// Use this specific ID in order to do things
 	buttonData      = buttons;
@@ -19,7 +20,6 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	// Set the mask color via a css string
 	// https://docs.wxwidgets.org/3.0/classwx_colour.html#a08e9f56265647b8b5e1349b76eb728e3
 	maskColor.Set((*mainSettings)["iconTransparent"].GetString());
-	// scrolledWindow = std::make_shared<Gtk::ScrolledWindow>();
 	// This is cool, so set it
 	EnableAlternateRowColours(true);
 	// Resize images based on the settings file
@@ -50,28 +50,34 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 
 	// Create keyboard handlers
 	// Each menu item is added here
-	wxAcceleratorEntry entries[8];
+	wxAcceleratorEntry entries[11];
 
-	pasteInsertID  = wxNewId();
-	pastePlaceID   = wxNewId();
-	addFrameID     = wxNewId();
-	frameAdvanceID = wxNewId();
-	savestateID    = wxNewId();
+	pasteInsertID         = wxNewId();
+	pastePlaceID          = wxNewId();
+	addFrameID            = wxNewId();
+	add10FramesID         = wxNewId();
+	removeFrameID         = wxNewId();
+	frameAdvanceID        = wxNewId();
+	savestateID           = wxNewId();
+	mergeIntoMainBranchID = wxNewId();
 
 	insertPaste = false;
 	placePaste  = false;
 
-	entries[0].Set(wxACCEL_CTRL, (int)'C', wxID_COPY, editMenu.Append(wxID_COPY, wxT("&Copy\tCtrl+C")));
-	entries[1].Set(wxACCEL_CTRL, (int)'X', wxID_CUT, editMenu.Append(wxID_CUT, wxT("&Cut\tCtrl+X")));
-	entries[2].Set(wxACCEL_CTRL, (int)'V', wxID_PASTE, editMenu.Append(wxID_PASTE, wxT("&Paste\tCtrl+V")));
-	entries[3].Set(wxACCEL_CTRL | wxACCEL_SHIFT, (int)'V', pasteInsertID, editMenu.Append(pasteInsertID, wxT("&Paste Insert\tCtrl+Shift+V")));
-	entries[4].Set(wxACCEL_CTRL | wxACCEL_ALT, (int)'V', pastePlaceID, editMenu.Append(pastePlaceID, wxT("&Paste Place\tCtrl+Alt+V")));
+	entries[0].Set(wxACCEL_CTRL, (int)'C', wxID_COPY, editMenu.Append(wxID_COPY, wxT("Copy\tCtrl+C")));
+	entries[1].Set(wxACCEL_CTRL, (int)'X', wxID_CUT, editMenu.Append(wxID_CUT, wxT("Cut\tCtrl+X")));
+	entries[2].Set(wxACCEL_CTRL, (int)'V', wxID_PASTE, editMenu.Append(wxID_PASTE, wxT("Paste\tCtrl+V")));
+	entries[3].Set(wxACCEL_CTRL | wxACCEL_SHIFT, (int)'V', pasteInsertID, editMenu.Append(pasteInsertID, wxT("Paste Insert\tCtrl+Shift+V")));
+	entries[4].Set(wxACCEL_CTRL | wxACCEL_ALT, (int)'V', pastePlaceID, editMenu.Append(pastePlaceID, wxT("Paste Place\tCtrl+Alt+V")));
 
-	entries[5].Set(wxACCEL_CTRL, (int)'=', addFrameID, editMenu.Append(addFrameID, wxT("&Add Frame\tCtrl+Plus")));
-	entries[6].Set(wxACCEL_CTRL, WXK_RIGHT, frameAdvanceID, editMenu.Append(frameAdvanceID, wxT("&Frame Advance\tCtrl+Right")));
-	entries[7].Set(wxACCEL_CTRL, (int)'H', savestateID, editMenu.Append(savestateID, wxT("&Add Savestate\tCtrl+H")));
+	entries[5].Set(wxACCEL_CTRL, (int)'=', addFrameID, editMenu.Append(addFrameID, wxT("Add Frame\tCtrl+Plus")));
+	entries[6].Set(wxACCEL_CTRL | wxACCEL_SHIFT, (int)'=', add10FramesID, editMenu.Append(add10FramesID, wxT("Add 10 Frames\tCtrl+Plus")));
+	entries[7].Set(wxACCEL_CTRL, (int)'-', removeFrameID, editMenu.Append(removeFrameID, wxT("Remove Frame\tCtrl+Minus")));
+	entries[8].Set(wxACCEL_CTRL, WXK_RIGHT, frameAdvanceID, editMenu.Append(frameAdvanceID, wxT("Frame Advance\tCtrl+Right")));
+	entries[9].Set(wxACCEL_CTRL, (int)'H', savestateID, editMenu.Append(savestateID, wxT("Add Savestate\tCtrl+H")));
+	entries[10].Set(wxACCEL_CTRL, (int)'M', mergeIntoMainBranchID, editMenu.Append(mergeIntoMainBranchID, wxT("Merge Frames into Main Branch\tCtrl+M")));
 
-	wxAcceleratorTable accel(8, entries);
+	wxAcceleratorTable accel(11, entries);
 	SetAcceleratorTable(accel);
 
 	// Bind each to a handler, both menu and button events
@@ -81,8 +87,11 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	Bind(wxEVT_MENU, &DataProcessing::onInsertPaste, this, pasteInsertID);
 	Bind(wxEVT_MENU, &DataProcessing::onPlacePaste, this, pastePlaceID);
 	Bind(wxEVT_MENU, &DataProcessing::onAddFrame, this, addFrameID);
+	Bind(wxEVT_MENU, &DataProcessing::onAdd10Frames, this, add10FramesID);
+	Bind(wxEVT_MENU, &DataProcessing::onRemoveFrame, this, removeFrameID);
 	Bind(wxEVT_MENU, &DataProcessing::onFrameAdvance, this, frameAdvanceID);
 	Bind(wxEVT_MENU, &DataProcessing::onAddSavestate, this, savestateID);
+	Bind(wxEVT_MENU, &DataProcessing::onMergeIntoMainBranch, this, mergeIntoMainBranchID);
 }
 
 // clang-format off
@@ -93,10 +102,11 @@ BEGIN_EVENT_TABLE(DataProcessing, wxListCtrl)
 	EVT_LIST_ITEM_ACTIVATED(DataProcessing::LIST_CTRL_ID, DataProcessing::onActivate)
 	EVT_CONTEXT_MENU(DataProcessing::onRightClick)
 	EVT_ERASE_BACKGROUND(DataProcessing::OnEraseBackground)
+	EVT_DROP_FILES(DataProcessing::onDropFiles)
 END_EVENT_TABLE()
 // clang-format on
 
-void DataProcessing::setInputCallback(std::function<void()> callback) {
+void DataProcessing::setInputCallback(std::function<void(uint8_t)> callback) {
 	inputCallback = callback;
 }
 
@@ -112,8 +122,12 @@ void DataProcessing::setChangingSelectedFrameCallback(std::function<void(FrameNu
 	changingSelectedFrameCallback = callback;
 }
 
-void DataProcessing::setPlayerInfoCallback(std::function<void(uint8_t, uint8_t)> callback) {
+void DataProcessing::setPlayerInfoCallback(std::function<void(uint8_t, uint8_t, bool)> callback) {
 	playerInfoCallback = callback;
+}
+
+void DataProcessing::setBranchInfoCallback(std::function<void(uint16_t, uint16_t, bool)> callback) {
+	branchInfoCallback = callback;
 }
 
 void DataProcessing::triggerCurrentFrameChanges() {
@@ -122,14 +136,80 @@ void DataProcessing::triggerCurrentFrameChanges() {
 	}
 }
 
-void DataProcessing::exportCurrentPlayerToFile(wxFileName exportTarget) {
+void DataProcessing::sendAutoAdvance(uint8_t includeFramebuffer) {
+	for(uint8_t playerIndex = 0; playerIndex < allPlayers.size(); playerIndex++) {
+		// Set inputs of all other players correctly but not the current one
+		if(playerIndex != viewingPlayerIndex) {
+			std::shared_ptr<ControllerData> controllerDatas = getControllerData(playerIndex, currentSavestateHook, viewingBranchIndex, currentRunFrame);
+
+			ADD_TO_QUEUE(SendFrameData, networkInstance, {
+				data.controllerData     = *controllerDatas;
+				data.frame              = currentRunFrame;
+				data.savestateHookNum   = currentSavestateHook;
+				data.branchIndex        = viewingBranchIndex;
+				data.playerIndex        = playerIndex;
+				data.incrementFrame     = false;
+				data.includeFramebuffer = includeFramebuffer;
+				data.isAutoRun          = false;
+			})
+		}
+	}
+
+	ADD_TO_QUEUE(SendFrameData, networkInstance, {
+		data.frame              = currentFrame + 1;
+		data.savestateHookNum   = currentSavestateHook;
+		data.branchIndex        = viewingBranchIndex;
+		data.playerIndex        = viewingPlayerIndex;
+		data.incrementFrame     = false;
+		data.includeFramebuffer = includeFramebuffer;
+		data.isAutoRun          = true;
+	})
+}
+
+std::string DataProcessing::getExportedCurrentPlayer() {
+	/*
 	wxFile file(exportTarget.GetFullPath(), wxFile::write);
 
 	if(file.IsOpened()) {
-		// This will block FOR AGES, no way around it
 		std::string exported = buttonData->framesToText(this, 0, 0, viewingPlayerIndex);
 		file.Write(wxString::FromUTF8(exported));
 		file.Close();
+	}
+	*/
+
+	// This blocks for a long time
+	// Always export the main branch, MAY CHANGE
+	return buttonData->framesToText(this, 0, 0, viewingPlayerIndex, 0);
+}
+
+void DataProcessing::importFromFile(wxFileName importTarget) {
+	wxFile file(importTarget.GetFullPath(), wxFile::read);
+
+	if(file.IsOpened()) {
+		wxString fileContents;
+		bool successful = file.ReadAll(&fileContents);
+		file.Close();
+
+		if(successful) {
+			Freeze();
+			FrameNum lastFrame = buttonData->textToFrames(this, fileContents.ToStdString(), 0, false, false);
+			// Remove all frames after the data
+			removeFrames(lastFrame + 1, allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->size() - 1);
+			Thaw();
+			setCurrentFrame(0);
+			Refresh();
+		}
+	}
+}
+
+void DataProcessing::onDropFiles(wxDropFilesEvent& event) {
+	if(event.GetNumberOfFiles() == 1) {
+		wxString dropped = event.GetFiles()[0];
+		wxFileName file(dropped);
+
+		if(file.FileExists()) {
+			importFromFile(file);
+		}
 	}
 }
 
@@ -166,7 +246,7 @@ wxString DataProcessing::OnGetItemText(long row, long column) const {
 		// Fallback for every other column
 		return "";
 	}
-	// This function shouldn't recieve any other column
+	// This function shouldn't receive any other column
 }
 
 // EXCUSE ME, WUT TODO
@@ -183,7 +263,8 @@ void DataProcessing::setItemAttributes() {
 	// Default is nothing
 	SET_BIT(state, false, FrameState::RAN);
 	itemAttribute = new wxItemAttr();
-	itemAttribute->SetBackgroundColour(wxColor((*mainSettings)["ui"]["frameViewerColors"]["notRan"].GetString()));
+	// itemAttribute->SetBackgroundColour(wxColor((*mainSettings)["ui"]["frameViewerColors"]["notRan"].GetString()));
+	itemAttribute->SetBackgroundColour(GetBackgroundColour());
 	itemAttributes[state] = itemAttribute;
 
 	SET_BIT(state, true, FrameState::RAN);
@@ -280,10 +361,11 @@ void DataProcessing::onCopy(wxCommandEvent& event) {
 		long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 		if(firstSelectedItem != wxNOT_FOUND) {
 			long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
+
 			// There is a selected item
 			if(currentFrame >= firstSelectedItem && currentFrame <= lastSelectedItem) {
 				// Add these items to the clipboard
-				wxTheClipboard->SetData(new wxTextDataObject(buttonData->framesToText(this, firstSelectedItem, lastSelectedItem, -1)));
+				wxTheClipboard->SetData(new wxTextDataObject(buttonData->framesToText(this, firstSelectedItem, lastSelectedItem, -1, viewingBranchIndex)));
 			} else {
 				// Deselect the others
 				for(FrameNum i = firstSelectedItem; i <= lastSelectedItem; i++) {
@@ -292,14 +374,14 @@ void DataProcessing::onCopy(wxCommandEvent& event) {
 				// Select just the one
 				SetItemState(currentFrame, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 
-				wxTheClipboard->SetData(new wxTextDataObject(buttonData->framesToText(this, currentFrame, currentFrame, -1)));
+				wxTheClipboard->SetData(new wxTextDataObject(buttonData->framesToText(this, currentFrame, currentFrame, -1, viewingBranchIndex)));
 
 				// See the new selection
 				RefreshItem(currentFrame);
 			}
-		}
 
-		wxTheClipboard->Close();
+			wxTheClipboard->Close();
+		}
 	}
 }
 
@@ -307,21 +389,40 @@ void DataProcessing::onCut(wxCommandEvent& event) {
 	// Copy the elements, then delete
 	onCopy(event);
 	// Erase the frames
-	removeFrames(currentFrame, currentFrame + GetSelectedItemCount() - 1);
+	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if(firstSelectedItem != wxNOT_FOUND) {
+		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
+		removeFrames(firstSelectedItem, lastSelectedItem);
+	}
 }
 
 void DataProcessing::onPaste(wxCommandEvent& event) {
 
-	if(wxTheClipboard->Open()) {
-		if(wxTheClipboard->IsSupported(wxDF_TEXT)) {
-			wxTextDataObject data;
-			wxTheClipboard->GetData(data);
-			std::string clipboardText = data.GetText().ToStdString();
+	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if(firstSelectedItem != wxNOT_FOUND) {
+		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
 
-			// Get to the meaty stuff, this is it
-			buttonData->textToFrames(this, clipboardText, currentFrame, insertPaste, placePaste);
+		if(wxTheClipboard->Open()) {
+			if(wxTheClipboard->IsSupported(wxDF_TEXT)) {
+				wxTextDataObject data;
+				wxTheClipboard->GetData(data);
+				wxTheClipboard->Close();
+
+				std::string clipboardText = data.GetText().ToStdString();
+
+				Freeze();
+				FrameNum lastItem    = buttonData->textToFrames(this, clipboardText, firstSelectedItem, insertPaste, placePaste);
+				FrameNum sizeOfPaste = lastItem - firstSelectedItem + 1;
+				if(!insertPaste) {
+					for(long i = firstSelectedItem; i <= lastSelectedItem; i += sizeOfPaste) {
+						buttonData->textToFrames(this, clipboardText, i, insertPaste, placePaste);
+					}
+				}
+				setCurrentFrame(firstSelectedItem + sizeOfPaste - 1);
+				Thaw();
+				Refresh();
+			}
 		}
-		wxTheClipboard->Close();
 	}
 }
 
@@ -338,13 +439,26 @@ void DataProcessing::onPlacePaste(wxCommandEvent& event) {
 }
 
 void DataProcessing::onAddFrame(wxCommandEvent& event) {
-	// These are 1-to-1 from sideUI.cpp
 	addFrame(currentFrame);
+}
+
+void DataProcessing::onAdd10Frames(wxCommandEvent& event) {
+	for(uint8_t i = 0; i < 10; i++) {
+		addFrame(currentFrame);
+	}
+}
+
+void DataProcessing::onRemoveFrame(wxCommandEvent& event) {
+	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if(firstSelectedItem != wxNOT_FOUND) {
+		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
+		removeFrames(firstSelectedItem, lastSelectedItem);
+	}
 }
 
 void DataProcessing::onFrameAdvance(wxCommandEvent& event) {
 	if(tethered) {
-		runFrame();
+		runFrame(false, false, true);
 	}
 }
 
@@ -353,16 +467,32 @@ void DataProcessing::onAddSavestate(wxCommandEvent& event) {
 	createSavestateHere();
 }
 
+void DataProcessing::onMergeIntoMainBranch(wxCommandEvent& event) {
+	// Don't just convert into text format, merge by moving over frames
+	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if(firstSelectedItem != wxNOT_FOUND) {
+		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
+		for(FrameNum i = firstSelectedItem; i <= lastSelectedItem; i++) {
+			// Transfer directly
+			buttonData->transferControllerData(*(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->at(i)), allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[0]->at(i), false);
+		}
+	}
+	// It's up to the user to remove the frames in the other branch if they want
+}
+
 void DataProcessing::setCurrentFrame(FrameNum frameNum) {
 	// Must be a frame that has already been written, else, raise error
-	if(frameNum < inputsList->size()) {
+	if(frameNum < getFramesSize()) {
 		// Set the current frame to this frame
 		// Shared pointer so this can be done
-		currentData = inputsList->at(frameNum);
+		currentData = allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->at(frameNum);
 		// Set the current frame to this number
 		// Focus to this specific row now
 		// This essentially scrolls to it
-		EnsureVisible(frameNum);
+
+		if(GetItemCount() != 1) {
+			EnsureVisible(frameNum);
+		}
 
 		currentFrame = frameNum;
 
@@ -383,7 +513,7 @@ void DataProcessing::setCurrentFrame(FrameNum frameNum) {
 
 // THIS NEEDS TO CHANGE COMPLETELY
 void DataProcessing::createSavestateHere() {
-	// NEEDS WORK
+	// NEEDS WORK UNUSED RIGHT NOW
 	// Add one savestate hook at this frame
 	savestates[currentFrame] = std::make_shared<Savestate>();
 	// Set the style of this frame
@@ -392,15 +522,17 @@ void DataProcessing::createSavestateHere() {
 	RefreshItem(currentFrame);
 }
 
-void DataProcessing::runFrame() {
-	if(currentRunFrame != inputsList->size()) {
-		// Technically, should handle for entering next savetstae hook block, but TODO
-		std::shared_ptr<ControllerData> controllerData = inputsList->at(currentRunFrame);
+void DataProcessing::runFrame(uint8_t forAutoFrame, uint8_t updateFramebuffer, uint8_t includeFramebuffer) {
+	if(currentRunFrame < allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->size() - 1) {
+		// Technically, should handle for entering next savetstate hook block, but TODO
+		std::shared_ptr<ControllerData> controllerData = allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->at(currentRunFrame);
 
 		setFramestateInfo(currentRunFrame, FrameState::RAN, true);
 
+		uint8_t withinFrames = currentRunFrame < allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->size();
+
 		// If possible, make current frame this frame
-		if(currentRunFrame < inputsList->size()) {
+		if(withinFrames) {
 			// Set to this frame
 			setCurrentFrame(currentRunFrame + 1);
 		}
@@ -410,18 +542,46 @@ void DataProcessing::runFrame() {
 		// Set image frame to this too
 		currentImageFrame = currentRunFrame;
 
-		modifyCurrentFrameViews(currentRunFrame);
+		modifyCurrentFrameViews(currentFrame);
+
+		// Refresh the grid
+		if(changingSelectedFrameCallback) {
+			changingSelectedFrameCallback(currentFrame, currentRunFrame, currentImageFrame);
+		}
+
+		if(inputCallback) {
+			// Doesn't matter what arguments
+			inputCallback(updateFramebuffer);
+		}
 
 		Refresh();
 
-		// Send to switch to run for each player
-		for(uint8_t playerIndex = 0; playerIndex < allPlayers.size(); playerIndex++) {
-			std::shared_ptr<ControllerData> controllerDatas = allPlayers[playerIndex]->at(currentSavestateHook)->inputs->at(currentRunFrame);
-			ADD_TO_QUEUE(SendRunFrame, networkInstance, {
-				data.controllerData = *controllerDatas;
-				data.frame          = currentRunFrame;
-				data.playerIndex    = playerIndex;
-			})
+		if(currentRunFrame < allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->size()) {
+			if(!forAutoFrame) {
+				// Send to switch to run for each player
+				for(uint8_t playerIndex = 0; playerIndex < allPlayers.size(); playerIndex++) {
+					std::shared_ptr<ControllerData> controllerDatas = getControllerData(playerIndex, currentSavestateHook, viewingBranchIndex, currentRunFrame);
+					ADD_TO_QUEUE(SendFrameData, networkInstance, {
+						data.controllerData     = *controllerDatas;
+						data.frame              = currentRunFrame;
+						data.savestateHookNum   = currentSavestateHook;
+						data.branchIndex        = viewingBranchIndex;
+						data.playerIndex        = playerIndex;
+						data.incrementFrame     = false;
+						data.includeFramebuffer = includeFramebuffer;
+						data.isAutoRun          = false;
+					})
+				}
+				ADD_TO_QUEUE(SendFrameData, networkInstance, {
+					data.frame              = currentRunFrame;
+					data.savestateHookNum   = currentSavestateHook;
+					data.branchIndex        = viewingBranchIndex;
+					data.playerIndex        = viewingPlayerIndex;
+					data.incrementFrame     = true;
+					data.includeFramebuffer = includeFramebuffer;
+					data.isAutoRun          = false;
+				})
+			}
 		}
 	}
 }
@@ -434,8 +594,8 @@ bool DataProcessing::handleKeyboardInput(wxChar key) {
 	return false;
 }
 
-std::shared_ptr<std::vector<std::shared_ptr<ControllerData>>> DataProcessing::getInputsList() {
-	return inputsList;
+std::shared_ptr<std::vector<std::shared_ptr<ControllerData>>> DataProcessing::getInputsList() const {
+	return currentBranchData;
 }
 
 wxRect DataProcessing::getFirstItemRect() {
@@ -445,8 +605,6 @@ wxRect DataProcessing::getFirstItemRect() {
 	return itemRect;
 }
 
-// The class itself is the list control
-// std::shared_ptr<wxGenericListCtrl> getWidget();
 void DataProcessing::onCacheHint(wxListEvent& event) {
 	if(viewableInputsCallback) {
 		long numOfRowsVisible = GetCountPerPage();
@@ -455,7 +613,9 @@ void DataProcessing::onCacheHint(wxListEvent& event) {
 			long first = GetTopItem();
 			long last  = first + numOfRowsVisible;
 
-			viewableInputsCallback(first, last);
+			if(viewableInputsCallback) {
+				viewableInputsCallback(first, last);
+			}
 		}
 	}
 }
@@ -466,22 +626,33 @@ void DataProcessing::addNewSavestateHook(std::string dHash, wxBitmap* screenshot
 		std::shared_ptr<SavestateHook> savestateHook = std::make_shared<SavestateHook>();
 		savestateHook->dHash                         = dHash;
 		savestateHook->screenshot                    = screenshot;
-		savestateHook->inputs                        = std::make_shared<std::vector<FrameData>>();
+		// Add a single branch for default
+		savestateHook->inputs.push_back(std::make_shared<std::vector<FrameData>>());
 		allPlayers[i]->push_back(savestateHook);
-		allPlayers[i]->at(0)->inputs->push_back(std::make_shared<ControllerData>());
+		allPlayers[i]->at(0)->inputs[0]->push_back(std::make_shared<ControllerData>());
+		viewingBranchIndex = 0;
 		// NOTE: There must be at least one block with one input when this is loaded
 		// Automatically, the first block is always at index 0
 		setSavestateHook(allPlayers[i]->size() - 1);
+		setBranch(0);
 	}
 }
 
 void DataProcessing::setSavestateHook(SavestateBlockNum index) {
-	inputsList = allPlayers[viewingPlayerIndex]->at(index)->inputs;
-	SetItemCount(inputsList->size());
-	setCurrentFrame(0);
-	currentRunFrame      = 0;
-	currentImageFrame    = 0;
 	currentSavestateHook = index;
+
+	// Just in case, refresh branch here
+	setBranch(viewingBranchIndex);
+	SetItemCount(getInputsList()->size());
+	setCurrentFrame(0);
+	currentRunFrame   = 0;
+	currentImageFrame = 0;
+
+	modifyCurrentFrameViews(currentFrame);
+
+	if(changingSelectedFrameCallback) {
+		changingSelectedFrameCallback(currentFrame, currentRunFrame, currentImageFrame);
+	}
 
 	Refresh();
 }
@@ -489,7 +660,37 @@ void DataProcessing::setSavestateHook(SavestateBlockNum index) {
 void DataProcessing::removeSavestateHook(SavestateBlockNum index) {
 	if(allPlayers[viewingPlayerIndex]->size() > 1) {
 		allPlayers[viewingPlayerIndex]->erase(allPlayers[viewingPlayerIndex]->begin() + index);
-		setSavestateHook(allPlayers[viewingPlayerIndex]->size() - 1);
+		setSavestateHook(0);
+
+		// Move over all the framebuffer names
+		wxRemoveFile(getFramebufferPathForSavestateHook(index).GetFullPath());
+		HELPERS::popOffDirs(getFramebufferPath(0, index, 0, 0), 1).Rmdir(wxPATH_RMDIR_RECURSIVE);
+
+		// Rename all images following this hook
+		SavestateBlockNum temp1 = index;
+		while(true) {
+			temp1++;
+			wxFileName savestateHookFile = getFramebufferPathForSavestateHook(temp1);
+			if(savestateHookFile.FileExists()) {
+				wxRenameFile(savestateHookFile.GetPath(), getFramebufferPathForSavestateHook(temp1).GetPath());
+			} else {
+				// Have encountered last savestate hook, break loop
+				break;
+			}
+		}
+
+		// Rename all folders following this hook
+		SavestateBlockNum temp2 = index;
+		while(true) {
+			temp2++;
+			wxFileName savestateHookDir = HELPERS::popOffDirs(getFramebufferPath(0, temp2, 0, 0), 1);
+			if(savestateHookDir.DirExists()) {
+				wxRenameFile(savestateHookDir.GetPath(), HELPERS::popOffDirs(getFramebufferPath(0, temp2 - 1, 0, 0), 1).GetPath());
+			} else {
+				// Have encountered last savestate hook, break loop
+				break;
+			}
+		}
 	}
 }
 
@@ -497,20 +698,24 @@ void DataProcessing::addNewPlayer() {
 	std::shared_ptr<std::vector<std::shared_ptr<SavestateHook>>> player = std::make_shared<std::vector<std::shared_ptr<SavestateHook>>>();
 
 	if(allPlayers.size() != 0) {
-		// Running it so early on boot seems to break networking
 		sendPlayerNum();
-
 		// Match this player to the number of savestate hooks as the first player
-		for(auto const& firstPlayer : *allPlayers[0]) {
-			std::shared_ptr<SavestateHook> savestateHook = std::make_shared<SavestateHook>();
-			savestateHook->inputs                        = std::make_shared<std::vector<std::shared_ptr<ControllerData>>>();
-			for(FrameNum i = 0; i < firstPlayer->inputs->size(); i++) {
-				// Create empty frames to add
-				savestateHook->inputs->push_back(std::make_shared<ControllerData>());
+		for(auto const& hook : *allPlayers[0]) {
+			std::shared_ptr<SavestateHook> newSavestateHook = std::make_shared<SavestateHook>();
+
+			// Has the same number of branches
+			for(FrameNum i = 0; i < hook->inputs.size(); i++) {
+				newSavestateHook->inputs.push_back(std::make_shared<std::vector<std::shared_ptr<ControllerData>>>());
+				// Each of those branches have the same number of inputs
+				for(FrameNum j = 0; j < hook->inputs[i]->size(); j++) {
+					// Create empty frames to add
+					newSavestateHook->inputs[i]->push_back(std::make_shared<ControllerData>());
+				}
 			}
-			savestateHook->dHash      = "";
-			savestateHook->screenshot = new wxBitmap();
-			player->push_back(savestateHook);
+
+			newSavestateHook->dHash      = "";
+			newSavestateHook->screenshot = HELPERS::getDefaultSavestateScreenshot();
+			player->push_back(newSavestateHook);
 		}
 	}
 
@@ -528,7 +733,10 @@ void DataProcessing::setPlayer(uint8_t playerIndex) {
 		setCurrentFrame(curFrame);
 	}
 	if(playerInfoCallback) {
-		playerInfoCallback(allPlayers.size(), viewingPlayerIndex);
+		playerInfoCallback(allPlayers.size(), viewingPlayerIndex, false);
+	}
+	if(branchInfoCallback) {
+		branchInfoCallback(getNumBranches(), viewingBranchIndex, true);
 	}
 }
 
@@ -538,6 +746,8 @@ void DataProcessing::removePlayer(uint8_t playerIndex) {
 		setPlayer(allPlayers.size() - 1);
 	}
 	sendPlayerNum();
+
+	// No framebuffer folders to remove because players dont have specific framebuffers
 }
 
 void DataProcessing::removeThisPlayer() {
@@ -546,25 +756,70 @@ void DataProcessing::removeThisPlayer() {
 
 void DataProcessing::sendPlayerNum() {
 	uint8_t size = allPlayers.size();
-	// clang-format off
-	ADD_TO_QUEUE(SendSetNumControllers, networkInstance, {
-		data.size = size;
-	})
-	// clang-format on
 	// Also sends to SideUI
 	if(playerInfoCallback) {
-		playerInfoCallback(size, viewingPlayerIndex);
+		playerInfoCallback(size, viewingPlayerIndex, false);
 	}
 }
 
 std::shared_ptr<ControllerData> DataProcessing::getFrame(FrameNum frame) const {
-	return inputsList->at(frame);
+	return allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->at(frame);
 }
 
-void DataProcessing::scrollToSpecific(uint8_t player, SavestateBlockNum savestateHookNum, FrameNum frame) {
+void DataProcessing::addNewBranch() {
+	// Only add to this player
+	for(auto& player : allPlayers) {
+		auto& list = player->at(currentSavestateHook)->inputs;
+		list.push_back(std::make_shared<std::vector<std::shared_ptr<ControllerData>>>());
+		uint16_t lastElement = list.size() - 1;
+		// Add number of frames as the first branch has
+		for(FrameNum j = 0; j < list[0]->size(); j++) {
+			list[lastElement]->push_back(std::make_shared<ControllerData>());
+		}
+	}
+	setBranch(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs.size() - 1);
+}
+
+void DataProcessing::setBranch(uint16_t branchIndex) {
+	viewingBranchIndex = branchIndex;
+	currentBranchData  = allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex];
+	if(branchInfoCallback) {
+		branchInfoCallback(getNumBranches(), branchIndex, true);
+	}
+	modifyCurrentFrameViews(currentFrame);
+	Refresh();
+}
+
+void DataProcessing::removeBranch(uint8_t branchIndex) {
+	if(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs.size() > 1) {
+		allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs.erase(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs.begin() + branchIndex);
+		setBranch(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs.size() - 1);
+
+		getFramebufferPath(0, currentSavestateHook, branchIndex, 0).Rmdir(wxPATH_RMDIR_RECURSIVE);
+
+		// Rename all images in this branch
+		while(true) {
+			branchIndex++;
+			wxFileName branchFolder = getFramebufferPath(0, currentSavestateHook, branchIndex, 0);
+			if(branchFolder.DirExists()) {
+				wxRenameFile(branchFolder.GetPath(), getFramebufferPath(0, currentSavestateHook, branchIndex - 1, 0).GetPath());
+			} else {
+				// Have encountered last savestate hook, break loop
+				break;
+			}
+		}
+	}
+}
+
+void DataProcessing::removeThisBranch() {
+	removeBranch(viewingBranchIndex);
+}
+
+void DataProcessing::scrollToSpecific(uint8_t player, SavestateBlockNum savestateHookNum, BranchNum branch, FrameNum frame) {
 	setPlayer(player);
 	setSavestateHook(savestateHookNum);
 	setCurrentFrame(frame);
+	setBranch(branch);
 }
 
 void DataProcessing::triggerButton(Btn button) {
@@ -589,18 +844,19 @@ void DataProcessing::triggerNumberValues(ControllerNumberValues joystickId, int1
 		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
 		for(FrameNum i = firstSelectedItem; i <= lastSelectedItem; i++) {
 			setNumberValues(i, joystickId, value);
-			// No refresh for now, as the joystick is not visible in the inputsList
+			// No refresh for now, as the joystick is not visible in the allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs
 		}
 	}
 }
 
 // New FANCY methods
 void DataProcessing::modifyButton(FrameNum frame, Btn button, uint8_t isPressed) {
-	SET_BIT(inputsList->at(frame)->buttons, isPressed, button);
+	SET_BIT(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->at(frame)->buttons, isPressed, button);
 
 	invalidateRun(frame);
-	modifyCurrentFrameViews(frame);
+
 	RefreshItem(frame);
+	modifyCurrentFrameViews(frame);
 }
 
 void DataProcessing::toggleButton(FrameNum frame, Btn button) {
@@ -609,7 +865,7 @@ void DataProcessing::toggleButton(FrameNum frame, Btn button) {
 
 void DataProcessing::clearAllButtons(FrameNum frame) {
 	// I think this works
-	inputsList->at(frame)->buttons = 0;
+	getInputsList()->at(frame)->buttons = 0;
 
 	invalidateRun(frame);
 	modifyCurrentFrameViews(frame);
@@ -619,122 +875,129 @@ void DataProcessing::clearAllButtons(FrameNum frame) {
 void DataProcessing::setNumberValues(FrameNum frame, ControllerNumberValues joystickId, int16_t value) {
 	switch(joystickId) {
 	case ControllerNumberValues::LEFT_X:
-		inputsList->at(frame)->LS_X = value;
+		getInputsList()->at(frame)->LS_X = value;
 		break;
 	case ControllerNumberValues::LEFT_Y:
-		inputsList->at(frame)->LS_Y = value;
+		getInputsList()->at(frame)->LS_Y = value;
 		break;
 	case ControllerNumberValues::RIGHT_X:
-		inputsList->at(frame)->RS_X = value;
+		getInputsList()->at(frame)->RS_X = value;
 		break;
 	case ControllerNumberValues::RIGHT_Y:
-		inputsList->at(frame)->RS_Y = value;
+		getInputsList()->at(frame)->RS_Y = value;
 		break;
 	case ControllerNumberValues::ACCEL_X:
-		inputsList->at(frame)->ACCEL_X = value;
+		getInputsList()->at(frame)->ACCEL_X = value;
 		break;
 	case ControllerNumberValues::ACCEL_Y:
-		inputsList->at(frame)->ACCEL_Y = value;
+		getInputsList()->at(frame)->ACCEL_Y = value;
 		break;
 	case ControllerNumberValues::ACCEL_Z:
-		inputsList->at(frame)->ACCEL_Z = value;
+		getInputsList()->at(frame)->ACCEL_Z = value;
 		break;
 	case ControllerNumberValues::GYRO_1:
-		inputsList->at(frame)->GYRO_1 = value;
+		getInputsList()->at(frame)->GYRO_1 = value;
 		break;
 	case ControllerNumberValues::GYRO_2:
-		inputsList->at(frame)->GYRO_2 = value;
+		getInputsList()->at(frame)->GYRO_2 = value;
 		break;
 	case ControllerNumberValues::GYRO_3:
-		inputsList->at(frame)->GYRO_3 = value;
+		getInputsList()->at(frame)->GYRO_3 = value;
 		break;
 	}
 
 	modifyCurrentFrameViews(frame);
-
 	invalidateRun(frame);
 }
 
 int16_t DataProcessing::getNumberValues(FrameNum frame, ControllerNumberValues joystickId) const {
 	switch(joystickId) {
 	case ControllerNumberValues::LEFT_X:
-		return inputsList->at(frame)->LS_X;
+		return getInputsList()->at(frame)->LS_X;
 		break;
 	case ControllerNumberValues::LEFT_Y:
-		return inputsList->at(frame)->LS_Y;
+		return getInputsList()->at(frame)->LS_Y;
 		break;
 	case ControllerNumberValues::RIGHT_X:
-		return inputsList->at(frame)->RS_X;
+		return getInputsList()->at(frame)->RS_X;
 		break;
 	case ControllerNumberValues::RIGHT_Y:
-		return inputsList->at(frame)->RS_Y;
+		return getInputsList()->at(frame)->RS_Y;
 		break;
 	case ControllerNumberValues::ACCEL_X:
-		return inputsList->at(frame)->ACCEL_X;
+		return getInputsList()->at(frame)->ACCEL_X;
 		break;
 	case ControllerNumberValues::ACCEL_Y:
-		return inputsList->at(frame)->ACCEL_Y;
+		return getInputsList()->at(frame)->ACCEL_Y;
 		break;
 	case ControllerNumberValues::ACCEL_Z:
-		return inputsList->at(frame)->ACCEL_Z;
+		return getInputsList()->at(frame)->ACCEL_Z;
 		break;
 	case ControllerNumberValues::GYRO_1:
-		return inputsList->at(frame)->GYRO_1;
+		return getInputsList()->at(frame)->GYRO_1;
 		break;
 	case ControllerNumberValues::GYRO_2:
-		return inputsList->at(frame)->GYRO_2;
+		return getInputsList()->at(frame)->GYRO_2;
 		break;
 	case ControllerNumberValues::GYRO_3:
-		return inputsList->at(frame)->GYRO_3;
+		return getInputsList()->at(frame)->GYRO_3;
 		break;
 	}
 }
 
-int16_t DataProcessing::getNumberValuesSpecific(FrameNum frame, ControllerNumberValues joystickId, SavestateBlockNum savestateHookNum, uint8_t player) const {
+int16_t DataProcessing::getNumberValuesSpecific(FrameNum frame, ControllerNumberValues joystickId, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
 	switch(joystickId) {
 	case ControllerNumberValues::LEFT_X:
-		return inputsList->at(frame)->LS_X;
+		return getControllerData(player, savestateHookNum, branch, frame)->LS_X;
 		break;
 	case ControllerNumberValues::LEFT_Y:
-		return inputsList->at(frame)->LS_Y;
+		return getControllerData(player, savestateHookNum, branch, frame)->LS_Y;
 		break;
 	case ControllerNumberValues::RIGHT_X:
-		return inputsList->at(frame)->RS_X;
+		return getControllerData(player, savestateHookNum, branch, frame)->RS_X;
 		break;
 	case ControllerNumberValues::RIGHT_Y:
-		return inputsList->at(frame)->RS_Y;
+		return getControllerData(player, savestateHookNum, branch, frame)->RS_Y;
 		break;
 	case ControllerNumberValues::ACCEL_X:
-		return inputsList->at(frame)->ACCEL_X;
+		return getControllerData(player, savestateHookNum, branch, frame)->ACCEL_X;
 		break;
 	case ControllerNumberValues::ACCEL_Y:
-		return inputsList->at(frame)->ACCEL_Y;
+		return getControllerData(player, savestateHookNum, branch, frame)->ACCEL_Y;
 		break;
 	case ControllerNumberValues::ACCEL_Z:
-		return inputsList->at(frame)->ACCEL_Z;
+		return getControllerData(player, savestateHookNum, branch, frame)->ACCEL_Z;
 		break;
 	case ControllerNumberValues::GYRO_1:
-		return inputsList->at(frame)->GYRO_1;
+		return getControllerData(player, savestateHookNum, branch, frame)->GYRO_1;
 		break;
 	case ControllerNumberValues::GYRO_2:
-		return inputsList->at(frame)->GYRO_2;
+		return getControllerData(player, savestateHookNum, branch, frame)->GYRO_2;
 		break;
 	case ControllerNumberValues::GYRO_3:
-		return inputsList->at(frame)->GYRO_3;
+		return getControllerData(player, savestateHookNum, branch, frame)->GYRO_3;
 		break;
 	}
 }
 
 uint8_t DataProcessing::getButton(FrameNum frame, Btn button) const {
-	return GET_BIT(inputsList->at(frame)->buttons, button);
+	return GET_BIT(getInputsList()->at(frame)->buttons, button);
 }
 
-uint8_t DataProcessing::getButtonSpecific(FrameNum frame, Btn button, SavestateBlockNum savestateHookNum, uint8_t player) const {
-	return GET_BIT(allPlayers[player]->at(savestateHookNum)->inputs->at(frame)->buttons, button);
+uint8_t DataProcessing::getButtonSpecific(FrameNum frame, Btn button, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
+	return GET_BIT(getControllerData(player, savestateHookNum, branch, frame)->buttons, button);
 }
 
 uint8_t DataProcessing::getButtonCurrent(Btn button) const {
 	return getButton(currentFrame, button);
+}
+
+void DataProcessing::setControllerDataForAutoRun(ControllerData controllerData) {
+	// Set controller data manually
+	std::shared_ptr<ControllerData> newData = std::make_shared<ControllerData>();
+	buttonData->transferControllerData(controllerData, newData, false);
+	getInputsList()->at(currentFrame) = newData;
+	modifyCurrentFrameViews(currentFrame);
 }
 
 int16_t DataProcessing::getNumberValueCurrent(ControllerNumberValues joystickId) const {
@@ -753,40 +1016,45 @@ void DataProcessing::modifyCurrentFrameViews(FrameNum frame) {
 			changingSelectedFrameCallback(currentFrame, currentRunFrame, currentImageFrame);
 		}
 		if(inputCallback) {
-			// Doesn't matter what arguments
-			inputCallback();
+			inputCallback(true);
 		}
 	}
 }
 
 void DataProcessing::setFramestateInfo(FrameNum frame, FrameState id, uint8_t state) {
-	SET_BIT(inputsList->at(frame)->frameState, state, id);
+	SET_BIT(getInputsList()->at(frame)->frameState, state, id);
 
-	RefreshItem(frame);
+	if(IsVisible(frame)) {
+		RefreshItem(frame);
+	}
 
 	modifyCurrentFrameViews(frame);
 }
 
-void DataProcessing::setFramestateInfoSpecific(FrameNum frame, FrameState id, uint8_t state, SavestateBlockNum savestateHookNum, uint8_t player) {
+void DataProcessing::setFramestateInfoSpecific(FrameNum frame, FrameState id, uint8_t state, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) {
 	if(savestateHookNum == currentSavestateHook && player == viewingPlayerIndex) {
 		setFramestateInfo(frame, id, state);
 	} else {
-		SET_BIT(allPlayers[player]->at(savestateHookNum)->inputs->at(frame)->frameState, state, id);
+		SET_BIT(getControllerData(player, savestateHookNum, branch, frame)->frameState, state, id);
 	}
 }
 
 uint8_t DataProcessing::getFramestateInfo(FrameNum frame, FrameState id) const {
-	return GET_BIT(inputsList->at(frame)->frameState, id);
+	return GET_BIT(getInputsList()->at(frame)->frameState, id);
+}
+
+uint8_t DataProcessing::getFramestateInfoSpecific(FrameNum frame, FrameState id, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
+	return GET_BIT(getControllerData(player, savestateHookNum, branch, frame)->frameState, id);
 }
 
 // Without the id, just return the whole hog
 uint8_t DataProcessing::getFramestateInfo(FrameNum frame) const {
-	return inputsList->at(frame)->frameState;
+	return getInputsList()->at(frame)->frameState;
 }
 
 void DataProcessing::invalidateRun(FrameNum frame) {
 	while(true) {
-		if(frame == inputsList->size() || !getFramestateInfo(frame, FrameState::RAN)) {
+		if(frame == getInputsList()->size() || !getFramestateInfo(frame, FrameState::RAN)) {
 			// Refresh all these items
 			// I don't care if it's way off the page, I think wxWidgets handles for this
 			Refresh();
@@ -794,22 +1062,31 @@ void DataProcessing::invalidateRun(FrameNum frame) {
 		}
 		// Set bit
 		setFramestateInfo(frame, FrameState::RAN, false);
+		// Also delete framebuffer from filesystem if neccessary
+		wxFileName framebufferFileName = getFramebufferPath(viewingPlayerIndex, currentSavestateHook, viewingBranchIndex, frame);
+		if(framebufferFileName.FileExists()) {
+			// Delete file from filesystem
+			wxRemoveFile(framebufferFileName.GetFullPath());
+		}
 		frame++;
 	}
 }
 
-void DataProcessing::invalidateRunSpecific(FrameNum frame, SavestateBlockNum savestateHookNum, uint8_t player) {
-	auto list = allPlayers[player]->at(savestateHookNum)->inputs;
+void DataProcessing::invalidateRunSpecific(FrameNum frame, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) {
+	auto& list       = allPlayers[player]->at(savestateHookNum)->inputs[branch];
+	std::size_t size = list->size();
 	while(true) {
-		if(frame == list->size() || !getFramestateInfo(frame, FrameState::RAN)) {
+		if(frame == size || !getFramestateInfoSpecific(frame, FrameState::RAN, savestateHookNum, branch, player)) {
 			// Refresh all these items
 			// I don't care if it's way off the page, I think wxWidgets handles for this
 			Refresh();
 			break;
+		} else {
+			// Set bit
+			setFramestateInfoSpecific(frame, FrameState::RAN, false, savestateHookNum, branch, player);
+			setFramestateInfoSpecific(frame, FrameState::SAVESTATE, false, savestateHookNum, branch, player);
+			frame++;
 		}
-		// Set bit
-		setFramestateInfoSpecific(frame, FrameState::RAN, false, savestateHookNum, player);
-		frame++;
 	}
 }
 
@@ -817,26 +1094,29 @@ void DataProcessing::addFrame(FrameNum afterFrame) {
 	// Add this to the vector right after the selected frame
 	uint8_t playerIndex = 0;
 	for(auto& player : allPlayers) {
-		std::shared_ptr<ControllerData> newControllerData = std::make_shared<ControllerData>();
+		BranchNum branchIndex = 0;
 
-		if(player->at(currentSavestateHook)->inputs->size() == 0) {
-			player->at(currentSavestateHook)->inputs->push_back(newControllerData);
-		} else {
-			auto begin = player->at(currentSavestateHook)->inputs->begin();
-			player->at(currentSavestateHook)->inputs->insert(begin + afterFrame + 1, newControllerData);
+		for(auto& branch : player->at(currentSavestateHook)->inputs) {
+			std::shared_ptr<ControllerData> newControllerData = std::make_shared<ControllerData>();
+
+			if(branch->size() == 0) {
+				branch->push_back(newControllerData);
+			} else {
+				auto begin = branch->begin();
+				branch->insert(begin + afterFrame + 1, newControllerData);
+			}
+
+			// Invalidate run for the data immidiently after this frame
+			invalidateRunSpecific(afterFrame + 1, currentSavestateHook, branchIndex, playerIndex);
+
+			branchIndex++;
 		}
-
-		setFramestateInfoSpecific(afterFrame + 1, FrameState::RAN, false, currentSavestateHook, playerIndex);
-		setFramestateInfoSpecific(afterFrame + 1, FrameState::SAVESTATE, false, currentSavestateHook, playerIndex);
-
-		// Invalidate run for the data immidiently after this frame
-		invalidateRunSpecific(afterFrame + 2, currentSavestateHook, playerIndex);
 
 		playerIndex++;
 	}
 
 	// Because of the usability of virtual list controls, just update the length
-	SetItemCount(inputsList->size());
+	SetItemCount(getInputsList()->size());
 
 	modifyCurrentFrameViews(afterFrame + 1);
 
@@ -851,29 +1131,39 @@ void DataProcessing::addFrameHere() {
 }
 
 void DataProcessing::removeFrames(FrameNum start, FrameNum end) {
-	uint8_t playerIndex = 0;
-	for(auto& player : allPlayers) {
-		auto beginning = player->at(currentSavestateHook)->inputs->begin();
-		player->at(currentSavestateHook)->inputs->erase(beginning + start, beginning + end + 1);
+	// Since only selected frames will ever be selected, this just makes sure
+	// One frame is left over
+	if(end - start != (getFramesSize() - 1)) {
+		uint8_t playerIndex = 0;
+		for(auto& player : allPlayers) {
+			BranchNum branchIndex = 0;
+			for(auto& branch : player->at(currentSavestateHook)->inputs) {
+				auto beginning = branch->begin();
+				branch->erase(beginning + start, beginning + end + 1);
 
-		// Invalidate run for the data immidiently after this frame
-		invalidateRunSpecific(start, currentSavestateHook, playerIndex);
+				// Invalidate run for the data immidiently after this frame
+				invalidateRunSpecific(start, currentSavestateHook, branchIndex, playerIndex);
 
-		playerIndex++;
+				branchIndex++;
+			}
+
+			playerIndex++;
+		}
+
+		// Because of the usability of virtual list controls, just update the length
+		SetItemCount(getInputsList()->size());
+
+		if(currentFrame > (getFramesSize() - 1)) {
+			setCurrentFrame(getFramesSize() - 1);
+		} else {
+			modifyCurrentFrameViews(currentFrame);
+			Refresh();
+		}
 	}
-
-	// Because of the usability of virtual list controls, just update the length
-	SetItemCount(inputsList->size());
-
-	for(FrameNum s = start; s <= end; s++) {
-		modifyCurrentFrameViews(s);
-	}
-
-	Refresh();
 }
 
 std::size_t DataProcessing::getFramesSize() const {
-	return inputsList->size();
+	return getInputsList()->size();
 }
 
 DataProcessing::~DataProcessing() {

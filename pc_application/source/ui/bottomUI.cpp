@@ -8,7 +8,7 @@ ButtonGrid::ButtonGrid(wxFrame* parent, wxSize requiredSize, std::shared_ptr<But
 	totalCombinedImageSize = requiredSize;
 	inputInstance          = inputs;
 
-	setBackgroundColor(*wxWHITE);
+	setBackgroundColor(HELPERS::getDefaultWindowBackground());
 
 	// Handle grid clicking
 	Bind(wxEVT_LEFT_DOWN, &ButtonGrid::onGridClick, this);
@@ -57,10 +57,7 @@ void ButtonGrid::onGridClick(wxMouseEvent& event) {
 	int X = (int)(((float)windowCoord.x / width) * buttonData->KeyWidth);
 	int Y = (int)(((float)windowCoord.y / height) * buttonData->KeyHeight);
 
-	char buf[5];
-	sprintf(buf, "%u-%u", X, Y);
-	std::string key(buf);
-
+	std::string key = wxString::Format("%u-%u", X, Y).ToStdString();
 	if(locToButton.count(key)) {
 		// Element exists, time to trigger the click
 		inputInstance->triggerButton(locToButton[key]);
@@ -116,10 +113,22 @@ JoystickCanvas::JoystickCanvas(rapidjson::Document* settings, wxFrame* parent, D
 	inputInstance  = inputData;
 	mainSettings   = settings;
 
+	setBackgroundColor(HELPERS::getDefaultWindowBackground());
+
 	// Create widgets
 	xInput                     = new wxSpinCtrl(parent, wxID_ANY, "x", wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
 	yInput                     = new wxSpinCtrl(parent, wxID_ANY, "y", wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
 	canGoOutsideCircleCheckbox = new wxCheckBox(parent, wxID_ANY, "Clamp");
+
+	if(leftJoy) {
+		xInput->SetToolTip("Edit X value for left joystick");
+		yInput->SetToolTip("Edit Y value for left joystick");
+	} else {
+		xInput->SetToolTip("Edit X value for right joystick");
+		yInput->SetToolTip("Edit Y value for right joystick");
+	}
+
+	canGoOutsideCircleCheckbox->SetToolTip("Lock joystick value to within circle");
 
 	lockButton = HELPERS::getBitmapButton(parent, mainSettings, "joystickLockButton");
 
@@ -151,8 +160,8 @@ void JoystickCanvas::draw(wxDC& dc) {
 
 	wxPoint approximateMiddle((float)width / 2, (float)height / 2);
 
-	dc.SetPen(*wxGREEN_PEN);
-	dc.SetBrush(*wxLIGHT_GREY_BRUSH);
+	dc.SetPen(*wxBLACK_PEN);
+	dc.SetBrush(*wxWHITE_BRUSH);
 
 	dc.DrawCircle(approximateMiddle, approximateMiddle.x);
 
@@ -247,28 +256,30 @@ void JoystickCanvas::correctForCircleLock() {
 
 void JoystickCanvas::onMouseClick(wxMouseEvent& event) {
 	wxPoint loc = event.GetPosition();
-	int width;
-	int height;
-	GetSize(&width, &height);
+	if(GetScreenRect().Contains(ClientToScreen(loc))) {
+		int width;
+		int height;
+		GetSize(&width, &height);
 
-	int16_t scaledX = ((float)loc.x / width) * 60000 - ButtonData::axisMax;
-	// Y is flipped
-	int16_t scaledY = (((float)loc.y / height) * 60000 - ButtonData::axisMax) * -1;
+		int16_t scaledX = ((float)loc.x / width) * ButtonData::axisMax * 2 - ButtonData::axisMax;
+		// Y is flipped
+		int16_t scaledY = (((float)loc.y / height) * ButtonData::axisMax * 2 - ButtonData::axisMax) * -1;
 
-	// Mutiply by twice the radius and then subtract the radius to get the middle
-	if(isLeftJoystick) {
-		inputInstance->triggerNumberValues(ControllerNumberValues::LEFT_X, scaledX);
-		inputInstance->triggerNumberValues(ControllerNumberValues::LEFT_Y, scaledY);
-	} else {
-		inputInstance->triggerNumberValues(ControllerNumberValues::RIGHT_X, scaledX);
-		inputInstance->triggerNumberValues(ControllerNumberValues::RIGHT_Y, scaledY);
+		// Mutiply by twice the radius and then subtract the radius to get the middle
+		if(isLeftJoystick) {
+			inputInstance->triggerNumberValues(ControllerNumberValues::LEFT_X, scaledX);
+			inputInstance->triggerNumberValues(ControllerNumberValues::LEFT_Y, scaledY);
+		} else {
+			inputInstance->triggerNumberValues(ControllerNumberValues::RIGHT_X, scaledX);
+			inputInstance->triggerNumberValues(ControllerNumberValues::RIGHT_Y, scaledY);
+		}
+
+		correctForCircleLock();
+
+		event.Skip();
+
+		Refresh();
 	}
-
-	correctForCircleLock();
-
-	event.Skip();
-
-	Refresh();
 }
 
 void JoystickCanvas::onMouseDrag(wxMouseEvent& event) {
@@ -338,40 +349,47 @@ void JoystickCanvas::setYValue(int16_t y) {
 	Refresh();
 }
 
-BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid, DataProcessing* input) {
+BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid, DataProcessing* input, std::shared_ptr<ProjectHandler> projHandler) {
 	// TODO set up joysticks
-	buttonData   = buttons;
-	mainSettings = settings;
+	buttonData     = buttons;
+	mainSettings   = settings;
+	projectHandler = projHandler;
 
 	inputInstance = input;
 
 	parent = parentFrame;
 
-	// Game frame viewer
-
 	mainSizer          = new wxBoxSizer(wxVERTICAL);
 	horizontalBoxSizer = new wxBoxSizer(wxHORIZONTAL);
 
-	leftJoystickDrawer = new JoystickCanvas(settings, parentFrame, inputInstance, true);
-	leftJoystickDrawer->setBackgroundColor(*wxWHITE);
+	leftJoystickDrawer  = new JoystickCanvas(settings, parentFrame, inputInstance, true);
 	rightJoystickDrawer = new JoystickCanvas(settings, parentFrame, inputInstance, false);
-	rightJoystickDrawer->setBackgroundColor(*wxWHITE);
+
+	leftJoystickDrawer->SetToolTip("Edit left joystick value");
+	rightJoystickDrawer->SetToolTip("Edit right joystick value");
 
 	leftJoystickDrawer->getLockButton()->Bind(wxEVT_BUTTON, &BottomUI::onLeftJoystickLock, this);
 	rightJoystickDrawer->getLockButton()->Bind(wxEVT_BUTTON, &BottomUI::onRightJoystickLock, this);
 
+	leftJoystickDrawer->getLockButton()->SetToolTip("Set current value of left gamepad joystick to frame");
+	rightJoystickDrawer->getLockButton()->SetToolTip("Set current value of right gamepad joystick to frame");
+
 	wxSize gridSize;
 	// Just to get a rough estimate
-	int w = buttonData->KeyWidth * buttonData->buttonMapping[Btn::A]->resizedGridOffBitmap->GetWidth();
-	int h = buttonData->KeyHeight * buttonData->buttonMapping[Btn::A]->resizedGridOffBitmap->GetHeight();
+	int w = ButtonData::KeyWidth * buttonData->buttonMapping[Btn::A]->resizedGridOffBitmap->GetWidth();
+	int h = ButtonData::KeyHeight * buttonData->buttonMapping[Btn::A]->resizedGridOffBitmap->GetHeight();
 	gridSize.SetWidth(w);
 	gridSize.SetHeight(h);
 
 	buttonGrid = new ButtonGrid(parentFrame, gridSize, buttonData, inputInstance);
 
+	buttonGrid->SetToolTip("Toggle buttons for frames with mouse");
+
 	frameViewerCanvas = new FrameViewerCanvas(parentFrame, new wxBitmap(HELPERS::resolvePath((*mainSettings)["videoViewerDefaultImage"].GetString()), wxBITMAP_TYPE_JPEG));
 
-	inputInstance->setInputCallback(std::bind(&BottomUI::refreshDataViews, this));
+	frameViewerCanvas->SetToolTip("View current frame's screenshot");
+
+	inputInstance->setInputCallback(std::bind(&BottomUI::refreshDataViews, this, std::placeholders::_1));
 
 	// Add the joystick submenu
 	joystickSubMenu = new wxMenu();
@@ -383,7 +401,7 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 	horizontalBoxSizer->Add(leftJoystickDrawer->getSizer(), 0);
 	horizontalBoxSizer->Add(rightJoystickDrawer->getSizer(), 0);
 
-	horizontalBoxSizer->Add(buttonGrid, 0, wxSHAPED | wxALIGN_CENTER);
+	horizontalBoxSizer->Add(buttonGrid, 0, wxSHAPED | wxEXPAND | wxALIGN_CENTER_VERTICAL);
 
 	frameViewerCanvas->SetMinSize(wxSize(0, 0));
 
@@ -391,19 +409,77 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 	mainSizer->Add(frameViewerCanvas, 0, wxSHAPED | wxEXPAND | wxALIGN_CENTER_HORIZONTAL);
 	mainSizer->Add(horizontalBoxSizer, 0, wxEXPAND | wxALL);
 
-	theGrid->Add(mainSizer, 3, wxEXPAND | wxALL);
+	theGrid->Add(mainSizer, 1, wxEXPAND | wxALL);
+
+	wxAcceleratorEntry entries[1];
+
+	screenshotExportID = wxNewId();
+
+	entries[0].Set(wxACCEL_CTRL, (int)'E', screenshotExportID, editMenu.Append(screenshotExportID, wxT("Export Screenshot\tCtrl+E")));
+
+	wxAcceleratorTable accel(11, entries);
+	frameViewerCanvas->SetAcceleratorTable(accel);
+
+	frameViewerCanvas->Bind(wxEVT_CONTEXT_MENU, &BottomUI::onFrameViewerRightClick, this);
+
+	frameViewerCanvas->Bind(wxEVT_MENU, &BottomUI::exportImageView, this, screenshotExportID);
 }
 
-void BottomUI::refreshDataViews() {
+void BottomUI::refreshDataViews(uint8_t refreshFramebuffer) {
 	// Just refresh the grid and the joysticks
 	leftJoystickDrawer->Refresh();
 	rightJoystickDrawer->Refresh();
 	buttonGrid->Refresh();
+	if(refreshFramebuffer) {
+		// Check to see if framebuffer is avaliable to draw
+		wxFileName framebufferFileName = inputInstance->getFramebufferPathForCurrentFramebuf();
+		if(framebufferFileName.FileExists()) {
+			wxImage framebuf(framebufferFileName.GetFullPath(), wxBITMAP_TYPE_JPEG);
+			frameViewerCanvas->setPrimaryBitmap(new wxBitmap(framebuf));
+		} else {
+			// Go back to default
+			frameViewerCanvas->setPrimaryBitmap(nullptr);
+		}
+	}
 }
 
 void BottomUI::recieveGameFramebuffer(std::vector<uint8_t> jpegBuffer) {
-	wxLogMessage("Recieved framebuffer from switch");
 	frameViewerCanvas->setPrimaryBitmap(new wxBitmap(HELPERS::getImageFromJPEGData(jpegBuffer)));
+}
+
+void BottomUI::onFrameViewerRightClick(wxContextMenuEvent& event) {
+	const wxPoint mousePosition = frameViewerCanvas->ScreenToClient(event.GetPosition());
+
+	frameViewerCanvas->PopupMenu(&editMenu, mousePosition);
+}
+
+void BottomUI::exportImageView(wxCommandEvent& event) {
+	// https://forums.wxwidgets.org/viewtopic.php?p=32313#32313
+	// Save a screenshot of the frame view if the user wants to do something with it
+
+	wxClientDC dcWindow(frameViewerCanvas);
+
+	wxCoord windowWidth, windowHeight;
+	dcWindow.GetSize(&windowWidth, &windowHeight);
+
+	wxBitmap screenshot(windowWidth, windowHeight, wxBITMAP_SCREEN_DEPTH);
+
+	wxMemoryDC memDC;
+
+	memDC.SelectObject(screenshot);
+	memDC.Blit(0, 0, windowWidth, windowHeight, &dcWindow, 0, 0);
+	memDC.SelectObject(wxNullBitmap);
+
+	wxFileName imageLocation = projectHandler->getProjectStart();
+	imageLocation.AppendDir("exported_images");
+	imageLocation.SetName(wxString::Format("exported_image_%hu", projectHandler->getExportImageIndex()));
+	imageLocation.SetExt("png");
+
+	imageLocation.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+
+	screenshot.SaveFile(imageLocation.GetFullPath(), wxBITMAP_TYPE_PNG);
+
+	projectHandler->incrementExportImageIndex();
 }
 
 void BottomUI::onJoystickSelect(wxCommandEvent& event) {

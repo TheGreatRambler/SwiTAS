@@ -18,6 +18,7 @@
 
 #include "../dataHandling/buttonData.hpp"
 #include "../dataHandling/dataProcessing.hpp"
+#include "../dataHandling/projectHandler.hpp"
 #include "../helpers.hpp"
 #include "drawingCanvas.hpp"
 
@@ -110,6 +111,7 @@ public:
 class BottomUI {
 private:
 	rapidjson::Document* mainSettings;
+	std::shared_ptr<ProjectHandler> projectHandler;
 
 	// Input instance to get inputs and such
 	DataProcessing* inputInstance;
@@ -147,6 +149,12 @@ private:
 		{ "RSY", 3 },
 	};
 
+	// Custom accelerator IDs
+	int screenshotExportID;
+
+	// Menu popup
+	wxMenu editMenu;
+
 	// All of these kinda map to Btn values, there are just some extra Btn
 	// Values after the normal ones
 	std::unordered_map<int, int> joyButtonToSwitch;
@@ -169,19 +177,27 @@ private:
 
 	wxString getJoyHexString(wxJoystick* joy);
 
-	void refreshDataViews();
+	void onFrameViewerRightClick(wxContextMenuEvent& event);
+
+	void exportImageView(wxCommandEvent& event);
 
 public:
-	BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid, DataProcessing* input);
+	BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid, DataProcessing* input, std::shared_ptr<ProjectHandler> projHandler);
 
-	void addJoystickMenu(wxMenu* parent) {
-		parent->AppendSubMenu(joystickSubMenu, "&List Joysticks\tCtrl+G");
+	wxMenu* getJoystickMenu() {
+		return joystickSubMenu;
+	}
+
+	FrameViewerCanvas* getFrameViewerCanvas() {
+		return frameViewerCanvas;
 	}
 
 	// Just a random large number, apparently can't be larger than 76
 	static constexpr int joystickSubmenuIDBase = 23;
 
 	void recieveGameFramebuffer(std::vector<uint8_t> jpegBuffer);
+
+	void refreshDataViews(uint8_t refreshFramebuffer);
 
 	void listenToJoystick();
 

@@ -4,7 +4,7 @@
 			"label": "Build Sysmodule Debug",
 			"type": "shell",
 			"promptOnClose": true,
-			"command": "make DINFO=1",
+			"command": "make sysmodule DINFO=1",
 			"group": "build",
 			"presentation": {
 				"reveal": "always",
@@ -22,7 +22,7 @@
 			"label": "Build Sysmodule Release",
 			"type": "shell",
 			"promptOnClose": true,
-			"command": "make",
+			"command": "make sysmodule BUILD_TYPE=release",
 			"presentation": {
 				"reveal": "always",
 				"panel": "dedicated"
@@ -40,10 +40,11 @@
 			}
 		},
 		{
-			"label": "Clean",
+			"label": "Build Dll Debug",
 			"type": "shell",
 			"promptOnClose": true,
-			"command": ".vscode/scripts/clean.sh",
+			"command": "make yuzu",
+			"group": "build",
 			"presentation": {
 				"reveal": "always",
 				"panel": "dedicated"
@@ -55,6 +56,27 @@
 					"${workspaceFolder}"
 				]
 			}]
+		},
+		{
+			"label": "Build Dll Release",
+			"type": "shell",
+			"promptOnClose": true,
+			"command": "make yuzu BUILD=release",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			},
+			"problemMatcher": [{
+				"base": "$gcc",
+				"fileLocation": [
+					"autoDetect",
+					"${workspaceFolder}"
+				]
+			}],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
 		},
 		{
 			"label": "Upload to Switch",

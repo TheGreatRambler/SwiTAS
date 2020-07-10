@@ -9,26 +9,31 @@
 #include <cstdio>
 #include <cstring>
 #include <iterator>
-extern "C" {
-#include <jpeglib.h>
-}
-#include <plog/Log.h>
 #include <string>
-#include <switch.h>
 #include <vector>
 
-#include "../../sharedNetworkCode/networkInterface.hpp"
+#ifdef __SWITCH__
+#include <plog/Log.h>
+#include <switch.h>
+#endif
 
-// Many thanks to 黯然的饭#8969 on Discord for the framebuffer implementation
 class ScreenshotHandler {
 private:
+	const uint8_t dhashWidth  = 80;
+	const uint8_t dhashHeight = 45;
+
+#ifdef __SWITCH__
 	Result rc;
+#endif
+
+#ifdef __SWITCH__
+	void readFullScreenshotStream(uint8_t* buf, uint64_t size, uint64_t offset);
+#endif
 
 public:
 	ScreenshotHandler();
 
-	// Returns a dHash (to determine similarity) and a jpegBuffer to actually view
-	void writeFramebuffer(std::shared_ptr<CommunicateWithNetwork> networkInstance);
+	void writeFramebuffer(std::vector<uint8_t>& buf, std::string& dhash);
 
 	~ScreenshotHandler();
 };

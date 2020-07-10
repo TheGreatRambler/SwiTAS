@@ -7,6 +7,12 @@ ProjectHandler::ProjectHandler(wxFrame* parent, DataProcessing* dataProcessingIn
 	// TODO this is simiar to the joysticks submenu
 	videoComparisonEntriesMenu = new wxMenu();
 
+	// Initialize it as empty
+	lastEnteredFtpPath = "";
+
+	// Get recent settings
+	recentSettings = HELPERS::getSettingsFile(HELPERS::getMainSettingsPath("switas_recent").GetFullPath().ToStdString());
+
 	dataProcessing->setSelectedFrameCallbackVideoViewer(std::bind(&ProjectHandler::updateVideoComparisonViewers, this, std::placeholders::_1));
 }
 
@@ -23,78 +29,67 @@ void ProjectHandler::loadProject() {
 
 	auto playersArray = jsonSettings["players"].GetArray();
 
-	std::vector<uint8_t> playerList(playersArray.Size());
-
-	uint8_t playerIndex = 0;
-	for(auto const& player : playersArray) {
-		uint8_t index     = player["index"].GetInt();
-		playerList[index] = playerIndex;
-		playerIndex++;
-	}
-
 	// The players to create
 	AllPlayers players(playersArray.Size());
 
-	playerIndex = 0;
-	for(auto const& player : playerList) {
-		auto savestateBlocksArray = playersArray[player]["savestateBlocks"].GetArray();
+	uint8_t playerIndex = 0;
+	for(auto const& player : playersArray) {
+		auto savestateBlocksArray = player["savestateBlocks"].GetArray();
 
-		std::vector<SavestateBlockNum> savestateHookList(savestateBlocksArray.Size());
-
-		SavestateBlockNum blockIndex = 0;
-		for(auto const& savestateBlock : savestateBlocksArray) {
-			SavestateBlockNum index  = savestateBlock["index"].GetInt();
-			savestateHookList[index] = blockIndex;
-			blockIndex++;
-		}
-
-		std::shared_ptr<AllSavestateHookBlocks> savestateHookBlocks = std::make_shared<AllSavestateHookBlocks>(savestateHookList.size());
+		std::shared_ptr<AllSavestateHookBlocks> savestateHookBlocks = std::make_shared<AllSavestateHookBlocks>(savestateBlocksArray.Size());
 
 		SavestateBlockNum savestateHookIndex = 0;
-		for(auto const& savestateIndex : savestateHookList) {
-			wxString path = projectDir.GetNameWithSep() + wxString::FromUTF8(savestateBlocksArray[savestateIndex]["filename"].GetString());
-			if(wxFileName(path).FileExists()) {
+		for(auto const& savestate : savestateBlocksArray) {
+			auto branchesArray = savestate["branches"].GetArray();
 
-				// Load up the inputs
-				wxFFileInputStream inputsFileStream(path, "rb");
-				wxZlibInputStream inputsDecompressStream(inputsFileStream, wxZLIB_ZLIB | wxZLIB_NO_HEADER);
+			std::shared_ptr<SavestateHook> savestateHook = std::make_shared<SavestateHook>();
 
-				wxMemoryOutputStream dataStream;
-				dataStream.Write(inputsDecompressStream);
+			for(auto const& branch : branchesArray) {
+				wxString path = projectDir.GetPathWithSep() + wxString::FromUTF8(branch["filename"].GetString());
+				if(wxFileName(path).FileExists()) {
+					// Load up the inputs
+					wxFFileInputStream inputsFileStream(path, "rb");
+					wxZlibInputStream inputsDecompressStream(inputsFileStream, wxZLIB_ZLIB);
 
-				wxStreamBuffer* streamBuffer = dataStream.GetOutputStreamBuffer();
-				uint8_t* bufferPointer       = (uint8_t*)streamBuffer->GetBufferStart();
-				std::size_t bufferSize       = streamBuffer->GetBufferSize();
+					wxMemoryOutputStream dataStream;
+					dataStream.Write(inputsDecompressStream);
 
-				std::shared_ptr<SavestateHook> savestateHook = std::make_shared<SavestateHook>();
-				SavestateHookBlock block                     = std::make_shared<std::vector<std::shared_ptr<ControllerData>>>();
+					wxStreamBuffer* streamBuffer = dataStream.GetOutputStreamBuffer();
+					uint8_t* bufferPointer       = (uint8_t*)streamBuffer->GetBufferStart();
+					std::size_t bufferSize       = streamBuffer->GetBufferSize();
 
-				// Loop through each part and unserialize it
-				// This is 0% endian safe
-				std::size_t sizeRead = 0;
-				while(sizeRead != bufferSize) {
-					// Find the size part first
-					uint8_t sizeOfControllerData = bufferPointer[sizeRead];
-					sizeRead += sizeof(sizeOfControllerData);
-					// Load the data
-					std::shared_ptr<ControllerData> controllerData = std::make_shared<ControllerData>();
+					BranchData inputs = std::make_shared<std::vector<std::shared_ptr<ControllerData>>>();
 
-					serializeProtocol.binaryToData<ControllerData>(*controllerData, &bufferPointer[sizeRead], sizeOfControllerData);
-					// For now, just add each frame one at a time, no optimization
-					block->push_back(controllerData);
-					sizeRead += sizeOfControllerData;
+					// Loop through each part and unserialize it
+					// This is 0% endian safe :)
+					std::size_t sizeRead = 0;
+					while(sizeRead != bufferSize) {
+						// Find the size part first
+						uint8_t sizeOfControllerData = bufferPointer[sizeRead];
+						// Possibility that I will save filespace by making sizeOfControllerData==0 be an empty controller data
+						sizeRead += sizeof(sizeOfControllerData);
+						// Load the data
+						std::shared_ptr<ControllerData> controllerData = std::make_shared<ControllerData>();
+
+						serializeProtocol.binaryToData<ControllerData>(*controllerData, &bufferPointer[sizeRead], sizeOfControllerData);
+						// For now, just add each frame one at a time, no optimization
+						inputs->push_back(controllerData);
+						sizeRead += sizeOfControllerData;
+					}
+
+					savestateHook->inputs.push_back(inputs);
 				}
-
-				savestateHook->inputs = block;
-				savestateHook->dHash  = std::string(savestateBlocksArray[savestateIndex]["dHash"].GetString());
-
-				wxImage screenshotImage(projectDir.GetNameWithSep() + wxString::FromUTF8(savestateBlocksArray[savestateIndex]["screenshot"].GetString()), wxBITMAP_TYPE_JPEG);
-				savestateHook->screenshot = new wxBitmap(screenshotImage);
-
-				(*savestateHookBlocks)[savestateHookIndex] = savestateHook;
-
-				savestateHookIndex++;
 			}
+
+			std::ifstream dhashFile(projectDir.GetPathWithSep().ToStdString() + std::string(savestate["dHash"].GetString()));
+			savestateHook->dHash = std::string((std::istreambuf_iterator<char>(dhashFile)), (std::istreambuf_iterator<char>()));
+
+			wxImage screenshotImage(projectDir.GetPathWithSep() + wxString::FromUTF8(savestate["screenshot"].GetString()), wxBITMAP_TYPE_JPEG);
+			savestateHook->screenshot = new wxBitmap(screenshotImage);
+
+			(*savestateHookBlocks)[savestateHookIndex] = savestateHook;
+
+			savestateHookIndex++;
 		}
 
 		players[playerIndex] = savestateHookBlocks;
@@ -105,7 +100,12 @@ void ProjectHandler::loadProject() {
 	// Set dataProcessing
 	dataProcessing->setAllPlayers(players);
 	dataProcessing->sendPlayerNum();
-	dataProcessing->scrollToSpecific(jsonSettings["currentPlayer"].GetUint64(), jsonSettings["currentSavestateBlock"].GetUint(), jsonSettings["currentFrame"].GetUint());
+	dataProcessing->scrollToSpecific(jsonSettings["currentPlayer"].GetUint(), jsonSettings["currentSavestateBlock"].GetUint(), jsonSettings["currentBranch"].GetUint(), jsonSettings["currentFrame"].GetUint64());
+
+	imageExportIndex = jsonSettings["currentImageExportIndex"].GetUint();
+	rerecordCount    = jsonSettings["currentRerecordCount"].GetUint();
+
+	lastEnteredFtpPath = std::string(jsonSettings["defaultFtpPathForExport"].GetString());
 
 	for(auto const& videoEntryJson : jsonSettings["videos"].GetArray()) {
 		std::shared_ptr<VideoEntry> videoEntry = std::make_shared<VideoEntry>();
@@ -140,65 +140,90 @@ void ProjectHandler::saveProject() {
 			rapidjson::Value savestateHooksJSON(rapidjson::kArrayType);
 			SavestateBlockNum savestateHookIndexNum = 0;
 			for(auto const& savestateHookBlock : savestateHookBlocks) {
-				wxFileName inputsFilename = getProjectStart();
-				inputsFilename.SetName(wxString::Format("savestate_block_%hu_player_%u", savestateHookIndexNum, playerIndexNum + 1));
-				inputsFilename.SetExt("bin");
+				rapidjson::Value branchesJSON(rapidjson::kArrayType);
 
-				wxFileName screenshotFileName = getProjectStart();
-				screenshotFileName.SetName(wxString::Format("savestate_block_%hu_player_%u_screenshot", savestateHookIndexNum, playerIndexNum + 1));
-				screenshotFileName.SetExt("jpg");
+				BranchNum branchIndexNum = 0;
+				for(auto const& branch : savestateHookBlock->inputs) {
+					// Create path as "hooks/player_[num]/savestate_block_[num]/branch_[num]"
+					// Will also put dHash here as txt file
+					wxFileName inputsFilename = getProjectStart();
+					inputsFilename.AppendDir("hooks");
+					inputsFilename.AppendDir(wxString::Format("player_%u", playerIndexNum));
+					inputsFilename.AppendDir(wxString::Format("savestate_block_%hu", savestateHookIndexNum));
+					if(branchIndexNum == 0) {
+						inputsFilename.AppendDir("branch_main");
+					} else {
+						inputsFilename.AppendDir(wxString::Format("branch_%hu", branchIndexNum));
+					}
+					inputsFilename.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+					inputsFilename.SetName("inputs");
+					inputsFilename.SetExt("bin");
 
-				if(savestateHookBlock->screenshot->IsOk()) {
-					savestateHookBlock->screenshot->SaveFile(screenshotFileName.GetFullPath(), wxBITMAP_TYPE_JPEG);
-				} else {
-					wxImage defaultImg(1280, 720);
-					// Set all of it to a pretty grey
-					defaultImg.SetRGB(wxRect(0, 0, 1280, 720), 76, 82, 92);
-					defaultImg.SaveFile(screenshotFileName.GetFullPath(), wxBITMAP_TYPE_JPEG);
+					// Delete file if already present and use binary mode
+					wxFFileOutputStream inputsFileStream(inputsFilename.GetFullPath(), "wb");
+					wxZlibOutputStream inputsCompressStream(inputsFileStream, compressionLevel, wxZLIB_ZLIB);
+
+					// Kinda annoying, but actually break up the vector and add each part with the size
+					for(auto const& controllerData : *branch) {
+						uint8_t* data;
+						uint32_t dataSize;
+						serializeProtocol.dataToBinary<ControllerData>(*controllerData, &data, &dataSize);
+						uint8_t sizeToPrint = (uint8_t)dataSize;
+						// Probably endian issues
+						inputsCompressStream.WriteAll(&sizeToPrint, sizeof(sizeToPrint));
+						inputsCompressStream.WriteAll(data, dataSize);
+					}
+
+					inputsCompressStream.Sync();
+					inputsCompressStream.Close();
+					inputsFileStream.Close();
+
+					rapidjson::Value branchJSON(rapidjson::kObjectType);
+					inputsFilename.MakeRelativeTo(getProjectStart().GetFullPath());
+
+					rapidjson::Value inputs;
+					wxString inputsPath = inputsFilename.GetFullPath(wxPATH_UNIX);
+					inputs.SetString(inputsPath.c_str(), inputsPath.size(), settingsJSON.GetAllocator());
+
+					branchJSON.AddMember("filename", inputs, settingsJSON.GetAllocator());
+
+					branchesJSON.PushBack(branchJSON, settingsJSON.GetAllocator());
+
+					branchIndexNum++;
 				}
 
-				// Delete file if already present and use binary mode
-				wxFFileOutputStream inputsFileStream(inputsFilename.GetFullPath(), "wb");
-				wxZlibOutputStream inputsCompressStream(inputsFileStream, compressionLevel, wxZLIB_ZLIB | wxZLIB_NO_HEADER);
+				wxFileName dhashFilename = getProjectStart();
+				dhashFilename.AppendDir("hooks");
+				dhashFilename.AppendDir(wxString::Format("player_%u", playerIndexNum));
+				dhashFilename.AppendDir(wxString::Format("savestate_block_%hu", savestateHookIndexNum));
+				dhashFilename.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+				dhashFilename.SetName("dhash");
+				dhashFilename.SetExt("txt");
 
-				// Kinda annoying, but actually break up the vector and add each part with the size
-				for(auto const& controllerData : *(savestateHookBlock->inputs)) {
-					uint8_t* data;
-					uint32_t dataSize;
-					serializeProtocol.dataToBinary<ControllerData>(*controllerData, &data, &dataSize);
-					uint8_t sizeToPrint = (uint8_t)dataSize;
-					// Probably endian issues
-					inputsCompressStream.WriteAll(&sizeToPrint, sizeof(sizeToPrint));
-					inputsCompressStream.WriteAll(data, dataSize);
-				}
+				wxFFileOutputStream dhashFile(dhashFilename.GetFullPath(), "w");
+				dhashFile.WriteAll(wxString::FromUTF8(savestateHookBlock->dHash), savestateHookBlock->dHash.size());
+				dhashFile.Close();
 
-				inputsCompressStream.Sync();
-				inputsCompressStream.Close();
-				inputsFileStream.Close();
+				wxFileName screenshotFileName = dataProcessing->getFramebufferPathForSavestateHook(savestateHookIndexNum);
+
+				savestateHookBlock->screenshot->SaveFile(screenshotFileName.GetFullPath(), wxBITMAP_TYPE_JPEG);
 
 				// Add the item in the savestateHooks JSON
 				rapidjson::Value savestateHookJSON(rapidjson::kObjectType);
-				inputsFilename.MakeRelativeTo(getProjectStart().GetFullPath());
 				screenshotFileName.MakeRelativeTo(getProjectStart().GetFullPath());
-
-				rapidjson::Value savestateHook;
-				wxString savestateHookPath = inputsFilename.GetFullPath();
-				savestateHook.SetString(savestateHookPath.c_str(), strlen(savestateHookPath.c_str()), settingsJSON.GetAllocator());
-
-				rapidjson::Value savestateHookIndex;
-				savestateHookIndex.SetUint(savestateHookIndexNum);
+				dhashFilename.MakeRelativeTo(getProjectStart().GetFullPath());
 
 				rapidjson::Value dHash;
-				dHash.SetString(savestateHookBlock->dHash.c_str(), strlen(savestateHookBlock->dHash.c_str()), settingsJSON.GetAllocator());
+				wxString dhashPath = dhashFilename.GetFullPath(wxPATH_UNIX);
+				dHash.SetString(dhashPath.c_str(), dhashPath.size(), settingsJSON.GetAllocator());
 
 				rapidjson::Value screenshot;
-				wxString screenshotPath = screenshotFileName.GetFullPath();
-				screenshot.SetString(screenshotPath.c_str(), strlen(screenshotPath.c_str()), settingsJSON.GetAllocator());
+				wxString screenshotPath = screenshotFileName.GetFullPath(wxPATH_UNIX);
+				screenshot.SetString(screenshotPath.c_str(), screenshotPath.size(), settingsJSON.GetAllocator());
 
-				savestateHookJSON.AddMember("filename", savestateHook, settingsJSON.GetAllocator());
-				savestateHookJSON.AddMember("index", savestateHookIndex, settingsJSON.GetAllocator());
 				savestateHookJSON.AddMember("dHash", dHash, settingsJSON.GetAllocator());
 				savestateHookJSON.AddMember("screenshot", screenshot, settingsJSON.GetAllocator());
+				savestateHookJSON.AddMember("branches", branchesJSON, settingsJSON.GetAllocator());
 
 				savestateHooksJSON.PushBack(savestateHookJSON, settingsJSON.GetAllocator());
 
@@ -207,10 +232,6 @@ void ProjectHandler::saveProject() {
 
 			rapidjson::Value playerJSON(rapidjson::kObjectType);
 
-			rapidjson::Value playerIndex;
-			playerIndex.SetUint(playerIndexNum);
-
-			playerJSON.AddMember("index", playerIndex, settingsJSON.GetAllocator());
 			playerJSON.AddMember("savestateBlocks", savestateHooksJSON, settingsJSON.GetAllocator());
 
 			playersJSON.PushBack(playerJSON, settingsJSON.GetAllocator());
@@ -226,12 +247,29 @@ void ProjectHandler::saveProject() {
 		rapidjson::Value lastSavestateHookIndex;
 		lastSavestateHookIndex.SetUint(dataProcessing->getCurrentSavestateHook());
 
+		rapidjson::Value lastExportImageIndex;
+		lastExportImageIndex.SetUint(imageExportIndex);
+
+		rapidjson::Value lastRerecordCount;
+		lastRerecordCount.SetUint(rerecordCount);
+
+		rapidjson::Value lastBranch;
+		lastBranch.SetUint64(dataProcessing->getCurrentBranch());
+
 		rapidjson::Value lastFrame;
 		lastFrame.SetUint64(dataProcessing->getCurrentFrame());
 
 		settingsJSON.AddMember("currentPlayer", lastPlayerIndex, settingsJSON.GetAllocator());
 		settingsJSON.AddMember("currentSavestateBlock", lastSavestateHookIndex, settingsJSON.GetAllocator());
+		settingsJSON.AddMember("currentBranch", lastBranch, settingsJSON.GetAllocator());
 		settingsJSON.AddMember("currentFrame", lastFrame, settingsJSON.GetAllocator());
+		settingsJSON.AddMember("currentImageExportIndex", lastExportImageIndex, settingsJSON.GetAllocator());
+		settingsJSON.AddMember("currentRerecordCount", lastRerecordCount, settingsJSON.GetAllocator());
+
+		rapidjson::Value defaultFtpPathForExport;
+		defaultFtpPathForExport.SetString(lastEnteredFtpPath.c_str(), lastEnteredFtpPath.size(), settingsJSON.GetAllocator());
+
+		settingsJSON.AddMember("defaultFtpPathForExport", defaultFtpPathForExport, settingsJSON.GetAllocator());
 
 		rapidjson::Value recentVideoEntries(rapidjson::kArrayType);
 		for(auto const& videoEntry : videoComparisonEntries) {
@@ -288,48 +326,149 @@ void ProjectHandler::saveProject() {
 		normalSettings.WriteAll(settingsSb.GetString(), settingsSb.GetLength());
 		normalSettings.Close();
 
-		rapidjson::GenericArray<false, rapidjson::Value> recentProjectsArray = (*mainSettings)["recentProjects"].GetArray();
 		// Add to recent projects list if not yet there, otherwise modify
 		if(recentProjectChoice == -1) {
 			// Add new
 			rapidjson::Value newRecentProject(rapidjson::kObjectType);
 
 			rapidjson::Value name;
-			name.SetString(projectName.c_str(), strlen(projectName.c_str()), mainSettings->GetAllocator());
+			name.SetString(projectName.c_str(), strlen(projectName.c_str()), recentSettings.GetAllocator());
 
 			rapidjson::Value directory;
-			wxString dirString = projectDir.GetNameWithSep();
-			directory.SetString(dirString.mb_str(), dirString.length(), mainSettings->GetAllocator());
+			wxString dirString = projectDir.GetPathWithSep();
+			directory.SetString(dirString.mb_str(), dirString.length(), recentSettings.GetAllocator());
 
-			newRecentProject.AddMember("projectDirectory", directory, mainSettings->GetAllocator());
-			newRecentProject.AddMember("projectName", name, mainSettings->GetAllocator());
+			newRecentProject.AddMember("projectDirectory", directory, recentSettings.GetAllocator());
+			newRecentProject.AddMember("projectName", name, recentSettings.GetAllocator());
 
 			// I think it's a reference, not sure
-			recentProjectsArray.PushBack(newRecentProject, mainSettings->GetAllocator());
+			getRecentProjects().PushBack(newRecentProject, recentSettings.GetAllocator());
+			recentProjectChoice = getRecentProjects().Size() - 1;
 		} else {
 			// Modify existing values
-			wxString dirString = projectDir.GetNameWithSep();
-			recentProjectsArray[recentProjectChoice]["projectDirectory"].SetString(dirString.c_str(), dirString.length(), mainSettings->GetAllocator());
+			wxString dirString = projectDir.GetPathWithSep();
+			getRecentProjects()[recentProjectChoice]["projectDirectory"].SetString(dirString.c_str(), dirString.length(), recentSettings.GetAllocator());
 
-			recentProjectsArray[recentProjectChoice]["projectName"].SetString(projectName.c_str(), projectName.size(), mainSettings->GetAllocator());
+			getRecentProjects()[recentProjectChoice]["projectName"].SetString(projectName.c_str(), projectName.size(), recentSettings.GetAllocator());
 		}
 
 		// Additionally, save the mainSettings and overwrite
-		wxFFileOutputStream settingsFileStream("../mainSettings.json", "w");
+		// wxFFileOutputStream settingsFileStream(HELPERS::getMainSettingsPath("switas_settings").GetFullPath(), "w");
 
-		rapidjson::StringBuffer sb;
-		rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
-		writer.SetIndent('\t', 1);
-		mainSettings->Accept(writer);
+		// rapidjson::StringBuffer sb;
+		// rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
+		// writer.SetIndent('\t', 1);
+		// mainSettings->Accept(writer);
 
-		settingsFileStream.WriteAll(sb.GetString(), sb.GetLength());
-		settingsFileStream.Close();
+		// settingsFileStream.WriteAll(sb.GetString(), sb.GetLength());
+		// settingsFileStream.Close();
+
+		wxFFileOutputStream recentFileStream(HELPERS::getMainSettingsPath("switas_recent").GetFullPath(), "w");
+
+		rapidjson::StringBuffer sbRecent;
+		rapidjson::PrettyWriter<rapidjson::StringBuffer> writerRecent(sbRecent);
+		writerRecent.SetIndent('\t', 1);
+		recentSettings.Accept(writerRecent);
+
+		recentFileStream.WriteAll(sbRecent.GetString(), sbRecent.GetLength());
+		recentFileStream.Close();
+	}
+}
+
+void ProjectHandler::newProjectWasCreated() {
+	// For now
+	dataProcessing->sendPlayerNum();
+}
+
+void ProjectHandler::promptForUpdate() {
+	const wxString releaseUrl = "https://api.github.com/repos/thegreatrambler/switas/releases/latest";
+	wxURL url(releaseUrl);
+	if(url.GetError() == wxURL_NOERR) {
+		wxString jsonData;
+		wxInputStream* in = url.GetInputStream();
+
+		if(in && in->IsOk()) {
+			wxStringOutputStream jsonStream(&jsonData);
+			in->Read(jsonStream);
+
+			rapidjson::Document releaseInfo = HELPERS::getSettingsFromString(jsonData.ToStdString());
+			if(strcmp((*mainSettings)["version"].GetString(), releaseInfo["tag_name"].GetString()) != 0) {
+				// The release on Github does not match this version, prompt to download
+				wxMessageDialog installDialog(parentFrame, wxString::Format("A new release is available for download:\n\n%s", wxString::FromUTF8(releaseInfo["body"].GetString())), "Install new update", wxYES_NO | wxCANCEL | wxNO_DEFAULT | wxICON_QUESTION);
+				int res = installDialog.ShowModal();
+				if(res == wxID_YES) {
+					// Install the update, closes the app entirely
+
+					// Windows is index 0
+					int releaseIndex = 0;
+					wxURL updateUrl(wxString::FromUTF8(releaseInfo["assets"][releaseIndex]["browser_download_url"].GetString()));
+					if(updateUrl.GetError() == wxURL_NOERR) {
+						wxInputStream* updateIn = url.GetInputStream();
+
+						if(updateIn && updateIn->IsOk()) {
+							wxZipEntry* entry;
+
+							// Dont take control of the pointer
+							wxZipInputStream zip(*updateIn);
+							while(entry = zip.GetNextEntry(), entry != NULL) {
+								// The name is it's relative path within the archive
+								wxFileName filename(entry->GetName());
+
+								// Only handle files
+								if(!filename.IsDir()) {
+									wxFileName relativeToExecutable(wxStandardPaths::Get().GetExecutablePath());
+									// Go one folder back
+									relativeToExecutable.RemoveDir(relativeToExecutable.GetDirCount() - 1);
+									// Remove first folder, it's 'release', hope path is relative
+									filename.RemoveDir(0);
+
+									wxFileName newFilename(relativeToExecutable.GetPathWithSep() + filename.GetFullPath());
+									newFilename.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+
+									// Cant set executable directly, replace differently
+									// Also depends on OS
+									if(newFilename.GetName() == "switas" && newFilename.GetExt() == "exe") {
+										newFilename.SetName("switas_temp");
+										newFilename.SetExt("exe");
+									}
+
+									if(newFilename.GetName() == "switas_recent" && newFilename.GetExt() == "json") {
+										// Ignored
+										delete entry;
+										continue;
+									}
+
+									zip.OpenEntry(*entry);
+
+									// Write binary might not work, I dunno
+									wxFFileOutputStream file(relativeToExecutable.GetFullPath(), "wb");
+
+									if(!file) {
+										// File not created
+										delete entry;
+										continue;
+									}
+
+									zip.Read(file);
+
+									file.Close();
+								}
+
+								delete entry;
+							}
+						}
+						delete updateIn;
+					}
+				}
+			}
+		}
+		delete in;
 	}
 }
 
 void ProjectHandler::openUpVideoComparisonViewer(int index) {
 	wxString projDir              = projectDir.GetName();
-	VideoComparisonViewer* viewer = new VideoComparisonViewer(parentFrame, std::bind(&ProjectHandler::closeVideoComparisonViewer, this, std::placeholders::_1), mainSettings, videoComparisonEntries, projDir);
+	VideoComparisonViewer* viewer = new VideoComparisonViewer(parentFrame, std::bind(&ProjectHandler::closeVideoComparisonViewer, this, std::placeholders::_1), &recentSettings, videoComparisonEntries, projDir);
 	videoComparisonViewers.push_back(viewer);
 	if(index != videoComparisonEntries.size()) {
 		// Old video, load with the preset
@@ -379,8 +518,8 @@ void ProjectHandlerWindow::createTempProjectDir() {
 	projectHandler->setProjectDir(dir.GetFullPath());
 }
 
-ProjectHandlerWindow::ProjectHandlerWindow(std::shared_ptr<ProjectHandler> projHandler, rapidjson::Document* settings)
-	: wxDialog(NULL, wxID_ANY, "Select Project", wxDefaultPosition, wxDefaultSize) {
+ProjectHandlerWindow::ProjectHandlerWindow(wxFrame* parent, std::shared_ptr<ProjectHandler> projHandler, rapidjson::Document* settings)
+	: wxDialog(parent, wxID_ANY, "Select Project", wxDefaultPosition, wxDefaultSize) {
 	projectHandler = projHandler;
 	mainSettings   = settings;
 
@@ -435,7 +574,7 @@ void ProjectHandlerWindow::onClickProject(wxCommandEvent& event) {
 	if(selectedProject == recentProjectsArray.Size()) {
 		// Open up a load project dialog
 		wxDirDialog dlg(NULL, "Choose Project Directory", "", wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
-		if(dlg.ShowModal() == wxID_OK) {
+		if(dlg.ShowModal() == wxID_OK && wxFileName(dlg.GetPath()).DirExists()) {
 			projectHandler->setProjectDir(dlg.GetPath());
 			projectHandler->setRecentProjectChoice(-1);
 			projectHandler->setProjectName("Unnamed");
@@ -450,10 +589,11 @@ void ProjectHandlerWindow::onClickProject(wxCommandEvent& event) {
 	} else if(selectedProject == recentProjectsArray.Size() + 1) {
 		// Open up a new project dialog
 		wxDirDialog dlg(NULL, "Choose Project Directory", "", wxDD_DEFAULT_STYLE);
-		if(dlg.ShowModal() == wxID_OK) {
+		if(dlg.ShowModal() == wxID_OK && wxFileName(dlg.GetPath()).DirExists()) {
 			projectHandler->setProjectDir(dlg.GetPath());
 			projectHandler->setRecentProjectChoice(-1);
 			projectHandler->setProjectName("Unnamed");
+			projectHandler->newProjectWasCreated();
 			projectChosen       = true;
 			wasClosedForcefully = false;
 

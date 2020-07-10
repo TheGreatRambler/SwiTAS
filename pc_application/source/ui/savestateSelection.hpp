@@ -8,13 +8,12 @@
 #include <wx/wrapsizer.h>
 #include <wx/wx.h>
 
-#include "../../sharedNetworkCode/networkInterface.hpp"
 #include "../dataHandling/dataProcessing.hpp"
 #include "../dataHandling/projectHandler.hpp"
 #include "../helpers.hpp"
+#include "../sharedNetworkCode/networkInterface.hpp"
 #include "drawingCanvas.hpp"
 
-// Class listing out the savestates in a grid so they can be selected
 class SavestateLister : public wxDialog {
 private:
 	wxBoxSizer* mainSizer;
@@ -31,7 +30,7 @@ private:
 	void onSavestateHookSelect(wxMouseEvent& event);
 
 public:
-	SavestateLister(DataProcessing* input);
+	SavestateLister(wxFrame* parent, DataProcessing* input);
 
 	bool getOperationSuccessful() {
 		return operationSuccessful;
@@ -63,6 +62,9 @@ private:
 	int dhashWidth;
 	int dhashHeight;
 
+	uint8_t paused   = true;
+	uint8_t okCalled = false;
+
 	rapidjson::Document* mainSettings;
 	std::shared_ptr<ProjectHandler> projectHandler;
 
@@ -72,46 +74,51 @@ private:
 	wxBitmapButton* playButton;
 	wxBitmapButton* pauseButton;
 	wxBitmapButton* frameAdvanceButton;
+	wxBitmapButton* autoFrameAdvanceButton;
 	wxBitmapButton* okButton;
 
 	// Canvases for showing the frames
 	DrawingCanvasBitmap* currentFrame;
 	DrawingCanvasBitmap* goalFrame;
 
+	std::string leftDhashString;
+
 	// Will be set if the dialog is supposed to load savestates, not create the first one
 	bool savestateLoadDialog;
 
 	bool operationSuccessful = false;
+	bool autoFrameEnabled    = false;
+
+	wxTimer* autoFrameAdvanceTimer;
 
 	wxSpinCtrl* selectFrameAutomatically;
+	wxSpinCtrl* autoIncrementDelay;
 
 	// To view the frames, will use if needed
 	DrawingCanvasBitmap* currentScreen;
 	// Only use with savestate loading
 	DrawingCanvasBitmap* savestateFrameTarget;
 
-	void callOk() {
-		// Use this frame as the savestate
-		operationSuccessful = true;
-		// clang-format off
-	    ADD_TO_QUEUE(SendFlag, networkInstance, {
-		    data.actFlag = SendInfo::START_TAS_MODE;
-	    })
-		// clang-format on
-		Close(true);
-	}
+	void callOk();
+
+	void registerFramebufferCallback();
 
 	void onIdle(wxIdleEvent& event);
+	void onAutoFrameAdvanceTimer(wxTimerEvent& event);
 
 	void onPlay(wxCommandEvent& event);
 	void onPause(wxCommandEvent& event);
 	void onFrameAdvance(wxCommandEvent& event);
+	void onAutoFrameAdvance(wxCommandEvent& event);
 	void onOk(wxCommandEvent& event);
 
 	void onClose(wxCloseEvent& event);
+	void onResize(wxSizeEvent& event);
+
+	void frameAdvance();
 
 public:
-	SavestateSelection(rapidjson::Document* settings, std::shared_ptr<ProjectHandler> projHandler, bool isSavestateLoadDialog, std::shared_ptr<CommunicateWithNetwork> networkImp);
+	SavestateSelection(wxFrame* parent, rapidjson::Document* settings, std::shared_ptr<ProjectHandler> projHandler, bool isSavestateLoadDialog, std::shared_ptr<CommunicateWithNetwork> networkImp);
 
 	// Will use ShowModel for this, act like a normal wxDialog
 
@@ -120,7 +127,7 @@ public:
 	}
 
 	std::string getNewDhash() {
-		return leftDHash->GetLabel().ToStdString();
+		return leftDhashString;
 	}
 
 	wxBitmap* getNewScreenshot() {
