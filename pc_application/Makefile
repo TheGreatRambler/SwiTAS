@@ -77,6 +77,8 @@ CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 # At some point, should manually include only the decoders I need, the ones most common to youtube
 # Notice: Build the DLLs for 32 bit
 
+# App Imgur album https://imgur.com/a/26GvzqA
+
 # For assets
 # https://unix.stackexchange.com/a/314823
 
