@@ -105,19 +105,19 @@ Next, input the IP address of the system to connect.
 
 Next, create a savestate in order to tether your TAS.
 
-![](https://i.imgur.com/QyDDMvp.gif)
+![](https://i.imgur.com/kdsORwd.gif)
 
 Next, use a feature called `auto-frame`. This feature allows you to use the first controller connected to your system to control the current player. The inputs on your controller will be captured and saved within the TAS. You may uncheck `Include Controller Data` in the bottom left if you have weak internet and you would like to increment faster. The delay between frames can be set in the bottom left.
 
 > NOTE: All the images optained both through auto-frame and normal increment can be removed from the project directory without consequences to save on file space, as these images can quickly build up in a large TAS. They can be found in the `framebuffers` folder.
 
-![](https://i.imgur.com/SxKPtuX.gif)
+![](https://i.imgur.com/tE7IOM2.gif)
 
 Finally, in order to load a savestate and trigger a rerecord, a dialog similar to savestate creation will be opened. This dialog allows you to return to the framebuffer, or screenshot, that you created the screenshot on. Simply start over the level or reload a save to return to that state.
 
 As a tip, once you are within a half second of the frame, you can simply automatically increment the frame and the system will infer when it approaches the frame and ask you if you wish to load. To decide for yourself about a frame, the closer the number in the bottom left is to zero, the more similar the two framebuffers are.
 
-![](https://i.imgur.com/1HxCYIz.gif)
+![](https://i.imgur.com/cWK8i2v.gif)
 
 ## Thanks
 - [Hamhub7](https://github.com/hamhub7): The creator of Nx-TAS
