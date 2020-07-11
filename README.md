@@ -71,6 +71,8 @@ In order to choose a good frame for this type of savestate, it is neccessary to 
 
 While each game will have different recommendations, it is usually good to search for a place following the loading of an in game save (the end of a kingdom cutscene in SMO) or the fade in of a level (a frame inside of the black fade in on a MM2 level). To get recommendations for your specific game, the Switch TAS discord would be glad to help.
 
+![](https://i.imgur.com/2O7hoRO.png)
+
 To aid in choosing the perfect frame, the dialog has a number of options. You can choose to play back the game in real time, increment a frame at a time, or increment frames with a specified delay in between each frame in milliseconds. Once you are satisfied with the frame you have chosen (you cannot rewind so don't worry if you have to loop a couple times in order to not miss your frame), press the checkmark on the right side to select the frame.
 
 ![](https://i.imgur.com/Pxit1Wt.gif)
