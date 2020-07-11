@@ -16,7 +16,17 @@ This editor is intended to most closely resemble the [FCEUX TAS Editor](http://w
 
 # UI Elements
 
-TODO: Add pictures of the UI, both with and without the savestate load dialog. Mark with arrows
+The main window:
+
+![](https://i.imgur.com/01Z1oYY.png)
+
+The load savestate dialog:
+
+![](https://i.imgur.com/OoMkHXy.png)
+
+The create savestate dialog, which highly resembles the load savestate dialog:
+
+![](https://i.imgur.com/2W1N4q0.png)
 
 ## Handling Projects
 
@@ -32,6 +42,8 @@ Choose an empty folder to create a new project, load from the recent list, or na
 The project folder can be freely transported on your hard drive and to other PCs and is designed to be friendly to version systems such as GIT. Exporting to the nx-TAS test format can be done with `File/Export To Text Format`. This same text format can also be imported as the current branch using `File/Import From Text Format`.
 
 ![](https://i.imgur.com/jJrvTc4.gif)
+
+In order to save the project, you can simply close the window, SwiTAS saves automatically when it is closed naturally. You may also save explicitly by pressing `File/Save Project` or `Ctrl + S`.
 
 ## Connecting to Your Switch
 
@@ -51,6 +63,8 @@ Whenever you change the number of players in a TAS (or connect to the Switch for
 
 The savestates in use in this application are designed to overcome the technical limitations of a lack of true savestates, where the state of the game is saved to a file to be reloaded. Instead, the system depends on detecting similarity between the framebuffers, or screenshot of the game.
 
+Every chunk of inputs you edit is linked to a savestate in order to keep the TASing deterministic and as such you are required to create at least one savestate in order to begin TASing.
+
 In order to choose a good frame for this type of savestate, it is neccessary to choose a frame that:
 * Can be returned to easily
 * Is visually unique
@@ -61,6 +75,8 @@ To aid in choosing the perfect frame, the dialog has a number of options. You ca
 
 ![](https://i.imgur.com/Pxit1Wt.gif)
 
+It is important to create savestates often. Many games have variable load times that are not full understood by the community. As such, it is important that you create a savestate after every variable load if you are making a long TAS. This includes a savestate for every kingdom in SMO and a savestate for every level in MM2.
+
 ## Frame Editing
 
 Select a frame in the *Piano Roll* to begin editing frames. Add frames with `Ctrl + Plus`, create and remove savestate blocks with the buttons on the top, and create and select players. All the familiar commands are here, right click to see them all. Included are `Paste Place`, which only adds buttons if they are not present, and `Paste Insert`, which inserts the frame below the selected one. The text put onto the Clipboard can be pasted in other programs to share inputs with others. `Undo` and `Redo` support are planned.
@@ -69,7 +85,7 @@ Select a frame in the *Piano Roll* to begin editing frames. Add frames with `Ctr
 
 To allow for seamless usage, button inputs support keyboards, gamepads, and selecting the corresponding button in the bottom right as methods to change the inputs of the currently selected frame. The keyboard bindings (which mirror that of [the Yuzu emulator](https://yuzu-emu.org/) with some slight changes) are as follows:
 
-Include image here
+![](https://i.imgur.com/uQF8HJZ.png)
 
 To change various settings of the app, refer to the corresponding entry in `switas_settings.json`. This settings file can be found in the root folder on the Windows and Macos releases and can be found at `/etc/switas/switas_settings.json` on Debian and Ubuntu systems. The application will have to be reloaded for the changes to take effect. 
 
