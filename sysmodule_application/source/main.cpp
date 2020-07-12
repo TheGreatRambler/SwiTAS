@@ -153,7 +153,7 @@ void __attribute__((weak)) __appExit(void) {
 #ifdef __SWITCH__
 int main(int argc, char* argv[]) {
 	remove("/SwiTAS.log");
-	plog::init(plog::debug, "/SwiTAS.log");
+	plog::init(plog::debug, "/SwiTAS_log.txt");
 	LOGD << "Started logging";
 
 	MainLoop mainLoop;

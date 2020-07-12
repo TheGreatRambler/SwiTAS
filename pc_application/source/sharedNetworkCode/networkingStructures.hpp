@@ -70,6 +70,7 @@ enum MemoryRegionTypes : uint8_t {
 	Bit64,
 	Float,
 	Double,
+	Bool,
 	CharPointer,
 	ByteArray,
 	NUM_OF_TYPES,

@@ -16,25 +16,25 @@ TasRunner::TasRunner(wxFrame* parent, std::shared_ptr<CommunicateWithNetwork> ne
 	firstSavestateHook->SetToolTip("Select first savestate hook (inclusive)");
 	lastSavestateHook->SetToolTip("Select last savestate hook (inclusive)");
 
-	hookSelectionSizer->Add(firstSavestateHook, 1, wxEXPAND | wxALL);
-	hookSelectionSizer->Add(lastSavestateHook, 1, wxEXPAND | wxALL);
+	hookSelectionSizer->Add(firstSavestateHook, 0);
+	hookSelectionSizer->Add(lastSavestateHook, 0);
 
 	startTasHomebrew = HELPERS::getBitmapButton(parent, mainSettings, "startTasHomebrewButton");
-	startTasArduino  = HELPERS::getBitmapButton(parent, mainSettings, "startTasArduinoButton");
+	// startTasArduino  = HELPERS::getBitmapButton(parent, mainSettings, "startTasArduinoButton");
 
 	stopTas = HELPERS::getBitmapButton(parent, mainSettings, "stopButton");
 
 	startTasHomebrew->SetToolTip("Start TAS via homebrew");
-	startTasArduino->SetToolTip("Start TAS via arduino");
+	// startTasArduino->SetToolTip("Start TAS via arduino");
 	stopTas->SetToolTip("Set player");
 
 	startTasHomebrew->Bind(wxEVT_BUTTON, &TasRunner::onStartTasHomebrewPressed, this);
-	startTasArduino->Bind(wxEVT_BUTTON, &TasRunner::onStartTasArduinoPressed, this);
+	// startTasArduino->Bind(wxEVT_BUTTON, &TasRunner::onStartTasArduinoPressed, this);
 	stopTas->Bind(wxEVT_BUTTON, &TasRunner::onStopTasPressed, this);
 
 	mainSizer->Add(hookSelectionSizer, 1, wxEXPAND | wxALL);
 	mainSizer->Add(startTasHomebrew, 1, wxEXPAND | wxALL);
-	mainSizer->Add(startTasArduino, 1, wxEXPAND | wxALL);
+	// mainSizer->Add(startTasArduino, 1, wxEXPAND | wxALL);
 	mainSizer->Add(stopTas, 1, wxEXPAND | wxALL);
 
 	SetSizer(mainSizer);
@@ -54,98 +54,84 @@ void TasRunner::onStartTasHomebrewPressed(wxCommandEvent& event) {
 		wxMessageDialog invalidRangeMessage(this, "Invalid savestate hook range", "Invalid Range", wxOK | wxICON_ERROR);
 		invalidRangeMessage.ShowModal();
 	} else {
-		// Build a large binary blob with all the data
-		AllPlayers& allPlayers = dataProcessing->getAllPlayers();
-		// Create a different file for each player
-		std::vector<wxString> playerFiles;
-		uint8_t playerIndex = 1;
-		for(auto const& player : allPlayers) {
-			wxString tempPath = wxFileName::CreateTempFileName("script");
-			wxFFileOutputStream fileStream(tempPath, "wb");
-
-			for(SavestateBlockNum hook = firstHook; hook <= lastHook; hook++) {
-				// Always first branch
-				for(auto const& controllerData : *(player->at(hook)->inputs[0])) {
-					// Continually write the savestate hook data in one unbroken stream
-					uint8_t* data;
-					uint32_t dataSize;
-					serializeProtocol.dataToBinary<ControllerData>(*controllerData, &data, &dataSize);
-					uint8_t sizeToPrint = (uint8_t)dataSize;
-					// Probably endian issues
-					fileStream.WriteAll(&sizeToPrint, sizeof(sizeToPrint));
-					fileStream.WriteAll(data, dataSize);
-				}
-			}
-
-			fileStream.Close();
-
-			playerFiles.push_back(tempPath);
-			playerIndex++;
-		}
-
-		uint8_t addressGood = false;
-		wxString address;
-
 		if(networkInstance->isConnected()) {
-			// Special case, ask again for custom if this fails for some reason
-			address     = wxString::FromUTF8(networkInstance->getSwitchIP());
-			addressGood = true;
-		}
+			// Build a large binary blob with all the data
+			AllPlayers& allPlayers = dataProcessing->getAllPlayers();
+			// Create a different file for each player
+			std::vector<wxString> playerFiles;
+			uint8_t playerIndex = 1;
+			for(auto const& player : allPlayers) {
+				wxString tempPath = wxFileName::CreateTempFileName("script");
+				wxFFileOutputStream fileStream(tempPath, "wb");
 
-		std::vector<std::string> scriptPaths;
+				for(SavestateBlockNum hook = firstHook; hook <= lastHook; hook++) {
+					// Always first branch
+					for(auto const& controllerData : *(player->at(hook)->inputs[0])) {
+						// Continually write the savestate hook data in one unbroken stream
+						uint8_t* data;
+						uint32_t dataSize;
+						serializeProtocol.dataToBinary<ControllerData>(*controllerData, &data, &dataSize);
+						uint8_t sizeToPrint = (uint8_t)dataSize;
+						// Probably endian issues
+						fileStream.WriteAll(&sizeToPrint, sizeof(sizeToPrint));
+						fileStream.WriteAll(data, dataSize);
+					}
+				}
 
-		uint8_t currentWorkingPlayer = 0;
-		while(true) {
-			if(currentWorkingPlayer == playerFiles.size()) {
-				// All players have been successfully dealt with, break the loop
-				break;
+				fileStream.Close();
+
+				playerFiles.push_back(tempPath);
+				playerIndex++;
 			}
 
-			if(!addressGood) {
-				// Ask for it from the user
-				wxString ipAddress = wxGetTextFromUser("Please enter IP address of Nintendo Switch", "Server connect", wxEmptyString);
-				if(!ipAddress.empty()) {
-					address     = ipAddress;
-					addressGood = true;
-				} else {
-					// If canceled, just forget this and roll back
+			wxString address = wxString::FromUTF8(networkInstance->getSwitchIP());
+
+			std::vector<std::string> scriptPaths;
+
+			for(uint8_t currentWorkingPlayer = 0; currentWorkingPlayer < playerFiles.size(); currentWorkingPlayer++) {
+				wxString ftpPath = wxString::Format("/switas-script-temp-%d.txt", currentWorkingPlayer);
+
+				std::string output = HELPERS::exec(wxString::Format("curl -T %s -m 10 --connect-timeout 3 --verbose %s", playerFiles[currentWorkingPlayer], wxString::Format("ftp://%s%s", address, ftpPath)).c_str());
+
+				if(output.find("is not recognized") != std::string::npos || output.find("command not found") != std::string::npos) {
+					wxMessageDialog errorDialog(this, "The Curl executable was not found, please install it to PATH right now", "Curl Not Found", wxOK | wxICON_ERROR);
+					errorDialog.ShowModal();
+
 					for(auto const& playerFile : playerFiles) {
 						wxRemoveFile(playerFile);
 					}
+
 					return;
+				} else if(output.find("Closing connection 0") != std::string::npos) {
+					std::vector<std::string> lines = HELPERS::splitString(output, '\n');
+
+					wxMessageDialog errorDialog(this, wxString::FromUTF8(lines[lines.size() - 1]), "Curl Error", wxOK | wxICON_ERROR);
+					errorDialog.ShowModal();
+
+					for(auto const& playerFile : playerFiles) {
+						wxRemoveFile(playerFile);
+					}
+
+					return;
+				} else {
+					// Assume successful writing, go on
+					wxRemoveFile(playerFiles[currentWorkingPlayer]);
+					scriptPaths.push_back(ftpPath.ToStdString());
+					currentWorkingPlayer++;
+					// EndModal(wxID_OK);
 				}
 			}
 
-			wxString ftpPath = wxString::Format("/switas-script-temp-%d.txt", currentWorkingPlayer);
-
-			std::string output = HELPERS::exec(wxString::Format("curl -T %s -m 10 --connect-timeout 3 --verbose %s", playerFiles[currentWorkingPlayer], wxString::Format("ftp://%s%s", address, ftpPath)).c_str());
-
-			if(output.find("is not recognized") != std::string::npos || output.find("command not found") != std::string::npos) {
-				wxMessageDialog errorDialog(this, "The Curl executable was not found, please install it to PATH right now", "Curl Not Found", wxOK | wxICON_ERROR);
-				errorDialog.ShowModal();
-				// The user should install CURL while this dialog is open
-			} else if(output.find("Closing connection 0") != std::string::npos) {
-				std::vector<std::string> lines = HELPERS::splitString(output, '\n');
-
-				wxMessageDialog errorDialog(this, wxString::FromUTF8(lines[lines.size() - 1]), "Curl Error", wxOK | wxICON_ERROR);
-				errorDialog.ShowModal();
-
-				// The address appears to be faulty, ask the user to investigate
-				addressGood = false;
-			} else {
-				// Successful writing, go on
-				wxRemoveFile(playerFiles[currentWorkingPlayer]);
-				scriptPaths.push_back(ftpPath.ToStdString());
-				currentWorkingPlayer++;
-				// EndModal(wxID_OK);
-			}
+			// clang-format off
+			ADD_TO_QUEUE(SendStartFinalTas, networkInstance, {
+				data.scriptPaths = scriptPaths;
+			})
+			// clang-format on
+		} else {
+			// Not connected, cannot run final TAS with homebrew then
+			wxMessageDialog connectedDialog(this, "You must connect to your switch in order to run using this method", "Not Connected", wxOK | wxICON_ERROR);
+			connectedDialog.ShowModal();
 		}
-
-		// clang-format off
-		ADD_TO_QUEUE(SendStartFinalTas, networkInstance, {
-			data.scriptPaths = scriptPaths;
-		})
-		// clang-format on
 	}
 }
 

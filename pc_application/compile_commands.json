@@ -301,6 +301,34 @@
    "-I/usr/include/x86_64-linux-gnu", 
    "-I./include", 
    "-c", 
+   "source/ui/savestateSelection.cpp", 
+   "-o", 
+   "bin/./source/ui/savestateSelection.cpp.o"
+  ], 
+  "file": "source/ui/savestateSelection.cpp"
+ }, 
+ {
+  "directory": "/home/thegreatrambler/Desktop/projects/NX-TAS-UI/pc_application", 
+  "arguments": [
+   "g++", 
+   "-Wall", 
+   "-Wno-maybe-uninitialized", 
+   "-Wno-sign-compare", 
+   "-DCLIENT_IMP", 
+   "-Og", 
+   "-g", 
+   "-ggdb", 
+   "-m64", 
+   "-std=gnu++17", 
+   "-I/usr/lib/x86_64-linux-gnu/wx/include/gtk3-unicode-3.1-unofficial3", 
+   "-I/usr/include/wx-3.1-unofficial", 
+   "-D_FILE_OFFSET_BITS=64", 
+   "-DWXUSINGDLL", 
+   "-D__WXGTK__", 
+   "-pthread", 
+   "-I/usr/include/x86_64-linux-gnu", 
+   "-I./include", 
+   "-c", 
    "source/dataHandling/applicationMemoryViewer.cpp", 
    "-o", 
    "bin/./source/dataHandling/applicationMemoryViewer.cpp.o"
@@ -329,11 +357,11 @@
    "-I/usr/include/x86_64-linux-gnu", 
    "-I./include", 
    "-c", 
-   "source/ui/drawingCanvas.cpp", 
+   "source/ui/debugWindow.cpp", 
    "-o", 
-   "bin/./source/ui/drawingCanvas.cpp.o"
+   "bin/./source/ui/debugWindow.cpp.o"
   ], 
-  "file": "source/ui/drawingCanvas.cpp"
+  "file": "source/ui/debugWindow.cpp"
  }, 
  {
   "directory": "/home/thegreatrambler/Desktop/projects/NX-TAS-UI/pc_application", 
@@ -385,11 +413,11 @@
    "-I/usr/include/x86_64-linux-gnu", 
    "-I./include", 
    "-c", 
-   "source/ui/savestateSelection.cpp", 
+   "source/ui/drawingCanvas.cpp", 
    "-o", 
-   "bin/./source/ui/savestateSelection.cpp.o"
+   "bin/./source/ui/drawingCanvas.cpp.o"
   ], 
-  "file": "source/ui/savestateSelection.cpp"
+  "file": "source/ui/drawingCanvas.cpp"
  }, 
  {
   "directory": "/home/thegreatrambler/Desktop/projects/NX-TAS-UI/pc_application", 
@@ -469,90 +497,6 @@
    "-I/usr/include/x86_64-linux-gnu", 
    "-I./include", 
    "-c", 
-   "source/helpers.cpp", 
-   "-o", 
-   "bin/./source/helpers.cpp.o"
-  ], 
-  "file": "source/helpers.cpp"
- }, 
- {
-  "directory": "/home/thegreatrambler/Desktop/projects/NX-TAS-UI/pc_application", 
-  "arguments": [
-   "g++", 
-   "-Wall", 
-   "-Wno-maybe-uninitialized", 
-   "-Wno-sign-compare", 
-   "-DCLIENT_IMP", 
-   "-Og", 
-   "-g", 
-   "-ggdb", 
-   "-m64", 
-   "-std=gnu++17", 
-   "-I/usr/lib/x86_64-linux-gnu/wx/include/gtk3-unicode-3.1-unofficial3", 
-   "-I/usr/include/wx-3.1-unofficial", 
-   "-D_FILE_OFFSET_BITS=64", 
-   "-DWXUSINGDLL", 
-   "-D__WXGTK__", 
-   "-pthread", 
-   "-I/usr/include/x86_64-linux-gnu", 
-   "-I./include", 
-   "-c", 
-   "source/sharedNetworkCode/networkInterface.cpp", 
-   "-o", 
-   "bin/./source/sharedNetworkCode/networkInterface.cpp.o"
-  ], 
-  "file": "source/sharedNetworkCode/networkInterface.cpp"
- }, 
- {
-  "directory": "/home/thegreatrambler/Desktop/projects/NX-TAS-UI/pc_application", 
-  "arguments": [
-   "g++", 
-   "-Wall", 
-   "-Wno-maybe-uninitialized", 
-   "-Wno-sign-compare", 
-   "-DCLIENT_IMP", 
-   "-Og", 
-   "-g", 
-   "-ggdb", 
-   "-m64", 
-   "-std=gnu++17", 
-   "-I/usr/lib/x86_64-linux-gnu/wx/include/gtk3-unicode-3.1-unofficial3", 
-   "-I/usr/include/wx-3.1-unofficial", 
-   "-D_FILE_OFFSET_BITS=64", 
-   "-DWXUSINGDLL", 
-   "-D__WXGTK__", 
-   "-pthread", 
-   "-I/usr/include/x86_64-linux-gnu", 
-   "-I./include", 
-   "-c", 
-   "source/ui/debugWindow.cpp", 
-   "-o", 
-   "bin/./source/ui/debugWindow.cpp.o"
-  ], 
-  "file": "source/ui/debugWindow.cpp"
- }, 
- {
-  "directory": "/home/thegreatrambler/Desktop/projects/NX-TAS-UI/pc_application", 
-  "arguments": [
-   "g++", 
-   "-Wall", 
-   "-Wno-maybe-uninitialized", 
-   "-Wno-sign-compare", 
-   "-DCLIENT_IMP", 
-   "-Og", 
-   "-g", 
-   "-ggdb", 
-   "-m64", 
-   "-std=gnu++17", 
-   "-I/usr/lib/x86_64-linux-gnu/wx/include/gtk3-unicode-3.1-unofficial3", 
-   "-I/usr/include/wx-3.1-unofficial", 
-   "-D_FILE_OFFSET_BITS=64", 
-   "-DWXUSINGDLL", 
-   "-D__WXGTK__", 
-   "-pthread", 
-   "-I/usr/include/x86_64-linux-gnu", 
-   "-I./include", 
-   "-c", 
    "source/ui/bottomUI.cpp", 
    "-o", 
    "bin/./source/ui/bottomUI.cpp.o"
@@ -581,10 +525,66 @@
    "-I/usr/include/x86_64-linux-gnu", 
    "-I./include", 
    "-c", 
+   "source/helpers.cpp", 
+   "-o", 
+   "bin/./source/helpers.cpp.o"
+  ], 
+  "file": "source/helpers.cpp"
+ }, 
+ {
+  "directory": "/home/thegreatrambler/Desktop/projects/NX-TAS-UI/pc_application", 
+  "arguments": [
+   "g++", 
+   "-Wall", 
+   "-Wno-maybe-uninitialized", 
+   "-Wno-sign-compare", 
+   "-DCLIENT_IMP", 
+   "-Og", 
+   "-g", 
+   "-ggdb", 
+   "-m64", 
+   "-std=gnu++17", 
+   "-I/usr/lib/x86_64-linux-gnu/wx/include/gtk3-unicode-3.1-unofficial3", 
+   "-I/usr/include/wx-3.1-unofficial", 
+   "-D_FILE_OFFSET_BITS=64", 
+   "-DWXUSINGDLL", 
+   "-D__WXGTK__", 
+   "-pthread", 
+   "-I/usr/include/x86_64-linux-gnu", 
+   "-I./include", 
+   "-c", 
    "source/ui/videoComparisonViewer.cpp", 
    "-o", 
    "bin/./source/ui/videoComparisonViewer.cpp.o"
   ], 
   "file": "source/ui/videoComparisonViewer.cpp"
+ }, 
+ {
+  "directory": "/home/thegreatrambler/Desktop/projects/NX-TAS-UI/pc_application", 
+  "arguments": [
+   "g++", 
+   "-Wall", 
+   "-Wno-maybe-uninitialized", 
+   "-Wno-sign-compare", 
+   "-DCLIENT_IMP", 
+   "-Og", 
+   "-g", 
+   "-ggdb", 
+   "-m64", 
+   "-std=gnu++17", 
+   "-I/usr/lib/x86_64-linux-gnu/wx/include/gtk3-unicode-3.1-unofficial3", 
+   "-I/usr/include/wx-3.1-unofficial", 
+   "-D_FILE_OFFSET_BITS=64", 
+   "-DWXUSINGDLL", 
+   "-D__WXGTK__", 
+   "-pthread", 
+   "-I/usr/include/x86_64-linux-gnu", 
+   "-I./include", 
+   "-c", 
+   "source/sharedNetworkCode/networkInterface.cpp", 
+   "-o", 
+   "bin/./source/sharedNetworkCode/networkInterface.cpp.o"
+  ], 
+  "file": "source/sharedNetworkCode/networkInterface.cpp"
  }
 ]

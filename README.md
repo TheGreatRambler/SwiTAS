@@ -2,6 +2,7 @@
 A TAS toolkit for the Nintendo Switch. Usuable via hardware, homebrew and emulator. Join [the Discord](https://discord.gg/3zDmqpQ)!
 
 # [RELEASES HERE](https://github.com/TheGreatRambler/SwiTAS/releases)
+# [BUG REPORTS HERE](https://github.com/TheGreatRambler/SwiTAS/issues)
 
 ## Why this?
 This project intends to give a easy to use yet powerful frontend to create Switch TASes. While projects exist that play back inputs on a console, usually through the usage of an arduino, these programs lack the ability to frame advance or pause the game consistently.
@@ -55,7 +56,7 @@ You may also opt to edit your TAS without having to connect to your Switch. This
 
 In order to take advantage of what SwiTAS has to offer, it is neccessary that you put SwiTAS into a tethered state. This can be done by Creating, Loading or Modifying a savestate.
 
-Whenever you change the number of players in a TAS (or connect to the Switch for the first time), you will be required to disconnect all of your controllers. Once you do so, a number of controllers corresponding to the number of players will automatically connect themselves. Once this is done, you may reconnect your controllers (it is recommended to reconnect just one for input capturing, another feature) and press *ok* on the dialog.
+Whenever you change the number of players in a TAS (or connect to the Switch for the first time), you will be required to disconnect all of your controllers. If you have joycons connected physically to the Switch, remove them. Enter the change grip screen in order to fully disconnect all controllers. Once you do so, a number of controllers corresponding to the number of players will automatically connect themselves. Once this is done, you may reconnect your controllers (it is recommended to reconnect just one for input capturing, another feature) and press *ok* on the dialog. You should not reenter the change grip screen unless you are prompted to remove all controllers again. If you did not see controllers connect themselves in the change grip order screen when you disconnected your controllers, there was an error and you should report the issue.
 
 ![](https://i.imgur.com/wqfU2b5.gif)
 

@@ -91,6 +91,10 @@ void VideoComparisonViewer::onIdle(wxIdleEvent& event) {
 			consoleLog->AppendText(text);
 		}
 	}
+
+	if(!IsBeingDeleted()) {
+		event.RequestMore();
+	}
 }
 
 void VideoComparisonViewer::onClose(wxCloseEvent& event) {
