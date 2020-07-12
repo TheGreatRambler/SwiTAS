@@ -36,6 +36,14 @@ MainLoop::MainLoop() {
 	if(R_FAILED(rc))
 		fatalThrow(rc);
 
+	// LOGD << "Obtain sleep module";
+	//// https://github.com/cathery/sys-con/blob/master/source/Sysmodule/source/psc_module.cpp
+	// const u16 deps[1] = { PscPmModuleId_Fs };
+	// rc                = pscmGetPmModule(&sleepModule, (PscPmModuleId)127, deps, sizeof(deps), true);
+	// if(R_FAILED(rc))
+	//	fatalThrow(rc);
+	// sleepModeWaiter = waiterForEvent(&sleepModule.event);
+
 	LOGD << "Attach work buffers";
 	// Attach Work Buffer
 	rc = hiddbgAttachHdlsWorkBuffer();
@@ -45,6 +53,16 @@ MainLoop::MainLoop() {
 }
 
 void MainLoop::mainLoopHandler() {
+	/*
+	if(checkSleep()) {
+		// Close down server
+	}
+
+	if(checkAwaken()) {
+		// restart server
+	}
+	*/
+
 	if(!isPaused) {
 #ifdef __SWITCH__
 		// Being debugged might break this application
@@ -182,6 +200,7 @@ void MainLoop::handleNetworkUpdates() {
 			clearEveryController();
 			waitForVsync();
 			unpauseApp();
+			lastNanoseconds = 0;
 		} else if(data.actFlag == SendInfo::STOP_FINAL_TAS) {
 			finalTasShouldRun = false;
 		}
@@ -245,6 +264,7 @@ void MainLoop::sendGameInfo() {
 		}
 #endif
 		unpauseApp();
+		lastNanoseconds = 0;
 
 		ADD_TO_QUEUE(RecieveGameInfo, networkInstance, {
 			data.applicationName      = gameName;
@@ -318,6 +338,7 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths) {
 
 	// Just in case
 	unpauseApp();
+	lastNanoseconds = 0;
 
 	while(true) {
 		// Run half a second of data before checking network
@@ -394,10 +415,10 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 
 #ifdef __SWITCH__
 		LOGD << "Pausing";
+		rc = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
 		if(lastNanoseconds != 0) {
 			LOGD << "Time taken between frames: " << (int)((armTicksToNs(armGetSystemTick()) - lastNanoseconds) / 1000000);
 		}
-		rc       = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
 		isPaused = true;
 #endif
 
@@ -477,6 +498,10 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 					bytes         = getMemory(addr, sizeof(double));
 					stringVersion = std::to_string(*(double*)bytes.data());
 					break;
+				case MemoryRegionTypes::Bool:
+					bytes         = getMemory(addr, sizeof(bool));
+					stringVersion = *(bool*)bytes.data() ? "1" : "0";
+					break;
 				case MemoryRegionTypes::CharPointer:
 					bytes         = getMemory(addr, currentMemoryRegions[i].size);
 					stringVersion = std::string((const char*)bytes.data(), bytes.size());
@@ -511,6 +536,47 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 	}
 }
 
+uint8_t MainLoop::checkSleep() {
+	// Wait for one millisecond
+	if(R_SUCCEEDED(waitSingle(sleepModeWaiter, 1000000 * 1))) {
+		PscPmState pscState;
+		u32 out_flags;
+		if(R_SUCCEEDED(pscPmModuleGetRequest(&sleepModule, &pscState, &out_flags))) {
+			pscPmModuleAcknowledge(&sleepModule, pscState);
+			switch(pscState) {
+			case PscPmState_Awake:
+			case PscPmState_ReadyAwaken:
+				return false;
+			case PscPmState_ReadySleep:
+			case PscPmState_ReadyShutdown:
+				return true;
+			default:
+				return false;
+			}
+		}
+	}
+}
+uint8_t MainLoop::checkAwaken() {
+	// Wait for one millisecond
+	if(R_SUCCEEDED(waitSingle(sleepModeWaiter, 1000000 * 1))) {
+		PscPmState pscState;
+		u32 out_flags;
+		if(R_SUCCEEDED(pscPmModuleGetRequest(&sleepModule, &pscState, &out_flags))) {
+			pscPmModuleAcknowledge(&sleepModule, pscState);
+			switch(pscState) {
+			case PscPmState_Awake:
+			case PscPmState_ReadyAwaken:
+				return true;
+			case PscPmState_ReadySleep:
+			case PscPmState_ReadyShutdown:
+				return false;
+			default:
+				return false;
+			}
+		}
+	}
+}
+
 void MainLoop::matchFirstControllerToTASController(uint8_t player) {
 #ifdef __SWITCH__
 	if(getNumControllers() > controllers.size() && controllers.size() != 0) {
@@ -535,6 +601,10 @@ MainLoop::~MainLoop() {
 	rc = hiddbgReleaseHdlsWorkBuffer();
 	hiddbgExit();
 #endif
+
+	pscPmModuleFinalize(&sleepModule);
+	pscPmModuleClose(&sleepModule);
+	eventClose(&sleepModule.event);
 
 	// Make absolutely sure the app is unpaused on close
 	reset();

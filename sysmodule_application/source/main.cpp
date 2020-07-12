@@ -90,6 +90,11 @@ void __attribute__((weak)) __appInit(void) {
 	if(R_FAILED(rc))
 		fatalThrow(rc);
 
+	// Sleep mode handler
+	rc = pscmInitialize();
+	if(R_FAILED(rc))
+		fatalThrow(rc);
+
 	rc = hiddbgInitialize();
 	if(R_FAILED(rc))
 		fatalThrow(rc);
@@ -140,6 +145,7 @@ void __attribute__((weak)) __appExit(void) {
 	setExit();
 	hiddbgExit();
 	pmdmntExit();
+	pscmExit();
 	hidExit();
 	capsscExit();
 	viExit();
@@ -152,7 +158,7 @@ void __attribute__((weak)) __appExit(void) {
 // Main program entrypoint
 #ifdef __SWITCH__
 int main(int argc, char* argv[]) {
-	remove("/SwiTAS.log");
+	remove("/SwiTAS_log.txt");
 	plog::init(plog::debug, "/SwiTAS_log.txt");
 	LOGD << "Started logging";
 

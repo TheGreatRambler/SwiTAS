@@ -270,7 +270,7 @@ void SideUI::onIdle(wxIdleEvent& event) {
 	// Called by MainWindow
 	PROCESS_NETWORK_CALLBACKS(networkInterface, RecieveFlag)
 
-	if(!IsBeingDeleted()) {
+	if(!parent->IsBeingDeleted()) {
 		event.RequestMore();
 	}
 }
