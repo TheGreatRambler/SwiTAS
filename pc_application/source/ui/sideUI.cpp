@@ -220,7 +220,7 @@ void SideUI::setPlayerInfo(uint8_t size, uint8_t selected, bool force) {
 			// clang-format on
 			// Now, user has to disconnect their controllers and don't allow continuing until done
 			while(true) {
-				wxMessageDialog removeControllersDialog(parent, "Remove all controllers from the switch, can connect them afterwards", "Remove controllers", wxOK | wxICON_INFORMATION);
+				wxMessageDialog removeControllersDialog(parent, "Remove all controllers from the switch by entering the Change Grip Screen, can connect them afterwards", "Remove controllers", wxOK | wxICON_INFORMATION);
 				removeControllersDialog.ShowModal();
 
 				PROCESS_NETWORK_CALLBACKS(networkInterface, RecieveFlag)

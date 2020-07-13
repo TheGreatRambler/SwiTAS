@@ -195,7 +195,7 @@ END_EVENT_TABLE()
 // clang-format on
 
 void SavestateSelection::onResize(wxSizeEvent& event) {
-	// Layout();
+	Layout();
 	// event.Skip();
 }
 
