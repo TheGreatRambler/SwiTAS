@@ -6,6 +6,7 @@
 #include <system_error>
 #include <vector>
 #include <wx/filepicker.h>
+#include <wx/wfstream.h>
 #include <wx/wx.h>
 
 #include "../dataHandling/projectHandler.hpp"
@@ -27,10 +28,14 @@ struct MemoryItemInfo {
 
 class MemoryViewer : public wxFrame {
 private:
+	const uint8_t NETWORK_CALLBACK_ID = 4;
+
 	wxBoxSizer* mainSizer;
 	wxBoxSizer* entryEditerSizer;
 
-	uint16_t currentItemSelection = 0;
+	long currentItemSelection = 0;
+
+	wxString typeChoices[MemoryRegionTypes::NUM_OF_TYPES];
 
 	std::shared_ptr<ProjectHandler> projectHandler;
 	std::shared_ptr<CommunicateWithNetwork> networkInterface;
@@ -50,14 +55,23 @@ private:
 
 	wxButton* updateEntry;
 	wxButton* addEntry;
+	wxButton* removeEntry;
 
 	wxListCtrl* itemsList;
 
 	void onUpdateEntry(wxCommandEvent& event);
 	void onAddEntry(wxCommandEvent& event);
+	void onRemoveEntry(wxCommandEvent& event);
+
+	void onIdle(wxIdleEvent& event);
+	void onClose(wxCloseEvent& event);
+
+	void sendUpdatedEntries();
 
 	void selectedItemChanged(wxListEvent& event);
 
 public:
 	MemoryViewer(wxFrame* parent, std::shared_ptr<ProjectHandler> proj, std::shared_ptr<CommunicateWithNetwork> networkImp);
+
+	DECLARE_EVENT_TABLE();
 };

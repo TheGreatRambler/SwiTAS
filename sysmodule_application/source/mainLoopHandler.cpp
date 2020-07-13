@@ -415,7 +415,9 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 
 #ifdef __SWITCH__
 		LOGD << "Pausing";
-		rc = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
+		uint64_t timeTakenToPause = armTicksToNs(armGetSystemTick());
+		rc                        = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
+		LOGD << "Time taken to pause: " << (int)((armTicksToNs(armGetSystemTick()) - timeTakenToPause) / 1000000);
 		if(lastNanoseconds != 0) {
 			LOGD << "Time taken between frames: " << (int)((armTicksToNs(armGetSystemTick()) - lastNanoseconds) / 1000000);
 		}

@@ -195,8 +195,8 @@ END_EVENT_TABLE()
 // clang-format on
 
 void SavestateSelection::onResize(wxSizeEvent& event) {
-	Layout();
-	event.Skip();
+	// Layout();
+	// event.Skip();
 }
 
 void SavestateSelection::setTargetFrame(wxBitmap* targetBitmap, std::string targetDhash) {

@@ -113,7 +113,8 @@ private:
 
 	void waitForVsync() {
 #ifdef __SWITCH__
-		rc = eventWait(&vsyncEvent, UINT64_MAX);
+		// Only allow it to wait for 15 milliseconds
+		rc = eventWait(&vsyncEvent, 1000000 * 15);
 		if(R_FAILED(rc))
 			fatalThrow(rc);
 			// svcSleepThread(1000000 * 1);
@@ -124,8 +125,10 @@ private:
 		if(isPaused) {
 #ifdef __SWITCH__
 			// Unpause application
-			lastNanoseconds = armTicksToNs(armGetSystemTick());
+			lastNanoseconds             = armTicksToNs(armGetSystemTick());
+			uint64_t timeTakenToUnpause = armTicksToNs(armGetSystemTick());
 			svcCloseHandle(applicationDebug);
+			LOGD << "Time taken to unpause: " << (int)((armTicksToNs(armGetSystemTick()) - timeTakenToUnpause) / 1000000);
 			isPaused = false;
 #endif
 		}
