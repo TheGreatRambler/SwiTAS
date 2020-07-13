@@ -44,4 +44,7 @@ END_EVENT_TABLE()
 
 void GameCorruptor::onIdle(wxIdleEvent& event) {
 	// Check networkInstance for memory info and enable everything
+	if(!IsBeingDeleted()) {
+		event.RequestMore();
+	}
 }

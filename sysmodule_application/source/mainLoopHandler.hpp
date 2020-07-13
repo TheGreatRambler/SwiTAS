@@ -44,6 +44,9 @@ private:
 	Result rc;
 	Handle applicationDebug;
 
+	PscPmModule sleepModule;
+	Waiter sleepModeWaiter;
+
 	uint64_t lastNanoseconds = 0;
 #endif
 
@@ -113,7 +116,7 @@ private:
 		rc = eventWait(&vsyncEvent, UINT64_MAX);
 		if(R_FAILED(rc))
 			fatalThrow(rc);
-		svcSleepThread(1000000 * 1);
+			// svcSleepThread(1000000 * 1);
 #endif
 	}
 
@@ -121,9 +124,9 @@ private:
 		if(isPaused) {
 #ifdef __SWITCH__
 			// Unpause application
-			svcCloseHandle(applicationDebug);
 			lastNanoseconds = armTicksToNs(armGetSystemTick());
-			isPaused        = false;
+			svcCloseHandle(applicationDebug);
+			isPaused = false;
 #endif
 		}
 	}
@@ -149,6 +152,9 @@ private:
 
 	uint8_t finalTasShouldRun;
 	void runFinalTas(std::vector<std::string> scriptPaths);
+
+	uint8_t checkSleep();
+	uint8_t checkAwaken();
 
 public:
 	MainLoop();

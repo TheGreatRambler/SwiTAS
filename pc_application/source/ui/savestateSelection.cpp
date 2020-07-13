@@ -217,6 +217,10 @@ void SavestateSelection::onAutoFrameAdvanceTimer(wxTimerEvent& event) {
 
 void SavestateSelection::onIdle(wxIdleEvent& event) {
 	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveGameFramebuffer)
+
+	if(!IsBeingDeleted()) {
+		event.RequestMore();
+	}
 }
 
 void SavestateSelection::registerFramebufferCallback() {
@@ -224,11 +228,14 @@ void SavestateSelection::registerFramebufferCallback() {
 		if(!operationSuccessful) {
 			playButton->Enable();
 			frameAdvanceButton->Enable();
+			autoFrameAdvanceButton->Enable();
 			okButton->Enable();
+
 			wxImage screenshot = HELPERS::getImageFromJPEGData(data.buf);
 			currentFrame->setBitmap(new wxBitmap(screenshot));
 			wxString hash   = HELPERS::calculateDhash(screenshot, dhashWidth, dhashHeight);
 			leftDhashString = hash.ToStdString();
+
 			if(savestateLoadDialog) {
 				leftDHash->SetLabel(hash);
 				uint16_t hamming = HELPERS::getHammingDistance(hash, rightDHash->GetLabel());
@@ -250,7 +257,11 @@ void SavestateSelection::registerFramebufferCallback() {
 }
 
 void SavestateSelection::onPlay(wxCommandEvent& event) {
-	// Trigger automatic playing
+	// Disable same buttons as frame advance
+	playButton->Disable();
+	frameAdvanceButton->Disable();
+	autoFrameAdvanceButton->Disable();
+	okButton->Disable();
 	// clang-format off
 	ADD_TO_QUEUE(SendFlag, networkInstance, {
 		data.actFlag = SendInfo::UNPAUSE;
@@ -274,6 +285,7 @@ void SavestateSelection::onPause(wxCommandEvent& event) {
 void SavestateSelection::frameAdvance() {
 	playButton->Disable();
 	frameAdvanceButton->Disable();
+	autoFrameAdvanceButton->Disable();
 	okButton->Disable();
 
 	// clang-format off

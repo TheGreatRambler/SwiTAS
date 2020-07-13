@@ -167,6 +167,10 @@ void MainWindow::onIdle(wxIdleEvent& event) {
 	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveApplicationConnected)
 	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveLogging)
 	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveMemoryRegion)
+
+	if(!IsBeingDeleted()) {
+		event.RequestMore();
+	}
 }
 
 void MainWindow::handleNetworkQueues() {
