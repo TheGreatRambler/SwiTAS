@@ -123,7 +123,7 @@ As a tip, once you are within a half second of the frame, you can simply automat
 ![](https://i.imgur.com/cWK8i2v.gif)
 
 ## Thanks
-- [Hamhub7](https://github.com/hamhub7): The creator of Nx-TAS
+- [Hamhub7](https://github.com/hamhub7) & [Soren](https://github.com/sorenbug): The creators of [nx-TAS](https://github.com/hamhub7/nx-TAS)
 - [MonsterDruide1](https://github.com/MonsterDruide1): Providing many valuable insights into the behavior of hardware-based TAS setups
 - [AtlasNX](https://twitter.com/atlasnx?lang=en): For their help during development
 - Members of the wxWidgets forums: For being incredibly useful for every question
