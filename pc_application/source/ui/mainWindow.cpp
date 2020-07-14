@@ -86,8 +86,8 @@ MainWindow::MainWindow()
 	// add_events(Gdk::KEY_PRESS_MASK);
 	handlePreviousWindowTransform();
 
-	// Wake up idle 10 times a second
-	wakeUpIdleTimer->Start(100);
+	// Wake up idle 20 times a second
+	wakeUpIdleTimer->Start(50);
 }
 
 void MainWindow::onStart() {

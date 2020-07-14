@@ -144,7 +144,7 @@ void MemoryViewer::onAddEntry(wxCommandEvent& event) {
 
 	mapFile(info);
 
-	infos.push_back(info);
+	infos.push_back(std::move(info));
 
 	long itemIndex = itemsList->InsertItem(0, info.pointerPath);
 	itemsList->SetItem(itemIndex, 1, typeChoices[info.type]);

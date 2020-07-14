@@ -388,10 +388,11 @@ void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t includeFra
 		svcGetThreadPriority(&currentPriority, CUR_THREAD_HANDLE);
 		svcSetThreadPriority(CUR_THREAD_HANDLE, 10);
 		waitForVsync();
-		lastNanoseconds = armTicksToNs(armGetSystemTick());
 		unpauseApp();
+		lastNanoseconds = armTicksToNs(armGetSystemTick());
 		// waitForVsync();
-		//svcSleepThread(1000000 * 5);
+		// Frame advancing is amazingly inconsistent
+		svcSleepThread(16666666);
 		pauseApp(linkedWithFrameAdvance, includeFramebuffer, autoAdvance, frame, savestateHookNum, branchIndex, playerIndex);
 		svcSetThreadPriority(CUR_THREAD_HANDLE, currentPriority);
 	}
@@ -410,18 +411,20 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 
 #ifdef __SWITCH__
 		LOGD << "Pausing";
-		uint64_t timeTakenToPause = armTicksToNs(armGetSystemTick());
-
 		rc = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
-
-		LOGD << "Time taken to pause: " << (int)((armTicksToNs(armGetSystemTick()) - timeTakenToPause) / 1000000);
 		if(lastNanoseconds != 0) {
-			while((armGetSystemTick() - lastNanoseconds) < (1000000 * 16)) {
+			uint64_t lastAttempt = armTicksToNs(armGetSystemTick()) - lastNanoseconds;
+			/*
+			while(lastAttempt < (1000000 * 16)) {
 				// Keep looping
+				isPaused = true;
 				unpauseApp();
 				rc = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
+				svcSleepThread(1000000 * 3);
+				lastAttempt = armTicksToNs(armGetSystemTick()) - lastNanoseconds;
 			}
-			LOGD << "Time taken between frames: " << (int)((armTicksToNs(armGetSystemTick()) - lastNanoseconds) / 1000000);
+			*/
+			LOGD << "Time taken between frames: " << (int)(lastAttempt / 1000000);
 			lastNanoseconds = 0;
 		}
 		isPaused = true;
