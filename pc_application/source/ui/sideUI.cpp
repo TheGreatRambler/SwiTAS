@@ -269,10 +269,6 @@ void SideUI::branchSelected(wxCommandEvent& event) {
 void SideUI::onIdle(wxIdleEvent& event) {
 	// Called by MainWindow
 	PROCESS_NETWORK_CALLBACKS(networkInterface, RecieveFlag)
-
-	if(!parent->IsBeingDeleted()) {
-		event.RequestMore();
-	}
 }
 
 void SideUI::onAddFramePressed(wxCommandEvent& event) {

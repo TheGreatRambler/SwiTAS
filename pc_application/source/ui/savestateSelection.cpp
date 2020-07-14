@@ -217,10 +217,6 @@ void SavestateSelection::onAutoFrameAdvanceTimer(wxTimerEvent& event) {
 
 void SavestateSelection::onIdle(wxIdleEvent& event) {
 	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveGameFramebuffer)
-
-	if(!IsBeingDeleted()) {
-		event.RequestMore();
-	}
 }
 
 void SavestateSelection::registerFramebufferCallback() {
