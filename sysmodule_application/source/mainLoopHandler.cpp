@@ -390,7 +390,8 @@ void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t includeFra
 		waitForVsync();
 		lastNanoseconds = armTicksToNs(armGetSystemTick());
 		unpauseApp();
-		waitForVsync();
+		// waitForVsync();
+		//svcSleepThread(1000000 * 5);
 		pauseApp(linkedWithFrameAdvance, includeFramebuffer, autoAdvance, frame, savestateHookNum, branchIndex, playerIndex);
 		svcSetThreadPriority(CUR_THREAD_HANDLE, currentPriority);
 	}

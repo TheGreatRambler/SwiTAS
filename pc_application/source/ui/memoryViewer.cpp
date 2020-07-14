@@ -66,13 +66,12 @@ MemoryViewer::MemoryViewer(wxFrame* parent, std::shared_ptr<ProjectHandler> proj
 
 		if(info.type != MemoryRegionTypes::ByteArray) {
 			// Byte arrays can't be represented this way
-			itemsList->SetItem(data.index, 2, data.stringRepresentation);
+			itemsList->SetItem(data.index, 2, wxString::FromUTF8(data.stringRepresentation));
 		}
 
 		if(info.saveToFile) {
-			wxFFileOutputStream fileStream(info.filePath, "wb");
-			fileStream.WriteAll(data.memory.data(), data.memory.size());
-			fileStream.Close();
+			std::copy(data.memory.begin(), data.memory.end(), info.mmap.begin());
+			info.mmap.sync(errorCode);
 		}
 	})
 
@@ -94,10 +93,6 @@ END_EVENT_TABLE()
 
 void MemoryViewer::onIdle(wxIdleEvent& event) {
 	PROCESS_NETWORK_CALLBACKS(networkInterface, RecieveMemoryRegion)
-
-	if(!IsBeingDeleted()) {
-		event.RequestMore();
-	}
 }
 
 void MemoryViewer::onClose(wxCloseEvent& event) {
@@ -128,6 +123,8 @@ void MemoryViewer::onUpdateEntry(wxCommandEvent& event) {
 		info.filePath    = filePath->GetPath();
 		info.pointerPath = pointerPath->GetLineText(0);
 
+		mapFile(info);
+
 		itemsList->SetItem(selectedItem, 0, info.pointerPath);
 		itemsList->SetItem(selectedItem, 1, typeChoices[info.type]);
 
@@ -144,6 +141,8 @@ void MemoryViewer::onAddEntry(wxCommandEvent& event) {
 	info.saveToFile  = saveToFile->GetValue();
 	info.filePath    = filePath->GetPath();
 	info.pointerPath = pointerPath->GetLineText(0);
+
+	mapFile(info);
 
 	infos.push_back(info);
 
