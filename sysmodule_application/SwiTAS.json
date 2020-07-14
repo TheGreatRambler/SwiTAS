@@ -20,7 +20,7 @@
 		"type": "kernel_flags",
 		"value": {
 			"highest_thread_priority": 63,
-			"lowest_thread_priority": 0,
+			"lowest_thread_priority": 10,
 			"lowest_cpu_id": 3,
 			"highest_cpu_id": 3
 		}

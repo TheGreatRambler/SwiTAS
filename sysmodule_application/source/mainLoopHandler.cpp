@@ -386,11 +386,11 @@ void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t includeFra
 #endif
 		int32_t currentPriority;
 		svcGetThreadPriority(&currentPriority, CUR_THREAD_HANDLE);
-		svcSetThreadPriority(CUR_THREAD_HANDLE, 0);
+		svcSetThreadPriority(CUR_THREAD_HANDLE, 10);
 		waitForVsync();
+		lastNanoseconds = armTicksToNs(armGetSystemTick());
 		unpauseApp();
-		// waitForVsync();
-		svcSleepThread(1000000 * 5);
+		waitForVsync();
 		pauseApp(linkedWithFrameAdvance, includeFramebuffer, autoAdvance, frame, savestateHookNum, branchIndex, playerIndex);
 		svcSetThreadPriority(CUR_THREAD_HANDLE, currentPriority);
 	}
@@ -410,10 +410,18 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 #ifdef __SWITCH__
 		LOGD << "Pausing";
 		uint64_t timeTakenToPause = armTicksToNs(armGetSystemTick());
-		rc                        = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
+
+		rc = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
+
 		LOGD << "Time taken to pause: " << (int)((armTicksToNs(armGetSystemTick()) - timeTakenToPause) / 1000000);
 		if(lastNanoseconds != 0) {
+			while((armGetSystemTick() - lastNanoseconds) < (1000000 * 16)) {
+				// Keep looping
+				unpauseApp();
+				rc = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
+			}
 			LOGD << "Time taken between frames: " << (int)((armTicksToNs(armGetSystemTick()) - lastNanoseconds) / 1000000);
+			lastNanoseconds = 0;
 		}
 		isPaused = true;
 #endif

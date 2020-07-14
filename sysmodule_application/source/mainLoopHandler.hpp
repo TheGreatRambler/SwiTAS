@@ -125,7 +125,6 @@ private:
 		if(isPaused) {
 #ifdef __SWITCH__
 			// Unpause application
-			lastNanoseconds = armTicksToNs(armGetSystemTick());
 			svcCloseHandle(applicationDebug);
 			isPaused = false;
 #endif
