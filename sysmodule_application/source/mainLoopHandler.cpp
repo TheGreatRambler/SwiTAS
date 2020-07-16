@@ -159,15 +159,6 @@ void MainLoop::handleNetworkUpdates() {
 		}
 	})
 
-	/*
-		CHECK_QUEUE(networkInstance, SendTrackMemoryRegion, {
-	#ifdef __SWITCH__
-			LOGD << "Track memory region";
-	#endif
-			memoryRegions.push_back(std::pair<uint64_t, uint64_t>(data.startByte, data.size));
-		})
-		*/
-
 	CHECK_QUEUE(networkInstance, SendFlag, {
 		if(data.actFlag == SendInfo::PAUSE_DEBUG) {
 			// Precaution to prevent the app getting stuck without the
@@ -195,7 +186,6 @@ void MainLoop::handleNetworkUpdates() {
 		} else if(data.actFlag == SendInfo::PAUSE) {
 			waitForVsync();
 			pauseApp(false, true, false, 0, 0, 0, 0);
-			lastNanoseconds = 0;
 		} else if(data.actFlag == SendInfo::UNPAUSE) {
 			clearEveryController();
 			waitForVsync();
@@ -394,10 +384,17 @@ void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t includeFra
 #ifdef __SWITCH__
 		LOGD << "Running frame";
 #endif
+		int32_t currentPriority;
+		svcGetThreadPriority(&currentPriority, CUR_THREAD_HANDLE);
+		svcSetThreadPriority(CUR_THREAD_HANDLE, 10);
 		waitForVsync();
 		unpauseApp();
-		waitForVsync();
+		lastNanoseconds = armTicksToNs(armGetSystemTick());
+		// waitForVsync();
+		// Frame advancing is amazingly inconsistent
+		svcSleepThread(16666666);
 		pauseApp(linkedWithFrameAdvance, includeFramebuffer, autoAdvance, frame, savestateHookNum, branchIndex, playerIndex);
+		svcSetThreadPriority(CUR_THREAD_HANDLE, currentPriority);
 	}
 }
 
@@ -409,7 +406,6 @@ void MainLoop::clearEveryController() {
 }
 
 void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, uint8_t autoAdvance, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex) {
-	// This is aborting for some reason
 	if(!isPaused) {
 		// Debug application again
 
@@ -417,7 +413,19 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 		LOGD << "Pausing";
 		rc = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
 		if(lastNanoseconds != 0) {
-			LOGD << "Time taken between frames: " << (int)((armTicksToNs(armGetSystemTick()) - lastNanoseconds) / 1000000);
+			uint64_t lastAttempt = armTicksToNs(armGetSystemTick()) - lastNanoseconds;
+			/*
+			while(lastAttempt < (1000000 * 16)) {
+				// Keep looping
+				isPaused = true;
+				unpauseApp();
+				rc = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
+				svcSleepThread(1000000 * 3);
+				lastAttempt = armTicksToNs(armGetSystemTick()) - lastNanoseconds;
+			}
+			*/
+			LOGD << "Time taken between frames: " << (int)(lastAttempt / 1000000);
+			lastNanoseconds = 0;
 		}
 		isPaused = true;
 #endif
@@ -500,7 +508,7 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 					break;
 				case MemoryRegionTypes::Bool:
 					bytes         = getMemory(addr, sizeof(bool));
-					stringVersion = *(bool*)bytes.data() ? "1" : "0";
+					stringVersion = *(bool*)bytes.data() ? "true" : "false";
 					break;
 				case MemoryRegionTypes::CharPointer:
 					bytes         = getMemory(addr, currentMemoryRegions[i].size);
@@ -519,19 +527,8 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 					data.index                = i;
 				})
 			}
-
-			/*
-						for(auto const& memoryRegion : memoryRegions) {
-							std::vector<uint8_t> buf(memoryRegion.second);
-							svcReadDebugProcessMemory(buf.data(), applicationDebug, memoryRegion.first, memoryRegion.second);
-
-							ADD_TO_QUEUE(RecieveMemoryRegion, networkInstance, {
-								data.startByte = memoryRegion.first;
-								data.size      = memoryRegion.second;
-								data.memory    = buf;
-							})
-						}
-						*/
+		} else {
+			LOGD << "Internet not connected, not sending framebuffer";
 		}
 	}
 }

@@ -61,7 +61,12 @@ MainWindow::MainWindow()
 	bottomUI = std::make_shared<BottomUI>(this, &mainSettings, buttonData, mainSizer, dataProcessingInstance, projectHandler);
 
 	autoFrameAdvanceTimer = new wxTimer(this);
-	Bind(wxEVT_TIMER, &MainWindow::onAutoFrameAdvanceTimer, this);
+	autoFrameTimerID      = autoFrameAdvanceTimer->GetId();
+
+	wakeUpIdleTimer   = new wxTimer(this);
+	wakeupIdleTimerID = wakeUpIdleTimer->GetId();
+
+	Bind(wxEVT_TIMER, &MainWindow::onTimer, this);
 
 	handleNetworkQueues();
 
@@ -80,6 +85,9 @@ MainWindow::MainWindow()
 	// Override the keypress handler
 	// add_events(Gdk::KEY_PRESS_MASK);
 	handlePreviousWindowTransform();
+
+	// Wake up idle 20 times a second
+	wakeUpIdleTimer->Start(50);
 }
 
 void MainWindow::onStart() {
@@ -135,8 +143,12 @@ void MainWindow::keyDownHandler(wxKeyEvent& event) {
 	}
 }
 
-void MainWindow::onAutoFrameAdvanceTimer(wxTimerEvent& event) {
-	sideUI->sendAutoRunData();
+void MainWindow::onTimer(wxTimerEvent& event) {
+	if(event.GetId() == autoFrameTimerID) {
+		sideUI->sendAutoRunData();
+	} else if(event.GetId() == wakeupIdleTimerID) {
+		wxWakeUpIdle();
+	}
 }
 
 void MainWindow::handlePreviousWindowTransform() {
@@ -167,10 +179,6 @@ void MainWindow::onIdle(wxIdleEvent& event) {
 	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveApplicationConnected)
 	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveLogging)
 	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveMemoryRegion)
-
-	if(!IsBeingDeleted()) {
-		event.RequestMore();
-	}
 }
 
 void MainWindow::handleNetworkQueues() {
@@ -381,6 +389,9 @@ void MainWindow::onClose(wxCloseEvent& event) {
 	networkInstance->endNetwork();
 
 	delete wxLog::SetActiveTarget(NULL);
+
+	wakeUpIdleTimer->Stop();
+
 	delete autoFrameAdvanceTimer;
 
 	// TODO, this raises errors for some reason

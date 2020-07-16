@@ -50,6 +50,10 @@ private:
 
 	// For sideUI
 	wxTimer* autoFrameAdvanceTimer;
+	wxTimer* wakeUpIdleTimer;
+
+	int autoFrameTimerID;
+	int wakeupIdleTimerID;
 
 	// Main logging window
 	wxLogWindow* logWindow;
@@ -87,7 +91,7 @@ private:
 	void onClose(wxCloseEvent& event);
 	void onIdle(wxIdleEvent& event);
 
-	void onAutoFrameAdvanceTimer(wxTimerEvent& event);
+	void onTimer(wxTimerEvent& event);
 
 	bool askForIP();
 	void handleNetworkQueues();

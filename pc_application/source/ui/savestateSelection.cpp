@@ -113,7 +113,7 @@ SavestateSelection::SavestateSelection(wxFrame* parent, rapidjson::Document* set
 		selectFrameAutomatically->SetToolTip("Select frame automatically at or below this hamming distance");
 	}
 
-	autoIncrementDelay = new wxSpinCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 5000, 0);
+	autoIncrementDelay = new wxSpinCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 5000, 200);
 	autoIncrementDelay->SetToolTip("Delay in mlliseconds for automatically incrementing frame");
 
 	playButton->Bind(wxEVT_BUTTON, &SavestateSelection::onPlay, this);
@@ -196,7 +196,7 @@ END_EVENT_TABLE()
 
 void SavestateSelection::onResize(wxSizeEvent& event) {
 	Layout();
-	event.Skip();
+	// event.Skip();
 }
 
 void SavestateSelection::setTargetFrame(wxBitmap* targetBitmap, std::string targetDhash) {
@@ -217,10 +217,6 @@ void SavestateSelection::onAutoFrameAdvanceTimer(wxTimerEvent& event) {
 
 void SavestateSelection::onIdle(wxIdleEvent& event) {
 	PROCESS_NETWORK_CALLBACKS(networkInstance, RecieveGameFramebuffer)
-
-	if(!IsBeingDeleted()) {
-		event.RequestMore();
-	}
 }
 
 void SavestateSelection::registerFramebufferCallback() {

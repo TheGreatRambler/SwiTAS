@@ -113,6 +113,7 @@ private:
 
 	void waitForVsync() {
 #ifdef __SWITCH__
+		// Only allow it to wait for 15 milliseconds
 		rc = eventWait(&vsyncEvent, UINT64_MAX);
 		if(R_FAILED(rc))
 			fatalThrow(rc);
@@ -124,7 +125,6 @@ private:
 		if(isPaused) {
 #ifdef __SWITCH__
 			// Unpause application
-			lastNanoseconds = armTicksToNs(armGetSystemTick());
 			svcCloseHandle(applicationDebug);
 			isPaused = false;
 #endif

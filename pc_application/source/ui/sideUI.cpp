@@ -177,7 +177,7 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	autoFrameEnd->Bind(wxEVT_BUTTON, &SideUI::onEndAutoFramePressed, this);
 
 	// Name is a misnomer
-	autoRunFramesPerSecond = new wxSpinCtrl(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 5000, 0);
+	autoRunFramesPerSecond = new wxSpinCtrl(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 5000, 200);
 
 	autoRunFramesPerSecond->SetToolTip("Delay in mlliseconds for automatically incrementing frame");
 
@@ -220,7 +220,7 @@ void SideUI::setPlayerInfo(uint8_t size, uint8_t selected, bool force) {
 			// clang-format on
 			// Now, user has to disconnect their controllers and don't allow continuing until done
 			while(true) {
-				wxMessageDialog removeControllersDialog(parent, "Remove all controllers from the switch, can connect them afterwards", "Remove controllers", wxOK | wxICON_INFORMATION);
+				wxMessageDialog removeControllersDialog(parent, "If you have Joycons physically connected to the Switch, please remove them.\nNow, open the Change Grip/Order Screen once whether or not you have any controllers connected. Then, press OK.", "Enter Change Grip/Order Screen", wxOK | wxICON_INFORMATION);
 				removeControllersDialog.ShowModal();
 
 				PROCESS_NETWORK_CALLBACKS(networkInterface, RecieveFlag)
@@ -269,10 +269,6 @@ void SideUI::branchSelected(wxCommandEvent& event) {
 void SideUI::onIdle(wxIdleEvent& event) {
 	// Called by MainWindow
 	PROCESS_NETWORK_CALLBACKS(networkInterface, RecieveFlag)
-
-	if(!parent->IsBeingDeleted()) {
-		event.RequestMore();
-	}
 }
 
 void SideUI::onAddFramePressed(wxCommandEvent& event) {
@@ -327,6 +323,8 @@ void SideUI::onSavestateHookModifyPressed(wxCommandEvent& event) {
 
 			inputData->setSavestateHook(inputData->getCurrentSavestateHook());
 
+			autoRunActive = false;
+
 			tether();
 		} else {
 			untether();
@@ -374,6 +372,8 @@ bool SideUI::createSavestateHook() {
 
 			inputData->setSavestateHook(blocks.size() - 1);
 
+			autoRunActive = false;
+
 			tether();
 			return true;
 		} else {
@@ -408,6 +408,9 @@ bool SideUI::loadSavestateHook(int block) {
 			projectHandler->incrementRerecordCount();
 			inputData->setSavestateHook(block);
 			// inputData->sendPlayerNum();
+
+			autoRunActive = false;
+
 			tether();
 			return true;
 		} else {
