@@ -177,7 +177,7 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	autoFrameEnd->Bind(wxEVT_BUTTON, &SideUI::onEndAutoFramePressed, this);
 
 	// Name is a misnomer
-	autoRunFramesPerSecond = new wxSpinCtrl(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 5000, 0);
+	autoRunFramesPerSecond = new wxSpinCtrl(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 5000, 200);
 
 	autoRunFramesPerSecond->SetToolTip("Delay in mlliseconds for automatically incrementing frame");
 
@@ -323,6 +323,8 @@ void SideUI::onSavestateHookModifyPressed(wxCommandEvent& event) {
 
 			inputData->setSavestateHook(inputData->getCurrentSavestateHook());
 
+			autoRunActive = false;
+
 			tether();
 		} else {
 			untether();
@@ -370,6 +372,8 @@ bool SideUI::createSavestateHook() {
 
 			inputData->setSavestateHook(blocks.size() - 1);
 
+			autoRunActive = false;
+
 			tether();
 			return true;
 		} else {
@@ -404,6 +408,9 @@ bool SideUI::loadSavestateHook(int block) {
 			projectHandler->incrementRerecordCount();
 			inputData->setSavestateHook(block);
 			// inputData->sendPlayerNum();
+
+			autoRunActive = false;
+
 			tether();
 			return true;
 		} else {

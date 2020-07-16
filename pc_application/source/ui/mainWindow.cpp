@@ -389,6 +389,9 @@ void MainWindow::onClose(wxCloseEvent& event) {
 	networkInstance->endNetwork();
 
 	delete wxLog::SetActiveTarget(NULL);
+
+	wakeUpIdleTimer->Stop();
+
 	delete autoFrameAdvanceTimer;
 
 	// TODO, this raises errors for some reason
