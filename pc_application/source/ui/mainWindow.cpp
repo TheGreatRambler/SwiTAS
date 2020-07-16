@@ -343,6 +343,7 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 		} else if(id == runFinalTasID) {
 			// Open the run final TAS dialog and untether
 			sideUI->untether();
+
 			TasRunner tasRunner(this, networkInstance, &mainSettings, dataProcessingInstance);
 			tasRunner.ShowModal();
 		}
