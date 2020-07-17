@@ -107,12 +107,16 @@ namespace Protocol {
 
 	// Recieve a ton of game and user info
 	DEFINE_STRUCT(RecieveGameInfo,
+	/*
 		std::string applicationName;
 		uint64_t applicationProgramId;
 		uint64_t applicationProcessId;
 		//std::string userNickname;
 		std::vector<GameMemoryInfo> memoryInfo;
-	, self.applicationName, self.applicationProgramId, self.applicationProcessId, self.memoryInfo)
+		*/
+		// Info in the form of a string
+		std::string infoJson;
+	, self.infoJson)
 
 	// Send start, with mostly everything as an enum value
 	DEFINE_STRUCT(SendFlag,

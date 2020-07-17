@@ -72,6 +72,7 @@ private:
 	wxWindowID toggleDebugMenuID;
 	wxWindowID openGameCorruptorID;
 	wxWindowID runFinalTasID;
+	wxWindowID requestGameInfoID;
 
 	void handlePreviousWindowTransform();
 

@@ -4,15 +4,23 @@ std::string HELPERS::resolvePath(std::string path) {
 	wxFileName relativeToExecutable(wxStandardPaths::Get().GetExecutablePath());
 	relativeToExecutable.RemoveDir(relativeToExecutable.GetDirCount() - 1);
 
+#ifdef DEBUG
+	wxFileName fullPath(relativeToExecutable.GetPathWithSep() + path, wxPATH_NATIVE);
+#else
+
 #ifdef __WXMSW__
 	wxFileName fullPath(relativeToExecutable.GetPathWithSep() + path, wxPATH_NATIVE);
 #endif
+
 #ifdef DEBIAN_SYSTEM
 	wxFileName fullPath("/usr/share/switas/" + path, wxPATH_NATIVE);
 #endif
+
 #ifdef __APPLE__
 	wxFileName fullPath(relativeToExecutable.GetPathWithSep() + path, wxPATH_NATIVE);
 #endif
+#endif
+
 	fullPath.MakeAbsolute();
 	std::string res = fullPath.GetFullPath(wxPATH_NATIVE).ToStdString();
 	return res;

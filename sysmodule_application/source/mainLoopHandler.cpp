@@ -193,6 +193,8 @@ void MainLoop::handleNetworkUpdates() {
 			lastNanoseconds = 0;
 		} else if(data.actFlag == SendInfo::STOP_FINAL_TAS) {
 			finalTasShouldRun = false;
+		} else if(data.actFlag == SendInfo::GET_GAME_INFO) {
+			sendGameInfo();
 		}
 	})
 
@@ -213,9 +215,10 @@ void MainLoop::handleNetworkUpdates() {
 
 			// prepareMemoryRegionMath(info.func, data.pointerDefinition);
 
-			info.type = data.type;
-			info.u    = data.u;
-			info.size = data.dataSize;
+			info.type              = data.type;
+			info.u                 = data.u;
+			info.size              = data.dataSize;
+			info.pointerDefinition = data.pointerDefinition;
 			currentMemoryRegions.push_back(info);
 		}
 	})
@@ -232,36 +235,145 @@ void MainLoop::handleNetworkUpdates() {
 
 void MainLoop::sendGameInfo() {
 	if(applicationOpened) {
-
-		std::vector<GameMemoryInfo> memoryInfo;
-
 		// Will get more info via
 		// https://github.com/switchbrew/switch-examples/blob/master/account/source/main.c
+		std::string infoJson = "{";
 
-		uint64_t addr = 0;
-		pauseApp(false, true, false, 0, 0, 0, 0);
+		infoJson += getJsonElement(1, "name", gameName);
+		infoJson += getJsonElementNum(1, "programID", std::string(applicationProgramId));
+		infoJson += getJsonElementNum(1, "processID", std::string(applicationProcessId));
+
+		// TODO make use of GetInfo
+
+		infoJson += "	memoryRegions: [";
+
+		uint8_t wasPaused = isPaused;
+
+		if(!wasPaused) {
+			pauseApp(false, true, false, 0, 0, 0, 0);
+		}
+
 #ifdef __SWITCH__
+		uint64_t addr = 0;
 		while(true) {
 			MemoryInfo info = { 0 };
 			uint32_t pageinfo;
 			rc = svcQueryDebugProcessMemory(&info, &pageinfo, applicationDebug, addr);
-			memoryInfo.push_back(getGameMemoryInfo(info));
 			addr += info.size;
 
 			if(R_FAILED(rc)) {
+				infoJson.pop_back();
+				infoJson += "]\n";
 				break;
 			}
+
+			// Add data to JSON
+			infoJson += "{\n";
+
+			infoJson += getJsonElementNum(2, "baseAddress", std::string(info.addr));
+			infoJson += getJsonElementNum(2, "regionSize", std::string(info.size));
+
+			infoJson += "		\"permissions\": [";
+
+			uint8_t hasSetFirstPermission = false;
+
+			if(info.perm & Perm_None) {
+				if(hasSetFirstPermission) {
+					infoJson += "\",none\"";
+				} else {
+					infoJson += "\"none\"";
+					hasSetFirstPermission = true;
+				}
+			}
+
+			if(info.perm & Perm_R) {
+				if(hasSetFirstPermission) {
+					infoJson += "\",read\"";
+				} else {
+					infoJson += "\"read\"";
+					hasSetFirstPermission = true;
+				}
+			}
+
+			if(info.perm & Perm_W) {
+				if(hasSetFirstPermission) {
+					infoJson += "\",write\"";
+				} else {
+					infoJson += "\"write\"";
+					hasSetFirstPermission = true;
+				}
+			}
+
+			if(info.perm & Perm_X) {
+				if(hasSetFirstPermission) {
+					infoJson += "\",execute\"";
+				} else {
+					infoJson += "\"execute\"";
+					hasSetFirstPermission = true;
+				}
+			}
+
+			infoJson += "],\n";
+
+			// Memory state unimplemented because wth...
+
+			infoJson += "		\"attributes\": [";
+
+			uint8_t hasSetFirstAttr = false;
+
+			if(info.attr & MemAttr_IsBorrowed) {
+				if(hasSetFirstAttr) {
+					infoJson += "\",borrowed\"";
+				} else {
+					infoJson += "\"borrowed\"";
+					hasSetFirstAttr = true;
+				}
+			}
+
+			if(info.attr & MemAttr_IsIpcMapped) {
+				if(hasSetFirstAttr) {
+					infoJson += "\",ipc_mapped\"";
+				} else {
+					infoJson += "\"ipc_mapped\"";
+					hasSetFirstAttr = true;
+				}
+			}
+
+			if(info.attr & MemAttr_IsDeviceMapped) {
+				if(hasSetFirstAttr) {
+					infoJson += "\",device_mapped\"";
+				} else {
+					infoJson += "\"device_mapped\"";
+					hasSetFirstAttr = true;
+				}
+			}
+
+			if(info.attr & MemAttr_IsUncached) {
+				if(hasSetFirstAttr) {
+					infoJson += "\",uncached\"";
+				} else {
+					infoJson += "\"uncached\"";
+					hasSetFirstAttr = true;
+				}
+			}
+
+			infoJson += "]\n";
+
+			infoJson += "	},"
 		}
 #endif
-		unpauseApp();
-		lastNanoseconds = 0;
+		infoJson += "}";
 
+		if(!wasPaused) {
+			unpauseApp();
+			lastNanoseconds = 0;
+		}
+
+		// clang-format off
 		ADD_TO_QUEUE(RecieveGameInfo, networkInstance, {
-			data.applicationName      = gameName;
-			data.applicationProgramId = applicationProgramId;
-			data.applicationProcessId = applicationProcessId;
-			data.memoryInfo           = memoryInfo;
+			data.infoJson = infoJson;
 		})
+		// clang-format on
 	}
 }
 
@@ -364,21 +476,6 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths) {
 	}
 }
 
-#ifdef __SWITCH__
-GameMemoryInfo MainLoop::getGameMemoryInfo(MemoryInfo memInfo) {
-	GameMemoryInfo info;
-	info.addr            = memInfo.addr;
-	info.size            = memInfo.size;
-	info.type            = memInfo.type;
-	info.attr            = memInfo.attr;
-	info.perm            = memInfo.perm;
-	info.device_refcount = memInfo.device_refcount;
-	info.ipc_refcount    = memInfo.ipc_refcount;
-	info.padding         = memInfo.padding;
-	return info;
-}
-#endif
-
 void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, uint8_t autoAdvance, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex) {
 	if(isPaused) {
 #ifdef __SWITCH__
@@ -458,7 +555,7 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 			// TODO set main and handle types correctly
 			// Put data into a vector<uint_t> first
 			for(uint16_t i = 0; i < currentMemoryRegions.size(); i++) {
-				uint64_t addr      = 0; // currentMemoryRegions[i].func.Eval();
+				uint64_t addr      = 0; // currentMemoryRegions[i].pointerDefinition
 				uint8_t isUnsigned = currentMemoryRegions[i].u;
 
 				MemoryRegionTypes type = currentMemoryRegions[i].type;

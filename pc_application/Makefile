@@ -33,7 +33,7 @@ ifeq ($(BUILD),release)
 	CPPFLAGS += -O3 -s -DNDEBUG
 else
 	# "Debug" build - no optimization, and debugging symbols
-	CPPFLAGS += -Og -g -ggdb
+	CPPFLAGS += -Og -g -ggdb -DDEBUG
 endif
 
 ifeq ($(SYSTEM),debian)

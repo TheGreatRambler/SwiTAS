@@ -27,6 +27,7 @@ struct MemoryRegionInfo {
 	MemoryRegionTypes type;
 	uint8_t u;
 	uint64_t size;
+	std::string pointerDefinition;
 };
 
 class MainLoop {
@@ -105,9 +106,13 @@ private:
 		return region;
 	}
 
-#ifdef __SWITCH__
-	GameMemoryInfo getGameMemoryInfo(MemoryInfo memInfo);
-#endif
+	std::string getJsonElement(uint8_t tabs, std::string key, std::string value) {
+		return std::string(tabs, '\t') + "\"" + key + "\": \"" + value + "\",\n";
+	}
+
+	std::string getJsonElementNum(uint8_t tabs, std::string key, std::string value) {
+		return std::string(tabs, '\t') + "\"" + key + "\": " + value + ",\n";
+	}
 
 	void pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, uint8_t autoAdvance, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex);
 

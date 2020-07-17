@@ -10,8 +10,8 @@ TasRunner::TasRunner(wxFrame* parent, std::shared_ptr<CommunicateWithNetwork> ne
 	hookSelectionSizer = new wxBoxSizer(wxHORIZONTAL);
 
 	int lastSavestateHookNum = (int)dataProcessing->getNumOfSavestateHooks(0) - 1;
-	firstSavestateHook       = new wxSpinCtrl(parent, wxID_ANY, "First Savestate Hook", wxDefaultPosition, wxDefaultSize, wxSP_WRAP, 0, lastSavestateHookNum, 0);
-	lastSavestateHook        = new wxSpinCtrl(parent, wxID_ANY, "Last Savestate Hook", wxDefaultPosition, wxDefaultSize, wxSP_WRAP, 0, lastSavestateHookNum, lastSavestateHookNum);
+	firstSavestateHook       = new wxSpinCtrl(this, wxID_ANY, "First Savestate Hook", wxDefaultPosition, wxDefaultSize, wxSP_WRAP, 0, lastSavestateHookNum, 0);
+	lastSavestateHook        = new wxSpinCtrl(this, wxID_ANY, "Last Savestate Hook", wxDefaultPosition, wxDefaultSize, wxSP_WRAP, 0, lastSavestateHookNum, lastSavestateHookNum);
 
 	firstSavestateHook->SetToolTip("Select first savestate hook (inclusive)");
 	lastSavestateHook->SetToolTip("Select last savestate hook (inclusive)");
@@ -19,10 +19,10 @@ TasRunner::TasRunner(wxFrame* parent, std::shared_ptr<CommunicateWithNetwork> ne
 	hookSelectionSizer->Add(firstSavestateHook, 0);
 	hookSelectionSizer->Add(lastSavestateHook, 0);
 
-	startTasHomebrew = HELPERS::getBitmapButton(parent, mainSettings, "startTasHomebrewButton");
-	// startTasArduino  = HELPERS::getBitmapButton(parent, mainSettings, "startTasArduinoButton");
+	startTasHomebrew = HELPERS::getBitmapButton(this, mainSettings, "startTasHomebrewButton");
+	// startTasArduino  = HELPERS::getBitmapButton(this, mainSettings, "startTasArduinoButton");
 
-	stopTas = HELPERS::getBitmapButton(parent, mainSettings, "stopButton");
+	stopTas = HELPERS::getBitmapButton(this, mainSettings, "stopButton");
 
 	startTasHomebrew->SetToolTip("Start TAS via homebrew");
 	// startTasArduino->SetToolTip("Start TAS via arduino");

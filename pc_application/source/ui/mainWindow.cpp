@@ -218,6 +218,11 @@ void MainWindow::handleNetworkQueues() {
 		}
 	})
 
+	ADD_NETWORK_CALLBACK(RecieveGameInfo, {
+		wxMessageDialog gameInfoDialog(this, wxString::FromUTF8(data.infoJson), "Game Info", wxOK | wxICON_INFORMATION);
+		gameInfoDialog.ShowModal();
+	})
+
 	/*
 	ADD_NETWORK_CALLBACK(RecieveFlag, {
 		if(data.actFlag == RecieveInfo::UNEXPECTED_CONTROLLER_SIZE) {
@@ -254,13 +259,14 @@ void MainWindow::addMenuBar() {
 	toggleDebugMenuID   = NewControlId();
 	openGameCorruptorID = NewControlId();
 	runFinalTasID       = NewControlId();
+	requestGameInfoID   = NewControlId();
 
 	fileMenu->Append(saveProject, "Save Project\tCtrl+S");
 	fileMenu->Append(exportAsText, "Export To Text Format\tCtrl+Alt+E");
 	fileMenu->Append(importAsText, "Import From Text Format\tCtrl+Alt+I");
 	fileMenu->Append(setNameID, "Set Name\tCtrl+Alt+N");
-	// Also not finished
-	// fileMenu->Append(runFinalTasID, "Run Final TAS\tCtrl+R");
+	fileMenu->Append(runFinalTasID, "Run Final TAS\tCtrl+R");
+	fileMenu->Append(requestGameInfoID, "Request Game Info\tCtrl+Shift+I");
 
 	// Add joystick submenu
 	fileMenu->AppendSubMenu(bottomUI->getJoystickMenu(), "&List Joysticks\tCtrl+G");
@@ -346,6 +352,15 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 
 			TasRunner tasRunner(this, networkInstance, &mainSettings, dataProcessingInstance);
 			tasRunner.ShowModal();
+		} else if(id == requestGameInfoID) {
+			if (networkInstance->isConnected()) {
+				// clang-format off
+				ADD_TO_QUEUE(SendFlag, networkInstance, {
+					data.actFlag = SendInfo::GET_GAME_INFO;
+				})
+				// clang-format on
+				// When finally sent over network, will be displayed
+			}
 		}
 	}
 }
@@ -384,6 +399,7 @@ void MainWindow::onClose(wxCloseEvent& event) {
 	REMOVE_NETWORK_CALLBACK(RecieveLogging)
 	REMOVE_NETWORK_CALLBACK(RecieveGameFramebuffer)
 	REMOVE_NETWORK_CALLBACK(RecieveFlag)
+	REMOVE_NETWORK_CALLBACK(RecieveGameInfo)
 
 	// Close project dialog and save
 	projectHandler->saveProject();
