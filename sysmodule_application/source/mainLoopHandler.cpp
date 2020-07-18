@@ -240,8 +240,8 @@ void MainLoop::sendGameInfo() {
 		std::string infoJson = "{";
 
 		infoJson += getJsonElement(1, "name", gameName);
-		infoJson += getJsonElementNum(1, "programID", std::string(applicationProgramId));
-		infoJson += getJsonElementNum(1, "processID", std::string(applicationProcessId));
+		infoJson += getJsonElementNum(1, "programID", std::to_string(applicationProgramId));
+		infoJson += getJsonElementNum(1, "processID", std::to_string(applicationProcessId));
 
 		// TODO make use of GetInfo
 
@@ -250,16 +250,18 @@ void MainLoop::sendGameInfo() {
 		uint8_t wasPaused = isPaused;
 
 		if(!wasPaused) {
-			pauseApp(false, true, false, 0, 0, 0, 0);
+			pauseApp(false, false, false, 0, 0, 0, 0);
 		}
 
 #ifdef __SWITCH__
 		uint64_t addr = 0;
 		while(true) {
+			LOGD << "Obtained memory region at: " << addr;
+
 			MemoryInfo info = { 0 };
 			uint32_t pageinfo;
-			rc = svcQueryDebugProcessMemory(&info, &pageinfo, applicationDebug, addr);
-			addr += info.size;
+			rc   = svcQueryDebugProcessMemory(&info, &pageinfo, applicationDebug, addr);
+			addr = info.addr + info.size;
 
 			if(R_FAILED(rc)) {
 				infoJson.pop_back();
@@ -270,8 +272,8 @@ void MainLoop::sendGameInfo() {
 			// Add data to JSON
 			infoJson += "{\n";
 
-			infoJson += getJsonElementNum(2, "baseAddress", std::string(info.addr));
-			infoJson += getJsonElementNum(2, "regionSize", std::string(info.size));
+			infoJson += getJsonElementNum(2, "baseAddress", std::to_string(info.addr));
+			infoJson += getJsonElementNum(2, "regionSize", std::to_string(info.size));
 
 			infoJson += "		\"permissions\": [";
 
@@ -359,7 +361,7 @@ void MainLoop::sendGameInfo() {
 
 			infoJson += "]\n";
 
-			infoJson += "	},"
+			infoJson += "	},";
 		}
 #endif
 		infoJson += "}";
@@ -368,6 +370,11 @@ void MainLoop::sendGameInfo() {
 			unpauseApp();
 			lastNanoseconds = 0;
 		}
+
+#ifdef __SWITCH__
+		LOGD << "Game info sent";
+		LOGD << "Generated info: " << infoJson.size() << " chars";
+#endif
 
 		// clang-format off
 		ADD_TO_QUEUE(RecieveGameInfo, networkInstance, {
@@ -433,6 +440,9 @@ void MainLoop::setControllerNumber(uint8_t numOfControllers) {
 void MainLoop::runFinalTas(std::vector<std::string> scriptPaths) {
 	std::vector<FILE*> files;
 	for(auto const& path : scriptPaths) {
+#ifdef __SWITCH__
+		LOGD << "Open script at: " << path;
+#endif
 		files.push_back(fopen(path.c_str(), "rb"));
 	}
 
