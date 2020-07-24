@@ -43,7 +43,7 @@ BUILD		:=	buildSysmodule
 SOURCES		:=	source
 DATA		:=	data
 INCLUDES	:=	include source/thirdParty/lua-5.3.5 source/thirdParty
-#ROMFS	:=	romfs
+ROMFS	:=	romfs
 
 SOURCES := $(shell find $(SOURCES) -print)
 
@@ -55,7 +55,7 @@ ARCH	:=	-march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE
 CFLAGS	:=	-g -Wall -ffunction-sections \
 			$(ARCH) $(DEFINES)
 
-CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -D__BSD_VISIBLE -DSERVER_IMP -DLLONG_MAX
+CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -D__BSD_VISIBLE -DSERVER_IMP -DLLONG_MAX -DWITHOUT_JPEG
 
 # Need Cpp11 for certain features
 # It has to be c++14 because of zpp

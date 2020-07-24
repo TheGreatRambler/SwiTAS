@@ -27,7 +27,7 @@ CXXFLAGS := -std=gnu++17
 
 # C/C++ flags
 CPPFLAGS := -I./include -I./source/thirdParty/lua-5.3.5 -I./source/thirdParty
-CPPFLAGS += -Wall -Wno-maybe-uninitialized -D__BSD_VISIBLE -DSERVER_IMP -DYUZU
+CPPFLAGS += -Wall -Wno-maybe-uninitialized -D__BSD_VISIBLE -DSERVER_IMP -DYUZU -DWITHOUT_JPEG
 
 ifeq ($(BUILD),release)
 	# "Release" build - optimization, and no debug symbols
