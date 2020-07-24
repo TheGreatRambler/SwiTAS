@@ -71,7 +71,6 @@ private:
 	std::string projectName;
 	uint8_t projectWasLoaded = true;
 
-	uint16_t imageExportIndex = 0;
 	uint16_t rerecordCount    = 0;
 
 	int recentProjectChoice;
@@ -152,14 +151,6 @@ public:
 
 	wxMenu* getVideoSubmenu() {
 		return videoComparisonEntriesMenu;
-	}
-
-	uint16_t getExportImageIndex() {
-		return imageExportIndex;
-	}
-
-	void incrementExportImageIndex() {
-		imageExportIndex++;
 	}
 
 	void incrementRerecordCount() {

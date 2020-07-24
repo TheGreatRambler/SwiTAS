@@ -472,14 +472,22 @@ void BottomUI::exportImageView(wxCommandEvent& event) {
 
 	wxFileName imageLocation = projectHandler->getProjectStart();
 	imageLocation.AppendDir("exported_images");
-	imageLocation.SetName(wxString::Format("exported_image_%hu", projectHandler->getExportImageIndex()));
 	imageLocation.SetExt("png");
+
+	uint32_t exportIndex = 0;
+	while(true) {
+		imageLocation.SetName(wxString::Format("exported_image_%hu", exportIndex);
+
+		if (!imageLocation.FileExists()) {
+			break;
+		} else {
+			exportIndex++;
+		}
+	}
 
 	imageLocation.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
 
 	screenshot.SaveFile(imageLocation.GetFullPath(), wxBITMAP_TYPE_PNG);
-
-	projectHandler->incrementExportImageIndex();
 }
 
 void BottomUI::onJoystickSelect(wxCommandEvent& event) {

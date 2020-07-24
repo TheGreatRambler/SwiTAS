@@ -11,6 +11,7 @@
 #define JPEG_BUF_SIZE 0x80000
 #define STB_TRUETYPE_IMPLEMENTATION
 
+#include <fbg/fbgraphics.h>
 #include <stb_truetype.h>
 
 #ifdef __SWITCH__
@@ -37,9 +38,10 @@ private:
 	// Error handling for everything
 	Result rc;
 	// Current pointer to the graphics data
-	uint8_t* currentBuffer;
 	uint8_t* savedJpegFramebuffer;
 #endif
+
+	_fbg* fbg;
 
 #ifdef __SWITCH__
 	stbtt_fontinfo stdNintendoFont;
@@ -49,7 +51,7 @@ private:
 #endif
 
 #ifdef __SWITCH__
-	inline u32 getPixelOffset(u32 x, u32 y) {
+	static u32 getPixelOffset(u32 x, u32 y) {
 		// Swizzling pattern:
 		//    y6,y5,y4,y3,y2,y1,y0,x7,x6,x5,x4,x3,x2,x1,x0
 		// -> x7,x6,x5,y6,y5,y4,y3,x4,y2,y1,x3,y0,x2,x1,x0
@@ -61,7 +63,11 @@ private:
 	}
 #endif
 
+	static void framebufferDraw(struct _fbg* fbg);
+
 public:
+	uint8_t* currentBuffer;
+
 	Gui();
 
 	void startFrame();

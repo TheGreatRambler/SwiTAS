@@ -102,8 +102,8 @@ void ProjectHandler::loadProject() {
 	dataProcessing->sendPlayerNum();
 	dataProcessing->scrollToSpecific(jsonSettings["currentPlayer"].GetUint(), jsonSettings["currentSavestateBlock"].GetUint(), jsonSettings["currentBranch"].GetUint(), jsonSettings["currentFrame"].GetUint64());
 
-	imageExportIndex = jsonSettings["currentImageExportIndex"].GetUint();
-	rerecordCount    = jsonSettings["currentRerecordCount"].GetUint();
+	// imageExportIndex = jsonSettings["currentImageExportIndex"].GetUint();
+	rerecordCount = jsonSettings["currentRerecordCount"].GetUint();
 
 	lastEnteredFtpPath = std::string(jsonSettings["defaultFtpPathForExport"].GetString());
 
@@ -248,7 +248,7 @@ void ProjectHandler::saveProject() {
 		lastSavestateHookIndex.SetUint(dataProcessing->getCurrentSavestateHook());
 
 		rapidjson::Value lastExportImageIndex;
-		lastExportImageIndex.SetUint(imageExportIndex);
+		lastExportImageIndex.SetUint(0);
 
 		rapidjson::Value lastRerecordCount;
 		lastRerecordCount.SetUint(rerecordCount);

@@ -70,11 +70,11 @@ Gui::Gui() {
 	// Make Framebuffer linear to make things easier
 	// Imma too dumb to figure out the raw format
 	// 4 bytes per pixel (outstride)
-	rc = framebufferMakeLinear(&framebuf);
-	if(R_FAILED(rc)) {
-		nwindowClose(&window);
-		fatalThrow(rc);
-	}
+	// rc = framebufferMakeLinear(&framebuf);
+	// if(R_FAILED(rc)) {
+	//	nwindowClose(&window);
+	//	fatalThrow(rc);
+	//}
 
 	static PlFontData stdFontData, extFontData;
 
@@ -102,6 +102,16 @@ Gui::Gui() {
 
 	savedJpegFramebuffer = (uint8_t*)malloc(JPEG_BUF_SIZE);
 #endif
+
+	fbg = fbg_customSetup(FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT, 3, false, false, (void*)this, Gui::framebufferDraw, NULL, NULL, NULL);
+	if(!fbg) {
+		// return NULL;
+	}
+
+	fbg->back_buffer = (uint8_t*)calloc(1, fbg->size * sizeof(uint8_t));
+	if(!fbg->back_buffer) {
+		// return NULL;
+	}
 }
 
 void Gui::startFrame() {
@@ -116,14 +126,43 @@ void Gui::endFrame() {
 #ifdef __SWITCH__
 	framebufferEnd(&framebuf);
 #endif
+	fbg_draw(fbg);
 }
 
 void Gui::setPixel(uint32_t x, uint32_t y, Color color) {
-// Outstride is 4 and bytes per pixel is 4
+	// Outstride is 4 and bytes per pixel is 4
+	/*
+	#ifdef __SWITCH__
+		uint32_t offset                 = getPixelOffset(x, y);
+		((Color*)currentBuffer)[offset] = color;
+	#endif
+	*/
+	// Handled by fbg
+}
+
+void Gui::framebufferDraw(struct _fbg* fbg) {
+	Gui* gui = (Gui*)fbg->user_context;
 #ifdef __SWITCH__
-	uint32_t offset                 = getPixelOffset(x, y);
-	((Color*)currentBuffer)[offset] = color;
+	Color* buf = (Color*)gui->currentBuffer;
 #endif
+
+	int x, y;
+	for(x = 0; x < FRAMEBUFFER_WIDTH; ++x) {
+		for(y = 0; y < FRAMEBUFFER_WIDTH; ++y) {
+			int index = x + y * FRAMEBUFFER_WIDTH;
+
+			Color color;
+
+			color.r = fbg->back_buffer[index * fbg->components];
+			color.g = fbg->back_buffer[index * fbg->components + 1];
+			color.b = fbg->back_buffer[index * fbg->components + 2];
+			color.a = 0;
+
+#ifdef __SWITCH__
+			buf[getPixelOffset(x, y)] = color;
+#endif
+		}
+	}
 }
 
 void Gui::takeScreenshot(std::string path) {

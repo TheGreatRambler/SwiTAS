@@ -42,7 +42,7 @@ TARGET		:=	SwiTAS
 BUILD		:=	buildSysmodule
 SOURCES		:=	source
 DATA		:=	data
-INCLUDES	:=	include source/thirdParty/lua-5.3.5
+INCLUDES	:=	include source/thirdParty/lua-5.3.5 source/thirdParty
 #ROMFS	:=	romfs
 
 SOURCES := $(shell find $(SOURCES) -print)

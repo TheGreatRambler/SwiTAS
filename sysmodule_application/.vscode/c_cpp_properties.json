@@ -3,6 +3,8 @@
 			"name": "Linux",
 			"includePath": [
 				"${workspaceFolder}/include/**",
+				"${workspaceFolder}/source/thirdParty/**",
+				"${workspaceFolder}/source/thirdParty/lua-5.3.5/**",
 				"/opt/devkitpro/libnx/include/**",
 				"/opt/devkitpro/libnx/include/switch/**",
 				"/opt/devkitpro/portlibs/switch/include/**"
@@ -22,6 +24,8 @@
 			"name": "Win32",
 			"includePath": [
 				"${workspaceFolder}/include/**",
+				"${workspaceFolder}/source/thirdParty/**",
+				"${workspaceFolder}/source/thirdParty/lua-5.3.5/**",
 				"C:/msys2/opt/devkitpro/libnx/include/**",
 				"C:/msys2/opt/devkitpro/libnx/include/switch/**",
 				"C:/msys2/opt/devkitpro/portlibs/switch/include/**"
