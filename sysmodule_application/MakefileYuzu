@@ -44,7 +44,7 @@ else
 endif
 
 # Linker flags
-LDFLAGS := -lpthread  -shared
+LDFLAGS := -lpthread -shared -Wl,-rpath,$$ORIGIN
 ifeq ($(UNAME),Msys)
 	# Needed for sockets on windows
 	LDFLAGS += -lws2_32
