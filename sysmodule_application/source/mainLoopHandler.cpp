@@ -81,6 +81,37 @@ void MainLoop::mainLoopHandler() {
 			if(R_SUCCEEDED(rc)) {
 				if(!applicationOpened) {
 					gameName = std::string(getAppName(applicationProgramId));
+
+					pauseApp(false, false, false, 0, 0, 0, 0);
+
+					// Obtain heap start
+					MemoryInfo meminfo;
+					u64 lastaddr = 0;
+					do {
+						lastaddr = meminfo.addr;
+						u32 pageinfo;
+						svcQueryDebugProcessMemory(&meminfo, &pageinfo, handle, meminfo.addr + meminfo.size);
+						if((meminfo.type & MemType_Heap) == MemType_Heap) {
+							heapBase = meminfo.addr;
+							break;
+						}
+					} while(lastaddr < meminfo.addr + meminfo.size);
+
+					// Obtain main start
+					LoaderModuleInfo proc_modules[2];
+					s32 numModules = 0;
+					Result rc      = ldrDmntGetProcessModuleInfo(applicationProcessId, proc_modules, 2, &numModules);
+
+					LoaderModuleInfo* proc_module = 0;
+					if(numModules == 2) {
+						proc_module = &proc_modules[1];
+					} else {
+						proc_module = &proc_modules[0];
+					}
+					mainBase = proc_module->base_address;
+
+					unpauseApp();
+
 					LOGD << "Application " + gameName + " opened";
 					ADD_TO_QUEUE(RecieveApplicationConnected, networkInstance, {
 						data.applicationName      = gameName;
@@ -212,8 +243,6 @@ void MainLoop::handleNetworkUpdates() {
 			currentMemoryRegions.clear();
 		} else {
 			MemoryRegionInfo info;
-
-			// prepareMemoryRegionMath(info.func, data.pointerDefinition);
 
 			info.type              = data.type;
 			info.u                 = data.u;
@@ -562,70 +591,87 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 				}
 			})
 
-			// TODO set main and handle types correctly
-			// Put data into a vector<uint_t> first
+			std::vector<std::string> outputs;
 			for(uint16_t i = 0; i < currentMemoryRegions.size(); i++) {
-				uint64_t addr      = 0; // currentMemoryRegions[i].pointerDefinition
-				uint8_t isUnsigned = currentMemoryRegions[i].u;
+				std::string revisedExpression = currentMemoryRegions[i].pointerDefinition;
+
+				replaceInString(revisedExpression, "main", std::to_string(mainBase));
+				replaceInString(revisedExpression, "heap", std::to_string(heapBase));
+
+				for(std::size_t outputIndex = 0; outputIndex < outputs.size(); outputIndex++) {
+					// For each already generated output, replace in the expression if needed
+					// Note, some values will absolutely cause an error
+					replaceInString(revisedExpression, "<" + std::to_string(outputIndex) + ">", outputs[outputIndex]);
+				}
 
 				MemoryRegionTypes type = currentMemoryRegions[i].type;
 				std::vector<uint8_t> bytes;
 				std::string stringVersion;
 
-				switch(type) {
-				case MemoryRegionTypes::Bit8:
-					bytes = getMemory(addr, sizeof(uint8_t));
-					if(isUnsigned) {
-						stringVersion = std::to_string(*(uint8_t*)bytes.data());
-					} else {
-						stringVersion = std::to_string(*(int8_t*)bytes.data());
+				try {
+					uint64_t addr      = calculator::eval<uint64_t>(revisedExpression, applicationDebug);
+					uint8_t isUnsigned = currentMemoryRegions[i].u;
+
+					switch(type) {
+					case MemoryRegionTypes::Bit8:
+						bytes = getMemory(addr, sizeof(uint8_t));
+						if(isUnsigned) {
+							stringVersion = std::to_string(*(uint8_t*)bytes.data());
+						} else {
+							stringVersion = std::to_string(*(int8_t*)bytes.data());
+						}
+						break;
+					case MemoryRegionTypes::Bit16:
+						bytes = getMemory(addr, sizeof(uint16_t));
+						if(isUnsigned) {
+							stringVersion = std::to_string(*(uint16_t*)bytes.data());
+						} else {
+							stringVersion = std::to_string(*(int16_t*)bytes.data());
+						}
+						break;
+					case MemoryRegionTypes::Bit32:
+						bytes = getMemory(addr, sizeof(uint32_t));
+						if(isUnsigned) {
+							stringVersion = std::to_string(*(uint32_t*)bytes.data());
+						} else {
+							stringVersion = std::to_string(*(int32_t*)bytes.data());
+						}
+						break;
+					case MemoryRegionTypes::Bit64:
+						bytes = getMemory(addr, sizeof(uint64_t));
+						if(isUnsigned) {
+							stringVersion = std::to_string(*(uint64_t*)bytes.data());
+						} else {
+							stringVersion = std::to_string(*(int64_t*)bytes.data());
+						}
+						break;
+					case MemoryRegionTypes::Float:
+						bytes         = getMemory(addr, sizeof(float));
+						stringVersion = std::to_string(*(float*)bytes.data());
+						break;
+					case MemoryRegionTypes::Double:
+						bytes         = getMemory(addr, sizeof(double));
+						stringVersion = std::to_string(*(double*)bytes.data());
+						break;
+					case MemoryRegionTypes::Bool:
+						bytes         = getMemory(addr, sizeof(bool));
+						stringVersion = *(bool*)bytes.data() ? "true" : "false";
+						break;
+					case MemoryRegionTypes::CharPointer:
+						bytes         = getMemory(addr, currentMemoryRegions[i].size);
+						stringVersion = std::string((const char*)bytes.data(), bytes.size());
+						break;
+					case MemoryRegionTypes::ByteArray:
+						bytes = getMemory(addr, currentMemoryRegions[i].size);
+						// Unused
+						stringVersion = "";
+						break;
 					}
-					break;
-				case MemoryRegionTypes::Bit16:
-					bytes = getMemory(addr, sizeof(uint16_t));
-					if(isUnsigned) {
-						stringVersion = std::to_string(*(uint16_t*)bytes.data());
-					} else {
-						stringVersion = std::to_string(*(int16_t*)bytes.data());
-					}
-					break;
-				case MemoryRegionTypes::Bit32:
-					bytes = getMemory(addr, sizeof(uint32_t));
-					if(isUnsigned) {
-						stringVersion = std::to_string(*(uint32_t*)bytes.data());
-					} else {
-						stringVersion = std::to_string(*(int32_t*)bytes.data());
-					}
-					break;
-				case MemoryRegionTypes::Bit64:
-					bytes = getMemory(addr, sizeof(uint64_t));
-					if(isUnsigned) {
-						stringVersion = std::to_string(*(uint64_t*)bytes.data());
-					} else {
-						stringVersion = std::to_string(*(int64_t*)bytes.data());
-					}
-					break;
-				case MemoryRegionTypes::Float:
-					bytes         = getMemory(addr, sizeof(float));
-					stringVersion = std::to_string(*(float*)bytes.data());
-					break;
-				case MemoryRegionTypes::Double:
-					bytes         = getMemory(addr, sizeof(double));
-					stringVersion = std::to_string(*(double*)bytes.data());
-					break;
-				case MemoryRegionTypes::Bool:
-					bytes         = getMemory(addr, sizeof(bool));
-					stringVersion = *(bool*)bytes.data() ? "true" : "false";
-					break;
-				case MemoryRegionTypes::CharPointer:
-					bytes         = getMemory(addr, currentMemoryRegions[i].size);
-					stringVersion = std::string((const char*)bytes.data(), bytes.size());
-					break;
-				case MemoryRegionTypes::ByteArray:
-					bytes = getMemory(addr, currentMemoryRegions[i].size);
-					// Unused
-					stringVersion = "";
-					break;
+
+					outputs.push_back(stringVersion);
+				} catch(calculator::error& e) {
+					// Communicate error out with string version, honestly sus
+					stringVersion = e.what();
 				}
 
 				ADD_TO_QUEUE(RecieveMemoryRegion, networkInstance, {

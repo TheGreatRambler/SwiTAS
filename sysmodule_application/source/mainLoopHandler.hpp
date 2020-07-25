@@ -1,5 +1,6 @@
 #pragma once
 
+#include <PointerChainParser.hpp>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
@@ -38,6 +39,9 @@ private:
 	uint8_t applicationOpened = false;
 	uint8_t internetConnected = false;
 	uint8_t isInTASMode       = false;
+
+	uint64_t heapBase;
+	uint64_t mainBase;
 
 	SerializeProtocol serializeProtocol;
 
@@ -78,6 +82,13 @@ private:
 		while(sizeActuallyRead != size) {
 			int bytesRead = fread(&buf[sizeActuallyRead], size - sizeActuallyRead, 1, file);
 			sizeActuallyRead += bytesRead;
+		}
+	}
+
+	void replaceInString(std::string input, std::string initial, std::string final) {
+		int index;
+		while((index = input.find(initial)) != string::npos) {
+			input.replace(index, final.length(), final);
 		}
 	}
 
