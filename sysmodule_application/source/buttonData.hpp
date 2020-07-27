@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../sharedNetworkCode/buttonData.hpp"
+#include "sharedNetworkCode/buttonData.hpp"
 #include <cstdint>
 #include <unordered_map>
 #include <zpp.hpp>
@@ -53,3 +53,26 @@ const std::unordered_map<Btn, int> btnToHidKeys {
 	//{ Btn::RS, KEY_RSTICK },
 };
 #endif
+
+const std::unordered_map<Btn, std::string> btnOverlayImageNames {
+	{ Btn::A, "A.png" },
+	{ Btn::B, "B.png" },
+	{ Btn::X, "X.png" },
+	{ Btn::Y, "Y.png" },
+	{ Btn::L, "L.png" },
+	{ Btn::R, "R.png" },
+	{ Btn::ZL, "ZL.png" },
+	{ Btn::ZR, "ZR.png" },
+	//{ Btn::SL, "SL.png" },
+	//{ Btn::SR, "SR.png" },
+	{ Btn::DUP, "UP.png" },
+	{ Btn::DDOWN, "DOWN.png" },
+	{ Btn::DLEFT, "LEFT.png" },
+	{ Btn::DRIGHT, "RIGHT.png" },
+	{ Btn::PLUS, "PLUS.png" },
+	{ Btn::MINUS, "MINUS.png" },
+	{ Btn::HOME, "HOME.png" },
+	{ Btn::CAPT, "CAPT.png" },
+	//{ Btn::LS, "LS.png" },
+	//{ Btn::RS, "RS.png" },
+};

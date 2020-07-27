@@ -1,18 +1,22 @@
 #pragma once
 
+#define JPEG_BUF_SIZE 0x80000
+#define STB_TRUETYPE_IMPLEMENTATION
+
 #include <cstdint>
 #include <cstdio>
+#include <cwctype>
 #include <string>
+#include <unordered_map>
+
+#include <fbg/fbgraphics.h>
+#include <stb_truetype.h>
+
+#include "../buttonData.hpp"
 
 #ifdef __SWITCH__
 #include <switch.h>
 #endif
-
-#define JPEG_BUF_SIZE 0x80000
-#define STB_TRUETYPE_IMPLEMENTATION
-
-#include <fbg/fbgraphics.h>
-#include <stb_truetype.h>
 
 #ifdef __SWITCH__
 extern "C" u64 __nx_vi_layer_id;
@@ -31,6 +35,12 @@ struct Color {
 class Gui {
 private:
 #ifdef __SWITCH__
+	const std::string controllerOverlayDirectory = "/switas/controllerOverlay";
+#endif
+
+const float joystickRangeConstant = 2184.0f;
+
+#ifdef __SWITCH__
 	ViDisplay display;
 	ViLayer layer;
 	NWindow window;
@@ -42,6 +52,13 @@ private:
 #endif
 
 	_fbg* fbg;
+	std::unordered_map<Btn, _fbg_img*> controllerImages;
+
+	_fbg_img* blankControllerImage;
+	_fbg_img* leftStickImage;
+	_fbg_img* rightStickImage;
+
+	_fbg_rgb currentColor;
 
 #ifdef __SWITCH__
 	stbtt_fontinfo stdNintendoFont;
@@ -65,6 +82,16 @@ private:
 
 	static void framebufferDraw(struct _fbg* fbg);
 
+	stbtt_fontinfo* fontForGlyph(uint32_t character) {
+		if(stbtt_FindGlyphIndex(&extNintendoFont, character)) {
+			return &extNintendoFont;
+		}
+
+		return &stdNintendoFont;
+	}
+
+	void drawText(uint32_t x, uint32_t y, float size, std::string text);
+
 public:
 	uint8_t* currentBuffer;
 
@@ -73,7 +100,18 @@ public:
 	void startFrame();
 	void endFrame();
 
-	void setPixel(uint32_t x, uint32_t y, Color color);
+	void setPixel(uint32_t x, uint32_t y, _fbg_rgb color);
+
+	void setColor(_fbg_rgb color) {
+		// Used for text
+		currentColor.r = color.r;
+		currentColor.g = color.g;
+		currentColor.b = color.b;
+		currentColor.a = color.a;
+	}
+
+	void drawControllerOverlay(HiddbgHdlsState& state, float scale, uint32_t x, uint32_t y);
+	void drawControllerOverlay(uint8_t playerIndex, HiddbgHdlsState& state);
 
 	void takeScreenshot(std::string path);
 

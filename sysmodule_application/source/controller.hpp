@@ -51,6 +51,10 @@ public:
 #endif
 	}
 
+	HiddbgHdlsState& getInput() {
+		return state;
+	}
+
 	std::shared_ptr<ControllerData> getControllerData();
 
 	~ControllerHandler();
