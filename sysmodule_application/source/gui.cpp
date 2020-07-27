@@ -103,7 +103,7 @@ Gui::Gui() {
 	savedJpegFramebuffer = (uint8_t*)malloc(JPEG_BUF_SIZE);
 #endif
 
-	fbg = fbg_customSetup(FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT, 4, false, false, (void*)this, Gui::framebufferDraw, NULL, NULL, NULL);
+	fbg = fbg_customSetup(FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT, 4, false, false, (void*)this, &Gui::framebufferDraw, NULL, NULL, NULL);
 	if(!fbg) {
 		// return NULL;
 	}
@@ -122,9 +122,9 @@ Gui::Gui() {
 		controllerImages[imageName.first] = fbg_loadPNG(fbg, (rootImagePath + imageName.second).c_str());
 	}
 
-	blankControllerImage = fbg_loadPNG(fbg, (rootImagePath + "blank.png").c_str());
-	leftStickImage       = fbg_loadPNG(fbg, (rootImagePath + "leftstick.png").c_str());
-	rightStickImage      = fbg_loadPNG(fbg, (rootImagePath + "rightstick.png").c_str());
+	blankControllerImage = fbg_loadPNG(fbg, (rootImagePath + blankControllerImageName).c_str());
+	leftStickImage       = fbg_loadPNG(fbg, (rootImagePath + leftStickImageName).c_str());
+	rightStickImage      = fbg_loadPNG(fbg, (rootImagePath + rightStickImageName).c_str());
 }
 
 void Gui::startFrame() {
@@ -138,8 +138,8 @@ void Gui::startFrame() {
 
 void Gui::endFrame() {
 	// Flush
-	fbg_flip(fbg);
 	fbg_draw(fbg);
+	// fbg_flip(fbg);
 #ifdef __SWITCH__
 	framebufferEnd(&framebuf);
 #endif

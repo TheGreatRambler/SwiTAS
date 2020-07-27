@@ -19,13 +19,11 @@
 
 make sysmodule -B BUILD=release
 
-mkdir -p atmosphere/contents
-rm switas_sysmodule.zip
+cd switch
+zip -r ../switas_sysmodule.zip *
+cd ../
 
-cp -R 4200000000000BAC atmosphere/contents
-
-zip -r switas_sysmodule.zip atmosphere
-rm -r atmosphere
+rm -r switch
 
 # make clean
 # make yuzu -B BUILD=release ARCH=32

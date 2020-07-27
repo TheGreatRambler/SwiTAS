@@ -12,7 +12,7 @@
 #include <fbg/fbgraphics.h>
 #include <stb_truetype.h>
 
-#include "../buttonData.hpp"
+#include "buttonData.hpp"
 
 #ifdef __SWITCH__
 #include <switch.h>
@@ -38,7 +38,11 @@ private:
 	const std::string controllerOverlayDirectory = "/switas/controllerOverlay";
 #endif
 
-const float joystickRangeConstant = 2184.0f;
+	const std::string blankControllerImageName = "blank.png";
+	const std::string leftStickImageName       = "leftstick.png";
+	const std::string rightStickImageName      = "rightstick.png";
+
+	const float joystickRangeConstant = 2184.0f;
 
 #ifdef __SWITCH__
 	ViDisplay display;
@@ -99,6 +103,11 @@ public:
 
 	void startFrame();
 	void endFrame();
+
+	void clearFrame() {
+		startFrame();
+		endFrame();
+	}
 
 	void setPixel(uint32_t x, uint32_t y, _fbg_rgb color);
 

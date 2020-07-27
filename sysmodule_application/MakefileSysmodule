@@ -180,10 +180,12 @@ $(BUILD):
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/MakefileSysmodule
 	# Copy files into a ready-made directory structure
 	# Custom stuff, will need to be changed later if need be
-	mkdir -p 4200000000000BAC/flags
-	cp SwiTAS.nsp 4200000000000BAC/exefs.nsp
-	cp toolbox.json 4200000000000BAC/toolbox.json
-	touch 4200000000000BAC/flags/boot2.flag
+	mkdir -p switch/atmosphere/contents/4200000000000BAC/flags
+	cp SwiTAS.nsp switch/atmosphere/contents/4200000000000BAC/exefs.nsp
+	cp toolbox.json switch/atmosphere/contents/4200000000000BAC/toolbox.json
+	touch switch/atmosphere/contents/4200000000000BAC/flags/boot2.flag
+	mkdir -p switch/switas/controllerOverlay
+	cp -r assets/controllerOverlay switch/switas/controllerOverlay
 
 #---------------------------------------------------------------------------------
 clean:

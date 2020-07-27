@@ -6,6 +6,7 @@
 #include <cstring>
 #include <functional>
 #include <memory>
+#include <string>
 #include <vector>
 
 #ifdef __SWITCH__
@@ -19,6 +20,7 @@
 #endif
 
 #include "controller.hpp"
+#include "gui.hpp"
 #include "scripting/luaScripting.hpp"
 #include "sharedNetworkCode/networkInterface.hpp"
 #include "sharedNetworkCode/serializeUnserializeData.hpp"
@@ -39,6 +41,8 @@ private:
 	uint8_t applicationOpened = false;
 	uint8_t internetConnected = false;
 	uint8_t isInTASMode       = false;
+
+	std::shared_ptr<Gui> gui;
 
 	uint64_t heapBase;
 	uint64_t mainBase;
@@ -87,7 +91,7 @@ private:
 
 	void replaceInString(std::string input, std::string initial, std::string final) {
 		int index;
-		while((index = input.find(initial)) != string::npos) {
+		while((index = input.find(initial)) != std::string::npos) {
 			input.replace(index, final.length(), final);
 		}
 	}

@@ -90,7 +90,7 @@ void MainLoop::mainLoopHandler() {
 					do {
 						lastaddr = meminfo.addr;
 						u32 pageinfo;
-						svcQueryDebugProcessMemory(&meminfo, &pageinfo, handle, meminfo.addr + meminfo.size);
+						svcQueryDebugProcessMemory(&meminfo, &pageinfo, applicationDebug, meminfo.addr + meminfo.size);
 						if((meminfo.type & MemType_Heap) == MemType_Heap) {
 							heapBase = meminfo.addr;
 							break;

@@ -43,7 +43,7 @@ ControllerHandler::ControllerHandler(std::shared_ptr<CommunicateWithNetwork> net
 	setInput();
 }
 
-void ControllerHandler::setFrame(ControllerData controllerData) {
+void ControllerHandler::setFrame(ControllerData& controllerData) {
 	clearState();
 // Set data one at a time
 #ifdef __SWITCH__

@@ -117,6 +117,11 @@ namespace calculator {
 			return eval(expr);
 		}
 
+		// Set application debug handle
+		void setApplicationDebugHandle(Handle handle) {
+			applicationDebug = handle;
+		}
+
 	private:
 		enum {
 			OPERATOR_NULL,
@@ -171,10 +176,6 @@ namespace calculator {
 
 		// Debug handle for memory reading
 		Handle applicationDebug;
-
-		void setApplicationDebugHandle(Handle handle) {
-			applicationDebug = handle;
-		}
 
 		/// Exponentiation by squaring, x^n.
 		static T pow(T x, T n) {
