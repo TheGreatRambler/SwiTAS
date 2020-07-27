@@ -139,6 +139,7 @@ void Gui::startFrame() {
 void Gui::endFrame() {
 	// Flush
 	fbg_flip(fbg);
+	fbg_draw(fbg);
 #ifdef __SWITCH__
 	framebufferEnd(&framebuf);
 #endif
