@@ -236,23 +236,23 @@ void Gui::drawText(uint32_t x, uint32_t y, float size, std::string text) {
 }
 
 void Gui::drawControllerOverlay(HiddbgHdlsState& state, float scale, uint32_t x, uint32_t y) {
-	fbg_imageEx(fbg, blankControllerImage, x, y, scale, scale, 0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
+	fbg_imageScale(fbg, blankControllerImage, x, y, scale, scale);
 
 	for(auto const& button : btnToHidKeys) {
 #ifdef __SWITCH__
 		if(state.buttons & button.second) {
-			fbg_imageEx(fbg, controllerImages[button.first], x, y, scale, scale, 0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
+			fbg_imageScale(fbg, controllerImages[button.first], x, y, scale, scale);
 		}
 #endif
 	}
 
 	int32_t deltaXLeft = (state.joysticks[JOYSTICK_LEFT].dx / joystickRangeConstant) * scale;
 	int32_t deltaYLeft = (state.joysticks[JOYSTICK_LEFT].dy / joystickRangeConstant) * scale;
-	fbg_imageEx(fbg, leftStickImage, x + deltaXLeft, y + deltaYLeft, scale, scale, 0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
+	fbg_imageScale(fbg, leftStickImage, x + deltaXLeft, y + deltaYLeft, scale, scale);
 
 	int32_t deltaXRight = (state.joysticks[JOYSTICK_RIGHT].dx / joystickRangeConstant) * scale;
 	int32_t deltaYRight = (state.joysticks[JOYSTICK_RIGHT].dy / joystickRangeConstant) * scale;
-	fbg_imageEx(fbg, rightStickImage, x + deltaXRight, y + deltaYRight, scale, scale, 0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
+	fbg_imageScale(fbg, rightStickImage, x + deltaXRight, y + deltaYRight, scale, scale);
 }
 
 void Gui::drawControllerOverlay(uint8_t playerIndex, HiddbgHdlsState& state) {
