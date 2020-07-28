@@ -248,6 +248,7 @@ void ProjectHandler::saveProject() {
 		lastSavestateHookIndex.SetUint(dataProcessing->getCurrentSavestateHook());
 
 		rapidjson::Value lastExportImageIndex;
+		// It's now ignored
 		lastExportImageIndex.SetUint(0);
 
 		rapidjson::Value lastRerecordCount;

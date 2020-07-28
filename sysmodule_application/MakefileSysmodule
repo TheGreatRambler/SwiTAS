@@ -42,7 +42,7 @@ TARGET		:=	SwiTAS
 BUILD		:=	buildSysmodule
 SOURCES		:=	source
 DATA		:=	data
-INCLUDES	:=	include source/thirdParty/lua-5.3.5 source/thirdParty
+INCLUDES	:=	include source/thirdParty/lua-5.3.5 source/thirdParty/fbg
 ROMFS	:=	romfs
 
 SOURCES := $(shell find $(SOURCES) -print)
@@ -174,8 +174,8 @@ endif
 all: $(BUILD)
 
 $(BUILD):
-	rm -r -f ./source/sharedNetworkCode
-	cp -p -r ../sharedNetworkCode ./source/sharedNetworkCode
+	rm -rf ./source/sharedNetworkCode
+	cp -rp ../sharedNetworkCode ./source/sharedNetworkCode
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/MakefileSysmodule
 	# Copy files into a ready-made directory structure
@@ -184,8 +184,8 @@ $(BUILD):
 	cp SwiTAS.nsp switch/atmosphere/contents/4200000000000BAC/exefs.nsp
 	cp toolbox.json switch/atmosphere/contents/4200000000000BAC/toolbox.json
 	touch switch/atmosphere/contents/4200000000000BAC/flags/boot2.flag
-	mkdir -p switch/switas/controllerOverlay
-	cp -r assets/controllerOverlay switch/switas/controllerOverlay
+	mkdir -p switch/switas
+	cp -rp assets/controllerOverlay switch/switas
 
 #---------------------------------------------------------------------------------
 clean:

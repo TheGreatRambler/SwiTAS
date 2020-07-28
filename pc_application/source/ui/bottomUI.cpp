@@ -476,9 +476,9 @@ void BottomUI::exportImageView(wxCommandEvent& event) {
 
 	uint32_t exportIndex = 0;
 	while(true) {
-		imageLocation.SetName(wxString::Format("exported_image_%hu", exportIndex);
+		imageLocation.SetName(wxString::Format("exported_image_%hu", exportIndex));
 
-		if (!imageLocation.FileExists()) {
+		if(!imageLocation.FileExists()) {
 			break;
 		} else {
 			exportIndex++;

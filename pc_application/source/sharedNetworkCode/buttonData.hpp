@@ -74,6 +74,7 @@ struct ControllerData : public zpp::serializer::polymorphic {
 
 // Not button data, but the memory info
 // Mirrors libnx MemoryInfo
+/*
 struct GameMemoryInfo {
 	uint64_t addr;            ///< Base address.
 	uint64_t size;            ///< Size.
@@ -93,3 +94,4 @@ struct GameMemoryInfo {
 		// clang-format on
 	}
 };
+*/

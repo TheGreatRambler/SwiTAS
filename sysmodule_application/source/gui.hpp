@@ -1,7 +1,6 @@
 #pragma once
 
 #define JPEG_BUF_SIZE 0x80000
-#define STB_TRUETYPE_IMPLEMENTATION
 
 #include <cstdint>
 #include <cstdio>
@@ -9,12 +8,16 @@
 #include <string>
 #include <unordered_map>
 
-#include <fbg/fbgraphics.h>
+extern "C" {
+#include <fbgraphics.h>
 #include <stb_truetype.h>
+}
 
 #include "buttonData.hpp"
+#include "helpers.hpp"
 
 #ifdef __SWITCH__
+#include <plog/Log.h>
 #include <switch.h>
 #endif
 
@@ -42,10 +45,9 @@ private:
 	const std::string leftStickImageName       = "leftstick.png";
 	const std::string rightStickImageName      = "rightstick.png";
 
-	const float joystickRangeConstant = 2184.0f;
+	const int32_t joystickRangeConstant = 2184;
 
 #ifdef __SWITCH__
-	ViDisplay display;
 	ViLayer layer;
 	NWindow window;
 	Framebuffer framebuf;
@@ -63,6 +65,8 @@ private:
 	_fbg_img* rightStickImage;
 
 	_fbg_rgb currentColor;
+
+	uint8_t wasJustDrawnTo = false;
 
 #ifdef __SWITCH__
 	stbtt_fontinfo stdNintendoFont;
@@ -94,12 +98,12 @@ private:
 		return &stdNintendoFont;
 	}
 
-	void drawText(uint32_t x, uint32_t y, float size, std::string text);
-
 public:
 	uint8_t* currentBuffer;
 
-	Gui();
+#ifdef __SWITCH__
+	Gui(ViDisplay& disp);
+#endif
 
 	void startFrame();
 	void endFrame();
@@ -107,6 +111,7 @@ public:
 	void clearFrame() {
 		startFrame();
 		endFrame();
+		wasJustDrawnTo = false;
 	}
 
 	void setPixel(uint32_t x, uint32_t y, _fbg_rgb color);
@@ -119,8 +124,14 @@ public:
 		currentColor.a = color.a;
 	}
 
+	uint8_t getWasJustDrawnTo() {
+		return wasJustDrawnTo;
+	}
+
 	void drawControllerOverlay(HiddbgHdlsState& state, float scale, uint32_t x, uint32_t y);
 	void drawControllerOverlay(uint8_t playerIndex, HiddbgHdlsState& state);
+
+	void drawText(uint32_t x, uint32_t y, float size, std::string text);
 
 	void takeScreenshot(std::string path);
 

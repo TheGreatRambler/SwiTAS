@@ -26,7 +26,6 @@ MainLoop::MainLoop() {
 
 #ifdef __SWITCH__
 	LOGD << "Open display";
-	ViDisplay disp;
 	rc = viOpenDefaultDisplay(&disp);
 	if(R_FAILED(rc))
 		fatalThrow(rc);
@@ -175,7 +174,9 @@ void MainLoop::mainLoopHandler() {
 		matchFirstControllerToTASController(0);
 	}
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	std::this_thread::sleep_for(std::chrono::milliseconds(5));
+	// I dunno how often to update this honestly
+	updateGui();
 }
 
 void MainLoop::handleNetworkUpdates() {
@@ -202,7 +203,8 @@ void MainLoop::handleNetworkUpdates() {
 			if(applicationOpened) {
 				clearEveryController();
 				unpauseApp();
-				lastNanoseconds = 0;
+				lastNanoseconds  = 0;
+				lastFrameAttempt = 0;
 			}
 		} else if(data.actFlag == SendInfo::GET_FRAMEBUFFER) {
 			if(applicationOpened) {
@@ -221,7 +223,8 @@ void MainLoop::handleNetworkUpdates() {
 			clearEveryController();
 			waitForVsync();
 			unpauseApp();
-			lastNanoseconds = 0;
+			lastNanoseconds  = 0;
+			lastFrameAttempt = 0;
 		} else if(data.actFlag == SendInfo::STOP_FINAL_TAS) {
 			finalTasShouldRun = false;
 		} else if(data.actFlag == SendInfo::GET_GAME_INFO) {
@@ -413,6 +416,46 @@ void MainLoop::sendGameInfo() {
 	}
 }
 
+void MainLoop::updateGui() {
+	if(printDebugInfo || printControllerOverlay) {
+		if(!gui) {
+			gui = std::make_shared<Gui>(disp);
+		}
+
+		gui->startFrame();
+
+		if(printControllerOverlay) {
+			for(uint8_t controllerIndex = 0; controllerIndex < controllers.size(); controllerIndex++) {
+				gui->drawControllerOverlay(controllerIndex, controllers[controllerIndex]->getInput());
+			}
+		}
+
+		if(printDebugInfo) {
+			std::string debugInfo;
+			// clang-format off
+				debugInfo += "TAS Controllers:                " + std::to_string(controllers.size()) + "\n";
+				debugInfo += "Real Controllers:               " + std::to_string(getNumControllers()) + "\n";
+			if(applicationOpened) {
+				debugInfo += "Game Name:                      " + gameName + "\n";
+				debugInfo += "Application Program ID:         " + std::to_string(getNumControllers()) + "\n";
+				debugInfo += "Application Process ID:         " + std::to_string(getNumControllers()) + "\n";
+				debugInfo += "Real Controllers:               " + std::to_string(getNumControllers()) + "\n";
+				debugInfo += "Is Paused:                      " + std::string((isPaused ? "true" : "false")) + "\n";
+				debugInfo += "Time Between Frames: " + lastFrameAttempt != 0 ? std::to_string(lastFrameAttempt) : std::string("NULL") + "\n";
+			}
+			// clang-format on
+			gui->drawText(0, 0, 28, debugInfo);
+		}
+
+		gui->endFrame();
+	} else {
+		if(gui && gui->getWasJustDrawnTo()) {
+			gui->clearFrame();
+		}
+		return;
+	}
+}
+
 #ifdef __SWITCH__
 char* MainLoop::getAppName(u64 application_id) {
 #ifdef __SWITCH__
@@ -560,7 +603,8 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 				lastAttempt = armTicksToNs(armGetSystemTick()) - lastNanoseconds;
 			}
 			*/
-			LOGD << "Time taken between frames: " << (int)(lastAttempt / 1000000);
+			lastFrameAttempt = (int)(lastAttempt / 1000000);
+			LOGD << "Time taken between frames: " << lastFrameAttempt;
 			lastNanoseconds = 0;
 		}
 		isPaused = true;
@@ -750,11 +794,13 @@ MainLoop::~MainLoop() {
 	LOGD << "Exiting app";
 	rc = hiddbgReleaseHdlsWorkBuffer();
 	hiddbgExit();
-#endif
+
+	viCloseDisplay(&disp);
 
 	pscPmModuleFinalize(&sleepModule);
 	pscPmModuleClose(&sleepModule);
 	eventClose(&sleepModule.event);
+#endif
 
 	// Make absolutely sure the app is unpaused on close
 	reset();

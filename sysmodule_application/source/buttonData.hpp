@@ -5,6 +5,10 @@
 #include <unordered_map>
 #include <zpp.hpp>
 
+#ifdef __SWITCH__
+#include <switch.h>
+#endif
+
 // Convert my button mappings to the ones recognized by the switch
 #ifdef __SWITCH__
 const std::unordered_map<Btn, HidControllerKeys> btnToHidKeys {
@@ -55,24 +59,10 @@ const std::unordered_map<Btn, int> btnToHidKeys {
 #endif
 
 const std::unordered_map<Btn, std::string> btnOverlayImageNames {
-	{ Btn::A, "A.png" },
-	{ Btn::B, "B.png" },
-	{ Btn::X, "X.png" },
-	{ Btn::Y, "Y.png" },
-	{ Btn::L, "L.png" },
-	{ Btn::R, "R.png" },
-	{ Btn::ZL, "ZL.png" },
-	{ Btn::ZR, "ZR.png" },
+	{ Btn::A, "A.png" }, { Btn::B, "B.png" }, { Btn::X, "X.png" }, { Btn::Y, "Y.png" }, { Btn::L, "L.png" }, { Btn::R, "R.png" }, { Btn::ZL, "ZL.png" }, { Btn::ZR, "ZR.png" },
 	//{ Btn::SL, "SL.png" },
 	//{ Btn::SR, "SR.png" },
-	{ Btn::DUP, "UP.png" },
-	{ Btn::DDOWN, "DOWN.png" },
-	{ Btn::DLEFT, "LEFT.png" },
-	{ Btn::DRIGHT, "RIGHT.png" },
-	{ Btn::PLUS, "PLUS.png" },
-	{ Btn::MINUS, "MINUS.png" },
-	{ Btn::HOME, "HOME.png" },
-	{ Btn::CAPT, "CAPT.png" },
+	{ Btn::DUP, "UP.png" }, { Btn::DDOWN, "DOWN.png" }, { Btn::DLEFT, "LEFT.png" }, { Btn::DRIGHT, "RIGHT.png" }, { Btn::PLUS, "PLUS.png" }, { Btn::MINUS, "MINUS.png" }, { Btn::HOME, "HOME.png" }, { Btn::CAPT, "CAPT.png" },
 	//{ Btn::LS, "LS.png" },
 	//{ Btn::RS, "RS.png" },
 };

@@ -1,40 +1,33 @@
+#define STB_TRUETYPE_IMPLEMENTATION
+
 #include "gui.hpp"
 
-Gui::Gui() {
+#ifdef __SWITCH__
+Gui::Gui(ViDisplay& disp) {
+#endif
 
 #ifdef __SWITCH__
 	// https://github.com/averne/dvdnx/blob/master/src/screen.cpp
-	rc = smInitialize();
-	if(R_FAILED(rc)) {
-		fatalThrow(rc);
-	}
-	// ViServiceType_Manager defined here https://switchbrew.github.io/libnx/vi_8h.html
-	rc = viInitialize(ViServiceType_Manager);
-	if(R_FAILED(rc)) {
-		fatalThrow(rc);
-	}
-	rc = viOpenDefaultDisplay(&display);
-	if(R_FAILED(rc)) {
-		viExit();
-		return;
-	}
 	// flag 0 allows non-fullscreen layer
-	rc = viCreateManagedLayer(&display, (ViLayerFlags)0, 0, &__nx_vi_layer_id);
+	LOGD << "Create managed layer";
+	rc = viCreateManagedLayer(&disp, (ViLayerFlags)0, 0, &__nx_vi_layer_id);
 	if(R_FAILED(rc)) {
-		viCloseDisplay(&display);
 		fatalThrow(rc);
 	}
-	rc = viCreateLayer(&display, &layer);
+	LOGD << "Create layer";
+	rc = viCreateLayer(&disp, &layer);
 	if(R_FAILED(rc)) {
 		viDestroyManagedLayer(&layer);
 		fatalThrow(rc);
 	}
+	LOGD << "Set layer scaling mode";
 	rc = viSetLayerScalingMode(&layer, ViScalingMode_FitToLayer);
 	if(R_FAILED(rc)) {
 		viDestroyManagedLayer(&layer);
 		fatalThrow(rc);
 	}
 	// Arbitrary z index
+	LOGD << "Set layer Z index";
 	rc = viSetLayerZ(&layer, 100);
 	if(R_FAILED(rc)) {
 		viDestroyManagedLayer(&layer);
@@ -42,25 +35,40 @@ Gui::Gui() {
 	}
 	// These might not be screenWidth and screenHeight TODO
 	// They are smaller in the source
+	LOGD << "Set layer size";
 	rc = viSetLayerSize(&layer, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
 	if(R_FAILED(rc)) {
 		viDestroyManagedLayer(&layer);
 		fatalThrow(rc);
 	}
 	// The X and Y positions of the layer
+	LOGD << "Set layer position";
 	rc = viSetLayerPosition(&layer, 0.0f, 0.0f);
 	if(R_FAILED(rc)) {
 		viDestroyManagedLayer(&layer);
 		fatalThrow(rc);
 	}
+	LOGD << "Create NWindow from layer";
 	rc = nwindowCreateFromLayer(&window, &layer);
 	if(R_FAILED(rc)) {
 		viDestroyManagedLayer(&layer);
 		fatalThrow(rc);
 	}
+
+	// LOGD << "Obtaining memory usage for GUI creation";
+	/*
+	uint64_t memAvaliable;
+	uint64_t memUsed;
+	HELPERS::getMemUsage(&memAvaliable, &memUsed);
+
+	LOGD << "Mem avaliable: " << std::to_string(memAvaliable);
+	LOGD << "Mem used: " << std::to_string(memUsed);
+	*/
+
 	// PIXEL_FORMAT_RGBA_8888  defined in LibNX (based on Android)
 	// Not PIXEL_FORMAT_RGBA_8888 in source, but I don't care
 	// Upscaling and downscaling will happen so that the Layer Size and the FB size match
+	LOGD << "Create framebuffer from layer";
 	rc = framebufferCreate(&framebuf, &window, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT, PIXEL_FORMAT_RGBA_4444, 1);
 	if(R_FAILED(rc)) {
 		nwindowClose(&window);
@@ -79,6 +87,7 @@ Gui::Gui() {
 	static PlFontData stdFontData, extFontData;
 
 	// Nintendo's default font
+	LOGD << "Get standard font";
 	rc = plGetSharedFontByType(&stdFontData, PlSharedFontType_Standard);
 
 	if(R_FAILED(rc)) {
@@ -86,10 +95,12 @@ Gui::Gui() {
 		fatalThrow(rc);
 	}
 
+	LOGD << "Get offset of standard font";
 	u8* fontBuffer = reinterpret_cast<u8*>(stdFontData.address);
 	stbtt_InitFont(&stdNintendoFont, fontBuffer, stbtt_GetFontOffsetForIndex(fontBuffer, 0));
 
 	// Nintendo's extended font containing a bunch of icons
+	LOGD << "Get extended font";
 	rc = plGetSharedFontByType(&extFontData, PlSharedFontType_NintendoExt);
 
 	if(R_FAILED(rc)) {
@@ -97,17 +108,21 @@ Gui::Gui() {
 		fatalThrow(rc);
 	}
 
+	LOGD << "Get offset of extended font";
 	fontBuffer = reinterpret_cast<u8*>(extFontData.address);
 	stbtt_InitFont(&extNintendoFont, fontBuffer, stbtt_GetFontOffsetForIndex(fontBuffer, 0));
 
+	LOGD << "Allocate saved JPEG framebuffer";
 	savedJpegFramebuffer = (uint8_t*)malloc(JPEG_BUF_SIZE);
 #endif
 
+	LOGD << "Set up fbg";
 	fbg = fbg_customSetup(FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT, 4, false, false, (void*)this, &Gui::framebufferDraw, NULL, NULL, NULL);
 	if(!fbg) {
 		// return NULL;
 	}
 
+	LOGD << "Construct back buffer";
 	fbg->back_buffer = (uint8_t*)calloc(1, fbg->size * sizeof(uint8_t));
 	if(!fbg->back_buffer) {
 		// return NULL;
@@ -143,6 +158,7 @@ void Gui::endFrame() {
 #ifdef __SWITCH__
 	framebufferEnd(&framebuf);
 #endif
+	wasJustDrawnTo = true;
 }
 
 void Gui::setPixel(uint32_t x, uint32_t y, _fbg_rgb color) {
@@ -290,7 +306,6 @@ Gui::~Gui() {
 	framebufferClose(&framebuf);
 	nwindowClose(&window);
 	viDestroyManagedLayer(&layer);
-	viCloseDisplay(&display);
 	viExit();
 #endif
 }

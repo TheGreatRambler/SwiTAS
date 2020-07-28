@@ -43,6 +43,8 @@ private:
 	uint8_t isInTASMode       = false;
 
 	std::shared_ptr<Gui> gui;
+	uint8_t printDebugInfo         = true;
+	uint8_t printControllerOverlay = false;
 
 	uint64_t heapBase;
 	uint64_t mainBase;
@@ -53,10 +55,13 @@ private:
 	Result rc;
 	Handle applicationDebug;
 
+	ViDisplay disp;
+
 	PscPmModule sleepModule;
 	Waiter sleepModeWaiter;
 
 	uint64_t lastNanoseconds = 0;
+	int lastFrameAttempt     = 0;
 #endif
 
 #ifdef YUZU
@@ -112,6 +117,8 @@ private:
 
 	void handleNetworkUpdates();
 	void sendGameInfo();
+
+	void updateGui();
 
 	// void prepareMemoryRegionMath(mu::Parser& parser, std::string func);
 
