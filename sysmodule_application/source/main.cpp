@@ -198,80 +198,82 @@ DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), emu_unpause)
 DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), emu_message)
 DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), emu_framecount)
 DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), emu_emulating)
+
+DLL_EXPORT uint64_t get_plugin_interface_version() { return PLUGIN_INTERFACE_VERSION; }
 // clang-format on
 // Etc...
 #endif
 
-	// Code on Yuzu side later
-	/*
-	#ifdef _WIN32
-	#include <Windows.h>
-	#endif
+// Code on Yuzu side later
+/*
+#ifdef _WIN32
+#include <Windows.h>
+#endif
 
-	#ifdef __linux__
-	#include<dlfcn.h>
-	#endif
+#ifdef __linux__
+#include<dlfcn.h>
+#endif
 
-	#ifdef _WIN32
-	std::string GetLastErrorAsString()
-	{
-	//Get the error message, if any.
-	DWORD errorMessageID = ::GetLastError();
-	if(errorMessageID == 0)
-		return std::string(); //No error message has been recorded
+#ifdef _WIN32
+std::string GetLastErrorAsString()
+{
+//Get the error message, if any.
+DWORD errorMessageID = ::GetLastError();
+if(errorMessageID == 0)
+	return std::string(); //No error message has been recorded
 
-	LPSTR messageBuffer = nullptr;
-	size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-								 NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
+LPSTR messageBuffer = nullptr;
+size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+							 NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
 
-	std::string message(messageBuffer, size);
+std::string message(messageBuffer, size);
 
-	//Free the buffer.
-	LocalFree(messageBuffer);
+//Free the buffer.
+LocalFree(messageBuffer);
 
-	return message;
-	}
-	#endif
+return message;
+}
+#endif
 
-	std::string sharedLibraryPath = ...;
-	std::string sharedLibraryDirectory = ...;
+std::string sharedLibraryPath = ...;
+std::string sharedLibraryDirectory = ...;
 
-	#ifdef _WIN32
-	DLL_DIRECTORY_COOKIE directoryHandle = AddDllDirectory(sharedLibraryDirectory.c_str());
-	if (!directoryHandle) {
-		LOG(GetLastErrorAsString());
-		return;
-	}
+#ifdef _WIN32
+DLL_DIRECTORY_COOKIE directoryHandle = AddDllDirectory(sharedLibraryDirectory.c_str());
+if (!directoryHandle) {
+	LOG(GetLastErrorAsString());
+	return;
+}
 
-	HMODULE sharedLibHandle = LoadLibraryEx(sharedLibraryPath.c_str(), NULL, LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
-	if (sharedLibHandle == NULL) {
-		LOG(GetLastErrorAsString());
-		return;
-	}
+HMODULE sharedLibHandle = LoadLibraryEx(sharedLibraryPath.c_str(), NULL, LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
+if (sharedLibHandle == NULL) {
+	LOG(GetLastErrorAsString());
+	return;
+}
 
-	// Do things
+// Do things
 
-	FreeLibrary(sharedLibHandle);
+FreeLibrary(sharedLibHandle);
 
-	if (!RemoveDllDirectory(directoryHandle)) {
-		LOG(GetLastErrorAsString());
-		return;
-	}
-	#endif
+if (!RemoveDllDirectory(directoryHandle)) {
+	LOG(GetLastErrorAsString());
+	return;
+}
+#endif
 
-	#ifdef __linux__
-	// Set `LD_LIBRARY_PATH` (`DYLD_LIBRARY_PATH` on OSX) to add the folder. Save original value
+#ifdef __linux__
+// Set `LD_LIBRARY_PATH` (`DYLD_LIBRARY_PATH` on OSX) to add the folder. Save original value
 
-	void* sharedLibHandle = (void *)dlopen(sharedLibraryPath.c_str(), RTLD_LAZY);
-	if (!sharedLibHandle) {
-		LOG(std::string(dlerror()));
-		return;
-	}
+void* sharedLibHandle = (void *)dlopen(sharedLibraryPath.c_str(), RTLD_LAZY);
+if (!sharedLibHandle) {
+	LOG(std::string(dlerror()));
+	return;
+}
 
-	// Do things
+// Do things
 
-	dlclose(sharedLibHandle);
+dlclose(sharedLibHandle);
 
-	// Restore original value to the ld path
-	#endif
-	*/
+// Restore original value to the ld path
+#endif
+*/

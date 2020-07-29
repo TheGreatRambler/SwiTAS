@@ -15,7 +15,6 @@
 #endif
 
 #ifdef YUZU
-#include "dllFunctionDefinitions.hpp"
 #include "yuzuSyscalls.hpp"
 #endif
 

@@ -27,6 +27,13 @@ public:
 	YUZU_FUNC(emu_getprocessid)
 	YUZU_FUNC(emu_getheapstart)
 	YUZU_FUNC(emu_getmainstart)
+	YUZU_FUNC(emu_log)
+	YUZU_FUNC(joypad_getnumjoypads)
+	YUZU_FUNC(joypad_setnumjoypads)
+	YUZU_FUNC(joypad_addjoypad)
+	YUZU_FUNC(emu_getscreenjpeg)
+	YUZU_FUNC(joypad_readjoystick)
+	YUZU_FUNC(joypad_read)
 
 // Etc...
 #endif

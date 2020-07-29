@@ -44,6 +44,8 @@ enum RecieveInfo : uint8_t {
 	APPLICATION_DISCONNECTED,
 	CONTROLLERS_CONNECTED,
 	UNEXPECTED_CONTROLLER_SIZE,
+	IS_YUZU,
+	IS_HOMEBREW,
 };
 
 enum SendInfo : uint8_t {
@@ -60,6 +62,7 @@ enum SendInfo : uint8_t {
 	STOP_FULL_SPEED,
 	PAUSE_FULL_SPEED,
 	STOP_FINAL_TAS,
+	IS_YUZU,
 };
 
 // This is used by the switch to determine size, a vector is always send back enyway

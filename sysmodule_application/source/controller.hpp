@@ -7,9 +7,13 @@
 #include <switch.h>
 #endif
 
-#include "../../sharedNetworkCode/networkInterface.hpp"
+#ifdef YUZU
+#include "yuzuSyscalls.hpp"
+#endif
+
 #include "buttonData.hpp"
 #include "screenshotHandler.hpp"
+#include "sharedNetworkCode/networkInterface.hpp"
 
 class ControllerHandler {
 	// Create one for each controller index
@@ -24,13 +28,20 @@ private:
 
 	std::shared_ptr<CommunicateWithNetwork> networkInstance;
 
+#ifdef YUZU
+	std::shared_ptr<Syscalls> yuzuSyscalls;
+#endif
+
 public:
+#ifdef YUZU
+	ControllerHandler(std::shared_ptr<CommunicateWithNetwork> networkImp, std::shared_ptr<Syscalls> syscalls);
+#endif
+#ifdef __SWITCH__
 	ControllerHandler(std::shared_ptr<CommunicateWithNetwork> networkImp);
+#endif
 
 	void setFrame(ControllerData& controllerData);
-#ifdef __SWITCH__
-	void setFrame(u64 buttons, JoystickPosition& left, JoystickPosition& right);
-#endif
+	void setFrame(u64 buttons, int32_t leftX, int32_t leftY, int32_t rightX, int32_t rightY);
 
 	void clearState() {
 #ifdef __SWITCH__

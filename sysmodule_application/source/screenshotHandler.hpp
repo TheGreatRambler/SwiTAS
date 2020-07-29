@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <cstring>
 #include <iterator>
+#include <shared_ptr>
 #include <string>
 #include <vector>
 
@@ -17,13 +18,21 @@
 #include <switch.h>
 #endif
 
+#ifdef YUZU
+#include "yuzuSyscalls.hpp"
+#endif
+
 class ScreenshotHandler {
 private:
 	const uint8_t dhashWidth  = 80;
 	const uint8_t dhashHeight = 45;
 
+#ifdef YUZU
+	std::shared_ptr<Syscalls> yuzuInstance;
+#endif
+
 #ifdef __SWITCH__
-	Result rc;
+		Result rc;
 #endif
 
 #ifdef __SWITCH__
@@ -32,6 +41,12 @@ private:
 
 public:
 	ScreenshotHandler();
+
+#ifdef YUZU
+	void setYuzuInstance(std::shared_ptr<Syscalls> yuzu) {
+		yuzuInstance = yuzu;
+	}
+#endif
 
 	void writeFramebuffer(std::vector<uint8_t>& buf, std::string& dhash);
 

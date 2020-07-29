@@ -49,6 +49,11 @@ MainLoop::MainLoop() {
 	if(R_FAILED(rc))
 		fatalThrow(rc);
 #endif
+
+#ifdef YUZU
+	yuzuSyscalls = std::make_shared<Syscalls>();
+	screenshotHandler.setYuzuInstance(yuzuInstance);
+#endif
 }
 
 void MainLoop::mainLoopHandler() {
@@ -133,10 +138,25 @@ void MainLoop::mainLoopHandler() {
 			gameName              = std::string(gameNamePointer);
 			free(gameNamePointer);
 
+			applicationProgramId = yuzuSyscalls->function_emu_getprogramid(yuzuSyscalls->getYuzuInstance());
+			applicationProcessId = yuzuSyscalls->function_emu_getprocessid(yuzuSyscalls->getYuzuInstance());
+
 			pauseApp(false, false, false, 0, 0, 0, 0);
 
 			heapBase = yuzuSyscalls->function_emu_getheapstart(yuzuSyscalls->getYuzuInstance());
 			mainBase = yuzuSyscalls->function_emu_getmainstart(yuzuSyscalls->getYuzuInstance());
+
+			yuzuSyscalls->function_emu_unpause(yuzuSyscalls->getYuzuInstance());
+
+			// yuzuSyscalls->function_emu_log(yuzuSyscalls->getYuzuInstance(), "Application opened");
+
+			ADD_TO_QUEUE(RecieveApplicationConnected, networkInstance, {
+				data.applicationName      = gameName;
+				data.applicationProgramId = applicationProgramId;
+				data.applicationProcessId = applicationProcessId;
+			})
+
+			applicationOpened = true;
 #endif
 		} else {
 			// I believe this means that there is no application running
@@ -146,9 +166,9 @@ void MainLoop::mainLoopHandler() {
 				LOGD << "Application closed";
 #endif
 				// clang-format off
-			ADD_TO_QUEUE(RecieveFlag, networkInstance, {
-				data.actFlag = RecieveInfo::APPLICATION_DISCONNECTED;
-			})
+				ADD_TO_QUEUE(RecieveFlag, networkInstance, {
+					data.actFlag = RecieveInfo::APPLICATION_DISCONNECTED;
+				})
 				// clang-format on
 				applicationOpened = false;
 			}
@@ -185,7 +205,10 @@ void MainLoop::mainLoopHandler() {
 		matchFirstControllerToTASController(0);
 	}
 
+#ifdef __SWITCH__
 	std::this_thread::sleep_for(std::chrono::milliseconds(5));
+#endif
+
 	// I dunno how often to update this honestly
 	updateGui();
 }
@@ -240,6 +263,21 @@ void MainLoop::handleNetworkUpdates() {
 			finalTasShouldRun = false;
 		} else if(data.actFlag == SendInfo::GET_GAME_INFO) {
 			sendGameInfo();
+		} else if(data.actFlag == SendInfo::IS_YUZU) {
+#ifdef __SWITCH__
+			// clang-format off
+			ADD_TO_QUEUE(RecieveFlag, networkInstance, {
+				data.actFlag = RecieveInfo::IS_HOMEBREW;
+			})
+// clang-format on
+#endif
+#ifdef YUZU
+			// clang-format off
+			ADD_TO_QUEUE(RecieveFlag, networkInstance, {
+				data.actFlag = RecieveInfo::IS_YUZU;
+			})
+// clang-format on
+#endif
 		}
 	})
 
@@ -295,6 +333,8 @@ void MainLoop::sendGameInfo() {
 		if(!wasPaused) {
 			pauseApp(false, false, false, 0, 0, 0, 0);
 		}
+
+		// I don't know how to handle this for Yuzu, so ignore for now
 
 #ifdef __SWITCH__
 		uint64_t addr = 0;
@@ -452,7 +492,7 @@ void MainLoop::updateGui() {
 				debugInfo += "Application Process ID:         " + std::to_string(getNumControllers()) + "\n";
 				debugInfo += "Real Controllers:               " + std::to_string(getNumControllers()) + "\n";
 				debugInfo += "Is Paused:                      " + std::string((isPaused ? "true" : "false")) + "\n";
-				debugInfo += "Time Between Frames: " + lastFrameAttempt != 0 ? std::to_string(lastFrameAttempt) : std::string("NULL") + "\n";
+				debugInfo += "Time Between Frames:            " + lastFrameAttempt != 0 ? std::to_string(lastFrameAttempt) : std::string("NULL") + "\n";
 			}
 			// clang-format on
 			gui->drawText(0, 0, 28, debugInfo);
@@ -469,7 +509,6 @@ void MainLoop::updateGui() {
 
 #ifdef __SWITCH__
 char* MainLoop::getAppName(u64 application_id) {
-#ifdef __SWITCH__
 	static NsApplicationControlData appControlData = { 0 };
 	size_t appControlDataSize                      = 0;
 	NacpLanguageEntry* languageEntry               = nullptr;
@@ -480,7 +519,6 @@ char* MainLoop::getAppName(u64 application_id) {
 				return languageEntry->name;
 		}
 	}
-#endif
 	return (char*)"Game Not Defined";
 }
 #endif
@@ -498,18 +536,30 @@ uint8_t MainLoop::getNumControllers() {
 
 	return num;
 #endif
+#ifdef YUZU
+	return yuzuSyscalls->function_joypad_getnumjoypads(yuzuSyscalls->getYuzuInstance());
+#endif
 }
 
 void MainLoop::setControllerNumber(uint8_t numOfControllers) {
-#ifdef __SWITCH__
 	controllers.clear();
+#ifdef __SWITCH__
 	// Wait for all controllers to be disconnected
 	LOGD << (int)getNumControllers();
 	while(getNumControllers() != 0) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
+#endif
+#ifdef YUZU
+	yuzuSyscalls->function_joypad_setnumjoypads(yuzuSyscalls->getYuzuInstance(), 0);
+#endif
 	for(uint8_t i = 0; i < numOfControllers; i++) {
+#ifdef __SWITCH__
 		controllers.push_back(std::make_unique<ControllerHandler>(networkInstance));
+#endif
+#ifdef YUZU
+		controllers.push_back(std::make_unique<ControllerHandler>(networkInstance, yuzuSyscalls));
+#endif
 	}
 	// clang-format off
 	ADD_TO_QUEUE(RecieveFlag, networkInstance, {
@@ -517,7 +567,6 @@ void MainLoop::setControllerNumber(uint8_t numOfControllers) {
 	})
 	// clang-format on
 	// Now, user is required to reconnect any controllers manually
-#endif
 }
 
 void MainLoop::runFinalTas(std::vector<std::string> scriptPaths) {
@@ -573,18 +622,22 @@ void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t includeFra
 	if(isPaused) {
 #ifdef __SWITCH__
 		LOGD << "Running frame";
-#endif
 		int32_t currentPriority;
 		svcGetThreadPriority(&currentPriority, CUR_THREAD_HANDLE);
 		svcSetThreadPriority(CUR_THREAD_HANDLE, 10);
+#endif
 		waitForVsync();
 		unpauseApp();
+#ifdef __SWITCH__
 		lastNanoseconds = armTicksToNs(armGetSystemTick());
 		// waitForVsync();
 		// Frame advancing is amazingly inconsistent
 		svcSleepThread(16666666);
+#endif
 		pauseApp(linkedWithFrameAdvance, includeFramebuffer, autoAdvance, frame, savestateHookNum, branchIndex, playerIndex);
+#ifdef __SWITCH__
 		svcSetThreadPriority(CUR_THREAD_HANDLE, currentPriority);
+#endif
 	}
 }
 
@@ -619,6 +672,9 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 			lastNanoseconds = 0;
 		}
 		isPaused = true;
+#endif
+#ifdef YUZU
+		yuzuSyscalls->function_emu_pause(yuzuSyscalls->getYuzuInstance());
 #endif
 
 		if(networkInstance->isConnected()) {
@@ -795,7 +851,22 @@ void MainLoop::matchFirstControllerToTASController(uint8_t player) {
 		hidJoystickRead(&left, id, JOYSTICK_LEFT);
 		hidJoystickRead(&right, id, JOYSTICK_RIGHT);
 
-		controllers[player]->setFrame(buttons, left, right);
+		controllers[player]->setFrame(buttons, left.dx, left.dy, right.dx, right.dy);
+	}
+#endif
+#ifdef YUZU
+	if(getNumControllers() > controllers.size() && controllers.size() != 0) {
+		// This should get the first non-TAS controller
+		uint8_t controllerIndex = (uint8_t)controllers.size();
+
+		uint64_t buttons = yuzuSyscalls->function_joypad_read(yuzuSyscalls->getYuzuInstance(), controllerIndex);
+
+		int32_t leftX  = yuzuSyscalls->function_joypad_readjoystick(yuzuSyscalls->getYuzuInstance(), controllerIndex, YuzuJoystickType::LeftX);
+		int32_t leftY  = yuzuSyscalls->function_joypad_readjoystick(yuzuSyscalls->getYuzuInstance(), controllerIndex, YuzuJoystickType::LeftY);
+		int32_t rightX = yuzuSyscalls->function_joypad_readjoystick(yuzuSyscalls->getYuzuInstance(), controllerIndex, YuzuJoystickType::RightX);
+		int32_t rightY = yuzuSyscalls->function_joypad_readjoystick(yuzuSyscalls->getYuzuInstance(), controllerIndex, YuzuJoystickType::RightY);
+
+		controllers[player]->setFrame(buttons, leftX, leftY, rightX, rightY);
 	}
 #endif
 }

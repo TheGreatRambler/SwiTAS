@@ -1,12 +1,29 @@
+#pragma once
+
+#define PLUGIN_INTERFACE_VERSION 0
+
 #include <cstdint>
+#include <cstring>
+
+enum YuzuJoystickType : uint8_t {
+	LeftX  = 0,
+	LeftY  = 1,
+	RightX = 2,
+	RightY = 3,
+};
 
 // NOTE: Every time a char string is returned, it must be freed by the DLL
+
+typedef void(meta_setup_plugin)(void*);
+typedef void(meta_handle_main_loop)();
+typedef void(meta_add_function)(void*);
+typedef uint64_t(meta_getplugininterfaceversion)();
 
 // Emu library
 
 // emu.poweron() ignored
 // emu.softreset() ignored
-typedef void(emu_speedmode)(void* ctx, char* mode);
+typedef void(emu_speedmode)(void* ctx, const char* mode);
 typedef void(emu_frameadvance)(void* ctx);
 typedef void(emu_pause)(void* ctx);
 typedef void(emu_unpause)(void* ctx);
@@ -30,7 +47,8 @@ typedef void(emu_loadrom)(void* ctx, char* filename);
 // bool emu.addgamegenie(string str) ignored
 // bool emu.delgamegenie(string str) ignored
 typedef void(emu_print)(void* ctx, uint8_t mode);
-typedef uint8_t*(emu_getscreenpixel)(void* ctx, int x, int y, bool getemuscreen);
+typedef uint8_t*(emu_getscreenframebuffer)(void* ctx, uint64_t* size);
+typedef uint8_t*(emu_getscreenjpeg)(void* ctx, uint64_t* size);
 
 // Check if game is opened
 typedef uint8_t(emu_isromopened)(void* ctx);
@@ -44,6 +62,8 @@ typedef uint64_t(emu_getprocessid)(void* ctx);
 typedef uint64_t(emu_getheapstart)(void* ctx);
 // Get main start
 typedef uint64_t(emu_getmainstart)(void* ctx);
+// Log on Yuzu
+typedef void(emu_log)(void* ctx, const char* logmessage);
 
 // ROM Library (handled differently since the games are bigger)
 
@@ -87,11 +107,17 @@ typedef uint64_t(joypad_immediate)(void* ctx, uint8_t player);
 typedef void(joypad_set)(void* ctx, uint8_t player, uint64_t input);
 
 // Joystick, accel and gyro based on enums
-typedef int16_t(joypad_readjoystick)(void* ctx, uint8_t player, uint8_t type);
+typedef int16_t(joypad_readjoystick)(void* ctx, uint8_t player, YuzuJoystickType type);
+// Joystick, accel and gyro based on enums
+typedef void(joypad_setjoystick)(void* ctx, uint8_t player, YuzuJoystickType type, int16_t val);
 // Disable input entering from outside the script, this allows the script to set input without interruption
 typedef void(joypad_enableoutsideinput)(void* ctx, uint8_t enable);
-// Set number of joysticks in use
+// Set number of joysticks in use, will reset all controllers and replace them
 typedef void(joypad_setnumjoypads)(void* ctx, uint8_t numofplayers);
+// Add controllers
+typedef void(joypad_addjoypad)(void* ctx);
+// Get number of controllers
+typedef uint8_t(joypad_getnumjoypads)(void* ctx);
 
 // Input Library
 
