@@ -69,7 +69,7 @@ void MainLoop::mainLoopHandler() {
 		// Lifted from switchPresense-Rewritten
 		uint8_t succeeded = R_SUCCEEDED(rc);
 #else
-		uint8_t succeeded = true;
+		uint8_t succeeded = yuzuSyscalls->function_emu_isromopened(yuzuSyscalls->getYuzuInstance());
 #endif
 
 		if(succeeded) {
@@ -77,6 +77,7 @@ void MainLoop::mainLoopHandler() {
 // Get application info
 #ifdef __SWITCH__
 			rc = pminfoGetProgramId(&applicationProgramId, applicationProcessId);
+			// This should never fail, but I dunno
 			if(R_SUCCEEDED(rc)) {
 				if(!applicationOpened) {
 					gameName = std::string(getAppName(applicationProgramId));
@@ -126,6 +127,16 @@ void MainLoop::mainLoopHandler() {
 					// pauseApp();
 				}
 			}
+#endif
+#ifdef YUZU
+			char* gameNamePointer = yuzuSyscalls->function_emu_romname(yuzuSyscalls->getYuzuInstance());
+			gameName              = std::string(gameNamePointer);
+			free(gameNamePointer);
+
+			pauseApp(false, false, false, 0, 0, 0, 0);
+
+			heapBase = yuzuSyscalls->function_emu_getheapstart(yuzuSyscalls->getYuzuInstance());
+			mainBase = yuzuSyscalls->function_emu_getmainstart(yuzuSyscalls->getYuzuInstance());
 #endif
 		} else {
 			// I believe this means that there is no application running

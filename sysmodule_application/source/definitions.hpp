@@ -1,5 +1,7 @@
 #include <cstdint>
 
+// NOTE: Every time a char string is returned, it must be freed by the DLL
+
 // Emu library
 
 // emu.poweron() ignored
@@ -29,6 +31,19 @@ typedef void(emu_loadrom)(void* ctx, char* filename);
 // bool emu.delgamegenie(string str) ignored
 typedef void(emu_print)(void* ctx, uint8_t mode);
 typedef uint8_t*(emu_getscreenpixel)(void* ctx, int x, int y, bool getemuscreen);
+
+// Check if game is opened
+typedef uint8_t(emu_isromopened)(void* ctx);
+// Get the name of the currently running game
+typedef char*(emu_romname)(void* ctx);
+// Get program ID
+typedef uint64_t(emu_getprogramid)(void* ctx);
+// Get process ID
+typedef uint64_t(emu_getprocessid)(void* ctx);
+// Get heap start
+typedef uint64_t(emu_getheapstart)(void* ctx);
+// Get main start
+typedef uint64_t(emu_getmainstart)(void* ctx);
 
 // ROM Library (handled differently since the games are bigger)
 
