@@ -19,6 +19,9 @@ typedef void(meta_handle_main_loop)();
 typedef void(meta_add_function)(void*);
 typedef uint64_t(meta_getplugininterfaceversion)();
 
+// Memory passed to the DLL that is allocated must be freed with this function
+typedef void(meta_free)(void*);
+
 // Emu library
 
 // emu.poweron() ignored
@@ -27,6 +30,7 @@ typedef void(emu_speedmode)(void* ctx, const char* mode);
 typedef void(emu_frameadvance)(void* ctx);
 typedef void(emu_pause)(void* ctx);
 typedef void(emu_unpause)(void* ctx);
+typedef void(emu_waitforvsync)(void* ctx);
 // emu.exec_count(int count, function func) ignored
 // emu.exec_time(int time, function func) ignored
 // emu.setrenderplanes(bool sprites, bool background) ignored
@@ -67,9 +71,10 @@ typedef void(emu_log)(void* ctx, const char* logmessage);
 
 // ROM Library (handled differently since the games are bigger)
 
-typedef uint8_t(rom_readbyteunsigned)(void* ctx, uint64_t address);
-typedef int8_t(rom_readbytesigned)(void* ctx, uint64_t address);
+typedef uint8_t(rom_readbyte)(void* ctx, uint64_t address);
+typedef void(rom_readbytes)(void* ctx, uint8_t* dest, uint64_t address, uint64_t size);
 typedef void(rom_writebyte)(void* ctx, uint64_t address, uint8_t byte);
+typedef void(rom_writebytes)(void* ctx, uint64_t address, uint8_t* bytes, uint64_t size);
 
 // Memory Library
 

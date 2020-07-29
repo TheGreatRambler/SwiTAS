@@ -74,7 +74,7 @@ void MainLoop::mainLoopHandler() {
 		// Lifted from switchPresense-Rewritten
 		uint8_t succeeded = R_SUCCEEDED(rc);
 #else
-		uint8_t succeeded = yuzuSyscalls->function_emu_isromopened(yuzuSyscalls->getYuzuInstance());
+		uint8_t succeeded = yuzuSyscalls->function_emu_emulating(yuzuSyscalls->getYuzuInstance());
 #endif
 
 		if(succeeded) {
@@ -136,7 +136,7 @@ void MainLoop::mainLoopHandler() {
 #ifdef YUZU
 			char* gameNamePointer = yuzuSyscalls->function_emu_romname(yuzuSyscalls->getYuzuInstance());
 			gameName              = std::string(gameNamePointer);
-			free(gameNamePointer);
+			yuzuSyscalls->function_meta_free(gameNamePointer);
 
 			applicationProgramId = yuzuSyscalls->function_emu_getprogramid(yuzuSyscalls->getYuzuInstance());
 			applicationProcessId = yuzuSyscalls->function_emu_getprocessid(yuzuSyscalls->getYuzuInstance());
@@ -146,7 +146,7 @@ void MainLoop::mainLoopHandler() {
 			heapBase = yuzuSyscalls->function_emu_getheapstart(yuzuSyscalls->getYuzuInstance());
 			mainBase = yuzuSyscalls->function_emu_getmainstart(yuzuSyscalls->getYuzuInstance());
 
-			yuzuSyscalls->function_emu_unpause(yuzuSyscalls->getYuzuInstance());
+			unpauseApp();
 
 			// yuzuSyscalls->function_emu_log(yuzuSyscalls->getYuzuInstance(), "Application opened");
 
@@ -263,7 +263,7 @@ void MainLoop::handleNetworkUpdates() {
 			finalTasShouldRun = false;
 		} else if(data.actFlag == SendInfo::GET_GAME_INFO) {
 			sendGameInfo();
-		} else if(data.actFlag == SendInfo::IS_YUZU) {
+		} else if(data.actFlag == SendInfo::GET_IS_YUZU) {
 #ifdef __SWITCH__
 			// clang-format off
 			ADD_TO_QUEUE(RecieveFlag, networkInstance, {
@@ -634,6 +634,10 @@ void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t includeFra
 		// Frame advancing is amazingly inconsistent
 		svcSleepThread(16666666);
 #endif
+#ifdef YUZU
+		// Yuzu has actually good frame incrementing
+		waitForVsync();
+#endif
 		pauseApp(linkedWithFrameAdvance, includeFramebuffer, autoAdvance, frame, savestateHookNum, branchIndex, playerIndex);
 #ifdef __SWITCH__
 		svcSetThreadPriority(CUR_THREAD_HANDLE, currentPriority);
@@ -720,7 +724,12 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 				std::string stringVersion;
 
 				try {
-					uint64_t addr      = calculator::eval<uint64_t>(revisedExpression, applicationDebug);
+#ifdef __SWITCH__
+					uint64_t addr = calculator::eval<uint64_t>(revisedExpression, applicationDebug);
+#endif
+#ifdef YUZU
+					uint64_t addr = calculator::eval<uint64_t>(revisedExpression, yuzuSyscalls);
+#endif
 					uint8_t isUnsigned = currentMemoryRegions[i].u;
 
 					switch(type) {
@@ -798,6 +807,7 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 }
 
 uint8_t MainLoop::checkSleep() {
+#ifdef __SWITCH__
 	// Wait for one millisecond
 	if(R_SUCCEEDED(waitSingle(sleepModeWaiter, 1000000 * 1))) {
 		PscPmState pscState;
@@ -816,8 +826,10 @@ uint8_t MainLoop::checkSleep() {
 			}
 		}
 	}
+#endif
 }
 uint8_t MainLoop::checkAwaken() {
+#ifdef __SWITCH__
 	// Wait for one millisecond
 	if(R_SUCCEEDED(waitSingle(sleepModeWaiter, 1000000 * 1))) {
 		PscPmState pscState;
@@ -836,6 +848,7 @@ uint8_t MainLoop::checkAwaken() {
 			}
 		}
 	}
+#endif
 }
 
 void MainLoop::matchFirstControllerToTASController(uint8_t player) {

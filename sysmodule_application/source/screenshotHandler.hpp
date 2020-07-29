@@ -9,7 +9,7 @@
 #include <cstdio>
 #include <cstring>
 #include <iterator>
-#include <shared_ptr>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -32,7 +32,7 @@ private:
 #endif
 
 #ifdef __SWITCH__
-		Result rc;
+	Result rc;
 #endif
 
 #ifdef __SWITCH__

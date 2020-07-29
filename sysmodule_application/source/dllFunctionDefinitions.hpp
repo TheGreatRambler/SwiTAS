@@ -10,7 +10,7 @@
 // The calling has to be done manually
 
 // clang-format off
-#define SET_YUZU_FUNC(class, func) void set_##func(func* function) { \
+#define SET_YUZU_FUNC(class, func) void yuzupluginset_##func(func* function) { \
 		class->set_##func(function); \
 	}
 // clang-format on

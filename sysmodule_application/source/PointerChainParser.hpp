@@ -63,11 +63,19 @@
 
 #include <cctype>
 #include <cstddef>
+#include <memory>
 #include <sstream>
 #include <stack>
 #include <stdexcept>
 #include <string>
+
+#ifdef __SWITCH__
 #include <switch.h>
+#endif
+
+#ifdef YUZU
+#include "yuzuSyscalls.hpp"
+#endif
 
 namespace calculator {
 
@@ -117,10 +125,18 @@ namespace calculator {
 			return eval(expr);
 		}
 
+#ifdef __SWITCH__
 		// Set application debug handle
 		void setApplicationDebugHandle(Handle handle) {
 			applicationDebug = handle;
 		}
+#endif
+
+#ifdef YUZU
+		void setYuzuSyscalls(std::shared_ptr<Syscalls> yuzu) {
+			yuzuSyscalls = yuzu;
+		}
+#endif
 
 	private:
 		enum {
@@ -174,8 +190,14 @@ namespace calculator {
 		/// top of the stack has lower precedence.
 		std::stack<OperatorValue> stack_;
 
+#ifdef __SWITCH__
 		// Debug handle for memory reading
 		Handle applicationDebug;
+#endif
+
+#ifdef YUZU
+		std::shared_ptr<Syscalls> yuzuSyscalls;
+#endif
 
 		/// Exponentiation by squaring, x^n.
 		static T pow(T x, T n) {
@@ -403,9 +425,13 @@ namespace calculator {
 			case '[':
 				index_++;
 
-				// Do pointer reversing
 				uint64_t newAddr;
+#ifdef __SWITCH__
 				svcReadDebugProcessMemory(&newAddr, applicationDebug, parseExpr(), sizeof(uint64_t));
+#endif
+#ifdef YUZU
+				yuzuSyscalls->function_rom_readbytes(yuzuSyscalls->getYuzuInstance(), &newAddr, parseExpr(), sizeof(uint64_t));
+#endif
 
 				val = newAddr;
 				eatSpaces();
@@ -468,17 +494,37 @@ namespace calculator {
 		}
 	};
 
+#ifdef __SWITCH__
 	template <typename T> inline T eval(const std::string& expression, Handle handle) {
 		ExpressionParser<T> parser;
 		parser.setApplicationDebugHandle(handle);
 		return parser.eval(expression);
 	}
+#endif
 
+#ifdef YUZU
+	template <typename T> inline T eval(const std::string& expression, std::shared_ptr<Syscalls> yuzu) {
+		ExpressionParser<T> parser;
+		parser.setYuzuSyscalls(yuzu);
+		return parser.eval(expression);
+	}
+#endif
+
+#ifdef __SWITCH__
 	template <typename T> inline T eval(char c, Handle Handle) {
 		ExpressionParser<T> parser;
 		parser.setApplicationDebugHandle(Handle);
 		return parser.eval(c);
 	}
+#endif
+
+#ifdef YUZU
+	template <typename T> inline T eval(char c, std::shared_ptr<Syscalls> yuzu) {
+		ExpressionParser<T> parser;
+		parser.setYuzuSyscalls(yuzu);
+		return parser.eval(c);
+	}
+#endif
 
 } // namespace calculator
 

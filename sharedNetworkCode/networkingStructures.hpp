@@ -62,7 +62,7 @@ enum SendInfo : uint8_t {
 	STOP_FULL_SPEED,
 	PAUSE_FULL_SPEED,
 	STOP_FINAL_TAS,
-	IS_YUZU,
+	GET_IS_YUZU,
 };
 
 // This is used by the switch to determine size, a vector is always send back enyway

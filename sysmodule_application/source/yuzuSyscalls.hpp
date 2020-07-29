@@ -21,7 +21,6 @@ public:
 	YUZU_FUNC(emu_message)
 	YUZU_FUNC(emu_framecount)
 	YUZU_FUNC(emu_emulating)
-	YUZU_FUNC(emu_isromopened)
 	YUZU_FUNC(emu_romname)
 	YUZU_FUNC(emu_getprogramid)
 	YUZU_FUNC(emu_getprocessid)
@@ -34,6 +33,8 @@ public:
 	YUZU_FUNC(emu_getscreenjpeg)
 	YUZU_FUNC(joypad_readjoystick)
 	YUZU_FUNC(joypad_read)
+	YUZU_FUNC(rom_readbytes)
+	YUZU_FUNC(meta_free)
 
 // Etc...
 #endif

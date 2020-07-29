@@ -1,6 +1,5 @@
 #pragma once
 
-#include <PointerChainParser.hpp>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
@@ -18,6 +17,7 @@
 #include "yuzuSyscalls.hpp"
 #endif
 
+#include "PointerChainParser.hpp"
 #include "controller.hpp"
 #include "gui.hpp"
 #include "scripting/luaScripting.hpp"
@@ -42,7 +42,8 @@ private:
 	uint8_t isInTASMode       = false;
 
 	std::shared_ptr<Gui> gui;
-	uint8_t printDebugInfo         = true;
+	// Currently broken
+	uint8_t printDebugInfo         = false;
 	uint8_t printControllerOverlay = false;
 
 	uint64_t heapBase;
@@ -123,7 +124,12 @@ private:
 
 	std::vector<uint8_t> getMemory(uint64_t addr, uint64_t size) {
 		std::vector<uint8_t> region(size);
+#ifdef __SWITCH__
 		svcReadDebugProcessMemory(region.data(), applicationDebug, addr, size);
+#endif
+#ifdef YUZU
+		yuzuSyscalls->function_rom_readbytes(yuzuSyscalls->getYuzuInstance(), region.data(), addr, size);
+#endif
 		return region;
 	}
 
@@ -145,6 +151,9 @@ private:
 			fatalThrow(rc);
 			// svcSleepThread(1000000 * 1);
 #endif
+#ifdef YUZU
+		yuzuSyscalls->function_emu_frameadvance(yuzuSyscalls->getYuzuInstance());
+#endif
 	}
 
 	void unpauseApp() {
@@ -153,6 +162,9 @@ private:
 			// Unpause application
 			svcCloseHandle(applicationDebug);
 			isPaused = false;
+#endif
+#ifdef YUZU
+			yuzuSyscalls->function_emu_unpause(yuzuSyscalls->getYuzuInstance());
 #endif
 		}
 	}

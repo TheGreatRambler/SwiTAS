@@ -11,6 +11,9 @@
 		},
 		{
 			"path": "sharedNetworkCode"
+		},
+		{
+			"path": "..\\yuzu"
 		}
 	],
 	"settings": {
@@ -92,7 +95,9 @@
 			"codecvt": "cpp",
 			"cfenv": "cpp",
 			"valarray": "cpp",
-			"*.ipp": "cpp"
+			"*.ipp": "cpp",
+			"*.hpp11": "cpp",
+			"future": "cpp"
 		},
 		"cSpell.enabled": false
 	}
