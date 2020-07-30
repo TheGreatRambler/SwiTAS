@@ -10,10 +10,11 @@ void ScreenshotHandler::writeFramebuffer(std::vector<uint8_t>& buf, std::string&
 #ifdef __SWITCH__
 	rc        = capsscCaptureJpegScreenShot(&outSize, buf.data(), JPEG_BUF_SIZE, ViLayerStack::ViLayerStack_ApplicationForDebug, INT64_MAX);
 	succeeded = R_SUCCEEDED(rc);
-#else
+#endif
+#ifdef YUZU
 	uint8_t* jpeg = yuzuSyscalls->function_emu_getscreenjpeg(yuzuSyscalls->getYuzuInstance(), &outSize);
 	memcpy(buf.data(), jpeg, outSize);
-	free(jpeg);
+	yuzuSyscalls->function_meta_free(jpeg);
 	succeeded = true;
 #endif
 

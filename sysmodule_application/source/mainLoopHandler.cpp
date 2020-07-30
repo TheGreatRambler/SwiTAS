@@ -470,7 +470,12 @@ void MainLoop::sendGameInfo() {
 void MainLoop::updateGui() {
 	if(printDebugInfo || printControllerOverlay) {
 		if(!gui) {
+#ifdef __SWITCH__
 			gui = std::make_shared<Gui>(disp);
+#endif
+#ifdef YUZU
+			gui = std::make_shared<Gui>(yuzuSyscalls);
+#endif
 		}
 
 		gui->startFrame();

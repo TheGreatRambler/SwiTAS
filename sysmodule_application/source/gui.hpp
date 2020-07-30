@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <cwctype>
+#include <memory>
 #include <string>
 #include <unordered_map>
 
@@ -19,6 +20,10 @@ extern "C" {
 #ifdef __SWITCH__
 #include <plog/Log.h>
 #include <switch.h>
+#endif
+
+#ifdef YUZU
+#include "yuzuSyscalls.hpp"
 #endif
 
 #ifdef __SWITCH__
@@ -47,14 +52,23 @@ private:
 
 	const int32_t joystickRangeConstant = 2184;
 
+	uint8_t isFontCached = false;
+
+	std::unordered_map<uint32_t, uint8_t*> fontCache;
+
 #ifdef __SWITCH__
 	ViLayer layer;
 	NWindow window;
 	Framebuffer framebuf;
 	// Error handling for everything
 	Result rc;
-	// Current pointer to the graphics data
+#endif
+
+// Current pointer to the graphics data
 	uint8_t* savedJpegFramebuffer;
+
+#ifdef YUZU
+	std::shared_ptr<Syscalls> yuzuSyscalls;
 #endif
 
 	_fbg* fbg;
@@ -103,6 +117,10 @@ public:
 
 #ifdef __SWITCH__
 	Gui(ViDisplay& disp);
+#endif
+
+#ifdef YUZU
+Gui(std::shared_ptr<Syscalls> yuzu);
 #endif
 
 	void startFrame();

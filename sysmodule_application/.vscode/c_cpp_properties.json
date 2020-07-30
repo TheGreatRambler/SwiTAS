@@ -11,7 +11,6 @@
 			],
 			"defines": [
 				"__SWITCH__",
-				"YUZU",
 				"DLL_EXPORT=extern \"C\" __attribute__((visibility(\"default\")))",
 				"SERVER_IMP"
 			],
@@ -32,7 +31,6 @@
 			],
 			"defines": [
 				"__SWITCH__",
-				"YUZU",
 				"DLL_EXPORT=extern \"C\" __declspec(dllexport)",
 				"SERVER_IMP"
 			],
