@@ -64,7 +64,7 @@ private:
 	Result rc;
 #endif
 
-// Current pointer to the graphics data
+	// Current pointer to the graphics data
 	uint8_t* savedJpegFramebuffer;
 
 #ifdef YUZU
@@ -116,11 +116,11 @@ public:
 	uint8_t* currentBuffer;
 
 #ifdef __SWITCH__
-	Gui(ViDisplay& disp);
+	Gui(ViDisplay* disp);
 #endif
 
 #ifdef YUZU
-Gui(std::shared_ptr<Syscalls> yuzu);
+	Gui(std::shared_ptr<Syscalls> yuzu);
 #endif
 
 	void startFrame();

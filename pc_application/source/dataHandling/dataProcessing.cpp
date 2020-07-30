@@ -626,6 +626,7 @@ void DataProcessing::addNewSavestateHook(std::string dHash, wxBitmap* screenshot
 		std::shared_ptr<SavestateHook> savestateHook = std::make_shared<SavestateHook>();
 		savestateHook->dHash                         = dHash;
 		savestateHook->screenshot                    = screenshot;
+		savestateHook->runFinalTasDelayFrames        = 0;
 		// Add a single branch for default
 		savestateHook->inputs.push_back(std::make_shared<std::vector<FrameData>>());
 		allPlayers[i]->push_back(savestateHook);
@@ -713,8 +714,9 @@ void DataProcessing::addNewPlayer() {
 				}
 			}
 
-			newSavestateHook->dHash      = "";
-			newSavestateHook->screenshot = HELPERS::getDefaultSavestateScreenshot();
+			newSavestateHook->dHash                  = "";
+			newSavestateHook->screenshot             = HELPERS::getDefaultSavestateScreenshot();
+			newSavestateHook->runFinalTasDelayFrames = 0;
 			player->push_back(newSavestateHook);
 		}
 	}

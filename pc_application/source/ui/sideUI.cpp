@@ -125,6 +125,9 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	branchSelect->Bind(wxEVT_COMBOBOX, &SideUI::branchSelected, this);
 	branchSelect->SetToolTip("Set branch");
 
+	runFinalTasStartingDelay = new wxSpinCtrl(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10000, 0);
+	runFinalTasStartingDelay->SetToolTip("Delay in frames when running this block in real time");
+
 	// clang-format off
 	ADD_NETWORK_CALLBACK(RecieveFlag, {
 		if (data.actFlag == RecieveInfo::CONTROLLERS_CONNECTED) {
@@ -178,8 +181,8 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 
 	// Name is a misnomer
 	autoRunFramesPerSecond = new wxSpinCtrl(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 5000, 200);
-
 	autoRunFramesPerSecond->SetToolTip("Delay in mlliseconds for automatically incrementing frame");
+	autoRunFramesPerSecond->Bind(wxEVT_SPINCTRL, &SideUI::finalTasFrameDelayChanged, this);
 
 	autoRunWithFramebuffer    = new wxCheckBox(parentFrame, wxID_ANY, "Include Screenshot");
 	autoRunWithControllerData = new wxCheckBox(parentFrame, wxID_ANY, "Include Controller Data");
@@ -244,6 +247,10 @@ void SideUI::setPlayerInfo(uint8_t size, uint8_t selected, bool force) {
 
 void SideUI::playerSelected(wxCommandEvent& event) {
 	inputData->setPlayer(event.GetSelection());
+}
+
+void SideUI::finalTasFrameDelayChanged(wxSpinEvent& event) {
+	inputData->setFinalTasDelayForCurrentSavestateHook(runFinalTasStartingDelay->GetValue());
 }
 
 void SideUI::setBranchInfo(uint8_t size, uint8_t selected, bool force) {
@@ -368,6 +375,8 @@ bool SideUI::createSavestateHook() {
 			blocks[blocks.size() - 1]->dHash      = savestateSelection.getNewDhash();
 			blocks[blocks.size() - 1]->screenshot = savestateSelection.getNewScreenshot();
 
+			runFinalTasStartingDelay->SetValue(0);
+
 			savestateSelection.getNewScreenshot()->SaveFile(inputData->getFramebufferPathForCurrentFramebuf().GetFullPath(), wxBITMAP_TYPE_JPEG);
 
 			inputData->setSavestateHook(blocks.size() - 1);
@@ -408,6 +417,8 @@ bool SideUI::loadSavestateHook(int block) {
 			projectHandler->incrementRerecordCount();
 			inputData->setSavestateHook(block);
 			// inputData->sendPlayerNum();
+
+			runFinalTasStartingDelay->SetValue(inputData->getFinalTasDelayForCurrentSavestateHook());
 
 			autoRunActive = false;
 

@@ -87,6 +87,8 @@ void ProjectHandler::loadProject() {
 			wxImage screenshotImage(projectDir.GetPathWithSep() + wxString::FromUTF8(savestate["screenshot"].GetString()), wxBITMAP_TYPE_JPEG);
 			savestateHook->screenshot = new wxBitmap(screenshotImage);
 
+			savestateHook->runFinalTasDelayFrames = savestate.HasMember("runFinalTasDelayFrames") ? savestate["runFinalTasDelayFrames"].GetUint64() : 0;
+
 			(*savestateHookBlocks)[savestateHookIndex] = savestateHook;
 
 			savestateHookIndex++;
@@ -221,9 +223,13 @@ void ProjectHandler::saveProject() {
 				wxString screenshotPath = screenshotFileName.GetFullPath(wxPATH_UNIX);
 				screenshot.SetString(screenshotPath.c_str(), screenshotPath.size(), settingsJSON.GetAllocator());
 
+				rapidjson::Value delayFrames;
+				delayFrames.SetUint64(savestateHookBlock->runFinalTasDelayFrames);
+
 				savestateHookJSON.AddMember("dHash", dHash, settingsJSON.GetAllocator());
 				savestateHookJSON.AddMember("screenshot", screenshot, settingsJSON.GetAllocator());
 				savestateHookJSON.AddMember("branches", branchesJSON, settingsJSON.GetAllocator());
+				savestateHookJSON.AddMember("runFinalTasDelayFrames", delayFrames, settingsJSON.GetAllocator());
 
 				savestateHooksJSON.PushBack(savestateHookJSON, settingsJSON.GetAllocator());
 

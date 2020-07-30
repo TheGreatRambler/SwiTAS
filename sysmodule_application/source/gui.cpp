@@ -3,7 +3,7 @@
 #include "gui.hpp"
 
 #ifdef __SWITCH__
-Gui::Gui(ViDisplay& disp) {
+Gui::Gui(ViDisplay* disp) {
 #endif
 
 #ifdef YUZU
@@ -15,12 +15,12 @@ Gui::Gui(ViDisplay& disp) {
 		// https://github.com/averne/dvdnx/blob/master/src/screen.cpp
 		// flag 0 allows non-fullscreen layer
 		LOGD << "Create managed layer";
-		rc = viCreateManagedLayer(&disp, (ViLayerFlags)0, 0, &__nx_vi_layer_id);
+		rc = viCreateManagedLayer(disp, (ViLayerFlags)0, 0, &__nx_vi_layer_id);
 		if(R_FAILED(rc)) {
 			fatalThrow(rc);
 		}
 		LOGD << "Create layer";
-		rc = viCreateLayer(&disp, &layer);
+		rc = viCreateLayer(disp, &layer);
 		if(R_FAILED(rc)) {
 			viDestroyManagedLayer(&layer);
 			fatalThrow(rc);
@@ -54,7 +54,7 @@ Gui::Gui(ViDisplay& disp) {
 			fatalThrow(rc);
 		}
 		LOGD << "Create NWindow from layer";
-		rc = nwindowCreateFromLayer(&this->window, &this->layer);
+		rc = nwindowCreateFromLayer(&window, &layer);
 		if(R_FAILED(rc)) {
 			viDestroyManagedLayer(&layer);
 			fatalThrow(rc);

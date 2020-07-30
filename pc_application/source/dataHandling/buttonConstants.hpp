@@ -49,6 +49,7 @@ typedef std::vector<std::shared_ptr<std::vector<std::shared_ptr<ControllerData>>
 struct SavestateHook {
 	std::string dHash;
 	wxBitmap* screenshot;
+	uint64_t runFinalTasDelayFrames;
 	SavestateHookBlock inputs;
 };
 

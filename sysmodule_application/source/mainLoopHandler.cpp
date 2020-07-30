@@ -471,7 +471,7 @@ void MainLoop::updateGui() {
 	if(printDebugInfo || printControllerOverlay) {
 		if(!gui) {
 #ifdef __SWITCH__
-			gui = std::make_shared<Gui>(disp);
+			gui = std::make_shared<Gui>(&disp);
 #endif
 #ifdef YUZU
 			gui = std::make_shared<Gui>(yuzuSyscalls);
@@ -601,6 +601,11 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths) {
 				// Based on code in project handler without compression
 				uint8_t controllerSize;
 				readFullFileData(files[player], &controllerSize, sizeof(controllerSize));
+
+				if(controllerSize == 0) {
+					// Skip handling controller data
+					continue;
+				}
 
 				uint8_t controllerDataBuf[controllerSize];
 				readFullFileData(files[player], controllerDataBuf, sizeof(controllerDataBuf));

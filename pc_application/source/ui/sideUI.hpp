@@ -62,6 +62,7 @@ private:
 
 	wxComboBox* playerSelect;
 	wxComboBox* branchSelect;
+	wxSpinCtrl* runFinalTasStartingDelay;
 
 	wxBoxSizer* buttonSizer;
 
@@ -90,6 +91,8 @@ private:
 	void playerSelected(wxCommandEvent& event);
 	void setBranchInfo(uint8_t size, uint8_t selected, bool force);
 	void branchSelected(wxCommandEvent& event);
+
+	void finalTasFrameDelayChanged(wxSpinEvent& event);
 
 	void onAddFramePressed(wxCommandEvent& event);
 	void onFrameAdvancePressed(wxCommandEvent& event);

@@ -1,7 +1,7 @@
 #include "runFinalTas.hpp"
 
 TasRunner::TasRunner(wxFrame* parent, std::shared_ptr<CommunicateWithNetwork> networkImp, rapidjson::Document* settings, DataProcessing* inputData)
-	: wxDialog(parent, wxID_ANY, "Run Final TAS", wxDefaultPosition, wxDefaultSize) {
+	: wxDialog(parent, wxID_ANY, "Run Final TAS", wxDefaultPosition, wxSize(200, 300)) {
 	networkInstance = networkImp;
 	mainSettings    = settings;
 	dataProcessing  = inputData;
@@ -33,9 +33,9 @@ TasRunner::TasRunner(wxFrame* parent, std::shared_ptr<CommunicateWithNetwork> ne
 	stopTas->Bind(wxEVT_BUTTON, &TasRunner::onStopTasPressed, this);
 
 	mainSizer->Add(hookSelectionSizer, 1, wxEXPAND | wxALL);
-	mainSizer->Add(startTasHomebrew, 1, wxEXPAND | wxALL);
-	// mainSizer->Add(startTasArduino, 1, wxEXPAND | wxALL);
-	mainSizer->Add(stopTas, 1, wxEXPAND | wxALL);
+	mainSizer->Add(startTasHomebrew, 0);
+	// mainSizer->Add(startTasArduino, 0);
+	mainSizer->Add(stopTas, 0);
 
 	SetSizer(mainSizer);
 	mainSizer->SetSizeHints(this);
@@ -59,13 +59,19 @@ void TasRunner::onStartTasHomebrewPressed(wxCommandEvent& event) {
 			AllPlayers& allPlayers = dataProcessing->getAllPlayers();
 			// Create a different file for each player
 			std::vector<wxString> playerFiles;
-			uint8_t playerIndex = 1;
+			uint8_t playerIndex = 0;
 			for(auto const& player : allPlayers) {
 				wxString tempPath = wxFileName::CreateTempFileName("script");
 				wxFFileOutputStream fileStream(tempPath, "wb");
 
 				for(SavestateBlockNum hook = firstHook; hook <= lastHook; hook++) {
 					// Always first branch
+					uint64_t frameDelay = player->at(hook)->runFinalTasDelayFrames;
+					for(uint64_t i = 0; i < frameDelay; i++) {
+						// A size of 0 means no frame
+						uint8_t noFrameHere = 0;
+						fileStream.WriteAll(&noFrameHere, sizeof(noFrameHere));
+					}
 					for(auto const& controllerData : *(player->at(hook)->inputs[0])) {
 						// Continually write the savestate hook data in one unbroken stream
 						uint8_t* data;

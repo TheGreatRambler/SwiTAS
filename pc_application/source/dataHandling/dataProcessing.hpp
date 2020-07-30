@@ -184,6 +184,12 @@ public:
 	SavestateBlockNum getCurrentSavestateHook() {
 		return currentSavestateHook;
 	}
+	void setFinalTasDelayForCurrentSavestateHook(uint64_t frames) {
+		allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->runFinalTasDelayFrames = frames;
+	}
+	uint64_t getFinalTasDelayForCurrentSavestateHook() {
+		return allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->runFinalTasDelayFrames;
+	}
 	FrameNum getCurrentFrame() {
 		return currentFrame;
 	}
