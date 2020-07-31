@@ -10,8 +10,8 @@ TasRunner::TasRunner(wxFrame* parent, std::shared_ptr<CommunicateWithNetwork> ne
 	hookSelectionSizer = new wxBoxSizer(wxHORIZONTAL);
 
 	int lastSavestateHookNum = (int)dataProcessing->getNumOfSavestateHooks(0) - 1;
-	firstSavestateHook       = new wxSpinCtrl(this, wxID_ANY, "First Savestate Hook", wxDefaultPosition, wxDefaultSize, wxSP_WRAP, 0, lastSavestateHookNum, 0);
-	lastSavestateHook        = new wxSpinCtrl(this, wxID_ANY, "Last Savestate Hook", wxDefaultPosition, wxDefaultSize, wxSP_WRAP, 0, lastSavestateHookNum, lastSavestateHookNum);
+	firstSavestateHook       = new wxSpinCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_WRAP, 0, lastSavestateHookNum, 0);
+	lastSavestateHook        = new wxSpinCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_WRAP, 0, lastSavestateHookNum, lastSavestateHookNum);
 
 	firstSavestateHook->SetToolTip("Select first savestate hook (inclusive)");
 	lastSavestateHook->SetToolTip("Select last savestate hook (inclusive)");
@@ -97,7 +97,8 @@ void TasRunner::onStartTasHomebrewPressed(wxCommandEvent& event) {
 			for(uint8_t currentWorkingPlayer = 0; currentWorkingPlayer < playerFiles.size(); currentWorkingPlayer++) {
 				wxString ftpPath = wxString::Format("/switas-script-temp-%d.txt", currentWorkingPlayer);
 
-				std::string output = HELPERS::exec(wxString::Format("curl -T %s -m 10 --connect-timeout 3 --verbose %s", playerFiles[currentWorkingPlayer], wxString::Format("ftp://%s%s", address, ftpPath)).c_str());
+				wxString commandString = wxString::Format("curl -T %s -m 10 --connect-timeout 3 --verbose %s", playerFiles[currentWorkingPlayer], wxString::Format("ftp://%s:%d%s", address, SWITCH_FTP_PORT, ftpPath));
+				std::string output     = HELPERS::exec(commandString.c_str());
 
 				if(output.find("is not recognized") != std::string::npos || output.find("command not found") != std::string::npos) {
 					wxMessageDialog errorDialog(this, "The Curl executable was not found, please install it to PATH right now", "Curl Not Found", wxOK | wxICON_ERROR);

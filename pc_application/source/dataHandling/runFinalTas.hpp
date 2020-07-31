@@ -11,6 +11,10 @@
 #include "buttonData.hpp"
 #include "dataProcessing.hpp"
 
+// This port is defined in code, may change
+// Will probably define in settings.json
+#define SWITCH_FTP_PORT 5000
+
 class TasRunner : public wxDialog {
 private:
 	std::shared_ptr<CommunicateWithNetwork> networkInstance;
