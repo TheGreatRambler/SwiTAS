@@ -81,7 +81,7 @@ enum MemoryRegionTypes : uint8_t {
 	NUM_OF_TYPES,
 };
 
-namespace MemoryRegionInfo {
+namespace MemoryDataInfo {
 	// Shamelessly copied from libnx
 	/// Memory type enumeration (lower 8 bits of \ref MemoryState)
 	typedef enum {
@@ -203,7 +203,7 @@ namespace Protocol {
 		uint64_t applicationProgramId;
 		uint64_t applicationProcessId;
 		std::string userNickname;
-		std::vector<MemoryRegionInfo::MemoryInfo> memoryInfo;
+		std::vector<MemoryDataInfo::MemoryInfo> memoryInfo;
 	, self.applicationName, self.applicationProgramId, self.applicationProcessId, self.userNickname, self.memoryInfo)
 
 	// Send start, with mostly everything as an enum value

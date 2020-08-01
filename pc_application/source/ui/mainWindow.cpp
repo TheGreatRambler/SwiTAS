@@ -219,9 +219,12 @@ void MainWindow::handleNetworkQueues() {
 	})
 
 	ADD_NETWORK_CALLBACK(RecieveGameInfo, {
-		wxMessageDialog gameInfoDialog(this, wxString::FromUTF8(data.infoJson), "Game Info", wxOK | wxICON_INFORMATION);
-		gameInfoDialog.ShowModal();
-	})
+											  // Has to be handled differently now
+											  /*
+											  wxMessageDialog gameInfoDialog(this, wxString::FromUTF8(data.infoJson), "Game Info", wxOK | wxICON_INFORMATION);
+											  gameInfoDialog.ShowModal();
+											  */
+										  })
 
 	/*
 	ADD_NETWORK_CALLBACK(RecieveFlag, {
@@ -353,7 +356,7 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 			TasRunner tasRunner(this, networkInstance, &mainSettings, dataProcessingInstance);
 			tasRunner.ShowModal();
 		} else if(id == requestGameInfoID) {
-			if (networkInstance->isConnected()) {
+			if(networkInstance->isConnected()) {
 				// clang-format off
 				ADD_TO_QUEUE(SendFlag, networkInstance, {
 					data.actFlag = SendInfo::GET_GAME_INFO;

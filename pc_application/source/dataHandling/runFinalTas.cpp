@@ -1,7 +1,7 @@
 #include "runFinalTas.hpp"
 
 TasRunner::TasRunner(wxFrame* parent, std::shared_ptr<CommunicateWithNetwork> networkImp, rapidjson::Document* settings, DataProcessing* inputData)
-	: wxDialog(parent, wxID_ANY, "Run Final TAS", wxDefaultPosition, wxSize(200, 300)) {
+	: wxDialog(parent, wxID_ANY, "Run Final TAS", wxDefaultPosition, wxSize(600, 400), wxDEFAULT_FRAME_STYLE) {
 	networkInstance = networkImp;
 	mainSettings    = settings;
 	dataProcessing  = inputData;
@@ -16,8 +16,8 @@ TasRunner::TasRunner(wxFrame* parent, std::shared_ptr<CommunicateWithNetwork> ne
 	firstSavestateHook->SetToolTip("Select first savestate hook (inclusive)");
 	lastSavestateHook->SetToolTip("Select last savestate hook (inclusive)");
 
-	hookSelectionSizer->Add(firstSavestateHook, 0);
-	hookSelectionSizer->Add(lastSavestateHook, 0);
+	hookSelectionSizer->Add(firstSavestateHook, 1, wxEXPAND | wxALL);
+	hookSelectionSizer->Add(lastSavestateHook, 1, wxEXPAND | wxALL);
 
 	consoleLog = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
 	Bind(wxEVT_END_PROCESS, &TasRunner::onCommandDone, this);
@@ -45,7 +45,6 @@ TasRunner::TasRunner(wxFrame* parent, std::shared_ptr<CommunicateWithNetwork> ne
 	SetSizer(mainSizer);
 	mainSizer->SetSizeHints(this);
 	Layout();
-	Fit();
 	Center(wxBOTH);
 
 	Layout();
@@ -100,8 +99,8 @@ void TasRunner::onStartTasHomebrewPressed(wxCommandEvent& event) {
 						fileStream.WriteAll(&sizeToPrint, sizeof(sizeToPrint));
 						fileStream.WriteAll(data, dataSize);
 
-						if(frame % 60 == 0 || frame == mainBranch.size() - 1) {
-							consoleLog->AppendText(wxString::Format("Progress serializing frames: %.5F%%, %lu/%lu, in savestate %u player %u\n", (float)frame / mainBranch.size(), frame, mainBranch.size(), hook, playerIndex));
+						if(frame != 0 && (frame % 60 == 0 || frame == mainBranch.size() - 1)) {
+							consoleLog->AppendText(wxString::Format("Progress serializing frames: %.5F%%, %lu/%lu, in savestate %hu player %u\n", ((double)frame / mainBranch.size()) * 100.0, frame, mainBranch.size(), hook, playerIndex));
 						}
 
 						frame++;
@@ -127,7 +126,7 @@ void TasRunner::onStartTasHomebrewPressed(wxCommandEvent& event) {
 void TasRunner::uploadScript() {
 	if(currentWorkingPlayer < playerFiles.size()) {
 		wxString address = wxString::FromUTF8(networkInstance->getSwitchIP());
-		ftpPath          = wxString::Format("/switas-script-temp-%d.txt", currentWorkingPlayer);
+		ftpPath          = wxString::Format("/switas-script-temp-%d.bin", currentWorkingPlayer);
 
 		wxString commandString = wxString::Format("curl -T %s -m 10 --connect-timeout 3 --verbose %s", playerFiles[currentWorkingPlayer], wxString::Format("ftp://%s:%d%s", address, SWITCH_FTP_PORT, ftpPath));
 

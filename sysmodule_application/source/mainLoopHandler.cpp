@@ -356,7 +356,7 @@ void MainLoop::sendGameInfo() {
 					break;
 				}
 
-				MemoryRegionInfo::MemoryInfo memoryInfo = { 0 };
+				MemoryDataInfo::MemoryInfo memoryInfo = { 0 };
 
 				memoryInfo.addr            = info.addr;
 				memoryInfo.size            = info.size;
@@ -364,7 +364,7 @@ void MainLoop::sendGameInfo() {
 				memoryInfo.attr            = info.attr;
 				memoryInfo.perm            = info.perm;
 				memoryInfo.device_refcount = info.device_refcount;
-				memoryInfo.ipc_refcount    = info.ipc_count;
+				memoryInfo.ipc_refcount    = info.ipc_refcount;
 
 				data.memoryInfo.push_back(memoryInfo);
 			}
