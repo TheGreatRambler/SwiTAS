@@ -316,154 +316,69 @@ void MainLoop::handleNetworkUpdates() {
 
 void MainLoop::sendGameInfo() {
 	if(applicationOpened) {
-		// Will get more info via
-		// https://github.com/switchbrew/switch-examples/blob/master/account/source/main.c
-		std::string infoJson = "{";
-
-		infoJson += getJsonElement(1, "name", gameName);
-		infoJson += getJsonElementNum(1, "programID", std::to_string(applicationProgramId));
-		infoJson += getJsonElementNum(1, "processID", std::to_string(applicationProcessId));
-
-		// TODO make use of GetInfo
-
-		infoJson += "	memoryRegions: [";
-
-		uint8_t wasPaused = isPaused;
-
-		if(!wasPaused) {
-			pauseApp(false, false, false, 0, 0, 0, 0);
-		}
-
-		// I don't know how to handle this for Yuzu, so ignore for now
-
-#ifdef __SWITCH__
-		uint64_t addr = 0;
-		while(true) {
-			LOGD << "Obtained memory region at: " << addr;
-
-			MemoryInfo info = { 0 };
-			uint32_t pageinfo;
-			rc   = svcQueryDebugProcessMemory(&info, &pageinfo, applicationDebug, addr);
-			addr = info.addr + info.size;
-
-			if(R_FAILED(rc)) {
-				infoJson.pop_back();
-				infoJson += "]\n";
-				break;
-			}
-
-			// Add data to JSON
-			infoJson += "{\n";
-
-			infoJson += getJsonElementNum(2, "baseAddress", std::to_string(info.addr));
-			infoJson += getJsonElementNum(2, "regionSize", std::to_string(info.size));
-
-			infoJson += "		\"permissions\": [";
-
-			uint8_t hasSetFirstPermission = false;
-
-			if(info.perm & Perm_None) {
-				if(hasSetFirstPermission) {
-					infoJson += "\",none\"";
-				} else {
-					infoJson += "\"none\"";
-					hasSetFirstPermission = true;
-				}
-			}
-
-			if(info.perm & Perm_R) {
-				if(hasSetFirstPermission) {
-					infoJson += "\",read\"";
-				} else {
-					infoJson += "\"read\"";
-					hasSetFirstPermission = true;
-				}
-			}
-
-			if(info.perm & Perm_W) {
-				if(hasSetFirstPermission) {
-					infoJson += "\",write\"";
-				} else {
-					infoJson += "\"write\"";
-					hasSetFirstPermission = true;
-				}
-			}
-
-			if(info.perm & Perm_X) {
-				if(hasSetFirstPermission) {
-					infoJson += "\",execute\"";
-				} else {
-					infoJson += "\"execute\"";
-					hasSetFirstPermission = true;
-				}
-			}
-
-			infoJson += "],\n";
-
-			// Memory state unimplemented because wth...
-
-			infoJson += "		\"attributes\": [";
-
-			uint8_t hasSetFirstAttr = false;
-
-			if(info.attr & MemAttr_IsBorrowed) {
-				if(hasSetFirstAttr) {
-					infoJson += "\",borrowed\"";
-				} else {
-					infoJson += "\"borrowed\"";
-					hasSetFirstAttr = true;
-				}
-			}
-
-			if(info.attr & MemAttr_IsIpcMapped) {
-				if(hasSetFirstAttr) {
-					infoJson += "\",ipc_mapped\"";
-				} else {
-					infoJson += "\"ipc_mapped\"";
-					hasSetFirstAttr = true;
-				}
-			}
-
-			if(info.attr & MemAttr_IsDeviceMapped) {
-				if(hasSetFirstAttr) {
-					infoJson += "\",device_mapped\"";
-				} else {
-					infoJson += "\"device_mapped\"";
-					hasSetFirstAttr = true;
-				}
-			}
-
-			if(info.attr & MemAttr_IsUncached) {
-				if(hasSetFirstAttr) {
-					infoJson += "\",uncached\"";
-				} else {
-					infoJson += "\"uncached\"";
-					hasSetFirstAttr = true;
-				}
-			}
-
-			infoJson += "]\n";
-
-			infoJson += "	},";
-		}
-#endif
-		infoJson += "}";
-
-		if(!wasPaused) {
-			unpauseApp();
-			lastNanoseconds = 0;
-		}
-
-#ifdef __SWITCH__
-		LOGD << "Game info sent";
-		LOGD << "Generated info: " << infoJson.size() << " chars";
-#endif
-
-		// clang-format off
 		ADD_TO_QUEUE(RecieveGameInfo, networkInstance, {
-			data.infoJson = infoJson;
+			data.applicationName      = gameName;
+			data.applicationProgramId = applicationProgramId;
+			data.applicationProcessId = applicationProcessId;
+
+#ifdef __SWITCH__
+			AccountUid uid;
+			AccountProfile profile;
+			AccountUserData userdata;
+			AccountProfileBase profilebase;
+			accountGetLastOpenedUser(&uid);
+			accountGetProfile(&profile, uid);
+			accountProfileGet(&profile, &userdata, &profileBase);
+
+			// If it uses all charactors, (ie has no NULL char), may need to get more smart
+			data.userNickname = std::string(profilebase.username);
+#endif
+
+			uint8_t wasPaused = isPaused;
+
+			if(!wasPaused) {
+				pauseApp(false, false, false, 0, 0, 0, 0);
+			}
+
+			// I don't know how to handle this for Yuzu, so ignore for now
+
+#ifdef __SWITCH__
+			uint64_t addr = 0;
+			while(true) {
+				// LOGD << "Obtained memory region at: " << addr;
+
+				MemoryInfo info = { 0 };
+				uint32_t pageinfo;
+				rc   = svcQueryDebugProcessMemory(&info, &pageinfo, applicationDebug, addr);
+				addr = info.addr + info.size;
+
+				if(R_FAILED(rc)) {
+					break;
+				}
+
+				MemoryRegionInfo::MemoryInfo memoryInfo = { 0 };
+
+				memoryInfo.addr            = info.addr;
+				memoryInfo.size            = info.size;
+				memoryInfo.type            = info.type;
+				memoryInfo.attr            = info.attr;
+				memoryInfo.perm            = info.perm;
+				memoryInfo.device_refcount = info.device_refcount;
+				memoryInfo.ipc_refcount    = info.ipc_count;
+
+				data.memoryInfo.push_back(memoryInfo);
+			}
+#endif
+
+			if(!wasPaused) {
+				unpauseApp();
+				lastNanoseconds = 0;
+			}
+
+#ifdef __SWITCH__
+			LOGD << "Game info sent";
+#endif
 		})
-		// clang-format on
 	}
 }
 
@@ -603,7 +518,9 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths) {
 				readFullFileData(files[player], &controllerSize, sizeof(controllerSize));
 
 				if(controllerSize == 0) {
-					// Skip handling controller data
+					// Skip handling controller data and clear existing buttons
+					controllers[player]->clearState();
+					controllers[player]->setInput();
 					continue;
 				}
 

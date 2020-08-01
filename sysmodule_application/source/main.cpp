@@ -80,6 +80,11 @@ void __attribute__((weak)) __appInit(void) {
 	if(R_FAILED(rc))
 		fatalThrow(rc);
 
+// Account service, to get account name
+		rc = accountInitialize();
+		if(R_FAILED(rc))
+		fatalThrow(rc);
+
 	// HID
 	rc = hidInitialize();
 	if(R_FAILED(rc))
@@ -147,6 +152,7 @@ void __attribute__((weak)) __appExit(void) {
 	pmdmntExit();
 	pscmExit();
 	hidExit();
+	accountExit();
 	capsscExit();
 	viExit();
 	fsdevUnmountAll();
