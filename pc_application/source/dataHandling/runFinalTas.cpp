@@ -20,7 +20,6 @@ TasRunner::TasRunner(wxFrame* parent, std::shared_ptr<CommunicateWithNetwork> ne
 	hookSelectionSizer->Add(lastSavestateHook, 1, wxEXPAND | wxALL);
 
 	consoleLog = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
-	Bind(wxEVT_END_PROCESS, &TasRunner::onCommandDone, this);
 	consoleLog->Show(false);
 
 	startTasHomebrew = HELPERS::getBitmapButton(this, mainSettings, "startTasHomebrewButton");
@@ -38,9 +37,9 @@ TasRunner::TasRunner(wxFrame* parent, std::shared_ptr<CommunicateWithNetwork> ne
 
 	mainSizer->Add(hookSelectionSizer, 1, wxEXPAND | wxALL);
 	mainSizer->Add(consoleLog, 3, wxEXPAND | wxALL);
-	mainSizer->Add(startTasHomebrew, 0);
-	// mainSizer->Add(startTasArduino, 0);
-	mainSizer->Add(stopTas, 0);
+	mainSizer->Add(startTasHomebrew, 0, wxALIGN_CENTER_HORIZONTAL);
+	// mainSizer->Add(startTasArduino, 0, wxALIGN_CENTER_HORIZONTAL);
+	mainSizer->Add(stopTas, 0, wxALIGN_CENTER_HORIZONTAL);
 
 	SetSizer(mainSizer);
 	mainSizer->SetSizeHints(this);
@@ -49,12 +48,6 @@ TasRunner::TasRunner(wxFrame* parent, std::shared_ptr<CommunicateWithNetwork> ne
 
 	Layout();
 }
-
-// clang-format off
-BEGIN_EVENT_TABLE(TasRunner, wxDialog)
-	EVT_IDLE(TasRunner::onIdle)
-END_EVENT_TABLE()
-// clang-format on
 
 void TasRunner::onStartTasHomebrewPressed(wxCommandEvent& event) {
 	int firstHook = firstSavestateHook->GetValue();
@@ -69,15 +62,25 @@ void TasRunner::onStartTasHomebrewPressed(wxCommandEvent& event) {
 			// Build a large binary blob with all the data
 			AllPlayers& allPlayers = dataProcessing->getAllPlayers();
 			// Create a different file for each player
-			playerFiles.clear();
-			scriptPaths.clear();
 
 			uint8_t playerIndex = 0;
 			consoleLog->Show(true);
 			Layout();
+
+			std::vector<std::string> scriptPaths;
+
 			for(auto const& player : allPlayers) {
-				wxString tempPath = wxFileName::CreateTempFileName("script");
-				wxFFileOutputStream fileStream(tempPath, "wb");
+				std::string path = wxString::Format("/switas-script-temp-%d.bin", playerIndex).ToStdString();
+				scriptPaths.push_back(path);
+
+				ADD_TO_QUEUE(SendFinalTasChunk, networkInstance, {
+					data.openFile  = true;
+					data.closeFile = false;
+					data.path      = path;
+				})
+
+				std::vector<uint8_t> dataToSend;
+				dataToSend.clear();
 
 				FrameNum frame = 0;
 				for(SavestateBlockNum hook = firstHook; hook <= lastHook; hook++) {
@@ -86,9 +89,10 @@ void TasRunner::onStartTasHomebrewPressed(wxCommandEvent& event) {
 					for(uint64_t i = 0; i < frameDelay; i++) {
 						// A size of 0 means no frame
 						uint8_t noFrameHere = 0;
-						fileStream.WriteAll(&noFrameHere, sizeof(noFrameHere));
+						dataToSend.insert(dataToSend.end(), &noFrameHere, &noFrameHere + sizeof(noFrameHere));
 					}
-					auto& mainBranch = *(player->at(hook)->inputs[0]);
+					auto& mainBranch    = *(player->at(hook)->inputs[0]);
+					FrameNum branchSize = mainBranch.size();
 					for(auto const& controllerData : mainBranch) {
 						// Continually write the savestate hook data in one unbroken stream
 						uint8_t* data;
@@ -96,56 +100,54 @@ void TasRunner::onStartTasHomebrewPressed(wxCommandEvent& event) {
 						serializeProtocol.dataToBinary<ControllerData>(*controllerData, &data, &dataSize);
 						uint8_t sizeToPrint = (uint8_t)dataSize;
 						// Probably endian issues
-						fileStream.WriteAll(&sizeToPrint, sizeof(sizeToPrint));
-						fileStream.WriteAll(data, dataSize);
+						dataToSend.insert(dataToSend.end(), &sizeToPrint, &sizeToPrint + sizeof(sizeToPrint));
+						dataToSend.insert(dataToSend.end(), data, data + dataSize);
 
 						if(frame != 0 && (frame % 60 == 0 || frame == mainBranch.size() - 1)) {
-							consoleLog->AppendText(wxString::Format("Progress serializing frames: %.5F%%, %lu/%lu, in savestate %hu player %u\n", ((double)frame / mainBranch.size()) * 100.0, frame, mainBranch.size(), hook, playerIndex));
+							float progress = ((float)frame / branchSize) * 100.0;
+							consoleLog->AppendText(wxString::Format("Progress serializing frames: %.5f%% %lu/%lu, in savestate %u player %u\n", progress, frame, branchSize, hook, playerIndex));
+						}
+
+						if(dataToSend.size() > 1000) {
+							// Dump the data
+							ADD_TO_QUEUE(SendFinalTasChunk, networkInstance, {
+								data.openFile  = false;
+								data.closeFile = false;
+								data.path      = path;
+								data.contents  = dataToSend;
+							})
+
+							consoleLog->AppendText(wxString::Format("Sent data %zu bytes long", dataToSend.size()));
+
+							dataToSend.clear();
 						}
 
 						frame++;
 					}
 				}
 
-				fileStream.Close();
+				ADD_TO_QUEUE(SendFinalTasChunk, networkInstance, {
+					data.openFile  = false;
+					data.closeFile = true;
+					data.path      = path;
+				})
 
-				playerFiles.push_back(tempPath);
 				playerIndex++;
 			}
 
-			currentWorkingPlayer = 0;
-			uploadScript();
+			consoleLog->Show(false);
+			Layout();
+
+			// clang-format off
+			ADD_TO_QUEUE(SendStartFinalTas, networkInstance, {
+				data.scriptPaths = scriptPaths;
+			})
+			// clang-format on
 		} else {
 			// Not connected, cannot run final TAS with homebrew then
 			wxMessageDialog connectedDialog(this, "You must connect to your switch in order to run using this method", "Not Connected", wxOK | wxICON_ERROR);
 			connectedDialog.ShowModal();
 		}
-	}
-}
-
-void TasRunner::uploadScript() {
-	if(currentWorkingPlayer < playerFiles.size()) {
-		wxString address = wxString::FromUTF8(networkInstance->getSwitchIP());
-		ftpPath          = wxString::Format("/switas-script-temp-%d.bin", currentWorkingPlayer);
-
-		wxString commandString = wxString::Format("curl -T %s -m 10 --connect-timeout 3 --verbose %s", playerFiles[currentWorkingPlayer], wxString::Format("ftp://%s:%d%s", address, SWITCH_FTP_PORT, ftpPath));
-
-		// This will run and the progress will be seen in console
-		currentRunningCommand = RUNNING_COMMAND::UPLOAD_SCRIPT;
-		wxExecute(commandString, wxEXEC_ASYNC | wxEXEC_HIDE_CONSOLE, commandProcess);
-
-	} else {
-		// All scripts have finished
-		consoleLog->Show(false);
-		Layout();
-		currentRunningCommand = RUNNING_COMMAND::NO_COMMAND;
-		delete commandProcess;
-		commandProcess = nullptr;
-		// clang-format off
-		ADD_TO_QUEUE(SendStartFinalTas, networkInstance, {
-			data.scriptPaths = scriptPaths;
-		})
-		// clang-format on
 	}
 }
 
@@ -168,36 +170,4 @@ void TasRunner::onStopTasPressed(wxCommandEvent& event) {
 		data.actFlag = SendInfo::STOP_FINAL_TAS;
 	})
 	// clang-format on
-}
-
-void TasRunner::onCommandDone(wxProcessEvent& event) {
-	// Assume successful writing, go on
-	wxRemoveFile(playerFiles[currentWorkingPlayer]);
-	scriptPaths.push_back(ftpPath.ToStdString());
-
-	currentWorkingPlayer++;
-	uploadScript();
-}
-
-void TasRunner::onIdle(wxIdleEvent& event) {
-	// Check command output
-	if(currentRunningCommand != RUNNING_COMMAND::NO_COMMAND) {
-		wxInputStream* inputStream = commandProcess->GetInputStream();
-		if(inputStream->CanRead()) {
-			consoleLog->Show(true);
-			Layout();
-
-			// https://forums.wxwidgets.org/viewtopic.php?t=24390#p104181
-
-			char buffer[BUFSIZE];
-			wxString text;
-			inputStream->Read(buffer, BUFSIZE - 1);
-			std::size_t count = inputStream->LastRead();
-			if(count > 0) {
-				text.Append(buffer, count);
-			}
-
-			consoleLog->AppendText(text);
-		}
-	}
 }

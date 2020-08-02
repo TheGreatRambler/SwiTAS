@@ -80,9 +80,9 @@ void __attribute__((weak)) __appInit(void) {
 	if(R_FAILED(rc))
 		fatalThrow(rc);
 
-// Account service, to get account name
-		rc = accountInitialize();
-		if(R_FAILED(rc))
+	// Account service, to get account name
+	rc = accountInitialize(AccountServiceType_System);
+	if(R_FAILED(rc))
 		fatalThrow(rc);
 
 	// HID

@@ -41,6 +41,7 @@ MainWindow::MainWindow()
 			SEND_QUEUE_DATA(SendSetNumControllers)
 			SEND_QUEUE_DATA(SendAddMemoryRegion)
 			SEND_QUEUE_DATA(SendStartFinalTas)
+			SEND_QUEUE_DATA(SendFinalTasChunk)
 		},
 		[](CommunicateWithNetwork* self) {
 			RECIEVE_QUEUE_DATA(RecieveFlag)

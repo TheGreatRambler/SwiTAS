@@ -37,6 +37,7 @@ enum DataFlag : uint8_t {
 	RecieveApplicationConnected,
 	RecieveGameMemoryInfo,
 	RecieveAutoRunControllerData,
+	SendFinalTasChunk,
 	NUM_OF_FLAGS,
 };
 
@@ -215,6 +216,13 @@ namespace Protocol {
 	DEFINE_STRUCT(SendStartFinalTas,
 		std::vector<std::string> scriptPaths;
 	, self.scriptPaths)
+
+	DEFINE_STRUCT(SendFinalTasChunk,
+		std::string path;
+		std::vector<uint8_t> contents;
+		uint8_t openFile;
+		uint8_t closeFile;
+	, self.path, self.contents, self.openFile, self.closeFile)
 
 	DEFINE_STRUCT(SendLogging,
 		std::string log;

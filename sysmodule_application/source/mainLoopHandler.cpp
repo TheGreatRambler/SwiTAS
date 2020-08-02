@@ -22,6 +22,7 @@ MainLoop::MainLoop() {
 			RECIEVE_QUEUE_DATA(SendSetNumControllers)
 			RECIEVE_QUEUE_DATA(SendAddMemoryRegion)
 			RECIEVE_QUEUE_DATA(SendStartFinalTas)
+			RECIEVE_QUEUE_DATA(SendFinalTasChunk)
 		});
 
 #ifdef __SWITCH__
@@ -281,6 +282,19 @@ void MainLoop::handleNetworkUpdates() {
 		}
 	})
 
+	CHECK_QUEUE(networkInstance, SendFinalTasChunk, {
+		if(data.closeFile) {
+			fclose(runFinalTasFileHandles[data.path]);
+			runFinalTasFileHandles.erase(data.path);
+		} else {
+			if(data.openFile) {
+				runFinalTasFileHandles[data.path] = fopen(data.path.c_str(), "rb");
+			} else {
+				fwrite(data.contents.data(), data.contents.size(), 1, runFinalTasFileHandles[data.path]);
+			}
+		}
+	})
+
 	// clang-format off
 	CHECK_QUEUE(networkInstance, SendSetNumControllers, {
 		#ifdef __SWITCH__
@@ -325,13 +339,13 @@ void MainLoop::sendGameInfo() {
 			AccountUid uid;
 			AccountProfile profile;
 			AccountUserData userdata;
-			AccountProfileBase profilebase;
+			AccountProfileBase profileBase;
 			accountGetLastOpenedUser(&uid);
 			accountGetProfile(&profile, uid);
 			accountProfileGet(&profile, &userdata, &profileBase);
 
 			// If it uses all charactors, (ie has no NULL char), may need to get more smart
-			data.userNickname = std::string(profilebase.username);
+			data.userNickname = std::string(profileBase.nickname);
 #endif
 
 			uint8_t wasPaused = isPaused;
@@ -543,6 +557,10 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths) {
 	for(auto const& file : files) {
 		fclose(file);
 	}
+	for(auto const& file : runFinalTasFileHandles) {
+		fclose(file.second);
+	}
+	runFinalTasFileHandles.clear();
 }
 
 void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, uint8_t autoAdvance, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex) {

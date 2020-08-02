@@ -161,6 +161,7 @@ public:
 	ADD_QUEUE(RecieveMemoryRegion)
 	ADD_QUEUE(SendAddMemoryRegion)
 	ADD_QUEUE(SendStartFinalTas)
+	ADD_QUEUE(SendFinalTasChunk)
 
 	CommunicateWithNetwork(std::function<void(CommunicateWithNetwork*)> sendCallback, std::function<void(CommunicateWithNetwork*)> recieveCallback);
 

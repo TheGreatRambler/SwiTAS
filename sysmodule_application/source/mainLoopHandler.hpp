@@ -6,6 +6,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #ifdef __SWITCH__
@@ -48,6 +49,8 @@ private:
 
 	uint64_t heapBase;
 	uint64_t mainBase;
+
+	std::unordered_map<std::string, FILE*> runFinalTasFileHandles;
 
 	SerializeProtocol serializeProtocol;
 
