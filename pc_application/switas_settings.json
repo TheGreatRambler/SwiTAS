@@ -249,6 +249,32 @@
 			"projectName": "rgb(12, 44, 112)",
 			"projectDir": "rgb(112, 89, 12)",
 			"newProject": "rgb(20, 110, 66)"
+		},
+		"memoryRegionViewerColors": {
+			// Some colors taken from Edizon
+			// The rest are a default
+			"Unmapped": "rgb(0, 0, 0)",
+			"Io": "rgb(128, 128, 128)",
+			"Normal": "rgb(128, 128, 128)",
+			"CodeStatic": "rgb(255, 0, 0)",
+			"CodeMutable": "rgb(255, 0, 0)",
+			"Heap": "rgb(0, 255, 0)",
+			"SharedMem": "rgb(0, 255, 0)",
+			"WeirdMappedMem": "rgb(128, 128, 128)",
+			"ModuleCodeStatic": "rgb(128, 128, 128)",
+			"ModuleCodeMutable": "rgb(128, 128, 128)",
+			"IpcBuffer0": "rgb(128, 128, 128)",
+			"MappedMemory": "rgb(128, 128, 128)",
+			"ThreadLocal": "rgb(255, 255, 0)",
+			"TransferMemIsolated": "rgb(128, 128, 128)",
+			"TransferMem": "rgb(128, 128, 128)",
+			"ProcessMem": "rgb(128, 128, 128)",
+			"Reserved": "rgb(128, 128, 128)",
+			"IpcBuffer1": "rgb(128, 128, 128)",
+			"IpcBuffer3": "rgb(128, 128, 128)",
+			"KernelStack": "rgb(255, 255, 0)",
+			"CodeReadOnly": "rgb(128, 128, 128)",
+			"CodeWritable": "rgb(128, 128, 128)"
 		}
 	}
 }

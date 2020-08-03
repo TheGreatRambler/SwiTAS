@@ -10,12 +10,9 @@
 #include <wx/wx.h>
 
 #include "../dataHandling/projectHandler.hpp"
+#include "drawingCanvas.hpp"
 #include "../sharedNetworkCode/networkInterface.hpp"
 #include "../sharedNetworkCode/networkingStructures.hpp"
-
-// This will use a wxListCtrl to list the memory locations currently shown
-// You will be able to add values by using their memory viewer fancy string version
-// The type will be specified and the data will be exported to a file on demand
 
 struct MemoryItemInfo {
 	uint8_t isUnsigned;
@@ -25,6 +22,20 @@ struct MemoryItemInfo {
 	wxString filePath;
 	wxString pointerPath;
 	mio::mmap_sink mmap;
+};
+
+class MemorySectionViewer : public DrawingCanvas {
+private:
+std::vector<MemoryDataInfo::MemoryInfo> memoryInfo;
+
+public:
+	MemorySectionViewer(wxFrame* parent);
+
+	void setMemoryInfo(std::vector<MemoryDataInfo::MemoryInfo> memInfo) {
+memoryInfo = memInfo;
+	}
+
+	virtual void draw(wxDC& dc) override;
 };
 
 class MemoryViewer : public wxFrame {

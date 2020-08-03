@@ -1,5 +1,20 @@
 #include "memoryViewer.hpp"
 
+MemorySectionViewer::MemorySectionViewer(wxFrame* parent)
+	: DrawingCanvas(parent, wxDefaultSize) {}
+
+void MemorySectionViewer::draw(wxDC& dc) {
+	// Do thing
+	int width;
+	int height;
+	GetSize(&width, &height);
+
+	if(memoryInfo.size() != 0) {
+		// Print the regions
+		// TODO
+	}
+};
+
 MemoryViewer::MemoryViewer(wxFrame* parent, std::shared_ptr<ProjectHandler> proj, std::shared_ptr<CommunicateWithNetwork> networkImp)
 	: wxFrame(parent, wxID_ANY, "Memory Viewer", wxDefaultPosition, wxSize(300, 200), wxDEFAULT_FRAME_STYLE | wxFRAME_FLOAT_ON_PARENT) {
 	projectHandler   = proj;
@@ -12,9 +27,9 @@ MemoryViewer::MemoryViewer(wxFrame* parent, std::shared_ptr<ProjectHandler> proj
 	unsignedCheckbox->SetValue(true);
 
 	typeChoices[MemoryRegionTypes::Bit8]        = "8 Bit Number";
-	typeChoices[MemoryRegionTypes::Bit16]       = "16 Bit Number";
-	typeChoices[MemoryRegionTypes::Bit32]       = "32 Bit Number";
-	typeChoices[MemoryRegionTypes::Bit64]       = "64 Bit Number";
+	typeChoices[MemoryRegionTypes::Bit16]       = "16 Bit Number / Short";
+	typeChoices[MemoryRegionTypes::Bit32]       = "32 Bit Number / Int";
+	typeChoices[MemoryRegionTypes::Bit64]       = "64 Bit Number / Long";
 	typeChoices[MemoryRegionTypes::Float]       = "Float";
 	typeChoices[MemoryRegionTypes::Double]      = "Double";
 	typeChoices[MemoryRegionTypes::Bool]        = "Bool";

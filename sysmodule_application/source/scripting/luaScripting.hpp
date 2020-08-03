@@ -1,12 +1,8 @@
 #pragma once
 
-#include <atomic>
-#include <condition_variable>
 #include <memory>
-#include <mutex>
 #include <sol/sol.hpp>
 #include <string>
-#include <thread>
 
 #ifdef __SWITCH__
 #include <switch.h>
@@ -19,8 +15,7 @@
 class LuaScripting {
 private:
 	sol::state luaState;
-	uint8_t scriptLoaded = false;
-	std::unique_ptr<std::thread> luaExecutionThread;
+	uint8_t isClosing = false;
 
 	std::string luaPath;
 
@@ -28,15 +23,7 @@ private:
 	std::shared_ptr<Syscalls> yuzuSyscalls;
 #endif
 
-	std::atomic_bool syscallReady = false;
-	uint8_t ready                 = false;
-	uint8_t processed             = false;
-	std::mutex syscallMutex;
-	std::condition_variable syscallCv;
-
-	void sendSyscall(std::function<void()> func);
-
-	void luaThread();
+	void registerLuaFuncs();
 
 public:
 	LuaScripting();
@@ -46,9 +33,19 @@ public:
 		yuzuSyscalls = syscalls;
 	}
 #endif
+	// Called on init
 	void loadScript(std::string path);
 
+	// Called prior to destruction
 	void endScript();
 
+	// Called on app init
 	void callMainloop();
+
+	// Called on a SwiTAS frame advance
+	void onFrameAdvance(uint8_t isRunFinalTas);
+
+	void setClosing() {
+		isClosing = true;
+	}
 };
