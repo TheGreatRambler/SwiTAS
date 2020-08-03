@@ -5,6 +5,7 @@
 #include "include/zpp.hpp"
 #include <cstdint>
 #include <memory>
+#include <unordered_map>
 
 #include "buttonData.hpp"
 
@@ -110,6 +111,31 @@ namespace MemoryDataInfo {
 		MemType_CodeWritable        = 0x15, ///< Mapped in kernel during \ref svcControlCodeMemory.
 	} MemoryType;
 
+	static std::unordered_map<MemoryType, std::string> memoryTypeName {
+		{ MemType_Unmapped, "Unmapped" },
+		{ MemType_Io, "Io" },
+		{ MemType_Normal, "Normal" },
+		{ MemType_CodeStatic, "CodeStatic" },
+		{ MemType_CodeMutable, "CodeMutable" },
+		{ MemType_Heap, "Heap" },
+		{ MemType_SharedMem, "SharedMem" },
+		{ MemType_WeirdMappedMem, "WeirdMappedMem" },
+		{ MemType_ModuleCodeStatic, "ModuleCodeStatic" },
+		{ MemType_ModuleCodeMutable, "ModuleCodeMutable" },
+		{ MemType_IpcBuffer0, "IpcBuffer0" },
+		{ MemType_MappedMemory, "MappedMemory" },
+		{ MemType_ThreadLocal, "ThreadLocal" },
+		{ MemType_TransferMemIsolated, "TransferMemIsolated" },
+		{ MemType_TransferMem, "TransferMem" },
+		{ MemType_ProcessMem, "ProcessMem" },
+		{ MemType_Reserved, "Reserved" },
+		{ MemType_IpcBuffer1, "IpcBuffer1" },
+		{ MemType_IpcBuffer3, "IpcBuffer3" },
+		{ MemType_KernelStack, "KernelStack" },
+		{ MemType_CodeReadOnly, "CodeReadOnly" },
+		{ MemType_CodeWritable, "CodeWritable" },
+	};
+
 	/// Memory state bitmasks.
 	typedef enum {
 		MemState_Type                       = 0xFF,                     ///< Type field (see \ref MemoryType).
@@ -133,6 +159,28 @@ namespace MemoryDataInfo {
 		MemState_CodeMemAllowed             = BIT(25),                  ///< Code memory allowed.
 	} MemoryState;
 
+	static std::unordered_map<MemoryState, std::string> memoryStateName {
+		{ MemState_Type, "Type" },
+		{ MemState_PermChangeAllowed, "PermChangeAllowed" },
+		{ MemState_ForceRwByDebugSyscalls, "ForceRwByDebugSyscalls" },
+		{ MemState_IpcSendAllowed_Type0, "IpcSendAllowed_Type0" },
+		{ MemState_IpcSendAllowed_Type3, "IpcSendAllowed_Type3" },
+		{ MemState_IpcSendAllowed_Type1, "IpcSendAllowed_Type1" },
+		{ MemState_ProcessPermChangeAllowed, "ProcessPermChangeAllowed" },
+		{ MemState_MapAllowed, "MapAllowed" },
+		{ MemState_UnmapProcessCodeMemAllowed, "UnmapProcessCodeMemAllowed" },
+		{ MemState_TransferMemAllowed, "TransferMemAllowed" },
+		{ MemState_QueryPAddrAllowed, "QueryPAddrAllowed" },
+		{ MemState_MapDeviceAllowed, "MapDeviceAllowed" },
+		{ MemState_MapDeviceAlignedAllowed, "MapDeviceAlignedAllowed" },
+		{ MemState_IpcBufferAllowed, "IpcBufferAllowed" },
+		{ MemState_IsPoolAllocated, "IsPoolAllocated" },
+		{ MemState_IsRefCounted, "IsRefCounted" },
+		{ MemState_MapProcessAllowed, "MapProcessAllowed" },
+		{ MemState_AttrChangeAllowed, "AttrChangeAllowed" },
+		{ MemState_CodeMemAllowed, "CodeMemAllowed" },
+	};
+
 	/// Memory attribute bitmasks.
 	typedef enum {
 		MemAttr_IsBorrowed     = BIT(0), ///< Is borrowed memory.
@@ -140,6 +188,13 @@ namespace MemoryDataInfo {
 		MemAttr_IsDeviceMapped = BIT(2), ///< Is device mapped (when DeviceRefCount > 0).
 		MemAttr_IsUncached     = BIT(3), ///< Is uncached.
 	} MemoryAttribute;
+
+	static std::unordered_map<MemoryAttribute, std::string> memoryAttributeName {
+		{ MemAttr_IsBorrowed, "IsBorrowed" },
+		{ MemAttr_IsIpcMapped, "IsIpcMapped" },
+		{ MemAttr_IsDeviceMapped, "IsDeviceMapped" },
+		{ MemAttr_IsUncached, "IsUncached" },
+	};
 
 	/// Memory permission bitmasks.
 	typedef enum {
@@ -151,6 +206,16 @@ namespace MemoryDataInfo {
 		Perm_Rx       = Perm_R | Perm_X, ///< Read/execute permissions.
 		Perm_DontCare = BIT(28),         ///< Don't care
 	} Permission;
+
+	static std::unordered_map<Permission, std::string> memoryPermissionName {
+		{ Perm_None, "None" },
+		{ Perm_R, "Read" },
+		{ Perm_W, "Write" },
+		{ Perm_X, "Execute" },
+		{ Perm_Rw, "ReadWrite" },
+		{ Perm_Rx, "ReadExecute" },
+		{ Perm_DontCare, "DontCare" },
+	};
 
 	/// Memory information structure.
 	typedef struct {

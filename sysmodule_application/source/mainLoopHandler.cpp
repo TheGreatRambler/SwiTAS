@@ -288,7 +288,7 @@ void MainLoop::handleNetworkUpdates() {
 			runFinalTasFileHandles.erase(data.path);
 		} else {
 			if(data.openFile) {
-				runFinalTasFileHandles[data.path] = fopen(data.path.c_str(), "rb");
+				runFinalTasFileHandles[data.path] = fopen(data.path.c_str(), "wb");
 			} else {
 				fwrite(data.contents.data(), data.contents.size(), 1, runFinalTasFileHandles[data.path]);
 			}
@@ -519,6 +519,7 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths) {
 	lastNanoseconds = 0;
 
 	while(true) {
+		LOGD << "Start half second";
 		// Run half a second of data before checking network
 		if(!finalTasShouldRun)
 			break;
@@ -527,6 +528,7 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths) {
 			// File reading can't slow down at all
 
 			for(uint8_t player = 0; player < filesSize; player++) {
+				LOGD << "For player " << (int)player;
 				// Based on code in project handler without compression
 				uint8_t controllerSize;
 				readFullFileData(files[player], &controllerSize, sizeof(controllerSize));
@@ -535,19 +537,20 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths) {
 					// Skip handling controller data and clear existing buttons
 					controllers[player]->clearState();
 					controllers[player]->setInput();
-					continue;
+					LOGD << "Empty frame";
+				} else {
+					uint8_t controllerDataBuf[controllerSize];
+					readFullFileData(files[player], controllerDataBuf, sizeof(controllerDataBuf));
+
+					ControllerData data;
+					serializeProtocol.binaryToData<ControllerData>(data, controllerDataBuf, controllerSize);
+
+					controllers[player]->setFrame(data);
+
+					LOGD << "Run final TAS frame: " << (int)controllerSize;
 				}
-
-				uint8_t controllerDataBuf[controllerSize];
-				readFullFileData(files[player], controllerDataBuf, sizeof(controllerDataBuf));
-
-				ControllerData data;
-				serializeProtocol.binaryToData<ControllerData>(data, controllerDataBuf, controllerSize);
-
-				controllers[player]->setFrame(data);
 			}
 
-			// Either put this before or after
 			waitForVsync();
 		}
 
@@ -557,10 +560,6 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths) {
 	for(auto const& file : files) {
 		fclose(file);
 	}
-	for(auto const& file : runFinalTasFileHandles) {
-		fclose(file.second);
-	}
-	runFinalTasFileHandles.clear();
 }
 
 void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, uint8_t autoAdvance, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex) {

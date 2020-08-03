@@ -1,12 +1,5 @@
 #include "gameCorruptor.hpp"
 
-MemorySectionViewer::MemorySectionViewer(wxWindow* parent)
-	: DrawingCanvas(parent, wxDefaultSize) {}
-
-void MemorySectionViewer::draw(wxDC& dc) {
-	// Will use https://github.com/WerWolv/EdiZon/blob/master/source/guis/gui_cheats.cpp#L340
-}
-
 GameCorruptor::GameCorruptor(wxWindow* parent, std::shared_ptr<ProjectHandler> projHandler, std::shared_ptr<CommunicateWithNetwork> networkImp)
 	: wxDialog(parent, wxID_ANY, "Game Corruptor", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE | wxMAXIMIZE) {
 	projectHandler  = projHandler;

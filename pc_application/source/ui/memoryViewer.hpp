@@ -29,7 +29,7 @@ private:
 std::vector<MemoryDataInfo::MemoryInfo> memoryInfo;
 
 public:
-	MemorySectionViewer(wxFrame* parent);
+	MemorySectionViewer(wxWindow* parent);
 
 	void setMemoryInfo(std::vector<MemoryDataInfo::MemoryInfo> memInfo) {
 memoryInfo = memInfo;

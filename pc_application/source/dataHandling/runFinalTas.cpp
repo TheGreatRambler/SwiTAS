@@ -103,12 +103,12 @@ void TasRunner::onStartTasHomebrewPressed(wxCommandEvent& event) {
 						dataToSend.insert(dataToSend.end(), &sizeToPrint, &sizeToPrint + sizeof(sizeToPrint));
 						dataToSend.insert(dataToSend.end(), data, data + dataSize);
 
-						if(frame != 0 && (frame % 60 == 0 || frame == mainBranch.size() - 1)) {
+						if(frame != 0 && (frame % 60 == 0 || frame == (branchSize - 1))) {
 							float progress = ((float)frame / branchSize) * 100.0;
 							consoleLog->AppendText(wxString::Format("Progress serializing frames: %.5f%% %lu/%lu, in savestate %u player %u\n", progress, frame, branchSize, hook, playerIndex));
 						}
 
-						if(dataToSend.size() > 1000) {
+						if(dataToSend.size() > 1000 || frame == (branchSize - 1)) {
 							// Dump the data
 							ADD_TO_QUEUE(SendFinalTasChunk, networkInstance, {
 								data.openFile  = false;

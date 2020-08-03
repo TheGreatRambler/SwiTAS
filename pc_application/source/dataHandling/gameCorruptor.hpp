@@ -4,16 +4,9 @@
 
 #include "../sharedNetworkCode/networkInterface.hpp"
 #include "../ui/drawingCanvas.hpp"
+#include "../ui/memoryViewer.hpp"
 #include "dataProcessing.hpp"
 #include "projectHandler.hpp"
-
-class MemorySectionViewer : public DrawingCanvas {
-private:
-public:
-	MemorySectionViewer(wxWindow* parent);
-
-	virtual void draw(wxDC& dc) override;
-};
 
 class GameCorruptor : public wxDialog {
 private:
