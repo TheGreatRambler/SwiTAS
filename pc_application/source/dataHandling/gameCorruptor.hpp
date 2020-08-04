@@ -14,6 +14,7 @@ private:
 
 	std::shared_ptr<ProjectHandler> projectHandler;
 	std::shared_ptr<CommunicateWithNetwork> networkInstance;
+	rapidjson::Document* mainSettings;
 
 	wxBoxSizer* mainSizer;
 
@@ -22,7 +23,7 @@ private:
 	void onIdle(wxIdleEvent& event);
 
 public:
-	GameCorruptor(wxWindow* parent, std::shared_ptr<ProjectHandler> projHandler, std::shared_ptr<CommunicateWithNetwork> networkImp);
+	GameCorruptor(wxWindow* parent, rapidjson::Document* settings, std::shared_ptr<ProjectHandler> projHandler, std::shared_ptr<CommunicateWithNetwork> networkImp);
 
 	DECLARE_EVENT_TABLE();
 };

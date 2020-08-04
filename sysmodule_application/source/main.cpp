@@ -6,9 +6,9 @@
 #include <vector>
 
 #ifdef __SWITCH__
+#include <libstratosphere/dmntcht.hpp>
 #include <plog/Log.h>
 #include <switch.h>
-#include <libstratosphere/dmntcht.hpp>
 #endif
 
 #ifdef YUZU
@@ -24,7 +24,7 @@ extern "C" {
 u32 __nx_applet_type = AppletType_None;
 
 // Adjust size as needed.
-#define INNER_HEAP_SIZE 0xB00000
+#define INNER_HEAP_SIZE 0xA00000
 size_t nx_inner_heap_size = INNER_HEAP_SIZE;
 char nx_inner_heap[INNER_HEAP_SIZE];
 

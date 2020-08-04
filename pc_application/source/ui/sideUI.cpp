@@ -223,7 +223,9 @@ void SideUI::setPlayerInfo(uint8_t size, uint8_t selected, bool force) {
 			// clang-format on
 			// Now, user has to disconnect their controllers and don't allow continuing until done
 			while(true) {
-				wxMessageDialog removeControllersDialog(parent, "If you have Joycons physically connected to the Switch, please remove them.\nNow, open the Change Grip/Order Screen once whether or not you have any controllers connected. Then, press OK.", "Enter Change Grip/Order Screen", wxOK | wxICON_INFORMATION);
+				wxMessageDialog removeControllersDialog(parent,
+					"Make sure you have a game open. If you have Joycons physically connected to the Switch, please remove them. Open the controller screen. If you have no controllers connected, press OK. Otherwise, open the Change Grip/Order Screen. An oddly colored Pro Controller will connect itself. Connect one of your own controllers. Then, press OK. Do not press Change Grip/Order twice, you will have to restart both the SwiTAS sysmodule and the PC app.",
+					"Enter Change Grip/Order Screen", wxOK | wxICON_INFORMATION);
 				removeControllersDialog.ShowModal();
 
 				PROCESS_NETWORK_CALLBACKS(networkInterface, RecieveFlag)

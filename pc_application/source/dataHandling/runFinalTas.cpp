@@ -88,7 +88,7 @@ void TasRunner::onStartTasHomebrewPressed(wxCommandEvent& event) {
 					uint64_t frameDelay = player->at(hook)->runFinalTasDelayFrames;
 					for(uint64_t i = 0; i < frameDelay; i++) {
 						// A size of 0 means no frame
-						uint8_t noFrameHere = 0;
+						uint8_t noFrameHere = 255;
 						dataToSend.insert(dataToSend.end(), &noFrameHere, &noFrameHere + sizeof(noFrameHere));
 					}
 					auto& mainBranch    = *(player->at(hook)->inputs[0]);

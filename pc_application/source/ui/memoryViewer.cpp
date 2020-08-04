@@ -4,8 +4,9 @@ MemorySectionViewer::MemorySectionViewer(wxWindow* parent, rapidjson::Document* 
 	: DrawingCanvas(parent, wxDefaultSize) {
 	mainSettings = settings;
 
+	auto& colorArray = (*mainSettings)["ui"]["memoryRegionViewerColors"];
 	for(auto const& color : MemoryDataInfo::memoryTypeName) {
-		sectionColors[color.first] = wxBrush(wxColor((*mainSettings)["ui"]["memoryRegionViewerColors"][color.second].GetString()), wxSOLID);
+		sectionColors[color.first] = wxBrush(wxColor(colorArray[color.second.c_str()].GetString()), wxSOLID);
 	}
 }
 
@@ -26,7 +27,7 @@ void MemorySectionViewer::draw(wxDC& dc) {
 		uint64_t soFar = 0;
 
 		for(auto const& region : memoryInfo) {
-			dc.SetBrush(sectionColors[region.type]);
+			dc.SetBrush(sectionColors[(MemoryDataInfo::MemoryType)region.type]);
 
 			dc.DrawRectangle(wxPoint(0, soFar * scale), wxSize(width, region.size * scale));
 
@@ -50,7 +51,7 @@ void MemorySectionViewer::onMouseMove(wxMouseEvent& event) {
 
 			for(auto const& region : memoryInfo) {
 				if(region.addr <= location && region.addr + region.size >= location) {
-					SetToolTip(wxString::Format("Memory Type: %s\nMemory Address: %lu\nMemory Size: %lu", wxString::FromUTF8(MemoryDataInfo::memoryTypeName[region.type]), region.addr, region.size));
+					SetToolTip(wxString::Format("Memory Type: %s\nMemory Address: %lu\nMemory Size: %lu", wxString::FromUTF8(MemoryDataInfo::memoryTypeName[(MemoryDataInfo::MemoryType)region.type]), region.addr, region.size));
 					return;
 				}
 			}

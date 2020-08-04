@@ -1,13 +1,14 @@
 #include "gameCorruptor.hpp"
 
-GameCorruptor::GameCorruptor(wxWindow* parent, std::shared_ptr<ProjectHandler> projHandler, std::shared_ptr<CommunicateWithNetwork> networkImp)
+GameCorruptor::GameCorruptor(wxWindow* parent, rapidjson::Document* settings, std::shared_ptr<ProjectHandler> projHandler, std::shared_ptr<CommunicateWithNetwork> networkImp)
 	: wxDialog(parent, wxID_ANY, "Game Corruptor", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE | wxMAXIMIZE) {
 	projectHandler  = projHandler;
 	networkInstance = networkImp;
+	mainSettings    = settings;
 
 	mainSizer = new wxBoxSizer(wxHORIZONTAL);
 
-	memorySectionViewer = new MemorySectionViewer(this);
+	memorySectionViewer = new MemorySectionViewer(this, settings);
 
 	// Implement RTC algorithms here
 	// Starting with Vector Engine

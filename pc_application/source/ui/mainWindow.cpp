@@ -328,7 +328,7 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 		} else if(id == openGameCorruptorID) {
 			Show(false);
 			sideUI->untether();
-			GameCorruptor gameCorruptor(this, projectHandler, networkInstance);
+			GameCorruptor gameCorruptor(this, &mainSettings, projectHandler, networkInstance);
 			gameCorruptor.ShowModal();
 			Show(true);
 		} else if(id == exportAsText) {

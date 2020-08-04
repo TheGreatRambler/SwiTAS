@@ -87,14 +87,15 @@ void MainLoop::mainLoopHandler() {
 			if(R_SUCCEEDED(rc)) {
 				if(!applicationOpened) {
 					// Sleep for a millisecond to allow SaltyNX to enable
-					svcSleepThread(1000000);
+					svcSleepThread(1000000 * 1);
 
 					gameName = std::string(getAppName(applicationProgramId));
 
-					bool out = false;
-					dmntchtHasCheatProcess(&out);
-					if(out == false)
+					bool dmntchtOpen = false;
+					dmntchtHasCheatProcess(&dmntchtOpen);
+					if(!dmntchtOpen) {
 						dmntchtForceOpenCheatProcess();
+					}
 
 					LOGD << "Get SaltyNX FPS offset";
 					// Used to do accurate frame advance
@@ -135,12 +136,12 @@ void MainLoop::mainLoopHandler() {
 			applicationProgramId = yuzuSyscalls->function_emu_getprogramid(yuzuSyscalls->getYuzuInstance());
 			applicationProcessId = yuzuSyscalls->function_emu_getprocessid(yuzuSyscalls->getYuzuInstance());
 
-			pauseApp(false, false, false, 0, 0, 0, 0);
+			// pauseApp(false, false, false, 0, 0, 0, 0);
 
 			heapBase = yuzuSyscalls->function_emu_getheapstart(yuzuSyscalls->getYuzuInstance());
 			mainBase = yuzuSyscalls->function_emu_getmainstart(yuzuSyscalls->getYuzuInstance());
 
-			unpauseApp();
+			// unpauseApp();
 
 			// yuzuSyscalls->function_emu_log(yuzuSyscalls->getYuzuInstance(), "Application opened");
 
@@ -280,6 +281,7 @@ void MainLoop::handleNetworkUpdates() {
 			runFinalTasFileHandles.erase(data.path);
 		} else {
 			if(data.openFile) {
+				remove(data.path.c_str());
 				runFinalTasFileHandles[data.path] = fopen(data.path.c_str(), "wb");
 			} else {
 				fwrite(data.contents.data(), data.contents.size(), 1, runFinalTasFileHandles[data.path]);
@@ -525,7 +527,7 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths) {
 				uint8_t controllerSize;
 				readFullFileData(files[player], &controllerSize, sizeof(controllerSize));
 
-				if(controllerSize == 0) {
+				if(controllerSize == 255) {
 					// Skip handling controller data and clear existing buttons
 					controllers[player]->clearState();
 					controllers[player]->setInput();
@@ -594,8 +596,16 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 		// Debug application again
 
 #ifdef __SWITCH__
-		LOGD << "Pausing";
+		LOGD << "Pausing DMNT";
+		rc = dmntchtPauseCheatProcess();
+		if(R_FAILED(rc)) {
+			fatalThrow(rc);
+		}
+		LOGD << "Pause app";
 		rc = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
+		if(R_FAILED(rc)) {
+			fatalThrow(rc);
+		}
 		if(lastNanoseconds != 0) {
 			uint64_t lastAttempt = armTicksToNs(armGetSystemTick()) - lastNanoseconds;
 			/*
@@ -662,7 +672,7 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 
 				try {
 #ifdef __SWITCH__
-					uint64_t addr = calculator::eval<uint64_t>(revisedExpression);
+					uint64_t addr = calculator::eval<uint64_t>(revisedExpression, applicationDebug);
 #endif
 #ifdef YUZU
 					uint64_t addr = calculator::eval<uint64_t>(revisedExpression, yuzuSyscalls);

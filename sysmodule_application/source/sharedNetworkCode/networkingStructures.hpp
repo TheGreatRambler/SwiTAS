@@ -111,7 +111,7 @@ namespace MemoryDataInfo {
 		MemType_CodeWritable        = 0x15, ///< Mapped in kernel during \ref svcControlCodeMemory.
 	} MemoryType;
 
-	static std::unordered_map<MemoryType, std::string> memoryTypeName {
+	static std::unordered_map<MemoryType, std::string> memoryTypeName{
 		{ MemType_Unmapped, "Unmapped" },
 		{ MemType_Io, "Io" },
 		{ MemType_Normal, "Normal" },
@@ -159,7 +159,7 @@ namespace MemoryDataInfo {
 		MemState_CodeMemAllowed             = BIT(25),                  ///< Code memory allowed.
 	} MemoryState;
 
-	static std::unordered_map<MemoryState, std::string> memoryStateName {
+	static std::unordered_map<MemoryState, std::string> memoryStateName{
 		{ MemState_Type, "Type" },
 		{ MemState_PermChangeAllowed, "PermChangeAllowed" },
 		{ MemState_ForceRwByDebugSyscalls, "ForceRwByDebugSyscalls" },
@@ -189,7 +189,7 @@ namespace MemoryDataInfo {
 		MemAttr_IsUncached     = BIT(3), ///< Is uncached.
 	} MemoryAttribute;
 
-	static std::unordered_map<MemoryAttribute, std::string> memoryAttributeName {
+	static std::unordered_map<MemoryAttribute, std::string> memoryAttributeName{
 		{ MemAttr_IsBorrowed, "IsBorrowed" },
 		{ MemAttr_IsIpcMapped, "IsIpcMapped" },
 		{ MemAttr_IsDeviceMapped, "IsDeviceMapped" },
@@ -207,7 +207,7 @@ namespace MemoryDataInfo {
 		Perm_DontCare = BIT(28),         ///< Don't care
 	} Permission;
 
-	static std::unordered_map<Permission, std::string> memoryPermissionName {
+	static std::unordered_map<Permission, std::string> memoryPermissionName{
 		{ Perm_None, "None" },
 		{ Perm_R, "Read" },
 		{ Perm_W, "Write" },
