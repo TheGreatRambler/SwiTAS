@@ -125,13 +125,6 @@ namespace calculator {
 			return eval(expr);
 		}
 
-#ifdef __SWITCH__
-		// Set application debug handle
-		void setApplicationDebugHandle(Handle handle) {
-			applicationDebug = handle;
-		}
-#endif
-
 #ifdef YUZU
 		void setYuzuSyscalls(std::shared_ptr<Syscalls> yuzu) {
 			yuzuSyscalls = yuzu;
@@ -189,11 +182,6 @@ namespace calculator {
 		/// are pushed onto the stack if the operator on
 		/// top of the stack has lower precedence.
 		std::stack<OperatorValue> stack_;
-
-#ifdef __SWITCH__
-		// Debug handle for memory reading
-		Handle applicationDebug;
-#endif
 
 #ifdef YUZU
 		std::shared_ptr<Syscalls> yuzuSyscalls;
@@ -427,7 +415,7 @@ namespace calculator {
 
 				uint64_t newAddr;
 #ifdef __SWITCH__
-				svcReadDebugProcessMemory(&newAddr, applicationDebug, parseExpr(), sizeof(uint64_t));
+				dmntchtReadCheatProcessMemory(&newAddr, parseExpr(), sizeof(uint64_t));
 #endif
 #ifdef YUZU
 				yuzuSyscalls->function_rom_readbytes(yuzuSyscalls->getYuzuInstance(), &newAddr, parseExpr(), sizeof(uint64_t));
@@ -495,9 +483,8 @@ namespace calculator {
 	};
 
 #ifdef __SWITCH__
-	template <typename T> inline T eval(const std::string& expression, Handle handle) {
+	template <typename T> inline T eval(const std::string& expression) {
 		ExpressionParser<T> parser;
-		parser.setApplicationDebugHandle(handle);
 		return parser.eval(expression);
 	}
 #endif
@@ -511,9 +498,8 @@ namespace calculator {
 #endif
 
 #ifdef __SWITCH__
-	template <typename T> inline T eval(char c, Handle Handle) {
+	template <typename T> inline T eval(char c) {
 		ExpressionParser<T> parser;
-		parser.setApplicationDebugHandle(Handle);
 		return parser.eval(c);
 	}
 #endif

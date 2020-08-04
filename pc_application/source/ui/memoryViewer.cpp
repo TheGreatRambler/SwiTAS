@@ -1,7 +1,19 @@
 #include "memoryViewer.hpp"
 
-MemorySectionViewer::MemorySectionViewer(wxWindow* parent)
-	: DrawingCanvas(parent, wxDefaultSize) {}
+MemorySectionViewer::MemorySectionViewer(wxWindow* parent, rapidjson::Document* settings)
+	: DrawingCanvas(parent, wxDefaultSize) {
+	mainSettings = settings;
+
+	for(auto const& color : MemoryDataInfo::memoryTypeName) {
+		sectionColors[color.first] = wxBrush(wxColor((*mainSettings)["ui"]["memoryRegionViewerColors"][color.second].GetString()), wxSOLID);
+	}
+}
+
+// clang-format off
+BEGIN_EVENT_TABLE(MemorySectionViewer, wxWindow)
+    EVT_MOTION(MemorySectionViewer::onMouseMove)
+END_EVENT_TABLE()
+// clang-format on
 
 void MemorySectionViewer::draw(wxDC& dc) {
 	// Do thing
@@ -9,11 +21,44 @@ void MemorySectionViewer::draw(wxDC& dc) {
 	int height;
 	GetSize(&width, &height);
 
-	if(memoryInfo.size() != 0) {
-		// Print the regions
-		// TODO
+	if(totalMemorySize != 0) {
+		float scale    = (float)height / totalMemorySize;
+		uint64_t soFar = 0;
+
+		for(auto const& region : memoryInfo) {
+			dc.SetBrush(sectionColors[region.type]);
+
+			dc.DrawRectangle(wxPoint(0, soFar * scale), wxSize(width, region.size * scale));
+
+			soFar += region.size;
+		}
 	}
 };
+
+void MemorySectionViewer::onMouseMove(wxMouseEvent& event) {
+	// Create a tooltip with some memory region info
+	wxPoint loc = event.GetPosition();
+	if(GetScreenRect().Contains(ClientToScreen(loc))) {
+		int width;
+		int height;
+		GetSize(&width, &height);
+
+		if(totalMemorySize != 0) {
+			float scale = (float)height / totalMemorySize;
+
+			uint64_t location = (loc.y / height) * totalMemorySize;
+
+			for(auto const& region : memoryInfo) {
+				if(region.addr <= location && region.addr + region.size >= location) {
+					SetToolTip(wxString::Format("Memory Type: %s\nMemory Address: %lu\nMemory Size: %lu", wxString::FromUTF8(MemoryDataInfo::memoryTypeName[region.type]), region.addr, region.size));
+					return;
+				}
+			}
+		}
+	} else {
+		UnsetToolTip();
+	}
+}
 
 MemoryViewer::MemoryViewer(wxFrame* parent, std::shared_ptr<ProjectHandler> proj, std::shared_ptr<CommunicateWithNetwork> networkImp)
 	: wxFrame(parent, wxID_ANY, "Memory Viewer", wxDefaultPosition, wxSize(300, 200), wxDEFAULT_FRAME_STYLE | wxFRAME_FLOAT_ON_PARENT) {

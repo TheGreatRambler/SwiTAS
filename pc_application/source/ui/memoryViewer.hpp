@@ -4,15 +4,16 @@
 #include <memory>
 #include <mio.hpp>
 #include <system_error>
+#include <unordered_map>
 #include <vector>
 #include <wx/filepicker.h>
 #include <wx/wfstream.h>
 #include <wx/wx.h>
 
 #include "../dataHandling/projectHandler.hpp"
-#include "drawingCanvas.hpp"
 #include "../sharedNetworkCode/networkInterface.hpp"
 #include "../sharedNetworkCode/networkingStructures.hpp"
+#include "drawingCanvas.hpp"
 
 struct MemoryItemInfo {
 	uint8_t isUnsigned;
@@ -26,16 +27,28 @@ struct MemoryItemInfo {
 
 class MemorySectionViewer : public DrawingCanvas {
 private:
-std::vector<MemoryDataInfo::MemoryInfo> memoryInfo;
+	std::vector<MemoryDataInfo::MemoryInfo> memoryInfo;
+	uint64_t totalMemorySize = 0;
+
+	rapidjson::Document* mainSettings;
+
+	std::unordered_map<MemoryDataInfo::MemoryType, wxBrush> sectionColors;
+
+	void onMouseMove(wxMouseEvent& event);
 
 public:
-	MemorySectionViewer(wxWindow* parent);
+	MemorySectionViewer(wxWindow* parent, rapidjson::Document* settings);
 
 	void setMemoryInfo(std::vector<MemoryDataInfo::MemoryInfo> memInfo) {
-memoryInfo = memInfo;
+		memoryInfo = memInfo;
+		for(auto const& region : memoryInfo) {
+			totalMemorySize += region.size;
+		}
 	}
 
 	virtual void draw(wxDC& dc) override;
+
+	DECLARE_EVENT_TABLE();
 };
 
 class MemoryViewer : public wxFrame {

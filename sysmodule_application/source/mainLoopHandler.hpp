@@ -10,6 +10,7 @@
 #include <vector>
 
 #ifdef __SWITCH__
+#include <libstratosphere/dmntcht.hpp>
 #include <plog/Log.h>
 #include <switch.h>
 #endif
@@ -65,6 +66,8 @@ private:
 
 	uint64_t lastNanoseconds = 0;
 	int lastFrameAttempt     = 0;
+
+	uintptr_t FPSaddress;
 #endif
 
 #ifdef YUZU
@@ -128,12 +131,16 @@ private:
 	std::vector<uint8_t> getMemory(uint64_t addr, uint64_t size) {
 		std::vector<uint8_t> region(size);
 #ifdef __SWITCH__
-		svcReadDebugProcessMemory(region.data(), applicationDebug, addr, size);
+		dmntchtReadCheatProcessMemory(region.data(), addr, size);
 #endif
 #ifdef YUZU
 		yuzuSyscalls->function_rom_readbytes(yuzuSyscalls->getYuzuInstance(), region.data(), addr, size);
 #endif
 		return region;
+	}
+
+	template <typename T> memoryToString(std::vector<uint8_t>& bytes) {
+		return std::to_string(*(T*)bytes.data());
 	}
 
 	std::string getJsonElement(uint8_t tabs, std::string key, std::string value) {
@@ -148,11 +155,25 @@ private:
 
 	void waitForVsync() {
 #ifdef __SWITCH__
-		// Only allow it to wait for 15 milliseconds
-		rc = eventWait(&vsyncEvent, UINT64_MAX);
-		if(R_FAILED(rc))
-			fatalThrow(rc);
-			// svcSleepThread(1000000 * 1);
+		// if(isPaused) {
+		//	rc = eventWait(&vsyncEvent, UINT64_MAX);
+		//	if(R_FAILED(rc))
+		//		fatalThrow(rc);
+		//	// svcSleepThread(1000000 * 1);
+		//} else {
+		while(true) {
+			uint8_t FPS = 0;
+			dmntchtReadCheatProcessMemory(FPSaddress, &FPS, sizeof(FPS));
+			if(FPS != 0) {
+				// Clear the variable so we can wait for it again
+				uint8_t dummyFPS = 0;
+				dmntchtWriteCheatProcessMemory(FPSaddress, &dummyFPS, sizeof(dummyFPS));
+				return;
+			} else {
+				svcSleepThread(1000000 * 1);
+			}
+		}
+		//}
 #endif
 #ifdef YUZU
 		yuzuSyscalls->function_emu_frameadvance(yuzuSyscalls->getYuzuInstance());

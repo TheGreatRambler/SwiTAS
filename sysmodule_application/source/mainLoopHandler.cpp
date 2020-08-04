@@ -86,37 +86,30 @@ void MainLoop::mainLoopHandler() {
 			// This should never fail, but I dunno
 			if(R_SUCCEEDED(rc)) {
 				if(!applicationOpened) {
+					// Sleep for a millisecond to allow SaltyNX to enable
+					svcSleepThread(1000000);
+
 					gameName = std::string(getAppName(applicationProgramId));
 
-					pauseApp(false, false, false, 0, 0, 0, 0);
+					bool out = false;
+					dmntchtHasCheatProcess(&out);
+					if(out == false)
+						dmntchtForceOpenCheatProcess();
 
-					// Obtain heap start
-					MemoryInfo meminfo;
-					u64 lastaddr = 0;
-					do {
-						lastaddr = meminfo.addr;
-						u32 pageinfo;
-						svcQueryDebugProcessMemory(&meminfo, &pageinfo, applicationDebug, meminfo.addr + meminfo.size);
-						if((meminfo.type & MemType_Heap) == MemType_Heap) {
-							heapBase = meminfo.addr;
-							break;
-						}
-					} while(lastaddr < meminfo.addr + meminfo.size);
-
-					// Obtain main start
-					LoaderModuleInfo proc_modules[2];
-					s32 numModules = 0;
-					Result rc      = ldrDmntGetProcessModuleInfo(applicationProcessId, proc_modules, 2, &numModules);
-
-					LoaderModuleInfo* proc_module = 0;
-					if(numModules == 2) {
-						proc_module = &proc_modules[1];
-					} else {
-						proc_module = &proc_modules[0];
+					LOGD << "Get SaltyNX FPS offset";
+					// Used to do accurate frame advance
+					FILE* FPSoffset = fopen("sdmc:/SaltySD/FPSoffset.hex", "rb");
+					if(FPSoffset != NULL) {
+						fread(&FPSaddress, 0x5, 1, FPSoffset);
+						fclose(FPSoffset);
 					}
-					mainBase = proc_module->base_address;
 
-					unpauseApp();
+					LOGD << "Get DMNT extents";
+					DmntCheatProcessMetadata appInfo;
+					dmntchtGetCheatProcessMetadata(&appInfo);
+
+					heapBase = appInfo.heap_extents.base;
+					mainBase = appInfo.main_nso_extents.base;
 
 					LOGD << "Application " + gameName + " opened";
 					ADD_TO_QUEUE(RecieveApplicationConnected, networkInstance, {
@@ -252,11 +245,10 @@ void MainLoop::handleNetworkUpdates() {
 		} else if(data.actFlag == SendInfo::START_TAS_MODE) {
 			// pauseApp(false, true, false, 0, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::PAUSE) {
-			waitForVsync();
+			// waitForVsync();
 			pauseApp(false, true, false, 0, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::UNPAUSE) {
 			clearEveryController();
-			waitForVsync();
 			unpauseApp();
 			lastNanoseconds  = 0;
 			lastFrameAttempt = 0;
@@ -540,7 +532,7 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths) {
 					LOGD << "Empty frame";
 				} else {
 					uint8_t controllerDataBuf[controllerSize];
-					readFullFileData(files[player], controllerDataBuf, sizeof(controllerDataBuf));
+					readFullFileData(files[player], controllerDataBuf, controllerSize);
 
 					ControllerData data;
 					serializeProtocol.binaryToData<ControllerData>(data, controllerDataBuf, controllerSize);
@@ -570,13 +562,14 @@ void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t includeFra
 		svcGetThreadPriority(&currentPriority, CUR_THREAD_HANDLE);
 		svcSetThreadPriority(CUR_THREAD_HANDLE, 10);
 #endif
-		waitForVsync();
 		unpauseApp();
 #ifdef __SWITCH__
 		lastNanoseconds = armTicksToNs(armGetSystemTick());
 		// waitForVsync();
 		// Frame advancing is amazingly inconsistent
-		svcSleepThread(16666666);
+		// svcSleepThread(16666666);
+		// New SaltyNX based version should be much more accurate
+		waitForVsync();
 #endif
 #ifdef YUZU
 		// Yuzu has actually good frame incrementing
@@ -669,7 +662,7 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 
 				try {
 #ifdef __SWITCH__
-					uint64_t addr = calculator::eval<uint64_t>(revisedExpression, applicationDebug);
+					uint64_t addr = calculator::eval<uint64_t>(revisedExpression);
 #endif
 #ifdef YUZU
 					uint64_t addr = calculator::eval<uint64_t>(revisedExpression, yuzuSyscalls);
@@ -680,42 +673,42 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 					case MemoryRegionTypes::Bit8:
 						bytes = getMemory(addr, sizeof(uint8_t));
 						if(isUnsigned) {
-							stringVersion = std::to_string(*(uint8_t*)bytes.data());
+							stringVersion = memoryToString<uint8_t>(bytes);
 						} else {
-							stringVersion = std::to_string(*(int8_t*)bytes.data());
+							stringVersion = memoryToString<int8_t>(bytes);
 						}
 						break;
 					case MemoryRegionTypes::Bit16:
 						bytes = getMemory(addr, sizeof(uint16_t));
 						if(isUnsigned) {
-							stringVersion = std::to_string(*(uint16_t*)bytes.data());
+							stringVersion = memoryToString<uint16_t>(bytes);
 						} else {
-							stringVersion = std::to_string(*(int16_t*)bytes.data());
+							stringVersion = memoryToString<int16_t>(bytes);
 						}
 						break;
 					case MemoryRegionTypes::Bit32:
 						bytes = getMemory(addr, sizeof(uint32_t));
 						if(isUnsigned) {
-							stringVersion = std::to_string(*(uint32_t*)bytes.data());
+							stringVersion = memoryToString<uint32_t>(bytes);
 						} else {
-							stringVersion = std::to_string(*(int32_t*)bytes.data());
+							stringVersion = memoryToString<int32_t>(bytes);
 						}
 						break;
 					case MemoryRegionTypes::Bit64:
 						bytes = getMemory(addr, sizeof(uint64_t));
 						if(isUnsigned) {
-							stringVersion = std::to_string(*(uint64_t*)bytes.data());
+							stringVersion = memoryToString<uint64_t>(bytes);
 						} else {
-							stringVersion = std::to_string(*(int64_t*)bytes.data());
+							stringVersion = memoryToString<int64_t>(bytes);
 						}
 						break;
 					case MemoryRegionTypes::Float:
 						bytes         = getMemory(addr, sizeof(float));
-						stringVersion = std::to_string(*(float*)bytes.data());
+						stringVersion = memoryToString<float>(bytes);
 						break;
 					case MemoryRegionTypes::Double:
 						bytes         = getMemory(addr, sizeof(double));
-						stringVersion = std::to_string(*(double*)bytes.data());
+						stringVersion = memoryToString<double>(bytes);
 						break;
 					case MemoryRegionTypes::Bool:
 						bytes         = getMemory(addr, sizeof(bool));
@@ -727,8 +720,6 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 						break;
 					case MemoryRegionTypes::ByteArray:
 						bytes = getMemory(addr, currentMemoryRegions[i].size);
-						// Unused
-						stringVersion = "";
 						break;
 					}
 

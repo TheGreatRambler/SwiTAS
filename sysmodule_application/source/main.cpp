@@ -8,6 +8,7 @@
 #ifdef __SWITCH__
 #include <plog/Log.h>
 #include <switch.h>
+#include <libstratosphere/dmntcht.hpp>
 #endif
 
 #ifdef YUZU
@@ -114,6 +115,11 @@ void __attribute__((weak)) __appInit(void) {
 	if(R_FAILED(rc))
 		fatalThrow(rc);
 
+	// Cheat services
+	rc = dmntchtInitialize();
+	if(R_FAILED(rc))
+		fatalThrow(rc);
+
 	// PMINFO
 	rc = pminfoInitialize();
 	if(R_FAILED(rc))
@@ -146,6 +152,7 @@ void __attribute__((weak)) userAppExit(void);
 void __attribute__((weak)) __appExit(void) {
 	socketExit();
 	pminfoExit();
+	dmntchtExit();
 	nsExit();
 	setExit();
 	hiddbgExit();
