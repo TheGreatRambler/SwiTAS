@@ -28,6 +28,10 @@ extern uint64_t _ZN2nn3hid21IsSixAxisSensorAtRestERKNS0_19SixAxisSensorHandleE(n
 extern uint64_t _ZN2nn3hid28IsSixAxisSensorFusionEnabledERKNS0_19SixAxisSensorHandleE(nn::hid::SixAxisSensorHandle* param_1) LINKABLE;
 extern void _ZN2nn3hid34ResetSixAxisSensorFusionParametersERKNS0_19SixAxisSensorHandleE(nn::hid::SixAxisSensorHandle* param_1) LINKABLE;
 extern void _ZN2nn3hid32SetSixAxisSensorFusionParametersERKNS0_19SixAxisSensorHandleEff(nn::hid::SixAxisSensorHandle* param_1, float param_2, float param_3) LINKABLE;
+extern void _ZN2nn3hid18StartSixAxisSensorERKNS0_26ConsoleSixAxisSensorHandleE(nn::hid::ConsoleSixAxisSensorHandle* param_1) LINKABLE;
+extern void _ZN2nn3hid18StartSixAxisSensorERKNS0_19SixAxisSensorHandleE(nn::hid::SixAxisSensorHandle* param_1) LINKABLE;
+extern void _ZN2nn3hid17StopSixAxisSensorERKNS0_26ConsoleSixAxisSensorHandleE(nn::hid::ConsoleSixAxisSensorHandle* param_1) LINKABLE;
+extern void _ZN2nn3hid17StopSixAxisSensorERKNS0_19SixAxisSensorHandleE(nn::hid::SixAxisSensorHandle* param_1) LINKABLE;
 }
 
 u32 __nx_applet_type = AppletType_None;
@@ -252,7 +256,7 @@ namespace nn {
 		typedef uint32_t SixAxisSensorHandle;
 		typedef uint32_t ConsoleSixAxisSensorHandle;
 
-		enum NpadStyleTag : u32 {
+		enum NpadStyleTag : uint32_t {
 			ProController = BIT(0),
 			Handheld      = BIT(1),
 			JoyconPair    = BIT(2),
@@ -299,24 +303,24 @@ void GetSixAxisSensorFusionParameters(float* param_1, float* param_2, nn::hid::S
 }
 
 /* nn::hid::GetSixAxisSensorHandle(nn::hid::ConsoleSixAxisSensorHandle*) */
-void GetSixAxisSensorHandle(nn::hid::ConsoleSixAxisSensorHandle* handle) {
+void GetSixAxisSensorHandle1(nn::hid::ConsoleSixAxisSensorHandle* handle) {
 	_ZN2nn3hid22GetSixAxisSensorHandleEPNS0_26ConsoleSixAxisSensorHandleE(handle);
 }
 
 /* nn::hid::GetSixAxisSensorHandle(nn::hid::SixAxisSensorHandle*, nn::hid::BasicXpadId) */
-void GetSixAxisSensorHandle(nn::hid::SixAxisSensorHandle* handle, nn::hid::BasicXpadId param_2) {
+void GetSixAxisSensorHandle2(nn::hid::SixAxisSensorHandle* handle, nn::hid::BasicXpadId param_2) {
 	_ZN2nn3hid22GetSixAxisSensorHandleEPNS0_19SixAxisSensorHandleENS0_11BasicXpadIdE(handle, param_2);
 }
 
 /* nn::hid::GetSixAxisSensorHandles(nn::hid::SixAxisSensorHandle*, nn::hid::SixAxisSensorHandle*,
    nn::hid::JoyXpadId) */
-void GetSixAxisSensorHandles(nn::hid::SixAxisSensorHandle* handle1, nn::hid::SixAxisSensorHandle* handle2, nn::hid::JoyXpadId param_3) {
+void GetSixAxisSensorHandles1(nn::hid::SixAxisSensorHandle* handle1, nn::hid::SixAxisSensorHandle* handle2, nn::hid::JoyXpadId param_3) {
 	_ZN2nn3hid23GetSixAxisSensorHandlesEPNS0_19SixAxisSensorHandleES2_NS0_9JoyXpadIdE(handle1, handle2, param_3);
 }
 
 /* nn::hid::GetSixAxisSensorHandles(nn::hid::SixAxisSensorHandle*, int, unsigned int const&,
    nn::util::BitFlagSet<32, nn::hid::NpadStyleTag>) */
-uint64_t GetSixAxisSensorHandles(nn::hid::SixAxisSensorHandle* param_1, int param_2, uint* param_3, nn::util::BitFlagSet<32, nn::hid::NpadStyleTag> param_4) {
+uint64_t GetSixAxisSensorHandles2(nn::hid::SixAxisSensorHandle* param_1, int param_2, uint* param_3, nn::util::BitFlagSet<32, nn::hid::NpadStyleTag> param_4) {
 	return _ZN2nn3hid23GetSixAxisSensorHandlesEPNS0_19SixAxisSensorHandleEiRKjNS_4util10BitFlagSetILi32ENS0_12NpadStyleTagEEE(param_1, param_2, param_3, param_4);
 }
 
@@ -328,13 +332,13 @@ void GetSixAxisSensorState(nn::hid::SixAxisSensorState* param_1, nn::hid::SixAxi
 
 /* nn::hid::GetSixAxisSensorStates(nn::hid::SixAxisSensorState*, int, nn::hid::BasicXpadId const&)
  */
-uint64_t GetSixAxisSensorStates(nn::hid::SixAxisSensorState* param_1, int param_2, nn::hid::BasicXpadId* param_3) {
+uint64_t GetSixAxisSensorStates1(nn::hid::SixAxisSensorState* param_1, int param_2, nn::hid::BasicXpadId* param_3) {
 	return _ZN2nn3hid22GetSixAxisSensorStatesEPNS0_18SixAxisSensorStateEiRKNS0_11BasicXpadIdE(param_1, param_2, param_3);
 }
 
 /* nn::hid::GetSixAxisSensorStates(nn::hid::SixAxisSensorState*, int, nn::hid::SixAxisSensorHandle
    const&) */
-uint64_t GetSixAxisSensorStates(nn::hid::SixAxisSensorState* param_1, int param_2, nn::hid::SixAxisSensorHandle* param_3) {
+uint64_t GetSixAxisSensorStates2(nn::hid::SixAxisSensorState* param_1, int param_2, nn::hid::SixAxisSensorHandle* param_3) {
 	return _ZN2nn3hid22GetSixAxisSensorStatesEPNS0_18SixAxisSensorStateEiRKNS0_19SixAxisSensorHandleE(param_1, param_2, param_3);
 }
 
@@ -363,6 +367,26 @@ void SetSixAxisSensorFusionParameters(nn::hid::SixAxisSensorHandle* param_1, flo
 	_ZN2nn3hid32SetSixAxisSensorFusionParametersERKNS0_19SixAxisSensorHandleEff(param_1, param_2, param_3);
 }
 
+/* nn::hid::StartSixAxisSensor(nn::hid::ConsoleSixAxisSensorHandle const&) */
+void StartSixAxisSensor1(nn::hid::ConsoleSixAxisSensorHandle* param_1) {
+	_ZN2nn3hid18StartSixAxisSensorERKNS0_26ConsoleSixAxisSensorHandleE(param_1);
+}
+
+/* nn::hid::StartSixAxisSensor(nn::hid::SixAxisSensorHandle const&) */
+void StartSixAxisSensor2(nn::hid::SixAxisSensorHandle* param_1) {
+	_ZN2nn3hid18StartSixAxisSensorERKNS0_19SixAxisSensorHandleE(param_1);
+}
+
+/* nn::hid::StopSixAxisSensor(nn::hid::ConsoleSixAxisSensorHandle const&) */
+void StopSixAxisSensor1(nn::hid::ConsoleSixAxisSensorHandle* param_1) {
+	_ZN2nn3hid17StopSixAxisSensorERKNS0_26ConsoleSixAxisSensorHandleE(param_1);
+}
+
+/* nn::hid::StopSixAxisSensor(nn::hid::SixAxisSensorHandle const&) */
+void StopSixAxisSensor2(nn::hid::SixAxisSensorHandle* param_1) {
+	_ZN2nn3hid17StopSixAxisSensorERKNS0_19SixAxisSensorHandleE(param_1);
+}
+
 int main(int argc, char* argv[]) {
 	SaltySD_printf("SwiTAS_MotionPlugin: alive\n");
 	/*
@@ -376,5 +400,62 @@ int main(int argc, char* argv[]) {
 	SaltySDCore_ReplaceImport("eglSwapBuffers", (void*)eglSwap);
 	SaltySDCore_ReplaceImport("vkQueuePresentKHR", (void*)vulkanSwap);
 	*/
+	// clang-format off
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid25EnableSixAxisSensorFusionERKNS0_19SixAxisSensorHandleEb",
+		&EnableSixAxisSensorFusion);
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid32GetSixAxisSensorFusionParametersEPfS1_RKNS0_19SixAxisSensorHandleE",
+		&GetSixAxisSensorFusionParameters);
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid22GetSixAxisSensorHandleEPNS0_26ConsoleSixAxisSensorHandleE",
+		&GetSixAxisSensorHandle1);
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid22GetSixAxisSensorHandleEPNS0_19SixAxisSensorHandleENS0_11BasicXpadIdE",
+		&GetSixAxisSensorHandle2);
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid23GetSixAxisSensorHandlesEPNS0_19SixAxisSensorHandleES2_NS0_9JoyXpadIdE",
+		&GetSixAxisSensorHandles1);
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid23GetSixAxisSensorHandlesEPNS0_19SixAxisSensorHandleEiRKjNS_4util10BitFlagSetILi32ENS0_12NpadStyleTagEEE",
+		&GetSixAxisSensorHandles2);
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid21GetSixAxisSensorStateEPNS0_18SixAxisSensorStateERKNS0_19SixAxisSensorHandleE",
+		&GetSixAxisSensorState);
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid22GetSixAxisSensorStatesEPNS0_18SixAxisSensorStateEiRKNS0_11BasicXpadIdE",
+		&GetSixAxisSensorStates1);
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid22GetSixAxisSensorStatesEPNS0_18SixAxisSensorStateEiRKNS0_19SixAxisSensorHandleE",
+		&GetSixAxisSensorStates2);
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid30InitializeConsoleSixAxisSensorEv",
+		&InitializeConsoleSixAxisSensor);
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid21IsSixAxisSensorAtRestERKNS0_19SixAxisSensorHandleE",
+		&IsSixAxisSensorAtRest);
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid28IsSixAxisSensorFusionEnabledERKNS0_19SixAxisSensorHandleE",
+		&IsSixAxisSensorFusionEnabled);
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid34ResetSixAxisSensorFusionParametersERKNS0_19SixAxisSensorHandleE",
+		&ResetSixAxisSensorFusionParameters);
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid32SetSixAxisSensorFusionParametersERKNS0_19SixAxisSensorHandleEff",
+		&SetSixAxisSensorFusionParameters);
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid18StartSixAxisSensorERKNS0_26ConsoleSixAxisSensorHandleE",
+		&StartSixAxisSensor1);
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid18StartSixAxisSensorERKNS0_19SixAxisSensorHandleE",
+		&StartSixAxisSensor2);
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid17StopSixAxisSensorERKNS0_26ConsoleSixAxisSensorHandleE",
+		&StopSixAxisSensor1);
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid17StopSixAxisSensorERKNS0_19SixAxisSensorHandleE",
+		&StopSixAxisSensor2);
+	// clang-format on
+
 	SaltySD_printf("SwiTAS_MotionPlugin: injection finished\n");
 }
