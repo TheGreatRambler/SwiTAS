@@ -1,6 +1,18 @@
 #pragma once
 
 // clang-format off
+#ifdef __SWITCH__
+	#define DLL_EXPORT
+#else
+	#ifdef _WIN32
+		#define DLL_EXPORT extern "C" __declspec(dllexport)
+	#else
+		#define DLL_EXPORT extern "C" __attribute__((visibility("default")))
+	#endif
+#endif
+// clang-format on
+
+// clang-format off
 #define YUZU_FUNC(func) \
 	func* function_##func = nullptr; \
 	void set_##func(func* function) { \

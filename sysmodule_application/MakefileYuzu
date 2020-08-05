@@ -37,10 +37,8 @@ else
 	CPPFLAGS += -Og -g -ggdb
 endif
 
-ifeq ($(UNAME),Msys)
-	CPPFLAGS += -DDLL_EXPORT='extern "C" __declspec(dllexport)'
-else
-	CPPFLAGS += -fPIC -DDLL_EXPORT='extern "C" __attribute__((visibility("default")))'
+ifneq ($(UNAME),Msys)
+	CPPFLAGS += -fPIC
 endif
 
 # Linker flags

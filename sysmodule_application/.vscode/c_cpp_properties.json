@@ -5,13 +5,15 @@
 				"${workspaceFolder}/include/**",
 				"${workspaceFolder}/source/thirdParty/**",
 				"${workspaceFolder}/source/thirdParty/lua-5.3.5/**",
+				"${workspaceFolder}/source/thirdParty/fbg/**",
+				"${workspaceFolder}/saltynx_motion_plugin/include/**",
+				"${workspaceFolder}/saltynx_motion_plugin/lib/libnx_min/nx/include/**",
 				"/opt/devkitpro/libnx/include/**",
 				"/opt/devkitpro/libnx/include/switch/**",
 				"/opt/devkitpro/portlibs/switch/include/**"
 			],
 			"defines": [
 				"__SWITCH__",
-				"DLL_EXPORT=extern \"C\" __attribute__((visibility(\"default\")))",
 				"SERVER_IMP"
 			],
 			"compilerPath": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc",
@@ -25,13 +27,15 @@
 				"${workspaceFolder}/include/**",
 				"${workspaceFolder}/source/thirdParty/**",
 				"${workspaceFolder}/source/thirdParty/lua-5.3.5/**",
+				"${workspaceFolder}/source/thirdParty/fbg/**",
+				"${workspaceFolder}/saltynx_motion_plugin/include/**",
+				"${workspaceFolder}/saltynx_motion_plugin/lib/libnx_min/nx/include/**",
 				"C:/msys2/opt/devkitpro/libnx/include/**",
 				"C:/msys2/opt/devkitpro/libnx/include/switch/**",
 				"C:/msys2/opt/devkitpro/portlibs/switch/include/**"
 			],
 			"defines": [
 				"__SWITCH__",
-				"DLL_EXPORT=extern \"C\" __declspec(dllexport)",
 				"SERVER_IMP"
 			],
 			"compilerPath": "C:/msys2/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc",

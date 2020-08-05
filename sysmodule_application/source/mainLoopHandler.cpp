@@ -91,26 +91,45 @@ void MainLoop::mainLoopHandler() {
 
 					gameName = std::string(getAppName(applicationProgramId));
 
-					bool dmntchtOpen = false;
-					dmntchtHasCheatProcess(&dmntchtOpen);
-					if(!dmntchtOpen) {
-						dmntchtForceOpenCheatProcess();
-					}
-
 					LOGD << "Get SaltyNX FPS offset";
 					// Used to do accurate frame advance
 					FILE* FPSoffset = fopen("sdmc:/SaltySD/FPSoffset.hex", "rb");
 					if(FPSoffset != NULL) {
 						fread(&FPSaddress, 0x5, 1, FPSoffset);
+						// The actual float FPS value is 8 bytes before
+						FPSaddress -= 0x8;
 						fclose(FPSoffset);
 					}
 
-					LOGD << "Get DMNT extents";
-					DmntCheatProcessMetadata appInfo;
-					dmntchtGetCheatProcessMetadata(&appInfo);
+					pauseApp(false, false, false, 0, 0, 0, 0);
 
-					heapBase = appInfo.heap_extents.base;
-					mainBase = appInfo.main_nso_extents.base;
+					// Obtain heap start
+					MemoryInfo meminfo;
+					u64 lastaddr = 0;
+					do {
+						lastaddr = meminfo.addr;
+						u32 pageinfo;
+						svcQueryDebugProcessMemory(&meminfo, &pageinfo, applicationDebug, meminfo.addr + meminfo.size);
+						if((meminfo.type & MemType_Heap) == MemType_Heap) {
+							heapBase = meminfo.addr;
+							break;
+						}
+					} while(lastaddr < meminfo.addr + meminfo.size);
+
+					// Obtain main start
+					LoaderModuleInfo proc_modules[2];
+					s32 numModules = 0;
+					Result rc      = ldrDmntGetProcessModuleInfo(applicationProcessId, proc_modules, 2, &numModules);
+
+					LoaderModuleInfo* proc_module = 0;
+					if(numModules == 2) {
+						proc_module = &proc_modules[1];
+					} else {
+						proc_module = &proc_modules[0];
+					}
+					mainBase = proc_module->base_address;
+
+					unpauseApp();
 
 					LOGD << "Application " + gameName + " opened";
 					ADD_TO_QUEUE(RecieveApplicationConnected, networkInstance, {
@@ -593,14 +612,7 @@ void MainLoop::clearEveryController() {
 
 void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, uint8_t autoAdvance, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex) {
 	if(!isPaused) {
-		// Debug application again
-
 #ifdef __SWITCH__
-		LOGD << "Pausing DMNT";
-		rc = dmntchtPauseCheatProcess();
-		if(R_FAILED(rc)) {
-			fatalThrow(rc);
-		}
 		LOGD << "Pause app";
 		rc = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
 		if(R_FAILED(rc)) {
@@ -749,6 +761,42 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 			LOGD << "Internet not connected, not sending framebuffer";
 		}
 	}
+}
+
+void MainLoop::waitForVsync() {
+#ifdef __SWITCH__
+	if(isPaused || FPSaddress == 0) {
+		rc = eventWait(&vsyncEvent, UINT64_MAX);
+		if(R_FAILED(rc))
+			fatalThrow(rc);
+		// svcSleepThread(1000000 * 1);
+	} else {
+		LOGD << "Wait for vsync";
+		while(true) {
+			// Repeatedly debug and undebug
+			rc = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
+			if(R_FAILED(rc)) {
+				fatalThrow(rc);
+			}
+			float FPS = 255.0;
+			svcReadDebugProcessMemory(&FPS, applicationDebug, FPSaddress, sizeof(FPS));
+
+			if(FPS != 0) {
+				// Clear the variable so we can wait for it again
+				float dummyFPS = 255.0;
+				svcWriteDebugProcessMemory(applicationDebug, &dummyFPS, FPSaddress, sizeof(dummyFPS));
+				svcCloseHandle(applicationDebug);
+				return;
+			} else {
+				svcCloseHandle(applicationDebug);
+				svcSleepThread(1000000 * 3);
+			}
+		}
+	}
+#endif
+#ifdef YUZU
+	yuzuSyscalls->function_emu_frameadvance(yuzuSyscalls->getYuzuInstance());
+#endif
 }
 
 uint8_t MainLoop::checkSleep() {

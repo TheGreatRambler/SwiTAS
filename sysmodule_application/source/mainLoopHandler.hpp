@@ -10,7 +10,6 @@
 #include <vector>
 
 #ifdef __SWITCH__
-#include <libstratosphere/dmntcht.hpp>
 #include <plog/Log.h>
 #include <switch.h>
 #endif
@@ -153,40 +152,13 @@ private:
 
 	void pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, uint8_t autoAdvance, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex);
 
-	void waitForVsync() {
-#ifdef __SWITCH__
-		if(isPaused || FPSaddress == 0) {
-			rc = eventWait(&vsyncEvent, UINT64_MAX);
-			if(R_FAILED(rc))
-				fatalThrow(rc);
-			// svcSleepThread(1000000 * 1);
-		} else {
-			while(true) {
-				LOGD << "Wait for vsync";
-				uint8_t FPS = 0;
-				dmntchtReadCheatProcessMemory(FPSaddress, &FPS, sizeof(FPS));
-				if(FPS != 0) {
-					// Clear the variable so we can wait for it again
-					uint8_t dummyFPS = 0;
-					dmntchtWriteCheatProcessMemory(FPSaddress, &dummyFPS, sizeof(dummyFPS));
-					return;
-				} else {
-					svcSleepThread(1000000 * 1);
-				}
-			}
-		}
-#endif
-#ifdef YUZU
-		yuzuSyscalls->function_emu_frameadvance(yuzuSyscalls->getYuzuInstance());
-#endif
-	}
+	void waitForVsync();
 
 	void unpauseApp() {
 		if(isPaused) {
 #ifdef __SWITCH__
 			// Unpause application
 			svcCloseHandle(applicationDebug);
-			dmntchtResumeCheatProcess();
 			isPaused = false;
 #endif
 #ifdef YUZU
