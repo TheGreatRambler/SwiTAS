@@ -86,5 +86,9 @@ namespace nn {
 		typedef uint32_t JoyXpadId;
 		typedef uint32_t SixAxisSensorHandle;
 		typedef uint32_t ConsoleSixAxisSensorHandle;
+
+		const float AccelerometerMax         = 7.0f;
+		const float AngularVelocityMax       = 5.0f;
+		const int SixAxisSensorStateCountMax = 16;
 	};
 };

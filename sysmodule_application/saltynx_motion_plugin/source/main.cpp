@@ -1,3 +1,4 @@
+#include <cstring>
 #include <saltysd/SaltySD_core.h>
 #include <saltysd/SaltySD_dynamic.h>
 #include <saltysd/SaltySD_ipc.h>
@@ -68,7 +69,19 @@ void __attribute__((weak)) NORETURN __libnx_exit(int rc) {
 		;
 }
 
-uint8_t dumpDebugInfo = true;
+uint8_t dumpDebugInfo       = true;
+uint8_t spoofMotionRequests = false;
+
+nn::hid::SixAxisSensorHandle* mainHandles[8] = NULL;
+nn::hid::SixAxisSensorHandle* handheldHandle = NULL;
+
+// Updated externally by SwiTAS
+nn::hid::SixAxisSensorState mainSixAxisState[8]  = { 0 };
+nn::hid::SixAxisSensorState handheldSixAxisState = { 0 };
+
+// Updated with the real values, for recording purposes
+nn::hid::SixAxisSensorState originalMainSixAxisState[8]  = { 0 };
+nn::hid::SixAxisSensorState originalHandheldSixAxisState = { 0 };
 
 /* nn::hid::EnableSixAxisSensorFusion(nn::hid::SixAxisSensorHandle const&, bool) */
 void EnableSixAxisSensorFusion(nn::hid::SixAxisSensorHandle* handle, bool param_2) {
@@ -113,38 +126,128 @@ void GetSixAxisSensorHandles1(nn::hid::SixAxisSensorHandle* handle1, nn::hid::Si
 
 /* nn::hid::GetSixAxisSensorHandles(nn::hid::SixAxisSensorHandle*, int, unsigned int const&,
    nn::util::BitFlagSet<32, nn::hid::NpadStyleTag>) */
-uint64_t GetSixAxisSensorHandles2(nn::hid::SixAxisSensorHandle* handleArr, int numOfControllers, nn::hid::NpadIdType id, uint32_t npadStyleBitflags) {
+uint64_t GetSixAxisSensorHandles2(nn::hid::SixAxisSensorHandle* handle, int numOfHandles, nn::hid::NpadIdType id, uint32_t npadStyleBitflags) {
+	// Ignore numOfHandles
 	if(dumpDebugInfo) {
 		SaltySD_printf("SwiTAS_MotionPlugin: GetSixAxisSensorHandles2 called\n");
 	}
-	return _ZN2nn3hid23GetSixAxisSensorHandlesEPNS0_19SixAxisSensorHandleEiRKjNS_4util10BitFlagSetILi32ENS0_12NpadStyleTagEEE(handleArr, numOfControllers, id, npadStyleBitflags);
+	// To see what kind of controller, and the bit flags with the chosen NpadStyleTag
+	// if (npadStyleBitflags & nn::hid::NpadStyleTag::ProController)
+	// Returned number is the number of successful handles
+
+	if(id == nn::hid::NpadIdType::Handheld) {
+		handheldHandle = handle;
+	} else {
+		if(i < 8) {
+			mainHandles[id] = handle;
+		} else {
+			if(dumpDebugInfo) {
+				SaltySD_printf("SwiTAS_MotionPlugin: GetSixAxisSensorHandles2: Invalid ID\n");
+			}
+		}
+	}
+
+	// Always handle one handle, even if the game requests more
+	return _ZN2nn3hid23GetSixAxisSensorHandlesEPNS0_19SixAxisSensorHandleEiRKjNS_4util10BitFlagSetILi32ENS0_12NpadStyleTagEEE(handle, 1, id, npadStyleBitflags);
 }
 
 /* nn::hid::GetSixAxisSensorState(nn::hid::SixAxisSensorState*, nn::hid::SixAxisSensorHandle const&)
  */
-void GetSixAxisSensorState(nn::hid::SixAxisSensorState* param_1, nn::hid::SixAxisSensorHandle* param_2) {
+void GetSixAxisSensorState(nn::hid::SixAxisSensorState* state, nn::hid::SixAxisSensorHandle* handle) {
 	if(dumpDebugInfo) {
 		SaltySD_printf("SwiTAS_MotionPlugin: GetSixAxisSensorState called\n");
 	}
-	_ZN2nn3hid21GetSixAxisSensorStateEPNS0_18SixAxisSensorStateERKNS0_19SixAxisSensorHandleE(param_1, param_2);
+
+	if(handle == handheldHandle) {
+		_ZN2nn3hid21GetSixAxisSensorStateEPNS0_18SixAxisSensorStateERKNS0_19SixAxisSensorHandleE(&originalHandheldSixAxisState, handle);
+
+		if(spoofMotionRequests) {
+			handheldSixAxisState.samplingNumber = originalHandheldSixAxisState.samplingNumber;
+			memcpy(state, &handheldSixAxisState, sizeof(nn::hid::SixAxisSensorState));
+		} else {
+			memcpy(state, &originalHandheldSixAxisState, sizeof(nn::hid::SixAxisSensorState));
+		}
+	} else {
+		for(nn::hid::NpadIdType i = 0; i < 8; i++) {
+			if(mainHandles[i] == handle) {
+				_ZN2nn3hid21GetSixAxisSensorStateEPNS0_18SixAxisSensorStateERKNS0_19SixAxisSensorHandleE(&originalMainSixAxisState[i], handle);
+
+				if(spoofMotionRequests) {
+					mainSixAxisState[i].samplingNumber = originalMainSixAxisState[i].samplingNumber;
+					memcpy(state, &mainSixAxisState[i], sizeof(nn::hid::SixAxisSensorState));
+					return;
+				} else {
+					memcpy(state, &originalMainSixAxisState[i], sizeof(nn::hid::SixAxisSensorState));
+					return;
+				}
+			}
+		}
+		if(dumpDebugInfo && spoofMotionRequests) {
+			SaltySD_printf("SwiTAS_MotionPlugin: GetSixAxisSensorState: Corresponding handle was not found\n");
+		}
+	}
 }
 
 /* nn::hid::GetSixAxisSensorStates(nn::hid::SixAxisSensorState*, int, nn::hid::BasicXpadId const&)
  */
-uint64_t GetSixAxisSensorStates1(nn::hid::SixAxisSensorState* param_1, int param_2, nn::hid::BasicXpadId* param_3) {
+uint64_t GetSixAxisSensorStates1(nn::hid::SixAxisSensorState* outStates, int count, nn::hid::BasicXpadId* handle) {
 	if(dumpDebugInfo) {
 		SaltySD_printf("SwiTAS_MotionPlugin: GetSixAxisSensorStates1 called\n");
 	}
-	return _ZN2nn3hid22GetSixAxisSensorStatesEPNS0_18SixAxisSensorStateEiRKNS0_11BasicXpadIdE(param_1, param_2, param_3);
+	return _ZN2nn3hid22GetSixAxisSensorStatesEPNS0_18SixAxisSensorStateEiRKNS0_11BasicXpadIdE(outStates, count, handle);
 }
 
 /* nn::hid::GetSixAxisSensorStates(nn::hid::SixAxisSensorState*, int, nn::hid::SixAxisSensorHandle
    const&) */
-uint64_t GetSixAxisSensorStates2(nn::hid::SixAxisSensorState* param_1, int param_2, nn::hid::SixAxisSensorHandle* param_3) {
+uint64_t GetSixAxisSensorStates2(nn::hid::SixAxisSensorState* outStates, int count, nn::hid::SixAxisSensorHandle* handle) {
 	if(dumpDebugInfo) {
 		SaltySD_printf("SwiTAS_MotionPlugin: GetSixAxisSensorStates2 called\n");
 	}
-	return _ZN2nn3hid22GetSixAxisSensorStatesEPNS0_18SixAxisSensorStateEiRKNS0_19SixAxisSensorHandleE(param_1, param_2, param_3);
+
+	// Pretty certain a few parts of each struct have to be modified to make this work
+
+	if(handle == handheldHandle) {
+		// One state version
+		_ZN2nn3hid21GetSixAxisSensorStateEPNS0_18SixAxisSensorStateERKNS0_19SixAxisSensorHandleE(&originalHandheldSixAxisState, handle);
+
+		for(int stateI = 0; stateI < count; i++) {
+			if(spoofMotionRequests) {
+				handheldSixAxisState.samplingNumber = originalHandheldSixAxisState.samplingNumber;
+				memcpy(&outStates[stateI], &handheldSixAxisState, sizeof(nn::hid::SixAxisSensorState));
+			} else {
+				memcpy(&outStates[stateI], &originalHandheldSixAxisState, sizeof(nn::hid::SixAxisSensorState));
+			}
+			// Pretend to take it back by 1 every time
+			originalHandheldSixAxisState.samplingNumber -= 1;
+		}
+	} else {
+		for(nn::hid::NpadIdType i = 0; i < 8; i++) {
+			if(mainHandles[i] == handle) {
+				// One state version
+				_ZN2nn3hid21GetSixAxisSensorStateEPNS0_18SixAxisSensorStateERKNS0_19SixAxisSensorHandleE(&originalMainSixAxisState[i], handle);
+
+				for(int stateI = 0; stateI < count; i++) {
+					if(spoofMotionRequests) {
+						mainSixAxisState[i].samplingNumber = originalMainSixAxisState[i].samplingNumber;
+						memcpy(&outStates[stateI], &mainSixAxisState[i], sizeof(nn::hid::SixAxisSensorState));
+					} else {
+						memcpy(&outStates[stateI], &originalMainSixAxisState[i], sizeof(nn::hid::SixAxisSensorState));
+					}
+					// Pretend to take it back by 1 every time
+					originalMainSixAxisState[i].samplingNumber -= 1;
+				}
+
+				return;
+			}
+		}
+		if(dumpDebugInfo && spoofMotionRequests) {
+			SaltySD_printf("SwiTAS_MotionPlugin: GetSixAxisSensorState: Corresponding handle was not found\n");
+		}
+	}
+
+	// return _ZN2nn3hid22GetSixAxisSensorStatesEPNS0_18SixAxisSensorStateEiRKNS0_19SixAxisSensorHandleE(outStates, count, handle);
+	// Maybe the count of states, I dunno
+	return count;
 }
 
 /* nn::hid::InitializeConsoleSixAxisSensor() */
@@ -200,6 +303,7 @@ void StartSixAxisSensor2(nn::hid::SixAxisSensorHandle* param_1) {
 	if(dumpDebugInfo) {
 		SaltySD_printf("SwiTAS_MotionPlugin: StartSixAxisSensor2 called\n");
 	}
+	// Standard used by games
 	_ZN2nn3hid18StartSixAxisSensorERKNS0_19SixAxisSensorHandleE(param_1);
 }
 
@@ -221,17 +325,23 @@ void StopSixAxisSensor2(nn::hid::SixAxisSensorHandle* param_1) {
 
 int main(int argc, char* argv[]) {
 	SaltySD_printf("SwiTAS_MotionPlugin: alive\n");
-	/*
-	uint64_t addr_FPS = (uint64_t)&FPS;
-	FILE* offset      = SaltySDCore_fopen("sdmc:/SaltySD/FPSoffset.hex", "wb");
-	SaltySDCore_fwrite(&addr_FPS, 0x5, 1, offset);
-	SaltySDCore_fclose(offset);
-	addr_nvnGetProcAddress = (uint64_t)&nvnGetProcAddress;
-	addr_nvnPresentTexture = (uint64_t)&nvnPresentTexture;
-	SaltySDCore_ReplaceImport("nvnBootstrapLoader", (void*)nvnBootstrapLoader_1);
-	SaltySDCore_ReplaceImport("eglSwapBuffers", (void*)eglSwap);
-	SaltySDCore_ReplaceImport("vkQueuePresentKHR", (void*)vulkanSwap);
-	*/
+
+	FILE* offsets = SaltySDCore_fopen("sdmc:/SaltySD/SwiTAS_MotionPlugin_Offsets.hex", "wb");
+
+	uint64_t mainSixAxisStateAddr = (uint64_t)&mainSixAxisState;
+	SaltySDCore_fwrite(&mainSixAxisStateAddr, sizeof(mainSixAxisStateAddr), 1, offsets);
+
+	uint64_t handheldSixAxisStateAddr = (uint64_t)&handheldSixAxisState;
+	SaltySDCore_fwrite(&handheldSixAxisStateAddr, sizeof(handheldSixAxisStateAddr), 1, offsets);
+
+	uint64_t originalMainSixAxisStateAddr = (uint64_t)&originalMainSixAxisState;
+	SaltySDCore_fwrite(&originalMainSixAxisStateAddr, sizeof(originalMainSixAxisStateAddr), 1, offsets);
+
+	uint64_t originalHandheldSixAxisStateAddr = (uint64_t)&originalHandheldSixAxisState;
+	SaltySDCore_fwrite(&originalHandheldSixAxisStateAddr, sizeof(originalHandheldSixAxisStateAddr), 1, offsets);
+
+	SaltySDCore_fclose(offsets);
+
 	// clang-format off
 	SaltySDCore_ReplaceImport(
 		"_ZN2nn3hid25EnableSixAxisSensorFusionERKNS0_19SixAxisSensorHandleEb",
