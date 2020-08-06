@@ -48,6 +48,14 @@ CFLAGS	+=	$(INCLUDE) -DSWITCH
 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -fpermissive -Wno-parentheses -Wno-write-strings -Wno-int-to-pointer-cast -std=gnu++11
 
+ifeq ($(BUILD),release)
+	# "Release" build - optimization, and no debug symbols
+	CFLAGS += -O3 -s -DNDEBUG
+else
+	# "Debug" build - no optimization, and debugging symbols
+	CFLAGS += -O2 -g
+endif
+
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(TOPDIR)/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 

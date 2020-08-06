@@ -176,6 +176,7 @@ all: $(BUILD)
 $(BUILD):
 	rm -rf ./source/sharedNetworkCode
 	cp -rp ../sharedNetworkCode ./source/sharedNetworkCode
+	make BUILD=$(BUILD) -C saltynx_motion_plugin
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/MakefileSysmodule
 	# Copy files into a ready-made directory structure
@@ -186,6 +187,7 @@ $(BUILD):
 	touch switch/atmosphere/contents/4200000000000BAC/flags/boot2.flag
 	mkdir -p switch/switas
 	cp -rp assets/controllerOverlay switch/switas
+	cp saltynx_motion_plugin/SwiTAS_MotionPlugin.elf switch/SaltySD/plugins/SwiTAS_MotionPlugin.elf
 
 #---------------------------------------------------------------------------------
 clean:

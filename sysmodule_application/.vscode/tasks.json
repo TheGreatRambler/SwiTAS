@@ -22,7 +22,7 @@
 			"label": "Build Sysmodule Release",
 			"type": "shell",
 			"promptOnClose": true,
-			"command": "make sysmodule BUILD_TYPE=release",
+			"command": "make sysmodule BUILD=release",
 			"presentation": {
 				"reveal": "always",
 				"panel": "dedicated"
@@ -62,6 +62,45 @@
 			"type": "shell",
 			"promptOnClose": true,
 			"command": "make yuzu BUILD=release",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			},
+			"problemMatcher": [{
+				"base": "$gcc",
+				"fileLocation": [
+					"autoDetect",
+					"${workspaceFolder}"
+				]
+			}],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"label": "Build SaltyNX-Plugin Debug",
+			"type": "shell",
+			"promptOnClose": true,
+			"command": "make DINFO=1 -C saltynx_motion_plugin",
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			},
+			"problemMatcher": [{
+				"base": "$gcc",
+				"fileLocation": [
+					"autoDetect",
+					"${workspaceFolder}"
+				]
+			}]
+		},
+		{
+			"label": "Build SaltyNX-Plugin Release",
+			"type": "shell",
+			"promptOnClose": true,
+			"command": "make BUILD=release -C saltynx_motion_plugin",
 			"presentation": {
 				"reveal": "always",
 				"panel": "dedicated"
