@@ -56,34 +56,6 @@ Handle orig_main_thread;
 void* orig_ctx;
 void* orig_saved_lr;
 
-void __libnx_init(void* ctx, Handle main_thread, void* saved_lr) {
-	extern char* fake_heap_start;
-	extern char* fake_heap_end;
-
-	fake_heap_start = &g_heap[0];
-	fake_heap_end   = &g_heap[sizeof g_heap];
-
-	orig_ctx         = ctx;
-	orig_main_thread = main_thread;
-	orig_saved_lr    = saved_lr;
-
-	// Call constructors.
-	// void __libc_init_array(void);
-	__libc_init_array();
-}
-
-void __attribute__((weak)) NORETURN __libnx_exit(int rc) {
-	// Call destructors.
-	// void __libc_fini_array(void);
-	__libc_fini_array();
-
-	SaltySD_printf("SaltySD Plugin: jumping to %p\n", orig_saved_lr);
-
-	__nx_exit(0, orig_saved_lr);
-	while(true)
-		;
-}
-
 // Print log info
 uint8_t dumpDebugInfo = true;
 // Allow SwiTAS to edit the motion sent to the game
@@ -124,6 +96,36 @@ void writeToFile(const char* str) {
 	}
 
 	_ZN2nn2fs9WriteFileENS0_10FileHandleElPKvmRKNS0_11WriteOptionE(logHandle, 0, (void*)str, strLength, nn::fs::WriteOption::CreateOption(nn::fs::WriteOptionFlag_Flush));
+}
+
+void __libnx_init(void* ctx, Handle main_thread, void* saved_lr) {
+	extern char* fake_heap_start;
+	extern char* fake_heap_end;
+
+	fake_heap_start = &g_heap[0];
+	fake_heap_end   = &g_heap[sizeof g_heap];
+
+	orig_ctx         = ctx;
+	orig_main_thread = main_thread;
+	orig_saved_lr    = saved_lr;
+
+	// Call constructors.
+	// void __libc_init_array(void);
+	__libc_init_array();
+}
+
+void __attribute__((weak)) NORETURN __libnx_exit(int rc) {
+	// Call destructors.
+	// void __libc_fini_array(void);
+	__libc_fini_array();
+
+	SaltySD_printf("SaltySD Plugin: jumping to %p\n", orig_saved_lr);
+
+	closeLogFile();
+
+	__nx_exit(0, orig_saved_lr);
+	while(true)
+		;
 }
 
 /* nn::hid::EnableSixAxisSensorFusion(nn::hid::SixAxisSensorHandle const&, bool) */
@@ -413,7 +415,9 @@ void StopSixAxisSensor2(nn::hid::SixAxisSensorHandle* param_1) {
 int main(int argc, char* argv[]) {
 	SaltySD_printf("SwiTAS_MotionPlugin: alive\n");
 
-	FILE* offsets = SaltySDCore_fopen("sdmc:/SaltySD/SwiTAS_MotionPlugin_Offsets.hex", "wb");
+	const char* pointersPath = "sdmc:/SaltySD/SwiTAS_MotionPlugin_Offsets.hex";
+	SaltySDCore_remove(pointersPath);
+	FILE* offsets = SaltySDCore_fopen(pointersPath, "wb");
 
 	uint64_t mainSixAxisStateAddr = (uint64_t)&mainSixAxisState;
 	SaltySDCore_fwrite(&mainSixAxisStateAddr, sizeof(mainSixAxisStateAddr), 1, offsets);
@@ -487,4 +491,6 @@ int main(int argc, char* argv[]) {
 	// clang-format on
 
 	SaltySD_printf("SwiTAS_MotionPlugin: injection finished\n");
+
+	openLogFile();
 }
