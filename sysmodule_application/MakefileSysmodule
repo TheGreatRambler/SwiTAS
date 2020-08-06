@@ -188,6 +188,7 @@ $(BUILD):
 	mkdir -p switch/switas
 	cp -rp assets/controllerOverlay switch/switas
 	cp saltynx_motion_plugin/SwiTAS_MotionPlugin.elf switch/SaltySD/plugins/SwiTAS_MotionPlugin.elf
+	touch switch/SaltySD/SwiTAS_MotionPlugin.log
 
 #---------------------------------------------------------------------------------
 clean:

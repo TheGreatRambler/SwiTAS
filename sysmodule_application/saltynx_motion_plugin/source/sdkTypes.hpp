@@ -5,6 +5,33 @@
 #include <type_traits>
 
 namespace nn {
+	namespace fs {
+		struct FileHandle {
+			void* handle;
+		};
+
+		enum OpenMode {
+			OpenMode_Read   = BIT(0),
+			OpenMode_Write  = BIT(1),
+			OpenMode_Append = BIT(2),
+
+			OpenMode_ReadWrite = OpenMode_Read | OpenMode_Write
+		};
+
+		struct WriteOption {
+			int flags;
+
+			static WriteOption CreateOption(int flags) {
+				WriteOption op;
+				op.flags = flags;
+				return op;
+			}
+		};
+
+		enum WriteOptionFlag { WriteOptionFlag_Flush = BIT(0) };
+
+	};
+
 	namespace util {
 		struct Float3 {
 			float x;
