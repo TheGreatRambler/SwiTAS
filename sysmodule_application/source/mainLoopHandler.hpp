@@ -10,6 +10,7 @@
 #include <vector>
 
 #ifdef __SWITCH__
+#include <libstratosphere/dmntcht.hpp>
 #include <plog/Log.h>
 #include <switch.h>
 #endif
@@ -56,7 +57,6 @@ private:
 
 #ifdef __SWITCH__
 	Result rc;
-	Handle applicationDebug;
 
 	ViDisplay disp;
 
@@ -130,7 +130,7 @@ private:
 	std::vector<uint8_t> getMemory(uint64_t addr, uint64_t size) {
 		std::vector<uint8_t> region(size);
 #ifdef __SWITCH__
-		svcReadDebugProcessMemory(region.data(), applicationDebug, addr, size);
+		dmntchtReadCheatProcessMemory(addr, region.data(), size);
 #endif
 #ifdef YUZU
 		yuzuSyscalls->function_rom_readbytes(yuzuSyscalls->getYuzuInstance(), region.data(), addr, size);
@@ -158,7 +158,7 @@ private:
 		if(isPaused) {
 #ifdef __SWITCH__
 			// Unpause application
-			svcCloseHandle(applicationDebug);
+			dmntchtResumeCheatProcess();
 			isPaused = false;
 #endif
 #ifdef YUZU

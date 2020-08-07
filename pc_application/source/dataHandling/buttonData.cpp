@@ -160,8 +160,8 @@ FrameNum ButtonData::textToFrames(DataProcessing* dataProcessing, std::string te
 		// Joysticks
 		std::vector<std::string> joystickPartsLeft = HELPERS::splitString(parts[currentIndexInParts], ';');
 		if(joystickPartsLeft.size() == 2) {
-			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::LEFT_X, strtol(joystickPartsLeft[0].c_str(), nullptr, 10));
-			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::LEFT_Y, strtol(joystickPartsLeft[1].c_str(), nullptr, 10));
+			dataProcessing->setNumberValuesJoystick(thisDataIndex, ControllerNumberValues::LEFT_X, strtol(joystickPartsLeft[0].c_str(), nullptr, 10));
+			dataProcessing->setNumberValuesJoystick(thisDataIndex, ControllerNumberValues::LEFT_Y, strtol(joystickPartsLeft[1].c_str(), nullptr, 10));
 		} else {
 			continue;
 		}
@@ -172,8 +172,8 @@ FrameNum ButtonData::textToFrames(DataProcessing* dataProcessing, std::string te
 
 		std::vector<std::string> joystickPartsRight = HELPERS::splitString(parts[currentIndexInParts], ';');
 		if(joystickPartsRight.size() == 2) {
-			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::RIGHT_X, strtol(joystickPartsRight[0].c_str(), nullptr, 10));
-			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::RIGHT_Y, strtol(joystickPartsRight[1].c_str(), nullptr, 10));
+			dataProcessing->setNumberValuesJoystick(thisDataIndex, ControllerNumberValues::RIGHT_X, strtol(joystickPartsRight[0].c_str(), nullptr, 10));
+			dataProcessing->setNumberValuesJoystick(thisDataIndex, ControllerNumberValues::RIGHT_Y, strtol(joystickPartsRight[1].c_str(), nullptr, 10));
 		} else {
 			continue;
 		}
@@ -186,9 +186,9 @@ FrameNum ButtonData::textToFrames(DataProcessing* dataProcessing, std::string te
 
 		std::vector<std::string> accelParts = HELPERS::splitString(parts[currentIndexInParts], ';');
 		if(accelParts.size() == 3) {
-			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::ACCEL_X, strtof(accelParts[0].c_str(), nullptr));
-			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::ACCEL_Y, strtof(accelParts[1].c_str(), nullptr));
-			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::ACCEL_Z, strtof(accelParts[2].c_str(), nullptr));
+			dataProcessing->setNumberValuesMotion(thisDataIndex, ControllerNumberValues::ACCEL_X, strtof(accelParts[0].c_str(), nullptr));
+			dataProcessing->setNumberValuesMotion(thisDataIndex, ControllerNumberValues::ACCEL_Y, strtof(accelParts[1].c_str(), nullptr));
+			dataProcessing->setNumberValuesMotion(thisDataIndex, ControllerNumberValues::ACCEL_Z, strtof(accelParts[2].c_str(), nullptr));
 		} else {
 			continue;
 		}
@@ -199,9 +199,9 @@ FrameNum ButtonData::textToFrames(DataProcessing* dataProcessing, std::string te
 
 		std::vector<std::string> gyroParts = HELPERS::splitString(parts[currentIndexInParts], ';');
 		if(gyroParts.size() == 3) {
-			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::GYRO_X, strtof(gyroParts[0].c_str(), nullptr));
-			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::GYRO_Y, strtof(gyroParts[1].c_str(), nullptr));
-			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::GYRO_Z, strtof(gyroParts[2].c_str(), nullptr));
+			dataProcessing->setNumberValuesMotion(thisDataIndex, ControllerNumberValues::GYRO_X, strtof(gyroParts[0].c_str(), nullptr));
+			dataProcessing->setNumberValuesMotion(thisDataIndex, ControllerNumberValues::GYRO_Y, strtof(gyroParts[1].c_str(), nullptr));
+			dataProcessing->setNumberValuesMotion(thisDataIndex, ControllerNumberValues::GYRO_Z, strtof(gyroParts[2].c_str(), nullptr));
 		} else {
 			continue;
 		}
@@ -212,9 +212,9 @@ FrameNum ButtonData::textToFrames(DataProcessing* dataProcessing, std::string te
 
 		std::vector<std::string> angleParts = HELPERS::splitString(parts[currentIndexInParts], ';');
 		if(angleParts.size() == 3) {
-			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::ANGLE_X, strtof(angleParts[0].c_str(), nullptr));
-			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::ANGLE_Y, strtof(angleParts[1].c_str(), nullptr));
-			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::ANGLE_Z, strtof(angleParts[2].c_str(), nullptr));
+			dataProcessing->setNumberValuesMotion(thisDataIndex, ControllerNumberValues::ANGLE_X, strtof(angleParts[0].c_str(), nullptr));
+			dataProcessing->setNumberValuesMotion(thisDataIndex, ControllerNumberValues::ANGLE_Y, strtof(angleParts[1].c_str(), nullptr));
+			dataProcessing->setNumberValuesMotion(thisDataIndex, ControllerNumberValues::ANGLE_Z, strtof(angleParts[2].c_str(), nullptr));
 		} else {
 			continue;
 		}
@@ -338,9 +338,12 @@ void ButtonData::transferControllerData(ControllerData src, std::shared_ptr<Cont
 	dest->ACCEL_X    = src.ACCEL_X;
 	dest->ACCEL_Y    = src.ACCEL_Y;
 	dest->ACCEL_Z    = src.ACCEL_Z;
-	dest->GYRO_1     = src.GYRO_1;
-	dest->GYRO_2     = src.GYRO_2;
-	dest->GYRO_3     = src.GYRO_3;
+	dest->GYRO_X     = src.GYRO_X;
+	dest->GYRO_Y     = src.GYRO_Y;
+	dest->GYRO_Z     = src.GYRO_Z;
+	dest->ANGLE_X    = src.ANGLE_X;
+	dest->ANGLE_Y    = src.ANGLE_Y;
+	dest->ANGLE_Z    = src.ANGLE_Z;
 	dest->frameState = src.frameState;
 }
 
@@ -356,9 +359,12 @@ bool ButtonData::isEmptyControllerData(std::shared_ptr<ControllerData> data) {
 		(data->ACCEL_X    == emptyData.ACCEL_X)   &&
 		(data->ACCEL_Y    == emptyData.ACCEL_Y)   &&
 		(data->ACCEL_Z    == emptyData.ACCEL_Z)   &&
-		(data->GYRO_1     == emptyData.GYRO_1)    &&
-		(data->GYRO_2     == emptyData.GYRO_2)    &&
-		(data->GYRO_3     == emptyData.GYRO_3)    &&
+		(data->GYRO_X     == emptyData.GYRO_X)    &&
+		(data->GYRO_Y     == emptyData.GYRO_Y)    &&
+		(data->GYRO_Z     == emptyData.GYRO_Z)    &&
+		(data->ANGLE_X     == emptyData.ANGLE_X)  &&
+		(data->ANGLE_Y     == emptyData.ANGLE_Y)  &&
+		(data->ANGLE_Z     == emptyData.ANGLE_Z)  &&
 		(data->frameState == emptyData.frameState);
 	// clang-format on
 }

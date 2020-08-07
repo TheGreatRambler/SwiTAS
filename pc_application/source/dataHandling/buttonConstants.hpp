@@ -61,7 +61,10 @@ enum ControllerNumberValues : uint8_t {
 	ACCEL_X,
 	ACCEL_Y,
 	ACCEL_Z,
-	GYRO_1,
-	GYRO_2,
-	GYRO_3,
+	GYRO_X,
+	GYRO_Y,
+	GYRO_Z,
+	ANGLE_X,
+	ANGLE_Y,
+	ANGLE_Z,
 };

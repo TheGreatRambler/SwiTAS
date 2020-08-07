@@ -318,7 +318,7 @@ public:
 	int16_t getNumberValuesSpecificJoystick(FrameNum frame, ControllerNumberValues joystickId, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
 	int16_t getNumberValueCurrentJoystick(ControllerNumberValues joystickId) const;
 	// Equivlents for accel etc
-void triggerNumberValuesMotion(ControllerNumberValues joystickId, float value);
+	void triggerNumberValuesMotion(ControllerNumberValues joystickId, float value);
 	void setNumberValuesMotion(FrameNum frame, ControllerNumberValues joystickId, float value);
 	float getNumberValuesMotion(FrameNum frame, ControllerNumberValues joystickId) const;
 	float getNumberValuesSpecificMotion(FrameNum frame, ControllerNumberValues joystickId, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;

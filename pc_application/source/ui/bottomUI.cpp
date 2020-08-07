@@ -169,11 +169,11 @@ void JoystickCanvas::draw(wxDC& dc) {
 	int16_t joyY;
 
 	if(isLeftJoystick) {
-		joyX = inputInstance->getNumberValueCurrent(ControllerNumberValues::LEFT_X);
-		joyY = inputInstance->getNumberValueCurrent(ControllerNumberValues::LEFT_Y);
+		joyX = inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::LEFT_X);
+		joyY = inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::LEFT_Y);
 	} else {
-		joyX = inputInstance->getNumberValueCurrent(ControllerNumberValues::RIGHT_X);
-		joyY = inputInstance->getNumberValueCurrent(ControllerNumberValues::RIGHT_Y);
+		joyX = inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::RIGHT_X);
+		joyY = inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::RIGHT_Y);
 	}
 
 	// Flip the height to resemble the coordinate system
@@ -215,11 +215,11 @@ void JoystickCanvas::draw(wxDC& dc) {
 
 	// Show the actual value underneath
 	if(isLeftJoystick) {
-		xInput->SetValue(inputInstance->getNumberValueCurrent(ControllerNumberValues::LEFT_X));
-		yInput->SetValue(inputInstance->getNumberValueCurrent(ControllerNumberValues::LEFT_Y));
+		xInput->SetValue(inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::LEFT_X));
+		yInput->SetValue(inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::LEFT_Y));
 	} else {
-		xInput->SetValue(inputInstance->getNumberValueCurrent(ControllerNumberValues::RIGHT_X));
-		yInput->SetValue(inputInstance->getNumberValueCurrent(ControllerNumberValues::RIGHT_Y));
+		xInput->SetValue(inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::RIGHT_X));
+		yInput->SetValue(inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::RIGHT_Y));
 	}
 }
 
@@ -228,11 +228,11 @@ void JoystickCanvas::correctForCircleLock() {
 		int x;
 		int y;
 		if(isLeftJoystick) {
-			x = inputInstance->getNumberValueCurrent(ControllerNumberValues::LEFT_X);
-			y = inputInstance->getNumberValueCurrent(ControllerNumberValues::LEFT_Y);
+			x = inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::LEFT_X);
+			y = inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::LEFT_Y);
 		} else {
-			x = inputInstance->getNumberValueCurrent(ControllerNumberValues::RIGHT_X);
-			y = inputInstance->getNumberValueCurrent(ControllerNumberValues::RIGHT_Y);
+			x = inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::RIGHT_X);
+			y = inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::RIGHT_Y);
 		}
 
 		// This corrects for circle lock if the checkbox is set
@@ -245,11 +245,11 @@ void JoystickCanvas::correctForCircleLock() {
 		}
 
 		if(isLeftJoystick) {
-			inputInstance->triggerNumberValues(ControllerNumberValues::LEFT_X, x);
-			inputInstance->triggerNumberValues(ControllerNumberValues::LEFT_Y, y);
+			inputInstance->triggerNumberValuesJoystick(ControllerNumberValues::LEFT_X, x);
+			inputInstance->triggerNumberValuesJoystick(ControllerNumberValues::LEFT_Y, y);
 		} else {
-			inputInstance->triggerNumberValues(ControllerNumberValues::RIGHT_X, x);
-			inputInstance->triggerNumberValues(ControllerNumberValues::RIGHT_Y, y);
+			inputInstance->triggerNumberValuesJoystick(ControllerNumberValues::RIGHT_X, x);
+			inputInstance->triggerNumberValuesJoystick(ControllerNumberValues::RIGHT_Y, y);
 		}
 	}
 }
@@ -267,11 +267,11 @@ void JoystickCanvas::onMouseClick(wxMouseEvent& event) {
 
 		// Mutiply by twice the radius and then subtract the radius to get the middle
 		if(isLeftJoystick) {
-			inputInstance->triggerNumberValues(ControllerNumberValues::LEFT_X, scaledX);
-			inputInstance->triggerNumberValues(ControllerNumberValues::LEFT_Y, scaledY);
+			inputInstance->triggerNumberValuesJoystick(ControllerNumberValues::LEFT_X, scaledX);
+			inputInstance->triggerNumberValuesJoystick(ControllerNumberValues::LEFT_Y, scaledY);
 		} else {
-			inputInstance->triggerNumberValues(ControllerNumberValues::RIGHT_X, scaledX);
-			inputInstance->triggerNumberValues(ControllerNumberValues::RIGHT_Y, scaledY);
+			inputInstance->triggerNumberValuesJoystick(ControllerNumberValues::RIGHT_X, scaledX);
+			inputInstance->triggerNumberValuesJoystick(ControllerNumberValues::RIGHT_Y, scaledY);
 		}
 
 		correctForCircleLock();
@@ -302,9 +302,9 @@ void JoystickCanvas::xValueSet(wxSpinEvent& event) {
 	setXValue(position);
 
 	if(isLeftJoystick) {
-		event.SetPosition(inputInstance->getNumberValueCurrent(ControllerNumberValues::LEFT_X));
+		event.SetPosition(inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::LEFT_X));
 	} else {
-		event.SetPosition(inputInstance->getNumberValueCurrent(ControllerNumberValues::RIGHT_X));
+		event.SetPosition(inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::RIGHT_X));
 	}
 }
 
@@ -321,18 +321,18 @@ void JoystickCanvas::yValueSet(wxSpinEvent& event) {
 	setYValue(position);
 
 	if(isLeftJoystick) {
-		event.SetPosition(inputInstance->getNumberValueCurrent(ControllerNumberValues::LEFT_Y));
+		event.SetPosition(inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::LEFT_Y));
 	} else {
-		event.SetPosition(inputInstance->getNumberValueCurrent(ControllerNumberValues::RIGHT_Y));
+		event.SetPosition(inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::RIGHT_Y));
 	}
 }
 
 void JoystickCanvas::setXValue(int16_t x) {
 	if(isLeftJoystick) {
-		inputInstance->triggerNumberValues(ControllerNumberValues::LEFT_X, x);
+		inputInstance->triggerNumberValuesJoystick(ControllerNumberValues::LEFT_X, x);
 		correctForCircleLock();
 	} else {
-		inputInstance->triggerNumberValues(ControllerNumberValues::RIGHT_X, x);
+		inputInstance->triggerNumberValuesJoystick(ControllerNumberValues::RIGHT_X, x);
 		correctForCircleLock();
 	}
 	Refresh();
@@ -340,10 +340,10 @@ void JoystickCanvas::setXValue(int16_t x) {
 
 void JoystickCanvas::setYValue(int16_t y) {
 	if(isLeftJoystick) {
-		inputInstance->triggerNumberValues(ControllerNumberValues::LEFT_Y, y);
+		inputInstance->triggerNumberValuesJoystick(ControllerNumberValues::LEFT_Y, y);
 		correctForCircleLock();
 	} else {
-		inputInstance->triggerNumberValues(ControllerNumberValues::RIGHT_Y, y);
+		inputInstance->triggerNumberValuesJoystick(ControllerNumberValues::RIGHT_Y, y);
 		correctForCircleLock();
 	}
 	Refresh();

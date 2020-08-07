@@ -101,35 +101,19 @@ void MainLoop::mainLoopHandler() {
 						fclose(FPSoffset);
 					}
 
-					pauseApp(false, false, false, 0, 0, 0, 0);
-
-					// Obtain heap start
-					MemoryInfo meminfo;
-					u64 lastaddr = 0;
-					do {
-						lastaddr = meminfo.addr;
-						u32 pageinfo;
-						svcQueryDebugProcessMemory(&meminfo, &pageinfo, applicationDebug, meminfo.addr + meminfo.size);
-						if((meminfo.type & MemType_Heap) == MemType_Heap) {
-							heapBase = meminfo.addr;
-							break;
-						}
-					} while(lastaddr < meminfo.addr + meminfo.size);
-
-					// Obtain main start
-					LoaderModuleInfo proc_modules[2];
-					s32 numModules = 0;
-					Result rc      = ldrDmntGetProcessModuleInfo(applicationProcessId, proc_modules, 2, &numModules);
-
-					LoaderModuleInfo* proc_module = 0;
-					if(numModules == 2) {
-						proc_module = &proc_modules[1];
-					} else {
-						proc_module = &proc_modules[0];
+					// Enable DMNT
+					bool cheatProcessActive = false;
+					dmntchtHasCheatProcess(&cheatProcessActive);
+					if(cheatProcessActive == false) {
+						dmntchtForceOpenCheatProcess();
 					}
-					mainBase = proc_module->base_address;
 
-					unpauseApp();
+					LOGD << "Get DMNT extents";
+					DmntCheatProcessMetadata appInfo;
+					dmntchtGetCheatProcessMetadata(&appInfo);
+
+					heapBase = appInfo.heap_extents.base;
+					mainBase = appInfo.main_nso_extents.base;
 
 					LOGD << "Application " + gameName + " opened";
 					ADD_TO_QUEUE(RecieveApplicationConnected, networkInstance, {
@@ -361,12 +345,6 @@ void MainLoop::sendGameInfo() {
 			data.userNickname = std::string(profileBase.nickname);
 #endif
 
-			uint8_t wasPaused = isPaused;
-
-			if(!wasPaused) {
-				pauseApp(false, false, false, 0, 0, 0, 0);
-			}
-
 			// I don't know how to handle this for Yuzu, so ignore for now
 
 #ifdef __SWITCH__
@@ -375,9 +353,8 @@ void MainLoop::sendGameInfo() {
 				// LOGD << "Obtained memory region at: " << addr;
 
 				MemoryInfo info = { 0 };
-				uint32_t pageinfo;
-				rc   = svcQueryDebugProcessMemory(&info, &pageinfo, applicationDebug, addr);
-				addr = info.addr + info.size;
+				rc              = dmntchtQueryCheatProcessMemory(&info, addr);
+				addr            = info.addr + info.size;
 
 				if(R_FAILED(rc)) {
 					break;
@@ -396,11 +373,6 @@ void MainLoop::sendGameInfo() {
 				data.memoryInfo.push_back(memoryInfo);
 			}
 #endif
-
-			if(!wasPaused) {
-				unpauseApp();
-				lastNanoseconds = 0;
-			}
 
 #ifdef __SWITCH__
 			LOGD << "Game info sent";
@@ -613,26 +585,10 @@ void MainLoop::clearEveryController() {
 void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, uint8_t autoAdvance, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex) {
 	if(!isPaused) {
 #ifdef __SWITCH__
-		LOGD << "Pause app";
-		rc = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
+		LOGD << "Pausing via DMNT";
+		rc = dmntchtPauseCheatProcess();
 		if(R_FAILED(rc)) {
 			fatalThrow(rc);
-		}
-		if(lastNanoseconds != 0) {
-			uint64_t lastAttempt = armTicksToNs(armGetSystemTick()) - lastNanoseconds;
-			/*
-			while(lastAttempt < (1000000 * 16)) {
-				// Keep looping
-				isPaused = true;
-				unpauseApp();
-				rc = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
-				svcSleepThread(1000000 * 3);
-				lastAttempt = armTicksToNs(armGetSystemTick()) - lastNanoseconds;
-			}
-			*/
-			lastFrameAttempt = (int)(lastAttempt / 1000000);
-			LOGD << "Time taken between frames: " << lastFrameAttempt;
-			lastNanoseconds = 0;
 		}
 		isPaused = true;
 #endif
@@ -684,7 +640,7 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 
 				try {
 #ifdef __SWITCH__
-					uint64_t addr = calculator::eval<uint64_t>(revisedExpression, applicationDebug);
+					uint64_t addr = calculator::eval<uint64_t>(revisedExpression);
 #endif
 #ifdef YUZU
 					uint64_t addr = calculator::eval<uint64_t>(revisedExpression, yuzuSyscalls);
@@ -773,22 +729,18 @@ void MainLoop::waitForVsync() {
 	} else {
 		LOGD << "Wait for vsync";
 		while(true) {
-			// Repeatedly debug and undebug
-			rc = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
+			float FPS = 255.0;
+			rc        = dmntchtReadCheatProcessMemory(FPSaddress, &FPS, sizeof(FPS));
 			if(R_FAILED(rc)) {
 				fatalThrow(rc);
 			}
-			float FPS = 255.0;
-			svcReadDebugProcessMemory(&FPS, applicationDebug, FPSaddress, sizeof(FPS));
 
 			if(FPS != 0) {
 				// Clear the variable so we can wait for it again
 				float dummyFPS = 255.0;
-				svcWriteDebugProcessMemory(applicationDebug, &dummyFPS, FPSaddress, sizeof(dummyFPS));
-				svcCloseHandle(applicationDebug);
+				dmntchtWriteCheatProcessMemory(FPSaddress, &dummyFPS, sizeof(dummyFPS));
 				return;
 			} else {
-				svcCloseHandle(applicationDebug);
 				svcSleepThread(1000000 * 3);
 			}
 		}

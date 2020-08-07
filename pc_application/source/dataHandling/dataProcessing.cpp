@@ -839,13 +839,13 @@ void DataProcessing::triggerButton(Btn button) {
 }
 
 // This includes joysticks, accel, gyro, etc...
-void DataProcessing::triggerNumberValues(ControllerNumberValues joystickId, int16_t value) {
+void DataProcessing::triggerNumberValuesJoystick(ControllerNumberValues joystickId, int16_t value) {
 	// Trigger joystick, can occur over range
 	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if(firstSelectedItem != wxNOT_FOUND) {
 		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
 		for(FrameNum i = firstSelectedItem; i <= lastSelectedItem; i++) {
-			setNumberValues(i, joystickId, value);
+			setNumberValuesJoystick(i, joystickId, value);
 			// No refresh for now, as the joystick is not visible in the allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs
 		}
 	}
@@ -874,7 +874,7 @@ void DataProcessing::clearAllButtons(FrameNum frame) {
 	RefreshItem(frame);
 }
 
-void DataProcessing::setNumberValues(FrameNum frame, ControllerNumberValues joystickId, int16_t value) {
+void DataProcessing::setNumberValuesJoystick(FrameNum frame, ControllerNumberValues joystickId, int16_t value) {
 	switch(joystickId) {
 	case ControllerNumberValues::LEFT_X:
 		getInputsList()->at(frame)->LS_X = value;
@@ -889,6 +889,24 @@ void DataProcessing::setNumberValues(FrameNum frame, ControllerNumberValues joys
 		getInputsList()->at(frame)->RS_Y = value;
 		break;
 	case ControllerNumberValues::ACCEL_X:
+	case ControllerNumberValues::ACCEL_Y:
+	case ControllerNumberValues::ACCEL_Z:
+	case ControllerNumberValues::GYRO_X:
+	case ControllerNumberValues::GYRO_Y:
+	case ControllerNumberValues::GYRO_Z:
+	case ControllerNumberValues::ANGLE_X:
+	case ControllerNumberValues::ANGLE_Y:
+	case ControllerNumberValues::ANGLE_Z:
+		break;
+	}
+
+	modifyCurrentFrameViews(frame);
+	invalidateRun(frame);
+}
+
+void DataProcessing::setNumberValuesMotion(FrameNum frame, ControllerNumberValues joystickId, float value) {
+	switch(joystickId) {
+	case ControllerNumberValues::ACCEL_X:
 		getInputsList()->at(frame)->ACCEL_X = value;
 		break;
 	case ControllerNumberValues::ACCEL_Y:
@@ -897,14 +915,28 @@ void DataProcessing::setNumberValues(FrameNum frame, ControllerNumberValues joys
 	case ControllerNumberValues::ACCEL_Z:
 		getInputsList()->at(frame)->ACCEL_Z = value;
 		break;
-	case ControllerNumberValues::GYRO_1:
-		getInputsList()->at(frame)->GYRO_1 = value;
+	case ControllerNumberValues::GYRO_X:
+		getInputsList()->at(frame)->GYRO_X = value;
 		break;
-	case ControllerNumberValues::GYRO_2:
-		getInputsList()->at(frame)->GYRO_2 = value;
+	case ControllerNumberValues::GYRO_Y:
+		getInputsList()->at(frame)->GYRO_Y = value;
 		break;
-	case ControllerNumberValues::GYRO_3:
-		getInputsList()->at(frame)->GYRO_3 = value;
+	case ControllerNumberValues::GYRO_Z:
+		getInputsList()->at(frame)->GYRO_Z = value;
+		break;
+	case ControllerNumberValues::ANGLE_X:
+		getInputsList()->at(frame)->ANGLE_X = value;
+		break;
+	case ControllerNumberValues::ANGLE_Y:
+		getInputsList()->at(frame)->ANGLE_Y = value;
+		break;
+	case ControllerNumberValues::ANGLE_Z:
+		getInputsList()->at(frame)->ANGLE_Z = value;
+		break;
+	case ControllerNumberValues::LEFT_X:
+	case ControllerNumberValues::LEFT_Y:
+	case ControllerNumberValues::RIGHT_X:
+	case ControllerNumberValues::RIGHT_Y:
 		break;
 	}
 
@@ -912,7 +944,7 @@ void DataProcessing::setNumberValues(FrameNum frame, ControllerNumberValues joys
 	invalidateRun(frame);
 }
 
-int16_t DataProcessing::getNumberValues(FrameNum frame, ControllerNumberValues joystickId) const {
+int16_t DataProcessing::getNumberValuesJoystick(FrameNum frame, ControllerNumberValues joystickId) const {
 	switch(joystickId) {
 	case ControllerNumberValues::LEFT_X:
 		return getInputsList()->at(frame)->LS_X;
@@ -927,6 +959,21 @@ int16_t DataProcessing::getNumberValues(FrameNum frame, ControllerNumberValues j
 		return getInputsList()->at(frame)->RS_Y;
 		break;
 	case ControllerNumberValues::ACCEL_X:
+	case ControllerNumberValues::ACCEL_Y:
+	case ControllerNumberValues::ACCEL_Z:
+	case ControllerNumberValues::GYRO_X:
+	case ControllerNumberValues::GYRO_Y:
+	case ControllerNumberValues::GYRO_Z:
+	case ControllerNumberValues::ANGLE_X:
+	case ControllerNumberValues::ANGLE_Y:
+	case ControllerNumberValues::ANGLE_Z:
+		break;
+	}
+}
+
+float DataProcessing::getNumberValuesMotion(FrameNum frame, ControllerNumberValues joystickId) const {
+	switch(joystickId) {
+	case ControllerNumberValues::ACCEL_X:
 		return getInputsList()->at(frame)->ACCEL_X;
 		break;
 	case ControllerNumberValues::ACCEL_Y:
@@ -935,19 +982,33 @@ int16_t DataProcessing::getNumberValues(FrameNum frame, ControllerNumberValues j
 	case ControllerNumberValues::ACCEL_Z:
 		return getInputsList()->at(frame)->ACCEL_Z;
 		break;
-	case ControllerNumberValues::GYRO_1:
-		return getInputsList()->at(frame)->GYRO_1;
+	case ControllerNumberValues::GYRO_X:
+		return getInputsList()->at(frame)->GYRO_X;
 		break;
-	case ControllerNumberValues::GYRO_2:
-		return getInputsList()->at(frame)->GYRO_2;
+	case ControllerNumberValues::GYRO_Y:
+		return getInputsList()->at(frame)->GYRO_Y;
 		break;
-	case ControllerNumberValues::GYRO_3:
-		return getInputsList()->at(frame)->GYRO_3;
+	case ControllerNumberValues::GYRO_Z:
+		return getInputsList()->at(frame)->GYRO_Z;
+		break;
+	case ControllerNumberValues::ANGLE_X:
+		return getInputsList()->at(frame)->ANGLE_X;
+		break;
+	case ControllerNumberValues::ANGLE_Y:
+		return getInputsList()->at(frame)->ANGLE_Y;
+		break;
+	case ControllerNumberValues::ANGLE_Z:
+		return getInputsList()->at(frame)->ANGLE_Z;
+		break;
+	case ControllerNumberValues::LEFT_X:
+	case ControllerNumberValues::LEFT_Y:
+	case ControllerNumberValues::RIGHT_X:
+	case ControllerNumberValues::RIGHT_Y:
 		break;
 	}
 }
 
-int16_t DataProcessing::getNumberValuesSpecific(FrameNum frame, ControllerNumberValues joystickId, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
+int16_t DataProcessing::getNumberValuesSpecificJoystick(FrameNum frame, ControllerNumberValues joystickId, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
 	switch(joystickId) {
 	case ControllerNumberValues::LEFT_X:
 		return getControllerData(player, savestateHookNum, branch, frame)->LS_X;
@@ -962,6 +1023,21 @@ int16_t DataProcessing::getNumberValuesSpecific(FrameNum frame, ControllerNumber
 		return getControllerData(player, savestateHookNum, branch, frame)->RS_Y;
 		break;
 	case ControllerNumberValues::ACCEL_X:
+	case ControllerNumberValues::ACCEL_Y:
+	case ControllerNumberValues::ACCEL_Z:
+	case ControllerNumberValues::GYRO_X:
+	case ControllerNumberValues::GYRO_Y:
+	case ControllerNumberValues::GYRO_Z:
+	case ControllerNumberValues::ANGLE_X:
+	case ControllerNumberValues::ANGLE_Y:
+	case ControllerNumberValues::ANGLE_Z:
+		break;
+	}
+}
+
+float DataProcessing::getNumberValuesSpecificMotion(FrameNum frame, ControllerNumberValues joystickId, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
+	switch(joystickId) {
+	case ControllerNumberValues::ACCEL_X:
 		return getControllerData(player, savestateHookNum, branch, frame)->ACCEL_X;
 		break;
 	case ControllerNumberValues::ACCEL_Y:
@@ -970,14 +1046,28 @@ int16_t DataProcessing::getNumberValuesSpecific(FrameNum frame, ControllerNumber
 	case ControllerNumberValues::ACCEL_Z:
 		return getControllerData(player, savestateHookNum, branch, frame)->ACCEL_Z;
 		break;
-	case ControllerNumberValues::GYRO_1:
-		return getControllerData(player, savestateHookNum, branch, frame)->GYRO_1;
+	case ControllerNumberValues::GYRO_X:
+		return getControllerData(player, savestateHookNum, branch, frame)->GYRO_X;
 		break;
-	case ControllerNumberValues::GYRO_2:
-		return getControllerData(player, savestateHookNum, branch, frame)->GYRO_2;
+	case ControllerNumberValues::GYRO_Y:
+		return getControllerData(player, savestateHookNum, branch, frame)->GYRO_Y;
 		break;
-	case ControllerNumberValues::GYRO_3:
-		return getControllerData(player, savestateHookNum, branch, frame)->GYRO_3;
+	case ControllerNumberValues::GYRO_Z:
+		return getControllerData(player, savestateHookNum, branch, frame)->GYRO_Z;
+		break;
+	case ControllerNumberValues::ANGLE_X:
+		return getControllerData(player, savestateHookNum, branch, frame)->ANGLE_X;
+		break;
+	case ControllerNumberValues::ANGLE_Y:
+		return getControllerData(player, savestateHookNum, branch, frame)->ANGLE_Y;
+		break;
+	case ControllerNumberValues::ANGLE_Z:
+		return getControllerData(player, savestateHookNum, branch, frame)->ANGLE_Z;
+		break;
+	case ControllerNumberValues::LEFT_X:
+	case ControllerNumberValues::LEFT_Y:
+	case ControllerNumberValues::RIGHT_X:
+	case ControllerNumberValues::RIGHT_Y:
 		break;
 	}
 }
@@ -1002,8 +1092,12 @@ void DataProcessing::setControllerDataForAutoRun(ControllerData controllerData) 
 	modifyCurrentFrameViews(currentFrame);
 }
 
-int16_t DataProcessing::getNumberValueCurrent(ControllerNumberValues joystickId) const {
-	return getNumberValues(currentFrame, joystickId);
+int16_t DataProcessing::getNumberValueCurrentJoystick(ControllerNumberValues joystickId) const {
+	return getNumberValuesJoystick(currentFrame, joystickId);
+}
+
+float DataProcessing::getNumberValueCurrentMotion(ControllerNumberValues joystickId) const {
+	return getNumberValuesMotion(currentFrame, joystickId);
 }
 
 // Updates how the current frame looks on the UI
