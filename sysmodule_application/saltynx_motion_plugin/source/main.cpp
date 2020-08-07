@@ -2,6 +2,7 @@
 #include <saltysd/SaltySD_core.h>
 #include <saltysd/SaltySD_dynamic.h>
 #include <saltysd/SaltySD_ipc.h>
+#include <string>
 #include <switch_min.h>
 
 #include "sdkTypes.hpp"
@@ -63,7 +64,7 @@ uint8_t spoofMotionRequests = false;
 // This needs to be set to spoof
 uint8_t recordMotionInputs = false;
 
-nn::fs::FileHandle logHandle;
+std::string logString;
 
 nn::hid::SixAxisSensorHandle* mainHandles[8] = { 0 };
 nn::hid::SixAxisSensorHandle* handheldHandle = { 0 };
@@ -84,26 +85,10 @@ nn::hid::SixAxisSensorState originalHandheldSixAxisState = { 0 };
 */
 // All these values are floats
 
-void openLogFile() {
-	_ZN2nn2fs8OpenFileEPNS0_10FileHandleEPKci(&logHandle, "sdmc:/SaltySD/SwiTAS_MotionPlugin.log", nn::fs::OpenMode_ReadWrite | nn::fs::OpenMode_Append);
-}
-
-void closeLogFile() {
-	_ZN2nn2fs9CloseFileENS0_10FileHandleE(logHandle);
-}
-
-void writeToFile(const char* str) {
-	// https://github.com/skyline-dev/skyline/blob/master/source/skyline/utils/cpputils.cpp#L128
-	int64_t strLength = strlen(str);
-
-	int64_t fileSize;
-	_ZN2nn2fs11GetFileSizeEPlNS0_10FileHandleE(&fileSize, logHandle);
-
-	if(fileSize < strLength) { // make sure we have enough space
-		_ZN2nn2fs11SetFileSizeENS0_10FileHandleEl(logHandle, strLength);
+void writeToFile(std::string str) {
+	if(logString.length() < 1000) {
+		logString += str;
 	}
-
-	_ZN2nn2fs9WriteFileENS0_10FileHandleElPKvmRKNS0_11WriteOptionE(logHandle, 0, (void*)str, strLength, nn::fs::WriteOption::CreateOption(nn::fs::WriteOptionFlag_Flush));
 }
 
 void __libnx_init(void* ctx, Handle main_thread, void* saved_lr) {
@@ -129,7 +114,15 @@ void __attribute__((weak)) NORETURN __libnx_exit(int rc) {
 
 	SaltySD_printf("SaltySD Plugin: jumping to %p\n", orig_saved_lr);
 
-	closeLogFile();
+	const char* logPath = "sdmc:/SaltySD/SwiTAS_MotionPlugin.log";
+	SaltySDCore_remove(logPath);
+	FILE* logFile = SaltySDCore_fopen(logPath, "w");
+
+	logString += "Done";
+
+	SaltySDCore_fwrite(logString.c_str(), logString.length(), 1, logFile);
+
+	SaltySDCore_fclose(logFile);
 
 	__nx_exit(0, orig_saved_lr);
 	while(true)
@@ -140,15 +133,15 @@ void fixState(nn::hid::SixAxisSensorState& dest, nn::hid::SixAxisSensorState& or
 	dest.deltaTimeNanoSeconds = orig.deltaTimeNanoSeconds;
 	dest.samplingNumber       = orig.samplingNumber;
 	// System default
-	dest.x = { 1.0, 0.0, 0.0 };
-	dest.y = { 0.0, 1.0, 0.0 };
-	dest.z = { 0.0, 0.0, 1.0 };
+	dest.direction.x = { 1.0, 0.0, 0.0 };
+	dest.direction.y = { 0.0, 1.0, 0.0 };
+	dest.direction.z = { 0.0, 0.0, 1.0 };
 }
 
 /* nn::hid::EnableSixAxisSensorFusion(nn::hid::SixAxisSensorHandle const&, bool) */
 void EnableSixAxisSensorFusion(nn::hid::SixAxisSensorHandle* handle, bool param_2) {
 	if(dumpDebugInfo) {
-		writeToFile("SwiTAS_MotionPlugin: EnableSixAxisSensorFusion called\n");
+		writeToFile("EnableSixAxisSensorFusion called\n");
 	}
 	_ZN2nn3hid25EnableSixAxisSensorFusionERKNS0_19SixAxisSensorHandleEb(handle, param_2);
 }
@@ -156,7 +149,7 @@ void EnableSixAxisSensorFusion(nn::hid::SixAxisSensorHandle* handle, bool param_
 /* nn::hid::GetSixAxisSensorFusionParameters(float*, float*, nn::hid::SixAxisSensorHandle const&) */
 void GetSixAxisSensorFusionParameters(float* param_1, float* param_2, nn::hid::SixAxisSensorHandle* handle) {
 	if(dumpDebugInfo) {
-		writeToFile("SwiTAS_MotionPlugin: GetSixAxisSensorFusionParameters called\n");
+		writeToFile("GetSixAxisSensorFusionParameters called\n");
 	}
 	_ZN2nn3hid32GetSixAxisSensorFusionParametersEPfS1_RKNS0_19SixAxisSensorHandleE(param_1, param_2, handle);
 }
@@ -164,7 +157,7 @@ void GetSixAxisSensorFusionParameters(float* param_1, float* param_2, nn::hid::S
 /* nn::hid::GetSixAxisSensorHandle(nn::hid::ConsoleSixAxisSensorHandle*) */
 void GetSixAxisSensorHandle1(nn::hid::ConsoleSixAxisSensorHandle* handle) {
 	if(dumpDebugInfo) {
-		writeToFile("SwiTAS_MotionPlugin: GetSixAxisSensorHandle1 called\n");
+		writeToFile("GetSixAxisSensorHandle1 called\n");
 	}
 	_ZN2nn3hid22GetSixAxisSensorHandleEPNS0_26ConsoleSixAxisSensorHandleE(handle);
 }
@@ -172,7 +165,7 @@ void GetSixAxisSensorHandle1(nn::hid::ConsoleSixAxisSensorHandle* handle) {
 /* nn::hid::GetSixAxisSensorHandle(nn::hid::SixAxisSensorHandle*, nn::hid::BasicXpadId) */
 void GetSixAxisSensorHandle2(nn::hid::SixAxisSensorHandle* handle, nn::hid::BasicXpadId param_2) {
 	if(dumpDebugInfo) {
-		writeToFile("SwiTAS_MotionPlugin: GetSixAxisSensorHandle2 called\n");
+		writeToFile("GetSixAxisSensorHandle2 called\n");
 	}
 	_ZN2nn3hid22GetSixAxisSensorHandleEPNS0_19SixAxisSensorHandleENS0_11BasicXpadIdE(handle, param_2);
 }
@@ -181,7 +174,7 @@ void GetSixAxisSensorHandle2(nn::hid::SixAxisSensorHandle* handle, nn::hid::Basi
    nn::hid::JoyXpadId) */
 void GetSixAxisSensorHandles1(nn::hid::SixAxisSensorHandle* handle1, nn::hid::SixAxisSensorHandle* handle2, nn::hid::JoyXpadId param_3) {
 	if(dumpDebugInfo) {
-		writeToFile("SwiTAS_MotionPlugin: GetSixAxisSensorHandles1 called\n");
+		writeToFile("GetSixAxisSensorHandles1 called\n");
 	}
 	_ZN2nn3hid23GetSixAxisSensorHandlesEPNS0_19SixAxisSensorHandleES2_NS0_9JoyXpadIdE(handle1, handle2, param_3);
 }
@@ -191,7 +184,7 @@ void GetSixAxisSensorHandles1(nn::hid::SixAxisSensorHandle* handle1, nn::hid::Si
 uint64_t GetSixAxisSensorHandles2(nn::hid::SixAxisSensorHandle* handle, int numOfHandles, nn::hid::NpadIdType id, uint32_t npadStyleBitflags) {
 	// Ignore numOfHandles
 	if(dumpDebugInfo) {
-		writeToFile("SwiTAS_MotionPlugin: GetSixAxisSensorHandles2 called\n");
+		writeToFile("GetSixAxisSensorHandles2 called\n");
 	}
 	// To see what kind of controller, and the bit flags with the chosen NpadStyleTag
 	// if (npadStyleBitflags & nn::hid::NpadStyleTag::ProController)
@@ -205,7 +198,7 @@ uint64_t GetSixAxisSensorHandles2(nn::hid::SixAxisSensorHandle* handle, int numO
 				mainHandles[(uint32_t)id] = handle;
 			} else {
 				if(dumpDebugInfo) {
-					writeToFile("SwiTAS_MotionPlugin: GetSixAxisSensorHandles2: Invalid ID\n");
+					writeToFile("GetSixAxisSensorHandles2: Invalid ID\n");
 				}
 			}
 		}
@@ -225,7 +218,7 @@ uint64_t GetSixAxisSensorHandles2(nn::hid::SixAxisSensorHandle* handle, int numO
  */
 void GetSixAxisSensorState(nn::hid::SixAxisSensorState* state, nn::hid::SixAxisSensorHandle* handle) {
 	if(dumpDebugInfo) {
-		writeToFile("SwiTAS_MotionPlugin: GetSixAxisSensorState called\n");
+		writeToFile("GetSixAxisSensorState called\n");
 	}
 
 	if(recordMotionInputs) {
@@ -255,7 +248,7 @@ void GetSixAxisSensorState(nn::hid::SixAxisSensorState* state, nn::hid::SixAxisS
 			}
 		}
 		if(dumpDebugInfo && spoofMotionRequests) {
-			writeToFile("SwiTAS_MotionPlugin: GetSixAxisSensorState: Corresponding handle was not found\n");
+			writeToFile("GetSixAxisSensorState: Corresponding handle was not found\n");
 		}
 	} else {
 		_ZN2nn3hid21GetSixAxisSensorStateEPNS0_18SixAxisSensorStateERKNS0_19SixAxisSensorHandleE(state, handle);
@@ -266,7 +259,7 @@ void GetSixAxisSensorState(nn::hid::SixAxisSensorState* state, nn::hid::SixAxisS
  */
 uint64_t GetSixAxisSensorStates1(nn::hid::SixAxisSensorState* outStates, int count, nn::hid::BasicXpadId* handle) {
 	if(dumpDebugInfo) {
-		writeToFile("SwiTAS_MotionPlugin: GetSixAxisSensorStates1 called\n");
+		writeToFile("GetSixAxisSensorStates1 called\n");
 	}
 	return _ZN2nn3hid22GetSixAxisSensorStatesEPNS0_18SixAxisSensorStateEiRKNS0_11BasicXpadIdE(outStates, count, handle);
 }
@@ -275,7 +268,7 @@ uint64_t GetSixAxisSensorStates1(nn::hid::SixAxisSensorState* outStates, int cou
    const&) */
 uint64_t GetSixAxisSensorStates2(nn::hid::SixAxisSensorState* outStates, int count, nn::hid::SixAxisSensorHandle* handle) {
 	if(dumpDebugInfo) {
-		writeToFile("SwiTAS_MotionPlugin: GetSixAxisSensorStates2 called\n");
+		writeToFile("GetSixAxisSensorStates2 called\n");
 	}
 
 	if(recordMotionInputs) {
@@ -345,7 +338,7 @@ uint64_t GetSixAxisSensorStates2(nn::hid::SixAxisSensorState* outStates, int cou
 				}
 			}
 			if(dumpDebugInfo && spoofMotionRequests) {
-				writeToFile("SwiTAS_MotionPlugin: GetSixAxisSensorState: Corresponding handle was not found\n");
+				writeToFile("GetSixAxisSensorState: Corresponding handle was not found\n");
 			}
 		}
 
@@ -363,7 +356,7 @@ uint64_t GetSixAxisSensorStates2(nn::hid::SixAxisSensorState* outStates, int cou
 /* nn::hid::InitializeConsoleSixAxisSensor() */
 void InitializeConsoleSixAxisSensor(void) {
 	if(dumpDebugInfo) {
-		writeToFile("SwiTAS_MotionPlugin: InitializeConsoleSixAxisSensor called\n");
+		writeToFile("InitializeConsoleSixAxisSensor called\n");
 	}
 	_ZN2nn3hid30InitializeConsoleSixAxisSensorEv();
 }
@@ -371,7 +364,7 @@ void InitializeConsoleSixAxisSensor(void) {
 /* nn::hid::IsSixAxisSensorAtRest(nn::hid::SixAxisSensorHandle const&) */
 uint64_t IsSixAxisSensorAtRest(nn::hid::SixAxisSensorHandle* param_1) {
 	if(dumpDebugInfo) {
-		writeToFile("SwiTAS_MotionPlugin: IsSixAxisSensorAtRest called\n");
+		writeToFile("IsSixAxisSensorAtRest called\n");
 	}
 	return _ZN2nn3hid21IsSixAxisSensorAtRestERKNS0_19SixAxisSensorHandleE(param_1);
 }
@@ -379,7 +372,7 @@ uint64_t IsSixAxisSensorAtRest(nn::hid::SixAxisSensorHandle* param_1) {
 /* nn::hid::IsSixAxisSensorFusionEnabled(nn::hid::SixAxisSensorHandle const&) */
 uint64_t IsSixAxisSensorFusionEnabled(nn::hid::SixAxisSensorHandle* param_1) {
 	if(dumpDebugInfo) {
-		writeToFile("SwiTAS_MotionPlugin: IsSixAxisSensorFusionEnabled called\n");
+		writeToFile("IsSixAxisSensorFusionEnabled called\n");
 	}
 	return _ZN2nn3hid28IsSixAxisSensorFusionEnabledERKNS0_19SixAxisSensorHandleE(param_1);
 }
@@ -387,7 +380,7 @@ uint64_t IsSixAxisSensorFusionEnabled(nn::hid::SixAxisSensorHandle* param_1) {
 /* nn::hid::ResetSixAxisSensorFusionParameters(nn::hid::SixAxisSensorHandle const&) */
 void ResetSixAxisSensorFusionParameters(nn::hid::SixAxisSensorHandle* param_1) {
 	if(dumpDebugInfo) {
-		writeToFile("SwiTAS_MotionPlugin: ResetSixAxisSensorFusionParameters called\n");
+		writeToFile("ResetSixAxisSensorFusionParameters called\n");
 	}
 	_ZN2nn3hid34ResetSixAxisSensorFusionParametersERKNS0_19SixAxisSensorHandleE(param_1);
 }
@@ -395,7 +388,7 @@ void ResetSixAxisSensorFusionParameters(nn::hid::SixAxisSensorHandle* param_1) {
 /* nn::hid::SetSixAxisSensorFusionParameters(nn::hid::SixAxisSensorHandle const&, float, float) */
 void SetSixAxisSensorFusionParameters(nn::hid::SixAxisSensorHandle* param_1, float param_2, float param_3) {
 	if(dumpDebugInfo) {
-		writeToFile("SwiTAS_MotionPlugin: SetSixAxisSensorFusionParameters called\n");
+		writeToFile("SetSixAxisSensorFusionParameters called\n");
 	}
 	_ZN2nn3hid32SetSixAxisSensorFusionParametersERKNS0_19SixAxisSensorHandleEff(param_1, param_2, param_3);
 }
@@ -403,7 +396,7 @@ void SetSixAxisSensorFusionParameters(nn::hid::SixAxisSensorHandle* param_1, flo
 /* nn::hid::StartSixAxisSensor(nn::hid::ConsoleSixAxisSensorHandle const&) */
 void StartSixAxisSensor1(nn::hid::ConsoleSixAxisSensorHandle* param_1) {
 	if(dumpDebugInfo) {
-		writeToFile("SwiTAS_MotionPlugin: StartSixAxisSensor1 called\n");
+		writeToFile("StartSixAxisSensor1 called\n");
 	}
 	_ZN2nn3hid18StartSixAxisSensorERKNS0_26ConsoleSixAxisSensorHandleE(param_1);
 }
@@ -411,7 +404,7 @@ void StartSixAxisSensor1(nn::hid::ConsoleSixAxisSensorHandle* param_1) {
 /* nn::hid::StartSixAxisSensor(nn::hid::SixAxisSensorHandle const&) */
 void StartSixAxisSensor2(nn::hid::SixAxisSensorHandle* param_1) {
 	if(dumpDebugInfo) {
-		writeToFile("SwiTAS_MotionPlugin: StartSixAxisSensor2 called\n");
+		writeToFile("StartSixAxisSensor2 called\n");
 	}
 	// Standard used by games
 	_ZN2nn3hid18StartSixAxisSensorERKNS0_19SixAxisSensorHandleE(param_1);
@@ -420,7 +413,7 @@ void StartSixAxisSensor2(nn::hid::SixAxisSensorHandle* param_1) {
 /* nn::hid::StopSixAxisSensor(nn::hid::ConsoleSixAxisSensorHandle const&) */
 void StopSixAxisSensor1(nn::hid::ConsoleSixAxisSensorHandle* param_1) {
 	if(dumpDebugInfo) {
-		writeToFile("SwiTAS_MotionPlugin: StopSixAxisSensor1 called\n");
+		writeToFile("StopSixAxisSensor1 called\n");
 	}
 	_ZN2nn3hid17StopSixAxisSensorERKNS0_26ConsoleSixAxisSensorHandleE(param_1);
 }
@@ -428,13 +421,13 @@ void StopSixAxisSensor1(nn::hid::ConsoleSixAxisSensorHandle* param_1) {
 /* nn::hid::StopSixAxisSensor(nn::hid::SixAxisSensorHandle const&) */
 void StopSixAxisSensor2(nn::hid::SixAxisSensorHandle* param_1) {
 	if(dumpDebugInfo) {
-		writeToFile("SwiTAS_MotionPlugin: StopSixAxisSensor2 called\n");
+		writeToFile("StopSixAxisSensor2 called\n");
 	}
 	_ZN2nn3hid17StopSixAxisSensorERKNS0_19SixAxisSensorHandleE(param_1);
 }
 
 int main(int argc, char* argv[]) {
-	SaltySD_printf("SwiTAS_MotionPlugin: alive\n");
+	writeToFile("Alive\n");
 
 	const char* pointersPath = "sdmc:/SaltySD/SwiTAS_MotionPlugin_Offsets.hex";
 	SaltySDCore_remove(pointersPath);
@@ -511,7 +504,5 @@ int main(int argc, char* argv[]) {
 		(void*) &StopSixAxisSensor2);
 	// clang-format on
 
-	SaltySD_printf("SwiTAS_MotionPlugin: injection finished\n");
-
-	openLogFile();
+	writeToFile("Injection finished\n");
 }

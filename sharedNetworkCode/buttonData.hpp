@@ -69,7 +69,8 @@ struct ControllerData : public zpp::serializer::polymorphic {
 			archive(self.buttons,
 				self.LS_X, self.LS_Y, self.RS_X, self.RS_Y,
 				self.ACCEL_X, self.ACCEL_Y, self.ACCEL_Z,
-				self.GYRO_1, self.GYRO_2, self.GYRO_3,
+				self.GYRO_X, self.GYRO_Y, self.GYRO_Z,
+				self.ANGLE_X, self.ANGLE_Y, self.ANGLE_Z,
 				self.frameState);
 		// clang-format on
 	}
