@@ -76,6 +76,14 @@ nn::hid::SixAxisSensorState handheldSixAxisState = { 0 };
 nn::hid::SixAxisSensorState originalMainSixAxisState[8]  = { 0 };
 nn::hid::SixAxisSensorState originalHandheldSixAxisState = { 0 };
 
+// ONLY values we will TAS
+/*
+	nn::util::Float3 acceleration;
+	nn::util::Float3 angularVelocity;
+	nn::util::Float3 angle;
+*/
+// All these values are floats
+
 void openLogFile() {
 	_ZN2nn2fs8OpenFileEPNS0_10FileHandleEPKci(&logHandle, "sdmc:/SaltySD/SwiTAS_MotionPlugin.log", nn::fs::OpenMode_ReadWrite | nn::fs::OpenMode_Append);
 }
@@ -126,6 +134,15 @@ void __attribute__((weak)) NORETURN __libnx_exit(int rc) {
 	__nx_exit(0, orig_saved_lr);
 	while(true)
 		;
+}
+
+void fixState(nn::hid::SixAxisSensorState& dest, nn::hid::SixAxisSensorState& orig) {
+	dest.deltaTimeNanoSeconds = orig.deltaTimeNanoSeconds;
+	dest.samplingNumber       = orig.samplingNumber;
+	// System default
+	dest.x = { 1.0, 0.0, 0.0 };
+	dest.y = { 0.0, 1.0, 0.0 };
+	dest.z = { 0.0, 0.0, 1.0 };
 }
 
 /* nn::hid::EnableSixAxisSensorFusion(nn::hid::SixAxisSensorHandle const&, bool) */
@@ -195,6 +212,10 @@ uint64_t GetSixAxisSensorHandles2(nn::hid::SixAxisSensorHandle* handle, int numO
 
 		// Always handle one handle, even if the game requests more
 		return _ZN2nn3hid23GetSixAxisSensorHandlesEPNS0_19SixAxisSensorHandleEiRKjNS_4util10BitFlagSetILi32ENS0_12NpadStyleTagEEE(handle, 1, id, npadStyleBitflags);
+		/* We can safely do this as:
+			The number of SixAxisSensorHandle that can be acquired depends on the operation mode.
+			For NpadStyleFullKey and NpadStyleHandheld, one SixAxisSensorHandle is acquired.
+		*/
 	} else {
 		return _ZN2nn3hid23GetSixAxisSensorHandlesEPNS0_19SixAxisSensorHandleEiRKjNS_4util10BitFlagSetILi32ENS0_12NpadStyleTagEEE(handle, numOfHandles, id, npadStyleBitflags);
 	}
@@ -212,7 +233,7 @@ void GetSixAxisSensorState(nn::hid::SixAxisSensorState* state, nn::hid::SixAxisS
 			_ZN2nn3hid21GetSixAxisSensorStateEPNS0_18SixAxisSensorStateERKNS0_19SixAxisSensorHandleE(&originalHandheldSixAxisState, handle);
 
 			if(spoofMotionRequests) {
-				handheldSixAxisState.samplingNumber = originalHandheldSixAxisState.samplingNumber;
+				fixState(handheldSixAxisState, originalHandheldSixAxisState);
 				memcpy(state, &handheldSixAxisState, sizeof(nn::hid::SixAxisSensorState));
 			} else {
 				memcpy(state, &originalHandheldSixAxisState, sizeof(nn::hid::SixAxisSensorState));
@@ -223,7 +244,7 @@ void GetSixAxisSensorState(nn::hid::SixAxisSensorState* state, nn::hid::SixAxisS
 					_ZN2nn3hid21GetSixAxisSensorStateEPNS0_18SixAxisSensorStateERKNS0_19SixAxisSensorHandleE(&originalMainSixAxisState[i], handle);
 
 					if(spoofMotionRequests) {
-						mainSixAxisState[i].samplingNumber = originalMainSixAxisState[i].samplingNumber;
+						fixState(mainSixAxisState[i], originalMainSixAxisState[i]);
 						memcpy(state, &mainSixAxisState[i], sizeof(nn::hid::SixAxisSensorState));
 						return;
 					} else {

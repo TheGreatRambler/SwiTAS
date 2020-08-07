@@ -50,13 +50,16 @@ struct ControllerData : public zpp::serializer::polymorphic {
 	int16_t LS_Y = 0;
 	int16_t RS_X = 0;
 	int16_t RS_Y = 0;
-	// Gyroscope and Accelerometer data (when it is implemented)
-	int16_t ACCEL_X = 0;
-	int16_t ACCEL_Y = 0;
-	int16_t ACCEL_Z = 0;
-	int16_t GYRO_1  = 0;
-	int16_t GYRO_2  = 0;
-	int16_t GYRO_3  = 0;
+	// Gyroscope and Accelerometer data, all floats
+	float ACCEL_X = 0;
+	float ACCEL_Y = 0;
+	float ACCEL_Z = 0;
+	float GYRO_X  = 0;
+	float GYRO_Y  = 0;
+	float GYRO_Z  = 0;
+	float ANGLE_X = 0;
+	float ANGLE_Y = 0;
+	float ANGLE_Z = 0;
 	// State of the frame, mostly for the editor
 	uint8_t frameState = 0;
 

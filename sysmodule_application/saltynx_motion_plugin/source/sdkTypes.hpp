@@ -29,7 +29,6 @@ namespace nn {
 		};
 
 		enum WriteOptionFlag { WriteOptionFlag_Flush = BIT(0) };
-
 	};
 
 	namespace util {
@@ -79,8 +78,10 @@ namespace nn {
 		};
 
 		enum class NpadStyle {
+			// These both return one handle
 			NpadStyleFullKey  = BIT(0),
 			NpadStyleHandheld = BIT(1),
+			// These do not
 			NpadStyleJoyDual  = BIT(2),
 			NpadStyleJoyLeft  = BIT(3),
 			NpadStyleJoyRight = BIT(4),

@@ -186,9 +186,9 @@ FrameNum ButtonData::textToFrames(DataProcessing* dataProcessing, std::string te
 
 		std::vector<std::string> accelParts = HELPERS::splitString(parts[currentIndexInParts], ';');
 		if(accelParts.size() == 3) {
-			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::ACCEL_X, strtol(accelParts[0].c_str(), nullptr, 10));
-			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::ACCEL_Y, strtol(accelParts[1].c_str(), nullptr, 10));
-			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::ACCEL_Z, strtol(accelParts[2].c_str(), nullptr, 10));
+			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::ACCEL_X, strtof(accelParts[0].c_str(), nullptr));
+			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::ACCEL_Y, strtof(accelParts[1].c_str(), nullptr));
+			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::ACCEL_Z, strtof(accelParts[2].c_str(), nullptr));
 		} else {
 			continue;
 		}
@@ -199,9 +199,22 @@ FrameNum ButtonData::textToFrames(DataProcessing* dataProcessing, std::string te
 
 		std::vector<std::string> gyroParts = HELPERS::splitString(parts[currentIndexInParts], ';');
 		if(gyroParts.size() == 3) {
-			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::GYRO_1, strtol(gyroParts[0].c_str(), nullptr, 10));
-			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::GYRO_2, strtol(gyroParts[1].c_str(), nullptr, 10));
-			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::GYRO_3, strtol(gyroParts[2].c_str(), nullptr, 10));
+			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::GYRO_X, strtof(gyroParts[0].c_str(), nullptr));
+			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::GYRO_Y, strtof(gyroParts[1].c_str(), nullptr));
+			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::GYRO_Z, strtof(gyroParts[2].c_str(), nullptr));
+		} else {
+			continue;
+		}
+
+		currentIndexInParts++;
+		if(parts.size() == currentIndexInParts)
+			continue;
+
+		std::vector<std::string> angleParts = HELPERS::splitString(parts[currentIndexInParts], ';');
+		if(angleParts.size() == 3) {
+			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::ANGLE_X, strtof(angleParts[0].c_str(), nullptr));
+			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::ANGLE_Y, strtof(angleParts[1].c_str(), nullptr));
+			dataProcessing->setNumberValues(thisDataIndex, ControllerNumberValues::ANGLE_Z, strtof(angleParts[2].c_str(), nullptr));
 		} else {
 			continue;
 		}
@@ -279,19 +292,23 @@ std::string ButtonData::framesToText(DataProcessing* dataProcessing, FrameNum st
 				}
 
 				// clang-format off
-				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::LEFT_X, j, branch, realPlayer)) + \
-					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::LEFT_Y, j, branch, realPlayer)));
+				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecificJoystick(i, CNV::LEFT_X, j, branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecificJoystick(i, CNV::LEFT_Y, j, branch, realPlayer)));
 
-				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::RIGHT_X, j, branch, realPlayer)) + \
-					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::RIGHT_Y, j,branch, realPlayer)));
+				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecificJoystick(i, CNV::RIGHT_X, j, branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecificJoystick(i, CNV::RIGHT_Y, j,branch, realPlayer)));
 
-				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::ACCEL_X, j, branch, realPlayer)) + \
-					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::ACCEL_Y, j, branch, realPlayer)) + \
-					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::ACCEL_Z, j, branch, realPlayer)));
+				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::ACCEL_X, j, branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::ACCEL_Y, j, branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::ACCEL_Z, j, branch, realPlayer)));
 
-				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::GYRO_1, j,branch, realPlayer)) + \
-					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::GYRO_2, j, branch, realPlayer)) + \
-					";" + std::to_string(dataProcessing->getNumberValuesSpecific(i, CNV::GYRO_3, j, branch, realPlayer)));
+				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::GYRO_X, j,branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::GYRO_Y, j, branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::GYRO_Z, j, branch, realPlayer)));
+
+				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::ANGLE_X, j,branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::ANGLE_Y, j, branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::ANGLE_Z, j, branch, realPlayer)));
 				// clang-format on
 
 				textVector.push_back(HELPERS::joinString(parts, " "));

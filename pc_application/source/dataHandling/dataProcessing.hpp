@@ -312,11 +312,17 @@ public:
 	void setControllerDataForAutoRun(ControllerData controllerData);
 
 	// This includes joysticks, accel, gyro, etc...
-	void triggerNumberValues(ControllerNumberValues joystickId, int16_t value);
-	void setNumberValues(FrameNum frame, ControllerNumberValues joystickId, int16_t value);
-	int16_t getNumberValues(FrameNum frame, ControllerNumberValues joystickId) const;
-	int16_t getNumberValuesSpecific(FrameNum frame, ControllerNumberValues joystickId, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
-	int16_t getNumberValueCurrent(ControllerNumberValues joystickId) const;
+	void triggerNumberValuesJoystick(ControllerNumberValues joystickId, int16_t value);
+	void setNumberValuesJoystick(FrameNum frame, ControllerNumberValues joystickId, int16_t value);
+	int16_t getNumberValuesJoystick(FrameNum frame, ControllerNumberValues joystickId) const;
+	int16_t getNumberValuesSpecificJoystick(FrameNum frame, ControllerNumberValues joystickId, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
+	int16_t getNumberValueCurrentJoystick(ControllerNumberValues joystickId) const;
+	// Equivlents for accel etc
+void triggerNumberValuesMotion(ControllerNumberValues joystickId, float value);
+	void setNumberValuesMotion(FrameNum frame, ControllerNumberValues joystickId, float value);
+	float getNumberValuesMotion(FrameNum frame, ControllerNumberValues joystickId) const;
+	float getNumberValuesSpecificMotion(FrameNum frame, ControllerNumberValues joystickId, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
+	float getNumberValueCurrentMotion(ControllerNumberValues joystickId) const;
 
 	// Updates how the current frame looks on the UI
 	// Also called when modifying anything of importance, like currentFrame
