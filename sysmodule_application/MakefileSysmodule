@@ -61,7 +61,7 @@ CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -D__BSD_VISIBLE -DSERVER_IMP -DLLONG_MAX -DWIT
 # It has to be c++14 because of zpp
 CXXFLAGS	:= $(CFLAGS) -std=gnu++17
 
-ifeq ($(BUILD),release)
+ifeq ($(BUILD_TYPE),release)
 	# "Release" build - optimization, and no debug symbols
 	CFLAGS += -O3 -s -DNDEBUG
 else
@@ -176,7 +176,7 @@ all: $(BUILD)
 $(BUILD):
 	rm -rf ./source/sharedNetworkCode
 	cp -rp ../sharedNetworkCode ./source/sharedNetworkCode
-	make BUILD=$(BUILD) -C saltynx_motion_plugin
+	make BUILD_TYPE=$(BUILD_TYPE) -C saltynx_plugin
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/MakefileSysmodule
 	# Copy files into a ready-made directory structure
@@ -187,12 +187,12 @@ $(BUILD):
 	touch switch/atmosphere/contents/4200000000000BAC/flags/boot2.flag
 	mkdir -p switch/switas
 	cp -rp assets/controllerOverlay switch/switas
-	cp saltynx_motion_plugin/SwiTAS_MotionPlugin.elf switch/SaltySD/plugins/SwiTAS_MotionPlugin.elf
-	touch switch/SaltySD/SwiTAS_MotionPlugin.log
+	cp saltynx_plugin/SwiTAS_SaltyPlugin.elf switch/SaltySD/plugins/SwiTAS_SaltyPlugin.elf
 
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
+	make clean -C saltynx_plugin
 ifeq ($(strip $(APP_JSON)),)
 	@rm -fr $(BUILD) $(TARGET).nro $(TARGET).nacp $(TARGET).elf
 else

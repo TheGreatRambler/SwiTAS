@@ -22,7 +22,7 @@
 			"label": "Build Sysmodule Release",
 			"type": "shell",
 			"promptOnClose": true,
-			"command": "make sysmodule BUILD=release",
+			"command": "make sysmodule BUILD_TYPE=release",
 			"presentation": {
 				"reveal": "always",
 				"panel": "dedicated"
@@ -82,7 +82,7 @@
 			"label": "Build SaltyNX-Plugin Debug",
 			"type": "shell",
 			"promptOnClose": true,
-			"command": "make DINFO=1 -C saltynx_motion_plugin",
+			"command": "make DINFO=1 -C saltynx_plugin",
 			"group": "build",
 			"presentation": {
 				"reveal": "always",
@@ -100,7 +100,7 @@
 			"label": "Build SaltyNX-Plugin Release",
 			"type": "shell",
 			"promptOnClose": true,
-			"command": "make BUILD=release -C saltynx_motion_plugin",
+			"command": "make BUILD_TYPE=release -C saltynx_plugin",
 			"presentation": {
 				"reveal": "always",
 				"panel": "dedicated"

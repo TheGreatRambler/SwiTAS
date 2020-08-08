@@ -66,7 +66,9 @@ private:
 	uint64_t lastNanoseconds = 0;
 	int lastFrameAttempt     = 0;
 
-	uintptr_t FPSaddress = 0;
+	uint64_t frameAddress           = 0;
+	uint64_t saltynxLogIndexAddress = 0;
+	uint64_t saltynxLogAddress      = 0;
 #endif
 
 #ifdef YUZU

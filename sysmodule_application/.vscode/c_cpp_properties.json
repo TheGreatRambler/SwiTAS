@@ -6,8 +6,8 @@
 				"${workspaceFolder}/source/thirdParty/**",
 				"${workspaceFolder}/source/thirdParty/lua-5.3.5/**",
 				"${workspaceFolder}/source/thirdParty/fbg/**",
-				"${workspaceFolder}/saltynx_motion_plugin/include/**",
-				"${workspaceFolder}/saltynx_motion_plugin/lib/libnx_min/nx/include/**",
+				"${workspaceFolder}/saltynx_plugin/include/**",
+				"${workspaceFolder}/saltynx_plugin/lib/libnx_min/nx/include/**",
 				"/opt/devkitpro/libnx/include/**",
 				"/opt/devkitpro/libnx/include/switch/**",
 				"/opt/devkitpro/portlibs/switch/include/**"
@@ -28,8 +28,8 @@
 				"${workspaceFolder}/source/thirdParty/**",
 				"${workspaceFolder}/source/thirdParty/lua-5.3.5/**",
 				"${workspaceFolder}/source/thirdParty/fbg/**",
-				"${workspaceFolder}/saltynx_motion_plugin/include/**",
-				"${workspaceFolder}/saltynx_motion_plugin/lib/libnx_min/nx/include/**",
+				"${workspaceFolder}/saltynx_plugin/include/**",
+				"${workspaceFolder}/saltynx_plugin/lib/libnx_min/nx/include/**",
 				"C:/msys2/opt/devkitpro/libnx/include/**",
 				"C:/msys2/opt/devkitpro/libnx/include/switch/**",
 				"C:/msys2/opt/devkitpro/portlibs/switch/include/**"

@@ -29,7 +29,7 @@ include $(DEVKITPRO)/libnx/switch_rules
 #     - icon.jpg
 #     - <libnx folder>/default_icon.jpg
 #---------------------------------------------------------------------------------
-TARGET		:=	SwiTAS_MotionPlugin
+TARGET		:=	SwiTAS_SaltyPlugin
 BUILD		:=	build
 SOURCES		:=	source
 INCLUDES	:=	include
@@ -48,7 +48,7 @@ CFLAGS	+=	$(INCLUDE) -DSWITCH
 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -fpermissive -Wno-parentheses -Wno-write-strings -Wno-int-to-pointer-cast -std=gnu++11
 
-ifeq ($(BUILD),release)
+ifeq ($(BUILD_TYPE),release)
 	# "Release" build - optimization, and no debug symbols
 	CFLAGS += -O3 -s -DNDEBUG
 else

@@ -91,14 +91,14 @@ void MainLoop::mainLoopHandler() {
 
 					gameName = std::string(getAppName(applicationProgramId));
 
-					LOGD << "Get SaltyNX FPS offset";
+					LOGD << "Get SaltyNX data";
 					// Used to do accurate frame advance
-					FILE* FPSoffset = fopen("sdmc:/SaltySD/FPSoffset.hex", "rb");
-					if(FPSoffset != NULL) {
-						fread(&FPSaddress, 0x5, 1, FPSoffset);
-						// The actual float FPS value is 8 bytes before
-						FPSaddress -= 0x8;
-						fclose(FPSoffset);
+					FILE* offsets = fopen("sdmc:/SaltySD/SwiTAS_SaltyPlugin_Offsets.hex", "rb");
+					if(offsets != NULL) {
+						fread(&frameAddress, sizeof(frameAddress), 1, offsets);
+						fread(&saltynxLogIndexAddress, sizeof(saltynxLogIndexAddress), 1, offsets);
+						fread(&saltynxLogAddress, sizeof(saltynxLogAddress), 1, offsets);
+						fclose(offsets);
 					}
 
 					// Enable DMNT
@@ -195,6 +195,25 @@ void MainLoop::mainLoopHandler() {
 	if(applicationOpened) {
 		// handle network updates always, they are stored in the queue regardless of the internet
 		handleNetworkUpdates();
+		// Handle SaltyNX output
+		uint16_t logOutputSize;
+		rc = dmntchtReadCheatProcessMemory(saltynxLogIndexAddress, &logOutputSize, sizeof(logOutputSize));
+		if(R_FAILED(rc)) {
+			fatalThrow(rc);
+		}
+
+		if(logOutputSize != 0) {
+			char log[logOutputSize];
+			rc = dmntchtReadCheatProcessMemory(saltynxLogAddress, &log, logOutputSize);
+			if(R_FAILED(rc)) {
+				fatalThrow(rc);
+			}
+
+			LOGD << "SaltyNX output: " << std::string(log, logOutputSize);
+
+			uint16_t dummyLogSize = 0;
+			dmntchtWriteCheatProcessMemory(saltynxLogIndexAddress, &dummyLogSize, sizeof(dummyLogSize));
+		}
 	}
 
 	// Match first controller inputs as often as possible
@@ -721,7 +740,7 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 
 void MainLoop::waitForVsync() {
 #ifdef __SWITCH__
-	if(isPaused || FPSaddress == 0) {
+	if(isPaused || frameAddress == 0) {
 		rc = eventWait(&vsyncEvent, UINT64_MAX);
 		if(R_FAILED(rc))
 			fatalThrow(rc);
@@ -729,16 +748,16 @@ void MainLoop::waitForVsync() {
 	} else {
 		LOGD << "Wait for vsync";
 		while(true) {
-			float FPS = 255.0;
-			rc        = dmntchtReadCheatProcessMemory(FPSaddress, &FPS, sizeof(FPS));
+			uint8_t frame;
+			rc = dmntchtReadCheatProcessMemory(frameAddress, &frame, sizeof(frame));
 			if(R_FAILED(rc)) {
 				fatalThrow(rc);
 			}
 
-			if(FPS != 0) {
+			if(frame) {
 				// Clear the variable so we can wait for it again
-				float dummyFPS = 255.0;
-				dmntchtWriteCheatProcessMemory(FPSaddress, &dummyFPS, sizeof(dummyFPS));
+				uint8_t dummyFrame = false;
+				dmntchtWriteCheatProcessMemory(frameAddress, &dummyFrame, sizeof(dummyFrame));
 				return;
 			} else {
 				svcSleepThread(1000000 * 3);

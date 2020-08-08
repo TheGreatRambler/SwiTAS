@@ -10,13 +10,18 @@
 extern "C" {
 extern u32 __start__;
 
-static char g_heap[0x8000];
+static char g_heap[0x10000];
 
 void __libnx_init(void* ctx, Handle main_thread, void* saved_lr);
 void __attribute__((weak)) NORETURN __libnx_exit(int rc);
 void __nx_exit(int, void*);
 void __libc_fini_array(void);
 void __libc_init_array(void);
+
+// Functions for frame handling
+extern u64 nvnBootstrapLoader(const char* nvnName) LINKABLE;
+extern void eglSwapBuffers(void* egl_unk1, void* egl_unk2) LINKABLE;
+extern u32 vkQueuePresentKHR(void* vk_unk1, void* vk_unk2) LINKABLE;
 
 // Six Axis external functions
 extern void _ZN2nn3hid25EnableSixAxisSensorFusionERKNS0_19SixAxisSensorHandleEb(nn::hid::SixAxisSensorHandle* handle, bool param_2) LINKABLE;
@@ -64,7 +69,10 @@ uint8_t spoofMotionRequests = false;
 // This needs to be set to spoof
 uint8_t recordMotionInputs = false;
 
-std::string logString;
+uint8_t frameHasPassed = false;
+
+uint16_t logStringIndex = 0;
+char logString[1000];
 
 nn::hid::SixAxisSensorHandle* mainHandles[8] = { 0 };
 nn::hid::SixAxisSensorHandle* handheldHandle = { 0 };
@@ -86,8 +94,10 @@ nn::hid::SixAxisSensorState originalHandheldSixAxisState = { 0 };
 // All these values are floats
 
 void writeToFile(std::string str) {
-	if(logString.length() < 1000) {
-		logString += str;
+	uint16_t stringLength = str.length();
+	if(logStringIndex + stringLength < sizeof(logString)) {
+		memcpy(&logString[logStringIndex], str.c_str(), stringLength);
+		logStringIndex += stringLength;
 	}
 }
 
@@ -113,8 +123,9 @@ void __attribute__((weak)) NORETURN __libnx_exit(int rc) {
 	__libc_fini_array();
 
 	SaltySD_printf("SaltySD Plugin: jumping to %p\n", orig_saved_lr);
+	/*
 
-	const char* logPath = "sdmc:/SaltySD/SwiTAS_MotionPlugin.log";
+	const char* logPath = "sdmc:/SaltySD/SwiTAS_SaltyPlugin.log";
 	SaltySDCore_remove(logPath);
 	FILE* logFile = SaltySDCore_fopen(logPath, "w");
 
@@ -123,6 +134,7 @@ void __attribute__((weak)) NORETURN __libnx_exit(int rc) {
 	SaltySDCore_fwrite(logString.c_str(), logString.length(), 1, logFile);
 
 	SaltySDCore_fclose(logFile);
+	*/
 
 	__nx_exit(0, orig_saved_lr);
 	while(true)
@@ -426,24 +438,68 @@ void StopSixAxisSensor2(nn::hid::SixAxisSensorHandle* param_1) {
 	_ZN2nn3hid17StopSixAxisSensorERKNS0_19SixAxisSensorHandleE(param_1);
 }
 
+uintptr_t ptr_nvnDeviceGetProcAddress;
+uintptr_t ptr_nvnQueuePresentTexture;
+uintptr_t addr_nvnGetProcAddress;
+uintptr_t addr_nvnPresentTexture;
+typedef void (*nvnQueuePresentTexture_0)(void* unk1_1, void* unk2_1, void* unk3_1);
+typedef uintptr_t (*GetProcAddress)(void* unk1_a, const char* nvnFunction_a);
+
+uint32_t vulkanSwap(void* vk_unk1_1, void* vk_unk2_1) {
+	uint32_t vulkanResult = vkQueuePresentKHR(vk_unk1_1, vk_unk2_1);
+	frameHasPassed        = true;
+	return vulkanResult;
+}
+
+void eglSwap(void* egl_unk1_1, void* egl_unk2_1) {
+	eglSwapBuffers(egl_unk1_1, egl_unk2_1);
+	frameHasPassed = true;
+	return;
+}
+
+void nvnPresentTexture(void* unk1, void* unk2, void* unk3) {
+	((nvnQueuePresentTexture_0)(ptr_nvnQueuePresentTexture))(unk1, unk2, unk3);
+	frameHasPassed = true;
+	return;
+}
+
+uintptr_t nvnGetProcAddress(void* unk1, const char* nvnFunction) {
+	uintptr_t address = ((GetProcAddress)(ptr_nvnDeviceGetProcAddress))(unk1, nvnFunction);
+	if(strcmp("nvnDeviceGetProcAddress", nvnFunction) == 0)
+		return addr_nvnGetProcAddress;
+	else if(strcmp("nvnQueuePresentTexture", nvnFunction) == 0) {
+		ptr_nvnQueuePresentTexture = address;
+		return addr_nvnPresentTexture;
+	} else
+		return address;
+}
+
+uintptr_t nvnBootstrapLoader_1(const char* nvnName) {
+	if(strcmp(nvnName, "nvnDeviceGetProcAddress") == 0) {
+		ptr_nvnDeviceGetProcAddress = nvnBootstrapLoader("nvnDeviceGetProcAddress");
+		return addr_nvnGetProcAddress;
+	}
+	uintptr_t ptrret = nvnBootstrapLoader(nvnName);
+	return ptrret;
+}
+
+void writePointerToFile(void* ptr, FILE* file) {
+	SaltySDCore_fwrite(&ptr, sizeof(ptr), 1, file);
+}
+
 int main(int argc, char* argv[]) {
-	writeToFile("Alive\n");
+	// writeToFile("Alive\n");
 
-	const char* pointersPath = "sdmc:/SaltySD/SwiTAS_MotionPlugin_Offsets.hex";
-	SaltySDCore_remove(pointersPath);
-	FILE* offsets = SaltySDCore_fopen(pointersPath, "wb");
+	const char* pointersPath = "sdmc:/SaltySD/SwiTAS_SaltyPlugin_Offsets.hex";
+	FILE* offsets            = SaltySDCore_fopen(pointersPath, "wb");
 
-	uint64_t mainSixAxisStateAddr = (uint64_t)&mainSixAxisState;
-	SaltySDCore_fwrite(&mainSixAxisStateAddr, sizeof(mainSixAxisStateAddr), 1, offsets);
-
-	uint64_t handheldSixAxisStateAddr = (uint64_t)&handheldSixAxisState;
-	SaltySDCore_fwrite(&handheldSixAxisStateAddr, sizeof(handheldSixAxisStateAddr), 1, offsets);
-
-	uint64_t originalMainSixAxisStateAddr = (uint64_t)&originalMainSixAxisState;
-	SaltySDCore_fwrite(&originalMainSixAxisStateAddr, sizeof(originalMainSixAxisStateAddr), 1, offsets);
-
-	uint64_t originalHandheldSixAxisStateAddr = (uint64_t)&originalHandheldSixAxisState;
-	SaltySDCore_fwrite(&originalHandheldSixAxisStateAddr, sizeof(originalHandheldSixAxisStateAddr), 1, offsets);
+	writePointerToFile(&frameHasPassed, offsets);
+	writePointerToFile(&logStringIndex, offsets);
+	writePointerToFile(&logString, offsets);
+	writePointerToFile(&mainSixAxisState, offsets);
+	writePointerToFile(&handheldSixAxisState, offsets);
+	writePointerToFile(&originalMainSixAxisState, offsets);
+	writePointerToFile(&originalHandheldSixAxisState, offsets);
 
 	SaltySDCore_fclose(offsets);
 
@@ -504,5 +560,11 @@ int main(int argc, char* argv[]) {
 		(void*) &StopSixAxisSensor2);
 	// clang-format on
 
-	writeToFile("Injection finished\n");
+	addr_nvnGetProcAddress = (uint64_t)&nvnGetProcAddress;
+	addr_nvnPresentTexture = (uint64_t)&nvnPresentTexture;
+	SaltySDCore_ReplaceImport("nvnBootstrapLoader", (void*)nvnBootstrapLoader_1);
+	SaltySDCore_ReplaceImport("eglSwapBuffers", (void*)eglSwap);
+	SaltySDCore_ReplaceImport("vkQueuePresentKHR", (void*)vulkanSwap);
+
+	// writeToFile("Injection finished\n");
 }
