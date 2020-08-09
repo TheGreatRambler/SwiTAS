@@ -158,7 +158,7 @@ private:
 	uint8_t currentJoyDefined;
 	int lastButtonState;
 
-	std::map<std::string, int> stringToButtonExtended{
+	std::map<std::string, int> stringToButtonExtended {
 		{ "LSX", 0 },
 		{ "LSY", 1 },
 		{ "RSX", 2 },
@@ -190,6 +190,9 @@ private:
 	// Menu item for joysticks, will be exclusively used
 	// by the bottom UI, so that's why it is here
 	void onJoystickMenuOpen(wxMenuEvent& event);
+
+	void motionValueChanged(wxSpinDoubleEvent& event);
+	void updateMotionValues();
 
 	wxString getJoyHexString(wxJoystick* joy);
 

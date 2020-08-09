@@ -594,7 +594,7 @@ bool DataProcessing::handleKeyboardInput(wxChar key) {
 	return false;
 }
 
-std::shared_ptr<std::vector<std::shared_ptr<ControllerData>>> DataProcessing::getInputsList() const {
+BranchData DataProcessing::getInputsList() const {
 	return currentBranchData;
 }
 

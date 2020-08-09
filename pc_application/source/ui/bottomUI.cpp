@@ -400,15 +400,15 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 	angleXCtrl->SetDigits(FLT_DIG);
 	angleXCtrl->SetDigits(FLT_DIG);
 
-	accelXCtr
-	accelYCtrl;
-	accelZCtrl;
-	angularVelocityXCtrl;
-	angularVelocityYCtrl;
-	angularVelocityZCtrl;
-	angleXCtrl;
-	angleXCtrl;
-	angleXCtrl;
+	accelXCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &BottomUI::motionValueChanged, this);
+	accelYCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &BottomUI::motionValueChanged, this);
+	accelZCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &BottomUI::motionValueChanged, this);
+	angularVelocityXCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &BottomUI::motionValueChanged, this);
+	angularVelocityYCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &BottomUI::motionValueChanged, this);
+	angularVelocityZCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &BottomUI::motionValueChanged, this);
+	angleXCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &BottomUI::motionValueChanged, this);
+	angleXCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &BottomUI::motionValueChanged, this);
+	angleXCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &BottomUI::motionValueChanged, this);
 
 	accelXCtrl->SetToolTip("Set acceleration X value");
 	accelYCtrl->SetToolTip("Set acceleration Y value");
@@ -475,7 +475,11 @@ void BottomUI::refreshDataViews(uint8_t refreshFramebuffer) {
 	// Just refresh the grid and the joysticks
 	leftJoystickDrawer->Refresh();
 	rightJoystickDrawer->Refresh();
+
+	updateMotionValues();
+
 	buttonGrid->Refresh();
+
 	if(refreshFramebuffer) {
 		// Check to see if framebuffer is avaliable to draw
 		wxFileName framebufferFileName = inputInstance->getFramebufferPathForCurrentFramebuf();
@@ -534,6 +538,41 @@ void BottomUI::exportImageView(wxCommandEvent& event) {
 	imageLocation.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
 
 	screenshot.SaveFile(imageLocation.GetFullPath(), wxBITMAP_TYPE_PNG);
+}
+
+void BottomUI::motionValueChanged(wxSpinDoubleEvent& event) {
+	wxSpinCtrlDouble* widget = (wxSpinCtrlDouble*)event.GetEventObject();
+	if(widget == accelXCtrl) {
+		inputInstance->triggerNumberValuesMotion(ControllerNumberValues::ACCEL_X, (float)widget->GetValue());
+	} else if(widget == accelYCtrl) {
+		inputInstance->triggerNumberValuesMotion(ControllerNumberValues::ACCEL_Y, (float)widget->GetValue());
+	} else if(widget == accelZCtrl) {
+		inputInstance->triggerNumberValuesMotion(ControllerNumberValues::ACCEL_Z, (float)widget->GetValue());
+	} else if(widget == angularVelocityXCtrl) {
+		inputInstance->triggerNumberValuesMotion(ControllerNumberValues::GYRO_X, (float)widget->GetValue());
+	} else if(widget == angularVelocityYCtrl) {
+		inputInstance->triggerNumberValuesMotion(ControllerNumberValues::GYRO_Y, (float)widget->GetValue());
+	} else if(widget == angularVelocityZCtrl) {
+		inputInstance->triggerNumberValuesMotion(ControllerNumberValues::GYRO_Z, (float)widget->GetValue());
+	} else if(widget == angleXCtrl) {
+		inputInstance->triggerNumberValuesMotion(ControllerNumberValues::ANGLE_X, (float)widget->GetValue());
+	} else if(widget == angleXCtrl) {
+		inputInstance->triggerNumberValuesMotion(ControllerNumberValues::ANGLE_Y, (float)widget->GetValue());
+	} else if(widget == angleXCtrl) {
+		inputInstance->triggerNumberValuesMotion(ControllerNumberValues::ANGLE_Z, (float)widget->GetValue());
+	}
+}
+
+void BottomUI::updateMotionValues() {
+	accelXCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(ControllerNumberValues::ACCEL_X));
+	accelYCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(ControllerNumberValues::ACCEL_Y));
+	accelZCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(ControllerNumberValues::ACCEL_Z));
+	angularVelocityXCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(ControllerNumberValues::GYRO_X));
+	angularVelocityYCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(ControllerNumberValues::GYRO_Y));
+	angularVelocityZCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(ControllerNumberValues::GYRO_Z));
+	angleXCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(ControllerNumberValues::ANGLE_X));
+	angleXCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(ControllerNumberValues::ANGLE_Y));
+	angleXCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(ControllerNumberValues::ANGLE_Z));
 }
 
 void BottomUI::onJoystickSelect(wxCommandEvent& event) {

@@ -266,7 +266,7 @@ public:
 	}
 
 	// TODO cache this
-	std::shared_ptr<std::vector<std::shared_ptr<ControllerData>>> getInputsList() const;
+	BranchData getInputsList() const;
 
 	std::shared_ptr<ControllerData> getControllerData(uint8_t player, SavestateBlockNum savestateHookNum, BranchNum branch, FrameNum frame) const {
 		return allPlayers[player]->at(savestateHookNum)->inputs[branch]->at(frame);

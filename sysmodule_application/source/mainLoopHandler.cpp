@@ -86,14 +86,14 @@ void MainLoop::mainLoopHandler() {
 			// This should never fail, but I dunno
 			if(R_SUCCEEDED(rc)) {
 				if(!applicationOpened) {
-					// Sleep for a millisecond to allow SaltyNX to enable
-					svcSleepThread(1000000 * 1);
+					// Sleep for a few millisecond to allow SaltyNX to enable
+					svcSleepThread(1000000 * 10);
 
 					gameName = std::string(getAppName(applicationProgramId));
 
 					LOGD << "Get SaltyNX data";
 					// Used to do accurate frame advance
-					FILE* offsets = fopen("sdmc:/SaltySD/SwiTAS_SaltyPlugin_Offsets.hex", "rb");
+					FILE* offsets = fopen("/SaltySD/SwiTAS_SaltyPlugin_Offsets.hex", "rb");
 					if(offsets != NULL) {
 						fread(&frameAddress, sizeof(frameAddress), 1, offsets);
 						fread(&saltynxLogIndexAddress, sizeof(saltynxLogIndexAddress), 1, offsets);
@@ -109,6 +109,7 @@ void MainLoop::mainLoopHandler() {
 					bool cheatProcessActive = false;
 					dmntchtHasCheatProcess(&cheatProcessActive);
 					if(cheatProcessActive == false) {
+						LOGD << "Need to force open DMNT process";
 						dmntchtForceOpenCheatProcess();
 					}
 

@@ -30,10 +30,11 @@ extern void _ZN2nn3hid32GetSixAxisSensorFusionParametersEPfS1_RKNS0_19SixAxisSen
 extern void _ZN2nn3hid22GetSixAxisSensorHandleEPNS0_26ConsoleSixAxisSensorHandleE(nn::hid::ConsoleSixAxisSensorHandle* handle) LINKABLE;
 extern void _ZN2nn3hid22GetSixAxisSensorHandleEPNS0_19SixAxisSensorHandleENS0_11BasicXpadIdE(nn::hid::SixAxisSensorHandle* handle, nn::hid::BasicXpadId param_2) LINKABLE;
 extern void _ZN2nn3hid23GetSixAxisSensorHandlesEPNS0_19SixAxisSensorHandleES2_NS0_9JoyXpadIdE(nn::hid::SixAxisSensorHandle* handle1, nn::hid::SixAxisSensorHandle* handle2, nn::hid::JoyXpadId param_3) LINKABLE;
-extern uint64_t _ZN2nn3hid23GetSixAxisSensorHandlesEPNS0_19SixAxisSensorHandleEiRKjNS_4util10BitFlagSetILi32ENS0_12NpadStyleTagEEE(nn::hid::SixAxisSensorHandle* handleArr, int numOfControllers, nn::hid::NpadIdType id, void* npadStyleBitflags) LINKABLE;
+// Last argument is a void* here because the type isn't well defined
+extern uint64_t _ZN2nn3hid23GetSixAxisSensorHandlesEPNS0_19SixAxisSensorHandleEiRKjNS_4util10BitFlagSetILi32ENS0_12NpadStyleTagEEE(nn::hid::SixAxisSensorHandle* handle, int32_t numOfHandles, const nn::hid::NpadIdType& id, uint32_t npadStyleBitflags) LINKABLE;
 extern void _ZN2nn3hid21GetSixAxisSensorStateEPNS0_18SixAxisSensorStateERKNS0_19SixAxisSensorHandleE(nn::hid::SixAxisSensorState* param_1, nn::hid::SixAxisSensorHandle* param_2) LINKABLE;
-extern uint64_t _ZN2nn3hid22GetSixAxisSensorStatesEPNS0_18SixAxisSensorStateEiRKNS0_11BasicXpadIdE(nn::hid::SixAxisSensorState* param_1, int param_2, nn::hid::BasicXpadId* param_3) LINKABLE;
-extern uint64_t _ZN2nn3hid22GetSixAxisSensorStatesEPNS0_18SixAxisSensorStateEiRKNS0_19SixAxisSensorHandleE(nn::hid::SixAxisSensorState* param_1, int param_2, nn::hid::SixAxisSensorHandle* param_3) LINKABLE;
+extern uint64_t _ZN2nn3hid22GetSixAxisSensorStatesEPNS0_18SixAxisSensorStateEiRKNS0_11BasicXpadIdE(nn::hid::SixAxisSensorState* param_1, int32_t param_2, nn::hid::BasicXpadId* param_3) LINKABLE;
+extern uint64_t _ZN2nn3hid22GetSixAxisSensorStatesEPNS0_18SixAxisSensorStateEiRKNS0_19SixAxisSensorHandleE(nn::hid::SixAxisSensorState* param_1, int32_t param_2, nn::hid::SixAxisSensorHandle* param_3) LINKABLE;
 extern void _ZN2nn3hid30InitializeConsoleSixAxisSensorEv(void) LINKABLE;
 extern uint64_t _ZN2nn3hid21IsSixAxisSensorAtRestERKNS0_19SixAxisSensorHandleE(nn::hid::SixAxisSensorHandle* param_1) LINKABLE;
 extern uint64_t _ZN2nn3hid28IsSixAxisSensorFusionEnabledERKNS0_19SixAxisSensorHandleE(nn::hid::SixAxisSensorHandle* param_1) LINKABLE;
@@ -198,7 +199,7 @@ void GetSixAxisSensorHandles1(nn::hid::SixAxisSensorHandle* handle1, nn::hid::Si
 
 /* nn::hid::GetSixAxisSensorHandles(nn::hid::SixAxisSensorHandle*, int, unsigned int const&,
    nn::util::BitFlagSet<32, nn::hid::NpadStyleTag>) */
-uint64_t GetSixAxisSensorHandles2(nn::hid::SixAxisSensorHandle* handle, int numOfHandles, nn::hid::NpadIdType id, void* npadStyleBitflags) {
+uint64_t GetSixAxisSensorHandles2(nn::hid::SixAxisSensorHandle* handle, int32_t numOfHandles, const nn::hid::NpadIdType& id, uint32_t npadStyleBitflags) {
 	// Ignore numOfHandles
 	if(dumpDebugInfo) {
 		writeToFile("GetSixAxisSensorHandles2 called\n");
@@ -210,25 +211,37 @@ uint64_t GetSixAxisSensorHandles2(nn::hid::SixAxisSensorHandle* handle, int numO
 	if(recordMotionInputs) {
 		if(id == nn::hid::NpadIdType::Handheld) {
 			handheldHandle = handle;
-		} else {
-			if((uint32_t)id < 8) {
-				mainHandles[(uint32_t)id] = handle;
-			} else {
-				if(dumpDebugInfo) {
-					writeToFile("GetSixAxisSensorHandles2: Invalid ID\n");
-				}
+
+			if(dumpDebugInfo) {
+				writeToFile("GetSixAxisSensorHandles2: Give handheld handle\n");
 			}
+
+			return _ZN2nn3hid23GetSixAxisSensorHandlesEPNS0_19SixAxisSensorHandleEiRKjNS_4util10BitFlagSetILi32ENS0_12NpadStyleTagEEE(handle, 1, id, npadStyleBitflags);
+		} else if((uint32_t)id < 8) {
+			mainHandles[(uint32_t)id] = handle;
+
+			if(dumpDebugInfo) {
+				writeToFile("GetSixAxisSensorHandles2: Give standard handle\n");
+			}
+
+			return _ZN2nn3hid23GetSixAxisSensorHandlesEPNS0_19SixAxisSensorHandleEiRKjNS_4util10BitFlagSetILi32ENS0_12NpadStyleTagEEE(handle, 1, id, npadStyleBitflags);
+		} else {
+			// Ignore entirely, we can't handle this
+			if(dumpDebugInfo) {
+				writeToFile("GetSixAxisSensorHandles2: Unhandleable ID\n");
+			}
+
+			return _ZN2nn3hid23GetSixAxisSensorHandlesEPNS0_19SixAxisSensorHandleEiRKjNS_4util10BitFlagSetILi32ENS0_12NpadStyleTagEEE(handle, 1, id, npadStyleBitflags);
 		}
 
 		// Always handle one handle, even if the game requests more
-		return _ZN2nn3hid23GetSixAxisSensorHandlesEPNS0_19SixAxisSensorHandleEiRKjNS_4util10BitFlagSetILi32ENS0_12NpadStyleTagEEE(handle, 1, id, npadStyleBitflags);
-		/* We can safely do this as:
-			The number of SixAxisSensorHandle that can be acquired depends on the operation mode.
-			For NpadStyleFullKey and NpadStyleHandheld, one SixAxisSensorHandle is acquired.
-		*/
-	} else {
-		return _ZN2nn3hid23GetSixAxisSensorHandlesEPNS0_19SixAxisSensorHandleEiRKjNS_4util10BitFlagSetILi32ENS0_12NpadStyleTagEEE(handle, numOfHandles, id, npadStyleBitflags);
+
+		// We can safely do this as:
+		//	The number of SixAxisSensorHandle that can be acquired depends on the operation mode.
+		//	For NpadStyleFullKey and NpadStyleHandheld, one SixAxisSensorHandle is acquired.
 	}
+
+	return _ZN2nn3hid23GetSixAxisSensorHandlesEPNS0_19SixAxisSensorHandleEiRKjNS_4util10BitFlagSetILi32ENS0_12NpadStyleTagEEE(handle, numOfHandles, id, npadStyleBitflags);
 }
 
 /* nn::hid::GetSixAxisSensorState(nn::hid::SixAxisSensorState*, nn::hid::SixAxisSensorHandle const&)
@@ -274,7 +287,7 @@ void GetSixAxisSensorState(nn::hid::SixAxisSensorState* state, nn::hid::SixAxisS
 
 /* nn::hid::GetSixAxisSensorStates(nn::hid::SixAxisSensorState*, int, nn::hid::BasicXpadId const&)
  */
-uint64_t GetSixAxisSensorStates1(nn::hid::SixAxisSensorState* outStates, int count, nn::hid::BasicXpadId* handle) {
+uint64_t GetSixAxisSensorStates1(nn::hid::SixAxisSensorState* outStates, int32_t count, nn::hid::BasicXpadId* handle) {
 	if(dumpDebugInfo) {
 		writeToFile("GetSixAxisSensorStates1 called\n");
 	}
@@ -283,7 +296,7 @@ uint64_t GetSixAxisSensorStates1(nn::hid::SixAxisSensorState* outStates, int cou
 
 /* nn::hid::GetSixAxisSensorStates(nn::hid::SixAxisSensorState*, int, nn::hid::SixAxisSensorHandle
    const&) */
-uint64_t GetSixAxisSensorStates2(nn::hid::SixAxisSensorState* outStates, int count, nn::hid::SixAxisSensorHandle* handle) {
+uint64_t GetSixAxisSensorStates2(nn::hid::SixAxisSensorState* outStates, int32_t count, nn::hid::SixAxisSensorHandle* handle) {
 	if(dumpDebugInfo) {
 		writeToFile("GetSixAxisSensorStates2 called\n");
 	}
