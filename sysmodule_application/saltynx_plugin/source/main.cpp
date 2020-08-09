@@ -14,6 +14,7 @@ static char g_heap[0x10000];
 
 void __libnx_init(void* ctx, Handle main_thread, void* saved_lr);
 void __attribute__((weak)) NORETURN __libnx_exit(int rc);
+void __attribute__((weak)) __libnx_exception_handler(ThreadExceptionDump* ctx);
 void __nx_exit(int, void*);
 void __libc_fini_array(void);
 void __libc_init_array(void);
@@ -62,45 +63,6 @@ Handle orig_main_thread;
 void* orig_ctx;
 void* orig_saved_lr;
 
-// Print log info
-uint8_t dumpDebugInfo = true;
-// Allow SwiTAS to edit the motion sent to the game
-uint8_t spoofMotionRequests = false;
-// This needs to be set to spoof
-uint8_t recordMotionInputs = false;
-
-uint8_t frameHasPassed = false;
-
-uint16_t logStringIndex = 0;
-char logString[1000];
-
-nn::hid::SixAxisSensorHandle* mainHandles[8] = { 0 };
-nn::hid::SixAxisSensorHandle* handheldHandle = { 0 };
-
-// Updated externally by SwiTAS
-nn::hid::SixAxisSensorState mainSixAxisState[8]  = { 0 };
-nn::hid::SixAxisSensorState handheldSixAxisState = { 0 };
-
-// Updated with the real values, for recording purposes
-nn::hid::SixAxisSensorState originalMainSixAxisState[8]  = { 0 };
-nn::hid::SixAxisSensorState originalHandheldSixAxisState = { 0 };
-
-// ONLY values we will TAS
-/*
-	nn::util::Float3 acceleration;
-	nn::util::Float3 angularVelocity;
-	nn::util::Float3 angle;
-*/
-// All these values are floats
-
-void writeToFile(std::string str) {
-	uint16_t stringLength = str.length();
-	if(logStringIndex + stringLength < sizeof(logString)) {
-		memcpy(&logString[logStringIndex], str.c_str(), stringLength);
-		logStringIndex += stringLength;
-	}
-}
-
 void __libnx_init(void* ctx, Handle main_thread, void* saved_lr) {
 	extern char* fake_heap_start;
 	extern char* fake_heap_end;
@@ -139,6 +101,49 @@ void __attribute__((weak)) NORETURN __libnx_exit(int rc) {
 	__nx_exit(0, orig_saved_lr);
 	while(true)
 		;
+}
+
+void __attribute__((weak)) __libnx_exception_handler(ThreadExceptionDump* ctx) {
+	// I dunno
+}
+
+// Print log info
+uint8_t dumpDebugInfo = true;
+// Allow SwiTAS to edit the motion sent to the game
+uint8_t spoofMotionRequests = false;
+// This needs to be set to spoof
+uint8_t recordMotionInputs = false;
+
+uint8_t frameHasPassed = false;
+
+uint16_t logStringIndex = 0;
+char logString[1000];
+
+nn::hid::SixAxisSensorHandle* mainHandles[8] = { 0 };
+nn::hid::SixAxisSensorHandle* handheldHandle = { 0 };
+
+// Updated externally by SwiTAS
+nn::hid::SixAxisSensorState mainSixAxisState[8]  = { 0 };
+nn::hid::SixAxisSensorState handheldSixAxisState = { 0 };
+
+// Updated with the real values, for recording purposes
+nn::hid::SixAxisSensorState originalMainSixAxisState[8]  = { 0 };
+nn::hid::SixAxisSensorState originalHandheldSixAxisState = { 0 };
+
+// ONLY values we will TAS
+/*
+	nn::util::Float3 acceleration;
+	nn::util::Float3 angularVelocity;
+	nn::util::Float3 angle;
+*/
+// All these values are floats
+
+void writeToFile(const char* str) {
+	uint16_t stringLength = strlen(str);
+	if(logStringIndex + stringLength < sizeof(logString)) {
+		memcpy(&logString[logStringIndex], str, stringLength);
+		logStringIndex += stringLength;
+	}
 }
 
 void fixState(nn::hid::SixAxisSensorState& dest, nn::hid::SixAxisSensorState& orig) {

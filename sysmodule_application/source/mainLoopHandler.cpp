@@ -99,7 +99,11 @@ void MainLoop::mainLoopHandler() {
 						fread(&saltynxLogIndexAddress, sizeof(saltynxLogIndexAddress), 1, offsets);
 						fread(&saltynxLogAddress, sizeof(saltynxLogAddress), 1, offsets);
 						fclose(offsets);
+
+						LOGD << "Pointers recieved: " << std::to_string(frameAddress) << " " << std::to_string(saltynxLogIndexAddress) << " " << std::to_string(saltynxLogAddress);
 					}
+
+					LOGD << "Start DMNT process";
 
 					// Enable DMNT
 					bool cheatProcessActive = false;
