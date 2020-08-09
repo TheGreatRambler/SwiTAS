@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cfloat>
 #include <cstdio>
 #include <functional>
 #include <map>
@@ -126,6 +127,21 @@ private:
 	JoystickCanvas* leftJoystickDrawer;
 	JoystickCanvas* rightJoystickDrawer;
 
+	wxBoxSizer* motionSizer;
+	wxBoxSizer* accelSizer;
+	wxBoxSizer* angularVelocitySizer;
+	wxBoxSizer* angleSizer;
+
+	wxSpinCtrlDouble* accelXCtrl;
+	wxSpinCtrlDouble* accelYCtrl;
+	wxSpinCtrlDouble* accelZCtrl;
+	wxSpinCtrlDouble* angularVelocityXCtrl;
+	wxSpinCtrlDouble* angularVelocityYCtrl;
+	wxSpinCtrlDouble* angularVelocityZCtrl;
+	wxSpinCtrlDouble* angleXCtrl;
+	wxSpinCtrlDouble* angleXCtrl;
+	wxSpinCtrlDouble* angleXCtrl;
+
 	// The true button grid
 	ButtonGrid* buttonGrid;
 
@@ -142,7 +158,7 @@ private:
 	uint8_t currentJoyDefined;
 	int lastButtonState;
 
-	std::map<std::string, int> stringToButtonExtended {
+	std::map<std::string, int> stringToButtonExtended{
 		{ "LSX", 0 },
 		{ "LSY", 1 },
 		{ "RSX", 2 },

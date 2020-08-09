@@ -374,6 +374,52 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 	leftJoystickDrawer->getLockButton()->SetToolTip("Set current value of left gamepad joystick to frame");
 	rightJoystickDrawer->getLockButton()->SetToolTip("Set current value of right gamepad joystick to frame");
 
+	motionSizer          = new wxBoxSizer(wxVERTICAL);
+	accelSizer           = new wxBoxSizer(wxHORIZONTAL);
+	angularVelocitySizer = new wxBoxSizer(wxHORIZONTAL);
+	angleSizer           = new wxBoxSizer(wxHORIZONTAL);
+
+	accelXCtrl           = new wxSpinCtrlDouble(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -7.0, 7.0);
+	accelYCtrl           = new wxSpinCtrlDouble(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -7.0, 7.0);
+	accelZCtrl           = new wxSpinCtrlDouble(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -7.0, 7.0);
+	angularVelocityXCtrl = new wxSpinCtrlDouble(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -5.0, 5.0);
+	angularVelocityYCtrl = new wxSpinCtrlDouble(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -5.0, 5.0);
+	angularVelocityZCtrl = new wxSpinCtrlDouble(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -5.0, 5.0);
+	angleXCtrl           = new wxSpinCtrlDouble(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -1.0, 1.0);
+	angleXCtrl           = new wxSpinCtrlDouble(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -1.0, 1.0);
+	angleXCtrl           = new wxSpinCtrlDouble(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -1.0, 1.0);
+
+	// Only those values representable as a float are counted
+	accelXCtrl->SetDigits(FLT_DIG);
+	accelYCtrl->SetDigits(FLT_DIG);
+	accelZCtrl->SetDigits(FLT_DIG);
+	angularVelocityXCtrl->SetDigits(FLT_DIG);
+	angularVelocityYCtrl->SetDigits(FLT_DIG);
+	angularVelocityZCtrl->SetDigits(FLT_DIG);
+	angleXCtrl->SetDigits(FLT_DIG);
+	angleXCtrl->SetDigits(FLT_DIG);
+	angleXCtrl->SetDigits(FLT_DIG);
+
+	accelXCtr
+	accelYCtrl;
+	accelZCtrl;
+	angularVelocityXCtrl;
+	angularVelocityYCtrl;
+	angularVelocityZCtrl;
+	angleXCtrl;
+	angleXCtrl;
+	angleXCtrl;
+
+	accelXCtrl->SetToolTip("Set acceleration X value");
+	accelYCtrl->SetToolTip("Set acceleration Y value");
+	accelZCtrl->SetToolTip("Set acceleration Z value");
+	angularVelocityXCtrl->SetToolTip("Set angular velocity X value");
+	angularVelocityYCtrl->SetToolTip("Set angular velocity Y value");
+	angularVelocityZCtrl->SetToolTip("Set angular velocity Z value");
+	angleXCtrl->SetToolTip("Set angle X value");
+	angleXCtrl->SetToolTip("Set angle Y value");
+	angleXCtrl->SetToolTip("Set angle Z value");
+
 	wxSize gridSize;
 	// Just to get a rough estimate
 	int w = ButtonData::KeyWidth * buttonData->buttonMapping[Btn::A]->resizedGridOffBitmap->GetWidth();
