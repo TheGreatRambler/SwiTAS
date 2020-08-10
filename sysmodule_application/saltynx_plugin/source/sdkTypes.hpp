@@ -101,13 +101,30 @@ namespace nn {
 		};
 
 		struct SixAxisSensorState {
-			int64_t deltaTimeNanoSeconds;
+			uint64 deltaTimeNanoSeconds;
 			int64_t samplingNumber;
 			nn::util::Float3 acceleration;
 			nn::util::Float3 angularVelocity;
 			nn::util::Float3 angle;
 			nn::hid::DirectionState direction;
 			int32_t attributes;
+		};
+
+		struct TouchState {
+			uint32_t attributes;
+			uint64_t deltaTimeNanoSeconds;
+			int32_t diameterX;
+			int32_t diameterY;
+			int32_t fingerId;
+			int32_t rotationAngle;
+			int32_t x;
+			int32_t y;
+		};
+
+		struct TouchScreenState {
+			int32_t count;
+			int64_t samplingNumber;
+			nn::hid::TouchState touches[nn::hid::TouchStateCountMax];
 		};
 
 		typedef uint32_t BasicXpadId;
@@ -118,5 +135,7 @@ namespace nn {
 		const float AccelerometerMax         = 7.0f;
 		const float AngularVelocityMax       = 5.0f;
 		const int SixAxisSensorStateCountMax = 16;
+		const int TouchStateCountMax         = 16;
+		const int TouchScreenStateCountMax   = 16;
 	};
 };

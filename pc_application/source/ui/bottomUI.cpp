@@ -417,8 +417,22 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 	angularVelocityYCtrl->SetToolTip("Set angular velocity Y value");
 	angularVelocityZCtrl->SetToolTip("Set angular velocity Z value");
 	angleXCtrl->SetToolTip("Set angle X value");
-	angleXCtrl->SetToolTip("Set angle Y value");
-	angleXCtrl->SetToolTip("Set angle Z value");
+	angleYCtrl->SetToolTip("Set angle Y value");
+	angleZCtrl->SetToolTip("Set angle Z value");
+
+	accelSizer->Add(accelXCtrl, 0, wxEXPAND);
+	accelSizer->Add(accelYCtrl, 0, wxEXPAND);
+	accelSizer->Add(accelZCtrl, 0, wxEXPAND);
+	angularVelocitySizer->Add(angularVelocityXCtrl, 0, wxEXPAND);
+	angularVelocitySizer->Add(angularVelocityYCtrl, 0, wxEXPAND);
+	angularVelocitySizer->Add(angularVelocityZCtrl, 0, wxEXPAND);
+	angleSizer->Add(angleXCtrl, 0, wxEXPAND);
+	angleSizer->Add(accelYCtrl, 0, wxEXPAND);
+	angleSizer->Add(angleZCtrl, 0, wxEXPAND);
+
+	motionSizer->Add(accelSizer, 1, wxEXPAND);
+	motionSizer->Add(angularVelocitySizer, 1, wxEXPAND);
+	motionSizer->Add(angleSizer, 1, wxEXPAND);
 
 	wxSize gridSize;
 	// Just to get a rough estimate
@@ -446,7 +460,7 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 	// These take up much less space than the grid
 	horizontalBoxSizer->Add(leftJoystickDrawer->getSizer(), 0);
 	horizontalBoxSizer->Add(rightJoystickDrawer->getSizer(), 0);
-
+	horizontalBoxSizer->Add(motionSizer, 0);
 	horizontalBoxSizer->Add(buttonGrid, 0, wxSHAPED | wxEXPAND | wxALIGN_CENTER_VERTICAL);
 
 	frameViewerCanvas->SetMinSize(wxSize(0, 0));
