@@ -324,6 +324,13 @@ public:
 	float getNumberValuesSpecificMotion(FrameNum frame, ControllerNumberValues joystickId, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
 	float getNumberValueCurrentMotion(ControllerNumberValues joystickId) const;
 
+	// Only up to 2 touches for now
+	void triggerNumberOfTouches(uint8_t value);
+	void setNumberOfTouches(FrameNum frame, uint8_t value);
+	uint8_t getNumberOfTouches(FrameNum frame) const;
+	uint8_t getNumberOfTouchesSpecific(FrameNum frame, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
+	uint8_t getNumberOfTouchesCurrent() const;
+
 	// Updates how the current frame looks on the UI
 	// Also called when modifying anything of importance, like currentFrame
 	void modifyCurrentFrameViews(FrameNum frame);

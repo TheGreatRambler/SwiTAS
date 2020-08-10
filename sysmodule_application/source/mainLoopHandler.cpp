@@ -91,6 +91,8 @@ void MainLoop::mainLoopHandler() {
 
 					gameName = std::string(getAppName(applicationProgramId));
 
+					/*
+
 					LOGD << "Get SaltyNX data";
 					// Used to do accurate frame advance
 					FILE* offsets = fopen("/SaltySD/SwiTAS_SaltyPlugin_Offsets.hex", "rb");
@@ -119,6 +121,7 @@ void MainLoop::mainLoopHandler() {
 
 					heapBase = appInfo.heap_extents.base;
 					mainBase = appInfo.main_nso_extents.base;
+					*/
 
 					LOGD << "Application " + gameName + " opened";
 					ADD_TO_QUEUE(RecieveApplicationConnected, networkInstance, {

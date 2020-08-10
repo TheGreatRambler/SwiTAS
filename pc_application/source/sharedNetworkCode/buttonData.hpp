@@ -51,15 +51,32 @@ struct ControllerData : public zpp::serializer::polymorphic {
 	int16_t RS_X = 0;
 	int16_t RS_Y = 0;
 	// Gyroscope and Accelerometer data, all floats
-	float ACCEL_X = 0;
-	float ACCEL_Y = 0;
-	float ACCEL_Z = 0;
-	float GYRO_X  = 0;
-	float GYRO_Y  = 0;
-	float GYRO_Z  = 0;
-	float ANGLE_X = 0;
-	float ANGLE_Y = 0;
-	float ANGLE_Z = 0;
+	// Left joycon
+	float ACCEL_X_LEFT = 0;
+	float ACCEL_Y_LEFT = 0;
+	float ACCEL_Z_LEFT = 0;
+	float GYRO_X_LEFT  = 0;
+	float GYRO_Y_LEFT  = 0;
+	float GYRO_Z_LEFT  = 0;
+	float ANGLE_X_LEFT = 0;
+	float ANGLE_Y_LEFT = 0;
+	float ANGLE_Z_LEFT = 0;
+	// Right joycon
+	float ACCEL_X_RIGHT = 0;
+	float ACCEL_Y_RIGHT = 0;
+	float ACCEL_Z_RIGHT = 0;
+	float GYRO_X_RIGHT  = 0;
+	float GYRO_Y_RIGHT  = 0;
+	float GYRO_Z_RIGHT  = 0;
+	float ANGLE_X_RIGHT = 0;
+	float ANGLE_Y_RIGHT = 0;
+	float ANGLE_Z_RIGHT = 0;
+	// Touchscreen data
+	uint8_t numberOfTouches = 0;
+	uint16_t TOUCH_X_1      = 0;
+	uint16_t TOUCH_Y_1      = 0;
+	uint16_t TOUCH_X_2      = 0;
+	uint16_t TOUCH_Y_2      = 0;
 	// State of the frame, mostly for the editor
 	uint8_t frameState = 0;
 
@@ -68,9 +85,13 @@ struct ControllerData : public zpp::serializer::polymorphic {
 		// clang-format off
 			archive(self.buttons,
 				self.LS_X, self.LS_Y, self.RS_X, self.RS_Y,
-				self.ACCEL_X, self.ACCEL_Y, self.ACCEL_Z,
-				self.GYRO_X, self.GYRO_Y, self.GYRO_Z,
-				self.ANGLE_X, self.ANGLE_Y, self.ANGLE_Z,
+				self.ACCEL_X_LEFT, self.ACCEL_Y_LEFT, self.ACCEL_Z_LEFT,
+				self.GYRO_X_LEFT, self.GYRO_Y_LEFT, self.GYRO_Z_LEFT,
+				self.ANGLE_X_LEFT, self.ANGLE_Y_LEFT, self.ANGLE_Z_LEFT,
+				self.ACCEL_X_RIGHT, self.ACCEL_Y_RIGHT, self.ACCEL_Z_RIGHT,
+				self.GYRO_X_RIGHT, self.GYRO_Y_RIGHT, self.GYRO_Z_RIGHT,
+				self.ANGLE_X_RIGHT, self.ANGLE_Y_RIGHT, self.ANGLE_Z_RIGHT,
+				self.TOUCH_X_1, self.TOUCH_Y_1, self.TOUCH_X_2, self.TOUCH_Y_2,
 				self.frameState);
 		// clang-format on
 	}

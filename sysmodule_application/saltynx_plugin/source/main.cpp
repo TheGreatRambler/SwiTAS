@@ -30,7 +30,6 @@ extern void _ZN2nn3hid32GetSixAxisSensorFusionParametersEPfS1_RKNS0_19SixAxisSen
 extern void _ZN2nn3hid22GetSixAxisSensorHandleEPNS0_26ConsoleSixAxisSensorHandleE(nn::hid::ConsoleSixAxisSensorHandle* handle) LINKABLE;
 extern void _ZN2nn3hid22GetSixAxisSensorHandleEPNS0_19SixAxisSensorHandleENS0_11BasicXpadIdE(nn::hid::SixAxisSensorHandle* handle, nn::hid::BasicXpadId param_2) LINKABLE;
 extern void _ZN2nn3hid23GetSixAxisSensorHandlesEPNS0_19SixAxisSensorHandleES2_NS0_9JoyXpadIdE(nn::hid::SixAxisSensorHandle* handle1, nn::hid::SixAxisSensorHandle* handle2, nn::hid::JoyXpadId param_3) LINKABLE;
-// Last argument is a void* here because the type isn't well defined
 extern uint64_t _ZN2nn3hid23GetSixAxisSensorHandlesEPNS0_19SixAxisSensorHandleEiRKjNS_4util10BitFlagSetILi32ENS0_12NpadStyleTagEEE(nn::hid::SixAxisSensorHandle* handle, int32_t numOfHandles, const nn::hid::NpadIdType& id, uint32_t npadStyleBitflags) LINKABLE;
 extern void _ZN2nn3hid21GetSixAxisSensorStateEPNS0_18SixAxisSensorStateERKNS0_19SixAxisSensorHandleE(nn::hid::SixAxisSensorState* param_1, nn::hid::SixAxisSensorHandle* param_2) LINKABLE;
 extern uint64_t _ZN2nn3hid22GetSixAxisSensorStatesEPNS0_18SixAxisSensorStateEiRKNS0_11BasicXpadIdE(nn::hid::SixAxisSensorState* param_1, int32_t param_2, nn::hid::BasicXpadId* param_3) LINKABLE;
@@ -44,21 +43,10 @@ extern void _ZN2nn3hid18StartSixAxisSensorERKNS0_26ConsoleSixAxisSensorHandleE(n
 extern void _ZN2nn3hid18StartSixAxisSensorERKNS0_19SixAxisSensorHandleE(nn::hid::SixAxisSensorHandle* param_1) LINKABLE;
 extern void _ZN2nn3hid17StopSixAxisSensorERKNS0_26ConsoleSixAxisSensorHandleE(nn::hid::ConsoleSixAxisSensorHandle* param_1) LINKABLE;
 extern void _ZN2nn3hid17StopSixAxisSensorERKNS0_19SixAxisSensorHandleE(nn::hid::SixAxisSensorHandle* param_1) LINKABLE;
-// Filesystem external functions
-/*
-// Result OpenFile(nn::fs::FileHandle *, char const* path, s32);
-extern uint64_t _ZN2nn2fs8OpenFileEPNS0_10FileHandleEPKci(nn::fs::FileHandle* handle, char const* path, int32_t mode) LINKABLE;
-// void CloseFile(FileHandle fileHandle);
-extern void _ZN2nn2fs9CloseFileENS0_10FileHandleE(nn::fs::FileHandle handle) LINKABLE;
-// Result ReadFile(u64 *, nn::fs::FileHandle, s64, void *, u64);
-extern void _ZN2nn2fs8ReadFileENS0_10FileHandleElPvm(nn::fs::FileHandle handle, int64_t offset, void* data, uint64_t length) LINKABLE;
-// Result WriteFile(FileHandle handle, s64 fileOffset, void const* buff, u64 size, WriteOption const& option);
-extern uint64_t _ZN2nn2fs9WriteFileENS0_10FileHandleElPKvmRKNS0_11WriteOptionE(nn::fs::FileHandle handle, int64_t fileOffset, void* buf, int64_t size, nn::fs::WriteOption options) LINKABLE;
-// Result GetFileSize(s64* size, FileHandle fileHandle);
-extern uint64_t _ZN2nn2fs11GetFileSizeEPlNS0_10FileHandleE(int64_t* size, nn::fs::FileHandle fileHandle) LINKABLE;
-// Result SetFileSize(FileHandle fileHandle, s64 filesize);
-extern uint64_t _ZN2nn2fs11SetFileSizeENS0_10FileHandleEl(nn::fs::FileHandle fileHandle, int64_t filesize) LINKABLE;
-*/
+// Touch external functions
+extern int32_t _ZN2nn3hid6detail19GetTouchScreenStateILm16EEENS_6ResultEPNS0_16TouchScreenStateIXT_EEE(nn::hid::TouchScreenState* state) LINKABLE;
+// Don't know why that int* is there, it's in the decomp
+extern int32_t _ZN2nn3hid6detail20GetTouchScreenStatesILm16EEENS_6ResultEPiPNS0_16TouchScreenStateIXT_EEEi(int32_t* unk1, nn::hid::TouchScreenState* outStates, int32_t unk2) LINKABLE;
 }
 
 u32 __nx_applet_type = AppletType_None;
@@ -165,21 +153,21 @@ void fixMotionState(nn::hid::SixAxisSensorState& dest, nn::hid::SixAxisSensorSta
 	dest.direction.z = { 0.0, 0.0, 1.0 };
 }
 
+/*
 void setTouchState(nn::hid::TouchScreenState& dest, nn::hid::TouchState[nn::hid::TouchStateCountMax] states, int32_t numOfStates) {
 	memcpy(&dest.touches, states, sizeof(nn::hid::TouchState) * numOfStates);
 	dest.count          = numOfStates;
 	dest.samplingNumber = orig.samplingNumber;
 
 	// Need to test these data points by holding my finger on the switch, todo
-	/*
 	dest[0].attributes           = orig[0].attributes;
 	dest[0].deltaTimeNanoSeconds = orig[0].deltaTimeNanoSeconds;
 	dest[0].diameterX            = orig[0].diameterX;
 	dest[0].diameterY            = orig[0].diameterY;
 	dest[0].fingerId             = 0;
 	dest[0].rotationAngle        = orig[0].rotationAngle;
-	*/
 }
+*/
 
 // Motion spoofing
 /* nn::hid::EnableSixAxisSensorFusion(nn::hid::SixAxisSensorHandle const&, bool) */
@@ -422,6 +410,7 @@ void StopSixAxisSensor2(nn::hid::SixAxisSensorHandle* param_1) {
 	_ZN2nn3hid17StopSixAxisSensorERKNS0_19SixAxisSensorHandleE(param_1);
 }
 
+/*
 // Touch screen spoofing
 // void nn::hid::GetTouchScreenState (TouchScreenState< N > *pOutValue)
 // Dunno how to handle templates
@@ -453,7 +442,7 @@ void GetTouchScreenState(nn::hid::TouchScreenState* state) {
 				nn::hid::TouchState& touchState = state->touches[0];
 
 				// clang-format off
-				std::string diagInfo = 
+				std::string diagInfo =
 					"attributes: " + std::to_string(touchState.attributes) + "\n" +
 					"deltaTimeNanoSeconds: " + std::to_string(touchState.deltaTimeNanoSeconds) + "\n" +
 					"diameterX: " + std::to_string(touchState.diameterX) + "\n" +
@@ -487,6 +476,7 @@ int32_t GetTouchScreenStates(nn::hid::TouchScreenState* outStates, int32_t count
 		return whateverthecallis(outstates, count);
 	}
 }
+*/
 
 uintptr_t ptr_nvnDeviceGetProcAddress;
 uintptr_t ptr_nvnQueuePresentTexture;

@@ -10,15 +10,9 @@ ControllerHandler::ControllerHandler(std::shared_ptr<CommunicateWithNetwork> net
 		networkInstance = networkImp;
 
 #ifdef __SWITCH__
-		// Types include:
-		// - HidDeviceType_FullKey3
-		// - HidDeviceType_JoyLeft2
-		// - HidDeviceType_JoyRight1
-		// - HidDeviceType_LarkLeftHVC
-		// - HidDeviceType_LarkRightHVC
-		// - HidDeviceType_LarkLeftNES
-		// - HidDeviceType_System19
-		device.deviceType = HidDeviceType_FullKey3;
+		// HidDeviceTypeBits_System with HidControllerType |= TYPE_JOYCON_PAIR.
+		// Should create a joycon pair, maybe
+		device.deviceType = HidDeviceType_System20;
 
 		// Set the interface type
 		device.npadInterfaceType = NpadInterfaceType_Bluetooth;

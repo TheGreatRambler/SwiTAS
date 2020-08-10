@@ -54,6 +54,17 @@ namespace nn {
 	};
 
 	namespace hid {
+		typedef uint32_t BasicXpadId;
+		typedef uint32_t JoyXpadId;
+		typedef uint32_t SixAxisSensorHandle;
+		typedef uint32_t ConsoleSixAxisSensorHandle;
+
+		const float AccelerometerMax         = 7.0f;
+		const float AngularVelocityMax       = 5.0f;
+		const int SixAxisSensorStateCountMax = 16;
+		const int TouchStateCountMax         = 16;
+		const int TouchScreenStateCountMax   = 16;
+
 		enum class GyroscopeZeroDriftMode : uint32_t {
 			GyroscopeZeroDriftMode_Loose,
 			GyroscopeZeroDriftMode_Standard,
@@ -101,7 +112,7 @@ namespace nn {
 		};
 
 		struct SixAxisSensorState {
-			uint64 deltaTimeNanoSeconds;
+			uint64_t deltaTimeNanoSeconds;
 			int64_t samplingNumber;
 			nn::util::Float3 acceleration;
 			nn::util::Float3 angularVelocity;
@@ -126,16 +137,5 @@ namespace nn {
 			int64_t samplingNumber;
 			nn::hid::TouchState touches[nn::hid::TouchStateCountMax];
 		};
-
-		typedef uint32_t BasicXpadId;
-		typedef uint32_t JoyXpadId;
-		typedef uint32_t SixAxisSensorHandle;
-		typedef uint32_t ConsoleSixAxisSensorHandle;
-
-		const float AccelerometerMax         = 7.0f;
-		const float AngularVelocityMax       = 5.0f;
-		const int SixAxisSensorStateCountMax = 16;
-		const int TouchStateCountMax         = 16;
-		const int TouchScreenStateCountMax   = 16;
 	};
 };

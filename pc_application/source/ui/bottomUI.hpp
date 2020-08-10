@@ -23,6 +23,50 @@
 #include "../helpers.hpp"
 #include "drawingCanvas.hpp"
 
+class MotionAndTouchWidget : public wxFrame {
+private:
+	DataProcessing* inputInstance;
+
+	wxBoxSizer* mainSizer;
+
+	wxBoxSizer* motionLeftSizer;
+	wxBoxSizer* accelLeftSizer;
+	wxBoxSizer* angularVelocityLeftSizer;
+	wxBoxSizer* angleLeftSizer;
+
+	wxSpinCtrlDouble* accelXLeftCtrl;
+	wxSpinCtrlDouble* accelYLeftCtrl;
+	wxSpinCtrlDouble* accelZLeftCtrl;
+	wxSpinCtrlDouble* angularVelocityXLeftCtrl;
+	wxSpinCtrlDouble* angularVelocityYLeftCtrl;
+	wxSpinCtrlDouble* angularVelocityZLeftCtrl;
+	wxSpinCtrlDouble* angleXLeftCtrl;
+	wxSpinCtrlDouble* angleYLeftCtrl;
+	wxSpinCtrlDouble* angleZLeftCtrl;
+
+	wxBoxSizer* motionRightSizer;
+	wxBoxSizer* accelRightSizer;
+	wxBoxSizer* angularVelocityRightSizer;
+	wxBoxSizer* angleRightSizer;
+
+	wxSpinCtrlDouble* accelXRightCtrl;
+	wxSpinCtrlDouble* accelYRightCtrl;
+	wxSpinCtrlDouble* accelZRightCtrl;
+	wxSpinCtrlDouble* angularVelocityXRightCtrl;
+	wxSpinCtrlDouble* angularVelocityYRightCtrl;
+	wxSpinCtrlDouble* angularVelocityZRightCtrl;
+	wxSpinCtrlDouble* angleXRightCtrl;
+	wxSpinCtrlDouble* angleYRightCtrl;
+	wxSpinCtrlDouble* angleZRightCtrl;
+
+	void motionValueChanged(wxSpinDoubleEvent& event);
+
+public:
+	MotionAndTouchWidget(wxFrame* parentFrame, DataProcessing* input);
+
+	void updateMotionValues();
+};
+
 class ButtonGrid : public DrawingCanvas {
 private:
 	// The button mapping instance
@@ -127,26 +171,14 @@ private:
 	JoystickCanvas* leftJoystickDrawer;
 	JoystickCanvas* rightJoystickDrawer;
 
-	wxBoxSizer* motionSizer;
-	wxBoxSizer* accelSizer;
-	wxBoxSizer* angularVelocitySizer;
-	wxBoxSizer* angleSizer;
-
-	wxSpinCtrlDouble* accelXCtrl;
-	wxSpinCtrlDouble* accelYCtrl;
-	wxSpinCtrlDouble* accelZCtrl;
-	wxSpinCtrlDouble* angularVelocityXCtrl;
-	wxSpinCtrlDouble* angularVelocityYCtrl;
-	wxSpinCtrlDouble* angularVelocityZCtrl;
-	wxSpinCtrlDouble* angleXCtrl;
-	wxSpinCtrlDouble* angleXCtrl;
-	wxSpinCtrlDouble* angleXCtrl;
-
 	// The true button grid
 	ButtonGrid* buttonGrid;
 
 	// The fancy viewer for the live framedata from the switch
 	FrameViewerCanvas* frameViewerCanvas;
+
+	// The editor for motion and touch data, not shown by default
+	MotionAndTouchWidget* motionAndTouchWidget;
 
 	// The button mapping instance
 	std::shared_ptr<ButtonData> buttonData;
@@ -190,9 +222,6 @@ private:
 	// Menu item for joysticks, will be exclusively used
 	// by the bottom UI, so that's why it is here
 	void onJoystickMenuOpen(wxMenuEvent& event);
-
-	void motionValueChanged(wxSpinDoubleEvent& event);
-	void updateMotionValues();
 
 	wxString getJoyHexString(wxJoystick* joy);
 
