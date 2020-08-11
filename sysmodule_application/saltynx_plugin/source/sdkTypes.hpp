@@ -19,7 +19,7 @@ namespace nn {
 		};
 
 		struct WriteOption {
-			int flags;
+			int32_t flags;
 
 			static WriteOption CreateOption(int flags) {
 				WriteOption op;
@@ -61,17 +61,17 @@ namespace nn {
 
 		const float AccelerometerMax         = 7.0f;
 		const float AngularVelocityMax       = 5.0f;
-		const int SixAxisSensorStateCountMax = 16;
-		const int TouchStateCountMax         = 16;
-		const int TouchScreenStateCountMax   = 16;
+		const int32_t SixAxisSensorStateCountMax = 16;
+		const int32_t TouchStateCountMax         = 16;
+		const int32_t TouchScreenStateCountMax   = 16;
 
-		enum class GyroscopeZeroDriftMode : uint32_t {
+		enum class GyroscopeZeroDriftMode : int32_t {
 			GyroscopeZeroDriftMode_Loose,
 			GyroscopeZeroDriftMode_Standard,
 			GyroscopeZeroDriftMode_Tight,
 		};
 
-		enum class NpadStyleTag : uint32_t {
+		enum class NpadStyleTag : int32_t {
 			ProController = BIT(0),
 			Handheld      = BIT(1),
 			JoyconPair    = BIT(2),
@@ -98,7 +98,7 @@ namespace nn {
 			NpadStyleJoyRight = BIT(4),
 		};
 
-		enum class NpadIdType : uint32_t {
+		enum class NpadIdType : int32_t {
 			Player1  = 0,
 			Player2  = 1,
 			Player3  = 2,
