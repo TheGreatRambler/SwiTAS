@@ -4,6 +4,9 @@ MotionAndTouchWidget::MotionAndTouchWidget(wxFrame* parentFrame, DataProcessing*
 	: wxFrame(parentFrame, wxID_ANY, "Motion and Touch Editor", wxDefaultPosition, wxSize(800, 400), wxDEFAULT_FRAME_STYLE | wxFRAME_FLOAT_ON_PARENT) {
 	inputInstance = input;
 
+	// Start hidden
+	Hide();
+
 	mainSizer = new wxBoxSizer(wxHORIZONTAL);
 
 	motionLeftSizer          = new wxBoxSizer(wxVERTICAL);
@@ -12,23 +15,23 @@ MotionAndTouchWidget::MotionAndTouchWidget(wxFrame* parentFrame, DataProcessing*
 	angleLeftSizer           = new wxBoxSizer(wxHORIZONTAL);
 
 	// clang-format off
-	accelXLeftCtrl           = new wxSpinCtrlDouble(parentFrame,
+	accelXLeftCtrl           = new wxSpinCtrlDouble(this,
 		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -7.0, 7.0);
-	accelYLeftCtrl           = new wxSpinCtrlDouble(parentFrame,
+	accelYLeftCtrl           = new wxSpinCtrlDouble(this,
 		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -7.0, 7.0);
-	accelZLeftCtrl           = new wxSpinCtrlDouble(parentFrame,
+	accelZLeftCtrl           = new wxSpinCtrlDouble(this,
 		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -7.0, 7.0);
-	angularVelocityXLeftCtrl = new wxSpinCtrlDouble(parentFrame,
+	angularVelocityXLeftCtrl = new wxSpinCtrlDouble(this,
 		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -5.0, 5.0);
-	angularVelocityYLeftCtrl = new wxSpinCtrlDouble(parentFrame,
+	angularVelocityYLeftCtrl = new wxSpinCtrlDouble(this,
 		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -5.0, 5.0);
-	angularVelocityZLeftCtrl = new wxSpinCtrlDouble(parentFrame,
+	angularVelocityZLeftCtrl = new wxSpinCtrlDouble(this,
 		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -5.0, 5.0);
-	angleXLeftCtrl           = new wxSpinCtrlDouble(parentFrame,
+	angleXLeftCtrl           = new wxSpinCtrlDouble(this,
 		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -1.0, 1.0);
-	angleXLeftCtrl           = new wxSpinCtrlDouble(parentFrame,
+	angleYLeftCtrl           = new wxSpinCtrlDouble(this,
 		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -1.0, 1.0);
-	angleXLeftCtrl           = new wxSpinCtrlDouble(parentFrame,
+	angleZLeftCtrl           = new wxSpinCtrlDouble(this,
 		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -1.0, 1.0);
 	// clang-format on
 
@@ -40,8 +43,8 @@ MotionAndTouchWidget::MotionAndTouchWidget(wxFrame* parentFrame, DataProcessing*
 	angularVelocityYLeftCtrl->SetDigits(FLT_DIG);
 	angularVelocityZLeftCtrl->SetDigits(FLT_DIG);
 	angleXLeftCtrl->SetDigits(FLT_DIG);
-	angleXLeftCtrl->SetDigits(FLT_DIG);
-	angleXLeftCtrl->SetDigits(FLT_DIG);
+	angleYLeftCtrl->SetDigits(FLT_DIG);
+	angleZLeftCtrl->SetDigits(FLT_DIG);
 
 	accelXLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
 	accelYLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
@@ -50,8 +53,8 @@ MotionAndTouchWidget::MotionAndTouchWidget(wxFrame* parentFrame, DataProcessing*
 	angularVelocityYLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
 	angularVelocityZLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
 	angleXLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
-	angleXLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
-	angleXLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
+	angleYLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
+	angleZLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
 
 	accelXLeftCtrl->SetToolTip("Set acceleration X value for left joycon");
 	accelYLeftCtrl->SetToolTip("Set acceleration Y value for left joycon");
@@ -70,7 +73,7 @@ MotionAndTouchWidget::MotionAndTouchWidget(wxFrame* parentFrame, DataProcessing*
 	angularVelocityLeftSizer->Add(angularVelocityYLeftCtrl, 0, wxEXPAND);
 	angularVelocityLeftSizer->Add(angularVelocityZLeftCtrl, 0, wxEXPAND);
 	angleLeftSizer->Add(angleXLeftCtrl, 0, wxEXPAND);
-	angleLeftSizer->Add(accelYLeftCtrl, 0, wxEXPAND);
+	angleLeftSizer->Add(angleYLeftCtrl, 0, wxEXPAND);
 	angleLeftSizer->Add(angleZLeftCtrl, 0, wxEXPAND);
 
 	motionLeftSizer->Add(accelLeftSizer, 1, wxEXPAND);
@@ -83,23 +86,23 @@ MotionAndTouchWidget::MotionAndTouchWidget(wxFrame* parentFrame, DataProcessing*
 	angleRightSizer           = new wxBoxSizer(wxHORIZONTAL);
 
 	// clang-format off
-	accelXRightCtrl           = new wxSpinCtrlDouble(parentFrame,
+	accelXRightCtrl           = new wxSpinCtrlDouble(this,
 		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -7.0, 7.0);
-	accelYRightCtrl           = new wxSpinCtrlDouble(parentFrame,
+	accelYRightCtrl           = new wxSpinCtrlDouble(this,
 		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -7.0, 7.0);
-	accelZRightCtrl           = new wxSpinCtrlDouble(parentFrame,
+	accelZRightCtrl           = new wxSpinCtrlDouble(this,
 		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -7.0, 7.0);
-	angularVelocityXRightCtrl = new wxSpinCtrlDouble(parentFrame,
+	angularVelocityXRightCtrl = new wxSpinCtrlDouble(this,
 		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -5.0, 5.0);
-	angularVelocityYRightCtrl = new wxSpinCtrlDouble(parentFrame,
+	angularVelocityYRightCtrl = new wxSpinCtrlDouble(this,
 		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -5.0, 5.0);
-	angularVelocityZRightCtrl = new wxSpinCtrlDouble(parentFrame,
+	angularVelocityZRightCtrl = new wxSpinCtrlDouble(this,
 		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -5.0, 5.0);
-	angleXRightCtrl           = new wxSpinCtrlDouble(parentFrame,
+	angleXRightCtrl           = new wxSpinCtrlDouble(this,
 		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -1.0, 1.0);
-	angleXRightCtrl           = new wxSpinCtrlDouble(parentFrame,
+	angleYRightCtrl           = new wxSpinCtrlDouble(this,
 		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -1.0, 1.0);
-	angleXRightCtrl           = new wxSpinCtrlDouble(parentFrame,
+	angleZRightCtrl           = new wxSpinCtrlDouble(this,
 		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -1.0, 1.0);
 	// clang-format on
 
@@ -111,8 +114,8 @@ MotionAndTouchWidget::MotionAndTouchWidget(wxFrame* parentFrame, DataProcessing*
 	angularVelocityYRightCtrl->SetDigits(FLT_DIG);
 	angularVelocityZRightCtrl->SetDigits(FLT_DIG);
 	angleXRightCtrl->SetDigits(FLT_DIG);
-	angleXRightCtrl->SetDigits(FLT_DIG);
-	angleXRightCtrl->SetDigits(FLT_DIG);
+	angleYRightCtrl->SetDigits(FLT_DIG);
+	angleZRightCtrl->SetDigits(FLT_DIG);
 
 	accelXRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
 	accelYRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
@@ -121,8 +124,8 @@ MotionAndTouchWidget::MotionAndTouchWidget(wxFrame* parentFrame, DataProcessing*
 	angularVelocityYRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
 	angularVelocityZRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
 	angleXRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
-	angleXRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
-	angleXRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
+	angleYRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
+	angleZRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
 
 	accelXRightCtrl->SetToolTip("Set acceleration X value for right joycon");
 	accelYRightCtrl->SetToolTip("Set acceleration Y value for right joycon");
@@ -141,7 +144,7 @@ MotionAndTouchWidget::MotionAndTouchWidget(wxFrame* parentFrame, DataProcessing*
 	angularVelocityRightSizer->Add(angularVelocityYRightCtrl, 0, wxEXPAND);
 	angularVelocityRightSizer->Add(angularVelocityZRightCtrl, 0, wxEXPAND);
 	angleRightSizer->Add(angleXRightCtrl, 0, wxEXPAND);
-	angleRightSizer->Add(accelYRightCtrl, 0, wxEXPAND);
+	angleRightSizer->Add(angleYRightCtrl, 0, wxEXPAND);
 	angleRightSizer->Add(angleZRightCtrl, 0, wxEXPAND);
 
 	motionRightSizer->Add(accelRightSizer, 1, wxEXPAND);
@@ -601,7 +604,6 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 
 	// Not shown by default
 	motionAndTouchWidget = new MotionAndTouchWidget(parentFrame, inputInstance);
-	motionAndTouchWidget->Show(false);
 
 	wxSize gridSize;
 	// Just to get a rough estimate

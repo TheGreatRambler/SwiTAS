@@ -7,10 +7,12 @@
 
 #include "sdkTypes.hpp"
 
+// clang-format off
 #define max(a,b) \
    ({ __typeof__ (a) _a = (a); \
        __typeof__ (b) _b = (b); \
      _a > _b ? _a : _b; })
+// clang-format on
 
 extern "C" {
 extern u32 __start__;
@@ -43,10 +45,8 @@ extern void _ZN2nn3hid18StartSixAxisSensorERKNS0_19SixAxisSensorHandleE(const nn
 extern void _ZN2nn3hid17StopSixAxisSensorERKNS0_26ConsoleSixAxisSensorHandleE(const nn::hid::ConsoleSixAxisSensorHandle& param_1) LINKABLE;
 extern void _ZN2nn3hid17StopSixAxisSensorERKNS0_19SixAxisSensorHandleE(const nn::hid::SixAxisSensorHandle& param_1) LINKABLE;
 // Touch external functions
-extern int32_t _ZN2nn3hid6detail19GetTouchScreenStateILm16EEENS_6ResultEPNS0_16TouchScreenStateIXT_EEE(nn::hid::TouchScreenState* state) LINKABLE;
-// Don't know why that int* is there, it's in the decomp
-// THIS IS THE WRONG ONE
-extern int32_t _ZN2nn3hid6detail20GetTouchScreenStatesILm16EEENS_6ResultEPiPNS0_16TouchScreenStateIXT_EEEi(int32_t* unk1, nn::hid::TouchScreenState* outStates, int32_t unk2) LINKABLE;
+// Only support version that doesn't require a backlog
+extern void _ZN2nn3hid19GetTouchScreenStateILm16EEEvPNS0_16TouchScreenStateIXT_EEE(nn::hid::TouchScreenState* state) LINKABLE;
 }
 
 u32 __nx_applet_type = AppletType_None;
@@ -112,22 +112,23 @@ char logString[1000];
 
 uint8_t wasJustLeft;
 uint8_t wasJustTASController;
+int32_t lastControllerId;
 
-nn::hid::SixAxisSensorHandle sixAxisHandlesLeftJoycon[8] = { 0 };
+nn::hid::SixAxisSensorHandle sixAxisHandlesLeftJoycon[8]  = { 0 };
 nn::hid::SixAxisSensorHandle sixAxisHandlesRightJoycon[8] = { 0 };
 
 // Update state of left and right joycons along with the touchscreen
-nn::hid::SixAxisSensorState sixAxisStateLeftJoycon[8]                   = { 0 };
-nn::hid::SixAxisSensorState sixAxisStateRightJoycon[8]                   = { 0 };
-nn::hid::TouchState touchscreenState[8] = { 0 };
+nn::hid::SixAxisSensorState sixAxisStateLeftJoycon[8]  = { 0 };
+nn::hid::SixAxisSensorState sixAxisStateRightJoycon[8] = { 0 };
+nn::hid::TouchState touchscreenState[8]                = { 0 };
 
-int32_t leftJoyconBacklogSize = 0;
-int32_t rightJoyconBacklogSize = 0;
-nn::hid::SixAxisSensorState sixAxisStateLeftJoyconBacklog[8][nn::hid::SixAxisSensorStateCountMax]                   = { 0 };
-nn::hid::SixAxisSensorState sixAxisStateRightJoyconBacklog[8][nn::hid::SixAxisSensorStateCountMax]                   = { 0 };
+int32_t leftJoyconBacklogSize                                                                      = 0;
+int32_t rightJoyconBacklogSize                                                                     = 0;
+nn::hid::SixAxisSensorState sixAxisStateLeftJoyconBacklog[8][nn::hid::SixAxisSensorStateCountMax]  = { 0 };
+nn::hid::SixAxisSensorState sixAxisStateRightJoyconBacklog[8][nn::hid::SixAxisSensorStateCountMax] = { 0 };
 
 // Updated with the real values, for recording purposes
-nn::hid::TouchState originalTouchscreenStateBacklog[8][nn::hid::TouchStateCountMax] = { 0 };
+nn::hid::TouchState originalTouchscreenState = { 0 };
 
 // ONLY values we will TAS
 /*
@@ -150,20 +151,20 @@ uint8_t canWriteToLog() {
 	return logStringIndex < (sizeof(logString) - 100);
 }
 
-void moveLeftBacklog() {
+void moveLeftBacklog(int32_t i) {
 	// Get state as normal and move back backlog by 1
-memmove(&sixAxisStateLeftJoyconBacklog[i][1], &sixAxisStateLeftJoyconBacklog[i][0], sizeof(nn::hid::SixAxisSensorState) * (nn::hid::SixAxisSensorStateCountMax - 1));
-if (leftJoyconBacklogSize != nn::hid::SixAxisSensorStateCountMax) {
-	leftJoyconBacklogSize++;
-}
+	memmove(&sixAxisStateLeftJoyconBacklog[i][1], &sixAxisStateLeftJoyconBacklog[i][0], sizeof(nn::hid::SixAxisSensorState) * (nn::hid::SixAxisSensorStateCountMax - 1));
+	if(leftJoyconBacklogSize != nn::hid::SixAxisSensorStateCountMax) {
+		leftJoyconBacklogSize++;
+	}
 }
 
-void moveRightBacklog() {
+void moveRightBacklog(int32_t i) {
 	// Get state as normal and move back backlog by 1
-memmove(&sixAxisStateRightJoyconBacklog[i][1], &sixAxisStateRightJoyconBacklog[i][0], sizeof(nn::hid::SixAxisSensorState) * (nn::hid::SixAxisSensorStateCountMax - 1));
-if (rightJoyconBacklogSize != nn::hid::SixAxisSensorStateCountMax) {
-	rightJoyconBacklogSize++;
-}
+	memmove(&sixAxisStateRightJoyconBacklog[i][1], &sixAxisStateRightJoyconBacklog[i][0], sizeof(nn::hid::SixAxisSensorState) * (nn::hid::SixAxisSensorStateCountMax - 1));
+	if(rightJoyconBacklogSize != nn::hid::SixAxisSensorStateCountMax) {
+		rightJoyconBacklogSize++;
+	}
 }
 
 void fixMotionState(nn::hid::SixAxisSensorState& dest, nn::hid::SixAxisSensorState& orig) {
@@ -173,6 +174,10 @@ void fixMotionState(nn::hid::SixAxisSensorState& dest, nn::hid::SixAxisSensorSta
 	dest.direction.x = { 1.0, 0.0, 0.0 };
 	dest.direction.y = { 0.0, 1.0, 0.0 };
 	dest.direction.z = { 0.0, 0.0, 1.0 };
+}
+
+void fixTouchState(nn::hid::SixAxisSensorState& dest) {
+	// dest.count is handled
 }
 
 /*
@@ -217,68 +222,68 @@ int32_t GetSixAxisSensorHandles2(nn::hid::SixAxisSensorHandle* handles, int32_t 
 	// if (npadStyleBitflags & nn::hid::NpadStyleTag::ProController)
 	// Returned number is the number of successful handles, I think
 	if(recordInputs) {
-		if (id != n::hid::NpadIdType::Unknown && id != n::hid::NpadIdType::Handheld) {
+		if(id != nn::hid::NpadIdType::Unknown && id != nn::hid::NpadIdType::Handheld) {
 			// We're dealing with a potential hid:dbg controller
 			// Check if it is dual joycons
-			if (numOfHandles == 2) {
+			if(numOfHandles == 2) {
 				int32_t res = _ZN2nn3hid23GetSixAxisSensorHandlesEPNS0_19SixAxisSensorHandleEiRKjNS_4util10BitFlagSetILi32ENS0_12NpadStyleTagEEE(handles, numOfHandles, id, npadStyleBitflags);
 
-				sixAxisHandlesLeftJoycon[(int32_t)id] = handles[0];
+				sixAxisHandlesLeftJoycon[(int32_t)id]  = handles[0];
 				sixAxisHandlesRightJoycon[(int32_t)id] = handles[1];
 
 				wasJustTASController = true;
 
 				return res;
 			}
-
 		}
 	}
 
-// Simply passthrough if need be
-	return _ZN2nn3hid23GetSixAxisSensorHandlesEPNS0_19SixAxisSensorHandleEiRKjNS_4util10BitFlagSetILi32ENS0_12NpadStyleTagEEE(handle, numOfHandles, id, npadStyleBitflags);
+	// Simply passthrough if need be
+	return _ZN2nn3hid23GetSixAxisSensorHandlesEPNS0_19SixAxisSensorHandleEiRKjNS_4util10BitFlagSetILi32ENS0_12NpadStyleTagEEE(handles, numOfHandles, id, npadStyleBitflags);
 }
 
 /* nn::hid::GetSixAxisSensorState(nn::hid::SixAxisSensorState*, nn::hid::SixAxisSensorHandle const&)
  */
 void GetSixAxisSensorState(nn::hid::SixAxisSensorState* state, const nn::hid::SixAxisSensorHandle& handle) {
 	if(recordInputs) {
-			for(int32_t i = 0; i < 8; i++) {
-				if(sixAxisHandlesLeftJoycon[i] == handle) {
-					_ZN2nn3hid21GetSixAxisSensorStateEPNS0_18SixAxisSensorStateERKNS0_19SixAxisSensorHandleE(state, handle);
+		for(int32_t i = 0; i < 8; i++) {
+			if(sixAxisHandlesLeftJoycon[i] == handle) {
+				_ZN2nn3hid21GetSixAxisSensorStateEPNS0_18SixAxisSensorStateERKNS0_19SixAxisSensorHandleE(state, handle);
 
-					if(spoofMotionRequests) {
-						fixMotionState(sixAxisStateLeftJoycon[i], *state);
-						memcpy(state, &sixAxisStateLeftJoycon[i], sizeof(nn::hid::SixAxisSensorState));
-					}
-
-moveLeftBacklog();
-					memcpy(&sixAxisStateLeftJoyconBacklog[i][0], state, sizeof(nn::hid::SixAxisSensorState));
-
-					wasJustLeft = true;
-					wasJustTASController = true;
-
-					return;
+				if(spoofMotionRequests) {
+					fixMotionState(sixAxisStateLeftJoycon[i], *state);
+					memcpy(state, &sixAxisStateLeftJoycon[i], sizeof(nn::hid::SixAxisSensorState));
 				}
 
-				if(sixAxisHandlesRightJoycon[i] == handle) {
-					_ZN2nn3hid21GetSixAxisSensorStateEPNS0_18SixAxisSensorStateERKNS0_19SixAxisSensorHandleE(state, handle);
+				moveLeftBacklog(i);
+				memcpy(&sixAxisStateLeftJoyconBacklog[i][0], state, sizeof(nn::hid::SixAxisSensorState));
 
-					if(spoofMotionRequests) {
-						fixMotionState(sixAxisStateRightJoycon[i], *state);
-						memcpy(state, &sixAxisStateRightJoycon[i], sizeof(nn::hid::SixAxisSensorState));
-					}
+				wasJustLeft          = true;
+				wasJustTASController = true;
+				lastControllerId     = i;
 
-moveRightBacklog();
-					memcpy(&sixAxisStateRightJoyconBacklog[i][0], state, sizeof(nn::hid::SixAxisSensorState));
+				return;
+			}
 
-					wasJustLeft = false;
-					wasJustTASController = true;
+			if(sixAxisHandlesRightJoycon[i] == handle) {
+				_ZN2nn3hid21GetSixAxisSensorStateEPNS0_18SixAxisSensorStateERKNS0_19SixAxisSensorHandleE(state, handle);
 
-					return;
+				if(spoofMotionRequests) {
+					fixMotionState(sixAxisStateRightJoycon[i], *state);
+					memcpy(state, &sixAxisStateRightJoycon[i], sizeof(nn::hid::SixAxisSensorState));
 				}
+
+				moveRightBacklog(i);
+				memcpy(&sixAxisStateRightJoyconBacklog[i][0], state, sizeof(nn::hid::SixAxisSensorState));
+
+				wasJustLeft          = false;
+				wasJustTASController = true;
+				lastControllerId     = i;
+
+				return;
 			}
 		}
-	
+	}
 
 	_ZN2nn3hid21GetSixAxisSensorStateEPNS0_18SixAxisSensorStateERKNS0_19SixAxisSensorHandleE(state, handle);
 }
@@ -295,29 +300,27 @@ int32_t GetSixAxisSensorStates2(nn::hid::SixAxisSensorState* outStates, int32_t 
 	if(recordInputs) {
 		// Get state as normal to advance the backlog
 		nn::hid::SixAxisSensorState dummyState;
-GetSixAxisSensorState(&dummyState, handle);
+		GetSixAxisSensorState(&dummyState, handle);
 
-if (wasJustTASController) {
-	// TAS controller being a kind of controller that would be handled by TAS
-if (wasJustLeft) {
-	int32_t backlogSize = max(count, leftJoyconBacklogSize);
-memcpy(outStates, &sixAxisStateLeftJoyconBacklog[i][0], sizeof(nn::hid::SixAxisSensorState) * backlogSize);
-return backlogSize;
-} else {
-	int32_t backlogSize = max(count, rightJoyconBacklogSize);
-memcpy(outStates, &sixAxisStateRightJoyconBacklog[i][0], sizeof(nn::hid::SixAxisSensorState) * backlogSize);
-return backlogSize;
-}
-
-	wasJustTASController = false;
-} else {
-	// This will trigger for controllers outside of the standard range, including pro controllers and single joycons
-	return _ZN2nn3hid22GetSixAxisSensorStatesEPNS0_18SixAxisSensorStateEiRKNS0_19SixAxisSensorHandleE(outStates, count, handle);
-}
-}
-
+		if(wasJustTASController) {
+			// TAS controller being a kind of controller that would be handled by TAS
+			wasJustTASController = false;
+			if(wasJustLeft) {
+				int32_t backlogSize = max(count, leftJoyconBacklogSize);
+				memcpy(outStates, &sixAxisStateLeftJoyconBacklog[lastControllerId][0], sizeof(nn::hid::SixAxisSensorState) * backlogSize);
+				return backlogSize;
+			} else {
+				int32_t backlogSize = max(count, rightJoyconBacklogSize);
+				memcpy(outStates, &sixAxisStateRightJoyconBacklog[lastControllerId][0], sizeof(nn::hid::SixAxisSensorState) * backlogSize);
+				return backlogSize;
+			}
+		} else {
+			// This will trigger for controllers outside of the standard range, including pro controllers and single joycons
+			return _ZN2nn3hid22GetSixAxisSensorStatesEPNS0_18SixAxisSensorStateEiRKNS0_19SixAxisSensorHandleE(outStates, count, handle);
+		}
 	}
-		return _ZN2nn3hid22GetSixAxisSensorStatesEPNS0_18SixAxisSensorStateEiRKNS0_19SixAxisSensorHandleE(outStates, count, handle);
+
+	return _ZN2nn3hid22GetSixAxisSensorStatesEPNS0_18SixAxisSensorStateEiRKNS0_19SixAxisSensorHandleE(outStates, count, handle);
 }
 
 /* nn::hid::IsSixAxisSensorAtRest(nn::hid::SixAxisSensorHandle const&) */
@@ -346,7 +349,6 @@ void StopSixAxisSensor2(const nn::hid::SixAxisSensorHandle& param_1) {
 	_ZN2nn3hid17StopSixAxisSensorERKNS0_19SixAxisSensorHandleE(param_1);
 }
 
-/*
 // Touch screen spoofing
 // void nn::hid::GetTouchScreenState (TouchScreenState< N > *pOutValue)
 // Dunno how to handle templates
@@ -363,15 +365,15 @@ void GetTouchScreenState(nn::hid::TouchScreenState* state) {
 	// May support multiple touches, I dunno
 
 	if(recordInputs) {
-		whateverthecallis(state);
+		_ZN2nn3hid19GetTouchScreenStateILm16EEEvPNS0_16TouchScreenStateIXT_EEE(state);
 
-		memcpy(&originalTouchscreenState, &state.touches, sizeof(originalTouchscreenState));
+		memcpy(&originalTouchscreenState, &state->touches, sizeof(originalTouchscreenState));
 
 		if(spoofMotionRequests) {
 			// Fix state and send to game
 		}
 	} else {
-		whateverthecallis(state);
+		_ZN2nn3hid19GetTouchScreenStateILm16EEEvPNS0_16TouchScreenStateIXT_EEE(state);
 
 		if(canWriteToLog()) {
 			if(state->count == 1) {
@@ -379,6 +381,8 @@ void GetTouchScreenState(nn::hid::TouchScreenState* state) {
 
 				// clang-format off
 				std::string diagInfo =
+					"count: " + std::to_string(state->count) + "\n" +
+					"samplingNumber: " + std::to_string(state->samplingNumber) + "\n" +
 					"attributes: " + std::to_string(touchState.attributes) + "\n" +
 					"deltaTimeNanoSeconds: " + std::to_string(touchState.deltaTimeNanoSeconds) + "\n" +
 					"diameterX: " + std::to_string(touchState.diameterX) + "\n" +
@@ -394,25 +398,6 @@ void GetTouchScreenState(nn::hid::TouchScreenState* state) {
 		}
 	}
 }
-
-// int nn::hid::GetTouchScreenStates (TouchScreenState< N > *outStates, int count)
-int32_t GetTouchScreenStates(nn::hid::TouchScreenState* outStates, int32_t count) {
-	// Return all past states, don't really want to use this one
-
-	int32_t successfulWrittenStates;
-
-	if(recordInputs) {
-		successfulWrittenStates = whateverthecallis(outstates, count);
-
-		memcpy(&originalTouchscreenState, &outStates[0].touches, sizeof(originalTouchscreenState));
-
-		if(spoofMotionRequests) {
-		}
-	} else {
-		return whateverthecallis(outstates, count);
-	}
-}
-*/
 
 uintptr_t ptr_nvnDeviceGetProcAddress;
 uintptr_t ptr_nvnQueuePresentTexture;
@@ -472,20 +457,14 @@ int main(int argc, char* argv[]) {
 	writePointerToFile(&frameHasPassed, offsets);
 	writePointerToFile(&logStringIndex, offsets);
 	writePointerToFile(&logString, offsets);
-	writePointerToFile(&mainSixAxisState, offsets);
-	writePointerToFile(&handheldSixAxisState, offsets);
-	writePointerToFile(&originalMainSixAxisState, offsets);
-	writePointerToFile(&originalHandheldSixAxisState, offsets);
+	writePointerToFile(&sixAxisStateLeftJoycon, offsets);
+	writePointerToFile(&sixAxisStateRightJoycon, offsets);
+	writePointerToFile(&sixAxisStateLeftJoyconBacklog, offsets);
+	writePointerToFile(&sixAxisStateRightJoyconBacklog, offsets);
 
 	SaltySDCore_fclose(offsets);
 
 	// clang-format off
-	SaltySDCore_ReplaceImport(
-		"_ZN2nn3hid25EnableSixAxisSensorFusionERKNS0_19SixAxisSensorHandleEb",
-		(void*) &EnableSixAxisSensorFusion);
-	SaltySDCore_ReplaceImport(
-		"_ZN2nn3hid32GetSixAxisSensorFusionParametersEPfS1_RKNS0_19SixAxisSensorHandleE",
-		(void*) &GetSixAxisSensorFusionParameters);
 	SaltySDCore_ReplaceImport(
 		"_ZN2nn3hid22GetSixAxisSensorHandleEPNS0_26ConsoleSixAxisSensorHandleE",
 		(void*) &GetSixAxisSensorHandle1);
@@ -508,20 +487,8 @@ int main(int argc, char* argv[]) {
 		"_ZN2nn3hid22GetSixAxisSensorStatesEPNS0_18SixAxisSensorStateEiRKNS0_19SixAxisSensorHandleE",
 		(void*) &GetSixAxisSensorStates2);
 	SaltySDCore_ReplaceImport(
-		"_ZN2nn3hid30InitializeConsoleSixAxisSensorEv",
-		(void*) &InitializeConsoleSixAxisSensor);
-	SaltySDCore_ReplaceImport(
 		"_ZN2nn3hid21IsSixAxisSensorAtRestERKNS0_19SixAxisSensorHandleE",
 		(void*) &IsSixAxisSensorAtRest);
-	SaltySDCore_ReplaceImport(
-		"_ZN2nn3hid28IsSixAxisSensorFusionEnabledERKNS0_19SixAxisSensorHandleE",
-		(void*) &IsSixAxisSensorFusionEnabled);
-	SaltySDCore_ReplaceImport(
-		"_ZN2nn3hid34ResetSixAxisSensorFusionParametersERKNS0_19SixAxisSensorHandleE",
-		(void*) &ResetSixAxisSensorFusionParameters);
-	SaltySDCore_ReplaceImport(
-		"_ZN2nn3hid32SetSixAxisSensorFusionParametersERKNS0_19SixAxisSensorHandleEff",
-		(void*) &SetSixAxisSensorFusionParameters);
 	SaltySDCore_ReplaceImport(
 		"_ZN2nn3hid18StartSixAxisSensorERKNS0_26ConsoleSixAxisSensorHandleE",
 		(void*) &StartSixAxisSensor1);

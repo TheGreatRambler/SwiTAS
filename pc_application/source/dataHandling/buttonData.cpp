@@ -444,25 +444,34 @@ bool ButtonData::isEmptyControllerData(std::shared_ptr<ControllerData> data) {
 	ControllerData emptyData;
 	// clang-format off
 	return
-		(data->buttons    == emptyData.buttons)   &&
-		(data->numberOfTouches    == emptyData.numberOfTouches)   &&
-		(data->LS_X       == emptyData.LS_X)      &&
-		(data->LS_Y       == emptyData.LS_Y)      &&
-		(data->RS_X       == emptyData.RS_X)      &&
-		(data->RS_Y       == emptyData.RS_Y)      &&
-		(data->TOUCH_X_1       == emptyData.TOUCH_X_1)      &&
-		(data->TOUCH_Y_1       == emptyData.TOUCH_Y_1)      &&
-		(data->TOUCH_X_2       == emptyData.TOUCH_X_2)      &&
-		(data->TOUCH_Y_2       == emptyData.TOUCH_Y_2)      &&
-		(data->ACCEL_X    == emptyData.ACCEL_X)   &&
-		(data->ACCEL_Y    == emptyData.ACCEL_Y)   &&
-		(data->ACCEL_Z    == emptyData.ACCEL_Z)   &&
-		(data->GYRO_X     == emptyData.GYRO_X)    &&
-		(data->GYRO_Y     == emptyData.GYRO_Y)    &&
-		(data->GYRO_Z     == emptyData.GYRO_Z)    &&
-		(data->ANGLE_X     == emptyData.ANGLE_X)  &&
-		(data->ANGLE_Y     == emptyData.ANGLE_Y)  &&
-		(data->ANGLE_Z     == emptyData.ANGLE_Z)  &&
-		(data->frameState == emptyData.frameState);
+		(data->buttons         == emptyData.buttons)         &&
+		(data->numberOfTouches == emptyData.numberOfTouches) &&
+		(data->LS_X            == emptyData.LS_X)            &&
+		(data->LS_Y            == emptyData.LS_Y)            &&
+		(data->RS_X            == emptyData.RS_X)            &&
+		(data->RS_Y            == emptyData.RS_Y)            &&
+		(data->TOUCH_X_1       == emptyData.TOUCH_X_1)       &&
+		(data->TOUCH_Y_1       == emptyData.TOUCH_Y_1)       &&
+		(data->TOUCH_X_2       == emptyData.TOUCH_X_2)       &&
+		(data->TOUCH_Y_2       == emptyData.TOUCH_Y_2)       &&
+		(data->ACCEL_X_LEFT    == emptyData.ACCEL_X_LEFT)    &&
+		(data->ACCEL_Y_LEFT    == emptyData.ACCEL_Y_LEFT)    &&
+		(data->ACCEL_Z_LEFT    == emptyData.ACCEL_Z_LEFT)    &&
+		(data->GYRO_X_LEFT     == emptyData.GYRO_X_LEFT)     &&
+		(data->GYRO_Y_LEFT     == emptyData.GYRO_Y_LEFT)     &&
+		(data->GYRO_Z_LEFT     == emptyData.GYRO_Z_LEFT)     &&
+		(data->ANGLE_X_LEFT    == emptyData.ANGLE_X_LEFT)    &&
+		(data->ANGLE_Y_LEFT    == emptyData.ANGLE_Y_LEFT)    &&
+		(data->ANGLE_Z_LEFT    == emptyData.ANGLE_Z_LEFT)    &&
+		(data->ACCEL_X_RIGHT   == emptyData.ACCEL_X_RIGHT)   &&
+		(data->ACCEL_Y_RIGHT   == emptyData.ACCEL_Y_RIGHT)   &&
+		(data->ACCEL_Z_RIGHT   == emptyData.ACCEL_Z_RIGHT)   &&
+		(data->GYRO_X_RIGHT    == emptyData.GYRO_X_RIGHT)    &&
+		(data->GYRO_Y_RIGHT    == emptyData.GYRO_Y_RIGHT)    &&
+		(data->GYRO_Z_RIGHT    == emptyData.GYRO_Z_RIGHT)    &&
+		(data->ANGLE_X_RIGHT   == emptyData.ANGLE_X_RIGHT)   &&
+		(data->ANGLE_Y_RIGHT   == emptyData.ANGLE_Y_RIGHT)   &&
+		(data->ANGLE_Z_RIGHT   == emptyData.ANGLE_Z_RIGHT)   &&
+		(data->frameState      == emptyData.frameState);
 	// clang-format on
 }

@@ -152,7 +152,7 @@ void ProjectHandler::saveProject() {
 					inputsFilename.AppendDir("hooks");
 					inputsFilename.AppendDir(wxString::Format("player_%u", playerIndexNum));
 					inputsFilename.AppendDir(wxString::Format("savestate_block_%hu", savestateHookIndexNum));
-					
+
 					if(branchIndexNum == 0) {
 						inputsFilename.AppendDir("branch_main");
 					} else {

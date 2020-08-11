@@ -1228,6 +1228,19 @@ float DataProcessing::getNumberValuesSpecificMotion(FrameNum frame, ControllerNu
 	}
 }
 
+// This includes joysticks, accel, gyro, etc...
+void DataProcessing::triggerNumberValuesMotion(ControllerNumberValues id, float value) {
+	// Trigger joystick, can occur over range
+	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if(firstSelectedItem != wxNOT_FOUND) {
+		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
+		for(FrameNum i = firstSelectedItem; i <= lastSelectedItem; i++) {
+			setNumberValuesMotion(i, id, value);
+			// No refresh for now, as the joystick is not visible in the allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs
+		}
+	}
+}
+
 void DataProcessing::triggerNumberOfTouches(uint8_t value) {
 	// Trigger button, can occur over range
 	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);

@@ -204,24 +204,24 @@ void MainLoop::mainLoopHandler() {
 		// handle network updates always, they are stored in the queue regardless of the internet
 		handleNetworkUpdates();
 		// Handle SaltyNX output
+		/*
 		uint16_t logOutputSize;
 		rc = dmntchtReadCheatProcessMemory(saltynxLogIndexAddress, &logOutputSize, sizeof(logOutputSize));
-		if(R_FAILED(rc)) {
-			fatalThrow(rc);
-		}
+		if(R_SUCCEEDED(rc)) {
+			if(logOutputSize != 0) {
+				char log[logOutputSize];
+				rc = dmntchtReadCheatProcessMemory(saltynxLogAddress, &log, logOutputSize);
+				if(R_FAILED(rc)) {
+					fatalThrow(rc);
+				}
 
-		if(logOutputSize != 0) {
-			char log[logOutputSize];
-			rc = dmntchtReadCheatProcessMemory(saltynxLogAddress, &log, logOutputSize);
-			if(R_FAILED(rc)) {
-				fatalThrow(rc);
+				LOGD << "SaltyNX output: " << std::string(log, logOutputSize);
+
+				uint16_t dummyLogSize = 0;
+				dmntchtWriteCheatProcessMemory(saltynxLogIndexAddress, &dummyLogSize, sizeof(dummyLogSize));
 			}
-
-			LOGD << "SaltyNX output: " << std::string(log, logOutputSize);
-
-			uint16_t dummyLogSize = 0;
-			dmntchtWriteCheatProcessMemory(saltynxLogIndexAddress, &dummyLogSize, sizeof(dummyLogSize));
 		}
+		*/
 	}
 
 	// Match first controller inputs as often as possible
