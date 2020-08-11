@@ -19,9 +19,13 @@ class ControllerHandler {
 	// Create one for each controller index
 private:
 #ifdef __SWITCH__
-	u64 HdlsHandle              = 0;
-	HiddbgHdlsDeviceInfo device = { 0 };
-	HiddbgHdlsState state       = { 0 };
+	u64 hdlsHandleLeftJoycon              = 0;
+	HiddbgHdlsDeviceInfo deviceLeftJoycon = { 0 };
+	HiddbgHdlsState stateLeftJoycon       = { 0 };
+
+	u64 hdlsHandleRightJoycon              = 0;
+	HiddbgHdlsDeviceInfo deviceRightJoycon = { 0 };
+	HiddbgHdlsState stateRightJoycon       = { 0 };
 
 	Result rc;
 #endif
@@ -37,7 +41,7 @@ public:
 	ControllerHandler(std::shared_ptr<CommunicateWithNetwork> networkImp, std::shared_ptr<Syscalls> syscalls);
 #endif
 #ifdef __SWITCH__
-	ControllerHandler(std::shared_ptr<CommunicateWithNetwork> networkImp);
+	ControllerHandler(std::shared_ptr<CommunicateWithNetwork> networkImp, HidControllerID startingID);
 #endif
 
 	void setFrame(ControllerData& controllerData);
@@ -45,17 +49,17 @@ public:
 
 	void clearState() {
 #ifdef __SWITCH__
-		state.buttons                      = 0;
-		state.joysticks[JOYSTICK_LEFT].dx  = 0;
-		state.joysticks[JOYSTICK_LEFT].dy  = 0;
-		state.joysticks[JOYSTICK_RIGHT].dx = 0;
-		state.joysticks[JOYSTICK_RIGHT].dy = 0;
+		stateLeftJoycon.buttons                      = 0;
+		stateLeftJoycon.joysticks[JOYSTICK_LEFT].dx  = 0;
+		stateLeftJoycon.joysticks[JOYSTICK_LEFT].dy  = 0;
+		stateLeftJoycon.joysticks[JOYSTICK_RIGHT].dx = 0;
+		stateLeftJoycon.joysticks[JOYSTICK_RIGHT].dy = 0;
 #endif
 	}
 
 	void setInput() {
 #ifdef __SWITCH__
-		rc = hiddbgSetHdlsState(HdlsHandle, &state);
+		rc = hiddbgSetHdlsState(hdlsHandleLeftJoycon, &stateLeftJoycon);
 		if(R_FAILED(rc)) {
 			fatalThrow(rc);
 		}
@@ -63,7 +67,7 @@ public:
 	}
 
 	HiddbgHdlsState& getInput() {
-		return state;
+		return stateLeftJoycon;
 	}
 
 	std::shared_ptr<ControllerData> getControllerData();

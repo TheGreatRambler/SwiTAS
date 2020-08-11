@@ -434,9 +434,8 @@ void MainLoop::updateGui() {
 				debugInfo += "Real Controllers:               " + std::to_string(getNumControllers()) + "\n";
 			if(applicationOpened) {
 				debugInfo += "Game Name:                      " + gameName + "\n";
-				debugInfo += "Application Program ID:         " + std::to_string(getNumControllers()) + "\n";
-				debugInfo += "Application Process ID:         " + std::to_string(getNumControllers()) + "\n";
-				debugInfo += "Real Controllers:               " + std::to_string(getNumControllers()) + "\n";
+				debugInfo += "Application Program ID:         " + std::to_string(applicationProgramId) + "\n";
+				debugInfo += "Application Process ID:         " + std::to_string(applicationProcessId) + "\n";
 				debugInfo += "Is Paused:                      " + std::string((isPaused ? "true" : "false")) + "\n";
 				debugInfo += "Time Between Frames:            " + lastFrameAttempt != 0 ? std::to_string(lastFrameAttempt) : std::string("NULL") + "\n";
 			}
@@ -501,7 +500,7 @@ void MainLoop::setControllerNumber(uint8_t numOfControllers) {
 #endif
 	for(uint8_t i = 0; i < numOfControllers; i++) {
 #ifdef __SWITCH__
-		controllers.push_back(std::make_unique<ControllerHandler>(networkInstance));
+		controllers.push_back(std::make_unique<ControllerHandler>(networkInstance, (HidControllerID)getNumControllers()));
 #endif
 #ifdef YUZU
 		controllers.push_back(std::make_unique<ControllerHandler>(networkInstance, yuzuSyscalls));

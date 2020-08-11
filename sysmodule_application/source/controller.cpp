@@ -5,58 +5,105 @@ ControllerHandler::ControllerHandler(std::shared_ptr<CommunicateWithNetwork> net
 	yuzuSyscalls = syscalls;
 #endif
 #ifdef __SWITCH__
-	ControllerHandler::ControllerHandler(std::shared_ptr<CommunicateWithNetwork> networkImp) {
+	ControllerHandler::ControllerHandler(std::shared_ptr<CommunicateWithNetwork> networkImp, HidControllerID startingID) {
 #endif
 		networkInstance = networkImp;
 
 #ifdef __SWITCH__
-		// HidDeviceTypeBits_System with HidControllerType |= TYPE_JOYCON_PAIR.
-		// Should create a joycon pair, maybe
-		device.deviceType = HidDeviceType_System20;
+		deviceLeftJoycon.deviceType = HidDeviceType_JoyLeft2;
 
-		// Set the interface type
-		device.npadInterfaceType = NpadInterfaceType_Bluetooth;
+		deviceLeftJoycon.npadInterfaceType = NpadInterfaceType_Bluetooth;
 
-		// Colors
-		// Colors hardcoded here
-		device.singleColorBody    = RGBA8_MAXALPHA(0x00, 0x00, 0xFF);
-		device.singleColorButtons = RGBA8_MAXALPHA(0xFF, 0x00, 0x00);
-		device.colorLeftGrip      = device.singleColorBody;
-		device.colorRightGrip     = device.singleColorBody;
+		deviceLeftJoycon.singleColorBody    = RGBA8_MAXALPHA(0x00, 0x00, 0xFF);
+		deviceLeftJoycon.singleColorButtons = RGBA8_MAXALPHA(0xFF, 0x00, 0x00);
+		deviceLeftJoycon.colorLeftGrip      = deviceLeftJoycon.singleColorBody;
+		deviceLeftJoycon.colorRightGrip     = deviceLeftJoycon.singleColorBody;
 
-		// Charge is max
-		state.batteryCharge = 4;
+		stateLeftJoycon.batteryCharge = 4;
+
+		stateLeftJoycon.buttons                      = 0;
+		stateLeftJoycon.joysticks[JOYSTICK_LEFT].dx  = 0;
+		stateLeftJoycon.joysticks[JOYSTICK_LEFT].dy  = 0;
+		stateLeftJoycon.joysticks[JOYSTICK_RIGHT].dx = 0;
+		stateLeftJoycon.joysticks[JOYSTICK_RIGHT].dy = 0;
+
+		rc = hiddbgAttachHdlsVirtualDevice(&hdlsHandleLeftJoycon, &deviceLeftJoycon);
+		if(R_FAILED(rc))
+			fatalThrow(rc);
+
+		rc = hiddbgSetHdlsState(hdlsHandleLeftJoycon, &stateLeftJoycon);
+		if(R_FAILED(rc))
+			fatalThrow(rc);
+
+		deviceRightJoycon.deviceType = HidDeviceType_JoyRight1;
+
+		deviceRightJoycon.npadInterfaceType = NpadInterfaceType_Bluetooth;
+
+		deviceRightJoycon.singleColorBody    = RGBA8_MAXALPHA(0x00, 0x00, 0xFF);
+		deviceRightJoycon.singleColorButtons = RGBA8_MAXALPHA(0xFF, 0x00, 0x00);
+		deviceRightJoycon.colorLeftGrip      = deviceRightJoycon.singleColorBody;
+		deviceRightJoycon.colorRightGrip     = deviceRightJoycon.singleColorBody;
+
+		stateRightJoycon.batteryCharge = 4;
+
+		stateRightJoycon.buttons                      = 0;
+		stateRightJoycon.joysticks[JOYSTICK_LEFT].dx  = 0;
+		stateRightJoycon.joysticks[JOYSTICK_LEFT].dy  = 0;
+		stateRightJoycon.joysticks[JOYSTICK_RIGHT].dx = 0;
+		stateRightJoycon.joysticks[JOYSTICK_RIGHT].dy = 0;
+
+		rc = hiddbgAttachHdlsVirtualDevice(&hdlsHandleRightJoycon, &deviceRightJoycon);
+		if(R_FAILED(rc))
+			fatalThrow(rc);
+
+		rc = hiddbgSetHdlsState(hdlsHandleRightJoycon, &stateRightJoycon);
+		if(R_FAILED(rc))
+			fatalThrow(rc);
+
+		svcSleepThread(1000000 * 10);
+
+		stateLeftJoycon.buttons  = KEY_L;
+		stateRightJoycon.buttons = KEY_R;
+
+		rc = hiddbgSetHdlsState(hdlsHandleLeftJoycon, &stateLeftJoycon);
+		if(R_FAILED(rc))
+			fatalThrow(rc);
+
+		rc = hiddbgSetHdlsState(hdlsHandleRightJoycon, &stateRightJoycon);
+		if(R_FAILED(rc))
+			fatalThrow(rc);
+
+		svcSleepThread(1000000 * 10);
+
+		stateLeftJoycon.buttons  = 0;
+		stateRightJoycon.buttons = 0;
+
+		rc = hiddbgSetHdlsState(hdlsHandleLeftJoycon, &stateLeftJoycon);
+		if(R_FAILED(rc))
+			fatalThrow(rc);
+
+		rc = hiddbgSetHdlsState(hdlsHandleRightJoycon, &stateRightJoycon);
+		if(R_FAILED(rc))
+			fatalThrow(rc);
+
 #endif
 
 #ifdef YUZU
 		yuzuSyscalls->function_joypad_addjoypad(yuzuSyscalls->getYuzuInstance());
 #endif
-
-		// Set Buttons and Joysticks
-		clearState();
-
-#ifdef __SWITCH__
-		// Attach the controller
-		rc = hiddbgAttachHdlsVirtualDevice(&HdlsHandle, &device);
-		if(R_FAILED(rc))
-			fatalThrow(rc);
-#endif
-
-		// Update the state with the zero initialized struct
-		setInput();
 	}
 
 	void ControllerHandler::setFrame(ControllerData & controllerData) {
 		clearState();
 // Set data one at a time
 #ifdef __SWITCH__
-		state.joysticks[JOYSTICK_LEFT].dx  = controllerData.LS_X;
-		state.joysticks[JOYSTICK_LEFT].dy  = controllerData.LS_Y;
-		state.joysticks[JOYSTICK_RIGHT].dx = controllerData.RS_X;
-		state.joysticks[JOYSTICK_RIGHT].dy = controllerData.RS_Y;
+		stateLeftJoycon.joysticks[JOYSTICK_LEFT].dx  = controllerData.LS_X;
+		stateLeftJoycon.joysticks[JOYSTICK_LEFT].dy  = controllerData.LS_Y;
+		stateLeftJoycon.joysticks[JOYSTICK_RIGHT].dx = controllerData.RS_X;
+		stateLeftJoycon.joysticks[JOYSTICK_RIGHT].dy = controllerData.RS_Y;
 		for(auto const& button : btnToHidKeys) {
 			if(GET_BIT(controllerData.buttons, button.first)) {
-				state.buttons |= button.second;
+				stateLeftJoycon.buttons |= button.second;
 			}
 		}
 #endif
@@ -68,11 +115,11 @@ ControllerHandler::ControllerHandler(std::shared_ptr<CommunicateWithNetwork> net
 		clearState();
 
 #ifdef __SWITCH__
-		state.buttons                      = buttons;
-		state.joysticks[JOYSTICK_LEFT].dx  = leftX;
-		state.joysticks[JOYSTICK_LEFT].dy  = leftY;
-		state.joysticks[JOYSTICK_RIGHT].dx = rightX;
-		state.joysticks[JOYSTICK_RIGHT].dy = rightY;
+		stateLeftJoycon.buttons                      = buttons;
+		stateLeftJoycon.joysticks[JOYSTICK_LEFT].dx  = leftX;
+		stateLeftJoycon.joysticks[JOYSTICK_LEFT].dy  = leftY;
+		stateLeftJoycon.joysticks[JOYSTICK_RIGHT].dx = rightX;
+		stateLeftJoycon.joysticks[JOYSTICK_RIGHT].dy = rightY;
 #endif
 
 		setInput();
@@ -83,7 +130,7 @@ ControllerHandler::ControllerHandler(std::shared_ptr<CommunicateWithNetwork> net
 
 		for(auto const& button : btnToHidKeys) {
 #ifdef __SWITCH__
-			if(state.buttons & button.second) {
+			if(stateLeftJoycon.buttons & button.second) {
 				SET_BIT(newControllerData->buttons, true, button.first);
 			} else {
 				SET_BIT(newControllerData->buttons, false, button.first);
@@ -92,10 +139,10 @@ ControllerHandler::ControllerHandler(std::shared_ptr<CommunicateWithNetwork> net
 		}
 
 #ifdef __SWITCH__
-		newControllerData->LS_X = state.joysticks[JOYSTICK_LEFT].dx;
-		newControllerData->LS_Y = state.joysticks[JOYSTICK_LEFT].dy;
-		newControllerData->RS_X = state.joysticks[JOYSTICK_RIGHT].dx;
-		newControllerData->RS_Y = state.joysticks[JOYSTICK_RIGHT].dy;
+		newControllerData->LS_X = stateLeftJoycon.joysticks[JOYSTICK_LEFT].dx;
+		newControllerData->LS_Y = stateLeftJoycon.joysticks[JOYSTICK_LEFT].dy;
+		newControllerData->RS_X = stateLeftJoycon.joysticks[JOYSTICK_RIGHT].dx;
+		newControllerData->RS_Y = stateLeftJoycon.joysticks[JOYSTICK_RIGHT].dy;
 #endif
 
 		// Accel TODO
@@ -108,7 +155,11 @@ ControllerHandler::ControllerHandler(std::shared_ptr<CommunicateWithNetwork> net
 	ControllerHandler::~ControllerHandler() {
 // Detatch Controller
 #ifdef __SWITCH__
-		rc = hiddbgDetachHdlsVirtualDevice(HdlsHandle);
+		rc = hiddbgDetachHdlsVirtualDevice(hdlsHandleLeftJoycon);
+		if(R_FAILED(rc))
+			fatalThrow(rc);
+
+		rc = hiddbgDetachHdlsVirtualDevice(hdlsHandleRightJoycon);
 		if(R_FAILED(rc))
 			fatalThrow(rc);
 #endif

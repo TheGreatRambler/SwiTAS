@@ -696,34 +696,36 @@ void DataProcessing::removeSavestateHook(SavestateBlockNum index) {
 }
 
 void DataProcessing::addNewPlayer() {
-	std::shared_ptr<std::vector<std::shared_ptr<SavestateHook>>> player = std::make_shared<std::vector<std::shared_ptr<SavestateHook>>>();
+	if(allPlayers.size() < 4) {
+		std::shared_ptr<std::vector<std::shared_ptr<SavestateHook>>> player = std::make_shared<std::vector<std::shared_ptr<SavestateHook>>>();
 
-	if(allPlayers.size() != 0) {
-		sendPlayerNum();
-		// Match this player to the number of savestate hooks as the first player
-		for(auto const& hook : *allPlayers[0]) {
-			std::shared_ptr<SavestateHook> newSavestateHook = std::make_shared<SavestateHook>();
+		if(allPlayers.size() != 0) {
+			sendPlayerNum();
+			// Match this player to the number of savestate hooks as the first player
+			for(auto const& hook : *allPlayers[0]) {
+				std::shared_ptr<SavestateHook> newSavestateHook = std::make_shared<SavestateHook>();
 
-			// Has the same number of branches
-			for(FrameNum i = 0; i < hook->inputs.size(); i++) {
-				newSavestateHook->inputs.push_back(std::make_shared<std::vector<std::shared_ptr<ControllerData>>>());
-				// Each of those branches have the same number of inputs
-				for(FrameNum j = 0; j < hook->inputs[i]->size(); j++) {
-					// Create empty frames to add
-					newSavestateHook->inputs[i]->push_back(std::make_shared<ControllerData>());
+				// Has the same number of branches
+				for(FrameNum i = 0; i < hook->inputs.size(); i++) {
+					newSavestateHook->inputs.push_back(std::make_shared<std::vector<std::shared_ptr<ControllerData>>>());
+					// Each of those branches have the same number of inputs
+					for(FrameNum j = 0; j < hook->inputs[i]->size(); j++) {
+						// Create empty frames to add
+						newSavestateHook->inputs[i]->push_back(std::make_shared<ControllerData>());
+					}
 				}
+
+				newSavestateHook->dHash                  = "";
+				newSavestateHook->screenshot             = HELPERS::getDefaultSavestateScreenshot();
+				newSavestateHook->runFinalTasDelayFrames = 0;
+				player->push_back(newSavestateHook);
 			}
-
-			newSavestateHook->dHash                  = "";
-			newSavestateHook->screenshot             = HELPERS::getDefaultSavestateScreenshot();
-			newSavestateHook->runFinalTasDelayFrames = 0;
-			player->push_back(newSavestateHook);
 		}
+
+		allPlayers.push_back(player);
+
+		setPlayer(allPlayers.size() - 1);
 	}
-
-	allPlayers.push_back(player);
-
-	setPlayer(allPlayers.size() - 1);
 }
 
 void DataProcessing::setPlayer(uint8_t playerIndex) {

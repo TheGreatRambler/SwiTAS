@@ -342,6 +342,7 @@ void SideUI::onSavestateHookModifyPressed(wxCommandEvent& event) {
 }
 
 void SideUI::onPlayerAddPressed(wxCommandEvent& event) {
+	// TODO inform user when they have hit the 4 player limit
 	inputData->addNewPlayer();
 }
 
