@@ -60,32 +60,6 @@ ControllerHandler::ControllerHandler(std::shared_ptr<CommunicateWithNetwork> net
 		if(R_FAILED(rc))
 			fatalThrow(rc);
 
-		svcSleepThread(1000000 * 10);
-
-		stateLeftJoycon.buttons  = KEY_L;
-		stateRightJoycon.buttons = KEY_R;
-
-		rc = hiddbgSetHdlsState(hdlsHandleLeftJoycon, &stateLeftJoycon);
-		if(R_FAILED(rc))
-			fatalThrow(rc);
-
-		rc = hiddbgSetHdlsState(hdlsHandleRightJoycon, &stateRightJoycon);
-		if(R_FAILED(rc))
-			fatalThrow(rc);
-
-		svcSleepThread(1000000 * 10);
-
-		stateLeftJoycon.buttons  = 0;
-		stateRightJoycon.buttons = 0;
-
-		rc = hiddbgSetHdlsState(hdlsHandleLeftJoycon, &stateLeftJoycon);
-		if(R_FAILED(rc))
-			fatalThrow(rc);
-
-		rc = hiddbgSetHdlsState(hdlsHandleRightJoycon, &stateRightJoycon);
-		if(R_FAILED(rc))
-			fatalThrow(rc);
-
 #endif
 
 #ifdef YUZU

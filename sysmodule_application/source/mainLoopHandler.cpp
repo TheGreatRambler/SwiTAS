@@ -91,8 +91,6 @@ void MainLoop::mainLoopHandler() {
 
 					gameName = std::string(getAppName(applicationProgramId));
 
-					/*
-
 					LOGD << "Get SaltyNX data";
 					// Used to do accurate frame advance
 					FILE* offsets = fopen("/SaltySD/SwiTAS_SaltyPlugin_Offsets.hex", "rb");
@@ -108,8 +106,12 @@ void MainLoop::mainLoopHandler() {
 					LOGD << "Start DMNT process";
 
 					// Enable DMNT
-					bool cheatProcessActive = false;
-					dmntchtHasCheatProcess(&cheatProcessActive);
+					bool cheatProcessActive;
+					rc = dmntchtHasCheatProcess(&cheatProcessActive);
+
+					if(R_FAILED(rc))
+						fatalThrow(rc);
+
 					if(cheatProcessActive == false) {
 						LOGD << "Need to force open DMNT process";
 						dmntchtForceOpenCheatProcess();
@@ -121,7 +123,6 @@ void MainLoop::mainLoopHandler() {
 
 					heapBase = appInfo.heap_extents.base;
 					mainBase = appInfo.main_nso_extents.base;
-					*/
 
 					LOGD << "Application " + gameName + " opened";
 					ADD_TO_QUEUE(RecieveApplicationConnected, networkInstance, {
@@ -494,6 +495,8 @@ void MainLoop::setControllerNumber(uint8_t numOfControllers) {
 	while(getNumControllers() != 0) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
+	// Once user leaves menu, wait a few seconds
+	svcSleepThread((uint64_t)1000000 * 3000);
 #endif
 #ifdef YUZU
 	yuzuSyscalls->function_joypad_setnumjoypads(yuzuSyscalls->getYuzuInstance(), 0);
