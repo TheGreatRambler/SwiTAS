@@ -86,7 +86,7 @@ void MainLoop::mainLoopHandler() {
 			// This should never fail, but I dunno
 			if(R_SUCCEEDED(rc)) {
 				if(!applicationOpened) {
-					// Sleep for a few millisecond to allow SaltyNX to enable
+					// Sleep for 10 milliseconds to allow SaltyNX to enable
 					svcSleepThread(1000000 * 10);
 
 					gameName = std::string(getAppName(applicationProgramId));
@@ -95,15 +95,15 @@ void MainLoop::mainLoopHandler() {
 					// Used to do accurate frame advance
 					FILE* offsets = fopen("/SaltySD/SwiTAS_SaltyPlugin_Offsets.hex", "rb");
 					if(offsets != NULL) {
-						fread(&saltynxFrameHasPassed, sizeof(uint54_t), 1, offsets);
-						fread(&saltynxLogStringIndex, sizeof(uint54_t), 1, offsets);
-						fread(&saltynxLogString, sizeof(uint54_t), 1, offsets);
-						fread(&saltynxSixAxisStateLeftJoycon, sizeof(uint54_t), 1, offsets);
-						fread(&saltynxSixAxisStateRightJoycon, sizeof(uint54_t), 1, offsets);
-						fread(&saltynxTouchscreenState, sizeof(uint54_t), 1, offsets);
-						fread(&saltynxSixAxisStateLeftJoyconBacklog, sizeof(uint54_t), 1, offsets);
-						fread(&saltynxSixAxisStateRightJoyconBacklog, sizeof(uint54_t), 1, offsets);
-						fread(&saltynxOriginalTouchscreenState, sizeof(uint54_t), 1, offsets);
+						fread(&saltynxFrameHasPassed, sizeof(uint64_t), 1, offsets);
+						fread(&saltynxLogStringIndex, sizeof(uint64_t), 1, offsets);
+						fread(&saltynxLogString, sizeof(uint64_t), 1, offsets);
+						fread(&saltynxSixAxisStateLeftJoycon, sizeof(uint64_t), 1, offsets);
+						fread(&saltynxSixAxisStateRightJoycon, sizeof(uint64_t), 1, offsets);
+						fread(&saltynxTouchscreenState, sizeof(uint64_t), 1, offsets);
+						fread(&saltynxSixAxisStateLeftJoyconBacklog, sizeof(uint64_t), 1, offsets);
+						fread(&saltynxSixAxisStateRightJoyconBacklog, sizeof(uint64_t), 1, offsets);
+						fread(&saltynxOriginalTouchscreenState, sizeof(uint64_t), 1, offsets);
 
 						fclose(offsets);
 					}
@@ -212,11 +212,11 @@ void MainLoop::mainLoopHandler() {
 		// Handle SaltyNX output
 		/*
 		uint16_t logOutputSize;
-		rc = dmntchtReadCheatProcessMemory(saltynxLogIndexAddress, &logOutputSize, sizeof(logOutputSize));
+		rc = dmntchtReadCheatProcessMemory(saltynxLogStringIndex, &logOutputSize, sizeof(logOutputSize));
 		if(R_SUCCEEDED(rc)) {
 			if(logOutputSize != 0) {
 				char log[logOutputSize];
-				rc = dmntchtReadCheatProcessMemory(saltynxLogAddress, &log, logOutputSize);
+				rc = dmntchtReadCheatProcessMemory(saltynxLogString, &log, logOutputSize);
 				if(R_FAILED(rc)) {
 					fatalThrow(rc);
 				}
@@ -224,7 +224,7 @@ void MainLoop::mainLoopHandler() {
 				LOGD << "SaltyNX output: " << std::string(log, logOutputSize);
 
 				uint16_t dummyLogSize = 0;
-				dmntchtWriteCheatProcessMemory(saltynxLogIndexAddress, &dummyLogSize, sizeof(dummyLogSize));
+				dmntchtWriteCheatProcessMemory(saltynxLogStringIndex, &dummyLogSize, sizeof(dummyLogSize));
 			}
 		}
 		*/
@@ -500,8 +500,8 @@ void MainLoop::setControllerNumber(uint8_t numOfControllers) {
 	while(getNumControllers() != 0) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
-	// Once user leaves menu, wait a few seconds
-	svcSleepThread((uint64_t)1000000 * 3000);
+	// Once user leaves menu, wait 3 seconds
+	svcSleepThread((int64_t)1000000 * 3000);
 #endif
 #ifdef YUZU
 	yuzuSyscalls->function_joypad_setnumjoypads(yuzuSyscalls->getYuzuInstance(), 0);
@@ -755,7 +755,7 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 
 void MainLoop::waitForVsync() {
 #ifdef __SWITCH__
-	if(isPaused || frameAddress == 0) {
+	if(isPaused || saltynxFrameHasPassed == 0) {
 		rc = eventWait(&vsyncEvent, UINT64_MAX);
 		if(R_FAILED(rc))
 			fatalThrow(rc);
@@ -764,7 +764,7 @@ void MainLoop::waitForVsync() {
 		LOGD << "Wait for vsync";
 		while(true) {
 			uint8_t frame;
-			rc = dmntchtReadCheatProcessMemory(frameAddress, &frame, sizeof(frame));
+			rc = dmntchtReadCheatProcessMemory(saltynxFrameHasPassed, &frame, sizeof(frame));
 			if(R_FAILED(rc)) {
 				fatalThrow(rc);
 			}
@@ -772,7 +772,7 @@ void MainLoop::waitForVsync() {
 			if(frame) {
 				// Clear the variable so we can wait for it again
 				uint8_t dummyFrame = false;
-				dmntchtWriteCheatProcessMemory(frameAddress, &dummyFrame, sizeof(dummyFrame));
+				dmntchtWriteCheatProcessMemory(saltynxFrameHasPassed, &dummyFrame, sizeof(dummyFrame));
 				return;
 			} else {
 				svcSleepThread(1000000 * 3);

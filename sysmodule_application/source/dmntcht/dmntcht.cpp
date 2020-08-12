@@ -14,8 +14,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #define NX_SERVICE_ASSUME_NON_DOMAIN
-#include <libstratosphere/dmntcht.hpp>
-#include <libstratosphere/service_guard.hpp>
+#include "dmntcht.hpp"
+#include "service_guard.hpp"
 
 static Service g_dmntchtSrv;
 

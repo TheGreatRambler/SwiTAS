@@ -1,38 +1,42 @@
 #pragma once
-#include <switch.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#include <switch/kernel/mutex.h>
+#include <switch/result.h>
+#include <switch/services/sm.h>
+#include <switch/sf/service.h>
+#include <switch/types.h>
+
 typedef struct ServiceGuard {
-    Mutex mutex;
-    u32 refCount;
+	Mutex mutex;
+	u32 refCount;
 } ServiceGuard;
 
-NX_INLINE bool serviceGuardBeginInit(ServiceGuard* g)
-{
-    mutexLock(&g->mutex);
-    return (g->refCount++) == 0;
+NX_INLINE bool serviceGuardBeginInit(ServiceGuard* g) {
+	mutexLock(&g->mutex);
+	return (g->refCount++) == 0;
 }
 
-NX_INLINE Result serviceGuardEndInit(ServiceGuard* g, Result rc, void (*cleanupFunc)(void))
-{
-    if (R_FAILED(rc)) {
-        cleanupFunc();
-        --g->refCount;
-    }
-    mutexUnlock(&g->mutex);
-    return rc;
+NX_INLINE Result serviceGuardEndInit(ServiceGuard* g, Result rc, void (*cleanupFunc)(void)) {
+	if(R_FAILED(rc)) {
+		cleanupFunc();
+		--g->refCount;
+	}
+	mutexUnlock(&g->mutex);
+	return rc;
 }
 
-NX_INLINE void serviceGuardExit(ServiceGuard* g, void (*cleanupFunc)(void))
-{
-    mutexLock(&g->mutex);
-    if (g->refCount && (--g->refCount) == 0)
-        cleanupFunc();
-    mutexUnlock(&g->mutex);
+NX_INLINE void serviceGuardExit(ServiceGuard* g, void (*cleanupFunc)(void)) {
+	mutexLock(&g->mutex);
+	if(g->refCount && (--g->refCount) == 0)
+		cleanupFunc();
+	mutexUnlock(&g->mutex);
 }
+
+// clang-format off
 
 #define NX_GENERATE_SERVICE_GUARD_PARAMS(name, _paramdecl, _parampass) \
 \
@@ -52,6 +56,8 @@ void name##Exit(void) \
 { \
     serviceGuardExit(&g_##name##Guard, _##name##Cleanup); \
 }
+
+// clang-format on
 
 #define NX_GENERATE_SERVICE_GUARD(name) NX_GENERATE_SERVICE_GUARD_PARAMS(name, (void), ())
 

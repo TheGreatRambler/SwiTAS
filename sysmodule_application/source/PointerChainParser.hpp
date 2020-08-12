@@ -70,7 +70,7 @@
 #include <string>
 
 #ifdef __SWITCH__
-#include <libstratosphere/dmntcht.hpp>
+#include "dmntcht/dmntcht.hpp"
 #include <switch.h>
 #endif
 

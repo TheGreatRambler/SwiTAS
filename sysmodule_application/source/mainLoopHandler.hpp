@@ -10,7 +10,7 @@
 #include <vector>
 
 #ifdef __SWITCH__
-#include <libstratosphere/dmntcht.hpp>
+#include "dmntcht/dmntcht.hpp"
 #include <plog/Log.h>
 #include <switch.h>
 #endif
