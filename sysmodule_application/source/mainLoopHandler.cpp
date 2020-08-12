@@ -95,12 +95,17 @@ void MainLoop::mainLoopHandler() {
 					// Used to do accurate frame advance
 					FILE* offsets = fopen("/SaltySD/SwiTAS_SaltyPlugin_Offsets.hex", "rb");
 					if(offsets != NULL) {
-						fread(&frameAddress, sizeof(frameAddress), 1, offsets);
-						fread(&saltynxLogIndexAddress, sizeof(saltynxLogIndexAddress), 1, offsets);
-						fread(&saltynxLogAddress, sizeof(saltynxLogAddress), 1, offsets);
-						fclose(offsets);
+						fread(&saltynxFrameHasPassed, sizeof(uint54_t), 1, offsets);
+						fread(&saltynxLogStringIndex, sizeof(uint54_t), 1, offsets);
+						fread(&saltynxLogString, sizeof(uint54_t), 1, offsets);
+						fread(&saltynxSixAxisStateLeftJoycon, sizeof(uint54_t), 1, offsets);
+						fread(&saltynxSixAxisStateRightJoycon, sizeof(uint54_t), 1, offsets);
+						fread(&saltynxTouchscreenState, sizeof(uint54_t), 1, offsets);
+						fread(&saltynxSixAxisStateLeftJoyconBacklog, sizeof(uint54_t), 1, offsets);
+						fread(&saltynxSixAxisStateRightJoyconBacklog, sizeof(uint54_t), 1, offsets);
+						fread(&saltynxOriginalTouchscreenState, sizeof(uint54_t), 1, offsets);
 
-						LOGD << "Pointers recieved: " << std::to_string(frameAddress) << " " << std::to_string(saltynxLogIndexAddress) << " " << std::to_string(saltynxLogAddress);
+						fclose(offsets);
 					}
 
 					LOGD << "Start DMNT process";

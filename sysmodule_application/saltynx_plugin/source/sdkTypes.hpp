@@ -132,7 +132,13 @@ namespace nn {
 			int32_t y;
 		};
 
-		struct TouchScreenState {
+		struct TouchScreenState1Touch {
+			int32_t count;
+			int64_t samplingNumber;
+			nn::hid::TouchState touches[1];
+		};
+
+		struct TouchScreenStateMaxTouch {
 			int32_t count;
 			int64_t samplingNumber;
 			nn::hid::TouchState touches[nn::hid::TouchStateCountMax];

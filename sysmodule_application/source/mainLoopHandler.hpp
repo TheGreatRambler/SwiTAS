@@ -66,9 +66,15 @@ private:
 	uint64_t lastNanoseconds = 0;
 	int lastFrameAttempt     = 0;
 
-	uint64_t frameAddress           = 0;
-	uint64_t saltynxLogIndexAddress = 0;
-	uint64_t saltynxLogAddress      = 0;
+	uint64_t saltynxFrameHasPassed;
+	uint64_t saltynxLogStringIndex;
+	uint64_t saltynxLogString;
+	uint64_t saltynxSixAxisStateLeftJoycon;
+	uint64_t saltynxSixAxisStateRightJoycon;
+	uint64_t saltynxTouchscreenState;
+	uint64_t saltynxSixAxisStateLeftJoyconBacklog;
+	uint64_t saltynxSixAxisStateRightJoyconBacklog;
+	uint64_t saltynxOriginalTouchscreenState;
 #endif
 
 #ifdef YUZU
