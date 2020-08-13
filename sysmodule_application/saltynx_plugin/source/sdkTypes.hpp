@@ -59,8 +59,8 @@ namespace nn {
 		typedef uint32_t SixAxisSensorHandle;
 		typedef uint32_t ConsoleSixAxisSensorHandle;
 
-		const float AccelerometerMax         = 7.0f;
-		const float AngularVelocityMax       = 5.0f;
+		const float AccelerometerMax             = 7.0f;
+		const float AngularVelocityMax           = 5.0f;
 		const int32_t SixAxisSensorStateCountMax = 16;
 		const int32_t TouchStateCountMax         = 16;
 		const int32_t TouchScreenStateCountMax   = 16;
@@ -138,7 +138,13 @@ namespace nn {
 			nn::hid::TouchState touches[1];
 		};
 
-		struct TouchScreenStateMaxTouch {
+		struct TouchScreenState5Touch {
+			int32_t count;
+			int64_t samplingNumber;
+			nn::hid::TouchState touches[5];
+		};
+
+		struct TouchScreenState16Touch {
 			int32_t count;
 			int64_t samplingNumber;
 			nn::hid::TouchState touches[nn::hid::TouchStateCountMax];
