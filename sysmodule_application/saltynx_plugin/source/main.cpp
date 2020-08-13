@@ -50,7 +50,11 @@ nn::hid::SixAxisSensorState sixAxisStateRightJoyconBacklog[8][nn::hid::SixAxisSe
 
 // Updated with the real values, for recording purposes
 uint64_t lastAccessTime                                    = ticksToNanoseconds(_ZN2nn2os13GetSystemTickEv());
-nn::hid::TouchScreenStateMaxTouch originalTouchscreenState = { 0 };
+nn::hid::TouchScreenState16Touch touchScreenStateBacklog[nn::hid::TouchScreenStateCountMax] = { 0 };
+
+nn::hid::KeyboardState keyboardStateBacklog[nn::hid::KeyboardStateCountMax] = {0};
+
+nn::hid::MouseState mouseStateBacklog[nn::hid::MouseStateCountMax] = {0};
 
 // ONLY values we will TAS
 /*
@@ -291,7 +295,6 @@ void StopSixAxisSensor2(const nn::hid::SixAxisSensorHandle& param_1) {
 
 // Touch screen spoofing
 // void nn::hid::GetTouchScreenState (TouchScreenState< N > *pOutValue)
-// Dunno how to handle templates
 void GetTouchScreenState1Touch(nn::hid::TouchScreenState1Touch* state) {
 
 	// Return the most recent state

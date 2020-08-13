@@ -61,13 +61,13 @@ extern void _ZN2nn3hid19GetTouchScreenStateILm16EEEvPNS0_16TouchScreenStateIXT_E
 extern uint64_t _ZN2nn2os13GetSystemTickEv() LINKABLE;
 // Mouse and keyboard external functions
 // nn::hid::GetKeyboardState
-// extern void _ZN2nn3hid16GetKeyboardStateEPNS0_13KeyboardStateE(nn::hid::KeyboardState* state) LINKABLE;
+extern void _ZN2nn3hid16GetKeyboardStateEPNS0_13KeyboardStateE(nn::hid::KeyboardState* state) LINKABLE;
 // nn::hid::GetKeyboardStates
-// extern int32_t _ZN2nn3hid17GetKeyboardStatesEPNS0_13KeyboardStateEi(nn::hid::KeyboardState* outStates, int32_t count) LINKABLE;
+extern int32_t _ZN2nn3hid17GetKeyboardStatesEPNS0_13KeyboardStateEi(nn::hid::KeyboardState* outStates, int32_t count) LINKABLE;
 // nn::hid::GetMouseState
-// extern void _ZN2nn3hid13GetMouseStateEPNS0_10MouseStateE(nn::hid::MouseState* state) LINKABLE;
+extern void _ZN2nn3hid13GetMouseStateEPNS0_10MouseStateE(nn::hid::MouseState* state) LINKABLE;
 // nn::hid::GetMouseStates
-// extern int32_t _ZN2nn3hid14GetMouseStatesEPNS0_10MouseStateEi(nn::hid::MouseState* outStates, int32_t count) LINKABLE;
+extern int32_t _ZN2nn3hid14GetMouseStatesEPNS0_10MouseStateEi(nn::hid::MouseState* outStates, int32_t count) LINKABLE;
 }
 
 u32 __nx_applet_type = AppletType_None;
