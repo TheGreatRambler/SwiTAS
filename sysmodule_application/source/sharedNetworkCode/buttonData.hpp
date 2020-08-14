@@ -90,6 +90,30 @@ struct ControllerData : public zpp::serializer::polymorphic {
 	}
 };
 
+struct TouchAndKeyboardData : public zpp::serializer::polymorphic {
+	int32_t touchX;
+	int32_t touchY;
+	int32_t keyboardModifiers;
+	uint32_t keyboardKeys[8];
+	int32_t mouseX;
+	int32_t mouseY;
+	int32_t mouseVelocityX;
+	int32_t mouseVelocityY;
+	int32_t scrollVelocityX;
+	int32_t scrollVelocityY;
+	int32_t mouseButtons;
+
+	friend zpp::serializer::access;
+	template <typename Archive, typename Self> static void serialize(Archive& archive, Self& self) {
+		// clang-format off
+			archive(self.touchX, self.touchY, self.keyboardModifiers,
+				self.keyboardKeys, self.mouseX, self.mouseY, self.mouseVelocityX,
+				self.mouseVelocityY, self.scrollVelocityX, self.scrollVelocityY,
+				self.mouseButtons);
+		// clang-format on
+	}
+};
+
 // Not button data, but the memory info
 // Mirrors libnx MemoryInfo
 /*

@@ -10,8 +10,8 @@
 #include <vector>
 
 #ifdef __SWITCH__
-#include "dmntcht/dmntcht.hpp"
 #include "../saltynx_plugin/source/sdkTypes.hpp"
+#include "dmntcht/dmntcht.hpp"
 #include <plog/Log.h>
 #include <switch.h>
 #endif
@@ -22,8 +22,8 @@
 
 #include "PointerChainParser.hpp"
 #include "controller.hpp"
-#include "helpers.hpp"
 #include "gui.hpp"
+#include "helpers.hpp"
 #include "scripting/luaScripting.hpp"
 #include "sharedNetworkCode/networkInterface.hpp"
 #include "sharedNetworkCode/serializeUnserializeData.hpp"
@@ -63,26 +63,25 @@ private:
 	ViDisplay disp;
 
 	PscPmModule sleepModule;
-	Waiter sleepModeWaiter;
 
 	uint64_t lastNanoseconds = 0;
 	int lastFrameAttempt     = 0;
 
-	uint64_t saltynxframeHasPassed = 0;
-	uint64_t saltynxlogStringIndex = 0;
-	uint64_t saltynxlogString = 0;
-	uint64_t saltynxcontrollerToRecord = 0;
-	uint64_t saltynxsixAxisStateLeftJoycon = 0;
-	uint64_t saltynxsixAxisStateRightJoycon = 0;
-	uint64_t saltynxsixAxisStateLeftJoyconBacklog = 0;
+	uint64_t saltynxframeHasPassed                 = 0;
+	uint64_t saltynxlogStringIndex                 = 0;
+	uint64_t saltynxlogString                      = 0;
+	uint64_t saltynxcontrollerToRecord             = 0;
+	uint64_t saltynxsixAxisStateLeftJoycon         = 0;
+	uint64_t saltynxsixAxisStateRightJoycon        = 0;
+	uint64_t saltynxsixAxisStateLeftJoyconBacklog  = 0;
 	uint64_t saltynxsixAxisStateRightJoyconBacklog = 0;
-	uint64_t saltynxrecordScreenOrKeyboard = 0;
-	uint64_t saltynxtouchscreenState = 0;
-	uint64_t saltynxtouchScreenStateBacklog = 0;
-	uint64_t saltynxkeyboardState = 0;
-	uint64_t saltynxkeyboardStateBacklog = 0;
-	uint64_t saltynxmouseState = 0;
-	uint64_t saltynxmouseStateBacklog = 0;
+	uint64_t saltynxrecordScreenOrKeyboard         = 0;
+	uint64_t saltynxtouchscreenState               = 0;
+	uint64_t saltynxtouchScreenStateBacklog        = 0;
+	uint64_t saltynxkeyboardState                  = 0;
+	uint64_t saltynxkeyboardStateBacklog           = 0;
+	uint64_t saltynxmouseState                     = 0;
+	uint64_t saltynxmouseStateBacklog              = 0;
 #endif
 
 #ifdef YUZU

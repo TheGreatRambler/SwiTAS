@@ -1,7 +1,9 @@
 #pragma once
 
+#define BIT(n) (1U << (n))
+
 #include <cstdint>
-#include <switch_min.h>
+//#include <switch_min.h>
 #include <type_traits>
 
 namespace nn {
@@ -268,6 +270,7 @@ namespace nn {
 		};
 
 		enum class NpadIdType : int32_t {
+			None     = -1,
 			Player1  = 0,
 			Player2  = 1,
 			Player3  = 2,

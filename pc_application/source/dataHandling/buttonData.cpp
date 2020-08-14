@@ -257,17 +257,6 @@ FrameNum ButtonData::textToFrames(DataProcessing* dataProcessing, std::string te
 		} else {
 			continue;
 		}
-
-		currentIndexInParts++;
-		if(parts.size() == currentIndexInParts)
-			continue;
-
-		std::vector<std::string> numberOfTouches = HELPERS::splitString(parts[currentIndexInParts], ';');
-		if(numberOfTouches.size() == 1) {
-			dataProcessing->setNumberOfTouches(thisDataIndex, strtol(numberOfTouches[0].c_str(), nullptr, 10));
-		} else {
-			continue;
-		}
 	}
 
 	return lastReadFrame;
@@ -359,11 +348,6 @@ std::string ButtonData::framesToText(DataProcessing* dataProcessing, FrameNum st
 				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::ANGLE_X_LEFT, j,branch, realPlayer)) + \
 					";" + std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::ANGLE_Y_LEFT, j, branch, realPlayer)) + \
 					";" + std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::ANGLE_Z_LEFT, j, branch, realPlayer)));
-
-				parts.push_back(std::to_string(dataProcessing->getNumberOfTouchesSpecific(i, j, branch, realPlayer)));
-
-				parts.push_back(std::to_string(dataProcessing->getNumberOfTouchesSpecific(i, j, branch, realPlayer)) + \
-					";" + std::to_string(dataProcessing->getNumberOfTouchesSpecific(i, j, branch, realPlayer)));
 				// clang-format on
 
 				textVector.push_back(HELPERS::joinString(parts, " "));
@@ -386,30 +370,29 @@ void ButtonData::transferControllerData(ControllerData src, std::shared_ptr<Cont
 		// Just replace
 		dest->buttons = src.buttons;
 	}
-	dest->numberOfTouches = src.numberOfTouches;
-	dest->LS_X            = src.LS_X;
-	dest->LS_Y            = src.LS_Y;
-	dest->RS_X            = src.RS_X;
-	dest->RS_Y            = src.RS_Y;
-	dest->ACCEL_X_LEFT    = src.ACCEL_X_LEFT;
-	dest->ACCEL_Y_LEFT    = src.ACCEL_Y_LEFT;
-	dest->ACCEL_Z_LEFT    = src.ACCEL_Z_LEFT;
-	dest->GYRO_X_LEFT     = src.GYRO_X_LEFT;
-	dest->GYRO_Y_LEFT     = src.GYRO_Y_LEFT;
-	dest->GYRO_Z_LEFT     = src.GYRO_Z_LEFT;
-	dest->ANGLE_X_LEFT    = src.ANGLE_X_LEFT;
-	dest->ANGLE_Y_LEFT    = src.ANGLE_Y_LEFT;
-	dest->ANGLE_Z_LEFT    = src.ANGLE_Z_LEFT;
-	dest->ACCEL_X_RIGHT   = src.ACCEL_X_RIGHT;
-	dest->ACCEL_Y_RIGHT   = src.ACCEL_Y_RIGHT;
-	dest->ACCEL_Z_RIGHT   = src.ACCEL_Z_RIGHT;
-	dest->GYRO_X_RIGHT    = src.GYRO_X_RIGHT;
-	dest->GYRO_Y_RIGHT    = src.GYRO_Y_RIGHT;
-	dest->GYRO_Z_RIGHT    = src.GYRO_Z_RIGHT;
-	dest->ANGLE_X_RIGHT   = src.ANGLE_X_RIGHT;
-	dest->ANGLE_Y_RIGHT   = src.ANGLE_Y_RIGHT;
-	dest->ANGLE_Z_RIGHT   = src.ANGLE_Z_RIGHT;
-	dest->frameState      = src.frameState;
+	dest->LS_X          = src.LS_X;
+	dest->LS_Y          = src.LS_Y;
+	dest->RS_X          = src.RS_X;
+	dest->RS_Y          = src.RS_Y;
+	dest->ACCEL_X_LEFT  = src.ACCEL_X_LEFT;
+	dest->ACCEL_Y_LEFT  = src.ACCEL_Y_LEFT;
+	dest->ACCEL_Z_LEFT  = src.ACCEL_Z_LEFT;
+	dest->GYRO_X_LEFT   = src.GYRO_X_LEFT;
+	dest->GYRO_Y_LEFT   = src.GYRO_Y_LEFT;
+	dest->GYRO_Z_LEFT   = src.GYRO_Z_LEFT;
+	dest->ANGLE_X_LEFT  = src.ANGLE_X_LEFT;
+	dest->ANGLE_Y_LEFT  = src.ANGLE_Y_LEFT;
+	dest->ANGLE_Z_LEFT  = src.ANGLE_Z_LEFT;
+	dest->ACCEL_X_RIGHT = src.ACCEL_X_RIGHT;
+	dest->ACCEL_Y_RIGHT = src.ACCEL_Y_RIGHT;
+	dest->ACCEL_Z_RIGHT = src.ACCEL_Z_RIGHT;
+	dest->GYRO_X_RIGHT  = src.GYRO_X_RIGHT;
+	dest->GYRO_Y_RIGHT  = src.GYRO_Y_RIGHT;
+	dest->GYRO_Z_RIGHT  = src.GYRO_Z_RIGHT;
+	dest->ANGLE_X_RIGHT = src.ANGLE_X_RIGHT;
+	dest->ANGLE_Y_RIGHT = src.ANGLE_Y_RIGHT;
+	dest->ANGLE_Z_RIGHT = src.ANGLE_Z_RIGHT;
+	dest->frameState    = src.frameState;
 }
 
 bool ButtonData::isEmptyControllerData(std::shared_ptr<ControllerData> data) {
@@ -417,7 +400,6 @@ bool ButtonData::isEmptyControllerData(std::shared_ptr<ControllerData> data) {
 	// clang-format off
 	return
 		(data->buttons         == emptyData.buttons)         &&
-		(data->numberOfTouches == emptyData.numberOfTouches) &&
 		(data->LS_X            == emptyData.LS_X)            &&
 		(data->LS_Y            == emptyData.LS_Y)            &&
 		(data->RS_X            == emptyData.RS_X)            &&

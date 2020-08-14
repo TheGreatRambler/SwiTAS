@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstdio>
+#include <string>
+
 #ifdef __SWITCH__
 #include <switch.h>
 #endif

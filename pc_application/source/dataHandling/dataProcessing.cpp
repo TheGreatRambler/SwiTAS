@@ -1207,7 +1207,7 @@ void DataProcessing::triggerNumberOfTouches(uint8_t value) {
 }
 
 void DataProcessing::setNumberOfTouches(FrameNum frame, uint8_t value) {
-	allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->at(frame)->numberOfTouches = value;
+	// allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->at(frame)->numberOfTouches = value;
 
 	invalidateRun(frame);
 
@@ -1216,11 +1216,13 @@ void DataProcessing::setNumberOfTouches(FrameNum frame, uint8_t value) {
 }
 
 uint8_t DataProcessing::getNumberOfTouches(FrameNum frame) const {
-	return getInputsList()->at(frame)->numberOfTouches;
+	// return getInputsList()->at(frame)->numberOfTouches;
+	return 0;
 }
 
 uint8_t DataProcessing::getNumberOfTouchesSpecific(FrameNum frame, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
-	return getControllerData(player, savestateHookNum, branch, frame)->numberOfTouches;
+	// return getControllerData(player, savestateHookNum, branch, frame)->numberOfTouches;
+	return 0;
 }
 
 uint8_t DataProcessing::getNumberOfTouchesCurrent() const {

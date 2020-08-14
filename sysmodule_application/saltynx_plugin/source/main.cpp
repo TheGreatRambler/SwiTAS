@@ -36,7 +36,7 @@ int32_t lastControllerId;
 // This is the controller that needs to record, all other controllers get their state
 // From the exposed sensor states
 // If -1, every controller records
-nn::hid::NpadIdType controllerToRecord = -1;
+int32_t controllerToRecord = (int32_t)nn::hid::NpadIdType::None;
 
 nn::hid::SixAxisSensorHandle sixAxisHandlesLeftJoycon[8]  = { 0 };
 nn::hid::SixAxisSensorHandle sixAxisHandlesRightJoycon[8] = { 0 };
@@ -365,6 +365,8 @@ void GetTouchScreenState1Touch(nn::hid::TouchScreenState1Touch* state) {
 			// clang-format on
 
 			writeToLog(diagInfo.c_str());
+		} else {
+			writeToLog("Not a suitable amount of touches");
 		}
 	}
 }
@@ -444,7 +446,7 @@ int main(int argc, char* argv[]) {
 
 	// Whether to record touch screen or keyboard
 	writePointerToFile(&recordScreenOrKeyboard, offsets);
-	
+
 	// State to send to touch screen
 	writePointerToFile(&touchscreenState, offsets);
 

@@ -36,13 +36,12 @@ MainLoop::MainLoop() {
 	if(R_FAILED(rc))
 		fatalThrow(rc);
 
-	// LOGD << "Obtain sleep module";
-	//// https://github.com/cathery/sys-con/blob/master/source/Sysmodule/source/psc_module.cpp
-	// const u16 deps[1] = { PscPmModuleId_Fs };
-	// rc                = pscmGetPmModule(&sleepModule, (PscPmModuleId)127, deps, sizeof(deps), true);
-	// if(R_FAILED(rc))
-	//	fatalThrow(rc);
-	// sleepModeWaiter = waiterForEvent(&sleepModule.event);
+	LOGD << "Obtain sleep module";
+	// https://github.com/cathery/sys-con/blob/master/source/Sysmodule/source/psc_module.cpp
+	const u16 deps[1] = { PscPmModuleId_Fs };
+	rc                = pscmGetPmModule(&sleepModule, (PscPmModuleId)127, deps, sizeof(deps), true);
+	if(R_FAILED(rc))
+		fatalThrow(rc);
 
 	LOGD << "Attach work buffers";
 	// Attach Work Buffer
@@ -50,9 +49,9 @@ MainLoop::MainLoop() {
 	if(R_FAILED(rc))
 		fatalThrow(rc);
 
-	rc = dmntchtForceOpenCheatProcess();
-	if(R_FAILED(rc))
-		fatalThrow(rc);
+	LOGD << "Start DMNT:CHT process";
+
+	dmntchtInitialize();
 #endif
 
 #ifdef YUZU
@@ -90,8 +89,13 @@ void MainLoop::mainLoopHandler() {
 			// This should never fail, but I dunno
 			if(R_SUCCEEDED(rc)) {
 				if(!applicationOpened) {
-					// Sleep for 10 milliseconds to allow SaltyNX to enable
-					svcSleepThread(1000000 * 10);
+					LOGD << "Check if DMNT:CHT is attached to game";
+					bool cheatProcessActive = false;
+
+					dmntchtHasCheatProcess(&cheatProcessActive);
+					if(!cheatProcessActive) {
+						dmntchtForceOpenCheatProcess();
+					}
 
 					gameName = std::string(getAppName(applicationProgramId));
 
@@ -118,21 +122,7 @@ void MainLoop::mainLoopHandler() {
 						fclose(offsets);
 					}
 
-					LOGD << "Start DMNT process";
-
-					// Enable DMNT
-					bool cheatProcessActive;
-					rc = dmntchtHasCheatProcess(&cheatProcessActive);
-
-					if(R_FAILED(rc))
-						fatalThrow(rc);
-
-					if(cheatProcessActive == false) {
-						LOGD << "Need to force open DMNT process";
-						dmntchtForceOpenCheatProcess();
-					}
-
-					LOGD << "Get DMNT extents";
+					LOGD << "Get DMNT:CHT extents";
 					DmntCheatProcessMetadata appInfo;
 					dmntchtGetCheatProcessMetadata(&appInfo);
 
@@ -220,24 +210,22 @@ void MainLoop::mainLoopHandler() {
 		// handle network updates always, they are stored in the queue regardless of the internet
 		handleNetworkUpdates();
 		// Handle SaltyNX output
-		/*
 		uint16_t logOutputSize;
-		rc = dmntchtReadCheatProcessMemory(saltynxLogStringIndex, &logOutputSize, sizeof(logOutputSize));
+		rc = dmntchtReadCheatProcessMemory(saltynxlogStringIndex, &logOutputSize, sizeof(logOutputSize));
 		if(R_SUCCEEDED(rc)) {
 			if(logOutputSize != 0) {
 				char log[logOutputSize];
-				rc = dmntchtReadCheatProcessMemory(saltynxLogString, &log, logOutputSize);
+				rc = dmntchtReadCheatProcessMemory(saltynxlogString, &log, logOutputSize);
 				if(R_FAILED(rc)) {
 					fatalThrow(rc);
 				}
 
-				LOGD << "SaltyNX output: " << std::string(log, logOutputSize);
+				LOGD << std::string(log, logOutputSize);
 
 				uint16_t dummyLogSize = 0;
-				dmntchtWriteCheatProcessMemory(saltynxLogStringIndex, &dummyLogSize, sizeof(dummyLogSize));
+				dmntchtWriteCheatProcessMemory(saltynxlogStringIndex, &dummyLogSize, sizeof(dummyLogSize));
 			}
 		}
-		*/
 	}
 
 	// Match first controller inputs as often as possible
@@ -560,7 +548,7 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths) {
 				LOGD << "For player " << (int)player;
 				// Based on code in project handler without compression
 				uint8_t controllerSize;
-				readFullFileData(files[player], &controllerSize, sizeof(controllerSize));
+				HELPERS::readFullFileData(files[player], &controllerSize, sizeof(controllerSize));
 
 				if(controllerSize == 255) {
 					// Skip handling controller data and clear existing buttons
@@ -569,7 +557,7 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths) {
 					LOGD << "Empty frame";
 				} else {
 					uint8_t controllerDataBuf[controllerSize];
-					readFullFileData(files[player], controllerDataBuf, controllerSize);
+					HELPERS::readFullFileData(files[player], controllerDataBuf, controllerSize);
 
 					ControllerData data;
 					serializeProtocol.binaryToData<ControllerData>(data, controllerDataBuf, controllerSize);
@@ -669,13 +657,13 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 			for(uint16_t i = 0; i < currentMemoryRegions.size(); i++) {
 				std::string revisedExpression = currentMemoryRegions[i].pointerDefinition;
 
-				replaceInString(revisedExpression, "main", std::to_string(mainBase));
-				replaceInString(revisedExpression, "heap", std::to_string(heapBase));
+				HELPERS::replaceInString(revisedExpression, "main", std::to_string(mainBase));
+				HELPERS::replaceInString(revisedExpression, "heap", std::to_string(heapBase));
 
 				for(std::size_t outputIndex = 0; outputIndex < outputs.size(); outputIndex++) {
 					// For each already generated output, replace in the expression if needed
 					// Note, some values will absolutely cause an error
-					replaceInString(revisedExpression, "<" + std::to_string(outputIndex) + ">", outputs[outputIndex]);
+					HELPERS::replaceInString(revisedExpression, "<" + std::to_string(outputIndex) + ">", outputs[outputIndex]);
 				}
 
 				MemoryRegionTypes type = currentMemoryRegions[i].type;
@@ -798,7 +786,7 @@ void MainLoop::waitForVsync() {
 uint8_t MainLoop::checkSleep() {
 #ifdef __SWITCH__
 	// Wait for one millisecond
-	if(R_SUCCEEDED(waitSingle(sleepModeWaiter, 1000000 * 1))) {
+	if(R_SUCCEEDED(eventWait(&sleepModule.event, 1000000 * 1))) {
 		PscPmState pscState;
 		u32 out_flags;
 		if(R_SUCCEEDED(pscPmModuleGetRequest(&sleepModule, &pscState, &out_flags))) {
@@ -820,7 +808,7 @@ uint8_t MainLoop::checkSleep() {
 uint8_t MainLoop::checkAwaken() {
 #ifdef __SWITCH__
 	// Wait for one millisecond
-	if(R_SUCCEEDED(waitSingle(sleepModeWaiter, 1000000 * 1))) {
+	if(R_SUCCEEDED(eventWait(&sleepModule.event, 1000000 * 1))) {
 		PscPmState pscState;
 		u32 out_flags;
 		if(R_SUCCEEDED(pscPmModuleGetRequest(&sleepModule, &pscState, &out_flags))) {
@@ -874,64 +862,64 @@ void MainLoop::matchFirstControllerToTASController(uint8_t player) {
 }
 
 void MainLoop::disableSixAxisModifying() {
-		if (saltynxcontrollerToRecord != 0) {
-			int32_t dummyControllerIndex = -1;
-			dmntchtWriteCheatProcessMemory(saltynxcontrollerToRecord, &dummyControllerIndex, sizeof(dummyControllerIndex));
-		}
+	if(saltynxcontrollerToRecord != 0) {
+		nn::hid::NpadIdType dummyControllerIndex = nn::hid::NpadIdType::None;
+		dmntchtWriteCheatProcessMemory(saltynxcontrollerToRecord, &dummyControllerIndex, sizeof(dummyControllerIndex));
 	}
+}
 
-	void MainLoop::setSixAxisControllerRecord(int32_t controller) {
-		if (saltynxcontrollerToRecord != 0) {
-			dmntchtWriteCheatProcessMemory(saltynxcontrollerToRecord, &controller, sizeof(controller));
-		}
+void MainLoop::setSixAxisControllerRecord(int32_t controller) {
+	if(saltynxcontrollerToRecord != 0) {
+		dmntchtWriteCheatProcessMemory(saltynxcontrollerToRecord, &controller, sizeof(controller));
 	}
+}
 
-	void MainLoop::disableKeyboardTouchModifying() {
-		if (saltynxrecordScreenOrKeyboard != 0) {
-			uint8_t dummyTouchKeyboard = 0;
-			dmntchtWriteCheatProcessMemory(saltynxrecordScreenOrKeyboard, &dummyTouchKeyboard, sizeof(dummyTouchKeyboard));
-		}
+void MainLoop::disableKeyboardTouchModifying() {
+	if(saltynxrecordScreenOrKeyboard != 0) {
+		uint8_t dummyTouchKeyboard = 0;
+		dmntchtWriteCheatProcessMemory(saltynxrecordScreenOrKeyboard, &dummyTouchKeyboard, sizeof(dummyTouchKeyboard));
 	}
+}
 
-	void MainLoop::setKeyboardRecord() {
-		if (saltynxrecordScreenOrKeyboard != 0) {
-			uint8_t dummyTouchKeyboard = 2;
-			dmntchtWriteCheatProcessMemory(saltynxrecordScreenOrKeyboard, &dummyTouchKeyboard, sizeof(dummyTouchKeyboard));
-		}
+void MainLoop::setKeyboardRecord() {
+	if(saltynxrecordScreenOrKeyboard != 0) {
+		uint8_t dummyTouchKeyboard = 2;
+		dmntchtWriteCheatProcessMemory(saltynxrecordScreenOrKeyboard, &dummyTouchKeyboard, sizeof(dummyTouchKeyboard));
 	}
+}
 
-	void MainLoop::setTouchRecord() {
-		if (saltynxrecordScreenOrKeyboard != 0) {
-			uint8_t dummyTouchKeyboard = 1;
-			dmntchtWriteCheatProcessMemory(saltynxrecordScreenOrKeyboard, &dummyTouchKeyboard, sizeof(dummyTouchKeyboard));
-		}
+void MainLoop::setTouchRecord() {
+	if(saltynxrecordScreenOrKeyboard != 0) {
+		uint8_t dummyTouchKeyboard = 1;
+		dmntchtWriteCheatProcessMemory(saltynxrecordScreenOrKeyboard, &dummyTouchKeyboard, sizeof(dummyTouchKeyboard));
 	}
+}
 
-	void MainLoop::getSixAxisState(int32_t controller, ControllerData* state) {
-		nn::hid::SixAxisSensorState sensorState;
-	}
+void MainLoop::getSixAxisState(int32_t controller, ControllerData* state) {
+	nn::hid::SixAxisSensorState sensorState;
+}
 
-	void MainLoop::setSixAxisState(int32_t controller, ControllerData* state) {
-		nn::hid::SixAxisSensorState sensorState;
-	}
+void MainLoop::setSixAxisState(int32_t controller, ControllerData* state) {
+	nn::hid::SixAxisSensorState sensorState;
+}
 
-	void MainLoop::getTouchState(TouchAndKeyboardData* state) {
-		nn::hid::TouchScreenState16Touch touchSensorState;
-	}
+void MainLoop::getTouchState(TouchAndKeyboardData* state) {
+	nn::hid::TouchScreenState16Touch touchSensorState;
+}
 
-	void MainLoop::setTouchState(TouchAndKeyboardData* state) {
-		nn::hid::TouchScreenState16Touch touchSensorState;
-	}
+void MainLoop::setTouchState(TouchAndKeyboardData* state) {
+	nn::hid::TouchScreenState16Touch touchSensorState;
+}
 
-	void MainLoop::getKeyboardMouseState(TouchAndKeyboardData* state) {
-		nn::hid::KeyboardState keyboardSensorState;
-		nn::hid::MouseState mouseSensorState;
-	}
+void MainLoop::getKeyboardMouseState(TouchAndKeyboardData* state) {
+	nn::hid::KeyboardState keyboardSensorState;
+	nn::hid::MouseState mouseSensorState;
+}
 
-	void MainLoop::setKeyboardMouseState(TouchAndKeyboardData* state) {
-		nn::hid::KeyboardState keyboardSensorState;
-		nn::hid::MouseState mouseSensorState;
-	}
+void MainLoop::setKeyboardMouseState(TouchAndKeyboardData* state) {
+	nn::hid::KeyboardState keyboardSensorState;
+	nn::hid::MouseState mouseSensorState;
+}
 
 MainLoop::~MainLoop() {
 #ifdef __SWITCH__
@@ -939,11 +927,12 @@ MainLoop::~MainLoop() {
 	rc = hiddbgReleaseHdlsWorkBuffer();
 	hiddbgExit();
 
+	dmntchtExit();
+
 	viCloseDisplay(&disp);
 
 	pscPmModuleFinalize(&sleepModule);
 	pscPmModuleClose(&sleepModule);
-	eventClose(&sleepModule.event);
 #endif
 
 	// Make absolutely sure the app is unpaused on close

@@ -96,11 +96,6 @@ void __attribute__((weak)) __appInit(void) {
 	if(R_FAILED(rc))
 		fatalThrow(rc);
 
-	// DMNT:CHT
-	rc = dmntchtInitialize();
-	if(R_FAILED(rc))
-		fatalThrow(rc);
-
 	// Sleep mode handler
 	rc = pscmInitialize();
 	if(R_FAILED(rc))
@@ -156,7 +151,6 @@ void __attribute__((weak)) __appExit(void) {
 	setExit();
 	hiddbgExit();
 	pmdmntExit();
-	dmntchtExit();
 	pscmExit();
 	hidExit();
 	accountExit();
