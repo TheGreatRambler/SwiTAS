@@ -99,15 +99,21 @@ void MainLoop::mainLoopHandler() {
 					// Used to do accurate frame advance
 					FILE* offsets = fopen("/SaltySD/SwiTAS_SaltyPlugin_Offsets.hex", "rb");
 					if(offsets != NULL) {
-						fread(&saltynxFrameHasPassed, sizeof(uint64_t), 1, offsets);
-						fread(&saltynxLogStringIndex, sizeof(uint64_t), 1, offsets);
-						fread(&saltynxLogString, sizeof(uint64_t), 1, offsets);
-						fread(&saltynxSixAxisStateLeftJoycon, sizeof(uint64_t), 1, offsets);
-						fread(&saltynxSixAxisStateRightJoycon, sizeof(uint64_t), 1, offsets);
-						fread(&saltynxTouchscreenState, sizeof(uint64_t), 1, offsets);
-						fread(&saltynxSixAxisStateLeftJoyconBacklog, sizeof(uint64_t), 1, offsets);
-						fread(&saltynxSixAxisStateRightJoyconBacklog, sizeof(uint64_t), 1, offsets);
-						fread(&saltynxOriginalTouchscreenState, sizeof(uint64_t), 1, offsets);
+						fread(&saltynxframeHasPassed, sizeof(uint64_t), 1, offsets);
+						fread(&saltynxlogStringIndex, sizeof(uint64_t), 1, offsets);
+						fread(&saltynxlogString, sizeof(uint64_t), 1, offsets);
+						fread(&saltynxcontrollerToRecord, sizeof(uint64_t), 1, offsets);
+						fread(&saltynxsixAxisStateLeftJoycon, sizeof(uint64_t), 1, offsets);
+						fread(&saltynxsixAxisStateRightJoycon, sizeof(uint64_t), 1, offsets);
+						fread(&saltynxsixAxisStateLeftJoyconBacklog, sizeof(uint64_t), 1, offsets);
+						fread(&saltynxsixAxisStateRightJoyconBacklog, sizeof(uint64_t), 1, offsets);
+						fread(&saltynxrecordScreenOrKeyboard, sizeof(uint64_t), 1, offsets);
+						fread(&saltynxtouchscreenState, sizeof(uint64_t), 1, offsets);
+						fread(&saltynxtouchScreenStateBacklog, sizeof(uint64_t), 1, offsets);
+						fread(&saltynxkeyboardState, sizeof(uint64_t), 1, offsets);
+						fread(&saltynxkeyboardStateBacklog, sizeof(uint64_t), 1, offsets);
+						fread(&saltynxmouseState, sizeof(uint64_t), 1, offsets);
+						fread(&saltynxmouseStateBacklog, sizeof(uint64_t), 1, offsets);
 
 						fclose(offsets);
 					}
@@ -759,7 +765,7 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 
 void MainLoop::waitForVsync() {
 #ifdef __SWITCH__
-	if(isPaused || saltynxFrameHasPassed == 0) {
+	if(isPaused || saltynxframeHasPassed == 0) {
 		rc = eventWait(&vsyncEvent, UINT64_MAX);
 		if(R_FAILED(rc))
 			fatalThrow(rc);
@@ -768,7 +774,7 @@ void MainLoop::waitForVsync() {
 		LOGD << "Wait for vsync";
 		while(true) {
 			uint8_t frame;
-			rc = dmntchtReadCheatProcessMemory(saltynxFrameHasPassed, &frame, sizeof(frame));
+			rc = dmntchtReadCheatProcessMemory(saltynxframeHasPassed, &frame, sizeof(frame));
 			if(R_FAILED(rc)) {
 				fatalThrow(rc);
 			}
@@ -776,7 +782,7 @@ void MainLoop::waitForVsync() {
 			if(frame) {
 				// Clear the variable so we can wait for it again
 				uint8_t dummyFrame = false;
-				dmntchtWriteCheatProcessMemory(saltynxFrameHasPassed, &dummyFrame, sizeof(dummyFrame));
+				dmntchtWriteCheatProcessMemory(saltynxframeHasPassed, &dummyFrame, sizeof(dummyFrame));
 				return;
 			} else {
 				svcSleepThread(1000000 * 3);
@@ -866,6 +872,66 @@ void MainLoop::matchFirstControllerToTASController(uint8_t player) {
 	}
 #endif
 }
+
+void MainLoop::disableSixAxisModifying() {
+		if (saltynxcontrollerToRecord != 0) {
+			int32_t dummyControllerIndex = -1;
+			dmntchtWriteCheatProcessMemory(saltynxcontrollerToRecord, &dummyControllerIndex, sizeof(dummyControllerIndex));
+		}
+	}
+
+	void MainLoop::setSixAxisControllerRecord(int32_t controller) {
+		if (saltynxcontrollerToRecord != 0) {
+			dmntchtWriteCheatProcessMemory(saltynxcontrollerToRecord, &controller, sizeof(controller));
+		}
+	}
+
+	void MainLoop::disableKeyboardTouchModifying() {
+		if (saltynxrecordScreenOrKeyboard != 0) {
+			uint8_t dummyTouchKeyboard = 0;
+			dmntchtWriteCheatProcessMemory(saltynxrecordScreenOrKeyboard, &dummyTouchKeyboard, sizeof(dummyTouchKeyboard));
+		}
+	}
+
+	void MainLoop::setKeyboardRecord() {
+		if (saltynxrecordScreenOrKeyboard != 0) {
+			uint8_t dummyTouchKeyboard = 2;
+			dmntchtWriteCheatProcessMemory(saltynxrecordScreenOrKeyboard, &dummyTouchKeyboard, sizeof(dummyTouchKeyboard));
+		}
+	}
+
+	void MainLoop::setTouchRecord() {
+		if (saltynxrecordScreenOrKeyboard != 0) {
+			uint8_t dummyTouchKeyboard = 1;
+			dmntchtWriteCheatProcessMemory(saltynxrecordScreenOrKeyboard, &dummyTouchKeyboard, sizeof(dummyTouchKeyboard));
+		}
+	}
+
+	void MainLoop::getSixAxisState(int32_t controller, ControllerData* state) {
+		nn::hid::SixAxisSensorState sensorState;
+	}
+
+	void MainLoop::setSixAxisState(int32_t controller, ControllerData* state) {
+		nn::hid::SixAxisSensorState sensorState;
+	}
+
+	void MainLoop::getTouchState(TouchAndKeyboardData* state) {
+		nn::hid::TouchScreenState16Touch touchSensorState;
+	}
+
+	void MainLoop::setTouchState(TouchAndKeyboardData* state) {
+		nn::hid::TouchScreenState16Touch touchSensorState;
+	}
+
+	void MainLoop::getKeyboardMouseState(TouchAndKeyboardData* state) {
+		nn::hid::KeyboardState keyboardSensorState;
+		nn::hid::MouseState mouseSensorState;
+	}
+
+	void MainLoop::setKeyboardMouseState(TouchAndKeyboardData* state) {
+		nn::hid::KeyboardState keyboardSensorState;
+		nn::hid::MouseState mouseSensorState;
+	}
 
 MainLoop::~MainLoop() {
 #ifdef __SWITCH__

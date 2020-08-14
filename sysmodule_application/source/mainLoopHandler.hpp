@@ -11,6 +11,7 @@
 
 #ifdef __SWITCH__
 #include "dmntcht/dmntcht.hpp"
+#include "../saltynx_plugin/source/sdkTypes.hpp"
 #include <plog/Log.h>
 #include <switch.h>
 #endif
@@ -21,6 +22,7 @@
 
 #include "PointerChainParser.hpp"
 #include "controller.hpp"
+#include "helpers.hpp"
 #include "gui.hpp"
 #include "scripting/luaScripting.hpp"
 #include "sharedNetworkCode/networkInterface.hpp"
@@ -66,15 +68,21 @@ private:
 	uint64_t lastNanoseconds = 0;
 	int lastFrameAttempt     = 0;
 
-	uint64_t saltynxFrameHasPassed;
-	uint64_t saltynxLogStringIndex;
-	uint64_t saltynxLogString;
-	uint64_t saltynxSixAxisStateLeftJoycon;
-	uint64_t saltynxSixAxisStateRightJoycon;
-	uint64_t saltynxTouchscreenState;
-	uint64_t saltynxSixAxisStateLeftJoyconBacklog;
-	uint64_t saltynxSixAxisStateRightJoyconBacklog;
-	uint64_t saltynxOriginalTouchscreenState;
+	uint64_t saltynxframeHasPassed = 0;
+	uint64_t saltynxlogStringIndex = 0;
+	uint64_t saltynxlogString = 0;
+	uint64_t saltynxcontrollerToRecord = 0;
+	uint64_t saltynxsixAxisStateLeftJoycon = 0;
+	uint64_t saltynxsixAxisStateRightJoycon = 0;
+	uint64_t saltynxsixAxisStateLeftJoyconBacklog = 0;
+	uint64_t saltynxsixAxisStateRightJoyconBacklog = 0;
+	uint64_t saltynxrecordScreenOrKeyboard = 0;
+	uint64_t saltynxtouchscreenState = 0;
+	uint64_t saltynxtouchScreenStateBacklog = 0;
+	uint64_t saltynxkeyboardState = 0;
+	uint64_t saltynxkeyboardStateBacklog = 0;
+	uint64_t saltynxmouseState = 0;
+	uint64_t saltynxmouseStateBacklog = 0;
 #endif
 
 #ifdef YUZU
@@ -97,36 +105,9 @@ private:
 
 	uint8_t isPaused = false;
 
-	void readFullFileData(FILE* file, void* bufPtr, int size) {
-		int sizeActuallyRead = 0;
-		uint8_t* buf         = (uint8_t*)bufPtr;
-
-		while(sizeActuallyRead != size) {
-			int bytesRead = fread(&buf[sizeActuallyRead], size - sizeActuallyRead, 1, file);
-			sizeActuallyRead += bytesRead;
-		}
-	}
-
-	void replaceInString(std::string input, std::string initial, std::string final) {
-		int index;
-		while((index = input.find(initial)) != std::string::npos) {
-			input.replace(index, final.length(), final);
-		}
-	}
-
 #ifdef __SWITCH__
 	static char* getAppName(u64 application_id);
 #endif
-
-	// https://stackoverflow.com/questions/2896600/how-to-replace-all-occurrences-of-a-character-in-string
-	std::string ReplaceAll(std::string str, const std::string& from, const std::string& to) {
-		size_t start_pos = 0;
-		while((start_pos = str.find(from, start_pos)) != std::string::npos) {
-			str.replace(start_pos, from.length(), to);
-			start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
-		}
-		return str;
-	}
 
 	void handleNetworkUpdates();
 	void sendGameInfo();
@@ -148,14 +129,6 @@ private:
 
 	template <typename T> std::string memoryToString(std::vector<uint8_t>& bytes) {
 		return std::to_string(*(T*)bytes.data());
-	}
-
-	std::string getJsonElement(uint8_t tabs, std::string key, std::string value) {
-		return std::string(tabs, '\t') + "\"" + key + "\": \"" + value + "\",\n";
-	}
-
-	std::string getJsonElementNum(uint8_t tabs, std::string key, std::string value) {
-		return std::string(tabs, '\t') + "\"" + key + "\": " + value + ",\n";
 	}
 
 	void pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, uint8_t autoAdvance, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex);
@@ -193,6 +166,18 @@ private:
 	// controllers. Otherwise, it sets the number of hid:dbg controllers
 	void setControllerNumber(uint8_t numOfControllers);
 	uint8_t getNumControllers();
+
+	void disableSixAxisModifying();
+	void setSixAxisControllerRecord(int32_t controller);
+	void disableKeyboardTouchModifying();
+	void setKeyboardRecord();
+	void setTouchRecord();
+	void getSixAxisState(int32_t controller, ControllerData* state);
+	void setSixAxisState(int32_t controller, ControllerData* state);
+	void getTouchState(TouchAndKeyboardData* state);
+	void setTouchState(TouchAndKeyboardData* state);
+	void getKeyboardMouseState(TouchAndKeyboardData* state);
+	void setKeyboardMouseState(TouchAndKeyboardData* state);
 
 	uint8_t finalTasShouldRun;
 	void runFinalTas(std::vector<std::string> scriptPaths);

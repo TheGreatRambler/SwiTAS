@@ -21,9 +21,7 @@ uint64_t ticksToNanoseconds(uint64_t tick) {
 
 // Print log info
 uint8_t dumpDebugInfo = true;
-// Allow SwiTAS to edit the motion sent to the game
-uint8_t spoofMotionRequests = false;
-// This needs to be set to spoof
+// This needs to be set to spoof, turned off for testing
 uint8_t recordInputs = false;
 
 uint8_t frameHasPassed = false;
@@ -34,6 +32,11 @@ char logString[1000];
 uint8_t wasJustLeft;
 uint8_t wasJustTASController;
 int32_t lastControllerId;
+
+// This is the controller that needs to record, all other controllers get their state
+// From the exposed sensor states
+// If -1, every controller records
+nn::hid::NpadIdType controllerToRecord = -1;
 
 nn::hid::SixAxisSensorHandle sixAxisHandlesLeftJoycon[8]  = { 0 };
 nn::hid::SixAxisSensorHandle sixAxisHandlesRightJoycon[8] = { 0 };
@@ -52,6 +55,10 @@ nn::hid::SixAxisSensorState sixAxisStateRightJoyconBacklog[8][nn::hid::SixAxisSe
 
 // Updated with the real values, to spoof touch values better
 uint64_t touchScreenLastAccessTime = ticksToNanoseconds(_ZN2nn2os13GetSystemTickEv());
+
+// Whether to record the touchscreen or the keyboard (and mouse)
+// Zero means record both, 1 means touchscreen, 2 means keyboard and mouse
+uint8_t recordScreenOrKeyboard = 0;
 
 int32_t touchScreenBacklogSize                                                              = 0;
 nn::hid::TouchScreenState16Touch touchScreenStateBacklog[nn::hid::TouchScreenStateCountMax] = { 0 };
@@ -243,7 +250,7 @@ void GetSixAxisSensorState(nn::hid::SixAxisSensorState* state, const nn::hid::Si
 			if(sixAxisHandlesLeftJoycon[i] == handle) {
 				_ZN2nn3hid21GetSixAxisSensorStateEPNS0_18SixAxisSensorStateERKNS0_19SixAxisSensorHandleE(state, handle);
 
-				if(spoofMotionRequests) {
+				if(controllerToRecord != i && controllerToRecord != -1) {
 					fixMotionState(&sixAxisStateLeftJoycon[i], state);
 					memcpy(state, &sixAxisStateLeftJoycon[i], sizeof(nn::hid::SixAxisSensorState));
 				}
@@ -260,7 +267,7 @@ void GetSixAxisSensorState(nn::hid::SixAxisSensorState* state, const nn::hid::Si
 			if(sixAxisHandlesRightJoycon[i] == handle) {
 				_ZN2nn3hid21GetSixAxisSensorStateEPNS0_18SixAxisSensorStateERKNS0_19SixAxisSensorHandleE(state, handle);
 
-				if(spoofMotionRequests) {
+				if(controllerToRecord != i && controllerToRecord != -1) {
 					fixMotionState(&sixAxisStateRightJoycon[i], state);
 					memcpy(state, &sixAxisStateRightJoycon[i], sizeof(nn::hid::SixAxisSensorState));
 				}
@@ -326,7 +333,7 @@ void GetTouchScreenState1Touch(nn::hid::TouchScreenState1Touch* state) {
 	if(recordInputs) {
 		_ZN2nn3hid19GetTouchScreenStateILm1EEEvPNS0_16TouchScreenStateIXT_EEE(state);
 
-		if(spoofMotionRequests) {
+		if(recordScreenOrKeyboard == 2) {
 			// Fix state and send to game
 			fixTouchState(&touchscreenState, state, 1);
 			memcpy(state, &touchscreenState, sizeof(nn::hid::TouchScreenState1Touch));
@@ -417,16 +424,44 @@ int main(int argc, char* argv[]) {
 	const char* pointersPath = "sdmc:/SaltySD/SwiTAS_SaltyPlugin_Offsets.hex";
 	FILE* offsets            = SaltySDCore_fopen(pointersPath, "wb");
 
-	// Need to revamp these pointers
+	// Frame has passed indicator
 	writePointerToFile(&frameHasPassed, offsets);
+
+	// Log handling
 	writePointerToFile(&logStringIndex, offsets);
 	writePointerToFile(&logString, offsets);
+
+	// Controller to record from the system
+	writePointerToFile(&controllerToRecord, offsets);
+
+	// State to send to six axis
 	writePointerToFile(&sixAxisStateLeftJoycon, offsets);
 	writePointerToFile(&sixAxisStateRightJoycon, offsets);
-	writePointerToFile(&touchscreenState, offsets);
+
+	// Recorded inputs of six axis
 	writePointerToFile(&sixAxisStateLeftJoyconBacklog, offsets);
 	writePointerToFile(&sixAxisStateRightJoyconBacklog, offsets);
+
+	// Whether to record touch screen or keyboard
+	writePointerToFile(&recordScreenOrKeyboard, offsets);
+	
+	// State to send to touch screen
+	writePointerToFile(&touchscreenState, offsets);
+
+	// Recorded inputs of touch screen
 	writePointerToFile(&touchScreenStateBacklog, offsets);
+
+	// State to send to keyboard
+	writePointerToFile(&keyboardState, offsets);
+
+	// Recorded inputs of keyboard
+	writePointerToFile(&keyboardStateBacklog, offsets);
+
+	// State to send to mouse
+	writePointerToFile(&mouseState, offsets);
+
+	// Recorded inputs of mouse
+	writePointerToFile(&mouseStateBacklog, offsets);
 
 	SaltySDCore_fclose(offsets);
 
