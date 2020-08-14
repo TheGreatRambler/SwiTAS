@@ -890,18 +890,6 @@ void DataProcessing::setNumberValuesJoystick(FrameNum frame, ControllerNumberVal
 	case ControllerNumberValues::RIGHT_Y:
 		getInputsList()->at(frame)->RS_Y = value;
 		break;
-	case ControllerNumberValues::TOUCH_X_1:
-		getInputsList()->at(frame)->TOUCH_X_1 = value;
-		break;
-	case ControllerNumberValues::TOUCH_Y_1:
-		getInputsList()->at(frame)->TOUCH_Y_1 = value;
-		break;
-	case ControllerNumberValues::TOUCH_X_2:
-		getInputsList()->at(frame)->TOUCH_X_2 = value;
-		break;
-	case ControllerNumberValues::TOUCH_Y_2:
-		getInputsList()->at(frame)->TOUCH_Y_2 = value;
-		break;
 	case ControllerNumberValues::ACCEL_X_LEFT:
 	case ControllerNumberValues::ACCEL_Y_LEFT:
 	case ControllerNumberValues::ACCEL_Z_LEFT:
@@ -987,10 +975,6 @@ void DataProcessing::setNumberValuesMotion(FrameNum frame, ControllerNumberValue
 	case ControllerNumberValues::LEFT_Y:
 	case ControllerNumberValues::RIGHT_X:
 	case ControllerNumberValues::RIGHT_Y:
-	case ControllerNumberValues::TOUCH_X_1:
-	case ControllerNumberValues::TOUCH_Y_1:
-	case ControllerNumberValues::TOUCH_X_2:
-	case ControllerNumberValues::TOUCH_Y_2:
 		break;
 	}
 
@@ -1011,18 +995,6 @@ int16_t DataProcessing::getNumberValuesJoystick(FrameNum frame, ControllerNumber
 		break;
 	case ControllerNumberValues::RIGHT_Y:
 		return getInputsList()->at(frame)->RS_Y;
-		break;
-	case ControllerNumberValues::TOUCH_X_1:
-		return getInputsList()->at(frame)->TOUCH_X_1;
-		break;
-	case ControllerNumberValues::TOUCH_Y_1:
-		return getInputsList()->at(frame)->TOUCH_Y_1;
-		break;
-	case ControllerNumberValues::TOUCH_X_2:
-		return getInputsList()->at(frame)->TOUCH_X_2;
-		break;
-	case ControllerNumberValues::TOUCH_Y_2:
-		return getInputsList()->at(frame)->TOUCH_Y_2;
 		break;
 	case ControllerNumberValues::ACCEL_X_LEFT:
 	case ControllerNumberValues::ACCEL_Y_LEFT:
@@ -1106,10 +1078,6 @@ float DataProcessing::getNumberValuesMotion(FrameNum frame, ControllerNumberValu
 	case ControllerNumberValues::LEFT_Y:
 	case ControllerNumberValues::RIGHT_X:
 	case ControllerNumberValues::RIGHT_Y:
-	case ControllerNumberValues::TOUCH_X_1:
-	case ControllerNumberValues::TOUCH_Y_1:
-	case ControllerNumberValues::TOUCH_X_2:
-	case ControllerNumberValues::TOUCH_Y_2:
 		break;
 	}
 }
@@ -1127,18 +1095,6 @@ int16_t DataProcessing::getNumberValuesSpecificJoystick(FrameNum frame, Controll
 		break;
 	case ControllerNumberValues::RIGHT_Y:
 		return getControllerData(player, savestateHookNum, branch, frame)->RS_Y;
-		break;
-	case ControllerNumberValues::TOUCH_X_1:
-		return getControllerData(player, savestateHookNum, branch, frame)->TOUCH_X_1;
-		break;
-	case ControllerNumberValues::TOUCH_Y_1:
-		return getControllerData(player, savestateHookNum, branch, frame)->TOUCH_Y_1;
-		break;
-	case ControllerNumberValues::TOUCH_X_2:
-		return getControllerData(player, savestateHookNum, branch, frame)->TOUCH_X_2;
-		break;
-	case ControllerNumberValues::TOUCH_Y_2:
-		return getControllerData(player, savestateHookNum, branch, frame)->TOUCH_Y_2;
 		break;
 	case ControllerNumberValues::ACCEL_X_LEFT:
 	case ControllerNumberValues::ACCEL_Y_LEFT:
@@ -1222,10 +1178,6 @@ float DataProcessing::getNumberValuesSpecificMotion(FrameNum frame, ControllerNu
 	case ControllerNumberValues::LEFT_Y:
 	case ControllerNumberValues::RIGHT_X:
 	case ControllerNumberValues::RIGHT_Y:
-	case ControllerNumberValues::TOUCH_X_1:
-	case ControllerNumberValues::TOUCH_Y_1:
-	case ControllerNumberValues::TOUCH_X_2:
-	case ControllerNumberValues::TOUCH_Y_2:
 		break;
 	}
 }

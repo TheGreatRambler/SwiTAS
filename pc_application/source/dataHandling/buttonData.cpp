@@ -268,30 +268,6 @@ FrameNum ButtonData::textToFrames(DataProcessing* dataProcessing, std::string te
 		} else {
 			continue;
 		}
-
-		currentIndexInParts++;
-		if(parts.size() == currentIndexInParts)
-			continue;
-
-		std::vector<std::string> touch1Parts = HELPERS::splitString(parts[currentIndexInParts], ';');
-		if(touch1Parts.size() == 2) {
-			dataProcessing->setNumberValuesJoystick(thisDataIndex, ControllerNumberValues::TOUCH_X_1, strtol(touch1Parts[0].c_str(), nullptr, 10));
-			dataProcessing->setNumberValuesJoystick(thisDataIndex, ControllerNumberValues::TOUCH_Y_1, strtol(touch1Parts[1].c_str(), nullptr, 10));
-		} else {
-			continue;
-		}
-
-		currentIndexInParts++;
-		if(parts.size() == currentIndexInParts)
-			continue;
-
-		std::vector<std::string> touch2Parts = HELPERS::splitString(parts[currentIndexInParts], ';');
-		if(touch2Parts.size() == 2) {
-			dataProcessing->setNumberValuesJoystick(thisDataIndex, ControllerNumberValues::TOUCH_X_2, strtol(touch2Parts[0].c_str(), nullptr, 10));
-			dataProcessing->setNumberValuesJoystick(thisDataIndex, ControllerNumberValues::TOUCH_Y_2, strtol(touch2Parts[1].c_str(), nullptr, 10));
-		} else {
-			continue;
-		}
 	}
 
 	return lastReadFrame;
@@ -415,10 +391,6 @@ void ButtonData::transferControllerData(ControllerData src, std::shared_ptr<Cont
 	dest->LS_Y            = src.LS_Y;
 	dest->RS_X            = src.RS_X;
 	dest->RS_Y            = src.RS_Y;
-	dest->TOUCH_X_1       = src.TOUCH_X_1;
-	dest->TOUCH_Y_1       = src.TOUCH_Y_1;
-	dest->TOUCH_X_2       = src.TOUCH_X_2;
-	dest->TOUCH_Y_2       = src.TOUCH_Y_2;
 	dest->ACCEL_X_LEFT    = src.ACCEL_X_LEFT;
 	dest->ACCEL_Y_LEFT    = src.ACCEL_Y_LEFT;
 	dest->ACCEL_Z_LEFT    = src.ACCEL_Z_LEFT;
@@ -450,10 +422,6 @@ bool ButtonData::isEmptyControllerData(std::shared_ptr<ControllerData> data) {
 		(data->LS_Y            == emptyData.LS_Y)            &&
 		(data->RS_X            == emptyData.RS_X)            &&
 		(data->RS_Y            == emptyData.RS_Y)            &&
-		(data->TOUCH_X_1       == emptyData.TOUCH_X_1)       &&
-		(data->TOUCH_Y_1       == emptyData.TOUCH_Y_1)       &&
-		(data->TOUCH_X_2       == emptyData.TOUCH_X_2)       &&
-		(data->TOUCH_Y_2       == emptyData.TOUCH_Y_2)       &&
 		(data->ACCEL_X_LEFT    == emptyData.ACCEL_X_LEFT)    &&
 		(data->ACCEL_Y_LEFT    == emptyData.ACCEL_Y_LEFT)    &&
 		(data->ACCEL_Z_LEFT    == emptyData.ACCEL_Z_LEFT)    &&

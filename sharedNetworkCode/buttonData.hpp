@@ -71,12 +71,6 @@ struct ControllerData : public zpp::serializer::polymorphic {
 	float ANGLE_X_RIGHT = 0;
 	float ANGLE_Y_RIGHT = 0;
 	float ANGLE_Z_RIGHT = 0;
-	// Touchscreen data
-	uint8_t numberOfTouches = 0;
-	uint16_t TOUCH_X_1      = 0;
-	uint16_t TOUCH_Y_1      = 0;
-	uint16_t TOUCH_X_2      = 0;
-	uint16_t TOUCH_Y_2      = 0;
 	// State of the frame, mostly for the editor
 	uint8_t frameState = 0;
 
@@ -91,7 +85,6 @@ struct ControllerData : public zpp::serializer::polymorphic {
 				self.ACCEL_X_RIGHT, self.ACCEL_Y_RIGHT, self.ACCEL_Z_RIGHT,
 				self.GYRO_X_RIGHT, self.GYRO_Y_RIGHT, self.GYRO_Z_RIGHT,
 				self.ANGLE_X_RIGHT, self.ANGLE_Y_RIGHT, self.ANGLE_Z_RIGHT,
-				self.TOUCH_X_1, self.TOUCH_Y_1, self.TOUCH_X_2, self.TOUCH_Y_2,
 				self.frameState);
 		// clang-format on
 	}
