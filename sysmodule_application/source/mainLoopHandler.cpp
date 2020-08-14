@@ -49,6 +49,10 @@ MainLoop::MainLoop() {
 	rc = hiddbgAttachHdlsWorkBuffer();
 	if(R_FAILED(rc))
 		fatalThrow(rc);
+
+	rc = dmntchtForceOpenCheatProcess();
+	if(R_FAILED(rc))
+		fatalThrow(rc);
 #endif
 
 #ifdef YUZU

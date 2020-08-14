@@ -41,20 +41,26 @@ nn::hid::SixAxisSensorHandle sixAxisHandlesRightJoycon[8] = { 0 };
 // Update state of left and right joycons along with the touchscreen
 nn::hid::SixAxisSensorState sixAxisStateLeftJoycon[8]  = { 0 };
 nn::hid::SixAxisSensorState sixAxisStateRightJoycon[8] = { 0 };
-nn::hid::TouchScreenStateMaxTouch touchscreenState     = { 0 };
+nn::hid::TouchScreenState16Touch touchscreenState      = { 0 };
+nn::hid::KeyboardState keyboardState                   = { 0 };
+nn::hid::MouseState mouseState                         = { 0 };
 
 int32_t leftJoyconBacklogSize                                                                      = 0;
 int32_t rightJoyconBacklogSize                                                                     = 0;
 nn::hid::SixAxisSensorState sixAxisStateLeftJoyconBacklog[8][nn::hid::SixAxisSensorStateCountMax]  = { 0 };
 nn::hid::SixAxisSensorState sixAxisStateRightJoyconBacklog[8][nn::hid::SixAxisSensorStateCountMax] = { 0 };
 
-// Updated with the real values, for recording purposes
-uint64_t lastAccessTime                                    = ticksToNanoseconds(_ZN2nn2os13GetSystemTickEv());
+// Updated with the real values, to spoof touch values better
+uint64_t touchScreenLastAccessTime = ticksToNanoseconds(_ZN2nn2os13GetSystemTickEv());
+
+int32_t touchScreenBacklogSize                                                              = 0;
 nn::hid::TouchScreenState16Touch touchScreenStateBacklog[nn::hid::TouchScreenStateCountMax] = { 0 };
 
-nn::hid::KeyboardState keyboardStateBacklog[nn::hid::KeyboardStateCountMax] = {0};
+int32_t keyboardBacklogSize                                                 = 0;
+nn::hid::KeyboardState keyboardStateBacklog[nn::hid::KeyboardStateCountMax] = { 0 };
 
-nn::hid::MouseState mouseStateBacklog[nn::hid::MouseStateCountMax] = {0};
+int32_t mouseBacklogSize                                           = 0;
+nn::hid::MouseState mouseStateBacklog[nn::hid::MouseStateCountMax] = { 0 };
 
 // ONLY values we will TAS
 /*
@@ -77,40 +83,79 @@ uint8_t canWriteToLog() {
 	return logStringIndex < (sizeof(logString) - 100);
 }
 
-void moveLeftBacklog(int32_t i) {
+void moveLeftBacklog(int32_t i, nn::hid::SixAxisSensorState* state) {
 	// Get state as normal and move back backlog by 1
 	memmove(&sixAxisStateLeftJoyconBacklog[i][1], &sixAxisStateLeftJoyconBacklog[i][0], sizeof(nn::hid::SixAxisSensorState) * (nn::hid::SixAxisSensorStateCountMax - 1));
 	if(leftJoyconBacklogSize != nn::hid::SixAxisSensorStateCountMax) {
 		leftJoyconBacklogSize++;
 	}
+
+	memcpy(&sixAxisStateLeftJoyconBacklog[i][0], state, sizeof(nn::hid::SixAxisSensorState));
 }
 
-void moveRightBacklog(int32_t i) {
+void moveRightBacklog(int32_t i, nn::hid::SixAxisSensorState* state) {
 	// Get state as normal and move back backlog by 1
 	memmove(&sixAxisStateRightJoyconBacklog[i][1], &sixAxisStateRightJoyconBacklog[i][0], sizeof(nn::hid::SixAxisSensorState) * (nn::hid::SixAxisSensorStateCountMax - 1));
 	if(rightJoyconBacklogSize != nn::hid::SixAxisSensorStateCountMax) {
 		rightJoyconBacklogSize++;
 	}
+
+	memcpy(&sixAxisStateRightJoyconBacklog[i][0], state, sizeof(nn::hid::SixAxisSensorState));
 }
 
-void fixMotionState(nn::hid::SixAxisSensorState& dest, nn::hid::SixAxisSensorState& orig) {
-	dest.deltaTimeNanoSeconds = orig.deltaTimeNanoSeconds;
-	dest.samplingNumber       = orig.samplingNumber;
+void moveTouchBacklog(void* state, int32_t numOfMaxTouches) {
+	// Get state as normal and move back backlog by 1
+	memmove(&touchScreenStateBacklog[1], &touchScreenStateBacklog[0], sizeof(nn::hid::TouchScreenState16Touch) * (nn::hid::TouchScreenStateCountMax - 1));
+	if(touchScreenBacklogSize != nn::hid::TouchScreenStateCountMax) {
+		touchScreenBacklogSize++;
+	}
+
+	// Header is 16 bytes
+	size_t sizeOfStruct = 16 + sizeof(nn::hid::TouchState) * numOfMaxTouches;
+	memcpy(&touchScreenStateBacklog[0], state, sizeOfStruct);
+	if(touchScreenStateBacklog[0].count > numOfMaxTouches) {
+		touchScreenStateBacklog[0].count = numOfMaxTouches;
+	}
+}
+
+void moveMouseBacklog(nn::hid::MouseState* state) {
+	// Get state as normal and move back backlog by 1
+	memmove(&mouseStateBacklog[1], &mouseStateBacklog[0], sizeof(nn::hid::MouseState) * (nn::hid::MouseStateCountMax - 1));
+	if(mouseBacklogSize != nn::hid::MouseStateCountMax) {
+		mouseBacklogSize++;
+	}
+
+	memcpy(&mouseStateBacklog[0], state, sizeof(nn::hid::MouseState));
+}
+
+void moveKeyboardBacklog(nn::hid::KeyboardState* state) {
+	// Get state as normal and move back backlog by 1
+	memmove(&keyboardStateBacklog[1], &keyboardStateBacklog[0], sizeof(nn::hid::KeyboardState) * (nn::hid::KeyboardStateCountMax - 1));
+	if(keyboardBacklogSize != nn::hid::KeyboardStateCountMax) {
+		keyboardBacklogSize++;
+	}
+
+	memcpy(&keyboardStateBacklog[0], state, sizeof(nn::hid::KeyboardState));
+}
+
+void fixMotionState(nn::hid::SixAxisSensorState* dest, nn::hid::SixAxisSensorState* orig) {
+	dest->deltaTimeNanoSeconds = orig->deltaTimeNanoSeconds;
+	dest->samplingNumber       = orig->samplingNumber;
 	// System default
-	dest.direction.x = { 1.0, 0.0, 0.0 };
-	dest.direction.y = { 0.0, 1.0, 0.0 };
-	dest.direction.z = { 0.0, 0.0, 1.0 };
+	dest->direction.x = { 1.0, 0.0, 0.0 };
+	dest->direction.y = { 0.0, 1.0, 0.0 };
+	dest->direction.z = { 0.0, 0.0, 1.0 };
 }
 
-void fixTouchState1Touch(nn::hid::TouchScreenStateMaxTouch& dest, nn::hid::TouchScreenState1Touch& orig) {
-	dest.count          = orig.count;
-	dest.samplingNumber = orig.samplingNumber;
+void fixTouchState(nn::hid::TouchScreenState16Touch* dest, void* orig, int32_t numOfMaxTouches) {
+	nn::hid::TouchScreenState16Touch* orig16Touch = (nn::hid::TouchScreenState16Touch*)orig;
+	dest->samplingNumber                          = orig16Touch->samplingNumber;
 
 	uint64_t currentNanosecond = ticksToNanoseconds(_ZN2nn2os13GetSystemTickEv());
-	uint64_t accessDuration    = currentNanosecond - lastAccessTime;
-	lastAccessTime             = currentNanosecond;
+	uint64_t accessDuration    = currentNanosecond - touchScreenLastAccessTime;
+	touchScreenLastAccessTime  = currentNanosecond;
 
-	for(int32_t i = 0; i < dest.count; i++) {
+	for(int32_t i = 0; i < dest->count; i++) {
 		// TODO the following need to be made into defaults
 		/*
 		dest.touches[i].attributes = 0;
@@ -124,21 +169,25 @@ void fixTouchState1Touch(nn::hid::TouchScreenStateMaxTouch& dest, nn::hid::Touch
 	}
 }
 
-/*
-void setTouchState(nn::hid::TouchScreenState& dest, nn::hid::TouchState[nn::hid::TouchStateCountMax] states, int32_t numOfStates) {
-	memcpy(&dest.touches, states, sizeof(nn::hid::TouchState) * numOfStates);
-	dest.count          = numOfStates;
-	dest.samplingNumber = orig.samplingNumber;
-
-	// Need to test these data points by holding my finger on the switch, todo
-	dest[0].attributes           = orig[0].attributes;
-	dest[0].deltaTimeNanoSeconds = orig[0].deltaTimeNanoSeconds;
-	dest[0].diameterX            = orig[0].diameterX;
-	dest[0].diameterY            = orig[0].diameterY;
-	dest[0].fingerId             = 0;
-	dest[0].rotationAngle        = orig[0].rotationAngle;
+void applyToStandardTouchBacklog(void* outStates, int32_t numOfMaxTouches) {
+	// Header is 16 bytes
+	size_t sizeOf1Struct = 16 + sizeof(nn::hid::TouchState) * numOfMaxTouches;
+	for(int32_t i = 0; i < touchScreenBacklogSize; i++) {
+		memcpy(outStates + sizeOf1Struct * i, &touchScreenStateBacklog[i], sizeOf1Struct);
+	}
 }
-*/
+
+void fixKeyboardState(nn::hid::KeyboardState* dest, nn::hid::KeyboardState* orig) {
+	dest->samplingNumber = orig->samplingNumber;
+	// Keyboard is always listed as connected
+	dest->attributes |= (int32_t)nn::hid::KeyboardAttribute::IsConnected;
+}
+
+void fixMouseState(nn::hid::MouseState* dest, nn::hid::MouseState* orig) {
+	dest->samplingNumber = orig->samplingNumber;
+	// Mouse is always listed as connected
+	dest->attributes |= (int32_t)nn::hid::MouseAttribute::IsConnected;
+}
 
 // Motion spoofing
 
@@ -195,12 +244,11 @@ void GetSixAxisSensorState(nn::hid::SixAxisSensorState* state, const nn::hid::Si
 				_ZN2nn3hid21GetSixAxisSensorStateEPNS0_18SixAxisSensorStateERKNS0_19SixAxisSensorHandleE(state, handle);
 
 				if(spoofMotionRequests) {
-					fixMotionState(sixAxisStateLeftJoycon[i], *state);
+					fixMotionState(&sixAxisStateLeftJoycon[i], state);
 					memcpy(state, &sixAxisStateLeftJoycon[i], sizeof(nn::hid::SixAxisSensorState));
 				}
 
-				moveLeftBacklog(i);
-				memcpy(&sixAxisStateLeftJoyconBacklog[i][0], state, sizeof(nn::hid::SixAxisSensorState));
+				moveLeftBacklog(i, state);
 
 				wasJustLeft          = true;
 				wasJustTASController = true;
@@ -213,12 +261,11 @@ void GetSixAxisSensorState(nn::hid::SixAxisSensorState* state, const nn::hid::Si
 				_ZN2nn3hid21GetSixAxisSensorStateEPNS0_18SixAxisSensorStateERKNS0_19SixAxisSensorHandleE(state, handle);
 
 				if(spoofMotionRequests) {
-					fixMotionState(sixAxisStateRightJoycon[i], *state);
+					fixMotionState(&sixAxisStateRightJoycon[i], state);
 					memcpy(state, &sixAxisStateRightJoycon[i], sizeof(nn::hid::SixAxisSensorState));
 				}
 
-				moveRightBacklog(i);
-				memcpy(&sixAxisStateRightJoyconBacklog[i][0], state, sizeof(nn::hid::SixAxisSensorState));
+				moveRightBacklog(i, state);
 
 				wasJustLeft          = false;
 				wasJustTASController = true;
@@ -269,65 +316,34 @@ int32_t GetSixAxisSensorStates2(nn::hid::SixAxisSensorState* outStates, int32_t 
 
 /* nn::hid::IsSixAxisSensorAtRest(nn::hid::SixAxisSensorHandle const&) */
 int32_t IsSixAxisSensorAtRest(const nn::hid::SixAxisSensorHandle& param_1) {
-	return _ZN2nn3hid21IsSixAxisSensorAtRestERKNS0_19SixAxisSensorHandleE(param_1);
-}
-
-/* nn::hid::StartSixAxisSensor(nn::hid::ConsoleSixAxisSensorHandle const&) */
-void StartSixAxisSensor1(const nn::hid::ConsoleSixAxisSensorHandle& param_1) {
-	_ZN2nn3hid18StartSixAxisSensorERKNS0_26ConsoleSixAxisSensorHandleE(param_1);
-}
-
-/* nn::hid::StartSixAxisSensor(nn::hid::SixAxisSensorHandle const&) */
-void StartSixAxisSensor2(const nn::hid::SixAxisSensorHandle& param_1) {
-	// Standard used by games
-	_ZN2nn3hid18StartSixAxisSensorERKNS0_19SixAxisSensorHandleE(param_1);
-}
-
-/* nn::hid::StopSixAxisSensor(nn::hid::ConsoleSixAxisSensorHandle const&) */
-void StopSixAxisSensor1(const nn::hid::ConsoleSixAxisSensorHandle& param_1) {
-	_ZN2nn3hid17StopSixAxisSensorERKNS0_26ConsoleSixAxisSensorHandleE(param_1);
-}
-
-/* nn::hid::StopSixAxisSensor(nn::hid::SixAxisSensorHandle const&) */
-void StopSixAxisSensor2(const nn::hid::SixAxisSensorHandle& param_1) {
-	_ZN2nn3hid17StopSixAxisSensorERKNS0_19SixAxisSensorHandleE(param_1);
+	return false;
+	// return _ZN2nn3hid21IsSixAxisSensorAtRestERKNS0_19SixAxisSensorHandleE(param_1);
 }
 
 // Touch screen spoofing
 // void nn::hid::GetTouchScreenState (TouchScreenState< N > *pOutValue)
 void GetTouchScreenState1Touch(nn::hid::TouchScreenState1Touch* state) {
-
-	// Return the most recent state
-	// Each state can have multiple touches, indicated by the template
-	// The touches are an array within the struct
-	// It is an option just to handle the largest, 16
-	// You can have up to 16 touches at a time
-	// When called, set `count` to the number of TASed touchscreen inputs
-	// The internal array is always as large as how it was defined, so likely 16
-	// Just set the first touch state in the array and set count to 1 to TAS
-	// May support multiple touches, I dunno
-
 	if(recordInputs) {
 		_ZN2nn3hid19GetTouchScreenStateILm1EEEvPNS0_16TouchScreenStateIXT_EEE(state);
 
-		// This will cut off some of the touches
-		memcpy(&originalTouchscreenState, state, sizeof(nn::hid::TouchScreenState1Touch));
-
 		if(spoofMotionRequests) {
 			// Fix state and send to game
-			fixTouchState1Touch(touchscreenState, *state);
+			fixTouchState(&touchscreenState, state, 1);
 			memcpy(state, &touchscreenState, sizeof(nn::hid::TouchScreenState1Touch));
 		}
 
+		moveTouchBacklog(state, 1);
+
 		return;
-	} else {
-		_ZN2nn3hid19GetTouchScreenStateILm1EEEvPNS0_16TouchScreenStateIXT_EEE(state);
+	}
 
-		if(canWriteToLog()) {
-			if(state->count == 1) {
-				nn::hid::TouchState& touchState = state->touches[0];
+	_ZN2nn3hid19GetTouchScreenStateILm1EEEvPNS0_16TouchScreenStateIXT_EEE(state);
 
-				// clang-format off
+	if(canWriteToLog()) {
+		if(state->count == 1) {
+			nn::hid::TouchState& touchState = state->touches[0];
+
+			// clang-format off
 				std::string diagInfo =
 					"count: " + std::to_string(state->count) + "\n" +
 					"samplingNumber: " + std::to_string(state->samplingNumber) + "\n" +
@@ -335,17 +351,14 @@ void GetTouchScreenState1Touch(nn::hid::TouchScreenState1Touch* state) {
 					"deltaTimeNanoSeconds: " + std::to_string(touchState.deltaTimeNanoSeconds) + "\n" +
 					"diameterX: " + std::to_string(touchState.diameterX) + "\n" +
 					"diameterY: " + std::to_string(touchState.diameterY) + "\n" +
-					"fingerId: " + std::to_string(touchState.fingerId) + "\n" +
+					"touchIndex: " + std::to_string(touchState.touchIndex) + "\n" +
 					"rotationAngle: " + std::to_string(touchState.rotationAngle) + "\n" +
 					"x: " + std::to_string(touchState.x) + "\n" +
 					"y: " + std::to_string(touchState.y) + "\n";
-				// clang-format on
+			// clang-format on
 
-				writeToLog(diagInfo.c_str());
-			}
+			writeToLog(diagInfo.c_str());
 		}
-
-		return;
 	}
 }
 
@@ -404,6 +417,7 @@ int main(int argc, char* argv[]) {
 	const char* pointersPath = "sdmc:/SaltySD/SwiTAS_SaltyPlugin_Offsets.hex";
 	FILE* offsets            = SaltySDCore_fopen(pointersPath, "wb");
 
+	// Need to revamp these pointers
 	writePointerToFile(&frameHasPassed, offsets);
 	writePointerToFile(&logStringIndex, offsets);
 	writePointerToFile(&logString, offsets);
@@ -412,7 +426,7 @@ int main(int argc, char* argv[]) {
 	writePointerToFile(&touchscreenState, offsets);
 	writePointerToFile(&sixAxisStateLeftJoyconBacklog, offsets);
 	writePointerToFile(&sixAxisStateRightJoyconBacklog, offsets);
-	writePointerToFile(&originalTouchscreenState, offsets);
+	writePointerToFile(&touchScreenStateBacklog, offsets);
 
 	SaltySDCore_fclose(offsets);
 
@@ -441,18 +455,6 @@ int main(int argc, char* argv[]) {
 	SaltySDCore_ReplaceImport(
 		"_ZN2nn3hid21IsSixAxisSensorAtRestERKNS0_19SixAxisSensorHandleE",
 		(void*) &IsSixAxisSensorAtRest);
-	SaltySDCore_ReplaceImport(
-		"_ZN2nn3hid18StartSixAxisSensorERKNS0_26ConsoleSixAxisSensorHandleE",
-		(void*) &StartSixAxisSensor1);
-	SaltySDCore_ReplaceImport(
-		"_ZN2nn3hid18StartSixAxisSensorERKNS0_19SixAxisSensorHandleE",
-		(void*) &StartSixAxisSensor2);
-	SaltySDCore_ReplaceImport(
-		"_ZN2nn3hid17StopSixAxisSensorERKNS0_26ConsoleSixAxisSensorHandleE",
-		(void*) &StopSixAxisSensor1);
-	SaltySDCore_ReplaceImport(
-		"_ZN2nn3hid17StopSixAxisSensorERKNS0_19SixAxisSensorHandleE",
-		(void*) &StopSixAxisSensor2);
 	SaltySDCore_ReplaceImport(
 		"_ZN2nn3hid19GetTouchScreenStateILm1EEEvPNS0_16TouchScreenStateIXT_EEE",
 		(void*) &GetTouchScreenState1Touch);
