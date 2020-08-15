@@ -51,7 +51,10 @@ MainLoop::MainLoop() {
 
 	LOGD << "Start DMNT:CHT process";
 
-	dmntchtInitialize();
+	rc = dmntchtInitialize();
+	if(R_FAILED(rc))
+		fatalThrow(rc);
+
 #endif
 
 #ifdef YUZU
@@ -89,13 +92,10 @@ void MainLoop::mainLoopHandler() {
 			// This should never fail, but I dunno
 			if(R_SUCCEEDED(rc)) {
 				if(!applicationOpened) {
-					LOGD << "Check if DMNT:CHT is attached to game";
-					bool cheatProcessActive = false;
-
-					dmntchtHasCheatProcess(&cheatProcessActive);
-					if(!cheatProcessActive) {
-						dmntchtForceOpenCheatProcess();
-					}
+					LOGD << "Wait for DMNT:CHT service";
+					rc = dmntchtForceOpenCheatProcess();
+					if(R_FAILED(rc))
+						fatalThrow(rc);
 
 					gameName = std::string(getAppName(applicationProgramId));
 
