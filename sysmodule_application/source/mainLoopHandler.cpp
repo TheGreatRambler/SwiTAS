@@ -51,7 +51,10 @@ MainLoop::MainLoop() {
 
 	LOGD << "Start DMNT:CHT process";
 
-	dmntchtInitialize();
+	rc = dmntchtInitialize();
+	if(R_FAILED(rc))
+		fatalThrow(rc);
+
 #endif
 
 #ifdef YUZU

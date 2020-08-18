@@ -90,6 +90,7 @@ private:
 
 #ifdef __SWITCH__
 	Event vsyncEvent;
+	Event dmntEvent;
 #endif
 
 	std::vector<std::unique_ptr<ControllerHandler>> controllers;
