@@ -89,6 +89,9 @@ void MainLoop::mainLoopHandler() {
 			// This should never fail, but I dunno
 			if(R_SUCCEEDED(rc)) {
 				if(!applicationOpened) {
+					svcSleepThread((int64_t)1000000 * 5000);
+
+					dmntchtInitialize();
 					LOGD << "Check if DMNT:CHT is attached to game";
 					bool cheatProcessActive = false;
 
