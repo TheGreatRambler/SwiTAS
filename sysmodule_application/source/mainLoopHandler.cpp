@@ -535,17 +535,17 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths) {
 	unpauseApp();
 	lastNanoseconds = 0;
 
-	uint8_t shouldRun = true;
+	uint8_t shouldRun     = true;
 	uint8_t shouldAdvance = false;
 
-uint32_t frameNum = 0;
+	uint32_t frameNum = 0;
 	while(true) {
 		LOGD << "Start half second";
 		// Run half a second of data before checking network
 		if(!finalTasShouldRun)
 			break;
 
-		if (shouldRun) {
+		if(shouldRun) {
 			for(uint8_t player = 0; player < filesSize; player++) {
 				LOGD << "For player " << (int)player;
 				// Based on code in project handler without compression
@@ -573,39 +573,40 @@ uint32_t frameNum = 0;
 
 		waitForVsync();
 
-		if (shouldAdvance) {
-shouldAdvance = false;
-shouldRun = false;
-pauseApp();
+		if(shouldAdvance) {
+			shouldAdvance = false;
+			shouldRun     = false;
+			pauseApp(false, false, false, 0, 0, 0, 0);
+		}
+
+#ifdef __SWITCH__
+		uint8_t numOfControllers = getNumControllers();
+		if(numOfControllers > filesSize) {
+			hidScanInput();
+			uint64_t kDown = hidKeysDown((HidControllerID)filesSize);
+
+			if(kDown & KEY_X) {
+				shouldRun = false;
+				pauseApp(false, false, false, 0, 0, 0, 0);
 			}
 
-		#ifdef __SWITCH__
-			uint8_t numOfControllers = getNumOfControllers();
-			if (numOfControllers > filesSize) {
-				hidScanInput();
-				uint64_t kDown = hidKeysDown(filesSize);
+			if(kDown & KEY_A) {
+				shouldRun = true;
+				unpauseApp();
+			}
 
-if (kDown & KEY_X) {
-	shouldRun = false;
-	pauseApp();
-}
+			if(kDown & KEY_DRIGHT) {
+				shouldAdvance = true;
+				unpauseApp();
+			}
+		}
+#endif
 
-if (kDown & KEY_A) {
-	shouldRun = true;
-	unpauseApp();
-}
+		if(frameNum % 30 == 0) {
+			handleNetworkUpdates();
+		}
 
-if (kDown & KEY_DRIGHT) {
-	shouldAdvance = true;
-	unpauseApp();
-}
-		#endif
-
-if (frameNum % 30 === 0) {
-handleNetworkUpdates();
-}
-
-			frameNum++;
+		frameNum++;
 	}
 
 	for(auto const& file : files) {
