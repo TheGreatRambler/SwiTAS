@@ -1,6 +1,8 @@
 #pragma once
 
 #define BIT(n) (1U << (n))
+#define IS_KEYBOARD_HELD(data, key) data[key / 32] & (1 << (key % 32));
+#define SET_KEYBOARD_HELD(data, key) data[key / 32] |= (1 << (key % 32));
 
 #include <cstdint>
 //#include <switch_min.h>

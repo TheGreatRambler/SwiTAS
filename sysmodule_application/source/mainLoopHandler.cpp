@@ -95,7 +95,7 @@ void MainLoop::mainLoopHandler() {
 					LOGD << "Connect DMNT:CHT to game";
 
 					// https://github.com/masagrator/Status-Monitor-Overlay/blob/master/source/main.cpp
-					svcSleepThread(1'000'000'000);
+					svcSleepThread(3'000'000'000);
 					bool out = false;
 					dmntchtHasCheatProcess(&out);
 					if(out == false)
@@ -535,15 +535,17 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths) {
 	unpauseApp();
 	lastNanoseconds = 0;
 
+	uint8_t shouldRun = true;
+	uint8_t shouldAdvance = false;
+
+uint32_t frameNum = 0;
 	while(true) {
 		LOGD << "Start half second";
 		// Run half a second of data before checking network
 		if(!finalTasShouldRun)
 			break;
 
-		for(uint8_t i = 0; i < 30; i++) {
-			// File reading can't slow down at all
-
+		if (shouldRun) {
 			for(uint8_t player = 0; player < filesSize; player++) {
 				LOGD << "For player " << (int)player;
 				// Based on code in project handler without compression
@@ -567,11 +569,43 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths) {
 					LOGD << "Run final TAS frame: " << (int)controllerSize;
 				}
 			}
-
-			waitForVsync();
 		}
 
-		handleNetworkUpdates();
+		waitForVsync();
+
+		if (shouldAdvance) {
+shouldAdvance = false;
+shouldRun = false;
+pauseApp();
+			}
+
+		#ifdef __SWITCH__
+			uint8_t numOfControllers = getNumOfControllers();
+			if (numOfControllers > filesSize) {
+				hidScanInput();
+				uint64_t kDown = hidKeysDown(filesSize);
+
+if (kDown & KEY_X) {
+	shouldRun = false;
+	pauseApp();
+}
+
+if (kDown & KEY_A) {
+	shouldRun = true;
+	unpauseApp();
+}
+
+if (kDown & KEY_DRIGHT) {
+	shouldAdvance = true;
+	unpauseApp();
+}
+		#endif
+
+if (frameNum % 30 === 0) {
+handleNetworkUpdates();
+}
+
+			frameNum++;
 	}
 
 	for(auto const& file : files) {
