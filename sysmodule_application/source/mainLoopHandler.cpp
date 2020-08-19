@@ -88,45 +88,42 @@ void MainLoop::mainLoopHandler() {
 // Application connected
 // Get application info
 #ifdef __SWITCH__
-			rc = pminfoGetProgramId(&applicationProgramId, applicationProcessId);
-			// This should never fail, but I dunno
-			if(R_SUCCEEDED(rc)) {
-				if(!applicationOpened) {
-					svcSleepThread((int64_t)1000000 * 5000);
+			if(!applicationOpened) {
+				// Check if this file exists first of all
+				FILE* offsets = fopen(saltyPluginPath, "rb");
+				if(offsets != NULL) {
+					LOGD << "Connect DMNT:CHT to game";
 
-					dmntchtInitialize();
-					LOGD << "Check if DMNT:CHT is attached to game";
-					bool cheatProcessActive = false;
-
-					dmntchtHasCheatProcess(&cheatProcessActive);
-					if(!cheatProcessActive) {
+					// https://github.com/masagrator/Status-Monitor-Overlay/blob/master/source/main.cpp
+					svcSleepThread(1'000'000'000);
+					bool out = false;
+					dmntchtHasCheatProcess(&out);
+					if(out == false)
 						dmntchtForceOpenCheatProcess();
-					}
 
+					LOGD << "Get game name";
+					pminfoGetProgramId(&applicationProgramId, applicationProcessId);
 					gameName = std::string(getAppName(applicationProgramId));
 
 					LOGD << "Get SaltyNX data";
 					// Used to do accurate frame advance
-					FILE* offsets = fopen("/SaltySD/SwiTAS_SaltyPlugin_Offsets.hex", "rb");
-					if(offsets != NULL) {
-						fread(&saltynxframeHasPassed, sizeof(uint64_t), 1, offsets);
-						fread(&saltynxlogStringIndex, sizeof(uint64_t), 1, offsets);
-						fread(&saltynxlogString, sizeof(uint64_t), 1, offsets);
-						fread(&saltynxcontrollerToRecord, sizeof(uint64_t), 1, offsets);
-						fread(&saltynxsixAxisStateLeftJoycon, sizeof(uint64_t), 1, offsets);
-						fread(&saltynxsixAxisStateRightJoycon, sizeof(uint64_t), 1, offsets);
-						fread(&saltynxsixAxisStateLeftJoyconBacklog, sizeof(uint64_t), 1, offsets);
-						fread(&saltynxsixAxisStateRightJoyconBacklog, sizeof(uint64_t), 1, offsets);
-						fread(&saltynxrecordScreenOrKeyboard, sizeof(uint64_t), 1, offsets);
-						fread(&saltynxtouchscreenState, sizeof(uint64_t), 1, offsets);
-						fread(&saltynxtouchScreenStateBacklog, sizeof(uint64_t), 1, offsets);
-						fread(&saltynxkeyboardState, sizeof(uint64_t), 1, offsets);
-						fread(&saltynxkeyboardStateBacklog, sizeof(uint64_t), 1, offsets);
-						fread(&saltynxmouseState, sizeof(uint64_t), 1, offsets);
-						fread(&saltynxmouseStateBacklog, sizeof(uint64_t), 1, offsets);
+					fread(&saltynxframeHasPassed, sizeof(uint64_t), 1, offsets);
+					fread(&saltynxlogStringIndex, sizeof(uint64_t), 1, offsets);
+					fread(&saltynxlogString, sizeof(uint64_t), 1, offsets);
+					fread(&saltynxcontrollerToRecord, sizeof(uint64_t), 1, offsets);
+					fread(&saltynxsixAxisStateLeftJoycon, sizeof(uint64_t), 1, offsets);
+					fread(&saltynxsixAxisStateRightJoycon, sizeof(uint64_t), 1, offsets);
+					fread(&saltynxsixAxisStateLeftJoyconBacklog, sizeof(uint64_t), 1, offsets);
+					fread(&saltynxsixAxisStateRightJoyconBacklog, sizeof(uint64_t), 1, offsets);
+					fread(&saltynxrecordScreenOrKeyboard, sizeof(uint64_t), 1, offsets);
+					fread(&saltynxtouchscreenState, sizeof(uint64_t), 1, offsets);
+					fread(&saltynxtouchScreenStateBacklog, sizeof(uint64_t), 1, offsets);
+					fread(&saltynxkeyboardState, sizeof(uint64_t), 1, offsets);
+					fread(&saltynxkeyboardStateBacklog, sizeof(uint64_t), 1, offsets);
+					fread(&saltynxmouseState, sizeof(uint64_t), 1, offsets);
+					fread(&saltynxmouseStateBacklog, sizeof(uint64_t), 1, offsets);
 
-						fclose(offsets);
-					}
+					fclose(offsets);
 
 					LOGD << "Get DMNT:CHT extents";
 					DmntCheatProcessMetadata appInfo;
@@ -143,12 +140,9 @@ void MainLoop::mainLoopHandler() {
 					})
 
 					applicationOpened = true;
-
-					// Start the whole main loop
-					// Set the application for the controller
-					// LOGD << "Start controllers";
-					// pauseApp();
 				}
+			} else {
+				remove(saltyPluginPath);
 			}
 #endif
 #ifdef YUZU
@@ -241,7 +235,7 @@ void MainLoop::mainLoopHandler() {
 	}
 
 #ifdef __SWITCH__
-	std::this_thread::sleep_for(std::chrono::milliseconds(5));
+	svcSleepThread(1000000 * 5);
 #endif
 
 	// I dunno how often to update this honestly

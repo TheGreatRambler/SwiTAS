@@ -64,6 +64,8 @@ private:
 
 	PscPmModule sleepModule;
 
+	const char* saltyPluginPath = "/SaltySD/SwiTAS_SaltyPlugin_Offsets.hex";
+
 	uint64_t lastNanoseconds = 0;
 	int lastFrameAttempt     = 0;
 
