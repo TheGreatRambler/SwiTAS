@@ -49,12 +49,6 @@ MainLoop::MainLoop() {
 	if(R_FAILED(rc))
 		fatalThrow(rc);
 
-	LOGD << "Start DMNT:CHT process";
-
-	rc = dmntchtInitialize();
-	if(R_FAILED(rc))
-		fatalThrow(rc);
-
 #endif
 
 #ifdef YUZU
@@ -94,12 +88,11 @@ void MainLoop::mainLoopHandler() {
 				if(offsets != NULL) {
 					LOGD << "Connect DMNT:CHT to game";
 
-					// https://github.com/masagrator/Status-Monitor-Overlay/blob/master/source/main.cpp
-					svcSleepThread(3'000'000'000);
-					bool out = false;
-					dmntchtHasCheatProcess(&out);
-					if(out == false)
-						dmntchtForceOpenCheatProcess();
+					rc = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
+					if(R_FAILED(rc))
+						fatalThrow(rc);
+					// https://github.com/Atmosphere-NX/Atmosphere/blob/3fd4002bc974e0478e67733f7757db898da6b703/stratosphere/dmnt/source/cheat/impl/dmnt_cheat_debug_events_manager.cpp#L87
+					svcContinueDebugEvent(applicationDebug, 5, nullptr, 0);
 
 					LOGD << "Get game name";
 					pminfoGetProgramId(&applicationProgramId, applicationProcessId);
@@ -125,12 +118,31 @@ void MainLoop::mainLoopHandler() {
 
 					fclose(offsets);
 
-					LOGD << "Get DMNT:CHT extents";
-					DmntCheatProcessMetadata appInfo;
-					dmntchtGetCheatProcessMetadata(&appInfo);
+					// Obtain heap start
+					MemoryInfo meminfo;
+					u64 lastaddr = 0;
+					do {
+						lastaddr = meminfo.addr;
+						u32 pageinfo;
+						svcQueryDebugProcessMemory(&meminfo, &pageinfo, applicationDebug, meminfo.addr + meminfo.size);
+						if((meminfo.type & MemType_Heap) == MemType_Heap) {
+							heapBase = meminfo.addr;
+							break;
+						}
+					} while(lastaddr < meminfo.addr + meminfo.size);
 
-					heapBase = appInfo.heap_extents.base;
-					mainBase = appInfo.main_nso_extents.base;
+					// Obtain main start
+					LoaderModuleInfo proc_modules[2];
+					s32 numModules = 0;
+					Result rc      = ldrDmntGetProcessModuleInfo(applicationProcessId, proc_modules, 2, &numModules);
+
+					LoaderModuleInfo* proc_module = 0;
+					if(numModules == 2) {
+						proc_module = &proc_modules[1];
+					} else {
+						proc_module = &proc_modules[0];
+					}
+					mainBase = proc_module->base_address;
 
 					LOGD << "Application " + gameName + " opened";
 					ADD_TO_QUEUE(RecieveApplicationConnected, networkInstance, {
@@ -210,22 +222,14 @@ void MainLoop::mainLoopHandler() {
 		// handle network updates always, they are stored in the queue regardless of the internet
 		handleNetworkUpdates();
 		// Handle SaltyNX output
-		uint16_t logOutputSize;
-		rc = dmntchtReadCheatProcessMemory(saltynxlogStringIndex, &logOutputSize, sizeof(logOutputSize));
-		if(R_SUCCEEDED(rc)) {
+		uint16_t logOutputSize = getMemoryType<uint16_t>(saltynxlogStringIndex);
 			if(logOutputSize != 0) {
-				char log[logOutputSize];
-				rc = dmntchtReadCheatProcessMemory(saltynxlogString, &log, logOutputSize);
-				if(R_FAILED(rc)) {
-					fatalThrow(rc);
-				}
+				auto const& logData = getMemory(saltynxlogString, logOutputSize);
 
-				LOGD << std::string(log, logOutputSize);
+				LOGD << std::string(logData.data(), logOutputSize);
 
-				uint16_t dummyLogSize = 0;
-				dmntchtWriteCheatProcessMemory(saltynxlogStringIndex, &dummyLogSize, sizeof(dummyLogSize));
+				setMemoryType<uint16_t>(saltynxlogStringIndex, 0);
 			}
-		}
 	}
 
 	// Match first controller inputs as often as possible
@@ -384,7 +388,9 @@ void MainLoop::sendGameInfo() {
 				// LOGD << "Obtained memory region at: " << addr;
 
 				MemoryInfo info = { 0 };
-				rc              = dmntchtQueryCheatProcessMemory(&info, addr);
+				uint32_t pageinfo;
+				rc = svcQueryDebugProcessMemory(&info, &pageinfo, applicationDebug, addr);
+
 				addr            = info.addr + info.size;
 
 				if(R_FAILED(rc)) {
@@ -653,10 +659,9 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 	if(!isPaused) {
 #ifdef __SWITCH__
 		LOGD << "Pausing via DMNT";
-		rc = dmntchtPauseCheatProcess();
-		if(R_FAILED(rc)) {
+		rc = svcBreakDebugProcess(applicationDebug);
+		if(R_FAILED(rc))
 			fatalThrow(rc);
-		}
 		isPaused = true;
 #endif
 #ifdef YUZU
@@ -707,7 +712,7 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 
 				try {
 #ifdef __SWITCH__
-					uint64_t addr = calculator::eval<uint64_t>(revisedExpression);
+					uint64_t addr = calculator::eval<uint64_t>(revisedExpression, applicationDebug);
 #endif
 #ifdef YUZU
 					uint64_t addr = calculator::eval<uint64_t>(revisedExpression, yuzuSyscalls);
@@ -796,16 +801,11 @@ void MainLoop::waitForVsync() {
 	} else {
 		LOGD << "Wait for vsync";
 		while(true) {
-			uint8_t frame;
-			rc = dmntchtReadCheatProcessMemory(saltynxframeHasPassed, &frame, sizeof(frame));
-			if(R_FAILED(rc)) {
-				fatalThrow(rc);
-			}
+			uint8_t frame = getMemoryType<uint8_t>(saltynxframeHasPassed);
 
 			if(frame) {
 				// Clear the variable so we can wait for it again
-				uint8_t dummyFrame = false;
-				dmntchtWriteCheatProcessMemory(saltynxframeHasPassed, &dummyFrame, sizeof(dummyFrame));
+				setMemoryType<uint8_t>(saltynxframeHasPassed, false);
 				return;
 			} else {
 				svcSleepThread(1000000 * 3);
@@ -898,35 +898,31 @@ void MainLoop::matchFirstControllerToTASController(uint8_t player) {
 
 void MainLoop::disableSixAxisModifying() {
 	if(saltynxcontrollerToRecord != 0) {
-		nn::hid::NpadIdType dummyControllerIndex = nn::hid::NpadIdType::None;
-		dmntchtWriteCheatProcessMemory(saltynxcontrollerToRecord, &dummyControllerIndex, sizeof(dummyControllerIndex));
+		setMemoryType<nn::hid::NpadIdType>(saltynxcontrollerToRecord, nn::hid::NpadIdType::None);
 	}
 }
 
 void MainLoop::setSixAxisControllerRecord(int32_t controller) {
 	if(saltynxcontrollerToRecord != 0) {
-		dmntchtWriteCheatProcessMemory(saltynxcontrollerToRecord, &controller, sizeof(controller));
+		setMemoryType<int32_t>(saltynxcontrollerToRecord, controller);
 	}
 }
 
 void MainLoop::disableKeyboardTouchModifying() {
 	if(saltynxrecordScreenOrKeyboard != 0) {
-		uint8_t dummyTouchKeyboard = 0;
-		dmntchtWriteCheatProcessMemory(saltynxrecordScreenOrKeyboard, &dummyTouchKeyboard, sizeof(dummyTouchKeyboard));
+		setMemoryType<uint8_t>(saltynxrecordScreenOrKeyboard, 0);
 	}
 }
 
 void MainLoop::setKeyboardRecord() {
 	if(saltynxrecordScreenOrKeyboard != 0) {
-		uint8_t dummyTouchKeyboard = 2;
-		dmntchtWriteCheatProcessMemory(saltynxrecordScreenOrKeyboard, &dummyTouchKeyboard, sizeof(dummyTouchKeyboard));
+		setMemoryType<uint8_t>(saltynxrecordScreenOrKeyboard, 2);
 	}
 }
 
 void MainLoop::setTouchRecord() {
 	if(saltynxrecordScreenOrKeyboard != 0) {
-		uint8_t dummyTouchKeyboard = 1;
-		dmntchtWriteCheatProcessMemory(saltynxrecordScreenOrKeyboard, &dummyTouchKeyboard, sizeof(dummyTouchKeyboard));
+		setMemoryType<uint8_t>(saltynxrecordScreenOrKeyboard, 1);
 	}
 }
 
@@ -961,8 +957,6 @@ MainLoop::~MainLoop() {
 	LOGD << "Exiting app";
 	rc = hiddbgReleaseHdlsWorkBuffer();
 	hiddbgExit();
-
-	dmntchtExit();
 
 	viCloseDisplay(&disp);
 

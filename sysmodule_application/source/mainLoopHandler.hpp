@@ -62,6 +62,8 @@ private:
 
 	ViDisplay disp;
 
+	Handle applicationDebug;
+
 	PscPmModule sleepModule;
 
 	const char* saltyPluginPath = "/SaltySD/SwiTAS_SaltyPlugin_Offsets.hex";
@@ -121,12 +123,32 @@ private:
 	std::vector<uint8_t> getMemory(uint64_t addr, uint64_t size) {
 		std::vector<uint8_t> region(size);
 #ifdef __SWITCH__
-		dmntchtReadCheatProcessMemory(addr, region.data(), size);
+		svcReadDebugProcessMemory(region.data(), applicationDebug, addr, size);
 #endif
 #ifdef YUZU
 		yuzuSyscalls->function_rom_readbytes(yuzuSyscalls->getYuzuInstance(), region.data(), addr, size);
 #endif
 		return region;
+	}
+
+	template <typename T> T getMemoryType(uint64_t addr) {
+		T item;
+#ifdef __SWITCH__
+		svcReadDebugProcessMemory(&item, applicationDebug, addr, sizeof(T));
+#endif
+#ifdef YUZU
+		yuzuSyscalls->function_rom_readbytes(yuzuSyscalls->getYuzuInstance(), &item, addr, sizeof(T));
+#endif
+		return item;
+	}
+
+	template <typename T> void setMemoryType(uint64_t addr, T& item) {
+#ifdef __SWITCH__
+		svcWriteDebugProcessMemory(applicationDebug, &item, addr, sizeof(T));
+#endif
+#ifdef YUZU
+		yuzuSyscalls->function_rom_writebytes(yuzuSyscalls->getYuzuInstance(), addr, &item, sizeof(T));
+#endif
 	}
 
 	template <typename T> std::string memoryToString(std::vector<uint8_t>& bytes) {
@@ -141,7 +163,7 @@ private:
 		if(isPaused) {
 #ifdef __SWITCH__
 			// Unpause application
-			dmntchtResumeCheatProcess();
+			svcContinueDebugEvent(applicationDebug, 5, nullptr, 0);
 			isPaused = false;
 #endif
 #ifdef YUZU
