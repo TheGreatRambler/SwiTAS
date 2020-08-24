@@ -13,6 +13,14 @@
 #include "drawingCanvas.hpp"
 #include "savestateSelection.hpp"
 
+class ExtraInputMethods : public wxFrame {
+	private:
+	DataProcessing* inputData;
+
+	public:
+	ExtraInputMethods(wxFrame* parent, DataProcessing* dataProcessing);
+}
+
 class FrameCanvas : public DrawingCanvas {
 private:
 	DataProcessing* inputData;

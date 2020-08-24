@@ -12,6 +12,7 @@
 #include <vector>
 #include <wx/wx.h>
 
+#include "../../../sysmodule_application/saltynx_plugin/source/sdkTypes.hpp"
 #include "../sharedNetworkCode/buttonData.hpp"
 
 // So that types are somewhat unified
@@ -76,4 +77,17 @@ enum ControllerNumberValues : uint8_t {
 	ANGLE_X_RIGHT,
 	ANGLE_Y_RIGHT,
 	ANGLE_Z_RIGHT,
+};
+
+enum ExtraValues : uint8_t {
+	TOUCH_X_1,
+	TOUCH_Y_1,
+	TOUCH_X_2,
+	TOUCH_Y_2,
+	MOUSE_X,
+	MOUSE_Y,
+	MOUSE_VELOCITY_X,
+	MOUSE_VELOCITY_Y,
+	SCROLL_VELOCITY_X,
+	SCROLL_VELOCITY_Y,
 };

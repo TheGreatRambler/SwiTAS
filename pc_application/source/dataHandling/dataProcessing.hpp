@@ -31,9 +31,12 @@
 #include "buttonData.hpp"
 
 typedef std::shared_ptr<ControllerData> FrameData;
+typedef std::shared_ptr<TouchAndKeyboardData> ExtraFrameData;
 typedef std::vector<std::shared_ptr<std::vector<std::shared_ptr<SavestateHook>>>> AllPlayers;
 typedef std::vector<std::shared_ptr<SavestateHook>> AllSavestateHookBlocks;
 typedef std::shared_ptr<std::vector<FrameData>> BranchData;
+typedef std::shared_ptr<std::vector<ExtraFrameData>> ExtraBranchData;
+typedef std::vector<std::shared_ptr<std::vector<std::shared_ptr<std::vector<ExtraFrameData>>>> ExtraFrameDataContainer;
 
 class ButtonData;
 
@@ -44,12 +47,14 @@ private:
 	// SavestateHookBlock inputsList;
 	// Current input
 	FrameData currentData;
+	ExtraBranchData currentExtraData;
 	BranchData currentBranchData;
 	// Button data instance (never changes)
 	std::shared_ptr<ButtonData> buttonData;
 	// Vector holding the savestate hook blocks
 	// Is a vector of the players as well
 	AllPlayers allPlayers;
+	ExtraFrameDataContainer allExtraFrameData;
 
 	wxFileName projectStart;
 
@@ -265,11 +270,15 @@ public:
 		}
 	}
 
-	// TODO cache this
 	BranchData getInputsList() const;
+	ExtraBranchData getInputsExtraList() const;
 
 	std::shared_ptr<ControllerData> getControllerData(uint8_t player, SavestateBlockNum savestateHookNum, BranchNum branch, FrameNum frame) const {
 		return allPlayers[player]->at(savestateHookNum)->inputs[branch]->at(frame);
+	}
+
+	std::shared_ptr<ControllerData> getControllerDataExtra(SavestateBlockNum savestateHookNum, BranchNum branch, FrameNum frame) const {
+		return allExtraFrameData->at(savestateHookNum)->inputs[branch]->at(frame);
 	}
 
 	wxRect getFirstItemRect();
@@ -330,6 +339,30 @@ public:
 	uint8_t getNumberOfTouches(FrameNum frame) const;
 	uint8_t getNumberOfTouchesSpecific(FrameNum frame, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
 	uint8_t getNumberOfTouchesCurrent() const;
+
+	void triggerExtraValue(ExtraValues extraValue, int32_t value);
+	void setExtraValue(FrameNum frame, ExtraValues extraValue, int32_t value);
+	int32_t getExtraValue(FrameNum frame) const;
+	int32_t getExtraValueSpecific(FrameNum frame, ExtraValues extraValue, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
+	int32_t getExtraValueCurrent(ExtraValues extraValue) const;
+
+	void triggerKeyboardButton(nn::hid::KeyboardKey key, uint8_t state);
+	void setKeyboardButton(FrameNum frame, nn::hid::KeyboardKey key, uint8_t state);
+	uint8_t getKeyboardButton(FrameNum frame) const;
+	uint8_t getKeyboardButtonSpecific(FrameNum frame, nn::hid::KeyboardKey key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
+	uint8_t getKeyboardButtonCurrent(nn::hid::KeyboardKey key) const;
+
+	void triggerKeyboardModifier(nn::hid::KeyboardModifier key, uint8_t state);
+	void setKeyboardModifier(FrameNum frame, nn::hid::KeyboardModifier key, uint8_t state);
+	uint8_t getKeyboardModifier(FrameNum frame) const;
+	uint8_t getKeyboardModifierSpecific(FrameNum frame, nn::hid::KeyboardModifier key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
+	uint8_t getKeyboardModifierCurrent(nn::hid::KeyboardModifier key) const;
+
+	void triggerMouseButton(nn::hid::MouseButton key, uint8_t state);
+	void setMouseButton(FrameNum frame, nn::hid::MouseButton key, uint8_t state);
+	uint8_t getMouseButton(FrameNum frame) const;
+	uint8_t getMouseButtonSpecific(FrameNum frame, nn::hid::MouseButton key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
+	uint8_t getMouseButtonCurrent(nn::hid::MouseButton key) const;
 
 	// Updates how the current frame looks on the UI
 	// Also called when modifying anything of importance, like currentFrame

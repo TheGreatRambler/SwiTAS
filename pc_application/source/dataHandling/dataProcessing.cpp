@@ -598,6 +598,10 @@ BranchData DataProcessing::getInputsList() const {
 	return currentBranchData;
 }
 
+ExtraBranchData DataProcessing::getInputsExtraList() const {
+	return currentExtraData;
+}
+
 wxRect DataProcessing::getFirstItemRect() {
 	wxRect itemRect;
 	long topItem = GetTopItem();
@@ -1207,7 +1211,7 @@ void DataProcessing::triggerNumberOfTouches(uint8_t value) {
 }
 
 void DataProcessing::setNumberOfTouches(FrameNum frame, uint8_t value) {
-	// allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->at(frame)->numberOfTouches = value;
+	getInputsExtraList()->at(frame)->numberOfTouches = value;
 
 	invalidateRun(frame);
 
@@ -1216,18 +1220,55 @@ void DataProcessing::setNumberOfTouches(FrameNum frame, uint8_t value) {
 }
 
 uint8_t DataProcessing::getNumberOfTouches(FrameNum frame) const {
-	// return getInputsList()->at(frame)->numberOfTouches;
-	return 0;
+	return getInputsExtraList()->at(frame)->numberOfTouches;
 }
 
 uint8_t DataProcessing::getNumberOfTouchesSpecific(FrameNum frame, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
-	// return getControllerData(player, savestateHookNum, branch, frame)->numberOfTouches;
-	return 0;
+	return getControllerDataExtra(savestateHookNum, branch, frame)->numberOfTouches;
 }
 
 uint8_t DataProcessing::getNumberOfTouchesCurrent() const {
 	return getNumberOfTouches(currentFrame);
 }
+
+
+
+
+
+
+
+
+
+	void DataProcessing::triggerExtraValue(ExtraValues extraValue, int32_t value);
+	void DataProcessing::setExtraValue(FrameNum frame, ExtraValues extraValue, int32_t value);
+	int32_t DataProcessing::getExtraValue(FrameNum frame) const;
+	int32_t DataProcessing::getExtraValueSpecific(FrameNum frame, ExtraValues extraValue, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
+	int32_t DataProcessing::getExtraValueCurrent(ExtraValues extraValue) const;
+
+	void DataProcessing::triggerKeyboardButton(nn::hid::KeyboardKey key, uint8_t state);
+	void DataProcessing::setKeyboardButton(FrameNum frame, nn::hid::KeyboardKey key, uint8_t state);
+	uint8_t DataProcessing::getKeyboardButton(FrameNum frame) const;
+	uint8_t DataProcessing::getKeyboardButtonSpecific(FrameNum frame, nn::hid::KeyboardKey key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
+	uint8_t DataProcessing::getKeyboardButtonCurrent(nn::hid::KeyboardKey key) const;
+
+	void DataProcessing::triggerKeyboardModifier(nn::hid::KeyboardModifier key, uint8_t state);
+	void DataProcessing::setKeyboardModifier(FrameNum frame, nn::hid::KeyboardModifier key, uint8_t state);
+	uint8_t DataProcessing::getKeyboardModifier(FrameNum frame) const;
+	uint8_t DataProcessing::getKeyboardModifierSpecific(FrameNum frame, nn::hid::KeyboardModifier key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
+	uint8_t DataProcessing::getKeyboardModifierCurrent(nn::hid::KeyboardModifier key) const;
+
+	void DataProcessing::triggerMouseButton(nn::hid::MouseButton key, uint8_t state);
+	void DataProcessing::setMouseButton(FrameNum frame, nn::hid::MouseButton key, uint8_t state);
+	uint8_t DataProcessing::getMouseButton(FrameNum frame) const;
+	uint8_t DataProcessing::getMouseButtonSpecific(FrameNum frame, nn::hid::MouseButton key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
+	uint8_t DataProcessing::getMouseButtonCurrent(nn::hid::MouseButton key) const;
+
+
+
+
+
+
+
 
 uint8_t DataProcessing::getButton(FrameNum frame, Btn button) const {
 	return GET_BIT(getInputsList()->at(frame)->buttons, button);
