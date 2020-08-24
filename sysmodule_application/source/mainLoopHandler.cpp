@@ -82,23 +82,25 @@ void MainLoop::mainLoopHandler() {
 // Application connected
 // Get application info
 #ifdef __SWITCH__
-			if(!applicationOpened) {
-				// Check if this file exists first of all
-				FILE* offsets = fopen(saltyPluginPath, "rb");
-				if(offsets != NULL) {
-					LOGD << "Connect DMNT:CHT to game";
+			if(R_SUCCEEDED(pminfoGetProgramId(&applicationProgramId, applicationProcessId))) {
+				if(!applicationOpened) {
+					// Check if this file exists first of all
+					LOGD << "Debug application at process: " << std::to_string(applicationProcessId);
 
 					rc = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
 					if(R_FAILED(rc))
 						fatalThrow(rc);
+
+					LOGD << "Continue debug event";
 					// https://github.com/Atmosphere-NX/Atmosphere/blob/3fd4002bc974e0478e67733f7757db898da6b703/stratosphere/dmnt/source/cheat/impl/dmnt_cheat_debug_events_manager.cpp#L87
 					svcContinueDebugEvent(applicationDebug, 5, nullptr, 0);
 
 					LOGD << "Get game name";
-					pminfoGetProgramId(&applicationProgramId, applicationProcessId);
 					gameName = std::string(getAppName(applicationProgramId));
 
 					LOGD << "Get SaltyNX data";
+					FILE* offsets = fopen(saltyPluginPath, "rb");
+
 					// Used to do accurate frame advance
 					fread(&saltynxframeHasPassed, sizeof(uint64_t), 1, offsets);
 					fread(&saltynxlogStringIndex, sizeof(uint64_t), 1, offsets);
@@ -153,8 +155,6 @@ void MainLoop::mainLoopHandler() {
 
 					applicationOpened = true;
 				}
-			} else {
-				remove(saltyPluginPath);
 			}
 #endif
 #ifdef YUZU
@@ -223,13 +223,13 @@ void MainLoop::mainLoopHandler() {
 		handleNetworkUpdates();
 		// Handle SaltyNX output
 		uint16_t logOutputSize = getMemoryType<uint16_t>(saltynxlogStringIndex);
-			if(logOutputSize != 0) {
-				auto const& logData = getMemory(saltynxlogString, logOutputSize);
+		if(logOutputSize != 0) {
+			std::vector<unsigned char> logData = getMemory(saltynxlogString, logOutputSize);
 
-				LOGD << std::string(logData.data(), logOutputSize);
+			LOGD << std::string((char*)logData.data(), logOutputSize);
 
-				setMemoryType<uint16_t>(saltynxlogStringIndex, 0);
-			}
+			setMemoryType(saltynxlogStringIndex, (uint16_t)0);
+		}
 	}
 
 	// Match first controller inputs as often as possible
@@ -391,7 +391,7 @@ void MainLoop::sendGameInfo() {
 				uint32_t pageinfo;
 				rc = svcQueryDebugProcessMemory(&info, &pageinfo, applicationDebug, addr);
 
-				addr            = info.addr + info.size;
+				addr = info.addr + info.size;
 
 				if(R_FAILED(rc)) {
 					break;
@@ -805,7 +805,7 @@ void MainLoop::waitForVsync() {
 
 			if(frame) {
 				// Clear the variable so we can wait for it again
-				setMemoryType<uint8_t>(saltynxframeHasPassed, false);
+				setMemoryType(saltynxframeHasPassed, (uint8_t) false);
 				return;
 			} else {
 				svcSleepThread(1000000 * 3);
@@ -898,31 +898,31 @@ void MainLoop::matchFirstControllerToTASController(uint8_t player) {
 
 void MainLoop::disableSixAxisModifying() {
 	if(saltynxcontrollerToRecord != 0) {
-		setMemoryType<nn::hid::NpadIdType>(saltynxcontrollerToRecord, nn::hid::NpadIdType::None);
+		setMemoryType(saltynxcontrollerToRecord, nn::hid::NpadIdType::None);
 	}
 }
 
 void MainLoop::setSixAxisControllerRecord(int32_t controller) {
 	if(saltynxcontrollerToRecord != 0) {
-		setMemoryType<int32_t>(saltynxcontrollerToRecord, controller);
+		setMemoryType(saltynxcontrollerToRecord, controller);
 	}
 }
 
 void MainLoop::disableKeyboardTouchModifying() {
 	if(saltynxrecordScreenOrKeyboard != 0) {
-		setMemoryType<uint8_t>(saltynxrecordScreenOrKeyboard, 0);
+		setMemoryType(saltynxrecordScreenOrKeyboard, (uint16_t)0);
 	}
 }
 
 void MainLoop::setKeyboardRecord() {
 	if(saltynxrecordScreenOrKeyboard != 0) {
-		setMemoryType<uint8_t>(saltynxrecordScreenOrKeyboard, 2);
+		setMemoryType(saltynxrecordScreenOrKeyboard, (uint16_t)2);
 	}
 }
 
 void MainLoop::setTouchRecord() {
 	if(saltynxrecordScreenOrKeyboard != 0) {
-		setMemoryType<uint8_t>(saltynxrecordScreenOrKeyboard, 1);
+		setMemoryType(saltynxrecordScreenOrKeyboard, (uint8_t)1);
 	}
 }
 

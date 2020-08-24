@@ -142,7 +142,7 @@ private:
 		return item;
 	}
 
-	template <typename T> void setMemoryType(uint64_t addr, T& item) {
+	template <typename T> void setMemoryType(uint64_t addr, T item) {
 #ifdef __SWITCH__
 		svcWriteDebugProcessMemory(applicationDebug, &item, addr, sizeof(T));
 #endif
