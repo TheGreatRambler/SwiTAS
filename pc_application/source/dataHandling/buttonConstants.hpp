@@ -41,6 +41,18 @@ struct ButtonInfo {
 	uint8_t gridY;
 };
 
+struct KeyboardKeyInfo {
+	std::string scriptName;
+};
+
+struct KeyboardModifierKeyInfo {
+	std::string scriptName;
+};
+
+struct MouseButtonInfo {
+	std::string scriptName;
+};
+
 struct Savestate {
 	// I don't know what to put here yet
 	uint32_t frame;

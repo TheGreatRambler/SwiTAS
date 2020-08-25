@@ -65,6 +65,10 @@ public:
 	static constexpr uint8_t KeyHeight = 4;
 
 	std::map<Btn, std::shared_ptr<ButtonInfo>> buttonMapping;
+	// TODO create corresponding mapping for keyboard, keyboard modifier and mouse buttons
+	std::map<nn::hid::KeyboardKey, std::shared_ptr<KeyboardKeyInfo>> keyboardKeyMapping;
+	std::map<nn::hid::KeyboardModifier, std::shared_ptr<KeyboardModifierKeyInfo>> keyboardModifierKeyMapping;
+	std::map<nn::hid::MouseButton, std::shared_ptr<MouseButtonInfo>> mouseButtonMapping;
 
 	void setupButtonMapping(rapidjson::Document* mainSettings);
 

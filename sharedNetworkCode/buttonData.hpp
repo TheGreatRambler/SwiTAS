@@ -2,6 +2,13 @@
 
 #define SET_BIT(number, bit, loc) (number) ^= (-(unsigned long)(bit) ^ (number)) & (1UL << (loc))
 #define GET_BIT(number, loc) ((number) >> (loc)) & 1U
+#define IS_KEYBOARD_HELD(data, key) data[key / 32] & (1 << (key % 32));
+#define SET_KEYBOARD_HELD(data, key, state) \
+	if (state) { \
+		data[key / 32] |= (1 << (key % 32)); \
+	} else { \
+		data[key / 32] &= ~(1 << (key % 32)); \
+	}
 
 #include "include/zpp.hpp"
 #include <cstdint>

@@ -634,13 +634,21 @@ void DataProcessing::addNewSavestateHook(std::string dHash, wxBitmap* screenshot
 		// Add a single branch for default
 		savestateHook->inputs.push_back(std::make_shared<std::vector<FrameData>>());
 		allPlayers[i]->push_back(savestateHook);
-		allPlayers[i]->at(0)->inputs[0]->push_back(std::make_shared<ControllerData>());
-		viewingBranchIndex = 0;
-		// NOTE: There must be at least one block with one input when this is loaded
-		// Automatically, the first block is always at index 0
-		setSavestateHook(allPlayers[i]->size() - 1);
-		setBranch(0);
+		// Add one controller data to the first branch
+		allPlayers[i]->at(allPlayers->size() - 1)->inputs[0]->push_back(std::make_shared<ControllerData>());
 	}
+
+	auto& thisHookExtraData = std::make_shared<std::vector<std::shared_ptr<std::vector<ExtraFrameData>>>();
+	thisHookExtraData->push_back(std::make_shared<std::vector<ExtraFrameData>>());
+	thisHookExtraData->at(0)->push_back(std::make_shared<TouchAndKeyboardData>());
+
+	allExtraFrameData.push_back(thisHookExtraData);
+
+	viewingBranchIndex = 0;
+	// NOTE: There must be at least one block with one input when this is loaded
+	// Automatically, the first block is always at index 0
+	setSavestateHook(allPlayers[0]->size() - 1);
+	setBranch(0);
 }
 
 void DataProcessing::setSavestateHook(SavestateBlockNum index) {
@@ -665,6 +673,7 @@ void DataProcessing::setSavestateHook(SavestateBlockNum index) {
 void DataProcessing::removeSavestateHook(SavestateBlockNum index) {
 	if(allPlayers[viewingPlayerIndex]->size() > 1) {
 		allPlayers[viewingPlayerIndex]->erase(allPlayers[viewingPlayerIndex]->begin() + index);
+		allExtraFrameData.erase(allExtraFrameData.begin() + index);
 		setSavestateHook(0);
 
 		// Move over all the framebuffer names
@@ -785,6 +794,12 @@ void DataProcessing::addNewBranch() {
 			list[lastElement]->push_back(std::make_shared<ControllerData>());
 		}
 	}
+	auto& extraFrameDataBranch = allExtraFrameData[currentSavestateHook];
+	extraFrameDataBranch->push_back(std::make_shared<std::vector<ExtraFrameData>>());
+	uint16_t lastElement = extraFrameDataBranch.size() - 1;
+	for(FrameNum j = 0; j < extraFrameDataBranch->at(0)->size(); j++) {
+		extraFrameDataBranch[lastElement]->push_back(std::make_shared<TouchAndKeyboardData>());
+	}
 	setBranch(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs.size() - 1);
 }
 
@@ -801,6 +816,7 @@ void DataProcessing::setBranch(uint16_t branchIndex) {
 void DataProcessing::removeBranch(uint8_t branchIndex) {
 	if(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs.size() > 1) {
 		allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs.erase(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs.begin() + branchIndex);
+		allExtraFrameData[currentSavestateHook]->erase(allExtraFrameData[currentSavestateHook]->begin() + branchIndex);
 		setBranch(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs.size() - 1);
 
 		getFramebufferPath(0, currentSavestateHook, branchIndex, 0).Rmdir(wxPATH_RMDIR_RECURSIVE);
@@ -1239,36 +1255,228 @@ uint8_t DataProcessing::getNumberOfTouchesCurrent() const {
 
 
 
-	void DataProcessing::triggerExtraValue(ExtraValues extraValue, int32_t value);
-	void DataProcessing::setExtraValue(FrameNum frame, ExtraValues extraValue, int32_t value);
-	int32_t DataProcessing::getExtraValue(FrameNum frame) const;
-	int32_t DataProcessing::getExtraValueSpecific(FrameNum frame, ExtraValues extraValue, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
-	int32_t DataProcessing::getExtraValueCurrent(ExtraValues extraValue) const;
+void DataProcessing::triggerExtraValue(ExtraValues extraValue, int32_t value) {
+	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if(firstSelectedItem != wxNOT_FOUND) {
+		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
+		for(FrameNum i = firstSelectedItem; i <= lastSelectedItem; i++) {
+			setExtraValue(i, extraValue, value);
+		}
+	}
+}
 
-	void DataProcessing::triggerKeyboardButton(nn::hid::KeyboardKey key, uint8_t state);
-	void DataProcessing::setKeyboardButton(FrameNum frame, nn::hid::KeyboardKey key, uint8_t state);
-	uint8_t DataProcessing::getKeyboardButton(FrameNum frame) const;
-	uint8_t DataProcessing::getKeyboardButtonSpecific(FrameNum frame, nn::hid::KeyboardKey key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
-	uint8_t DataProcessing::getKeyboardButtonCurrent(nn::hid::KeyboardKey key) const;
+void DataProcessing::setExtraValue(FrameNum frame, ExtraValues extraValue, int32_t value) {
+	switch(extraValue) {
+	case TOUCH_X_1:
+		getInputsExtraList()->at(frame)->touchX1 = value;
+		break;
+	case TOUCH_Y_1:
+		getInputsExtraList()->at(frame)->touchY1 = value;
+		break;
+	case TOUCH_X_2:
+		getInputsExtraList()->at(frame)->touchX2 = value;
+		break;
+	case TOUCH_Y_2:
+		getInputsExtraList()->at(frame)->touchY2 = value;
+		break;
+	case MOUSE_X:
+		getInputsExtraList()->at(frame)->mouseX = value;
+		break;
+	case MOUSE_Y:
+		getInputsExtraList()->at(frame)->mouseY = value;
+		break;
+	case MOUSE_VELOCITY_X:
+		getInputsExtraList()->at(frame)->mouseVelocityX = value;
+		break;
+	case MOUSE_VELOCITY_Y:
+		getInputsExtraList()->at(frame)->mouseVelocityY = value;
+		break;
+	case SCROLL_VELOCITY_X:
+		getInputsExtraList()->at(frame)->scrollVelocityX = value;
+		break;
+	case SCROLL_VELOCITY_Y:
+		getInputsExtraList()->at(frame)->scrollVelocityY = value;
+		break;
+	}
 
-	void DataProcessing::triggerKeyboardModifier(nn::hid::KeyboardModifier key, uint8_t state);
-	void DataProcessing::setKeyboardModifier(FrameNum frame, nn::hid::KeyboardModifier key, uint8_t state);
-	uint8_t DataProcessing::getKeyboardModifier(FrameNum frame) const;
-	uint8_t DataProcessing::getKeyboardModifierSpecific(FrameNum frame, nn::hid::KeyboardModifier key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
-	uint8_t DataProcessing::getKeyboardModifierCurrent(nn::hid::KeyboardModifier key) const;
+	invalidateRun(frame);
 
-	void DataProcessing::triggerMouseButton(nn::hid::MouseButton key, uint8_t state);
-	void DataProcessing::setMouseButton(FrameNum frame, nn::hid::MouseButton key, uint8_t state);
-	uint8_t DataProcessing::getMouseButton(FrameNum frame) const;
-	uint8_t DataProcessing::getMouseButtonSpecific(FrameNum frame, nn::hid::MouseButton key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
-	uint8_t DataProcessing::getMouseButtonCurrent(nn::hid::MouseButton key) const;
+	RefreshItem(frame);
+	modifyCurrentFrameViews(frame);
+}
 
+int32_t DataProcessing::getExtraValue(FrameNum frame, ExtraValues extraValue) const {
+	switch(extraValue) {
+	case TOUCH_X_1:
+		return getInputsExtraList()->at(frame)->touchX1;
+		break;
+	case TOUCH_Y_1:
+		return getInputsExtraList()->at(frame)->touchY1;
+		break;
+	case TOUCH_X_2:
+		return getInputsExtraList()->at(frame)->touchX2;
+		break;
+	case TOUCH_Y_2:
+		return getInputsExtraList()->at(frame)->touchY2;
+		break;
+	case MOUSE_X:
+		return getInputsExtraList()->at(frame)->mouseX;
+		break;
+	case MOUSE_Y:
+		return getInputsExtraList()->at(frame)->mouseY;
+		break;
+	case MOUSE_VELOCITY_X:
+		return getInputsExtraList()->at(frame)->mouseVelocityX;
+		break;
+	case MOUSE_VELOCITY_Y:
+		return getInputsExtraList()->at(frame)->mouseVelocityY;
+		break;
+	case SCROLL_VELOCITY_X:
+		return getInputsExtraList()->at(frame)->scrollVelocityX;
+		break;
+	case SCROLL_VELOCITY_Y:
+		return getInputsExtraList()->at(frame)->scrollVelocityY;
+		break;
+	}
+}
 
+int32_t DataProcessing::getExtraValueSpecific(FrameNum frame, ExtraValues extraValue, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
+	switch(extraValue) {
+	case TOUCH_X_1:
+		return getControllerDataExtra(savestateHookNum, branch, frame)->touchX1;
+		break;
+	case TOUCH_Y_1:
+		return getControllerDataExtra(savestateHookNum, branch, frame)->touchY1;
+		break;
+	case TOUCH_X_2:
+		return getControllerDataExtra(savestateHookNum, branch, frame)->touchX2;
+		break;
+	case TOUCH_Y_2:
+		return getControllerDataExtra(savestateHookNum, branch, frame)->touchY2;
+		break;
+	case MOUSE_X:
+		return getControllerDataExtra(savestateHookNum, branch, frame)->mouseX;
+		break;
+	case MOUSE_Y:
+		return getControllerDataExtra(savestateHookNum, branch, frame)->mouseY;
+		break;
+	case MOUSE_VELOCITY_X:
+		return getControllerDataExtra(savestateHookNum, branch, frame)->mouseVelocityX;
+		break;
+	case MOUSE_VELOCITY_Y:
+		return getControllerDataExtra(savestateHookNum, branch, frame)->mouseVelocityY;
+		break;
+	case SCROLL_VELOCITY_X:
+		return getControllerDataExtra(savestateHookNum, branch, frame)->scrollVelocityX;
+		break;
+	case SCROLL_VELOCITY_Y:
+		return getControllerDataExtra(savestateHookNum, branch, frame)->scrollVelocityY;
+		break;
+	}
+}
 
+int32_t DataProcessing::getExtraValueCurrent(ExtraValues extraValue) const {
+	return getExtraValue(currentFrame, extraValue);
+}
 
+void DataProcessing::triggerKeyboardButton(nn::hid::KeyboardKey key, uint8_t state) {
+	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if(firstSelectedItem != wxNOT_FOUND) {
+		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
+		for(FrameNum i = firstSelectedItem; i <= lastSelectedItem; i++) {
+			setKeyboardButton(i, key, state);
+		}
+	}
+}
 
+void DataProcessing::setKeyboardButton(FrameNum frame, nn::hid::KeyboardKey key, uint8_t state) {
+	SET_KEYBOARD_HELD(getInputsExtraList()->at(frame)->keyboardKeys, key, state);
 
+	invalidateRun(frame);
 
+	RefreshItem(frame);
+	modifyCurrentFrameViews(frame);
+}
+uint8_t DataProcessing::getKeyboardButton(FrameNum frame, nn::hid::KeyboardKey key) const {
+	return IS_KEYBOARD_HELD(getInputsExtraList()->at(frame)->keyboardKeys, key);
+}
+
+uint8_t DataProcessing::getKeyboardButtonSpecific(FrameNum frame, nn::hid::KeyboardKey key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
+	return IS_KEYBOARD_HELD(getControllerDataExtra(savestateHookNum, branch, frame)->keyboardKeys, key);
+}
+
+uint8_t DataProcessing::getKeyboardButtonCurrent(nn::hid::KeyboardKey key) const {
+	return getKeyboardButton(currentFrame, key);
+}
+
+void DataProcessing::triggerKeyboardModifier(nn::hid::KeyboardModifier key, uint8_t state) {
+	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if(firstSelectedItem != wxNOT_FOUND) {
+		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
+		for(FrameNum i = firstSelectedItem; i <= lastSelectedItem; i++) {
+			setKeyboardModifier(i, key, state);
+		}
+	}
+}
+
+void DataProcessing::setKeyboardModifier(FrameNum frame, nn::hid::KeyboardModifier key, uint8_t state) {
+	if (state) {
+		getInputsExtraList()->at(frame)->keyboardModifiers |= key; 
+	} else {
+		getInputsExtraList()->at(frame)->keyboardModifiers &= ~key;
+	}
+
+	invalidateRun(frame);
+
+	RefreshItem(frame);
+	modifyCurrentFrameViews(frame);
+}
+
+uint8_t DataProcessing::getKeyboardModifier(FrameNum frame, nn::hid::KeyboardModifier key) const {
+	return getInputsExtraList()->at(frame)->keyboardModifiers & key;
+}
+uint8_t DataProcessing::getKeyboardModifierSpecific(FrameNum frame, nn::hid::KeyboardModifier key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
+	return getControllerDataExtra(savestateHookNum, branch, frame)->keyboardModifiers & key;
+}
+
+uint8_t DataProcessing::getKeyboardModifierCurrent(nn::hid::KeyboardModifier key) const {
+	return getKeyboardModifier(currentFrame, key);
+}
+
+void DataProcessing::triggerMouseButton(nn::hid::MouseButton key, uint8_t state) {
+	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	if(firstSelectedItem != wxNOT_FOUND) {
+		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
+		for(FrameNum i = firstSelectedItem; i <= lastSelectedItem; i++) {
+			setMouseButton(i, key, state);
+		}
+	}
+}
+
+void DataProcessing::setMouseButton(FrameNum frame, nn::hid::MouseButton key, uint8_t state) {
+	if (state) {
+		getInputsExtraList()->at(frame)->mouseButtons |= key; 
+	} else {
+		getInputsExtraList()->at(frame)->mouseButtons &= ~key;
+	}
+
+	invalidateRun(frame);
+
+	RefreshItem(frame);
+	modifyCurrentFrameViews(frame);	
+}
+
+uint8_t DataProcessing::getMouseButton(FrameNum frame, nn::hid::MouseButton key) const {
+	return getInputsExtraList()->at(frame)->mouseButtons & key;
+}
+
+uint8_t DataProcessing::getMouseButtonSpecific(FrameNum frame, nn::hid::MouseButton key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
+	return getControllerDataExtra(savestateHookNum, branch, frame)->mouseButtons & key;
+}
+
+uint8_t DataProcessing::getMouseButtonCurrent(nn::hid::MouseButton key) const {
+	return getMouseButton(currentFrame, key);
+}
 
 uint8_t DataProcessing::getButton(FrameNum frame, Btn button) const {
 	return GET_BIT(getInputsList()->at(frame)->buttons, button);

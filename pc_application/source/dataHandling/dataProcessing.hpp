@@ -169,6 +169,10 @@ public:
 		return *allPlayers[viewingPlayerIndex];
 	}
 
+	void setAllExtraData(ExtraFrameDataContainer extraFrameData) {
+		allExtraFrameData = extraFrameData;
+	}
+
 	void setAllPlayers(AllPlayers players) {
 		// Called by projectHandlerplayers when loading
 		// It has to have at least one block with one input
@@ -181,6 +185,10 @@ public:
 
 	AllPlayers& getAllPlayers() {
 		return allPlayers;
+	}
+
+	ExtraFrameDataContainer& getAllExtraFrameData() {
+		return allExtraFrameData;
 	}
 
 	uint8_t getCurrentPlayer() {
@@ -342,25 +350,25 @@ public:
 
 	void triggerExtraValue(ExtraValues extraValue, int32_t value);
 	void setExtraValue(FrameNum frame, ExtraValues extraValue, int32_t value);
-	int32_t getExtraValue(FrameNum frame) const;
+	int32_t getExtraValue(FrameNum frame, ExtraValues extraValue) const;
 	int32_t getExtraValueSpecific(FrameNum frame, ExtraValues extraValue, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
 	int32_t getExtraValueCurrent(ExtraValues extraValue) const;
 
 	void triggerKeyboardButton(nn::hid::KeyboardKey key, uint8_t state);
 	void setKeyboardButton(FrameNum frame, nn::hid::KeyboardKey key, uint8_t state);
-	uint8_t getKeyboardButton(FrameNum frame) const;
+	uint8_t getKeyboardButton(FrameNum frame, nn::hid::KeyboardKey key) const;
 	uint8_t getKeyboardButtonSpecific(FrameNum frame, nn::hid::KeyboardKey key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
 	uint8_t getKeyboardButtonCurrent(nn::hid::KeyboardKey key) const;
 
 	void triggerKeyboardModifier(nn::hid::KeyboardModifier key, uint8_t state);
 	void setKeyboardModifier(FrameNum frame, nn::hid::KeyboardModifier key, uint8_t state);
-	uint8_t getKeyboardModifier(FrameNum frame) const;
+	uint8_t getKeyboardModifier(FrameNum frame, nn::hid::KeyboardModifier key) const;
 	uint8_t getKeyboardModifierSpecific(FrameNum frame, nn::hid::KeyboardModifier key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
 	uint8_t getKeyboardModifierCurrent(nn::hid::KeyboardModifier key) const;
 
 	void triggerMouseButton(nn::hid::MouseButton key, uint8_t state);
 	void setMouseButton(FrameNum frame, nn::hid::MouseButton key, uint8_t state);
-	uint8_t getMouseButton(FrameNum frame) const;
+	uint8_t getMouseButton(FrameNum frame, nn::hid::MouseButton key) const;
 	uint8_t getMouseButtonSpecific(FrameNum frame, nn::hid::MouseButton key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
 	uint8_t getMouseButtonCurrent(nn::hid::MouseButton key) const;
 

@@ -27,9 +27,61 @@ void ProjectHandler::loadProject() {
 	// First, find each savestate hook block
 	rapidjson::Document jsonSettings = HELPERS::getSettingsFile(settingsFileName.GetFullPath().ToStdString());
 
-	auto playersArray = jsonSettings["players"].GetArray();
+	auto extraFrameDataArray = jsonSettings["extraFrameData"].GetArray();
+	ExtraFrameDataContainer extraFrameDatas(extraFrameDataArray.Size());
 
-	// The players to create
+	SavestateBlockNum savestateHookIndex = 0;
+		for(auto const& savestate : extraFrameDataArray) {
+			auto branchesArray = savestate["branches"].GetArray();
+
+			// Not actually a savestate hook, just the vector of branches
+			std::shared_ptr<std::vector<std::shared_ptr<std::vector<ExtraFrameData>>> savestateHook = std::make_shared<std::vector<std::shared_ptr<std::vector<ExtraFrameData>>>();
+
+			for(auto const& branch : branchesArray) {
+				wxString path = projectDir.GetPathWithSep() + wxString::FromUTF8(branch["filename"].GetString());
+				if(wxFileName(path).FileExists()) {
+					// Load up the inputs
+					wxFFileInputStream inputsFileStream(path, "rb");
+					wxZlibInputStream inputsDecompressStream(inputsFileStream, wxZLIB_ZLIB);
+
+					wxMemoryOutputStream dataStream;
+					dataStream.Write(inputsDecompressStream);
+
+					wxStreamBuffer* streamBuffer = dataStream.GetOutputStreamBuffer();
+					uint8_t* bufferPointer       = (uint8_t*)streamBuffer->GetBufferStart();
+					std::size_t bufferSize       = streamBuffer->GetBufferSize();
+
+					ExtraBranchData inputs = std::make_shared<std::vector<std::shared_ptr<TouchAndKeyboardData>>>();
+
+					// Loop through each part and unserialize it
+					// This is 0% endian safe :)
+					std::size_t sizeRead = 0;
+					while(sizeRead != bufferSize) {
+						// Find the size part first
+						uint8_t sizeOfControllerData = bufferPointer[sizeRead];
+						// Possibility that I will save filespace by making sizeOfControllerData==0 be an empty controller data
+						sizeRead += sizeof(sizeOfControllerData);
+						// Load the data
+						std::shared_ptr<ControllerData> controllerData = std::make_shared<TouchAndKeyboardData>();
+
+						serializeProtocol.binaryToData<ControllerData>(*controllerData, &bufferPointer[sizeRead], sizeOfControllerData);
+						// For now, just add each frame one at a time, no optimization
+						inputs->push_back(controllerData);
+						sizeRead += sizeOfControllerData;
+					}
+
+					savestateHook->push_back(inputs);
+				}
+			}
+			
+			extraFrameDatas[savestateHookIndex] = savestateHook;
+
+			savestateHookIndex++;
+		}
+
+		dataProcessing->setAllExtraData(extraFrameDatas);
+
+	auto playersArray = jsonSettings["players"].GetArray();
 	AllPlayers players(playersArray.Size());
 
 	uint8_t playerIndex = 0;
@@ -87,7 +139,7 @@ void ProjectHandler::loadProject() {
 			wxImage screenshotImage(projectDir.GetPathWithSep() + wxString::FromUTF8(savestate["screenshot"].GetString()), wxBITMAP_TYPE_JPEG);
 			savestateHook->screenshot = new wxBitmap(screenshotImage);
 
-			savestateHook->runFinalTasDelayFrames = savestate.HasMember("runFinalTasDelayFrames") ? savestate["runFinalTasDelayFrames"].GetUint64() : 0;
+			savestateHook->runFinalTasDelayFrames = savestate["runFinalTasDelayFrames"].GetUint64();
 
 			(*savestateHookBlocks)[savestateHookIndex] = savestateHook;
 
@@ -247,7 +299,75 @@ void ProjectHandler::saveProject() {
 			playerIndexNum++;
 		}
 
+		rapidjson::Value extraFrameDataJSON(rapidjson::kArrayType);
+
+		ExtraFrameDataContainer& allExtraFrameData = dataProcessing->getAllExtraFrameData();
+		SavestateBlockNum savestateHookIndexNum = 0;
+			for(auto const& savestateHookBlock : allExtraFrameData) {
+				rapidjson::Value branchesJSON(rapidjson::kArrayType);
+
+				BranchNum branchIndexNum = 0;
+				for(auto const& branch : *savestateHookBlock) {
+					// Create path as "extra_frame_data/savestate_block_[num]/branch_[num]"
+					wxFileName inputsFilename = getProjectStart();
+					inputsFilename.AppendDir("extra_frame_data");
+					inputsFilename.AppendDir(wxString::Format("savestate_block_%hu", savestateHookIndexNum));
+
+					if(branchIndexNum == 0) {
+						inputsFilename.AppendDir("branch_main");
+					} else {
+						inputsFilename.AppendDir(wxString::Format("branch_%hu", branchIndexNum));
+					}
+
+					inputsFilename.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+					inputsFilename.SetName("inputs");
+					inputsFilename.SetExt("bin");
+
+					// Delete file if already present and use binary mode
+					wxFFileOutputStream inputsFileStream(inputsFilename.GetFullPath(), "wb");
+					wxZlibOutputStream inputsCompressStream(inputsFileStream, compressionLevel, wxZLIB_ZLIB);
+
+					// Kinda annoying, but actually break up the vector and add each part with the size
+					for(auto const& extraFrameData : *branch) {
+						uint8_t* data;
+						uint32_t dataSize;
+						serializeProtocol.dataToBinary<TouchAndKeyboardData>(*controllerData, &data, &dataSize);
+						uint8_t sizeToPrint = (uint8_t)dataSize;
+						// Probably endian issues
+						inputsCompressStream.WriteAll(&sizeToPrint, sizeof(sizeToPrint));
+						inputsCompressStream.WriteAll(data, dataSize);
+					}
+
+					inputsCompressStream.Sync();
+					inputsCompressStream.Close();
+					inputsFileStream.Close();
+
+					rapidjson::Value branchJSON(rapidjson::kObjectType);
+					inputsFilename.MakeRelativeTo(getProjectStart().GetFullPath());
+
+					rapidjson::Value inputs;
+					wxString inputsPath = inputsFilename.GetFullPath(wxPATH_UNIX);
+					inputs.SetString(inputsPath.c_str(), inputsPath.size(), settingsJSON.GetAllocator());
+
+					branchJSON.AddMember("filename", inputs, settingsJSON.GetAllocator());
+
+					branchesJSON.PushBack(branchJSON, settingsJSON.GetAllocator());
+
+					branchIndexNum++;
+				}
+
+				// Add the item in the savestateHooks JSON
+				rapidjson::Value savestateHookJSON(rapidjson::kObjectType);
+
+				savestateHookJSON.AddMember("branches", branchesJSON, settingsJSON.GetAllocator());
+
+				extraFrameDataJSON.PushBack(savestateHookJSON, settingsJSON.GetAllocator());
+
+				savestateHookIndexNum++;
+			}
+
 		settingsJSON.AddMember("players", playersJSON, settingsJSON.GetAllocator());
+		settingsJSON.AddMember("extraFrameData", extraFrameDataJSON, settingsJSON.GetAllocator());
 
 		rapidjson::Value lastPlayerIndex;
 		lastPlayerIndex.SetUint(dataProcessing->getCurrentPlayer());
