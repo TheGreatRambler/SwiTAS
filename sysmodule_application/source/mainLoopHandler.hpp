@@ -11,7 +11,6 @@
 
 #ifdef __SWITCH__
 #include "../saltynx_plugin/source/sdkTypes.hpp"
-#include "dmntcht/dmntcht.hpp"
 #include <plog/Log.h>
 #include <switch.h>
 #endif

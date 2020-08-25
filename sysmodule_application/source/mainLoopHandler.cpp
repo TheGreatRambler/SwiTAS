@@ -84,6 +84,9 @@ void MainLoop::mainLoopHandler() {
 #ifdef __SWITCH__
 			if(R_SUCCEEDED(pminfoGetProgramId(&applicationProgramId, applicationProcessId))) {
 				if(!applicationOpened) {
+					// Wait for half a second
+					svcSleepThread((s64)1000000 * 500);
+
 					// Check if this file exists first of all
 					LOGD << "Debug application at process: " << std::to_string(applicationProcessId);
 
