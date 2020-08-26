@@ -1,6 +1,6 @@
 #include "bottomUI.hpp"
 
-MotionAndTouchWidget::MotionAndTouchWidget(wxFrame* parentFrame, DataProcessing* input)
+ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input)
 	: wxFrame(parentFrame, wxID_ANY, "Motion and Touch Editor", wxDefaultPosition, wxSize(800, 400), wxDEFAULT_FRAME_STYLE | wxFRAME_FLOAT_ON_PARENT) {
 	inputInstance = input;
 
@@ -163,7 +163,7 @@ MotionAndTouchWidget::MotionAndTouchWidget(wxFrame* parentFrame, DataProcessing*
 	Layout();
 }
 
-void MotionAndTouchWidget::motionValueChanged(wxSpinDoubleEvent& event) {
+void ExtraInputMethods::motionValueChanged(wxSpinDoubleEvent& event) {
 	wxSpinCtrlDouble* widget = (wxSpinCtrlDouble*)event.GetEventObject();
 	if(widget == accelXLeftCtrl) {
 		inputInstance->triggerNumberValuesMotion(ControllerNumberValues::ACCEL_X_LEFT, (float)widget->GetValue());
@@ -206,7 +206,7 @@ void MotionAndTouchWidget::motionValueChanged(wxSpinDoubleEvent& event) {
 	}
 }
 
-void MotionAndTouchWidget::updateMotionValues() {
+void ExtraInputMethods::updateAllValues() {
 	accelXLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(ControllerNumberValues::ACCEL_X_LEFT));
 	accelYLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(ControllerNumberValues::ACCEL_Y_LEFT));
 	accelZLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(ControllerNumberValues::ACCEL_Z_LEFT));

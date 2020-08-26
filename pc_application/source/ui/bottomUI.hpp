@@ -23,7 +23,7 @@
 #include "../helpers.hpp"
 #include "drawingCanvas.hpp"
 
-class MotionAndTouchWidget : public wxFrame {
+class ExtraInputMethods : public wxFrame {
 private:
 	DataProcessing* inputInstance;
 
@@ -59,12 +59,14 @@ private:
 	wxSpinCtrlDouble* angleYRightCtrl;
 	wxSpinCtrlDouble* angleZRightCtrl;
 
+
+
 	void motionValueChanged(wxSpinDoubleEvent& event);
 
 public:
-	MotionAndTouchWidget(wxFrame* parentFrame, DataProcessing* input);
+	ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input);
 
-	void updateMotionValues();
+	void updateAllValues();
 };
 
 class ButtonGrid : public DrawingCanvas {

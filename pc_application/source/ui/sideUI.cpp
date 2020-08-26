@@ -1,9 +1,5 @@
 #include "sideUI.hpp"
 
-ExtraInputMethods::ExtraInputMethods(wxFrame* parent, DataProcessing* dataProcessing) : wxFrame(parent, wxID_ANY, "Extra Input Methods", wxDefaultPosition, wxSize(600, 400), wxDEFAULT_FRAME_STYLE | wxFRAME_FLOAT_ON_PARENT) {
-	inputData = dataProcessing;
-}
-
 FrameCanvas::FrameCanvas(wxFrame* parent, DataProcessing* dataProcessing)
 	: DrawingCanvas(parent, wxDefaultSize) {
 	currentFirst = 0;
