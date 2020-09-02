@@ -84,8 +84,7 @@ void MainLoop::mainLoopHandler() {
 #ifdef __SWITCH__
 			if(R_SUCCEEDED(pminfoGetProgramId(&applicationProgramId, applicationProcessId))) {
 				if(!applicationOpened) {
-					// Wait for half a second
-					svcSleepThread((s64)1000000 * 500);
+					svcSleepThread((s64)1000000 * 1000);
 
 					// Check if this file exists first of all
 					LOGD << "Debug application at process: " << std::to_string(applicationProcessId);
@@ -93,10 +92,6 @@ void MainLoop::mainLoopHandler() {
 					rc = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
 					if(R_FAILED(rc))
 						fatalThrow(rc);
-
-					LOGD << "Continue debug event";
-					// https://github.com/Atmosphere-NX/Atmosphere/blob/3fd4002bc974e0478e67733f7757db898da6b703/stratosphere/dmnt/source/cheat/impl/dmnt_cheat_debug_events_manager.cpp#L87
-					svcContinueDebugEvent(applicationDebug, 5, nullptr, 0);
 
 					LOGD << "Get game name";
 					gameName = std::string(getAppName(applicationProgramId));
@@ -148,6 +143,11 @@ void MainLoop::mainLoopHandler() {
 						proc_module = &proc_modules[0];
 					}
 					mainBase = proc_module->base_address;
+
+					LOGD << "Unpause app";
+					rc = svcCloseHandle(applicationDebug);
+					if(R_FAILED(rc))
+						fatalThrow(rc);
 
 					LOGD << "Application " + gameName + " opened";
 					ADD_TO_QUEUE(RecieveApplicationConnected, networkInstance, {
@@ -242,7 +242,8 @@ void MainLoop::mainLoopHandler() {
 	}
 
 #ifdef __SWITCH__
-	svcSleepThread(1000000 * 5);
+	// Sleep for 5 milliseconds
+	svcSleepThread((s64)1000000 * 5);
 #endif
 
 	// I dunno how often to update this honestly
@@ -661,8 +662,8 @@ void MainLoop::clearEveryController() {
 void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, uint8_t autoAdvance, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex) {
 	if(!isPaused) {
 #ifdef __SWITCH__
-		LOGD << "Pausing via DMNT";
-		rc = svcBreakDebugProcess(applicationDebug);
+		LOGD << "Pausing";
+		rc = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
 		if(R_FAILED(rc))
 			fatalThrow(rc);
 		isPaused = true;

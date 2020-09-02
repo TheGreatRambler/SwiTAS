@@ -86,9 +86,9 @@ namespace calculator {
 	public:
 		error(const std::string& expr, const std::string& message)
 			: std::runtime_error(message)
-			, expr_(expr) {}
+			, expr_(expr) { }
 #if __cplusplus < 201103L
-		~error() throw() {}
+		~error() throw() { }
 #endif
 		std::string expression() const {
 			return expr_;
@@ -164,7 +164,7 @@ namespace calculator {
 			Operator(int opr, int prec, int assoc)
 				: op(opr)
 				, precedence(prec)
-				, associativity(assoc) {}
+				, associativity(assoc) { }
 		};
 
 		struct OperatorValue {
@@ -172,7 +172,7 @@ namespace calculator {
 			T value;
 			OperatorValue(const Operator& opr, T val)
 				: op(opr)
-				, value(val) {}
+				, value(val) { }
 			int getPrecedence() const {
 				return op.precedence;
 			}
@@ -427,6 +427,7 @@ namespace calculator {
 
 				uint64_t newAddr;
 #ifdef __SWITCH__
+				// Assume the app is debugged
 				svcReadDebugProcessMemory(&newAddr, applicationDebug, parseExpr(), sizeof(uint64_t));
 #endif
 #ifdef YUZU

@@ -2,6 +2,13 @@
 
 #define SET_BIT(number, bit, loc) (number) ^= (-(unsigned long)(bit) ^ (number)) & (1UL << (loc))
 #define GET_BIT(number, loc) ((number) >> (loc)) & 1U
+#define IS_KEYBOARD_HELD(data, key) data[key / 32] & (1 << (key % 32));
+#define SET_KEYBOARD_HELD(data, key, state) \
+	if (state) { \
+		data[key / 32] |= (1 << (key % 32)); \
+	} else { \
+		data[key / 32] &= ~(1 << (key % 32)); \
+	}
 
 #include "include/zpp.hpp"
 #include <cstdint>
@@ -90,9 +97,13 @@ struct ControllerData : public zpp::serializer::polymorphic {
 	}
 };
 
+// Stored in parrallel to the rest of the data, just not sharing the player
 struct TouchAndKeyboardData : public zpp::serializer::polymorphic {
-	int32_t touchX;
-	int32_t touchY;
+	int32_t touchX1;
+	int32_t touchY1;
+	int32_t touchX2;
+	int32_t touchY2;
+	uint8_t numberOfTouches;
 	int32_t keyboardModifiers;
 	uint32_t keyboardKeys[8];
 	int32_t mouseX;
@@ -106,7 +117,8 @@ struct TouchAndKeyboardData : public zpp::serializer::polymorphic {
 	friend zpp::serializer::access;
 	template <typename Archive, typename Self> static void serialize(Archive& archive, Self& self) {
 		// clang-format off
-			archive(self.touchX, self.touchY, self.keyboardModifiers,
+			archive(self.touchX1, self.touchY1, self.touchX2, self.touchY2,
+				self.keyboardModifiers, self.numberOfTouches,
 				self.keyboardKeys, self.mouseX, self.mouseY, self.mouseVelocityX,
 				self.mouseVelocityY, self.scrollVelocityX, self.scrollVelocityY,
 				self.mouseButtons);

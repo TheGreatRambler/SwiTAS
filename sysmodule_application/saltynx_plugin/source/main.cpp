@@ -148,6 +148,8 @@ void moveKeyboardBacklog(nn::hid::KeyboardState* state) {
 void fixMotionState(nn::hid::SixAxisSensorState* dest, nn::hid::SixAxisSensorState* orig) {
 	dest->deltaTimeNanoSeconds = orig->deltaTimeNanoSeconds;
 	dest->samplingNumber       = orig->samplingNumber;
+	// I dunno
+	dest->attributes |= (uint8_t)nn::hid::SixAxisSensorAttribute::IsInterpolated;
 	// System default
 	dest->direction.x = { 1.0, 0.0, 0.0 };
 	dest->direction.y = { 0.0, 1.0, 0.0 };
@@ -164,15 +166,13 @@ void fixTouchState(nn::hid::TouchScreenState16Touch* dest, void* orig, int32_t n
 
 	for(int32_t i = 0; i < dest->count; i++) {
 		// TODO the following need to be made into defaults
-		/*
-		dest.touches[i].attributes = 0;
-		dest.touches[i].rotationAngle;
-		dest.touches[i].diameterX = 0;
-		dest.touches[i].diameterY = 0;
+		dest->touches[i].attributes    = 0;
+		dest->touches[i].rotationAngle = 0;
+		dest->touches[i].diameterX     = 15;
+		dest->touches[i].diameterY     = 15;
 
-		dest.touches[i].fingerId             = i;
-		dest.touches[i].deltaTimeNanoSeconds = accessDuration;
-		*/
+		dest->touches[i].touchIndex           = i;
+		dest->touches[i].deltaTimeNanoSeconds = accessDuration;
 	}
 }
 
@@ -345,30 +345,31 @@ void GetTouchScreenState1Touch(nn::hid::TouchScreenState1Touch* state) {
 	}
 
 	_ZN2nn3hid19GetTouchScreenStateILm1EEEvPNS0_16TouchScreenStateIXT_EEE(state);
+	/*
+		if(canWriteToLog()) {
+			if(state->count == 1) {
+				nn::hid::TouchState& touchState = state->touches[0];
 
-	if(canWriteToLog()) {
-		if(state->count == 1) {
-			nn::hid::TouchState& touchState = state->touches[0];
+				// clang-format off
+					std::string diagInfo =
+						"count: " + std::to_string(state->count) + "\n" +
+						"samplingNumber: " + std::to_string(state->samplingNumber) + "\n" +
+						"attributes: " + std::to_string(touchState.attributes) + "\n" +
+						"deltaTimeNanoSeconds: " + std::to_string(touchState.deltaTimeNanoSeconds) + "\n" +
+						"diameterX: " + std::to_string(touchState.diameterX) + "\n" +
+						"diameterY: " + std::to_string(touchState.diameterY) + "\n" +
+						"touchIndex: " + std::to_string(touchState.touchIndex) + "\n" +
+						"rotationAngle: " + std::to_string(touchState.rotationAngle) + "\n" +
+						"x: " + std::to_string(touchState.x) + "\n" +
+						"y: " + std::to_string(touchState.y) + "\n";
+				// clang-format on
 
-			// clang-format off
-				std::string diagInfo =
-					"count: " + std::to_string(state->count) + "\n" +
-					"samplingNumber: " + std::to_string(state->samplingNumber) + "\n" +
-					"attributes: " + std::to_string(touchState.attributes) + "\n" +
-					"deltaTimeNanoSeconds: " + std::to_string(touchState.deltaTimeNanoSeconds) + "\n" +
-					"diameterX: " + std::to_string(touchState.diameterX) + "\n" +
-					"diameterY: " + std::to_string(touchState.diameterY) + "\n" +
-					"touchIndex: " + std::to_string(touchState.touchIndex) + "\n" +
-					"rotationAngle: " + std::to_string(touchState.rotationAngle) + "\n" +
-					"x: " + std::to_string(touchState.x) + "\n" +
-					"y: " + std::to_string(touchState.y) + "\n";
-			// clang-format on
-
-			writeToLog(diagInfo.c_str());
-		} else {
-			writeToLog("Not a suitable amount of touches");
+				writeToLog(diagInfo.c_str());
+			} else {
+				writeToLog("Not a suitable amount of touches");
+			}
 		}
-	}
+	*/
 }
 
 uintptr_t ptr_nvnDeviceGetProcAddress;
@@ -421,7 +422,7 @@ void writePointerToFile(void* ptr, FILE* file) {
 }
 
 int main(int argc, char* argv[]) {
-	// writeToLog("Alive\n");
+	writeToLog("Alive\n");
 
 	const char* pointersPath = "sdmc:/SaltySD/SwiTAS_SaltyPlugin_Offsets.hex";
 	FILE* offsets            = SaltySDCore_fopen(pointersPath, "wb");
@@ -503,5 +504,5 @@ int main(int argc, char* argv[]) {
 	SaltySDCore_ReplaceImport("eglSwapBuffers", (void*)eglSwap);
 	SaltySDCore_ReplaceImport("vkQueuePresentKHR", (void*)vulkanSwap);
 
-	// writeToLog("Injection finished\n");
+	writeToLog("Injection finished\n");
 }

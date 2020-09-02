@@ -1,6 +1,7 @@
 {
 	"version": "2.0.0",
-	"tasks": [{
+	"tasks": [
+		{
 			"label": "Build Sysmodule Debug",
 			"type": "shell",
 			"promptOnClose": true,
@@ -10,13 +11,15 @@
 				"reveal": "always",
 				"panel": "dedicated"
 			},
-			"problemMatcher": [{
-				"base": "$gcc",
-				"fileLocation": [
-					"autoDetect",
-					"${workspaceFolder}"
-				]
-			}]
+			"problemMatcher": [
+				{
+					"base": "$gcc",
+					"fileLocation": [
+						"autoDetect",
+						"${workspaceFolder}"
+					]
+				}
+			]
 		},
 		{
 			"label": "Build Sysmodule Release",
@@ -27,13 +30,15 @@
 				"reveal": "always",
 				"panel": "dedicated"
 			},
-			"problemMatcher": [{
-				"base": "$gcc",
-				"fileLocation": [
-					"autoDetect",
-					"${workspaceFolder}"
-				]
-			}],
+			"problemMatcher": [
+				{
+					"base": "$gcc",
+					"fileLocation": [
+						"autoDetect",
+						"${workspaceFolder}"
+					]
+				}
+			],
 			"group": {
 				"kind": "build",
 				"isDefault": true
@@ -49,13 +54,15 @@
 				"reveal": "always",
 				"panel": "dedicated"
 			},
-			"problemMatcher": [{
-				"base": "$gcc",
-				"fileLocation": [
-					"autoDetect",
-					"${workspaceFolder}"
-				]
-			}]
+			"problemMatcher": [
+				{
+					"base": "$gcc",
+					"fileLocation": [
+						"autoDetect",
+						"${workspaceFolder}"
+					]
+				}
+			]
 		},
 		{
 			"label": "Build Dll Release",
@@ -66,13 +73,15 @@
 				"reveal": "always",
 				"panel": "dedicated"
 			},
-			"problemMatcher": [{
-				"base": "$gcc",
-				"fileLocation": [
-					"autoDetect",
-					"${workspaceFolder}"
-				]
-			}],
+			"problemMatcher": [
+				{
+					"base": "$gcc",
+					"fileLocation": [
+						"autoDetect",
+						"${workspaceFolder}"
+					]
+				}
+			],
 			"group": {
 				"kind": "build",
 				"isDefault": true
@@ -88,13 +97,15 @@
 				"reveal": "always",
 				"panel": "dedicated"
 			},
-			"problemMatcher": [{
-				"base": "$gcc",
-				"fileLocation": [
-					"autoDetect",
-					"${workspaceFolder}"
-				]
-			}]
+			"problemMatcher": [
+				{
+					"base": "$gcc",
+					"fileLocation": [
+						"autoDetect",
+						"${workspaceFolder}"
+					]
+				}
+			]
 		},
 		{
 			"label": "Build SaltyNX-Plugin Release",
@@ -105,13 +116,15 @@
 				"reveal": "always",
 				"panel": "dedicated"
 			},
-			"problemMatcher": [{
-				"base": "$gcc",
-				"fileLocation": [
-					"autoDetect",
-					"${workspaceFolder}"
-				]
-			}],
+			"problemMatcher": [
+				{
+					"base": "$gcc",
+					"fileLocation": [
+						"autoDetect",
+						"${workspaceFolder}"
+					]
+				}
+			],
 			"group": {
 				"kind": "build",
 				"isDefault": true
