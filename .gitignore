@@ -3,9 +3,10 @@ pc_application/linuxBin
 pc_application/bin
 pc_application/sharedNetworkCode
 pc_application/compile_commands.json
-pc_application/mainSettings.json
+pc_application/switas_recent.json
 pc_application/*.snap
 pc_application/*.zip
+pc_application/*.deb
 
 sysmodule_application/SwiTAS.elf
 sysmodule_application/SwiTAS.npdm
@@ -14,4 +15,9 @@ sysmodule_application/SwiTAS.nsp
 sysmodule_application/buildYuzu
 sysmodule_application/buildSysmodule
 sysmodule_application/sharedNetworkCode
+sysmodule_application/release
 sysmodule_application/*.zip
+sysmodule_application/upload.sh
+sysmodule_application/saltynx_plugin/build
+
+.gitpod.yml

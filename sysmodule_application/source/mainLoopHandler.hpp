@@ -1,5 +1,20 @@
 #pragma once
 
+// clang-format off
+#define ACCESS_MEMORY_SAFE(body) \ 
+	if(!isPaused) { \
+		rc = svcDebugActiveProcess(&applicationDebug, applicationProcessId); \
+		if(R_FAILED(rc)) \
+			fatalThrow(rc); \
+	} \
+	body \
+	if(!isPaused) { \
+		rc = svcCloseHandle(applicationDebug); \
+		if(R_FAILED(rc)) \
+			fatalThrow(rc); \
+	}
+// clang-format on
+
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
@@ -117,22 +132,10 @@ private:
 
 	void updateGui();
 
-	// void prepareMemoryRegionMath(mu::Parser& parser, std::string func);
-
 	std::vector<uint8_t> getMemory(uint64_t addr, uint64_t size) {
 		std::vector<uint8_t> region(size);
 #ifdef __SWITCH__
-		if(!isPaused) {
-			rc = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
-			if(R_FAILED(rc))
-				fatalThrow(rc);
-		}
-		svcReadDebugProcessMemory(region.data(), applicationDebug, addr, size);
-		if(!isPaused) {
-			rc = svcCloseHandle(applicationDebug);
-			if(R_FAILED(rc))
-				fatalThrow(rc);
-		}
+		ACCESS_MEMORY_SAFE({ svcReadDebugProcessMemory(region.data(), applicationDebug, addr, size); })
 #endif
 #ifdef YUZU
 		yuzuSyscalls->function_rom_readbytes(yuzuSyscalls->getYuzuInstance(), region.data(), addr, size);
@@ -140,20 +143,19 @@ private:
 		return region;
 	}
 
+	void setMemory(uint64_t addr, std::vector<uint8_t> item) {
+#ifdef __SWITCH__
+		ACCESS_MEMORY_SAFE({ svcWriteDebugProcessMemory(applicationDebug, item.data(), addr, item.size()); })
+#endif
+#ifdef YUZU
+		yuzuSyscalls->function_rom_writebytes(yuzuSyscalls->getYuzuInstance(), addr, item.data(), item.size());
+#endif
+	}
+
 	template <typename T> T getMemoryType(uint64_t addr) {
 		T item;
 #ifdef __SWITCH__
-		if(!isPaused) {
-			rc = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
-			if(R_FAILED(rc))
-				fatalThrow(rc);
-		}
-		svcReadDebugProcessMemory(&item, applicationDebug, addr, sizeof(T));
-		if(!isPaused) {
-			rc = svcCloseHandle(applicationDebug);
-			if(R_FAILED(rc))
-				fatalThrow(rc);
-		}
+		ACCESS_MEMORY_SAFE({ svcReadDebugProcessMemory(&item, applicationDebug, addr, sizeof(T)); })
 #endif
 #ifdef YUZU
 		yuzuSyscalls->function_rom_readbytes(yuzuSyscalls->getYuzuInstance(), &item, addr, sizeof(T));
@@ -163,17 +165,7 @@ private:
 
 	template <typename T> void setMemoryType(uint64_t addr, T item) {
 #ifdef __SWITCH__
-		if(!isPaused) {
-			rc = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
-			if(R_FAILED(rc))
-				fatalThrow(rc);
-		}
-		svcWriteDebugProcessMemory(applicationDebug, &item, addr, sizeof(T));
-		if(!isPaused) {
-			rc = svcCloseHandle(applicationDebug);
-			if(R_FAILED(rc))
-				fatalThrow(rc);
-		}
+		ACCESS_MEMORY_SAFE({ svcWriteDebugProcessMemory(applicationDebug, &item, addr, sizeof(T)); })
 #endif
 #ifdef YUZU
 		yuzuSyscalls->function_rom_writebytes(yuzuSyscalls->getYuzuInstance(), addr, &item, sizeof(T));

@@ -61,8 +61,10 @@ namespace nn {
 		typedef uint32_t SixAxisSensorHandle;
 		typedef uint32_t ConsoleSixAxisSensorHandle;
 
+		// Both positive and negative
 		const float AccelerometerMax             = 7.0f;
 		const float AngularVelocityMax           = 5.0f;
+		// Angle is unbounded, but 1 is equal to one full rotation
 		const int32_t SixAxisSensorStateCountMax = 16;
 		const int32_t TouchStateCountMax         = 16;
 		const int32_t TouchScreenStateCountMax   = 16;

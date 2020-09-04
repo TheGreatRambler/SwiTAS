@@ -183,7 +183,6 @@ $(BUILD):
 	# Custom stuff, will need to be changed later if need be
 	mkdir -p switch/atmosphere/contents/4200000000000BAC/flags
 	cp SwiTAS.nsp switch/atmosphere/contents/4200000000000BAC/exefs.nsp
-	cp toolbox.json switch/atmosphere/contents/4200000000000BAC/toolbox.json
 	touch switch/atmosphere/contents/4200000000000BAC/flags/boot2.flag
 	mkdir -p switch/switas
 	cp -rp assets/controllerOverlay switch/switas

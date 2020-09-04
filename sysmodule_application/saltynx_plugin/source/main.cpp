@@ -27,7 +27,7 @@ uint8_t recordInputs = false;
 uint8_t frameHasPassed = false;
 
 uint16_t logStringIndex = 0;
-char logString[1000];
+char logString[1024];
 
 uint8_t wasJustLeft;
 uint8_t wasJustTASController;

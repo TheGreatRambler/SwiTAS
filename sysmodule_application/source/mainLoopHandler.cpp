@@ -931,29 +931,116 @@ void MainLoop::setTouchRecord() {
 }
 
 void MainLoop::getSixAxisState(int32_t controller, ControllerData* state) {
-	nn::hid::SixAxisSensorState sensorState;
+	size_t offset                                = sizeof(nn::hid::SixAxisSensorState) * nn::hid::SixAxisSensorStateCountMax * controller;
+	nn::hid::SixAxisSensorState sensorStateLeft  = getMemoryType<nn::hid::SixAxisSensorState>(saltynxsixAxisStateLeftJoyconBacklog + offset);
+	nn::hid::SixAxisSensorState sensorStateRight = getMemoryType<nn::hid::SixAxisSensorState>(saltynxsixAxisStateRightJoyconBacklog + offset);
+
+	state->ACCEL_X_LEFT  = sensorStateLeft.acceleration.x;
+	state->ACCEL_Y_LEFT  = sensorStateLeft.acceleration.y;
+	state->ACCEL_Z_LEFT  = sensorStateLeft.acceleration.z;
+	state->GYRO_X_LEFT   = sensorStateLeft.angularVelocity.x;
+	state->GYRO_Y_LEFT   = sensorStateLeft.angularVelocity.y;
+	state->GYRO_Z_LEFT   = sensorStateLeft.angularVelocity.z;
+	state->ANGLE_X_LEFT  = sensorStateLeft.angle.x;
+	state->ANGLE_Y_LEFT  = sensorStateLeft.angle.y;
+	state->ANGLE_Z_LEFT  = sensorStateLeft.angle.z;
+	state->ACCEL_X_RIGHT = sensorStateRight.acceleration.x;
+	state->ACCEL_Y_RIGHT = sensorStateRight.acceleration.y;
+	state->ACCEL_Z_RIGHT = sensorStateRight.acceleration.z;
+	state->GYRO_X_RIGHT  = sensorStateRight.angularVelocity.x;
+	state->GYRO_Y_RIGHT  = sensorStateRight.angularVelocity.y;
+	state->GYRO_Z_RIGHT  = sensorStateRight.angularVelocity.z;
+	state->ANGLE_X_RIGHT = sensorStateRight.angle.x;
+	state->ANGLE_Y_RIGHT = sensorStateRight.angle.y;
+	state->ANGLE_Z_RIGHT = sensorStateRight.angle.z;
 }
 
 void MainLoop::setSixAxisState(int32_t controller, ControllerData* state) {
-	nn::hid::SixAxisSensorState sensorState;
+	nn::hid::SixAxisSensorState sensorStateLeft;
+	nn::hid::SixAxisSensorState sensorStateRight;
+
+	sensorStateLeft.acceleration.x     = state->ACCEL_X_LEFT;
+	sensorStateLeft.acceleration.y     = state->ACCEL_Y_LEFT;
+	sensorStateLeft.acceleration.z     = state->ACCEL_Z_LEFT;
+	sensorStateLeft.angularVelocity.x  = state->GYRO_X_LEFT;
+	sensorStateLeft.angularVelocity.y  = state->GYRO_Y_LEFT;
+	sensorStateLeft.angularVelocity.z  = state->GYRO_Z_LEFT;
+	sensorStateLeft.angle.x            = state->ANGLE_X_LEFT;
+	sensorStateLeft.angle.y            = state->ANGLE_Y_LEFT;
+	sensorStateLeft.angle.z            = state->ANGLE_Z_LEFT;
+	sensorStateRight.acceleration.x    = state->ACCEL_X_RIGHT;
+	sensorStateRight.acceleration.y    = state->ACCEL_Y_RIGHT;
+	sensorStateRight.acceleration.z    = state->ACCEL_Z_RIGHT;
+	sensorStateRight.angularVelocity.x = state->GYRO_X_RIGHT;
+	sensorStateRight.angularVelocity.y = state->GYRO_Y_RIGHT;
+	sensorStateRight.angularVelocity.z = state->GYRO_Z_RIGHT;
+	sensorStateRight.angle.x           = state->ANGLE_X_RIGHT;
+	sensorStateRight.angle.y           = state->ANGLE_Y_RIGHT;
+	sensorStateRight.angle.z           = state->ANGLE_Z_RIGHT;
+
+	// Set to correct player
+	size_t offset = sizeof(nn::hid::SixAxisSensorState) * controller;
+	setMemoryType(saltynxsixAxisStateLeftJoycon + offset, sensorStateLeft);
+	setMemoryType(saltynxsixAxisStateRightJoycon + offset, sensorStateRight);
 }
 
 void MainLoop::getTouchState(TouchAndKeyboardData* state) {
-	nn::hid::TouchScreenState16Touch touchSensorState;
+	nn::hid::TouchScreenState16Touch touchSensorState = getMemoryType<nn::hid::TouchScreenState16Touch>(saltynxtouchScreenStateBacklog);
+
+	// Can't go over 2
+	if(touchSensorState.count > 2)
+		touchSensorState.count = 2;
+
+	state->touchX1         = touchSensorState.touches[0].x;
+	state->touchY1         = touchSensorState.touches[0].y;
+	state->touchX2         = touchSensorState.touches[1].x;
+	state->touchY2         = touchSensorState.touches[1].y;
+	state->numberOfTouches = touchSensorState.count;
 }
 
 void MainLoop::setTouchState(TouchAndKeyboardData* state) {
 	nn::hid::TouchScreenState16Touch touchSensorState;
+
+	touchSensorState.touches[0].x = state->touchX1;
+	touchSensorState.touches[0].y = state->touchY1;
+	touchSensorState.touches[1].x = state->touchX2;
+	touchSensorState.touches[1].y = state->touchY2;
+	touchSensorState.count        = state->numberOfTouches;
+
+	setMemoryType(saltynxtouchscreenState, touchSensorState);
 }
 
 void MainLoop::getKeyboardMouseState(TouchAndKeyboardData* state) {
-	nn::hid::KeyboardState keyboardSensorState;
-	nn::hid::MouseState mouseSensorState;
+	nn::hid::KeyboardState keyboardSensorState = getMemoryType<nn::hid::KeyboardState>(saltynxkeyboardStateBacklog);
+	nn::hid::MouseState mouseSensorState       = getMemoryType<nn::hid::MouseState>(saltynxmouseStateBacklog);
+
+	memcpy(state->keyboardKeys, keyboardSensorState.keys, sizeof(state->keyboardKeys));
+	state->keyboardModifiers = keyboardSensorState.modifiers;
+	state->mouseX            = mouseSensorState.x;
+	state->mouseY            = mouseSensorState.y;
+	state->mouseVelocityX    = mouseSensorState.velocityX;
+	state->mouseVelocityY    = mouseSensorState.velocityY;
+	state->scrollVelocityX   = mouseSensorState.scrollVelocityX;
+	state->scrollVelocityY   = mouseSensorState.scrollVelocityY;
+	state->mouseButtons      = mouseSensorState.buttons;
 }
 
 void MainLoop::setKeyboardMouseState(TouchAndKeyboardData* state) {
 	nn::hid::KeyboardState keyboardSensorState;
 	nn::hid::MouseState mouseSensorState;
+
+	memcpy(keyboardSensorState.keys, state->keyboardKeys, sizeof(state->keyboardKeys));
+	keyboardSensorState.modifiers    = state->keyboardModifiers;
+	mouseSensorState.x               = state->mouseX;
+	mouseSensorState.y               = state->mouseY;
+	mouseSensorState.velocityX       = state->mouseVelocityX;
+	mouseSensorState.velocityY       = state->mouseVelocityY;
+	mouseSensorState.scrollVelocityX = state->scrollVelocityX;
+	mouseSensorState.scrollVelocityY = state->scrollVelocityY;
+	mouseSensorState.buttons         = state->mouseButtons;
+
+	setMemoryType(saltynxkeyboardState, keyboardSensorState);
+	setMemoryType(saltynxmouseState, mouseSensorState);
 }
 
 MainLoop::~MainLoop() {
