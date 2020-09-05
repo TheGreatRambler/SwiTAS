@@ -59,9 +59,32 @@ private:
 	wxSpinCtrlDouble* angleYRightCtrl;
 	wxSpinCtrlDouble* angleZRightCtrl;
 
+	wxBoxSizer* firstTouchSizer;
+	wxBoxSizer* secondTouchSizer;
+	wxBoxSizer* touchesSizer;
+	wxBoxSizer* mainTouchSizer;
 
+	wxSpinCtrl* touchX1Ctrl;
+	wxSpinCtrl* touchY1Ctrl;
+	wxSpinCtrl* touchX2Ctrl;
+	wxSpinCtrl* touchY2Ctrl;
+	wxSpinCtrl* numberOfTouchesCtrl;
+
+	wxBoxSizer* mainMouseSizer;
+
+	wxSpinCtrl* mouseXCtrl;
+	wxSpinCtrl* mouseYCtrl;
+	wxSpinCtrl* mouseVelocityXCtrl;
+	wxSpinCtrl* mouseVelocityYCtrl;
+	wxSpinCtrl* scrollVelocityXCtrl;
+	wxSpinCtrl* scrollVelocityYCtrl;
+
+	wxBoxSizer* mainKeyboardSizer;
 
 	void motionValueChanged(wxSpinDoubleEvent& event);
+	void touchValueChanged(wxSpinEvent& event);
+	void numOfTouchesChanged(wxSpinEvent& event);
+	void mouseValueChanged(wxSpinEvent& event);
 
 public:
 	ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input);

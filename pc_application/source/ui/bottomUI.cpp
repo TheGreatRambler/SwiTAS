@@ -151,8 +151,90 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 	motionRightSizer->Add(angularVelocityRightSizer, 1, wxEXPAND);
 	motionRightSizer->Add(angleRightSizer, 1, wxEXPAND);
 
+	firstTouchSizer = new wxBoxSizer(wxVERTICAL);
+	secondTouchSizer = new wxBoxSizer(wxVERTICAL);
+	touchesSizer = new wxBoxSizer(wxHORIZONTAL);
+	mainTouchSizer = new wxBoxSizer(wxVERTICAL);
+
+	// clang-format off
+	touchX1Ctrl = new wxSpinCtrl(this, wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 1279, 1139);
+	touchY1Ctrl = new wxSpinCtrl(this, wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 719, 359);
+	touchX2Ctrl = new wxSpinCtrl(this, wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 1279, 1139);
+	touchY2Ctrl = new wxSpinCtrl(this, wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 719, 359);
+	numberOfTouchesCtrl = new wxSpinCtrl(this, wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 2, 0);
+	// clang-format on
+
+	touchX1Ctrl->Bind(wxEVT_SPINCTRL, &MotionAndTouchWidget::touchValueChanged, this);
+	touchY1Ctrl->Bind(wxEVT_SPINCTRL, &MotionAndTouchWidget::touchValueChanged, this);
+	touchX2Ctrl->Bind(wxEVT_SPINCTRL, &MotionAndTouchWidget::touchValueChanged, this);
+	touchY2Ctrl->Bind(wxEVT_SPINCTRL, &MotionAndTouchWidget::touchValueChanged, this);
+	numberOfTouchesCtrl->Bind(wxEVT_SPINCTRL, &MotionAndTouchWidget::numOfTouchesChanged, this);
+
+	touchX1Ctrl->SetToolTip("Set coordinate X for touch #1");
+	touchY1Ctrl->SetToolTip("Set coordinate Y for touch #1");
+	touchX2Ctrl->SetToolTip("Set coordinate X for touch #2");
+	touchY2Ctrl->SetToolTip("Set coordinate Y for touch #2");
+	numberOfTouchesCtrl->SetToolTip("Set number of touches to be sent to the game");
+
+	firstTouchSizer->Add(touchX1Ctrl, 0, wxEXPAND);
+	firstTouchSizer->Add(touchY1Ctrl, 0, wxEXPAND);
+	secondTouchSizer->Add(touchX2Ctrl, 0, wxEXPAND);
+	secondTouchSizer->Add(touchY2Ctrl, 0, wxEXPAND);
+
+	touchesSizer->Add(firstTouchSizer, 1, wxEXPAND);
+	touchesSizer->Add(secondTouchSizer, 1, wxEXPAND);
+
+	mainTouchSizer->Add(touchesSizer, 1, wxEXPAND);
+	mainTouchSizer->Add(numberOfTouchesCtrl, 0, wxEXPAND);
+
+	mainMouseSizer = new wxBoxSizer(wxVERTICAL);
+
+	// clang-format off
+	// I don't know any of the ranges of these values
+	mouseXCtrl = new wxSpinCtrl(this, wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 1279, 1139);
+	mouseYCtrl = new wxSpinCtrl(this, wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 1279, 1139);
+	mouseVelocityXCtrl = new wxSpinCtrl(this, wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 1279, 1139);
+	mouseVelocityYCtrl = new wxSpinCtrl(this, wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 1279, 1139);
+	scrollVelocityXCtrl = new wxSpinCtrl(this, wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 1279, 1139);
+	scrollVelocityYCtrl = new wxSpinCtrl(this, wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 1279, 1139);
+	// clang-format on
+
+	mouseXCtrl->Bind(wxEVT_SPINCTRL, &MotionAndTouchWidget::mouseValueChanged, this);
+	mouseYCtrl->Bind(wxEVT_SPINCTRL, &MotionAndTouchWidget::mouseValueChanged, this);
+	mouseVelocityXCtrl->Bind(wxEVT_SPINCTRL, &MotionAndTouchWidget::mouseValueChanged, this);
+	mouseVelocityYCtrl->Bind(wxEVT_SPINCTRL, &MotionAndTouchWidget::mouseValueChanged, this);
+	scrollVelocityXCtrl->Bind(wxEVT_SPINCTRL, &MotionAndTouchWidget::mouseValueChanged, this);
+	scrollVelocityYCtrl->Bind(wxEVT_SPINCTRL, &MotionAndTouchWidget::mouseValueChanged, this);
+
+	mouseXCtrl->SetToolTip("Set mouse coordinate X");
+	mouseYCtrl->SetToolTip("Set mouse coordinate Y");
+	mouseVelocityXCtrl->SetToolTip("Set mouse velocity X");
+	mouseVelocityYCtrl->SetToolTip("Set mouse velocity X");
+	scrollVelocityXCtrl->SetToolTip("Set mouse scroll velocity X");
+	scrollVelocityYCtrl->SetToolTip("Set mouse scroll velocity X");
+
+	mainMouseSizer->Add(mouseXCtrl, 0, wxEXPAND);
+	mainMouseSizer->Add(mouseYCtrl, 0, wxEXPAND);
+	mainMouseSizer->Add(mouseVelocityXCtrl, 0, wxEXPAND);
+	mainMouseSizer->Add(mouseVelocityYCtrl, 0, wxEXPAND);
+	mainMouseSizer->Add(scrollVelocityXCtrl, 0, wxEXPAND);
+	mainMouseSizer->Add(scrollVelocityYCtrl, 0, wxEXPAND);
+
 	mainSizer->Add(motionLeftSizer, 0);
 	mainSizer->Add(motionRightSizer, 0);
+	mainSizer->Add(mainTouchSizer, 0);
+	mainSizer->Add(mainMouseSizer, 0);
 
 	SetSizer(mainSizer);
 	mainSizer->SetSizeHints(this);
@@ -164,6 +246,7 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 }
 
 void ExtraInputMethods::motionValueChanged(wxSpinDoubleEvent& event) {
+	// TODO use unordered_map here
 	wxSpinCtrlDouble* widget = (wxSpinCtrlDouble*)event.GetEventObject();
 	if(widget == accelXLeftCtrl) {
 		inputInstance->triggerNumberValuesMotion(ControllerNumberValues::ACCEL_X_LEFT, (float)widget->GetValue());
@@ -183,9 +266,7 @@ void ExtraInputMethods::motionValueChanged(wxSpinDoubleEvent& event) {
 		inputInstance->triggerNumberValuesMotion(ControllerNumberValues::ANGLE_Y_LEFT, (float)widget->GetValue());
 	} else if(widget == angleXLeftCtrl) {
 		inputInstance->triggerNumberValuesMotion(ControllerNumberValues::ANGLE_Z_LEFT, (float)widget->GetValue());
-	}
-
-	if(widget == accelXRightCtrl) {
+	} else if(widget == accelXRightCtrl) {
 		inputInstance->triggerNumberValuesMotion(ControllerNumberValues::ACCEL_X_RIGHT, (float)widget->GetValue());
 	} else if(widget == accelYRightCtrl) {
 		inputInstance->triggerNumberValuesMotion(ControllerNumberValues::ACCEL_Y_RIGHT, (float)widget->GetValue());
@@ -207,25 +288,74 @@ void ExtraInputMethods::motionValueChanged(wxSpinDoubleEvent& event) {
 }
 
 void ExtraInputMethods::updateAllValues() {
-	accelXLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(ControllerNumberValues::ACCEL_X_LEFT));
-	accelYLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(ControllerNumberValues::ACCEL_Y_LEFT));
-	accelZLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(ControllerNumberValues::ACCEL_Z_LEFT));
-	angularVelocityXLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(ControllerNumberValues::GYRO_X_LEFT));
-	angularVelocityYLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(ControllerNumberValues::GYRO_Y_LEFT));
-	angularVelocityZLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(ControllerNumberValues::GYRO_Z_LEFT));
-	angleXLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(ControllerNumberValues::ANGLE_X_LEFT));
-	angleXLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(ControllerNumberValues::ANGLE_Y_LEFT));
-	angleXLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(ControllerNumberValues::ANGLE_Z_LEFT));
+	using CNV = ControllerNumberValues;
 
-	accelXRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(ControllerNumberValues::ACCEL_X_RIGHT));
-	accelYRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(ControllerNumberValues::ACCEL_Y_RIGHT));
-	accelZRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(ControllerNumberValues::ACCEL_Z_RIGHT));
-	angularVelocityXRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(ControllerNumberValues::GYRO_X_RIGHT));
-	angularVelocityYRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(ControllerNumberValues::GYRO_Y_RIGHT));
-	angularVelocityZRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(ControllerNumberValues::GYRO_Z_RIGHT));
-	angleXRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(ControllerNumberValues::ANGLE_X_RIGHT));
-	angleXRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(ControllerNumberValues::ANGLE_Y_RIGHT));
-	angleXRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(ControllerNumberValues::ANGLE_Z_RIGHT));
+	accelXLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::ACCEL_X_LEFT));
+	accelYLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::ACCEL_Y_LEFT));
+	accelZLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::ACCEL_Z_LEFT));
+	angularVelocityXLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::GYRO_X_LEFT));
+	angularVelocityYLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::GYRO_Y_LEFT));
+	angularVelocityZLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::GYRO_Z_LEFT));
+	angleXLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::ANGLE_X_LEFT));
+	angleXLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::ANGLE_Y_LEFT));
+	angleXLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::ANGLE_Z_LEFT));
+
+	accelXRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::ACCEL_X_RIGHT));
+	accelYRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::ACCEL_Y_RIGHT));
+	accelZRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::ACCEL_Z_RIGHT));
+	angularVelocityXRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::GYRO_X_RIGHT));
+	angularVelocityYRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::GYRO_Y_RIGHT));
+	angularVelocityZRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::GYRO_Z_RIGHT));
+	angleXRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::ANGLE_X_RIGHT));
+	angleXRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::ANGLE_Y_RIGHT));
+	angleXRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::ANGLE_Z_RIGHT));
+
+	touchX1Ctrl->SetValue(inputInstance->getExtraValueCurrent(ExtraValues::TOUCH_X_1));
+	touchY1Ctrl->SetValue(inputInstance->getExtraValueCurrent(ExtraValues::TOUCH_Y_1));
+	touchX2Ctrl->SetValue(inputInstance->getExtraValueCurrent(ExtraValues::TOUCH_X_2));
+	touchY2Ctrl->SetValue(inputInstance->getExtraValueCurrent(ExtraValues::TOUCH_Y_2));
+	numberOfTouchesCtrl->SetValue(inputInstance->getNumberOfTouchesCurrent());
+
+	mouseXCtrl->SetValue(inputInstance->getExtraValueCurrent(ExtraValues::MOUSE_X));
+	mouseYCtrl->SetValue(inputInstance->getExtraValueCurrent(ExtraValues::MOUSE_Y));
+	mouseVelocityXCtrl->SetValue(inputInstance->getExtraValueCurrent(ExtraValues::MOUSE_VELOCITY_X));
+	mouseVelocityYCtrl->SetValue(inputInstance->getExtraValueCurrent(ExtraValues::MOUSE_VELOCITY_Y));
+	scrollVelocityXCtrl->SetValue(inputInstance->getExtraValueCurrent(ExtraValues::SCROLL_VELOCITY_X));
+	scrollVelocityYCtrl->SetValue(inputInstance->getExtraValueCurrent(ExtraValues::SCROLL_VELOCITY_Y));
+}
+
+void ExtraInputMethods::touchValueChanged(wxSpinEvent& event) {
+	wxSpinCtrl* widget = (wxSpinCtrl*)event.GetEventObject();
+	if(widget == touchX1Ctrl) {
+		inputInstance->triggerExtraValue(ExtraValues::TOUCH_X_1, (int32_t)widget->GetValue());
+	} else if(widget == touchY1Ctrl) {
+		inputInstance->triggerExtraValue(ExtraValues::TOUCH_Y_1, (int32_t)widget->GetValue());
+	} else if(widget == touchX2Ctrl) {
+		inputInstance->triggerExtraValue(ExtraValues::TOUCH_X_2, (int32_t)widget->GetValue());
+	} else if(widget == touchY2Ctrl) {
+		inputInstance->triggerExtraValue(ExtraValues::TOUCH_Y_2, (int32_t)widget->GetValue());
+	}
+}
+
+void ExtraInputMethods::numOfTouchesChanged(wxSpinEvent& event) {
+	inputInstance->triggerNumberOfTouches((uint8_t)numberOfTouchesCtrl->GetValue());
+}
+
+void ExtraInputMethods::mouseValueChanged(wxSpinEvent& event) {
+	wxSpinCtrl* widget = (wxSpinCtrl*)event.GetEventObject();
+	if(widget == mouseXCtrl) {
+		inputInstance->triggerExtraValue(ExtraValues::MOUSE_X, (int32_t)widget->GetValue());
+	} else if(widget == mouseYCtrl) {
+		inputInstance->triggerExtraValue(ExtraValues::MOUSE_Y, (int32_t)widget->GetValue());
+	} else if(widget == mouseVelocityXCtrl) {
+		inputInstance->triggerExtraValue(ExtraValues::MOUSE_VELOCITY_X, (int32_t)widget->GetValue());
+	} else if(widget == mouseVelocityYCtrl) {
+		inputInstance->triggerExtraValue(ExtraValues::MOUSE_VELOCITY_Y, (int32_t)widget->GetValue());
+	} else if(widget == scrollVelocityXCtrl) {
+		inputInstance->triggerExtraValue(ExtraValues::SCROLL_VELOCITY_X, (int32_t)widget->GetValue());
+	} else if(widget == scrollVelocityYCtrl) {
+		inputInstance->triggerExtraValue(ExtraValues::SCROLL_VELOCITY_Y, (int32_t)widget->GetValue());
+	}
 }
 
 ButtonGrid::ButtonGrid(wxFrame* parent, wxSize requiredSize, std::shared_ptr<ButtonData> data, DataProcessing* inputs)
