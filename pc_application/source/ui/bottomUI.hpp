@@ -86,6 +86,8 @@ private:
 	void numOfTouchesChanged(wxSpinEvent& event);
 	void mouseValueChanged(wxSpinEvent& event);
 
+	void onClose(wxCloseEvent& event);
+
 public:
 	ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input);
 
@@ -203,7 +205,7 @@ private:
 	FrameViewerCanvas* frameViewerCanvas;
 
 	// The editor for motion and touch data, not shown by default
-	MotionAndTouchWidget* motionAndTouchWidget;
+	ExtraInputMethods* extraInputMethodsWindow;
 
 	// The button mapping instance
 	std::shared_ptr<ButtonData> buttonData;
@@ -271,6 +273,10 @@ public:
 	void recieveGameFramebuffer(std::vector<uint8_t> jpegBuffer);
 
 	void refreshDataViews(uint8_t refreshFramebuffer);
+
+	void toggleExtraInputMethodsWindow() {
+		extraInputMethodsWindow->Show(!extraInputMethodsWindow->IsShown());
+	}
 
 	void listenToJoystick();
 

@@ -264,13 +264,14 @@ void MainWindow::addMenuBar() {
 	openGameCorruptorID = NewControlId();
 	runFinalTasID       = NewControlId();
 	requestGameInfoID   = NewControlId();
+	toggleExtraInputMethodsID = NewControlId();
 
 	fileMenu->Append(saveProject, "Save Project\tCtrl+S");
 	fileMenu->Append(exportAsText, "Export To Text Format\tCtrl+Alt+E");
 	fileMenu->Append(importAsText, "Import From Text Format\tCtrl+Alt+I");
 	fileMenu->Append(setNameID, "Set Name\tCtrl+Alt+N");
 	fileMenu->Append(runFinalTasID, "Run Final TAS\tCtrl+R");
-	fileMenu->Append(requestGameInfoID, "Request Game Info\tCtrl+Shift+I");
+	//fileMenu->Append(requestGameInfoID, "Request Game Info\tCtrl+Shift+I");
 
 	// Add joystick submenu
 	fileMenu->AppendSubMenu(bottomUI->getJoystickMenu(), "&List Joysticks\tCtrl+G");
@@ -281,8 +282,12 @@ void MainWindow::addMenuBar() {
 	fileMenu->AppendSeparator();
 
 	fileMenu->Append(selectIPID, "Set Switch IP\tCtrl+I");
+
+	fileMenu->AppendSeparator();
+	
 	fileMenu->Append(toggleLoggingID, "Toggle Logging\tCtrl+Shift+L");
 	fileMenu->Append(toggleDebugMenuID, "Toggle Debug Menu\tCtrl+D");
+	fileMenu->Append(toggleExtraInputMethodsID, "Toggle Extra Input Methods Window\tCtrl+E");
 	// Not finished as of now
 	// fileMenu->Append(openGameCorruptorID, "Open Game Corruptor\tCtrl+B");
 
@@ -365,6 +370,8 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 				// clang-format on
 				// When finally sent over network, will be displayed
 			}
+		} else if(id == toggleExtraInputMethodsID) {
+			bottomUI->toggleExtraInputMethodsWindow();
 		}
 	}
 }

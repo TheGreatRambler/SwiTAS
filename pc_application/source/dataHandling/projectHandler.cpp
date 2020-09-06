@@ -35,7 +35,7 @@ void ProjectHandler::loadProject() {
 			auto branchesArray = savestate["branches"].GetArray();
 
 			// Not actually a savestate hook, just the vector of branches
-			std::shared_ptr<std::vector<std::shared_ptr<std::vector<ExtraFrameData>>> savestateHook = std::make_shared<std::vector<std::shared_ptr<std::vector<ExtraFrameData>>>();
+			std::shared_ptr<std::vector<std::shared_ptr<std::vector<ExtraFrameData>>>> savestateHook = std::make_shared<std::vector<std::shared_ptr<std::vector<ExtraFrameData>>>>();
 
 			for(auto const& branch : branchesArray) {
 				wxString path = projectDir.GetPathWithSep() + wxString::FromUTF8(branch["filename"].GetString());
@@ -62,11 +62,11 @@ void ProjectHandler::loadProject() {
 						// Possibility that I will save filespace by making sizeOfControllerData==0 be an empty controller data
 						sizeRead += sizeof(sizeOfControllerData);
 						// Load the data
-						std::shared_ptr<ControllerData> controllerData = std::make_shared<TouchAndKeyboardData>();
+						std::shared_ptr<TouchAndKeyboardData> extraControllerData = std::make_shared<TouchAndKeyboardData>();
 
-						serializeProtocol.binaryToData<ControllerData>(*controllerData, &bufferPointer[sizeRead], sizeOfControllerData);
+						serializeProtocol.binaryToData<TouchAndKeyboardData>(*extraControllerData, &bufferPointer[sizeRead], sizeOfControllerData);
 						// For now, just add each frame one at a time, no optimization
-						inputs->push_back(controllerData);
+						inputs->push_back(extraControllerData);
 						sizeRead += sizeOfControllerData;
 					}
 
@@ -303,6 +303,7 @@ void ProjectHandler::saveProject() {
 
 		ExtraFrameDataContainer& allExtraFrameData = dataProcessing->getAllExtraFrameData();
 		SavestateBlockNum savestateHookIndexNum = 0;
+
 			for(auto const& savestateHookBlock : allExtraFrameData) {
 				rapidjson::Value branchesJSON(rapidjson::kArrayType);
 
@@ -331,7 +332,7 @@ void ProjectHandler::saveProject() {
 					for(auto const& extraFrameData : *branch) {
 						uint8_t* data;
 						uint32_t dataSize;
-						serializeProtocol.dataToBinary<TouchAndKeyboardData>(*controllerData, &data, &dataSize);
+						serializeProtocol.dataToBinary<TouchAndKeyboardData>(*extraFrameData, &data, &dataSize);
 						uint8_t sizeToPrint = (uint8_t)dataSize;
 						// Probably endian issues
 						inputsCompressStream.WriteAll(&sizeToPrint, sizeof(sizeToPrint));

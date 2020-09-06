@@ -36,7 +36,7 @@ typedef std::vector<std::shared_ptr<std::vector<std::shared_ptr<SavestateHook>>>
 typedef std::vector<std::shared_ptr<SavestateHook>> AllSavestateHookBlocks;
 typedef std::shared_ptr<std::vector<FrameData>> BranchData;
 typedef std::shared_ptr<std::vector<ExtraFrameData>> ExtraBranchData;
-typedef std::vector<std::shared_ptr<std::vector<std::shared_ptr<std::vector<ExtraFrameData>>>> ExtraFrameDataContainer;
+typedef std::vector<std::shared_ptr<std::vector<std::shared_ptr<std::vector<ExtraFrameData>>>>> ExtraFrameDataContainer;
 
 class ButtonData;
 
@@ -281,12 +281,12 @@ public:
 	BranchData getInputsList() const;
 	ExtraBranchData getInputsExtraList() const;
 
-	std::shared_ptr<ControllerData> getControllerData(uint8_t player, SavestateBlockNum savestateHookNum, BranchNum branch, FrameNum frame) const {
+	FrameData getControllerData(uint8_t player, SavestateBlockNum savestateHookNum, BranchNum branch, FrameNum frame) const {
 		return allPlayers[player]->at(savestateHookNum)->inputs[branch]->at(frame);
 	}
 
-	std::shared_ptr<ControllerData> getControllerDataExtra(SavestateBlockNum savestateHookNum, BranchNum branch, FrameNum frame) const {
-		return allExtraFrameData->at(savestateHookNum)->inputs[branch]->at(frame);
+	ExtraFrameData getControllerDataExtra(SavestateBlockNum savestateHookNum, BranchNum branch, FrameNum frame) const {
+		return allExtraFrameData[savestateHookNum]->at(branch)->at(frame);
 	}
 
 	wxRect getFirstItemRect();

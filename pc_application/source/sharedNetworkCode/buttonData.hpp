@@ -99,20 +99,20 @@ struct ControllerData : public zpp::serializer::polymorphic {
 
 // Stored in parrallel to the rest of the data, just not sharing the player
 struct TouchAndKeyboardData : public zpp::serializer::polymorphic {
-	int32_t touchX1;
-	int32_t touchY1;
-	int32_t touchX2;
-	int32_t touchY2;
-	uint8_t numberOfTouches;
-	int32_t keyboardModifiers;
+	int32_t touchX1 = 0;
+	int32_t touchY1 = 0;
+	int32_t touchX2 = 0;
+	int32_t touchY2 = 0;
+	uint8_t numberOfTouches = 0;
+	int32_t keyboardModifiers = 0;
 	uint32_t keyboardKeys[8];
-	int32_t mouseX;
-	int32_t mouseY;
-	int32_t mouseVelocityX;
-	int32_t mouseVelocityY;
-	int32_t scrollVelocityX;
-	int32_t scrollVelocityY;
-	int32_t mouseButtons;
+	int32_t mouseX = 0;
+	int32_t mouseY = 0;
+	int32_t mouseVelocityX = 0;
+	int32_t mouseVelocityY = 0;
+	int32_t scrollVelocityX = 0;
+	int32_t scrollVelocityY = 0;
+	int32_t mouseButtons = 0;
 
 	friend zpp::serializer::access;
 	template <typename Archive, typename Self> static void serialize(Archive& archive, Self& self) {

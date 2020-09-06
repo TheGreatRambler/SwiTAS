@@ -635,10 +635,10 @@ void DataProcessing::addNewSavestateHook(std::string dHash, wxBitmap* screenshot
 		savestateHook->inputs.push_back(std::make_shared<std::vector<FrameData>>());
 		allPlayers[i]->push_back(savestateHook);
 		// Add one controller data to the first branch
-		allPlayers[i]->at(allPlayers->size() - 1)->inputs[0]->push_back(std::make_shared<ControllerData>());
+		allPlayers[i]->at(allPlayers.size() - 1)->inputs[0]->push_back(std::make_shared<ControllerData>());
 	}
 
-	auto& thisHookExtraData = std::make_shared<std::vector<std::shared_ptr<std::vector<ExtraFrameData>>>();
+	std::shared_ptr<std::vector<std::shared_ptr<std::vector<ExtraFrameData>>>> thisHookExtraData = std::make_shared<std::vector<std::shared_ptr<std::vector<ExtraFrameData>>>>();
 	thisHookExtraData->push_back(std::make_shared<std::vector<ExtraFrameData>>());
 	thisHookExtraData->at(0)->push_back(std::make_shared<TouchAndKeyboardData>());
 
@@ -796,9 +796,9 @@ void DataProcessing::addNewBranch() {
 	}
 	auto& extraFrameDataBranch = allExtraFrameData[currentSavestateHook];
 	extraFrameDataBranch->push_back(std::make_shared<std::vector<ExtraFrameData>>());
-	uint16_t lastElement = extraFrameDataBranch.size() - 1;
+	uint16_t lastElement = extraFrameDataBranch->size() - 1;
 	for(FrameNum j = 0; j < extraFrameDataBranch->at(0)->size(); j++) {
-		extraFrameDataBranch[lastElement]->push_back(std::make_shared<TouchAndKeyboardData>());
+		extraFrameDataBranch->at(lastElement)->push_back(std::make_shared<TouchAndKeyboardData>());
 	}
 	setBranch(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs.size() - 1);
 }
@@ -806,6 +806,7 @@ void DataProcessing::addNewBranch() {
 void DataProcessing::setBranch(uint16_t branchIndex) {
 	viewingBranchIndex = branchIndex;
 	currentBranchData  = allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex];
+	currentExtraData = allExtraFrameData[currentSavestateHook]->at(viewingBranchIndex);
 	if(branchInfoCallback) {
 		branchInfoCallback(getNumBranches(), branchIndex, true);
 	}
@@ -1390,7 +1391,7 @@ void DataProcessing::triggerKeyboardButton(nn::hid::KeyboardKey key, uint8_t sta
 }
 
 void DataProcessing::setKeyboardButton(FrameNum frame, nn::hid::KeyboardKey key, uint8_t state) {
-	SET_KEYBOARD_HELD(getInputsExtraList()->at(frame)->keyboardKeys, key, state);
+	SET_KEYBOARD_HELD(getInputsExtraList()->at(frame)->keyboardKeys, (int32_t)key, state);
 
 	invalidateRun(frame);
 
@@ -1398,11 +1399,11 @@ void DataProcessing::setKeyboardButton(FrameNum frame, nn::hid::KeyboardKey key,
 	modifyCurrentFrameViews(frame);
 }
 uint8_t DataProcessing::getKeyboardButton(FrameNum frame, nn::hid::KeyboardKey key) const {
-	return IS_KEYBOARD_HELD(getInputsExtraList()->at(frame)->keyboardKeys, key);
+	return IS_KEYBOARD_HELD(getInputsExtraList()->at(frame)->keyboardKeys, (int32_t)key);
 }
 
 uint8_t DataProcessing::getKeyboardButtonSpecific(FrameNum frame, nn::hid::KeyboardKey key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
-	return IS_KEYBOARD_HELD(getControllerDataExtra(savestateHookNum, branch, frame)->keyboardKeys, key);
+	return IS_KEYBOARD_HELD(getControllerDataExtra(savestateHookNum, branch, frame)->keyboardKeys, (int32_t)key);
 }
 
 uint8_t DataProcessing::getKeyboardButtonCurrent(nn::hid::KeyboardKey key) const {
@@ -1421,9 +1422,9 @@ void DataProcessing::triggerKeyboardModifier(nn::hid::KeyboardModifier key, uint
 
 void DataProcessing::setKeyboardModifier(FrameNum frame, nn::hid::KeyboardModifier key, uint8_t state) {
 	if (state) {
-		getInputsExtraList()->at(frame)->keyboardModifiers |= key; 
+		getInputsExtraList()->at(frame)->keyboardModifiers |= (int32_t)key; 
 	} else {
-		getInputsExtraList()->at(frame)->keyboardModifiers &= ~key;
+		getInputsExtraList()->at(frame)->keyboardModifiers &= ~(int32_t)key;
 	}
 
 	invalidateRun(frame);
@@ -1433,10 +1434,10 @@ void DataProcessing::setKeyboardModifier(FrameNum frame, nn::hid::KeyboardModifi
 }
 
 uint8_t DataProcessing::getKeyboardModifier(FrameNum frame, nn::hid::KeyboardModifier key) const {
-	return getInputsExtraList()->at(frame)->keyboardModifiers & key;
+	return getInputsExtraList()->at(frame)->keyboardModifiers & (int32_t)key;
 }
 uint8_t DataProcessing::getKeyboardModifierSpecific(FrameNum frame, nn::hid::KeyboardModifier key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
-	return getControllerDataExtra(savestateHookNum, branch, frame)->keyboardModifiers & key;
+	return getControllerDataExtra(savestateHookNum, branch, frame)->keyboardModifiers & (int32_t)key;
 }
 
 uint8_t DataProcessing::getKeyboardModifierCurrent(nn::hid::KeyboardModifier key) const {
@@ -1455,9 +1456,9 @@ void DataProcessing::triggerMouseButton(nn::hid::MouseButton key, uint8_t state)
 
 void DataProcessing::setMouseButton(FrameNum frame, nn::hid::MouseButton key, uint8_t state) {
 	if (state) {
-		getInputsExtraList()->at(frame)->mouseButtons |= key; 
+		getInputsExtraList()->at(frame)->mouseButtons |= (int32_t)key; 
 	} else {
-		getInputsExtraList()->at(frame)->mouseButtons &= ~key;
+		getInputsExtraList()->at(frame)->mouseButtons &= ~(int32_t)key;
 	}
 
 	invalidateRun(frame);
@@ -1467,11 +1468,11 @@ void DataProcessing::setMouseButton(FrameNum frame, nn::hid::MouseButton key, ui
 }
 
 uint8_t DataProcessing::getMouseButton(FrameNum frame, nn::hid::MouseButton key) const {
-	return getInputsExtraList()->at(frame)->mouseButtons & key;
+	return getInputsExtraList()->at(frame)->mouseButtons & (int32_t)key;
 }
 
 uint8_t DataProcessing::getMouseButtonSpecific(FrameNum frame, nn::hid::MouseButton key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
-	return getControllerDataExtra(savestateHookNum, branch, frame)->mouseButtons & key;
+	return getControllerDataExtra(savestateHookNum, branch, frame)->mouseButtons & (int32_t)key;
 }
 
 uint8_t DataProcessing::getMouseButtonCurrent(nn::hid::MouseButton key) const {

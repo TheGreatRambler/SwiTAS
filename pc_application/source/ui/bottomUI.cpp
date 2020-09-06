@@ -46,15 +46,15 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 	angleYLeftCtrl->SetDigits(FLT_DIG);
 	angleZLeftCtrl->SetDigits(FLT_DIG);
 
-	accelXLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
-	accelYLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
-	accelZLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
-	angularVelocityXLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
-	angularVelocityYLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
-	angularVelocityZLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
-	angleXLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
-	angleYLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
-	angleZLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
+	accelXLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	accelYLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	accelZLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	angularVelocityXLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	angularVelocityYLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	angularVelocityZLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	angleXLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	angleYLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	angleZLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
 
 	accelXLeftCtrl->SetToolTip("Set acceleration X value for left joycon");
 	accelYLeftCtrl->SetToolTip("Set acceleration Y value for left joycon");
@@ -117,15 +117,15 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 	angleYRightCtrl->SetDigits(FLT_DIG);
 	angleZRightCtrl->SetDigits(FLT_DIG);
 
-	accelXRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
-	accelYRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
-	accelZRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
-	angularVelocityXRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
-	angularVelocityYRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
-	angularVelocityZRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
-	angleXRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
-	angleYRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
-	angleZRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &MotionAndTouchWidget::motionValueChanged, this);
+	accelXRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	accelYRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	accelZRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	angularVelocityXRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	angularVelocityYRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	angularVelocityZRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	angleXRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	angleYRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	angleZRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
 
 	accelXRightCtrl->SetToolTip("Set acceleration X value for right joycon");
 	accelYRightCtrl->SetToolTip("Set acceleration Y value for right joycon");
@@ -169,11 +169,11 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 2, 0);
 	// clang-format on
 
-	touchX1Ctrl->Bind(wxEVT_SPINCTRL, &MotionAndTouchWidget::touchValueChanged, this);
-	touchY1Ctrl->Bind(wxEVT_SPINCTRL, &MotionAndTouchWidget::touchValueChanged, this);
-	touchX2Ctrl->Bind(wxEVT_SPINCTRL, &MotionAndTouchWidget::touchValueChanged, this);
-	touchY2Ctrl->Bind(wxEVT_SPINCTRL, &MotionAndTouchWidget::touchValueChanged, this);
-	numberOfTouchesCtrl->Bind(wxEVT_SPINCTRL, &MotionAndTouchWidget::numOfTouchesChanged, this);
+	touchX1Ctrl->Bind(wxEVT_SPINCTRL, &ExtraInputMethods::touchValueChanged, this);
+	touchY1Ctrl->Bind(wxEVT_SPINCTRL, &ExtraInputMethods::touchValueChanged, this);
+	touchX2Ctrl->Bind(wxEVT_SPINCTRL, &ExtraInputMethods::touchValueChanged, this);
+	touchY2Ctrl->Bind(wxEVT_SPINCTRL, &ExtraInputMethods::touchValueChanged, this);
+	numberOfTouchesCtrl->Bind(wxEVT_SPINCTRL, &ExtraInputMethods::numOfTouchesChanged, this);
 
 	touchX1Ctrl->SetToolTip("Set coordinate X for touch #1");
 	touchY1Ctrl->SetToolTip("Set coordinate Y for touch #1");
@@ -197,25 +197,25 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 	// clang-format off
 	// I don't know any of the ranges of these values
 	mouseXCtrl = new wxSpinCtrl(this, wxID_ANY, wxEmptyString,
-		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 1279, 1139);
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 1279, 0);
 	mouseYCtrl = new wxSpinCtrl(this, wxID_ANY, wxEmptyString,
-		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 1279, 1139);
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 719, 0);
 	mouseVelocityXCtrl = new wxSpinCtrl(this, wxID_ANY, wxEmptyString,
-		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 1279, 1139);
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 1279, 0);
 	mouseVelocityYCtrl = new wxSpinCtrl(this, wxID_ANY, wxEmptyString,
-		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 1279, 1139);
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 719, 0);
 	scrollVelocityXCtrl = new wxSpinCtrl(this, wxID_ANY, wxEmptyString,
-		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 1279, 1139);
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0);
 	scrollVelocityYCtrl = new wxSpinCtrl(this, wxID_ANY, wxEmptyString,
-		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 1279, 1139);
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0);
 	// clang-format on
 
-	mouseXCtrl->Bind(wxEVT_SPINCTRL, &MotionAndTouchWidget::mouseValueChanged, this);
-	mouseYCtrl->Bind(wxEVT_SPINCTRL, &MotionAndTouchWidget::mouseValueChanged, this);
-	mouseVelocityXCtrl->Bind(wxEVT_SPINCTRL, &MotionAndTouchWidget::mouseValueChanged, this);
-	mouseVelocityYCtrl->Bind(wxEVT_SPINCTRL, &MotionAndTouchWidget::mouseValueChanged, this);
-	scrollVelocityXCtrl->Bind(wxEVT_SPINCTRL, &MotionAndTouchWidget::mouseValueChanged, this);
-	scrollVelocityYCtrl->Bind(wxEVT_SPINCTRL, &MotionAndTouchWidget::mouseValueChanged, this);
+	mouseXCtrl->Bind(wxEVT_SPINCTRL, &ExtraInputMethods::mouseValueChanged, this);
+	mouseYCtrl->Bind(wxEVT_SPINCTRL, &ExtraInputMethods::mouseValueChanged, this);
+	mouseVelocityXCtrl->Bind(wxEVT_SPINCTRL, &ExtraInputMethods::mouseValueChanged, this);
+	mouseVelocityYCtrl->Bind(wxEVT_SPINCTRL, &ExtraInputMethods::mouseValueChanged, this);
+	scrollVelocityXCtrl->Bind(wxEVT_SPINCTRL, &ExtraInputMethods::mouseValueChanged, this);
+	scrollVelocityYCtrl->Bind(wxEVT_SPINCTRL, &ExtraInputMethods::mouseValueChanged, this);
 
 	mouseXCtrl->SetToolTip("Set mouse coordinate X");
 	mouseYCtrl->SetToolTip("Set mouse coordinate Y");
@@ -356,6 +356,10 @@ void ExtraInputMethods::mouseValueChanged(wxSpinEvent& event) {
 	} else if(widget == scrollVelocityYCtrl) {
 		inputInstance->triggerExtraValue(ExtraValues::SCROLL_VELOCITY_Y, (int32_t)widget->GetValue());
 	}
+}
+
+void ExtraInputMethods::onClose(wxCloseEvent& event) {
+	Show(false);
 }
 
 ButtonGrid::ButtonGrid(wxFrame* parent, wxSize requiredSize, std::shared_ptr<ButtonData> data, DataProcessing* inputs)
@@ -733,7 +737,8 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 	rightJoystickDrawer->getLockButton()->SetToolTip("Set current value of right gamepad joystick to frame");
 
 	// Not shown by default
-	motionAndTouchWidget = new MotionAndTouchWidget(parentFrame, inputInstance);
+	extraInputMethodsWindow = new ExtraInputMethods(parentFrame, inputInstance);
+	extraInputMethodsWindow->Hide();
 
 	wxSize gridSize;
 	// Just to get a rough estimate
@@ -790,8 +795,7 @@ void BottomUI::refreshDataViews(uint8_t refreshFramebuffer) {
 	leftJoystickDrawer->Refresh();
 	rightJoystickDrawer->Refresh();
 
-	// TODO update motion values in motion and touch editor
-	motionAndTouchWidget->updateMotionValues();
+	extraInputMethodsWindow->updateAllValues();
 
 	buttonGrid->Refresh();
 
