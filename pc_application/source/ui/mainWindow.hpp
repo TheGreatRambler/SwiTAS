@@ -1,6 +1,6 @@
 #pragma once
 
-//#include "../thirdParty/win32darkmode/DarkMode.h"
+//#include "../third_party/win32darkmode/DarkMode.h"
 #include <ffms.h>
 #include <fstream>
 #include <memory>
@@ -11,13 +11,13 @@
 #include <wx/msgdlg.h>
 #include <wx/wx.h>
 
-#include "../sharedNetworkCode/networkInterface.hpp"
+#include "../shared_network_code/networkInterface.hpp"
 
-#include "../dataHandling/buttonData.hpp"
-#include "../dataHandling/dataProcessing.hpp"
-#include "../dataHandling/gameCorruptor.hpp"
-#include "../dataHandling/projectHandler.hpp"
-#include "../dataHandling/runFinalTas.hpp"
+#include "../data_handling/buttonData.hpp"
+#include "../data_handling/dataProcessing.hpp"
+#include "../data_handling/gameCorruptor.hpp"
+#include "../data_handling/projectHandler.hpp"
+#include "../data_handling/runFinalTas.hpp"
 #include "../helpers.hpp"
 #include "bottomUI.hpp"
 #include "debugWindow.hpp"

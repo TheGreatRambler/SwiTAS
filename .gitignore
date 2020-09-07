@@ -1,7 +1,7 @@
 pc_application/windowsBin
 pc_application/linuxBin
 pc_application/bin
-pc_application/sharedNetworkCode
+pc_application/shared_network_code
 pc_application/compile_commands.json
 pc_application/switas_recent.json
 pc_application/*.snap
@@ -13,8 +13,8 @@ sysmodule_application/SwiTAS.npdm
 sysmodule_application/SwiTAS.nso
 sysmodule_application/SwiTAS.nsp
 sysmodule_application/buildYuzu
-sysmodule_application/buildSysmodule
-sysmodule_application/sharedNetworkCode
+sysmodule_application/build_sysmodule
+sysmodule_application/shared_network_code
 sysmodule_application/release
 sysmodule_application/*.zip
 sysmodule_application/upload.sh

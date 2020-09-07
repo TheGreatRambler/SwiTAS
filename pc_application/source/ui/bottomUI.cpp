@@ -20,7 +20,7 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 	accelYLeftCtrl           = new wxSpinCtrlDouble(this,
 		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -7.0, 7.0, 0.0);
 	accelZLeftCtrl           = new wxSpinCtrlDouble(this,
-		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -7.0, 7.0, 0.0);
+		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -7.0, 7.0, -1.0);
 	angularVelocityXLeftCtrl = new wxSpinCtrlDouble(this,
 		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -5.0, 5.0, 0.0);
 	angularVelocityYLeftCtrl = new wxSpinCtrlDouble(this,
@@ -40,7 +40,7 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 	directionXZLeftCtrl - new wxSpinCtrlDouble(this,
 		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 0.0);
 	directionYXLeftCtrl - new wxSpinCtrlDouble(this,
-		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 1.0);
+		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 0.0);
 	directionYYLeftCtrl - new wxSpinCtrlDouble(this,
 		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 1.0);
 	directionYZLeftCtrl - new wxSpinCtrlDouble(this,
@@ -144,23 +144,23 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 
 	// clang-format off
 	accelXRightCtrl           = new wxSpinCtrlDouble(this,
-		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -7.0, 7.0);
+		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -7.0, 7.0, 0.0);
 	accelYRightCtrl           = new wxSpinCtrlDouble(this,
-		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -7.0, 7.0);
+		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -7.0, 7.0, 0.0);
 	accelZRightCtrl           = new wxSpinCtrlDouble(this,
-		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -7.0, 7.0);
+		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -7.0, 7.0, -1.0);
 	angularVelocityXRightCtrl = new wxSpinCtrlDouble(this,
-		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -5.0, 5.0);
+		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -5.0, 5.0, 0.0);
 	angularVelocityYRightCtrl = new wxSpinCtrlDouble(this,
-		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -5.0, 5.0);
+		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -5.0, 5.0, 0.0);
 	angularVelocityZRightCtrl = new wxSpinCtrlDouble(this,
-		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -5.0, 5.0);
+		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -5.0, 5.0, 0.0);
 	angleXRightCtrl           = new wxSpinCtrlDouble(this,
-		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -1.0, 1.0);
+		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -1.0, 1.0, 0.0);
 	angleYRightCtrl           = new wxSpinCtrlDouble(this,
-		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -1.0, 1.0);
+		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -1.0, 1.0, 0.0);
 	angleZRightCtrl           = new wxSpinCtrlDouble(this,
-		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -1.0, 1.0);
+		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -1.0, 1.0, 0.0);
 	directionXXRightCtrl - new wxSpinCtrlDouble(this,
 		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 1.0);
 	directionXYRightCtrl - new wxSpinCtrlDouble(this,
@@ -168,7 +168,7 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 	directionXZRightCtrl - new wxSpinCtrlDouble(this,
 		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 0.0);
 	directionYXRightCtrl - new wxSpinCtrlDouble(this,
-		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 1.0);
+		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 0.0);
 	directionYYRightCtrl - new wxSpinCtrlDouble(this,
 		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 1.0);
 	directionYZRightCtrl - new wxSpinCtrlDouble(this,
@@ -265,10 +265,10 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 	motionRightSizer->Add(directionYRightSizer, 1, wxEXPAND);
 	motionRightSizer->Add(directionZRightSizer, 1, wxEXPAND);
 
-	firstTouchSizer = new wxBoxSizer(wxVERTICAL);
+	firstTouchSizer  = new wxBoxSizer(wxVERTICAL);
 	secondTouchSizer = new wxBoxSizer(wxVERTICAL);
-	touchesSizer = new wxBoxSizer(wxHORIZONTAL);
-	mainTouchSizer = new wxBoxSizer(wxVERTICAL);
+	touchesSizer     = new wxBoxSizer(wxHORIZONTAL);
+	mainTouchSizer   = new wxBoxSizer(wxVERTICAL);
 
 	// clang-format off
 	touchX1Ctrl = new wxSpinCtrl(this, wxID_ANY, wxEmptyString,
@@ -382,7 +382,7 @@ void ExtraInputMethods::motionValueChanged(wxSpinDoubleEvent& event) {
 		inputInstance->triggerNumberValuesMotion(CNV::ANGLE_Y_LEFT, (float)widget->GetValue());
 	} else if(widget == angleXLeftCtrl) {
 		inputInstance->triggerNumberValuesMotion(CNV::ANGLE_Z_LEFT, (float)widget->GetValue());
-	}  else if(widget == directionXXLeftCtrl) {
+	} else if(widget == directionXXLeftCtrl) {
 		inputInstance->triggerNumberValuesMotion(CNV::DIRECTION_XX_LEFT, (float)widget->GetValue());
 	} else if(widget == directionXYLeftCtrl) {
 		inputInstance->triggerNumberValuesMotion(CNV::DIRECTION_XY_LEFT, (float)widget->GetValue());
@@ -418,7 +418,7 @@ void ExtraInputMethods::motionValueChanged(wxSpinDoubleEvent& event) {
 		inputInstance->triggerNumberValuesMotion(CNV::ANGLE_Y_RIGHT, (float)widget->GetValue());
 	} else if(widget == angleXRightCtrl) {
 		inputInstance->triggerNumberValuesMotion(CNV::ANGLE_Z_RIGHT, (float)widget->GetValue());
-	}  else if(widget == directionXXRightCtrl) {
+	} else if(widget == directionXXRightCtrl) {
 		inputInstance->triggerNumberValuesMotion(CNV::DIRECTION_XX_RIGHT, (float)widget->GetValue());
 	} else if(widget == directionXYRightCtrl) {
 		inputInstance->triggerNumberValuesMotion(CNV::DIRECTION_XY_RIGHT, (float)widget->GetValue());

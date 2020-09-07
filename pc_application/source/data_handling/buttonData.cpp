@@ -83,6 +83,11 @@ FrameNum ButtonData::textToFrames(DataProcessing* dataProcessing, std::string te
 		// This is to allow a variable number of parts
 		uint8_t currentIndexInParts = 0;
 
+		// clang-format off
+		// FULL DATA SPECIFICATION
+		// FRAME KEYS JOY_L_X;JOY_L_Y JOY_R_X;JOY_R_Y ACCEL_L_X;ACCEL_L_Y;ACCEL_L_Z GYRO_L_X;GYRO_L_Y;GYRO_L_Z ANGLE_L_X;ANGLE_L_Y;ANGLE_L_Z ACCEL_R_X;ACCEL_R_Y;ACCEL_R_Z GYRO_R_X;GYRO_R_Y;GYRO_R_Z ANGLE_R_X;ANGLE_R_Y;ANGLE_R_Z DIRECTION_L_XX;DIRECTION_L_XY;DIRECTION_L_XZ DIRECTION_L_YX;DIRECTION_L_YY;DIRECTION_L_YZ DIRECTION_L_ZX;DIRECTION_L_ZY;DIRECTION_L_ZZ DIRECTION_R_XX;DIRECTION_R_XY;DIRECTION_R_XZ DIRECTION_R_YX;DIRECTION_R_YY;DIRECTION_R_YZ DIRECTION_R_ZX;DIRECTION_R_ZY;DIRECTION_R_ZZ
+		// clang-format on
+
 		// This is repeated to break function when it runs out of parts, allows variable
 		// Amounts of data per line
 		if(parts.size() == currentIndexInParts)
@@ -257,6 +262,85 @@ FrameNum ButtonData::textToFrames(DataProcessing* dataProcessing, std::string te
 		} else {
 			continue;
 		}
+
+		currentIndexInParts++;
+		if(parts.size() == currentIndexInParts)
+			continue;
+
+		// DirectionState parts, left and right
+		std::vector<std::string> directionXLeft = HELPERS::splitString(parts[currentIndexInParts], ';');
+		if(directionXLeft.size() == 3) {
+			dataProcessing->setNumberValuesMotion(thisDataIndex, ControllerNumberValues::DIRECTION_XX_LEFT, strtof(directionXLeft[0].c_str(), nullptr));
+			dataProcessing->setNumberValuesMotion(thisDataIndex, ControllerNumberValues::DIRECTION_XY_LEFT, strtof(directionXLeft[1].c_str(), nullptr));
+			dataProcessing->setNumberValuesMotion(thisDataIndex, ControllerNumberValues::DIRECTION_XZ_LEFT, strtof(directionXLeft[2].c_str(), nullptr));
+		} else {
+			continue;
+		}
+
+		currentIndexInParts++;
+		if(parts.size() == currentIndexInParts)
+			continue;
+
+		std::vector<std::string> directionYLeft = HELPERS::splitString(parts[currentIndexInParts], ';');
+		if(directionYLeft.size() == 3) {
+			dataProcessing->setNumberValuesMotion(thisDataIndex, ControllerNumberValues::DIRECTION_YX_LEFT, strtof(directionYLeft[0].c_str(), nullptr));
+			dataProcessing->setNumberValuesMotion(thisDataIndex, ControllerNumberValues::DIRECTION_YY_LEFT, strtof(directionYLeft[1].c_str(), nullptr));
+			dataProcessing->setNumberValuesMotion(thisDataIndex, ControllerNumberValues::DIRECTION_YZ_LEFT, strtof(directionYLeft[2].c_str(), nullptr));
+		} else {
+			continue;
+		}
+
+		currentIndexInParts++;
+		if(parts.size() == currentIndexInParts)
+			continue;
+
+		std::vector<std::string> directionZLeft = HELPERS::splitString(parts[currentIndexInParts], ';');
+		if(directionZLeft.size() == 3) {
+			dataProcessing->setNumberValuesMotion(thisDataIndex, ControllerNumberValues::DIRECTION_ZX_LEFT, strtof(directionZLeft[0].c_str(), nullptr));
+			dataProcessing->setNumberValuesMotion(thisDataIndex, ControllerNumberValues::DIRECTION_ZY_LEFT, strtof(directionZLeft[1].c_str(), nullptr));
+			dataProcessing->setNumberValuesMotion(thisDataIndex, ControllerNumberValues::DIRECTION_ZZ_LEFT, strtof(directionZLeft[2].c_str(), nullptr));
+		} else {
+			continue;
+		}
+
+		currentIndexInParts++;
+		if(parts.size() == currentIndexInParts)
+			continue;
+
+		std::vector<std::string> directionXRight = HELPERS::splitString(parts[currentIndexInParts], ';');
+		if(directionXRight.size() == 3) {
+			dataProcessing->setNumberValuesMotion(thisDataIndex, ControllerNumberValues::DIRECTION_XX_RIGHT, strtof(directionXRight[0].c_str(), nullptr));
+			dataProcessing->setNumberValuesMotion(thisDataIndex, ControllerNumberValues::DIRECTION_XY_RIGHT, strtof(directionXRight[1].c_str(), nullptr));
+			dataProcessing->setNumberValuesMotion(thisDataIndex, ControllerNumberValues::DIRECTION_XZ_RIGHT, strtof(directionXRight[2].c_str(), nullptr));
+		} else {
+			continue;
+		}
+
+		currentIndexInParts++;
+		if(parts.size() == currentIndexInParts)
+			continue;
+
+		std::vector<std::string> directionYRight = HELPERS::splitString(parts[currentIndexInParts], ';');
+		if(directionYRight.size() == 3) {
+			dataProcessing->setNumberValuesMotion(thisDataIndex, ControllerNumberValues::DIRECTION_YX_RIGHT, strtof(directionYRight[0].c_str(), nullptr));
+			dataProcessing->setNumberValuesMotion(thisDataIndex, ControllerNumberValues::DIRECTION_YY_RIGHT, strtof(directionYRight[1].c_str(), nullptr));
+			dataProcessing->setNumberValuesMotion(thisDataIndex, ControllerNumberValues::DIRECTION_YZ_RIGHT, strtof(directionYRight[2].c_str(), nullptr));
+		} else {
+			continue;
+		}
+
+		currentIndexInParts++;
+		if(parts.size() == currentIndexInParts)
+			continue;
+
+		std::vector<std::string> directionZRight = HELPERS::splitString(parts[currentIndexInParts], ';');
+		if(directionZRight.size() == 3) {
+			dataProcessing->setNumberValuesMotion(thisDataIndex, ControllerNumberValues::DIRECTION_ZX_RIGHT, strtof(directionZRight[0].c_str(), nullptr));
+			dataProcessing->setNumberValuesMotion(thisDataIndex, ControllerNumberValues::DIRECTION_ZY_RIGHT, strtof(directionZRight[1].c_str(), nullptr));
+			dataProcessing->setNumberValuesMotion(thisDataIndex, ControllerNumberValues::DIRECTION_ZZ_RIGHT, strtof(directionZRight[2].c_str(), nullptr));
+		} else {
+			continue;
+		}
 	}
 
 	return lastReadFrame;
@@ -348,6 +432,42 @@ std::string ButtonData::framesToText(DataProcessing* dataProcessing, FrameNum st
 				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::ANGLE_X_LEFT, j,branch, realPlayer)) + \
 					";" + std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::ANGLE_Y_LEFT, j, branch, realPlayer)) + \
 					";" + std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::ANGLE_Z_LEFT, j, branch, realPlayer)));
+
+				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::ACCEL_X_RIGHT, j, branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::ACCEL_Y_RIGHT, j, branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::ACCEL_Z_RIGHT, j, branch, realPlayer)));
+
+				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::GYRO_X_RIGHT, j,branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::GYRO_Y_RIGHT, j, branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::GYRO_Z_RIGHT, j, branch, realPlayer)));
+
+				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::ANGLE_X_RIGHT, j,branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::ANGLE_Y_RIGHT, j, branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::ANGLE_Z_RIGHT, j, branch, realPlayer)));
+
+				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::DIRECTION_XX_LEFT, j, branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::DIRECTION_XY_LEFT, j, branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::DIRECTION_XZ_LEFT, j, branch, realPlayer)));
+
+				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::DIRECTION_YX_LEFT, j,branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::DIRECTION_YY_LEFT, j, branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::DIRECTION_YZ_LEFT, j, branch, realPlayer)));
+
+				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::DIRECTION_ZX_LEFT, j,branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::DIRECTION_ZY_LEFT, j, branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::DIRECTION_ZZ_LEFT, j, branch, realPlayer)));
+
+				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::DIRECTION_XX_RIGHT, j, branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::DIRECTION_XY_RIGHT, j, branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::DIRECTION_XZ_RIGHT, j, branch, realPlayer)));
+
+				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::DIRECTION_YX_RIGHT, j,branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::DIRECTION_YY_RIGHT, j, branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::DIRECTION_YZ_RIGHT, j, branch, realPlayer)));
+
+				parts.push_back(std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::DIRECTION_ZX_RIGHT, j,branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::DIRECTION_ZY_RIGHT, j, branch, realPlayer)) + \
+					";" + std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::DIRECTION_ZZ_RIGHT, j, branch, realPlayer)));
 				// clang-format on
 
 				textVector.push_back(HELPERS::joinString(parts, " "));
@@ -370,58 +490,94 @@ void ButtonData::transferControllerData(ControllerData src, std::shared_ptr<Cont
 		// Just replace
 		dest->buttons = src.buttons;
 	}
-	dest->LS_X          = src.LS_X;
-	dest->LS_Y          = src.LS_Y;
-	dest->RS_X          = src.RS_X;
-	dest->RS_Y          = src.RS_Y;
-	dest->ACCEL_X_LEFT  = src.ACCEL_X_LEFT;
-	dest->ACCEL_Y_LEFT  = src.ACCEL_Y_LEFT;
-	dest->ACCEL_Z_LEFT  = src.ACCEL_Z_LEFT;
-	dest->GYRO_X_LEFT   = src.GYRO_X_LEFT;
-	dest->GYRO_Y_LEFT   = src.GYRO_Y_LEFT;
-	dest->GYRO_Z_LEFT   = src.GYRO_Z_LEFT;
-	dest->ANGLE_X_LEFT  = src.ANGLE_X_LEFT;
-	dest->ANGLE_Y_LEFT  = src.ANGLE_Y_LEFT;
-	dest->ANGLE_Z_LEFT  = src.ANGLE_Z_LEFT;
-	dest->ACCEL_X_RIGHT = src.ACCEL_X_RIGHT;
-	dest->ACCEL_Y_RIGHT = src.ACCEL_Y_RIGHT;
-	dest->ACCEL_Z_RIGHT = src.ACCEL_Z_RIGHT;
-	dest->GYRO_X_RIGHT  = src.GYRO_X_RIGHT;
-	dest->GYRO_Y_RIGHT  = src.GYRO_Y_RIGHT;
-	dest->GYRO_Z_RIGHT  = src.GYRO_Z_RIGHT;
-	dest->ANGLE_X_RIGHT = src.ANGLE_X_RIGHT;
-	dest->ANGLE_Y_RIGHT = src.ANGLE_Y_RIGHT;
-	dest->ANGLE_Z_RIGHT = src.ANGLE_Z_RIGHT;
-	dest->frameState    = src.frameState;
+	dest->LS_X               = src.LS_X;
+	dest->LS_Y               = src.LS_Y;
+	dest->RS_X               = src.RS_X;
+	dest->RS_Y               = src.RS_Y;
+	dest->ACCEL_X_LEFT       = src.ACCEL_X_LEFT;
+	dest->ACCEL_Y_LEFT       = src.ACCEL_Y_LEFT;
+	dest->ACCEL_Z_LEFT       = src.ACCEL_Z_LEFT;
+	dest->GYRO_X_LEFT        = src.GYRO_X_LEFT;
+	dest->GYRO_Y_LEFT        = src.GYRO_Y_LEFT;
+	dest->GYRO_Z_LEFT        = src.GYRO_Z_LEFT;
+	dest->ANGLE_X_LEFT       = src.ANGLE_X_LEFT;
+	dest->ANGLE_Y_LEFT       = src.ANGLE_Y_LEFT;
+	dest->ANGLE_Z_LEFT       = src.ANGLE_Z_LEFT;
+	dest->ACCEL_X_RIGHT      = src.ACCEL_X_RIGHT;
+	dest->ACCEL_Y_RIGHT      = src.ACCEL_Y_RIGHT;
+	dest->ACCEL_Z_RIGHT      = src.ACCEL_Z_RIGHT;
+	dest->GYRO_X_RIGHT       = src.GYRO_X_RIGHT;
+	dest->GYRO_Y_RIGHT       = src.GYRO_Y_RIGHT;
+	dest->GYRO_Z_RIGHT       = src.GYRO_Z_RIGHT;
+	dest->ANGLE_X_RIGHT      = src.ANGLE_X_RIGHT;
+	dest->ANGLE_Y_RIGHT      = src.ANGLE_Y_RIGHT;
+	dest->ANGLE_Z_RIGHT      = src.ANGLE_Z_RIGHT;
+	dest->DIRECTION_XX_LEFT  = src.DIRECTION_XX_LEFT;
+	dest->DIRECTION_XY_LEFT  = src.DIRECTION_XY_LEFT;
+	dest->DIRECTION_XZ_LEFT  = src.DIRECTION_XZ_LEFT;
+	dest->DIRECTION_YX_LEFT  = src.DIRECTION_YX_LEFT;
+	dest->DIRECTION_YY_LEFT  = src.DIRECTION_YY_LEFT;
+	dest->DIRECTION_YZ_LEFT  = src.DIRECTION_YZ_LEFT;
+	dest->DIRECTION_ZX_LEFT  = src.DIRECTION_ZX_LEFT;
+	dest->DIRECTION_ZY_LEFT  = src.DIRECTION_ZY_LEFT;
+	dest->DIRECTION_ZZ_LEFT  = src.DIRECTION_ZZ_LEFT;
+	dest->DIRECTION_XX_RIGHT = src.DIRECTION_XX_RIGHT;
+	dest->DIRECTION_XY_RIGHT = src.DIRECTION_XY_RIGHT;
+	dest->DIRECTION_XZ_RIGHT = src.DIRECTION_XZ_RIGHT;
+	dest->DIRECTION_YX_RIGHT = src.DIRECTION_YX_RIGHT;
+	dest->DIRECTION_YY_RIGHT = src.DIRECTION_YY_RIGHT;
+	dest->DIRECTION_YZ_RIGHT = src.DIRECTION_YZ_RIGHT;
+	dest->DIRECTION_ZX_RIGHT = src.DIRECTION_ZX_RIGHT;
+	dest->DIRECTION_ZY_RIGHT = src.DIRECTION_ZY_RIGHT;
+	dest->DIRECTION_ZZ_RIGHT = src.DIRECTION_ZZ_RIGHT;
+	dest->frameState         = src.frameState;
 }
 
 bool ButtonData::isEmptyControllerData(std::shared_ptr<ControllerData> data) {
 	ControllerData emptyData;
 	// clang-format off
 	return
-		(data->buttons         == emptyData.buttons)         &&
-		(data->LS_X            == emptyData.LS_X)            &&
-		(data->LS_Y            == emptyData.LS_Y)            &&
-		(data->RS_X            == emptyData.RS_X)            &&
-		(data->RS_Y            == emptyData.RS_Y)            &&
-		(data->ACCEL_X_LEFT    == emptyData.ACCEL_X_LEFT)    &&
-		(data->ACCEL_Y_LEFT    == emptyData.ACCEL_Y_LEFT)    &&
-		(data->ACCEL_Z_LEFT    == emptyData.ACCEL_Z_LEFT)    &&
-		(data->GYRO_X_LEFT     == emptyData.GYRO_X_LEFT)     &&
-		(data->GYRO_Y_LEFT     == emptyData.GYRO_Y_LEFT)     &&
-		(data->GYRO_Z_LEFT     == emptyData.GYRO_Z_LEFT)     &&
-		(data->ANGLE_X_LEFT    == emptyData.ANGLE_X_LEFT)    &&
-		(data->ANGLE_Y_LEFT    == emptyData.ANGLE_Y_LEFT)    &&
-		(data->ANGLE_Z_LEFT    == emptyData.ANGLE_Z_LEFT)    &&
-		(data->ACCEL_X_RIGHT   == emptyData.ACCEL_X_RIGHT)   &&
-		(data->ACCEL_Y_RIGHT   == emptyData.ACCEL_Y_RIGHT)   &&
-		(data->ACCEL_Z_RIGHT   == emptyData.ACCEL_Z_RIGHT)   &&
-		(data->GYRO_X_RIGHT    == emptyData.GYRO_X_RIGHT)    &&
-		(data->GYRO_Y_RIGHT    == emptyData.GYRO_Y_RIGHT)    &&
-		(data->GYRO_Z_RIGHT    == emptyData.GYRO_Z_RIGHT)    &&
-		(data->ANGLE_X_RIGHT   == emptyData.ANGLE_X_RIGHT)   &&
-		(data->ANGLE_Y_RIGHT   == emptyData.ANGLE_Y_RIGHT)   &&
-		(data->ANGLE_Z_RIGHT   == emptyData.ANGLE_Z_RIGHT)   &&
+		(data->buttons            == emptyData.buttons)            &&
+		(data->LS_X               == emptyData.LS_X)               &&
+		(data->LS_Y               == emptyData.LS_Y)               &&
+		(data->RS_X               == emptyData.RS_X)               &&
+		(data->RS_Y               == emptyData.RS_Y)               &&
+		(data->ACCEL_X_LEFT       == emptyData.ACCEL_X_LEFT)       &&
+		(data->ACCEL_Y_LEFT       == emptyData.ACCEL_Y_LEFT)       &&
+		(data->ACCEL_Z_LEFT       == emptyData.ACCEL_Z_LEFT)       &&
+		(data->GYRO_X_LEFT        == emptyData.GYRO_X_LEFT)        &&
+		(data->GYRO_Y_LEFT        == emptyData.GYRO_Y_LEFT)        &&
+		(data->GYRO_Z_LEFT        == emptyData.GYRO_Z_LEFT)        &&
+		(data->ANGLE_X_LEFT       == emptyData.ANGLE_X_LEFT)       &&
+		(data->ANGLE_Y_LEFT       == emptyData.ANGLE_Y_LEFT)       &&
+		(data->ANGLE_Z_LEFT       == emptyData.ANGLE_Z_LEFT)       &&
+		(data->ACCEL_X_RIGHT      == emptyData.ACCEL_X_RIGHT)      &&
+		(data->ACCEL_Y_RIGHT      == emptyData.ACCEL_Y_RIGHT)      &&
+		(data->ACCEL_Z_RIGHT      == emptyData.ACCEL_Z_RIGHT)      &&
+		(data->GYRO_X_RIGHT       == emptyData.GYRO_X_RIGHT)       &&
+		(data->GYRO_Y_RIGHT       == emptyData.GYRO_Y_RIGHT)       &&
+		(data->GYRO_Z_RIGHT       == emptyData.GYRO_Z_RIGHT)       &&
+		(data->ANGLE_X_RIGHT      == emptyData.ANGLE_X_RIGHT)      &&
+		(data->ANGLE_Y_RIGHT      == emptyData.ANGLE_Y_RIGHT)      &&
+		(data->ANGLE_Z_RIGHT      == emptyData.ANGLE_Z_RIGHT)      &&
+		(data->DIRECTION_XX_LEFT  == emptyData.DIRECTION_XX_LEFT)  &&
+		(data->DIRECTION_XY_LEFT  == emptyData.DIRECTION_XY_LEFT)  &&
+		(data->DIRECTION_XZ_LEFT  == emptyData.DIRECTION_XZ_LEFT)  &&
+		(data->DIRECTION_YX_LEFT  == emptyData.DIRECTION_YX_LEFT)  &&
+		(data->DIRECTION_YY_LEFT  == emptyData.DIRECTION_YY_LEFT)  &&
+		(data->DIRECTION_YZ_LEFT  == emptyData.DIRECTION_YZ_LEFT)  &&
+		(data->DIRECTION_ZX_LEFT  == emptyData.DIRECTION_ZX_LEFT)  &&
+		(data->DIRECTION_ZY_LEFT  == emptyData.DIRECTION_ZY_LEFT)  &&
+		(data->DIRECTION_ZZ_LEFT  == emptyData.DIRECTION_ZZ_LEFT)  &&
+		(data->DIRECTION_XX_RIGHT == emptyData.DIRECTION_XX_RIGHT) &&
+		(data->DIRECTION_XY_RIGHT == emptyData.DIRECTION_XY_RIGHT) &&
+		(data->DIRECTION_XZ_RIGHT == emptyData.DIRECTION_XZ_RIGHT) &&
+		(data->DIRECTION_YX_RIGHT == emptyData.DIRECTION_YX_RIGHT) &&
+		(data->DIRECTION_YY_RIGHT == emptyData.DIRECTION_YY_RIGHT) &&
+		(data->DIRECTION_YZ_RIGHT == emptyData.DIRECTION_YZ_RIGHT) &&
+		(data->DIRECTION_ZX_RIGHT == emptyData.DIRECTION_ZX_RIGHT) &&
+		(data->DIRECTION_ZY_RIGHT == emptyData.DIRECTION_ZY_RIGHT) &&
+		(data->DIRECTION_ZZ_RIGHT == emptyData.DIRECTION_ZZ_RIGHT) &&
 		(data->frameState      == emptyData.frameState);
 	// clang-format on
 }

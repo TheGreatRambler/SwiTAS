@@ -13,7 +13,7 @@
 
 #include "buttonData.hpp"
 #include "screenshotHandler.hpp"
-#include "sharedNetworkCode/networkInterface.hpp"
+#include "shared_network_code/networkInterface.hpp"
 
 class ControllerHandler {
 	// Create one for each controller index

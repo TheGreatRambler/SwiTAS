@@ -90,10 +90,10 @@ all: pre-build $(BUILD_DIR)/$(TARGET_EXEC)
 ifeq ($(SNAPCRAFT_PROJECT_NAME),)
 pre-build:
 	# This runs before anything happens
-	# Copy in sharedNetworkCode
+	# Copy in shared_network_code
 	# https://stackoverflow.com/a/1622186/9329945
-	rm -r -f ./source/sharedNetworkCode
-	cp -p -r ../sharedNetworkCode ./source/sharedNetworkCode
+	rm -r -f ./source/shared_network_code
+	cp -p -r ../shared_network_code ./source/shared_network_code
 else
 pre-build: ;
 endif
@@ -104,7 +104,7 @@ $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
 	# Delete all DLLs already there
 	find . -type f -iwholename $(BUILD_DIR)\*.dll -delete
 	# Add custom DLLs
-	cp -a customDlls/. $(BUILD_DIR)
+	cp -a custom_dlls/. $(BUILD_DIR)
 	# Copy required DLLs to folder, not copying the ones that are custom
 	ldd $(BUILD_DIR)/$(TARGET_EXEC) | grep '\/mingw.*\.dll' -o | xargs -I{} cp -n "{}" $(BUILD_DIR)
 else

@@ -26,7 +26,7 @@ CFLAGS := -std=c11
 CXXFLAGS := -std=gnu++17
 
 # C/C++ flags
-CPPFLAGS := -I./include -I./source/thirdParty/lua-5.3.5 -I./source/thirdParty
+CPPFLAGS := -I./include -I./source/third_party/lua-5.3.5 -I./source/third_party
 CPPFLAGS += -Wall -Wno-maybe-uninitialized -D__BSD_VISIBLE -DSERVER_IMP -DYUZU -DWITHOUT_JPEG
 
 ifeq ($(BUILD),release)
@@ -79,10 +79,10 @@ all: pre-build $(BUILD_DIR)/$(TARGET_EXEC)
 
 pre-build:
 	# This runs before anything happens
-	# Copy in sharedNetworkCode
+	# Copy in shared_network_code
 	# https://stackoverflow.com/a/1622186/9329945
-	rm -r -f ./source/sharedNetworkCode
-	cp -p -r ../sharedNetworkCode ./source/sharedNetworkCode
+	rm -r -f ./source/shared_network_code
+	cp -p -r ../shared_network_code ./source/shared_network_code
 
 ifeq ($(UNAME),Msys)
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
@@ -91,7 +91,7 @@ $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
 	# Add my own
 	$(CXX) $(DLLFLAGS) $(OBJS) -o $@ $(LDFLAGS)
 	# Add custom DLLs
-	cp -a customDlls/. $(BUILD_DIR)
+	cp -a custom_dlls/. $(BUILD_DIR)
 	# Copy required DLLs to folder, not copying the ones that are custom
 	ldd $(BUILD_DIR)/$(TARGET_EXEC) | grep '\/mingw.*\.dll' -o | xargs -I{} cp -n "{}" $(BUILD_DIR)
 else

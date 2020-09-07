@@ -56,7 +56,7 @@
 #include <wx/buffer.h>
 #include <zstd.h>
 
-#include "../sharedNetworkCode/serializeUnserializeData.hpp"
+#include "../shared_network_code/serializeUnserializeData.hpp"
 #include "../ui/drawingCanvas.hpp"
 #include "../ui/videoComparisonViewer.hpp"
 #include "dataProcessing.hpp"
@@ -72,7 +72,7 @@ private:
 	std::string projectName;
 	uint8_t projectWasLoaded = true;
 
-	uint16_t rerecordCount    = 0;
+	uint16_t rerecordCount = 0;
 
 	int recentProjectChoice;
 

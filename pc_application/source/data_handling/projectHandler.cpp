@@ -27,81 +27,80 @@ void ProjectHandler::loadProject() {
 	// First, find each savestate hook block
 	rapidjson::Document jsonSettings = HELPERS::getSettingsFile(settingsFileName.GetFullPath().ToStdString());
 
-	size_t const decompressBuffInSize = ZSTD_DStreamInSize();
-    void*  const decompressBuffIn  = malloc(decompressBuffInSize);
-    size_t const decompressBuffOutSize = ZSTD_DStreamOutSize();
-    void*  const decompressBuffOut = malloc(decompressBuffOutSize);
+	size_t const decompressBuffInSize  = ZSTD_DStreamInSize();
+	void* const decompressBuffIn       = malloc(decompressBuffInSize);
+	size_t const decompressBuffOutSize = ZSTD_DStreamOutSize();
+	void* const decompressBuffOut      = malloc(decompressBuffOutSize);
 
-    ZSTD_DCtx* const dctx = ZSTD_createDCtx();
+	ZSTD_DCtx* const dctx = ZSTD_createDCtx();
 
 	auto extraFrameDataArray = jsonSettings["extraFrameData"].GetArray();
 	ExtraFrameDataContainer extraFrameDatas(extraFrameDataArray.Size());
 
 	SavestateBlockNum savestateHookIndex = 0;
-		for(auto const& savestate : extraFrameDataArray) {
-			auto branchesArray = savestate["branches"].GetArray();
+	for(auto const& savestate : extraFrameDataArray) {
+		auto branchesArray = savestate["branches"].GetArray();
 
-			// Not actually a savestate hook, just the vector of branches
-			std::shared_ptr<std::vector<std::shared_ptr<std::vector<ExtraFrameData>>>> savestateHook = std::make_shared<std::vector<std::shared_ptr<std::vector<ExtraFrameData>>>>();
+		// Not actually a savestate hook, just the vector of branches
+		std::shared_ptr<std::vector<std::shared_ptr<std::vector<ExtraFrameData>>>> savestateHook = std::make_shared<std::vector<std::shared_ptr<std::vector<ExtraFrameData>>>>();
 
-			for(auto const& branch : branchesArray) {
-				wxString path = projectDir.GetPathWithSep() + wxString::FromUTF8(branch["filename"].GetString());
-				if(wxFileName(path).FileExists()) {
-					wxMemoryBuffer memoryBuffer;
-					FILE* fin  = fopen(path.c_str(), "rb");
-					
-					// https://github.com/facebook/zstd/blob/dev/examples/streaming_decompression.c
-    size_t const toRead = decompressBuffInSize;
-    size_t read;
-    size_t lastRet = 0;
-    int isEmpty = 1;
-    while ( (read = fread(decompressBuffIn, toRead, 1, fin)) ) {
-        isEmpty = 0;
-        ZSTD_inBuffer input = { decompressBuffIn, read, 0 };
-        while (input.pos < input.size) {
-            ZSTD_outBuffer output = { decompressBuffOut, decompressBuffOutSize, 0 };
-            size_t const ret = ZSTD_decompressStream(dctx, &output , &input);
-			memoryBuffer.AppendData (decompressBuffOut, output.pos);
-            lastRet = ret;
-        }
-    }
+		for(auto const& branch : branchesArray) {
+			wxString path = projectDir.GetPathWithSep() + wxString::FromUTF8(branch["filename"].GetString());
+			if(wxFileName(path).FileExists()) {
+				wxMemoryBuffer memoryBuffer;
+				FILE* fin = fopen(path.c_str(), "rb");
 
-fclose(fin);
-	ZSTD_DCtx_reset(dctx, ZSTD_reset_session_only);
-
-
-					uint8_t* bufferPointer       = (uint8_t*)memoryBuffer.GetData();
-					std::size_t bufferSize       = memoryBuffer.GetDataLen();
-
-					ExtraBranchData inputs = std::make_shared<std::vector<std::shared_ptr<TouchAndKeyboardData>>>();
-
-					// Loop through each part and unserialize it
-					// This is 0% endian safe :)
-					std::size_t sizeRead = 0;
-					while(sizeRead != bufferSize) {
-						// Find the size part first
-						uint8_t sizeOfControllerData = bufferPointer[sizeRead];
-						// Possibility that I will save filespace by making sizeOfControllerData==0 be an empty controller data
-						sizeRead += sizeof(sizeOfControllerData);
-						// Load the data
-						std::shared_ptr<TouchAndKeyboardData> extraControllerData = std::make_shared<TouchAndKeyboardData>();
-
-						serializeProtocol.binaryToData<TouchAndKeyboardData>(*extraControllerData, &bufferPointer[sizeRead], sizeOfControllerData);
-						// For now, just add each frame one at a time, no optimization
-						inputs->push_back(extraControllerData);
-						sizeRead += sizeOfControllerData;
+				// https://github.com/facebook/zstd/blob/dev/examples/streaming_decompression.c
+				size_t const toRead = decompressBuffInSize;
+				size_t read;
+				size_t lastRet = 0;
+				int isEmpty    = 1;
+				while((read = fread(decompressBuffIn, toRead, 1, fin))) {
+					isEmpty             = 0;
+					ZSTD_inBuffer input = { decompressBuffIn, read, 0 };
+					while(input.pos < input.size) {
+						ZSTD_outBuffer output = { decompressBuffOut, decompressBuffOutSize, 0 };
+						size_t const ret      = ZSTD_decompressStream(dctx, &output, &input);
+						memoryBuffer.AppendData(decompressBuffOut, output.pos);
+						lastRet = ret;
 					}
-
-					savestateHook->push_back(inputs);
 				}
-			}
-			
-			extraFrameDatas[savestateHookIndex] = savestateHook;
 
-			savestateHookIndex++;
+				fclose(fin);
+				ZSTD_DCtx_reset(dctx, ZSTD_reset_session_only);
+
+				uint8_t* bufferPointer = (uint8_t*)memoryBuffer.GetData();
+				std::size_t bufferSize = memoryBuffer.GetDataLen();
+
+				ExtraBranchData inputs = std::make_shared<std::vector<std::shared_ptr<TouchAndKeyboardData>>>();
+
+				// Loop through each part and unserialize it
+				// This is 0% endian safe :)
+				std::size_t sizeRead = 0;
+				while(sizeRead != bufferSize) {
+					// Find the size part first
+					uint8_t sizeOfControllerData = bufferPointer[sizeRead];
+					// Possibility that I will save filespace by making sizeOfControllerData==0 be an empty controller data
+					sizeRead += sizeof(sizeOfControllerData);
+					// Load the data
+					std::shared_ptr<TouchAndKeyboardData> extraControllerData = std::make_shared<TouchAndKeyboardData>();
+
+					serializeProtocol.binaryToData<TouchAndKeyboardData>(*extraControllerData, &bufferPointer[sizeRead], sizeOfControllerData);
+					// For now, just add each frame one at a time, no optimization
+					inputs->push_back(extraControllerData);
+					sizeRead += sizeOfControllerData;
+				}
+
+				savestateHook->push_back(inputs);
+			}
 		}
 
-		dataProcessing->setAllExtraData(extraFrameDatas);
+		extraFrameDatas[savestateHookIndex] = savestateHook;
+
+		savestateHookIndex++;
+	}
+
+	dataProcessing->setAllExtraData(extraFrameDatas);
 
 	auto playersArray = jsonSettings["players"].GetArray();
 	AllPlayers players(playersArray.Size());
@@ -122,30 +121,29 @@ fclose(fin);
 				wxString path = projectDir.GetPathWithSep() + wxString::FromUTF8(branch["filename"].GetString());
 				if(wxFileName(path).FileExists()) {
 					wxMemoryBuffer memoryBuffer;
-					FILE* fin  = fopen(path.c_str(), "rb");
-					
+					FILE* fin = fopen(path.c_str(), "rb");
+
 					// https://github.com/facebook/zstd/blob/dev/examples/streaming_decompression.c
-    size_t const toRead = decompressBuffInSize;
-    size_t read;
-    size_t lastRet = 0;
-    int isEmpty = 1;
-    while ( (read = fread(decompressBuffIn, toRead, 1, fin)) ) {
-        isEmpty = 0;
-        ZSTD_inBuffer input = { decompressBuffIn, read, 0 };
-        while (input.pos < input.size) {
-            ZSTD_outBuffer output = { decompressBuffOut, decompressBuffOutSize, 0 };
-            size_t const ret = ZSTD_decompressStream(dctx, &output , &input);
-			memoryBuffer.AppendData (decompressBuffOut, output.pos);
-            lastRet = ret;
-        }
-    }
+					size_t const toRead = decompressBuffInSize;
+					size_t read;
+					size_t lastRet = 0;
+					int isEmpty    = 1;
+					while((read = fread(decompressBuffIn, toRead, 1, fin))) {
+						isEmpty             = 0;
+						ZSTD_inBuffer input = { decompressBuffIn, read, 0 };
+						while(input.pos < input.size) {
+							ZSTD_outBuffer output = { decompressBuffOut, decompressBuffOutSize, 0 };
+							size_t const ret      = ZSTD_decompressStream(dctx, &output, &input);
+							memoryBuffer.AppendData(decompressBuffOut, output.pos);
+							lastRet = ret;
+						}
+					}
 
-fclose(fin);
-	ZSTD_DCtx_reset(dctx, ZSTD_reset_session_only);
+					fclose(fin);
+					ZSTD_DCtx_reset(dctx, ZSTD_reset_session_only);
 
-
-					uint8_t* bufferPointer       = (uint8_t*)memoryBuffer.GetData();
-					std::size_t bufferSize       = memoryBuffer.GetDataLen();
+					uint8_t* bufferPointer = (uint8_t*)memoryBuffer.GetData();
+					std::size_t bufferSize = memoryBuffer.GetDataLen();
 
 					BranchData inputs = std::make_shared<std::vector<std::shared_ptr<ControllerData>>>();
 
@@ -226,13 +224,14 @@ void ProjectHandler::saveProject() {
 
 		AllPlayers& players = dataProcessing->getAllPlayers();
 
-    	size_t const compressBuffOutSize = ZSTD_CStreamOutSize();
-    	void*  const compressBuffOut = malloc(compressBuffOutSize);
+		size_t const compressBuffOutSize = ZSTD_CStreamOutSize();
+		void* const compressBuffOut      = malloc(compressBuffOutSize);
 
 		ZSTD_CCtx* const cctx = ZSTD_createCCtx();
 		ZSTD_CCtx_setParameter(cctx, ZSTD_c_compressionLevel, compressionLevel)
 
-		uint8_t playerIndexNum = 0;
+			uint8_t playerIndexNum
+			= 0;
 		for(auto const& player : players) {
 			AllSavestateHookBlocks& savestateHookBlocks = *player;
 
@@ -281,14 +280,14 @@ void ProjectHandler::saveProject() {
 						ZSTD_inBuffer input = { input, read, 0 };
 
 						int finished;
-        do {
-            ZSTD_outBuffer output = { compressBuffOut, compressBuffOutSize, 0 };
-            size_t const remaining = ZSTD_compressStream2(cctx, &output , &input, mode);
+						do {
+							ZSTD_outBuffer output  = { compressBuffOut, compressBuffOutSize, 0 };
+							size_t const remaining = ZSTD_compressStream2(cctx, &output, &input, mode);
 
-			inputsFileStream.WriteAll(compressBuffOut, output.pos);
+							inputsFileStream.WriteAll(compressBuffOut, output.pos);
 
-            finished = mode == ZSTD_e_end ? (remaining == 0) : (input.pos == input.size);
-        } while (!finished);
+							finished = mode == ZSTD_e_end ? (remaining == 0) : (input.pos == input.size);
+						} while(!finished);
 					}
 
 					ZSTD_CCtx_reset(cctx, ZSTD_reset_session_only);
@@ -362,85 +361,85 @@ void ProjectHandler::saveProject() {
 		rapidjson::Value extraFrameDataJSON(rapidjson::kArrayType);
 
 		ExtraFrameDataContainer& allExtraFrameData = dataProcessing->getAllExtraFrameData();
-		SavestateBlockNum savestateHookIndexNum = 0;
+		SavestateBlockNum savestateHookIndexNum    = 0;
 
-			for(auto const& savestateHookBlock : allExtraFrameData) {
-				rapidjson::Value branchesJSON(rapidjson::kArrayType);
+		for(auto const& savestateHookBlock : allExtraFrameData) {
+			rapidjson::Value branchesJSON(rapidjson::kArrayType);
 
-				BranchNum branchIndexNum = 0;
-				for(auto const& branch : *savestateHookBlock) {
-					// Create path as "extra_frame_data/savestate_block_[num]/branch_[num]"
-					wxFileName inputsFilename = getProjectStart();
-					inputsFilename.AppendDir("extra_frame_data");
-					inputsFilename.AppendDir(wxString::Format("savestate_block_%hu", savestateHookIndexNum));
+			BranchNum branchIndexNum = 0;
+			for(auto const& branch : *savestateHookBlock) {
+				// Create path as "extra_frame_data/savestate_block_[num]/branch_[num]"
+				wxFileName inputsFilename = getProjectStart();
+				inputsFilename.AppendDir("extra_frame_data");
+				inputsFilename.AppendDir(wxString::Format("savestate_block_%hu", savestateHookIndexNum));
 
-					if(branchIndexNum == 0) {
-						inputsFilename.AppendDir("branch_main");
-					} else {
-						inputsFilename.AppendDir(wxString::Format("branch_%hu", branchIndexNum));
-					}
-
-					inputsFilename.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
-					inputsFilename.SetName("inputs");
-					inputsFilename.SetExt("bin");
-
-					// Delete file if already present and use binary mode
-					wxFFileOutputStream inputsFileStream(inputsFilename.GetFullPath(), "wb");
-
-					// Kinda annoying, but actually break up the vector and add each part with the size
-					for(auto const& extraFrameData : *branch) {
-						// https://github.com/facebook/zstd/blob/dev/examples/streaming_compression.c
-						ZSTD_EndDirective const mode = (branch->back() == extraFrameData) ? ZSTD_e_end : ZSTD_e_continue;
-
-						uint8_t* data;
-						uint32_t dataSize;
-						serializeProtocol.dataToBinary<TouchAndKeyboardData>(*extraFrameData, &data, &dataSize);
-						uint8_t sizeToPrint = (uint8_t)dataSize;
-
-						uint8_t input[sizeof(sizeToPrint) + dataSize];
-
-						memcpy(&input[0], &sizeToPrint, sizeof(sizeToPrint));
-						memcpy(&input[sizeof(sizeToPrint)], data, dataSize);
-
-						ZSTD_inBuffer input = { input, read, 0 };
-
-						int finished;
-        do {
-            ZSTD_outBuffer output = { compressBuffOut, compressBuffOutSize, 0 };
-            size_t const remaining = ZSTD_compressStream2(cctx, &output , &input, mode);
-
-			inputsFileStream.WriteAll(compressBuffOut, output.pos);
-
-            finished = mode == ZSTD_e_end ? (remaining == 0) : (input.pos == input.size);
-        } while (!finished);
-					}
-
-					ZSTD_CCtx_reset(cctx, ZSTD_reset_session_only);
-					inputsFileStream.Close();
-
-					rapidjson::Value branchJSON(rapidjson::kObjectType);
-					inputsFilename.MakeRelativeTo(getProjectStart().GetFullPath());
-
-					rapidjson::Value inputs;
-					wxString inputsPath = inputsFilename.GetFullPath(wxPATH_UNIX);
-					inputs.SetString(inputsPath.c_str(), inputsPath.size(), settingsJSON.GetAllocator());
-
-					branchJSON.AddMember("filename", inputs, settingsJSON.GetAllocator());
-
-					branchesJSON.PushBack(branchJSON, settingsJSON.GetAllocator());
-
-					branchIndexNum++;
+				if(branchIndexNum == 0) {
+					inputsFilename.AppendDir("branch_main");
+				} else {
+					inputsFilename.AppendDir(wxString::Format("branch_%hu", branchIndexNum));
 				}
 
-				// Add the item in the savestateHooks JSON
-				rapidjson::Value savestateHookJSON(rapidjson::kObjectType);
+				inputsFilename.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+				inputsFilename.SetName("inputs");
+				inputsFilename.SetExt("bin");
 
-				savestateHookJSON.AddMember("branches", branchesJSON, settingsJSON.GetAllocator());
+				// Delete file if already present and use binary mode
+				wxFFileOutputStream inputsFileStream(inputsFilename.GetFullPath(), "wb");
 
-				extraFrameDataJSON.PushBack(savestateHookJSON, settingsJSON.GetAllocator());
+				// Kinda annoying, but actually break up the vector and add each part with the size
+				for(auto const& extraFrameData : *branch) {
+					// https://github.com/facebook/zstd/blob/dev/examples/streaming_compression.c
+					ZSTD_EndDirective const mode = (branch->back() == extraFrameData) ? ZSTD_e_end : ZSTD_e_continue;
 
-				savestateHookIndexNum++;
+					uint8_t* data;
+					uint32_t dataSize;
+					serializeProtocol.dataToBinary<TouchAndKeyboardData>(*extraFrameData, &data, &dataSize);
+					uint8_t sizeToPrint = (uint8_t)dataSize;
+
+					uint8_t input[sizeof(sizeToPrint) + dataSize];
+
+					memcpy(&input[0], &sizeToPrint, sizeof(sizeToPrint));
+					memcpy(&input[sizeof(sizeToPrint)], data, dataSize);
+
+					ZSTD_inBuffer input = { input, read, 0 };
+
+					int finished;
+					do {
+						ZSTD_outBuffer output  = { compressBuffOut, compressBuffOutSize, 0 };
+						size_t const remaining = ZSTD_compressStream2(cctx, &output, &input, mode);
+
+						inputsFileStream.WriteAll(compressBuffOut, output.pos);
+
+						finished = mode == ZSTD_e_end ? (remaining == 0) : (input.pos == input.size);
+					} while(!finished);
+				}
+
+				ZSTD_CCtx_reset(cctx, ZSTD_reset_session_only);
+				inputsFileStream.Close();
+
+				rapidjson::Value branchJSON(rapidjson::kObjectType);
+				inputsFilename.MakeRelativeTo(getProjectStart().GetFullPath());
+
+				rapidjson::Value inputs;
+				wxString inputsPath = inputsFilename.GetFullPath(wxPATH_UNIX);
+				inputs.SetString(inputsPath.c_str(), inputsPath.size(), settingsJSON.GetAllocator());
+
+				branchJSON.AddMember("filename", inputs, settingsJSON.GetAllocator());
+
+				branchesJSON.PushBack(branchJSON, settingsJSON.GetAllocator());
+
+				branchIndexNum++;
 			}
+
+			// Add the item in the savestateHooks JSON
+			rapidjson::Value savestateHookJSON(rapidjson::kObjectType);
+
+			savestateHookJSON.AddMember("branches", branchesJSON, settingsJSON.GetAllocator());
+
+			extraFrameDataJSON.PushBack(savestateHookJSON, settingsJSON.GetAllocator());
+
+			savestateHookIndexNum++;
+		}
 
 		ZSTD_freeCCtx(cctx);
 

@@ -10,7 +10,10 @@
 			"path": "sysmodule_application"
 		},
 		{
-			"path": "sharedNetworkCode"
+			"path": "shared_network_code"
+		},
+		{
+			"path": "..\\yuzu"
 		}
 	],
 	"settings": {

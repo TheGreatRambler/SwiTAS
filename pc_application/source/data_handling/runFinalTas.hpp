@@ -7,8 +7,8 @@
 #include <wx/wx.h>
 
 #include "../helpers.hpp"
-#include "../sharedNetworkCode/networkInterface.hpp"
-#include "../sharedNetworkCode/serializeUnserializeData.hpp"
+#include "../shared_network_code/networkInterface.hpp"
+#include "../shared_network_code/serializeUnserializeData.hpp"
 #include "buttonConstants.hpp"
 #include "buttonData.hpp"
 #include "dataProcessing.hpp"

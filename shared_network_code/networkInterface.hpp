@@ -87,9 +87,9 @@
 
 // Active sockets are the client
 #ifdef SERVER_IMP
-#include "thirdParty/clsocket/PassiveSocket.h"
+#include "third_party/clsocket/PassiveSocket.h"
 #endif
-#include "thirdParty/clsocket/ActiveSocket.h"
+#include "third_party/clsocket/ActiveSocket.h"
 #include "serializeUnserializeData.hpp"
 #include "networkingStructures.hpp"
 

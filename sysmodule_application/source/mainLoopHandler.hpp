@@ -39,8 +39,8 @@
 #include "gui.hpp"
 #include "helpers.hpp"
 #include "scripting/luaScripting.hpp"
-#include "sharedNetworkCode/networkInterface.hpp"
-#include "sharedNetworkCode/serializeUnserializeData.hpp"
+#include "shared_network_code/networkInterface.hpp"
+#include "shared_network_code/serializeUnserializeData.hpp"
 
 struct MemoryRegionInfo {
 	// mu::Parser func;

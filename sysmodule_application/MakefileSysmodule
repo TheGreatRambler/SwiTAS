@@ -39,10 +39,10 @@ include $(DEVKITPRO)/libnx/switch_rules
 #---------------------------------------------------------------------------------
 
 TARGET		:=	SwiTAS
-BUILD		:=	buildSysmodule
+BUILD		:=	build_sysmodule
 SOURCES		:=	source
 DATA		:=	data
-INCLUDES	:=	include source/thirdParty/lua-5.3.5 source/thirdParty/fbg
+INCLUDES	:=	include source/third_party/lua-5.3.5 source/third_party/fbg
 ROMFS	:=	romfs
 
 SOURCES := $(shell find $(SOURCES) -print)
@@ -174,8 +174,8 @@ endif
 all: $(BUILD)
 
 $(BUILD):
-	rm -rf ./source/sharedNetworkCode
-	cp -rp ../sharedNetworkCode ./source/sharedNetworkCode
+	rm -rf ./source/shared_network_code
+	cp -rp ../shared_network_code ./source/shared_network_code
 	make BUILD_TYPE=$(BUILD_TYPE) -C saltynx_plugin
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/MakefileSysmodule

@@ -9,10 +9,10 @@
 #include <wx/stream.h>
 #include <wx/wx.h>
 
-#include "../dataHandling/dataProcessing.hpp"
-#include "../dataHandling/projectHandler.hpp"
+#include "../data_handling/dataProcessing.hpp"
+#include "../data_handling/projectHandler.hpp"
 #include "../helpers.hpp"
-#include "../sharedNetworkCode/networkInterface.hpp"
+#include "../shared_network_code/networkInterface.hpp"
 
 class ScriptExporter : public wxDialog {
 private:

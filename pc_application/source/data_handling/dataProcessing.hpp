@@ -26,7 +26,7 @@
 #include <wx/menu.h>
 #include <wx/wx.h>
 
-#include "../sharedNetworkCode/networkInterface.hpp"
+#include "../shared_network_code/networkInterface.hpp"
 #include "buttonConstants.hpp"
 #include "buttonData.hpp"
 

@@ -10,9 +10,9 @@
 #include <wx/wfstream.h>
 #include <wx/wx.h>
 
-#include "../dataHandling/projectHandler.hpp"
-#include "../sharedNetworkCode/networkInterface.hpp"
-#include "../sharedNetworkCode/networkingStructures.hpp"
+#include "../data_handling/projectHandler.hpp"
+#include "../shared_network_code/networkInterface.hpp"
+#include "../shared_network_code/networkingStructures.hpp"
 #include "drawingCanvas.hpp"
 
 struct MemoryItemInfo {

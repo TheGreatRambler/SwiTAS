@@ -20,11 +20,11 @@
    "-IC:/msys2/mingw64/include",
    "-I./include",
    "-c",
-   "source/dataHandling/buttonData.cpp",
+   "source/data_handling/buttonData.cpp",
    "-o",
-   "bin/./source/dataHandling/buttonData.cpp.o"
+   "bin/./source/data_handling/buttonData.cpp.o"
   ],
-  "file": "source/dataHandling/buttonData.cpp"
+  "file": "source/data_handling/buttonData.cpp"
  },
  {
   "directory": "C:\\Users\\aehar\\Desktop\\projects\\VSC_Projects\\SwiTAS\\pc_application",
@@ -47,11 +47,11 @@
    "-IC:/msys2/mingw64/include",
    "-I./include",
    "-c",
-   "source/dataHandling/dataProcessing.cpp",
+   "source/data_handling/dataProcessing.cpp",
    "-o",
-   "bin/./source/dataHandling/dataProcessing.cpp.o"
+   "bin/./source/data_handling/dataProcessing.cpp.o"
   ],
-  "file": "source/dataHandling/dataProcessing.cpp"
+  "file": "source/data_handling/dataProcessing.cpp"
  },
  {
   "directory": "C:\\Users\\aehar\\Desktop\\projects\\VSC_Projects\\SwiTAS\\pc_application",
@@ -74,11 +74,11 @@
    "-IC:/msys2/mingw64/include",
    "-I./include",
    "-c",
-   "source/dataHandling/gameCorruptor.cpp",
+   "source/data_handling/gameCorruptor.cpp",
    "-o",
-   "bin/./source/dataHandling/gameCorruptor.cpp.o"
+   "bin/./source/data_handling/gameCorruptor.cpp.o"
   ],
-  "file": "source/dataHandling/gameCorruptor.cpp"
+  "file": "source/data_handling/gameCorruptor.cpp"
  },
  {
   "directory": "C:\\Users\\aehar\\Desktop\\projects\\VSC_Projects\\SwiTAS\\pc_application",
@@ -101,11 +101,11 @@
    "-IC:/msys2/mingw64/include",
    "-I./include",
    "-c",
-   "source/dataHandling/projectHandler.cpp",
+   "source/data_handling/projectHandler.cpp",
    "-o",
-   "bin/./source/dataHandling/projectHandler.cpp.o"
+   "bin/./source/data_handling/projectHandler.cpp.o"
   ],
-  "file": "source/dataHandling/projectHandler.cpp"
+  "file": "source/data_handling/projectHandler.cpp"
  },
  {
   "directory": "C:\\Users\\aehar\\Desktop\\projects\\VSC_Projects\\SwiTAS\\pc_application",
@@ -128,11 +128,11 @@
    "-IC:/msys2/mingw64/include",
    "-I./include",
    "-c",
-   "source/dataHandling/runFinalTas.cpp",
+   "source/data_handling/runFinalTas.cpp",
    "-o",
-   "bin/./source/dataHandling/runFinalTas.cpp.o"
+   "bin/./source/data_handling/runFinalTas.cpp.o"
   ],
-  "file": "source/dataHandling/runFinalTas.cpp"
+  "file": "source/data_handling/runFinalTas.cpp"
  },
  {
   "directory": "C:\\Users\\aehar\\Desktop\\projects\\VSC_Projects\\SwiTAS\\pc_application",
@@ -209,92 +209,11 @@
    "-IC:/msys2/mingw64/include",
    "-I./include",
    "-c",
-   "source/sharedNetworkCode/networkInterface.cpp",
+   "source/shared_network_code/networkInterface.cpp",
    "-o",
-   "bin/./source/sharedNetworkCode/networkInterface.cpp.o"
+   "bin/./source/shared_network_code/networkInterface.cpp.o"
   ],
-  "file": "source/sharedNetworkCode/networkInterface.cpp"
- },
- {
-  "directory": "C:\\Users\\aehar\\Desktop\\projects\\VSC_Projects\\SwiTAS\\pc_application",
-  "arguments": [
-   "x86_64-w64-mingw32-g++",
-   "-Wall",
-   "-Wno-maybe-uninitialized",
-   "-Wno-sign-compare",
-   "-DCLIENT_IMP",
-   "-Og",
-   "-g",
-   "-ggdb",
-   "-DDEBUG",
-   "-m64",
-   "-std=gnu++17",
-   "-IC:/msys2/mingw64/lib/wx/include/msw-unicode-static-3.1",
-   "-IC:/msys2/mingw64/include/wx-3.1",
-   "-D_FILE_OFFSET_BITS=64",
-   "-D__WXMSW__",
-   "-IC:/msys2/mingw64/include",
-   "-I./include",
-   "-c",
-   "source/sharedNetworkCode/thirdParty/clsocket/ActiveSocket.cpp",
-   "-o",
-   "bin/./source/sharedNetworkCode/thirdParty/clsocket/ActiveSocket.cpp.o"
-  ],
-  "file": "source/sharedNetworkCode/thirdParty/clsocket/ActiveSocket.cpp"
- },
- {
-  "directory": "C:\\Users\\aehar\\Desktop\\projects\\VSC_Projects\\SwiTAS\\pc_application",
-  "arguments": [
-   "x86_64-w64-mingw32-g++",
-   "-Wall",
-   "-Wno-maybe-uninitialized",
-   "-Wno-sign-compare",
-   "-DCLIENT_IMP",
-   "-Og",
-   "-g",
-   "-ggdb",
-   "-DDEBUG",
-   "-m64",
-   "-std=gnu++17",
-   "-IC:/msys2/mingw64/lib/wx/include/msw-unicode-static-3.1",
-   "-IC:/msys2/mingw64/include/wx-3.1",
-   "-D_FILE_OFFSET_BITS=64",
-   "-D__WXMSW__",
-   "-IC:/msys2/mingw64/include",
-   "-I./include",
-   "-c",
-   "source/sharedNetworkCode/thirdParty/clsocket/PassiveSocket.cpp",
-   "-o",
-   "bin/./source/sharedNetworkCode/thirdParty/clsocket/PassiveSocket.cpp.o"
-  ],
-  "file": "source/sharedNetworkCode/thirdParty/clsocket/PassiveSocket.cpp"
- },
- {
-  "directory": "C:\\Users\\aehar\\Desktop\\projects\\VSC_Projects\\SwiTAS\\pc_application",
-  "arguments": [
-   "x86_64-w64-mingw32-g++",
-   "-Wall",
-   "-Wno-maybe-uninitialized",
-   "-Wno-sign-compare",
-   "-DCLIENT_IMP",
-   "-Og",
-   "-g",
-   "-ggdb",
-   "-DDEBUG",
-   "-m64",
-   "-std=gnu++17",
-   "-IC:/msys2/mingw64/lib/wx/include/msw-unicode-static-3.1",
-   "-IC:/msys2/mingw64/include/wx-3.1",
-   "-D_FILE_OFFSET_BITS=64",
-   "-D__WXMSW__",
-   "-IC:/msys2/mingw64/include",
-   "-I./include",
-   "-c",
-   "source/sharedNetworkCode/thirdParty/clsocket/SimpleSocket.cpp",
-   "-o",
-   "bin/./source/sharedNetworkCode/thirdParty/clsocket/SimpleSocket.cpp.o"
-  ],
-  "file": "source/sharedNetworkCode/thirdParty/clsocket/SimpleSocket.cpp"
+  "file": "source/shared_network_code/networkInterface.cpp"
  },
  {
   "directory": "C:\\Users\\aehar\\Desktop\\projects\\VSC_Projects\\SwiTAS\\pc_application",
@@ -538,5 +457,86 @@
    "bin/./source/ui/videoComparisonViewer.cpp.o"
   ],
   "file": "source/ui/videoComparisonViewer.cpp"
+ },
+ {
+  "directory": "C:\\Users\\aehar\\Desktop\\projects\\VSC_Projects\\SwiTAS\\pc_application",
+  "arguments": [
+   "x86_64-w64-mingw32-g++",
+   "-Wall",
+   "-Wno-maybe-uninitialized",
+   "-Wno-sign-compare",
+   "-DCLIENT_IMP",
+   "-Og",
+   "-g",
+   "-ggdb",
+   "-DDEBUG",
+   "-m64",
+   "-std=gnu++17",
+   "-IC:/msys2/mingw64/lib/wx/include/msw-unicode-static-3.1",
+   "-IC:/msys2/mingw64/include/wx-3.1",
+   "-D_FILE_OFFSET_BITS=64",
+   "-D__WXMSW__",
+   "-IC:/msys2/mingw64/include",
+   "-I./include",
+   "-c",
+   "source/shared_network_code/third_party/clsocket/ActiveSocket.cpp",
+   "-o",
+   "bin/./source/shared_network_code/third_party/clsocket/ActiveSocket.cpp.o"
+  ],
+  "file": "source/shared_network_code/third_party/clsocket/ActiveSocket.cpp"
+ },
+ {
+  "directory": "C:\\Users\\aehar\\Desktop\\projects\\VSC_Projects\\SwiTAS\\pc_application",
+  "arguments": [
+   "x86_64-w64-mingw32-g++",
+   "-Wall",
+   "-Wno-maybe-uninitialized",
+   "-Wno-sign-compare",
+   "-DCLIENT_IMP",
+   "-Og",
+   "-g",
+   "-ggdb",
+   "-DDEBUG",
+   "-m64",
+   "-std=gnu++17",
+   "-IC:/msys2/mingw64/lib/wx/include/msw-unicode-static-3.1",
+   "-IC:/msys2/mingw64/include/wx-3.1",
+   "-D_FILE_OFFSET_BITS=64",
+   "-D__WXMSW__",
+   "-IC:/msys2/mingw64/include",
+   "-I./include",
+   "-c",
+   "source/shared_network_code/third_party/clsocket/PassiveSocket.cpp",
+   "-o",
+   "bin/./source/shared_network_code/third_party/clsocket/PassiveSocket.cpp.o"
+  ],
+  "file": "source/shared_network_code/third_party/clsocket/PassiveSocket.cpp"
+ },
+ {
+  "directory": "C:\\Users\\aehar\\Desktop\\projects\\VSC_Projects\\SwiTAS\\pc_application",
+  "arguments": [
+   "x86_64-w64-mingw32-g++",
+   "-Wall",
+   "-Wno-maybe-uninitialized",
+   "-Wno-sign-compare",
+   "-DCLIENT_IMP",
+   "-Og",
+   "-g",
+   "-ggdb",
+   "-DDEBUG",
+   "-m64",
+   "-std=gnu++17",
+   "-IC:/msys2/mingw64/lib/wx/include/msw-unicode-static-3.1",
+   "-IC:/msys2/mingw64/include/wx-3.1",
+   "-D_FILE_OFFSET_BITS=64",
+   "-D__WXMSW__",
+   "-IC:/msys2/mingw64/include",
+   "-I./include",
+   "-c",
+   "source/shared_network_code/third_party/clsocket/SimpleSocket.cpp",
+   "-o",
+   "bin/./source/shared_network_code/third_party/clsocket/SimpleSocket.cpp.o"
+  ],
+  "file": "source/shared_network_code/third_party/clsocket/SimpleSocket.cpp"
  }
 ]

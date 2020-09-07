@@ -1,6 +1,6 @@
 # Match the network code in this source tree to do intellisense
-rm -r -f ./source/sharedNetworkCode
-cp -p -r ../sharedNetworkCode ./source/sharedNetworkCode
+rm -r -f ./source/shared_network_code
+cp -p -r ../shared_network_code ./source/shared_network_code
 
 compiledb -n make
 if [[ "$OSTYPE" == "msys" ]]; then

@@ -17,9 +17,9 @@
 #include <wx/spinctrl.h>
 #include <wx/wx.h>
 
-#include "../dataHandling/buttonData.hpp"
-#include "../dataHandling/dataProcessing.hpp"
-#include "../dataHandling/projectHandler.hpp"
+#include "../data_handling/buttonData.hpp"
+#include "../data_handling/dataProcessing.hpp"
+#include "../data_handling/projectHandler.hpp"
 #include "../helpers.hpp"
 #include "drawingCanvas.hpp"
 

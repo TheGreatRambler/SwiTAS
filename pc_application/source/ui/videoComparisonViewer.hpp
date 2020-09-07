@@ -30,7 +30,7 @@
 #include <wx/wx.h>
 
 #include "../helpers.hpp"
-#include "../sharedNetworkCode/networkInterface.hpp"
+#include "../shared_network_code/networkInterface.hpp"
 #include "drawingCanvas.hpp"
 
 struct VideoEntry {

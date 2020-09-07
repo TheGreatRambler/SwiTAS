@@ -3,12 +3,14 @@
 #define SET_BIT(number, bit, loc) (number) ^= (-(unsigned long)(bit) ^ (number)) & (1UL << (loc))
 #define GET_BIT(number, loc) ((number) >> (loc)) & 1U
 #define IS_KEYBOARD_HELD(data, key) data[key / 32] & (1 << (key % 32));
+// clang-format off
 #define SET_KEYBOARD_HELD(data, key, state) \
-	if (state) { \
+	if(state) { \
 		data[key / 32] |= (1 << (key % 32)); \
 	} else { \
 		data[key / 32] &= ~(1 << (key % 32)); \
 	}
+// clang-format on
 
 #include "include/zpp.hpp"
 #include <cstdint>
@@ -47,39 +49,48 @@ enum FrameState : uint8_t {
 // Controller data that will be packed into the array and will be recieved from
 // the switch
 struct ControllerData : public zpp::serializer::polymorphic {
-	// Button data stored with bitflags in 3 bytes
-	// 20 flags need to be stored
-	uint32_t buttons = 0;
-	// Joystick values
-	// https://switchbrew.github.io/libnx/structHiddbgHdlsState.html
-	// Range -30000 to 30000
-	int16_t LS_X = 0;
-	int16_t LS_Y = 0;
-	int16_t RS_X = 0;
-	int16_t RS_Y = 0;
-	// Gyroscope and Accelerometer data, all floats
-	// Left joycon
-	float ACCEL_X_LEFT = 0;
-	float ACCEL_Y_LEFT = 0;
-	float ACCEL_Z_LEFT = 0;
-	float GYRO_X_LEFT  = 0;
-	float GYRO_Y_LEFT  = 0;
-	float GYRO_Z_LEFT  = 0;
-	float ANGLE_X_LEFT = 0;
-	float ANGLE_Y_LEFT = 0;
-	float ANGLE_Z_LEFT = 0;
-	// Right joycon
-	float ACCEL_X_RIGHT = 0;
-	float ACCEL_Y_RIGHT = 0;
-	float ACCEL_Z_RIGHT = 0;
-	float GYRO_X_RIGHT  = 0;
-	float GYRO_Y_RIGHT  = 0;
-	float GYRO_Z_RIGHT  = 0;
-	float ANGLE_X_RIGHT = 0;
-	float ANGLE_Y_RIGHT = 0;
-	float ANGLE_Z_RIGHT = 0;
-	// State of the frame, mostly for the editor
-	uint8_t frameState = 0;
+	uint32_t buttons         = 0;
+	int16_t LS_X             = 0;
+	int16_t LS_Y             = 0;
+	int16_t RS_X             = 0;
+	int16_t RS_Y             = 0;
+	float ACCEL_X_LEFT       = 0.0;
+	float ACCEL_Y_LEFT       = 0.0;
+	float ACCEL_Z_LEFT       = -1.0;
+	float GYRO_X_LEFT        = 0.0;
+	float GYRO_Y_LEFT        = 0.0;
+	float GYRO_Z_LEFT        = 0.0;
+	float ANGLE_X_LEFT       = 0.0;
+	float ANGLE_Y_LEFT       = 0.0;
+	float ANGLE_Z_LEFT       = 0.0;
+	float DIRECTION_XX_LEFT  = 1.0;
+	float DIRECTION_XY_LEFT  = 0.0;
+	float DIRECTION_XZ_LEFT  = 0.0;
+	float DIRECTION_YX_LEFT  = 0.0;
+	float DIRECTION_YY_LEFT  = 1.0;
+	float DIRECTION_YZ_LEFT  = 0.0;
+	float DIRECTION_ZX_LEFT  = 0.0;
+	float DIRECTION_ZY_LEFT  = 0.0;
+	float DIRECTION_ZZ_LEFT  = 1.0;
+	float ACCEL_X_RIGHT      = 0.0;
+	float ACCEL_Y_RIGHT      = 0.0;
+	float ACCEL_Z_RIGHT      = -1.0;
+	float GYRO_X_RIGHT       = 0.0;
+	float GYRO_Y_RIGHT       = 0.0;
+	float GYRO_Z_RIGHT       = 0.0;
+	float ANGLE_X_RIGHT      = 0.0;
+	float ANGLE_Y_RIGHT      = 0.0;
+	float ANGLE_Z_RIGHT      = 0.0;
+	float DIRECTION_XX_RIGHT = 1.0;
+	float DIRECTION_XY_RIGHT = 0.0;
+	float DIRECTION_XZ_RIGHT = 0.0;
+	float DIRECTION_YX_RIGHT = 0.0;
+	float DIRECTION_YY_RIGHT = 1.0;
+	float DIRECTION_YZ_RIGHT = 0.0;
+	float DIRECTION_ZX_RIGHT = 0.0;
+	float DIRECTION_ZY_RIGHT = 0.0;
+	float DIRECTION_ZZ_RIGHT = 1.0;
+	uint8_t frameState       = 0;
 
 	friend zpp::serializer::access;
 	template <typename Archive, typename Self> static void serialize(Archive& archive, Self& self) {
@@ -92,6 +103,15 @@ struct ControllerData : public zpp::serializer::polymorphic {
 				self.ACCEL_X_RIGHT, self.ACCEL_Y_RIGHT, self.ACCEL_Z_RIGHT,
 				self.GYRO_X_RIGHT, self.GYRO_Y_RIGHT, self.GYRO_Z_RIGHT,
 				self.ANGLE_X_RIGHT, self.ANGLE_Y_RIGHT, self.ANGLE_Z_RIGHT,
+				self.DIRECTION_XX_LEFT, self.DIRECTION_XY_LEFT,
+				self.DIRECTION_XZ_LEFT, self.DIRECTION_YX_LEFT,
+				self.DIRECTION_YY_LEFT, self.DIRECTION_YZ_LEFT,
+				self.DIRECTION_ZX_LEFT, self.DIRECTION_ZY_LEFT,
+				self.DIRECTION_ZZ_LEFT, self.DIRECTION_XX_RIGHT,
+				self.DIRECTION_XY_RIGHT, self.DIRECTION_XZ_RIGHT,
+				self.DIRECTION_YX_RIGHT, self.DIRECTION_YY_RIGHT,
+				self.DIRECTION_YZ_RIGHT, self.DIRECTION_ZX_RIGHT,
+				self.DIRECTION_ZY_RIGHT, self.DIRECTION_ZZ_RIGHT,
 				self.frameState);
 		// clang-format on
 	}
@@ -99,20 +119,20 @@ struct ControllerData : public zpp::serializer::polymorphic {
 
 // Stored in parrallel to the rest of the data, just not sharing the player
 struct TouchAndKeyboardData : public zpp::serializer::polymorphic {
-	int32_t touchX1;
-	int32_t touchY1;
-	int32_t touchX2;
-	int32_t touchY2;
-	uint8_t numberOfTouches;
-	int32_t keyboardModifiers;
+	int32_t touchX1           = 0;
+	int32_t touchY1           = 0;
+	int32_t touchX2           = 0;
+	int32_t touchY2           = 0;
+	uint8_t numberOfTouches   = 0;
+	int32_t keyboardModifiers = 0;
 	uint32_t keyboardKeys[8];
-	int32_t mouseX;
-	int32_t mouseY;
-	int32_t mouseVelocityX;
-	int32_t mouseVelocityY;
-	int32_t scrollVelocityX;
-	int32_t scrollVelocityY;
-	int32_t mouseButtons;
+	int32_t mouseX          = 0;
+	int32_t mouseY          = 0;
+	int32_t mouseVelocityX  = 0;
+	int32_t mouseVelocityY  = 0;
+	int32_t scrollVelocityX = 0;
+	int32_t scrollVelocityY = 0;
+	int32_t mouseButtons    = 0;
 
 	friend zpp::serializer::access;
 	template <typename Archive, typename Self> static void serialize(Archive& archive, Self& self) {

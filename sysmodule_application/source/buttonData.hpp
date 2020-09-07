@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sharedNetworkCode/buttonData.hpp"
+#include "shared_network_code/buttonData.hpp"
 #include <cstdint>
 #include <unordered_map>
 #include <zpp.hpp>

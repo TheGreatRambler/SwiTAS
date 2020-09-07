@@ -8,10 +8,10 @@
 #include <wx/wrapsizer.h>
 #include <wx/wx.h>
 
-#include "../dataHandling/dataProcessing.hpp"
-#include "../dataHandling/projectHandler.hpp"
+#include "../data_handling/dataProcessing.hpp"
+#include "../data_handling/projectHandler.hpp"
 #include "../helpers.hpp"
-#include "../sharedNetworkCode/networkInterface.hpp"
+#include "../shared_network_code/networkInterface.hpp"
 #include "drawingCanvas.hpp"
 
 class SavestateLister : public wxDialog {

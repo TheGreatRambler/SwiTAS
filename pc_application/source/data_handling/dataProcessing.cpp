@@ -806,7 +806,7 @@ void DataProcessing::addNewBranch() {
 void DataProcessing::setBranch(uint16_t branchIndex) {
 	viewingBranchIndex = branchIndex;
 	currentBranchData  = allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex];
-	currentExtraData = allExtraFrameData[currentSavestateHook]->at(viewingBranchIndex);
+	currentExtraData   = allExtraFrameData[currentSavestateHook]->at(viewingBranchIndex);
 	if(branchInfoCallback) {
 		branchInfoCallback(getNumBranches(), branchIndex, true);
 	}
@@ -929,24 +929,24 @@ void DataProcessing::setNumberValuesJoystick(FrameNum frame, ControllerNumberVal
 	case ControllerNumberValues::ANGLE_X_RIGHT:
 	case ControllerNumberValues::ANGLE_Y_RIGHT:
 	case ControllerNumberValues::ANGLE_Z_RIGHT:
-case ControllerNumberValues::DIRECTION_XX_LEFT:
-case ControllerNumberValues::DIRECTION_XY_LEFT:
-case ControllerNumberValues::DIRECTION_XZ_LEFT:
-case ControllerNumberValues::DIRECTION_YX_LEFT:
-case ControllerNumberValues::DIRECTION_YY_LEFT:
-case ControllerNumberValues::DIRECTION_YZ_LEFT:
-case ControllerNumberValues::DIRECTION_ZX_LEFT:
-case ControllerNumberValues::DIRECTION_ZY_LEFT:
-case ControllerNumberValues::DIRECTION_ZZ_LEFT:
-case ControllerNumberValues::DIRECTION_XX_RIGHT:
-case ControllerNumberValues::DIRECTION_XY_RIGHT:
-case ControllerNumberValues::DIRECTION_XZ_RIGHT:
-case ControllerNumberValues::DIRECTION_YX_RIGHT:
-case ControllerNumberValues::DIRECTION_YY_RIGHT:
-case ControllerNumberValues::DIRECTION_YZ_RIGHT:
-case ControllerNumberValues::DIRECTION_ZX_RIGHT:
-case ControllerNumberValues::DIRECTION_ZY_RIGHT:
-case ControllerNumberValues::DIRECTION_ZZ_RIGHT:
+	case ControllerNumberValues::DIRECTION_XX_LEFT:
+	case ControllerNumberValues::DIRECTION_XY_LEFT:
+	case ControllerNumberValues::DIRECTION_XZ_LEFT:
+	case ControllerNumberValues::DIRECTION_YX_LEFT:
+	case ControllerNumberValues::DIRECTION_YY_LEFT:
+	case ControllerNumberValues::DIRECTION_YZ_LEFT:
+	case ControllerNumberValues::DIRECTION_ZX_LEFT:
+	case ControllerNumberValues::DIRECTION_ZY_LEFT:
+	case ControllerNumberValues::DIRECTION_ZZ_LEFT:
+	case ControllerNumberValues::DIRECTION_XX_RIGHT:
+	case ControllerNumberValues::DIRECTION_XY_RIGHT:
+	case ControllerNumberValues::DIRECTION_XZ_RIGHT:
+	case ControllerNumberValues::DIRECTION_YX_RIGHT:
+	case ControllerNumberValues::DIRECTION_YY_RIGHT:
+	case ControllerNumberValues::DIRECTION_YZ_RIGHT:
+	case ControllerNumberValues::DIRECTION_ZX_RIGHT:
+	case ControllerNumberValues::DIRECTION_ZY_RIGHT:
+	case ControllerNumberValues::DIRECTION_ZZ_RIGHT:
 		break;
 	}
 
@@ -1010,40 +1010,40 @@ void DataProcessing::setNumberValuesMotion(FrameNum frame, ControllerNumberValue
 	case ControllerNumberValues::ANGLE_Z_RIGHT:
 		getInputsList()->at(frame)->ANGLE_Z_RIGHT = value;
 		break;
-case ControllerNumberValues::DIRECTION_XX_LEFT:
-	getInputsList()->at(frame)->DIRECTION_XX_LEFT = value;
-case ControllerNumberValues::DIRECTION_XY_LEFT:
-	getInputsList()->at(frame)->DIRECTION_XY_LEFT = value;
-case ControllerNumberValues::DIRECTION_XZ_LEFT:
-	getInputsList()->at(frame)->DIRECTION_XZ_LEFT = value;
-case ControllerNumberValues::DIRECTION_YX_LEFT:
-	getInputsList()->at(frame)->DIRECTION_YX_LEFT = value;
-case ControllerNumberValues::DIRECTION_YY_LEFT:
-	getInputsList()->at(frame)->DIRECTION_YY_LEFT = value;
-case ControllerNumberValues::DIRECTION_YZ_LEFT:
-	getInputsList()->at(frame)->DIRECTION_YZ_LEFT = value;
-case ControllerNumberValues::DIRECTION_ZX_LEFT:
-	getInputsList()->at(frame)->DIRECTION_ZX_LEFT = value;
-case ControllerNumberValues::DIRECTION_ZY_LEFT:
-	getInputsList()->at(frame)->DIRECTION_ZY_LEFT = value;
-case ControllerNumberValues::DIRECTION_ZZ_LEFT:
-	getInputsList()->at(frame)->DIRECTION_ZZ_LEFT = value;
-case ControllerNumberValues::DIRECTION_XX_RIGHT:
-	getInputsList()->at(frame)->DIRECTION_XX_RIGHT = value;
-case ControllerNumberValues::DIRECTION_XY_RIGHT:
-	getInputsList()->at(frame)->DIRECTION_XY_RIGHT = value;
-case ControllerNumberValues::DIRECTION_XZ_RIGHT:
-	getInputsList()->at(frame)->DIRECTION_XZ_RIGHT = value;
-case ControllerNumberValues::DIRECTION_YX_RIGHT:
-	getInputsList()->at(frame)->DIRECTION_YX_RIGHT = value;
-case ControllerNumberValues::DIRECTION_YY_RIGHT:
-	getInputsList()->at(frame)->DIRECTION_YY_RIGHT = value;
-case ControllerNumberValues::DIRECTION_YZ_RIGHT:
-	getInputsList()->at(frame)->DIRECTION_YZ_RIGHT = value;
-case ControllerNumberValues::DIRECTION_ZX_RIGHT:
-	getInputsList()->at(frame)->DIRECTION_ZX_RIGHT = value;
-case ControllerNumberValues::DIRECTION_ZY_RIGHT:
-	getInputsList()->at(frame)->DIRECTION_ZY_RIGHT = value;
+	case ControllerNumberValues::DIRECTION_XX_LEFT:
+		getInputsList()->at(frame)->DIRECTION_XX_LEFT = value;
+	case ControllerNumberValues::DIRECTION_XY_LEFT:
+		getInputsList()->at(frame)->DIRECTION_XY_LEFT = value;
+	case ControllerNumberValues::DIRECTION_XZ_LEFT:
+		getInputsList()->at(frame)->DIRECTION_XZ_LEFT = value;
+	case ControllerNumberValues::DIRECTION_YX_LEFT:
+		getInputsList()->at(frame)->DIRECTION_YX_LEFT = value;
+	case ControllerNumberValues::DIRECTION_YY_LEFT:
+		getInputsList()->at(frame)->DIRECTION_YY_LEFT = value;
+	case ControllerNumberValues::DIRECTION_YZ_LEFT:
+		getInputsList()->at(frame)->DIRECTION_YZ_LEFT = value;
+	case ControllerNumberValues::DIRECTION_ZX_LEFT:
+		getInputsList()->at(frame)->DIRECTION_ZX_LEFT = value;
+	case ControllerNumberValues::DIRECTION_ZY_LEFT:
+		getInputsList()->at(frame)->DIRECTION_ZY_LEFT = value;
+	case ControllerNumberValues::DIRECTION_ZZ_LEFT:
+		getInputsList()->at(frame)->DIRECTION_ZZ_LEFT = value;
+	case ControllerNumberValues::DIRECTION_XX_RIGHT:
+		getInputsList()->at(frame)->DIRECTION_XX_RIGHT = value;
+	case ControllerNumberValues::DIRECTION_XY_RIGHT:
+		getInputsList()->at(frame)->DIRECTION_XY_RIGHT = value;
+	case ControllerNumberValues::DIRECTION_XZ_RIGHT:
+		getInputsList()->at(frame)->DIRECTION_XZ_RIGHT = value;
+	case ControllerNumberValues::DIRECTION_YX_RIGHT:
+		getInputsList()->at(frame)->DIRECTION_YX_RIGHT = value;
+	case ControllerNumberValues::DIRECTION_YY_RIGHT:
+		getInputsList()->at(frame)->DIRECTION_YY_RIGHT = value;
+	case ControllerNumberValues::DIRECTION_YZ_RIGHT:
+		getInputsList()->at(frame)->DIRECTION_YZ_RIGHT = value;
+	case ControllerNumberValues::DIRECTION_ZX_RIGHT:
+		getInputsList()->at(frame)->DIRECTION_ZX_RIGHT = value;
+	case ControllerNumberValues::DIRECTION_ZY_RIGHT:
+		getInputsList()->at(frame)->DIRECTION_ZY_RIGHT = value;
 	case ControllerNumberValues::LEFT_X:
 	case ControllerNumberValues::LEFT_Y:
 	case ControllerNumberValues::RIGHT_X:
@@ -1088,23 +1088,23 @@ int16_t DataProcessing::getNumberValuesJoystick(FrameNum frame, ControllerNumber
 	case ControllerNumberValues::ANGLE_Y_RIGHT:
 	case ControllerNumberValues::ANGLE_Z_RIGHT:
 	case ControllerNumberValues::DIRECTION_XX_LEFT:
-case ControllerNumberValues::DIRECTION_XY_LEFT:
-case ControllerNumberValues::DIRECTION_XZ_LEFT:
-case ControllerNumberValues::DIRECTION_YX_LEFT:
-case ControllerNumberValues::DIRECTION_YY_LEFT:
-case ControllerNumberValues::DIRECTION_YZ_LEFT:
-case ControllerNumberValues::DIRECTION_ZX_LEFT:
-case ControllerNumberValues::DIRECTION_ZY_LEFT:
-case ControllerNumberValues::DIRECTION_ZZ_LEFT:
-case ControllerNumberValues::DIRECTION_XX_RIGHT:
-case ControllerNumberValues::DIRECTION_XY_RIGHT:
-case ControllerNumberValues::DIRECTION_XZ_RIGHT:
-case ControllerNumberValues::DIRECTION_YX_RIGHT:
-case ControllerNumberValues::DIRECTION_YY_RIGHT:
-case ControllerNumberValues::DIRECTION_YZ_RIGHT:
-case ControllerNumberValues::DIRECTION_ZX_RIGHT:
-case ControllerNumberValues::DIRECTION_ZY_RIGHT:
-case ControllerNumberValues::DIRECTION_ZZ_RIGHT:
+	case ControllerNumberValues::DIRECTION_XY_LEFT:
+	case ControllerNumberValues::DIRECTION_XZ_LEFT:
+	case ControllerNumberValues::DIRECTION_YX_LEFT:
+	case ControllerNumberValues::DIRECTION_YY_LEFT:
+	case ControllerNumberValues::DIRECTION_YZ_LEFT:
+	case ControllerNumberValues::DIRECTION_ZX_LEFT:
+	case ControllerNumberValues::DIRECTION_ZY_LEFT:
+	case ControllerNumberValues::DIRECTION_ZZ_LEFT:
+	case ControllerNumberValues::DIRECTION_XX_RIGHT:
+	case ControllerNumberValues::DIRECTION_XY_RIGHT:
+	case ControllerNumberValues::DIRECTION_XZ_RIGHT:
+	case ControllerNumberValues::DIRECTION_YX_RIGHT:
+	case ControllerNumberValues::DIRECTION_YY_RIGHT:
+	case ControllerNumberValues::DIRECTION_YZ_RIGHT:
+	case ControllerNumberValues::DIRECTION_ZX_RIGHT:
+	case ControllerNumberValues::DIRECTION_ZY_RIGHT:
+	case ControllerNumberValues::DIRECTION_ZZ_RIGHT:
 		break;
 	}
 }
@@ -1165,40 +1165,40 @@ float DataProcessing::getNumberValuesMotion(FrameNum frame, ControllerNumberValu
 	case ControllerNumberValues::ANGLE_Z_RIGHT:
 		return getInputsList()->at(frame)->ANGLE_Z_RIGHT;
 		break;
-case ControllerNumberValues::DIRECTION_XX_LEFT:
-	return getInputsList()->at(frame)->DIRECTION_XX_LEFT;
-case ControllerNumberValues::DIRECTION_XY_LEFT:
-	return getInputsList()->at(frame)->DIRECTION_XY_LEFT;
-case ControllerNumberValues::DIRECTION_XZ_LEFT:
-	return getInputsList()->at(frame)->DIRECTION_XZ_LEFT;
-case ControllerNumberValues::DIRECTION_YX_LEFT:
-	return getInputsList()->at(frame)->DIRECTION_YX_LEFT;
-case ControllerNumberValues::DIRECTION_YY_LEFT:
-	return getInputsList()->at(frame)->DIRECTION_YY_LEFT;
-case ControllerNumberValues::DIRECTION_YZ_LEFT:
-	return getInputsList()->at(frame)->DIRECTION_YZ_LEFT;
-case ControllerNumberValues::DIRECTION_ZX_LEFT:
-	return getInputsList()->at(frame)->DIRECTION_ZX_LEFT;
-case ControllerNumberValues::DIRECTION_ZY_LEFT:
-	return getInputsList()->at(frame)->DIRECTION_ZY_LEFT;
-case ControllerNumberValues::DIRECTION_ZZ_LEFT:
-	return getInputsList()->at(frame)->DIRECTION_ZZ_LEFT;
-case ControllerNumberValues::DIRECTION_XX_RIGHT:
-	return getInputsList()->at(frame)->DIRECTION_XX_RIGHT;
-case ControllerNumberValues::DIRECTION_XY_RIGHT:
-	return getInputsList()->at(frame)->DIRECTION_XY_RIGHT;
-case ControllerNumberValues::DIRECTION_XZ_RIGHT:
-	return getInputsList()->at(frame)->DIRECTION_XZ_RIGHT;
-case ControllerNumberValues::DIRECTION_YX_RIGHT:
-	return getInputsList()->at(frame)->DIRECTION_YX_RIGHT;
-case ControllerNumberValues::DIRECTION_YY_RIGHT:
-	return getInputsList()->at(frame)->DIRECTION_YY_RIGHT;
-case ControllerNumberValues::DIRECTION_YZ_RIGHT:
-	return getInputsList()->at(frame)->DIRECTION_YZ_RIGHT;
-case ControllerNumberValues::DIRECTION_ZX_RIGHT:
-	return getInputsList()->at(frame)->DIRECTION_ZX_RIGHT;
-case ControllerNumberValues::DIRECTION_ZY_RIGHT:
-	return getInputsList()->at(frame)->DIRECTION_ZY_RIGHT;
+	case ControllerNumberValues::DIRECTION_XX_LEFT:
+		return getInputsList()->at(frame)->DIRECTION_XX_LEFT;
+	case ControllerNumberValues::DIRECTION_XY_LEFT:
+		return getInputsList()->at(frame)->DIRECTION_XY_LEFT;
+	case ControllerNumberValues::DIRECTION_XZ_LEFT:
+		return getInputsList()->at(frame)->DIRECTION_XZ_LEFT;
+	case ControllerNumberValues::DIRECTION_YX_LEFT:
+		return getInputsList()->at(frame)->DIRECTION_YX_LEFT;
+	case ControllerNumberValues::DIRECTION_YY_LEFT:
+		return getInputsList()->at(frame)->DIRECTION_YY_LEFT;
+	case ControllerNumberValues::DIRECTION_YZ_LEFT:
+		return getInputsList()->at(frame)->DIRECTION_YZ_LEFT;
+	case ControllerNumberValues::DIRECTION_ZX_LEFT:
+		return getInputsList()->at(frame)->DIRECTION_ZX_LEFT;
+	case ControllerNumberValues::DIRECTION_ZY_LEFT:
+		return getInputsList()->at(frame)->DIRECTION_ZY_LEFT;
+	case ControllerNumberValues::DIRECTION_ZZ_LEFT:
+		return getInputsList()->at(frame)->DIRECTION_ZZ_LEFT;
+	case ControllerNumberValues::DIRECTION_XX_RIGHT:
+		return getInputsList()->at(frame)->DIRECTION_XX_RIGHT;
+	case ControllerNumberValues::DIRECTION_XY_RIGHT:
+		return getInputsList()->at(frame)->DIRECTION_XY_RIGHT;
+	case ControllerNumberValues::DIRECTION_XZ_RIGHT:
+		return getInputsList()->at(frame)->DIRECTION_XZ_RIGHT;
+	case ControllerNumberValues::DIRECTION_YX_RIGHT:
+		return getInputsList()->at(frame)->DIRECTION_YX_RIGHT;
+	case ControllerNumberValues::DIRECTION_YY_RIGHT:
+		return getInputsList()->at(frame)->DIRECTION_YY_RIGHT;
+	case ControllerNumberValues::DIRECTION_YZ_RIGHT:
+		return getInputsList()->at(frame)->DIRECTION_YZ_RIGHT;
+	case ControllerNumberValues::DIRECTION_ZX_RIGHT:
+		return getInputsList()->at(frame)->DIRECTION_ZX_RIGHT;
+	case ControllerNumberValues::DIRECTION_ZY_RIGHT:
+		return getInputsList()->at(frame)->DIRECTION_ZY_RIGHT;
 	case ControllerNumberValues::LEFT_X:
 	case ControllerNumberValues::LEFT_Y:
 	case ControllerNumberValues::RIGHT_X:
@@ -1240,23 +1240,23 @@ int16_t DataProcessing::getNumberValuesSpecificJoystick(FrameNum frame, Controll
 	case ControllerNumberValues::ANGLE_Y_RIGHT:
 	case ControllerNumberValues::ANGLE_Z_RIGHT:
 	case ControllerNumberValues::DIRECTION_XX_LEFT:
-case ControllerNumberValues::DIRECTION_XY_LEFT:
-case ControllerNumberValues::DIRECTION_XZ_LEFT:
-case ControllerNumberValues::DIRECTION_YX_LEFT:
-case ControllerNumberValues::DIRECTION_YY_LEFT:
-case ControllerNumberValues::DIRECTION_YZ_LEFT:
-case ControllerNumberValues::DIRECTION_ZX_LEFT:
-case ControllerNumberValues::DIRECTION_ZY_LEFT:
-case ControllerNumberValues::DIRECTION_ZZ_LEFT:
-case ControllerNumberValues::DIRECTION_XX_RIGHT:
-case ControllerNumberValues::DIRECTION_XY_RIGHT:
-case ControllerNumberValues::DIRECTION_XZ_RIGHT:
-case ControllerNumberValues::DIRECTION_YX_RIGHT:
-case ControllerNumberValues::DIRECTION_YY_RIGHT:
-case ControllerNumberValues::DIRECTION_YZ_RIGHT:
-case ControllerNumberValues::DIRECTION_ZX_RIGHT:
-case ControllerNumberValues::DIRECTION_ZY_RIGHT:
-case ControllerNumberValues::DIRECTION_ZZ_RIGHT:
+	case ControllerNumberValues::DIRECTION_XY_LEFT:
+	case ControllerNumberValues::DIRECTION_XZ_LEFT:
+	case ControllerNumberValues::DIRECTION_YX_LEFT:
+	case ControllerNumberValues::DIRECTION_YY_LEFT:
+	case ControllerNumberValues::DIRECTION_YZ_LEFT:
+	case ControllerNumberValues::DIRECTION_ZX_LEFT:
+	case ControllerNumberValues::DIRECTION_ZY_LEFT:
+	case ControllerNumberValues::DIRECTION_ZZ_LEFT:
+	case ControllerNumberValues::DIRECTION_XX_RIGHT:
+	case ControllerNumberValues::DIRECTION_XY_RIGHT:
+	case ControllerNumberValues::DIRECTION_XZ_RIGHT:
+	case ControllerNumberValues::DIRECTION_YX_RIGHT:
+	case ControllerNumberValues::DIRECTION_YY_RIGHT:
+	case ControllerNumberValues::DIRECTION_YZ_RIGHT:
+	case ControllerNumberValues::DIRECTION_ZX_RIGHT:
+	case ControllerNumberValues::DIRECTION_ZY_RIGHT:
+	case ControllerNumberValues::DIRECTION_ZZ_RIGHT:
 		break;
 	}
 }
@@ -1317,40 +1317,40 @@ float DataProcessing::getNumberValuesSpecificMotion(FrameNum frame, ControllerNu
 	case ControllerNumberValues::ANGLE_Z_RIGHT:
 		return getControllerData(player, savestateHookNum, branch, frame)->ANGLE_Z_RIGHT;
 		break;
-case ControllerNumberValues::DIRECTION_XX_LEFT:
-	return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_XX_LEFT;
-case ControllerNumberValues::DIRECTION_XY_LEFT:
-	return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_XY_LEFT;
-case ControllerNumberValues::DIRECTION_XZ_LEFT:
-	return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_XZ_LEFT;
-case ControllerNumberValues::DIRECTION_YX_LEFT:
-	return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_YX_LEFT;
-case ControllerNumberValues::DIRECTION_YY_LEFT:
-	return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_YY_LEFT;
-case ControllerNumberValues::DIRECTION_YZ_LEFT:
-	return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_YZ_LEFT;
-case ControllerNumberValues::DIRECTION_ZX_LEFT:
-	return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_ZX_LEFT;
-case ControllerNumberValues::DIRECTION_ZY_LEFT:
-	return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_ZY_LEFT;
-case ControllerNumberValues::DIRECTION_ZZ_LEFT:
-	return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_ZZ_LEFT;
-case ControllerNumberValues::DIRECTION_XX_RIGHT:
-	return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_XX_RIGHT;
-case ControllerNumberValues::DIRECTION_XY_RIGHT:
-	return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_XY_RIGHT;
-case ControllerNumberValues::DIRECTION_XZ_RIGHT:
-	return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_XZ_RIGHT;
-case ControllerNumberValues::DIRECTION_YX_RIGHT:
-	return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_YX_RIGHT;
-case ControllerNumberValues::DIRECTION_YY_RIGHT:
-	return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_YY_RIGHT;
-case ControllerNumberValues::DIRECTION_YZ_RIGHT:
-	return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_YZ_RIGHT;
-case ControllerNumberValues::DIRECTION_ZX_RIGHT:
-	return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_ZX_RIGHT;
-case ControllerNumberValues::DIRECTION_ZY_RIGHT:
-	return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_ZY_RIGHT;
+	case ControllerNumberValues::DIRECTION_XX_LEFT:
+		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_XX_LEFT;
+	case ControllerNumberValues::DIRECTION_XY_LEFT:
+		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_XY_LEFT;
+	case ControllerNumberValues::DIRECTION_XZ_LEFT:
+		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_XZ_LEFT;
+	case ControllerNumberValues::DIRECTION_YX_LEFT:
+		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_YX_LEFT;
+	case ControllerNumberValues::DIRECTION_YY_LEFT:
+		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_YY_LEFT;
+	case ControllerNumberValues::DIRECTION_YZ_LEFT:
+		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_YZ_LEFT;
+	case ControllerNumberValues::DIRECTION_ZX_LEFT:
+		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_ZX_LEFT;
+	case ControllerNumberValues::DIRECTION_ZY_LEFT:
+		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_ZY_LEFT;
+	case ControllerNumberValues::DIRECTION_ZZ_LEFT:
+		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_ZZ_LEFT;
+	case ControllerNumberValues::DIRECTION_XX_RIGHT:
+		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_XX_RIGHT;
+	case ControllerNumberValues::DIRECTION_XY_RIGHT:
+		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_XY_RIGHT;
+	case ControllerNumberValues::DIRECTION_XZ_RIGHT:
+		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_XZ_RIGHT;
+	case ControllerNumberValues::DIRECTION_YX_RIGHT:
+		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_YX_RIGHT;
+	case ControllerNumberValues::DIRECTION_YY_RIGHT:
+		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_YY_RIGHT;
+	case ControllerNumberValues::DIRECTION_YZ_RIGHT:
+		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_YZ_RIGHT;
+	case ControllerNumberValues::DIRECTION_ZX_RIGHT:
+		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_ZX_RIGHT;
+	case ControllerNumberValues::DIRECTION_ZY_RIGHT:
+		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_ZY_RIGHT;
 	case ControllerNumberValues::LEFT_X:
 	case ControllerNumberValues::LEFT_Y:
 	case ControllerNumberValues::RIGHT_X:
@@ -1569,8 +1569,8 @@ void DataProcessing::triggerKeyboardModifier(nn::hid::KeyboardModifier key, uint
 }
 
 void DataProcessing::setKeyboardModifier(FrameNum frame, nn::hid::KeyboardModifier key, uint8_t state) {
-	if (state) {
-		getInputsExtraList()->at(frame)->keyboardModifiers |= (int32_t)key; 
+	if(state) {
+		getInputsExtraList()->at(frame)->keyboardModifiers |= (int32_t)key;
 	} else {
 		getInputsExtraList()->at(frame)->keyboardModifiers &= ~(int32_t)key;
 	}
@@ -1603,8 +1603,8 @@ void DataProcessing::triggerMouseButton(nn::hid::MouseButton key, uint8_t state)
 }
 
 void DataProcessing::setMouseButton(FrameNum frame, nn::hid::MouseButton key, uint8_t state) {
-	if (state) {
-		getInputsExtraList()->at(frame)->mouseButtons |= (int32_t)key; 
+	if(state) {
+		getInputsExtraList()->at(frame)->mouseButtons |= (int32_t)key;
 	} else {
 		getInputsExtraList()->at(frame)->mouseButtons &= ~(int32_t)key;
 	}
@@ -1612,7 +1612,7 @@ void DataProcessing::setMouseButton(FrameNum frame, nn::hid::MouseButton key, ui
 	invalidateRun(frame);
 
 	RefreshItem(frame);
-	modifyCurrentFrameViews(frame);	
+	modifyCurrentFrameViews(frame);
 }
 
 uint8_t DataProcessing::getMouseButton(FrameNum frame, nn::hid::MouseButton key) const {
