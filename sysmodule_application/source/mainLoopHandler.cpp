@@ -953,6 +953,25 @@ void MainLoop::getSixAxisState(int32_t controller, ControllerData* state) {
 	state->ANGLE_X_RIGHT = sensorStateRight.angle.x;
 	state->ANGLE_Y_RIGHT = sensorStateRight.angle.y;
 	state->ANGLE_Z_RIGHT = sensorStateRight.angle.z;
+	state->DIRECTION_XX_LEFT = sensorStateLeft.direction.x.x;
+	state->DIRECTION_XY_LEFT = sensorStateLeft.direction.x.y;
+	state->DIRECTION_XZ_LEFT = sensorStateLeft.direction.x.z;
+	state->DIRECTION_YX_LEFT = sensorStateLeft.direction.y.x;
+	state->DIRECTION_YY_LEFT = sensorStateLeft.direction.y.y;
+	state->DIRECTION_YZ_LEFT = sensorStateLeft.direction.y.z;
+	state->DIRECTION_ZX_LEFT = sensorStateLeft.direction.z.x;
+	state->DIRECTION_ZY_LEFT = sensorStateLeft.direction.z.y;
+	state->DIRECTION_ZZ_LEFT = sensorStateLeft.direction.z.z;
+	state->DIRECTION_XX_RIGHT = sensorStateRight.direction.x.x;
+	state->DIRECTION_XY_RIGHT = sensorStateRight.direction.x.y;
+	state->DIRECTION_XZ_RIGHT = sensorStateRight.direction.x.z;
+	state->DIRECTION_YX_RIGHT = sensorStateRight.direction.y.x;
+	state->DIRECTION_YY_RIGHT = sensorStateRight.direction.y.y;
+	state->DIRECTION_YZ_RIGHT = sensorStateRight.direction.y.z;
+	state->DIRECTION_ZX_RIGHT = sensorStateRight.direction.z.x;
+	state->DIRECTION_ZY_RIGHT = sensorStateRight.direction.z.y;
+	state->DIRECTION_ZZ_RIGHT = sensorStateRight.direction.z.z;
+
 }
 
 void MainLoop::setSixAxisState(int32_t controller, ControllerData* state) {
@@ -977,6 +996,24 @@ void MainLoop::setSixAxisState(int32_t controller, ControllerData* state) {
 	sensorStateRight.angle.x           = state->ANGLE_X_RIGHT;
 	sensorStateRight.angle.y           = state->ANGLE_Y_RIGHT;
 	sensorStateRight.angle.z           = state->ANGLE_Z_RIGHT;
+	sensorStateLeft.direction.x.x = state->DIRECTION_XX_LEFT;
+	sensorStateLeft.direction.x.y = state->DIRECTION_XY_LEFT;
+	sensorStateLeft.direction.x.z = state->DIRECTION_XZ_LEFT;
+	sensorStateLeft.direction.y.x = state->DIRECTION_YX_LEFT;
+	sensorStateLeft.direction.y.y = state->DIRECTION_YY_LEFT;
+	sensorStateLeft.direction.y.z = state->DIRECTION_YZ_LEFT;
+	sensorStateLeft.direction.z.x = state->DIRECTION_ZX_LEFT;
+	sensorStateLeft.direction.z.y = state->DIRECTION_ZY_LEFT;
+	sensorStateLeft.direction.z.z = state->DIRECTION_ZZ_LEFT;
+	sensorStateRight.direction.x.x = state->DIRECTION_XX_RIGHT;
+	sensorStateRight.direction.x.y = state->DIRECTION_XY_RIGHT;
+	sensorStateRight.direction.x.z = state->DIRECTION_XZ_RIGHT;
+	sensorStateRight.direction.y.x = state->DIRECTION_YX_RIGHT;
+	sensorStateRight.direction.y.y = state->DIRECTION_YY_RIGHT;
+	sensorStateRight.direction.y.z = state->DIRECTION_YZ_RIGHT;
+	sensorStateRight.direction.z.x = state->DIRECTION_ZX_RIGHT;
+	sensorStateRight.direction.z.y = state->DIRECTION_ZY_RIGHT;
+	sensorStateRight.direction.z.z = state->DIRECTION_ZZ_RIGHT;
 
 	// Set to correct player
 	size_t offset = sizeof(nn::hid::SixAxisSensorState) * controller;

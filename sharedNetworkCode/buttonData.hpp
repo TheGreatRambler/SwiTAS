@@ -47,38 +47,47 @@ enum FrameState : uint8_t {
 // Controller data that will be packed into the array and will be recieved from
 // the switch
 struct ControllerData : public zpp::serializer::polymorphic {
-	// Button data stored with bitflags in 3 bytes
-	// 20 flags need to be stored
 	uint32_t buttons = 0;
-	// Joystick values
-	// https://switchbrew.github.io/libnx/structHiddbgHdlsState.html
-	// Range -30000 to 30000
 	int16_t LS_X = 0;
 	int16_t LS_Y = 0;
 	int16_t RS_X = 0;
 	int16_t RS_Y = 0;
-	// Gyroscope and Accelerometer data, all floats
-	// Left joycon
-	float ACCEL_X_LEFT = 0;
-	float ACCEL_Y_LEFT = 0;
-	float ACCEL_Z_LEFT = 0;
-	float GYRO_X_LEFT  = 0;
-	float GYRO_Y_LEFT  = 0;
-	float GYRO_Z_LEFT  = 0;
-	float ANGLE_X_LEFT = 0;
-	float ANGLE_Y_LEFT = 0;
-	float ANGLE_Z_LEFT = 0;
-	// Right joycon
-	float ACCEL_X_RIGHT = 0;
-	float ACCEL_Y_RIGHT = 0;
-	float ACCEL_Z_RIGHT = 0;
-	float GYRO_X_RIGHT  = 0;
-	float GYRO_Y_RIGHT  = 0;
-	float GYRO_Z_RIGHT  = 0;
-	float ANGLE_X_RIGHT = 0;
-	float ANGLE_Y_RIGHT = 0;
-	float ANGLE_Z_RIGHT = 0;
-	// State of the frame, mostly for the editor
+	float ACCEL_X_LEFT = 0.0;
+	float ACCEL_Y_LEFT = 0.0;
+	float ACCEL_Z_LEFT = 0.0;
+	float GYRO_X_LEFT  = 0.0;
+	float GYRO_Y_LEFT  = 0.0;
+	float GYRO_Z_LEFT  = 0.0;
+	float ANGLE_X_LEFT = 0.0;
+	float ANGLE_Y_LEFT = 0.0;
+	float ANGLE_Z_LEFT = 0.0;
+	float DIRECTION_XX_LEFT = 1.0;
+	float DIRECTION_XY_LEFT = 0.0;
+	float DIRECTION_XZ_LEFT = 0.0;
+	float DIRECTION_YX_LEFT = 1.0;
+	float DIRECTION_YY_LEFT = 1.0;
+	float DIRECTION_YZ_LEFT = 0.0;
+	float DIRECTION_ZX_LEFT = 0.0;
+	float DIRECTION_ZY_LEFT = 0.0;
+	float DIRECTION_ZZ_LEFT = 1.0;
+	float ACCEL_X_RIGHT = 0.0;
+	float ACCEL_Y_RIGHT = 0.0;
+	float ACCEL_Z_RIGHT = 0.0;
+	float GYRO_X_RIGHT  = 0.0;
+	float GYRO_Y_RIGHT  = 0.0;
+	float GYRO_Z_RIGHT  = 0.0;
+	float ANGLE_X_RIGHT = 0.0;
+	float ANGLE_Y_RIGHT = 0.0;
+	float ANGLE_Z_RIGHT = 0.0;
+	float DIRECTION_XX_RIGHT = 1.0;
+	float DIRECTION_XY_RIGHT = 0.0;
+	float DIRECTION_XZ_RIGHT = 0.0;
+	float DIRECTION_YX_RIGHT = 1.0;
+	float DIRECTION_YY_RIGHT = 1.0;
+	float DIRECTION_YZ_RIGHT = 0.0;
+	float DIRECTION_ZX_RIGHT = 0.0;
+	float DIRECTION_ZY_RIGHT = 0.0;
+	float DIRECTION_ZZ_RIGHT = 1.0;
 	uint8_t frameState = 0;
 
 	friend zpp::serializer::access;
@@ -92,6 +101,15 @@ struct ControllerData : public zpp::serializer::polymorphic {
 				self.ACCEL_X_RIGHT, self.ACCEL_Y_RIGHT, self.ACCEL_Z_RIGHT,
 				self.GYRO_X_RIGHT, self.GYRO_Y_RIGHT, self.GYRO_Z_RIGHT,
 				self.ANGLE_X_RIGHT, self.ANGLE_Y_RIGHT, self.ANGLE_Z_RIGHT,
+				self.DIRECTION_XX_LEFT, self.DIRECTION_XY_LEFT,
+				self.DIRECTION_XZ_LEFT, self.DIRECTION_YX_LEFT,
+				self.DIRECTION_YY_LEFT, self.DIRECTION_YZ_LEFT,
+				self.DIRECTION_ZX_LEFT, self.DIRECTION_ZY_LEFT,
+				self.DIRECTION_ZZ_LEFT, self.DIRECTION_XX_RIGHT,
+				self.DIRECTION_XY_RIGHT, self.DIRECTION_XZ_RIGHT,
+				self.DIRECTION_YX_RIGHT, self.DIRECTION_YY_RIGHT,
+				self.DIRECTION_YZ_RIGHT, self.DIRECTION_ZX_RIGHT,
+				self.DIRECTION_ZY_RIGHT, self.DIRECTION_ZZ_RIGHT,
 				self.frameState);
 		// clang-format on
 	}

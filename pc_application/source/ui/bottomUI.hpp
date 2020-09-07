@@ -33,6 +33,9 @@ private:
 	wxBoxSizer* accelLeftSizer;
 	wxBoxSizer* angularVelocityLeftSizer;
 	wxBoxSizer* angleLeftSizer;
+	wxBoxSizer* directionXLeftSizer;
+	wxBoxSizer* directionYLeftSizer;
+	wxBoxSizer* directionZLeftSizer;
 
 	wxSpinCtrlDouble* accelXLeftCtrl;
 	wxSpinCtrlDouble* accelYLeftCtrl;
@@ -43,11 +46,23 @@ private:
 	wxSpinCtrlDouble* angleXLeftCtrl;
 	wxSpinCtrlDouble* angleYLeftCtrl;
 	wxSpinCtrlDouble* angleZLeftCtrl;
+	wxSpinCtrlDouble* directionXXLeftCtrl;
+	wxSpinCtrlDouble* directionXYLeftCtrl;
+	wxSpinCtrlDouble* directionXZLeftCtrl;
+	wxSpinCtrlDouble* directionYXLeftCtrl;
+	wxSpinCtrlDouble* directionYYLeftCtrl;
+	wxSpinCtrlDouble* directionYZLeftCtrl;
+	wxSpinCtrlDouble* directionZXLeftCtrl;
+	wxSpinCtrlDouble* directionZYLeftCtrl;
+	wxSpinCtrlDouble* directionZZLeftCtrl;
 
 	wxBoxSizer* motionRightSizer;
 	wxBoxSizer* accelRightSizer;
 	wxBoxSizer* angularVelocityRightSizer;
 	wxBoxSizer* angleRightSizer;
+	wxBoxSizer* directionXRightSizer;
+	wxBoxSizer* directionYRightSizer;
+	wxBoxSizer* directionZRightSizer;
 
 	wxSpinCtrlDouble* accelXRightCtrl;
 	wxSpinCtrlDouble* accelYRightCtrl;
@@ -58,6 +73,15 @@ private:
 	wxSpinCtrlDouble* angleXRightCtrl;
 	wxSpinCtrlDouble* angleYRightCtrl;
 	wxSpinCtrlDouble* angleZRightCtrl;
+	wxSpinCtrlDouble* directionXXRightCtrl;
+	wxSpinCtrlDouble* directionXYRightCtrl;
+	wxSpinCtrlDouble* directionXZRightCtrl;
+	wxSpinCtrlDouble* directionYXRightCtrl;
+	wxSpinCtrlDouble* directionYYRightCtrl;
+	wxSpinCtrlDouble* directionYZRightCtrl;
+	wxSpinCtrlDouble* directionZXRightCtrl;
+	wxSpinCtrlDouble* directionZYRightCtrl;
+	wxSpinCtrlDouble* directionZZRightCtrl;
 
 	wxBoxSizer* firstTouchSizer;
 	wxBoxSizer* secondTouchSizer;

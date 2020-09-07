@@ -27,6 +27,13 @@ void ProjectHandler::loadProject() {
 	// First, find each savestate hook block
 	rapidjson::Document jsonSettings = HELPERS::getSettingsFile(settingsFileName.GetFullPath().ToStdString());
 
+	size_t const decompressBuffInSize = ZSTD_DStreamInSize();
+    void*  const decompressBuffIn  = malloc(decompressBuffInSize);
+    size_t const decompressBuffOutSize = ZSTD_DStreamOutSize();
+    void*  const decompressBuffOut = malloc(decompressBuffOutSize);
+
+    ZSTD_DCtx* const dctx = ZSTD_createDCtx();
+
 	auto extraFrameDataArray = jsonSettings["extraFrameData"].GetArray();
 	ExtraFrameDataContainer extraFrameDatas(extraFrameDataArray.Size());
 
@@ -40,16 +47,31 @@ void ProjectHandler::loadProject() {
 			for(auto const& branch : branchesArray) {
 				wxString path = projectDir.GetPathWithSep() + wxString::FromUTF8(branch["filename"].GetString());
 				if(wxFileName(path).FileExists()) {
-					// Load up the inputs
-					wxFFileInputStream inputsFileStream(path, "rb");
-					wxZlibInputStream inputsDecompressStream(inputsFileStream, wxZLIB_ZLIB);
+					wxMemoryBuffer memoryBuffer;
+					FILE* fin  = fopen(path.c_str(), "rb");
+					
+					// https://github.com/facebook/zstd/blob/dev/examples/streaming_decompression.c
+    size_t const toRead = decompressBuffInSize;
+    size_t read;
+    size_t lastRet = 0;
+    int isEmpty = 1;
+    while ( (read = fread(decompressBuffIn, toRead, 1, fin)) ) {
+        isEmpty = 0;
+        ZSTD_inBuffer input = { decompressBuffIn, read, 0 };
+        while (input.pos < input.size) {
+            ZSTD_outBuffer output = { decompressBuffOut, decompressBuffOutSize, 0 };
+            size_t const ret = ZSTD_decompressStream(dctx, &output , &input);
+			memoryBuffer.AppendData (decompressBuffOut, output.pos);
+            lastRet = ret;
+        }
+    }
 
-					wxMemoryOutputStream dataStream;
-					dataStream.Write(inputsDecompressStream);
+fclose(fin);
+	ZSTD_DCtx_reset(dctx, ZSTD_reset_session_only);
 
-					wxStreamBuffer* streamBuffer = dataStream.GetOutputStreamBuffer();
-					uint8_t* bufferPointer       = (uint8_t*)streamBuffer->GetBufferStart();
-					std::size_t bufferSize       = streamBuffer->GetBufferSize();
+
+					uint8_t* bufferPointer       = (uint8_t*)memoryBuffer.GetData();
+					std::size_t bufferSize       = memoryBuffer.GetDataLen();
 
 					ExtraBranchData inputs = std::make_shared<std::vector<std::shared_ptr<TouchAndKeyboardData>>>();
 
@@ -99,16 +121,31 @@ void ProjectHandler::loadProject() {
 			for(auto const& branch : branchesArray) {
 				wxString path = projectDir.GetPathWithSep() + wxString::FromUTF8(branch["filename"].GetString());
 				if(wxFileName(path).FileExists()) {
-					// Load up the inputs
-					wxFFileInputStream inputsFileStream(path, "rb");
-					wxZlibInputStream inputsDecompressStream(inputsFileStream, wxZLIB_ZLIB);
+					wxMemoryBuffer memoryBuffer;
+					FILE* fin  = fopen(path.c_str(), "rb");
+					
+					// https://github.com/facebook/zstd/blob/dev/examples/streaming_decompression.c
+    size_t const toRead = decompressBuffInSize;
+    size_t read;
+    size_t lastRet = 0;
+    int isEmpty = 1;
+    while ( (read = fread(decompressBuffIn, toRead, 1, fin)) ) {
+        isEmpty = 0;
+        ZSTD_inBuffer input = { decompressBuffIn, read, 0 };
+        while (input.pos < input.size) {
+            ZSTD_outBuffer output = { decompressBuffOut, decompressBuffOutSize, 0 };
+            size_t const ret = ZSTD_decompressStream(dctx, &output , &input);
+			memoryBuffer.AppendData (decompressBuffOut, output.pos);
+            lastRet = ret;
+        }
+    }
 
-					wxMemoryOutputStream dataStream;
-					dataStream.Write(inputsDecompressStream);
+fclose(fin);
+	ZSTD_DCtx_reset(dctx, ZSTD_reset_session_only);
 
-					wxStreamBuffer* streamBuffer = dataStream.GetOutputStreamBuffer();
-					uint8_t* bufferPointer       = (uint8_t*)streamBuffer->GetBufferStart();
-					std::size_t bufferSize       = streamBuffer->GetBufferSize();
+
+					uint8_t* bufferPointer       = (uint8_t*)memoryBuffer.GetData();
+					std::size_t bufferSize       = memoryBuffer.GetDataLen();
 
 					BranchData inputs = std::make_shared<std::vector<std::shared_ptr<ControllerData>>>();
 
@@ -151,6 +188,8 @@ void ProjectHandler::loadProject() {
 		playerIndex++;
 	}
 
+	ZSTD_freeDCtx(dctx);
+
 	// Set dataProcessing
 	dataProcessing->setAllPlayers(players);
 	dataProcessing->sendPlayerNum();
@@ -187,6 +226,12 @@ void ProjectHandler::saveProject() {
 
 		AllPlayers& players = dataProcessing->getAllPlayers();
 
+    	size_t const compressBuffOutSize = ZSTD_CStreamOutSize();
+    	void*  const compressBuffOut = malloc(compressBuffOutSize);
+
+		ZSTD_CCtx* const cctx = ZSTD_createCCtx();
+		ZSTD_CCtx_setParameter(cctx, ZSTD_c_compressionLevel, compressionLevel)
+
 		uint8_t playerIndexNum = 0;
 		for(auto const& player : players) {
 			AllSavestateHookBlocks& savestateHookBlocks = *player;
@@ -217,21 +262,36 @@ void ProjectHandler::saveProject() {
 
 					// Delete file if already present and use binary mode
 					wxFFileOutputStream inputsFileStream(inputsFilename.GetFullPath(), "wb");
-					wxZlibOutputStream inputsCompressStream(inputsFileStream, compressionLevel, wxZLIB_ZLIB);
 
 					// Kinda annoying, but actually break up the vector and add each part with the size
 					for(auto const& controllerData : *branch) {
+						// https://github.com/facebook/zstd/blob/dev/examples/streaming_compression.c
+						ZSTD_EndDirective const mode = (branch->back() == controllerData) ? ZSTD_e_end : ZSTD_e_continue;
+
 						uint8_t* data;
 						uint32_t dataSize;
 						serializeProtocol.dataToBinary<ControllerData>(*controllerData, &data, &dataSize);
 						uint8_t sizeToPrint = (uint8_t)dataSize;
-						// Probably endian issues
-						inputsCompressStream.WriteAll(&sizeToPrint, sizeof(sizeToPrint));
-						inputsCompressStream.WriteAll(data, dataSize);
+
+						uint8_t input[sizeof(sizeToPrint) + dataSize];
+
+						memcpy(&input[0], &sizeToPrint, sizeof(sizeToPrint));
+						memcpy(&input[sizeof(sizeToPrint)], data, dataSize);
+
+						ZSTD_inBuffer input = { input, read, 0 };
+
+						int finished;
+        do {
+            ZSTD_outBuffer output = { compressBuffOut, compressBuffOutSize, 0 };
+            size_t const remaining = ZSTD_compressStream2(cctx, &output , &input, mode);
+
+			inputsFileStream.WriteAll(compressBuffOut, output.pos);
+
+            finished = mode == ZSTD_e_end ? (remaining == 0) : (input.pos == input.size);
+        } while (!finished);
 					}
 
-					inputsCompressStream.Sync();
-					inputsCompressStream.Close();
+					ZSTD_CCtx_reset(cctx, ZSTD_reset_session_only);
 					inputsFileStream.Close();
 
 					rapidjson::Value branchJSON(rapidjson::kObjectType);
@@ -326,21 +386,36 @@ void ProjectHandler::saveProject() {
 
 					// Delete file if already present and use binary mode
 					wxFFileOutputStream inputsFileStream(inputsFilename.GetFullPath(), "wb");
-					wxZlibOutputStream inputsCompressStream(inputsFileStream, compressionLevel, wxZLIB_ZLIB);
 
 					// Kinda annoying, but actually break up the vector and add each part with the size
 					for(auto const& extraFrameData : *branch) {
+						// https://github.com/facebook/zstd/blob/dev/examples/streaming_compression.c
+						ZSTD_EndDirective const mode = (branch->back() == extraFrameData) ? ZSTD_e_end : ZSTD_e_continue;
+
 						uint8_t* data;
 						uint32_t dataSize;
 						serializeProtocol.dataToBinary<TouchAndKeyboardData>(*extraFrameData, &data, &dataSize);
 						uint8_t sizeToPrint = (uint8_t)dataSize;
-						// Probably endian issues
-						inputsCompressStream.WriteAll(&sizeToPrint, sizeof(sizeToPrint));
-						inputsCompressStream.WriteAll(data, dataSize);
+
+						uint8_t input[sizeof(sizeToPrint) + dataSize];
+
+						memcpy(&input[0], &sizeToPrint, sizeof(sizeToPrint));
+						memcpy(&input[sizeof(sizeToPrint)], data, dataSize);
+
+						ZSTD_inBuffer input = { input, read, 0 };
+
+						int finished;
+        do {
+            ZSTD_outBuffer output = { compressBuffOut, compressBuffOutSize, 0 };
+            size_t const remaining = ZSTD_compressStream2(cctx, &output , &input, mode);
+
+			inputsFileStream.WriteAll(compressBuffOut, output.pos);
+
+            finished = mode == ZSTD_e_end ? (remaining == 0) : (input.pos == input.size);
+        } while (!finished);
 					}
 
-					inputsCompressStream.Sync();
-					inputsCompressStream.Close();
+					ZSTD_CCtx_reset(cctx, ZSTD_reset_session_only);
 					inputsFileStream.Close();
 
 					rapidjson::Value branchJSON(rapidjson::kObjectType);
@@ -366,6 +441,8 @@ void ProjectHandler::saveProject() {
 
 				savestateHookIndexNum++;
 			}
+
+		ZSTD_freeCCtx(cctx);
 
 		settingsJSON.AddMember("players", playersJSON, settingsJSON.GetAllocator());
 		settingsJSON.AddMember("extraFrameData", extraFrameDataJSON, settingsJSON.GetAllocator());
@@ -541,7 +618,7 @@ void ProjectHandler::promptForUpdate() {
 							// Dont take control of the pointer
 							wxZipInputStream zip(*updateIn);
 							while(entry = zip.GetNextEntry(), entry != NULL) {
-								// The name is it's relative path within the archive
+								// The name is its relative path within the archive
 								wxFileName filename(entry->GetName());
 
 								// Only handle files
@@ -556,10 +633,8 @@ void ProjectHandler::promptForUpdate() {
 									newFilename.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
 
 									// Cant set executable directly, replace differently
-									// Also depends on OS
-									if(newFilename.GetName() == "switas" && newFilename.GetExt() == "exe") {
+									if(newFilename.GetName() == "switas") {
 										newFilename.SetName("switas_temp");
-										newFilename.SetExt("exe");
 									}
 
 									if(newFilename.GetName() == "switas_recent" && newFilename.GetExt() == "json") {

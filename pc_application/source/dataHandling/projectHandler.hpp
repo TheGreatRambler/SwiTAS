@@ -36,7 +36,6 @@
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
-#include <wx/zipstrm.h>
 #include <unordered_map>
 #include <wx/dir.h>
 #include <wx/dirdlg.h>
@@ -53,7 +52,9 @@
 #include <wx/wfstream.h>
 #include <wx/wx.h>
 #include <wx/sstream.h>
-#include <wx/zstream.h>
+#include <wx/zipstrm.h>
+#include <wx/buffer.h>
+#include <zstd.h>
 
 #include "../sharedNetworkCode/serializeUnserializeData.hpp"
 #include "../ui/drawingCanvas.hpp"

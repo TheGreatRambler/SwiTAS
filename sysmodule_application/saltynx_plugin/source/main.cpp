@@ -150,10 +150,7 @@ void fixMotionState(nn::hid::SixAxisSensorState* dest, nn::hid::SixAxisSensorSta
 	dest->samplingNumber       = orig->samplingNumber;
 	// I dunno
 	dest->attributes |= (uint8_t)nn::hid::SixAxisSensorAttribute::IsInterpolated;
-	// System default
-	dest->direction.x = { 1.0, 0.0, 0.0 };
-	dest->direction.y = { 0.0, 1.0, 0.0 };
-	dest->direction.z = { 0.0, 0.0, 1.0 };
+	// Direction state is also TASed
 }
 
 void fixTouchState(nn::hid::TouchScreenState16Touch* dest, void* orig, int32_t numOfMaxTouches) {
