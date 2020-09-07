@@ -136,7 +136,7 @@ void DataProcessing::triggerCurrentFrameChanges() {
 	}
 }
 
-void DataProcessing::sendAutoAdvance(uint8_t includeFramebuffer) {
+void DataProcessing::sendAutoAdvance(uint8_t includeFramebuffer, TasValueToRecord valueToRecord) {
 	for(uint8_t playerIndex = 0; playerIndex < allPlayers.size(); playerIndex++) {
 		// Set inputs of all other players correctly but not the current one
 		if(playerIndex != viewingPlayerIndex) {
@@ -780,7 +780,11 @@ void DataProcessing::sendPlayerNum() {
 }
 
 std::shared_ptr<ControllerData> DataProcessing::getFrame(FrameNum frame) const {
-	return allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->at(frame);
+	return getInputsList()->at(frame);
+}
+
+std::shared_ptr<TouchAndKeyboardData> DataProcessing::getFrameExtra(FrameNum frame) const {
+	return getInputsExtraList()->at(frame);
 }
 
 void DataProcessing::addNewBranch() {

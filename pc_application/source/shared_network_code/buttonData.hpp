@@ -46,6 +46,14 @@ enum FrameState : uint8_t {
 	SAVESTATE,
 };
 
+enum TasValueToRecord : uint8_t {
+	NONE,
+	CONTROLLER,
+	KEYBOARD_MOUSE,
+	TOUCHSCREEN,
+	NUM_OF_VALUES,
+};
+
 // Controller data that will be packed into the array and will be recieved from
 // the switch
 struct ControllerData : public zpp::serializer::polymorphic {

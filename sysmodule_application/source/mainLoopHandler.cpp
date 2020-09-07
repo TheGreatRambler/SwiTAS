@@ -624,7 +624,7 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths) {
 	}
 }
 
-void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, uint8_t autoAdvance, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex) {
+void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, TasValueToRecord typeToRecord, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex) {
 	if(isPaused) {
 #ifdef __SWITCH__
 		LOGD << "Running frame";
@@ -645,7 +645,7 @@ void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t includeFra
 		// Yuzu has actually good frame incrementing
 		waitForVsync();
 #endif
-		pauseApp(linkedWithFrameAdvance, includeFramebuffer, autoAdvance, frame, savestateHookNum, branchIndex, playerIndex);
+		pauseApp(linkedWithFrameAdvance, includeFramebuffer, typeToRecord, frame, savestateHookNum, branchIndex, playerIndex);
 #ifdef __SWITCH__
 		svcSetThreadPriority(CUR_THREAD_HANDLE, currentPriority);
 #endif
@@ -659,7 +659,7 @@ void MainLoop::clearEveryController() {
 	}
 }
 
-void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, uint8_t autoAdvance, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex) {
+void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, TasValueToRecord typeToRecord, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex) {
 	if(!isPaused) {
 #ifdef __SWITCH__
 		LOGD << "Pausing";
@@ -935,33 +935,33 @@ void MainLoop::getSixAxisState(int32_t controller, ControllerData* state) {
 	nn::hid::SixAxisSensorState sensorStateLeft  = getMemoryType<nn::hid::SixAxisSensorState>(saltynxsixAxisStateLeftJoyconBacklog + offset);
 	nn::hid::SixAxisSensorState sensorStateRight = getMemoryType<nn::hid::SixAxisSensorState>(saltynxsixAxisStateRightJoyconBacklog + offset);
 
-	state->ACCEL_X_LEFT  = sensorStateLeft.acceleration.x;
-	state->ACCEL_Y_LEFT  = sensorStateLeft.acceleration.y;
-	state->ACCEL_Z_LEFT  = sensorStateLeft.acceleration.z;
-	state->GYRO_X_LEFT   = sensorStateLeft.angularVelocity.x;
-	state->GYRO_Y_LEFT   = sensorStateLeft.angularVelocity.y;
-	state->GYRO_Z_LEFT   = sensorStateLeft.angularVelocity.z;
-	state->ANGLE_X_LEFT  = sensorStateLeft.angle.x;
-	state->ANGLE_Y_LEFT  = sensorStateLeft.angle.y;
-	state->ANGLE_Z_LEFT  = sensorStateLeft.angle.z;
-	state->ACCEL_X_RIGHT = sensorStateRight.acceleration.x;
-	state->ACCEL_Y_RIGHT = sensorStateRight.acceleration.y;
-	state->ACCEL_Z_RIGHT = sensorStateRight.acceleration.z;
-	state->GYRO_X_RIGHT  = sensorStateRight.angularVelocity.x;
-	state->GYRO_Y_RIGHT  = sensorStateRight.angularVelocity.y;
-	state->GYRO_Z_RIGHT  = sensorStateRight.angularVelocity.z;
-	state->ANGLE_X_RIGHT = sensorStateRight.angle.x;
-	state->ANGLE_Y_RIGHT = sensorStateRight.angle.y;
-	state->ANGLE_Z_RIGHT = sensorStateRight.angle.z;
-	state->DIRECTION_XX_LEFT = sensorStateLeft.direction.x.x;
-	state->DIRECTION_XY_LEFT = sensorStateLeft.direction.x.y;
-	state->DIRECTION_XZ_LEFT = sensorStateLeft.direction.x.z;
-	state->DIRECTION_YX_LEFT = sensorStateLeft.direction.y.x;
-	state->DIRECTION_YY_LEFT = sensorStateLeft.direction.y.y;
-	state->DIRECTION_YZ_LEFT = sensorStateLeft.direction.y.z;
-	state->DIRECTION_ZX_LEFT = sensorStateLeft.direction.z.x;
-	state->DIRECTION_ZY_LEFT = sensorStateLeft.direction.z.y;
-	state->DIRECTION_ZZ_LEFT = sensorStateLeft.direction.z.z;
+	state->ACCEL_X_LEFT       = sensorStateLeft.acceleration.x;
+	state->ACCEL_Y_LEFT       = sensorStateLeft.acceleration.y;
+	state->ACCEL_Z_LEFT       = sensorStateLeft.acceleration.z;
+	state->GYRO_X_LEFT        = sensorStateLeft.angularVelocity.x;
+	state->GYRO_Y_LEFT        = sensorStateLeft.angularVelocity.y;
+	state->GYRO_Z_LEFT        = sensorStateLeft.angularVelocity.z;
+	state->ANGLE_X_LEFT       = sensorStateLeft.angle.x;
+	state->ANGLE_Y_LEFT       = sensorStateLeft.angle.y;
+	state->ANGLE_Z_LEFT       = sensorStateLeft.angle.z;
+	state->ACCEL_X_RIGHT      = sensorStateRight.acceleration.x;
+	state->ACCEL_Y_RIGHT      = sensorStateRight.acceleration.y;
+	state->ACCEL_Z_RIGHT      = sensorStateRight.acceleration.z;
+	state->GYRO_X_RIGHT       = sensorStateRight.angularVelocity.x;
+	state->GYRO_Y_RIGHT       = sensorStateRight.angularVelocity.y;
+	state->GYRO_Z_RIGHT       = sensorStateRight.angularVelocity.z;
+	state->ANGLE_X_RIGHT      = sensorStateRight.angle.x;
+	state->ANGLE_Y_RIGHT      = sensorStateRight.angle.y;
+	state->ANGLE_Z_RIGHT      = sensorStateRight.angle.z;
+	state->DIRECTION_XX_LEFT  = sensorStateLeft.direction.x.x;
+	state->DIRECTION_XY_LEFT  = sensorStateLeft.direction.x.y;
+	state->DIRECTION_XZ_LEFT  = sensorStateLeft.direction.x.z;
+	state->DIRECTION_YX_LEFT  = sensorStateLeft.direction.y.x;
+	state->DIRECTION_YY_LEFT  = sensorStateLeft.direction.y.y;
+	state->DIRECTION_YZ_LEFT  = sensorStateLeft.direction.y.z;
+	state->DIRECTION_ZX_LEFT  = sensorStateLeft.direction.z.x;
+	state->DIRECTION_ZY_LEFT  = sensorStateLeft.direction.z.y;
+	state->DIRECTION_ZZ_LEFT  = sensorStateLeft.direction.z.z;
 	state->DIRECTION_XX_RIGHT = sensorStateRight.direction.x.x;
 	state->DIRECTION_XY_RIGHT = sensorStateRight.direction.x.y;
 	state->DIRECTION_XZ_RIGHT = sensorStateRight.direction.x.z;
@@ -971,7 +971,6 @@ void MainLoop::getSixAxisState(int32_t controller, ControllerData* state) {
 	state->DIRECTION_ZX_RIGHT = sensorStateRight.direction.z.x;
 	state->DIRECTION_ZY_RIGHT = sensorStateRight.direction.z.y;
 	state->DIRECTION_ZZ_RIGHT = sensorStateRight.direction.z.z;
-
 }
 
 void MainLoop::setSixAxisState(int32_t controller, ControllerData* state) {
@@ -996,24 +995,24 @@ void MainLoop::setSixAxisState(int32_t controller, ControllerData* state) {
 	sensorStateRight.angle.x           = state->ANGLE_X_RIGHT;
 	sensorStateRight.angle.y           = state->ANGLE_Y_RIGHT;
 	sensorStateRight.angle.z           = state->ANGLE_Z_RIGHT;
-	sensorStateLeft.direction.x.x = state->DIRECTION_XX_LEFT;
-	sensorStateLeft.direction.x.y = state->DIRECTION_XY_LEFT;
-	sensorStateLeft.direction.x.z = state->DIRECTION_XZ_LEFT;
-	sensorStateLeft.direction.y.x = state->DIRECTION_YX_LEFT;
-	sensorStateLeft.direction.y.y = state->DIRECTION_YY_LEFT;
-	sensorStateLeft.direction.y.z = state->DIRECTION_YZ_LEFT;
-	sensorStateLeft.direction.z.x = state->DIRECTION_ZX_LEFT;
-	sensorStateLeft.direction.z.y = state->DIRECTION_ZY_LEFT;
-	sensorStateLeft.direction.z.z = state->DIRECTION_ZZ_LEFT;
-	sensorStateRight.direction.x.x = state->DIRECTION_XX_RIGHT;
-	sensorStateRight.direction.x.y = state->DIRECTION_XY_RIGHT;
-	sensorStateRight.direction.x.z = state->DIRECTION_XZ_RIGHT;
-	sensorStateRight.direction.y.x = state->DIRECTION_YX_RIGHT;
-	sensorStateRight.direction.y.y = state->DIRECTION_YY_RIGHT;
-	sensorStateRight.direction.y.z = state->DIRECTION_YZ_RIGHT;
-	sensorStateRight.direction.z.x = state->DIRECTION_ZX_RIGHT;
-	sensorStateRight.direction.z.y = state->DIRECTION_ZY_RIGHT;
-	sensorStateRight.direction.z.z = state->DIRECTION_ZZ_RIGHT;
+	sensorStateLeft.direction.x.x      = state->DIRECTION_XX_LEFT;
+	sensorStateLeft.direction.x.y      = state->DIRECTION_XY_LEFT;
+	sensorStateLeft.direction.x.z      = state->DIRECTION_XZ_LEFT;
+	sensorStateLeft.direction.y.x      = state->DIRECTION_YX_LEFT;
+	sensorStateLeft.direction.y.y      = state->DIRECTION_YY_LEFT;
+	sensorStateLeft.direction.y.z      = state->DIRECTION_YZ_LEFT;
+	sensorStateLeft.direction.z.x      = state->DIRECTION_ZX_LEFT;
+	sensorStateLeft.direction.z.y      = state->DIRECTION_ZY_LEFT;
+	sensorStateLeft.direction.z.z      = state->DIRECTION_ZZ_LEFT;
+	sensorStateRight.direction.x.x     = state->DIRECTION_XX_RIGHT;
+	sensorStateRight.direction.x.y     = state->DIRECTION_XY_RIGHT;
+	sensorStateRight.direction.x.z     = state->DIRECTION_XZ_RIGHT;
+	sensorStateRight.direction.y.x     = state->DIRECTION_YX_RIGHT;
+	sensorStateRight.direction.y.y     = state->DIRECTION_YY_RIGHT;
+	sensorStateRight.direction.y.z     = state->DIRECTION_YZ_RIGHT;
+	sensorStateRight.direction.z.x     = state->DIRECTION_ZX_RIGHT;
+	sensorStateRight.direction.z.y     = state->DIRECTION_ZY_RIGHT;
+	sensorStateRight.direction.z.z     = state->DIRECTION_ZZ_RIGHT;
 
 	// Set to correct player
 	size_t offset = sizeof(nn::hid::SixAxisSensorState) * controller;

@@ -78,8 +78,10 @@ private:
 	wxBitmapButton* autoFrameEnd;
 	wxSpinCtrl* autoRunFramesPerSecond;
 
+	wxString typeChoices[TasValueToRecord::NUM_OF_TYPES];
+
 	wxCheckBox* autoRunWithFramebuffer;
-	wxCheckBox* autoRunWithControllerData;
+	wxChoice* valueToRecord;
 
 	// Minimum size of this widget (it just gets too small normally)
 	static constexpr float minimumSize = 1 / 4;

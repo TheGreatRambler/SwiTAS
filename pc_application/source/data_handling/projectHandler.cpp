@@ -11,7 +11,16 @@ ProjectHandler::ProjectHandler(wxFrame* parent, DataProcessing* dataProcessingIn
 	lastEnteredFtpPath = "";
 
 	// Get recent settings
-	recentSettings = HELPERS::getSettingsFile(HELPERS::getMainSettingsPath("switas_recent").GetFullPath().ToStdString());
+	wxString recentSettingsPath = HELPERS::getMainSettingsPath("switas_recent").GetFullPath();
+	if(wxFileExists(recentSettingsPath)) {
+		recentSettings = HELPERS::getSettingsFile(recentSettingsPath.ToStdString());
+	} else {
+		// Initialize it from scratch
+		recentSettings = HELPERS::getSettingsFromString("{"
+														"	'recentProjects': [],"
+														"	'recentVideos': []"
+														"}");
+	}
 
 	dataProcessing->setSelectedFrameCallbackVideoViewer(std::bind(&ProjectHandler::updateVideoComparisonViewers, this, std::placeholders::_1));
 }
@@ -228,10 +237,9 @@ void ProjectHandler::saveProject() {
 		void* const compressBuffOut      = malloc(compressBuffOutSize);
 
 		ZSTD_CCtx* const cctx = ZSTD_createCCtx();
-		ZSTD_CCtx_setParameter(cctx, ZSTD_c_compressionLevel, compressionLevel)
+		ZSTD_CCtx_setParameter(cctx, ZSTD_c_compressionLevel, compressionLevel);
 
-			uint8_t playerIndexNum
-			= 0;
+		uint8_t playerIndexNum = 0;
 		for(auto const& player : players) {
 			AllSavestateHookBlocks& savestateHookBlocks = *player;
 
@@ -272,21 +280,22 @@ void ProjectHandler::saveProject() {
 						serializeProtocol.dataToBinary<ControllerData>(*controllerData, &data, &dataSize);
 						uint8_t sizeToPrint = (uint8_t)dataSize;
 
-						uint8_t input[sizeof(sizeToPrint) + dataSize];
+						std::size_t inputSize = sizeof(sizeToPrint) + dataSize;
+						uint8_t input[inputSize];
 
 						memcpy(&input[0], &sizeToPrint, sizeof(sizeToPrint));
 						memcpy(&input[sizeof(sizeToPrint)], data, dataSize);
 
-						ZSTD_inBuffer input = { input, read, 0 };
+						ZSTD_inBuffer inputBuffer = { input, inputSize, 0 };
 
 						int finished;
 						do {
 							ZSTD_outBuffer output  = { compressBuffOut, compressBuffOutSize, 0 };
-							size_t const remaining = ZSTD_compressStream2(cctx, &output, &input, mode);
+							size_t const remaining = ZSTD_compressStream2(cctx, &output, &inputBuffer, mode);
 
 							inputsFileStream.WriteAll(compressBuffOut, output.pos);
 
-							finished = mode == ZSTD_e_end ? (remaining == 0) : (input.pos == input.size);
+							finished = mode == ZSTD_e_end ? (remaining == 0) : (inputBuffer.pos == inputBuffer.size);
 						} while(!finished);
 					}
 
@@ -396,21 +405,22 @@ void ProjectHandler::saveProject() {
 					serializeProtocol.dataToBinary<TouchAndKeyboardData>(*extraFrameData, &data, &dataSize);
 					uint8_t sizeToPrint = (uint8_t)dataSize;
 
-					uint8_t input[sizeof(sizeToPrint) + dataSize];
+					std::size_t inputSize = sizeof(sizeToPrint) + dataSize;
+					uint8_t input[inputSize];
 
 					memcpy(&input[0], &sizeToPrint, sizeof(sizeToPrint));
 					memcpy(&input[sizeof(sizeToPrint)], data, dataSize);
 
-					ZSTD_inBuffer input = { input, read, 0 };
+					ZSTD_inBuffer inputBuffer = { input, inputSize, 0 };
 
 					int finished;
 					do {
 						ZSTD_outBuffer output  = { compressBuffOut, compressBuffOutSize, 0 };
-						size_t const remaining = ZSTD_compressStream2(cctx, &output, &input, mode);
+						size_t const remaining = ZSTD_compressStream2(cctx, &output, &inputBuffer, mode);
 
 						inputsFileStream.WriteAll(compressBuffOut, output.pos);
 
-						finished = mode == ZSTD_e_end ? (remaining == 0) : (input.pos == input.size);
+						finished = mode == ZSTD_e_end ? (remaining == 0) : (inputBuffer.pos == inputBuffer.size);
 					} while(!finished);
 				}
 

@@ -176,7 +176,7 @@ private:
 		return std::to_string(*(T*)bytes.data());
 	}
 
-	void pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, uint8_t autoAdvance, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex);
+	void pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, TasValueToRecord typeToRecord, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex);
 
 	void waitForVsync();
 
@@ -196,7 +196,7 @@ private:
 	}
 
 	// This assumes that the app is paused
-	void runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, uint8_t autoAdvance, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex);
+	void runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, TasValueToRecord typeToRecord, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex);
 
 	void clearEveryController();
 

@@ -5,6 +5,7 @@
 
 #include <bitset>
 #include <cstdio>
+#include <cstring>
 #include <map>
 #include <memory>
 #include <rapidjson/document.h>
@@ -76,6 +77,10 @@ public:
 	std::string framesToText(DataProcessing* dataProcessing, FrameNum startLoc, FrameNum endLoc, int playerIndex, BranchNum branch);
 
 	void transferControllerData(ControllerData src, std::shared_ptr<ControllerData> dest, bool placePaste);
+	void transferExtraData(TouchAndKeyboardData src, std::shared_ptr<TouchAndKeyboardData> dest, bool placePaste);
+	void transferOnlyKeyboard(TouchAndKeyboardData src, std::shared_ptr<TouchAndKeyboardData> dest);
+	void transferOnlyTouch(TouchAndKeyboardData src, std::shared_ptr<TouchAndKeyboardData> dest);
 
 	bool isEmptyControllerData(std::shared_ptr<ControllerData> data);
+	bool isEmptyExtraData(std::shared_ptr<TouchAndKeyboardData> data);
 };

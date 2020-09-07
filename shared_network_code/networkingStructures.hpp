@@ -111,7 +111,7 @@ namespace MemoryDataInfo {
 		MemType_CodeWritable        = 0x15, ///< Mapped in kernel during \ref svcControlCodeMemory.
 	} MemoryType;
 
-	static std::unordered_map<MemoryType, std::string> memoryTypeName{
+	static std::unordered_map<MemoryType, std::string> memoryTypeName {
 		{ MemType_Unmapped, "Unmapped" },
 		{ MemType_Io, "Io" },
 		{ MemType_Normal, "Normal" },
@@ -159,7 +159,7 @@ namespace MemoryDataInfo {
 		MemState_CodeMemAllowed             = BIT(25),                  ///< Code memory allowed.
 	} MemoryState;
 
-	static std::unordered_map<MemoryState, std::string> memoryStateName{
+	static std::unordered_map<MemoryState, std::string> memoryStateName {
 		{ MemState_Type, "Type" },
 		{ MemState_PermChangeAllowed, "PermChangeAllowed" },
 		{ MemState_ForceRwByDebugSyscalls, "ForceRwByDebugSyscalls" },
@@ -189,7 +189,7 @@ namespace MemoryDataInfo {
 		MemAttr_IsUncached     = BIT(3), ///< Is uncached.
 	} MemoryAttribute;
 
-	static std::unordered_map<MemoryAttribute, std::string> memoryAttributeName{
+	static std::unordered_map<MemoryAttribute, std::string> memoryAttributeName {
 		{ MemAttr_IsBorrowed, "IsBorrowed" },
 		{ MemAttr_IsIpcMapped, "IsIpcMapped" },
 		{ MemAttr_IsDeviceMapped, "IsDeviceMapped" },
@@ -207,7 +207,7 @@ namespace MemoryDataInfo {
 		Perm_DontCare = BIT(28),         ///< Don't care
 	} Permission;
 
-	static std::unordered_map<Permission, std::string> memoryPermissionName{
+	static std::unordered_map<Permission, std::string> memoryPermissionName {
 		{ Perm_None, "None" },
 		{ Perm_R, "Read" },
 		{ Perm_W, "Write" },
@@ -239,6 +239,7 @@ namespace Protocol {
 	// Run a single frame and return when done
 	DEFINE_STRUCT(SendFrameData,
 		ControllerData controllerData;
+		TouchAndKeyboardData extraData;
 		// This is the frame of this frame, the framebuffer
 		// sent back will be one more than this frame
 		uint32_t frame;
@@ -247,8 +248,8 @@ namespace Protocol {
 		uint8_t playerIndex;
 		uint8_t incrementFrame;
 		uint8_t includeFramebuffer;
-		uint8_t isAutoRun;
-	, self.controllerData, self.frame, self.playerIndex, self.incrementFrame, self.branchIndex, self.savestateHookNum, self.includeFramebuffer, self.isAutoRun)
+		TasValueToRecord typeToRecord;
+	, self.controllerData, self.extraData, self.frame, self.playerIndex, self.incrementFrame, self.branchIndex, self.savestateHookNum, self.includeFramebuffer, self.isAutoRun)
 
 	// Recieve all of the game's framebuffer
 	DEFINE_STRUCT(RecieveGameFramebuffer,
@@ -259,8 +260,9 @@ namespace Protocol {
 		uint16_t branchIndex;
 		uint8_t playerIndex;
 		// Set by auto advance
-		uint8_t controllerDataIncluded;
+		TasValueToRecord valueIncluded;
 		ControllerData controllerData;
+		TouchAndKeyboardData extraData;
 	, self.buf, self.fromFrameAdvance, self.frame, self.savestateHookNum, self.branchIndex, self.playerIndex, self.controllerDataIncluded, self.controllerData)
 
 	// Recieve a ton of game and user info

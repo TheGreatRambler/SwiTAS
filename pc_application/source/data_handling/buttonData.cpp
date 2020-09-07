@@ -374,7 +374,7 @@ std::string ButtonData::framesToText(DataProcessing* dataProcessing, FrameNum st
 			}
 
 			// Keeping empty ones there clutters things
-			if(!isEmptyControllerData(dataProcessing->getFrame(i))) {
+			if(!isEmptyControllerData(dataProcessing->getFrame(i)) || !isEmptyExtraData(dataProcessing->getFrameExtra(i))) {
 				std::vector<std::string> parts;
 
 				if(playerIndex == -1) {
@@ -481,8 +481,6 @@ std::string ButtonData::framesToText(DataProcessing* dataProcessing, FrameNum st
 }
 
 void ButtonData::transferControllerData(ControllerData src, std::shared_ptr<ControllerData> dest, bool placePaste) {
-	// Transfer all over
-
 	if(placePaste) {
 		// Add them together, not replace (bitwise or)
 		dest->buttons |= src.buttons;
@@ -533,6 +531,59 @@ void ButtonData::transferControllerData(ControllerData src, std::shared_ptr<Cont
 	dest->frameState         = src.frameState;
 }
 
+void ButtonData::transferExtraData(TouchAndKeyboardData src, std::shared_ptr<TouchAndKeyboardData> dest, bool placePaste) {
+	if(placePaste) {
+		// Add them together, not replace (bitwise or)
+		dest->keyboardModifiers |= src.keyboardModifiers;
+		dest->mouseButtons |= src.mouseButtons;
+		dest->keyboardKeys[0] |= src.keyboardKeys[0];
+		dest->keyboardKeys[1] |= src.keyboardKeys[1];
+		dest->keyboardKeys[2] |= src.keyboardKeys[2];
+		dest->keyboardKeys[3] |= src.keyboardKeys[3];
+		dest->keyboardKeys[4] |= src.keyboardKeys[4];
+		dest->keyboardKeys[5] |= src.keyboardKeys[5];
+		dest->keyboardKeys[6] |= src.keyboardKeys[6];
+		dest->keyboardKeys[7] |= src.keyboardKeys[7];
+	} else {
+		// Just replace
+		dest->keyboardModifiers == src.keyboardModifiers;
+		dest->mouseButtons == src.mouseButtons;
+		memcpy(dest->keyboardKeys, src.keyboardKeys, 8);
+	}
+
+	dest->touchX1         = src.touchX1;
+	dest->touchY1         = src.touchY1;
+	dest->touchX2         = src.touchX2;
+	dest->touchY2         = src.touchY2;
+	dest->numberOfTouches = src.numberOfTouches;
+	dest->mouseX          = src.mouseX;
+	dest->mouseY          = src.mouseY;
+	dest->mouseVelocityX  = src.mouseVelocityX;
+	dest->mouseVelocityY  = src.mouseVelocityY;
+	dest->scrollVelocityX = src.scrollVelocityX;
+	dest->scrollVelocityY = src.scrollVelocityY;
+}
+
+void ButtonData::transferOnlyKeyboard(TouchAndKeyboardData src, std::shared_ptr<TouchAndKeyboardData> dest) {
+	dest->keyboardModifiers == src.keyboardModifiers;
+	dest->mouseButtons == src.mouseButtons;
+	memcpy(dest->keyboardKeys, src.keyboardKeys, 8);
+	dest->mouseX          = src.mouseX;
+	dest->mouseY          = src.mouseY;
+	dest->mouseVelocityX  = src.mouseVelocityX;
+	dest->mouseVelocityY  = src.mouseVelocityY;
+	dest->scrollVelocityX = src.scrollVelocityX;
+	dest->scrollVelocityY = src.scrollVelocityY;
+}
+
+void ButtonData::transferOnlyTouch(TouchAndKeyboardData src, std::shared_ptr<TouchAndKeyboardData> dest) {
+	dest->touchX1         = src.touchX1;
+	dest->touchY1         = src.touchY1;
+	dest->touchX2         = src.touchX2;
+	dest->touchY2         = src.touchY2;
+	dest->numberOfTouches = src.numberOfTouches;
+}
+
 bool ButtonData::isEmptyControllerData(std::shared_ptr<ControllerData> data) {
 	ControllerData emptyData;
 	// clang-format off
@@ -579,5 +630,26 @@ bool ButtonData::isEmptyControllerData(std::shared_ptr<ControllerData> data) {
 		(data->DIRECTION_ZY_RIGHT == emptyData.DIRECTION_ZY_RIGHT) &&
 		(data->DIRECTION_ZZ_RIGHT == emptyData.DIRECTION_ZZ_RIGHT) &&
 		(data->frameState      == emptyData.frameState);
+	// clang-format on
+}
+
+bool ButtonData::isEmptyExtraData(std::shared_ptr<TouchAndKeyboardData> data) {
+	TouchAndKeyboardData emptyData;
+	// clang-format off
+	return
+		(data->touchX1           == emptyData.touchX1) &&
+		(data->touchY1           == emptyData.touchY1) &&
+		(data->touchX2           == emptyData.touchX2) &&
+		(data->touchY2           == emptyData.touchY2) &&
+		(data->numberOfTouches   == emptyData.numberOfTouches) &&
+		(data->keyboardModifiers == emptyData.keyboardModifiers) &&
+		(memcmp(data->keyboardKeys, emptyData.keyboardKeys, 8) == 0) &&
+		(data->mouseX            == emptyData.mouseX) &&
+		(data->mouseY            == emptyData.mouseY) &&
+		(data->mouseVelocityX    == emptyData.mouseVelocityX) &&
+		(data->mouseVelocityY    == emptyData.mouseVelocityY) &&
+		(data->scrollVelocityX   == emptyData.scrollVelocityX) &&
+		(data->scrollVelocityY   == emptyData.scrollVelocityY) &&
+		(data->mouseButtons      == emptyData.mouseButtons);
 	// clang-format on
 }

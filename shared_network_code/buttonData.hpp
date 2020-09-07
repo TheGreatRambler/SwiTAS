@@ -46,6 +46,14 @@ enum FrameState : uint8_t {
 	SAVESTATE,
 };
 
+enum TasValueToRecord : uint8_t {
+	NONE,
+	CONTROLLER,
+	KEYBOARD_MOUSE,
+	TOUCHSCREEN,
+	NUM_OF_TYPES,
+};
+
 // Controller data that will be packed into the array and will be recieved from
 // the switch
 struct ControllerData : public zpp::serializer::polymorphic {
@@ -125,14 +133,14 @@ struct TouchAndKeyboardData : public zpp::serializer::polymorphic {
 	int32_t touchY2           = 0;
 	uint8_t numberOfTouches   = 0;
 	int32_t keyboardModifiers = 0;
-	uint32_t keyboardKeys[8];
-	int32_t mouseX          = 0;
-	int32_t mouseY          = 0;
-	int32_t mouseVelocityX  = 0;
-	int32_t mouseVelocityY  = 0;
-	int32_t scrollVelocityX = 0;
-	int32_t scrollVelocityY = 0;
-	int32_t mouseButtons    = 0;
+	uint32_t keyboardKeys[8]  = { 0 };
+	int32_t mouseX            = 0;
+	int32_t mouseY            = 0;
+	int32_t mouseVelocityX    = 0;
+	int32_t mouseVelocityY    = 0;
+	int32_t scrollVelocityX   = 0;
+	int32_t scrollVelocityY   = 0;
+	int32_t mouseButtons      = 0;
 
 	friend zpp::serializer::access;
 	template <typename Archive, typename Self> static void serialize(Archive& archive, Self& self) {

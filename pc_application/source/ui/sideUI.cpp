@@ -184,11 +184,17 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	autoRunFramesPerSecond->SetToolTip("Delay in mlliseconds for automatically incrementing frame");
 	autoRunFramesPerSecond->Bind(wxEVT_SPINCTRL, &SideUI::finalTasFrameDelayChanged, this);
 
-	autoRunWithFramebuffer    = new wxCheckBox(parentFrame, wxID_ANY, "Include Screenshot");
-	autoRunWithControllerData = new wxCheckBox(parentFrame, wxID_ANY, "Include Controller Data");
+	autoRunWithFramebuffer = new wxCheckBox(parentFrame, wxID_ANY, "Include Screenshot");
+
+	typeChoices[TasValueToRecord::NONE]           = "Record None";
+	typeChoices[TasValueToRecord::CONTROLLER]     = "Record Controller";
+	typeChoices[TasValueToRecord::KEYBOARD_MOUSE] = "Record Keyboard/Mouse";
+	typeChoices[TasValueToRecord::TOUCHSCREEN]    = "Record Touchscreen";
+
+	valueToRecord = new wxChoice(parentFrame, wxID_ANY, wxDefaultPosition, wxDefaultSize, TasValueToRecord::NUM_OF_TYPES, typeChoices);
+	valueToRecord->SetSelection(0);
 
 	autoRunWithFramebuffer->SetValue(true);
-	autoRunWithControllerData->SetValue(true);
 
 	autoFrameSizer->Add(autoFrameStart, 0, wxEXPAND | wxALL);
 	autoFrameSizer->Add(autoFrameEnd, 0, wxEXPAND | wxALL);
@@ -196,7 +202,7 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	verticalBoxSizer->Add(autoFrameSizer, 0, wxEXPAND | wxALL);
 	verticalBoxSizer->Add(autoRunFramesPerSecond, 0, wxEXPAND | wxALL);
 	verticalBoxSizer->Add(autoRunWithFramebuffer, 0, wxEXPAND | wxALL);
-	verticalBoxSizer->Add(autoRunWithControllerData, 0, wxEXPAND | wxALL);
+	verticalBoxSizer->Add(valueToRecord, 0, wxEXPAND | wxALL);
 
 	sizer->Add(verticalBoxSizer, 0, wxEXPAND | wxALL);
 
@@ -468,8 +474,9 @@ void SideUI::onStartAutoFramePressed(wxCommandEvent& event) {
 
 void SideUI::sendAutoRunData() {
 	if(autoRunActive) {
-		if(autoRunWithControllerData->GetValue()) {
-			inputData->sendAutoAdvance(autoRunWithFramebuffer->GetValue());
+		TasValueToRecord chosenValue = (TasValueToRecord)valueToRecord->GetCurrentSelection();
+		if(chosenValue != TasValueToRecord::NONE) {
+			inputData->sendAutoAdvance(autoRunWithFramebuffer->GetValue(), chosenValue);
 		} else {
 			inputData->runFrame(false, false, autoRunWithFramebuffer->GetValue());
 		}

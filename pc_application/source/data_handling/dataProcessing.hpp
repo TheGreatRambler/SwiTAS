@@ -156,7 +156,7 @@ public:
 	void setBranchInfoCallback(std::function<void(uint16_t, uint16_t, bool)> callback);
 	void triggerCurrentFrameChanges();
 
-	void sendAutoAdvance(uint8_t includeFramebuffer);
+	void sendAutoAdvance(uint8_t includeFramebuffer, TasValueToRecord valueToRecord);
 
 	std::string getExportedCurrentPlayer();
 	void importFromFile(wxFileName importTarget);
@@ -314,6 +314,7 @@ public:
 	}
 
 	std::shared_ptr<ControllerData> getFrame(FrameNum frame) const;
+	std::shared_ptr<TouchAndKeyboardData> getFrameExtra(FrameNum frame) const;
 
 	void scrollToSpecific(uint8_t player, SavestateBlockNum savestateHookNum, BranchNum branch, FrameNum frame);
 
