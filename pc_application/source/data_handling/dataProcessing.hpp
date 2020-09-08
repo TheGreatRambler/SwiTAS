@@ -328,6 +328,8 @@ public:
 	uint8_t getButtonCurrent(Btn button) const;
 
 	void setControllerDataForAutoRun(ControllerData controllerData);
+	void setExtraDataKeyboardForAutoRun(TouchAndKeyboardData extraData);
+	void setExtraDataTouchForAutoRun(TouchAndKeyboardData extraData);
 
 	// This includes joysticks, accel, gyro, etc...
 	void triggerNumberValuesJoystick(ControllerNumberValues joystickId, int16_t value);

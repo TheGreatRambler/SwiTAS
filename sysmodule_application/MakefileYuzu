@@ -6,7 +6,7 @@ else
 	TARGET_EXEC ?= libswitas.so
 endif
 
-BUILD_DIR ?= ./buildYuzu
+BUILD_DIR ?= ./build_yuzu
 
 SRC_DIRS ?= ./source
 

@@ -137,6 +137,8 @@ void DataProcessing::triggerCurrentFrameChanges() {
 }
 
 void DataProcessing::sendAutoAdvance(uint8_t includeFramebuffer, TasValueToRecord valueToRecord) {
+	std::shared_ptr<TouchAndKeyboardData> extraDatas = getControllerDataExtra(playerIndex, currentSavestateHook, viewingBranchIndex, currentRunFrame);
+	
 	for(uint8_t playerIndex = 0; playerIndex < allPlayers.size(); playerIndex++) {
 		// Set inputs of all other players correctly but not the current one
 		if(playerIndex != viewingPlayerIndex) {
@@ -151,11 +153,13 @@ void DataProcessing::sendAutoAdvance(uint8_t includeFramebuffer, TasValueToRecor
 				data.incrementFrame     = false;
 				data.includeFramebuffer = includeFramebuffer;
 				data.isAutoRun          = false;
+				data.typeToRecord       = valueToRecord;
 			})
 		}
 	}
 
 	ADD_TO_QUEUE(SendFrameData, networkInstance, {
+		data.extraData          = *extraDatas;
 		data.frame              = currentFrame + 1;
 		data.savestateHookNum   = currentSavestateHook;
 		data.branchIndex        = viewingBranchIndex;
@@ -556,7 +560,7 @@ void DataProcessing::runFrame(uint8_t forAutoFrame, uint8_t updateFramebuffer, u
 
 		Refresh();
 
-		if(currentRunFrame < allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->size()) {
+		if(currentRunFrame < getFramesSize()) {
 			if(!forAutoFrame) {
 				// Send to switch to run for each player
 				for(uint8_t playerIndex = 0; playerIndex < allPlayers.size(); playerIndex++) {
@@ -1644,12 +1648,19 @@ uint8_t DataProcessing::getButtonCurrent(Btn button) const {
 }
 
 void DataProcessing::setControllerDataForAutoRun(ControllerData controllerData) {
-	// Set controller data manually
-	std::shared_ptr<ControllerData> newData = std::make_shared<ControllerData>();
-	buttonData->transferControllerData(controllerData, newData, false);
-	getInputsList()->at(currentFrame) = newData;
+	buttonData->transferControllerData(controllerData, getInputsList()->at(currentFrame), false);
 	modifyCurrentFrameViews(currentFrame);
 }
+
+void DataProcessing::setExtraDataKeyboardForAutoRun(TouchAndKeyboardData extraData) {
+	buttonData->transferOnlyKeyboard(extraData, getInputsExtraList()->at(currentFrame), false);
+	modifyCurrentFrameViews(currentFrame);
+}
+
+	void DataProcessing::setExtraDataTouchForAutoRun(TouchAndKeyboardData extraData) {
+buttonData->transferOnlyTouch(extraData, getInputsExtraList()->at(currentFrame), false);
+	modifyCurrentFrameViews(currentFrame);
+	}
 
 int16_t DataProcessing::getNumberValueCurrentJoystick(ControllerNumberValues joystickId) const {
 	return getNumberValuesJoystick(currentFrame, joystickId);

@@ -253,12 +253,34 @@ void MainLoop::mainLoopHandler() {
 void MainLoop::handleNetworkUpdates() {
 	CHECK_QUEUE(networkInstance, SendFrameData, {
 		if(data.incrementFrame) {
-			runSingleFrame(true, data.includeFramebuffer, false, data.frame, data.savestateHookNum, data.branchIndex, data.playerIndex);
-		} else if(data.isAutoRun) {
-			matchFirstControllerToTASController(data.playerIndex);
-			runSingleFrame(true, data.includeFramebuffer, true, data.frame, data.savestateHookNum, data.branchIndex, data.playerIndex);
+			runSingleFrame(true, data.includeFramebuffer, TasValueToRecord::ALL, data.frame, data.savestateHookNum, data.branchIndex, data.playerIndex);
+		} else if(data.typeToRecord != TasValueToRecord::NONE) {
+
+			switch(typeToRecord) {
+					case TasValueToRecord::NONE:
+						break;
+					case TasValueToRecord::ALL:
+						recordAll();
+						break;
+					case TasValueToRecord::CONTROLLER:
+						matchFirstControllerToTASController(data.playerIndex);
+						setSixAxisRecord(playerIndex);
+						break;
+					case TasValueToRecord::KEYBOARD_MOUSE:
+						setKeyboardRecord();
+						break;
+					case TasValueToRecord::TOUCHSCREEN:
+						setTouchRecord();
+						break;
+				}
+
+			runSingleFrame(true, data.includeFramebuffer, data.typeToRecord, data.frame, data.savestateHookNum, data.branchIndex, data.playerIndex);
 		} else {
 			controllers[data.playerIndex]->setFrame(data.controllerData);
+			setSixAxisState(data.playerIndex, &data.controllerData);
+			// This needs to be handled differently
+			setTouchState();
+			setKeyboardMouseState();
 		}
 	})
 
@@ -267,7 +289,7 @@ void MainLoop::handleNetworkUpdates() {
 			// Precaution to prevent the app getting stuck without the
 			// User able to unpause it
 			if(applicationOpened && internetConnected) {
-				pauseApp(false, true, false, 0, 0, 0, 0);
+				pauseApp(false, true, TasValueToRecord::ALL, 0, 0, 0, 0);
 				lastNanoseconds = 0;
 			}
 		} else if(data.actFlag == SendInfo::UNPAUSE_DEBUG) {
@@ -284,12 +306,12 @@ void MainLoop::handleNetworkUpdates() {
 			}
 		} else if(data.actFlag == SendInfo::RUN_BLANK_FRAME) {
 			matchFirstControllerToTASController(0);
-			runSingleFrame(false, true, false, 0, 0, 0, 0);
+			runSingleFrame(false, true, TasValueToRecord::ALL, 0, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::START_TAS_MODE) {
 			// pauseApp(false, true, false, 0, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::PAUSE) {
 			// waitForVsync();
-			pauseApp(false, true, false, 0, 0, 0, 0);
+			pauseApp(false, true, TasValueToRecord::ALL, 0, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::UNPAUSE) {
 			clearEveryController();
 			unpauseApp();
@@ -586,7 +608,7 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths) {
 		if(shouldAdvance) {
 			shouldAdvance = false;
 			shouldRun     = false;
-			pauseApp(false, false, false, 0, 0, 0, 0);
+			pauseApp(false, false, TasValueToRecord::ALL, 0, 0, 0, 0);
 		}
 
 #ifdef __SWITCH__
@@ -597,7 +619,7 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths) {
 
 			if(kDown & KEY_X) {
 				shouldRun = false;
-				pauseApp(false, false, false, 0, 0, 0, 0);
+				pauseApp(false, false, TasValueToRecord::ALL, 0, 0, 0, 0);
 			}
 
 			if(kDown & KEY_A) {
@@ -626,29 +648,11 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths) {
 
 void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, TasValueToRecord typeToRecord, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex) {
 	if(isPaused) {
-#ifdef __SWITCH__
-		LOGD << "Running frame";
-		int32_t currentPriority;
-		svcGetThreadPriority(&currentPriority, CUR_THREAD_HANDLE);
-		svcSetThreadPriority(CUR_THREAD_HANDLE, 10);
-#endif
 		unpauseApp();
-#ifdef __SWITCH__
-		lastNanoseconds = armTicksToNs(armGetSystemTick());
-		// waitForVsync();
-		// Frame advancing is amazingly inconsistent
-		// svcSleepThread(16666666);
-		// New SaltyNX based version should be much more accurate
+
 		waitForVsync();
-#endif
-#ifdef YUZU
-		// Yuzu has actually good frame incrementing
-		waitForVsync();
-#endif
+
 		pauseApp(linkedWithFrameAdvance, includeFramebuffer, typeToRecord, frame, savestateHookNum, branchIndex, playerIndex);
-#ifdef __SWITCH__
-		svcSetThreadPriority(CUR_THREAD_HANDLE, currentPriority);
-#endif
 	}
 }
 
@@ -691,9 +695,28 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 				data.savestateHookNum       = savestateHookNum;
 				data.branchIndex            = branchIndex;
 				data.playerIndex            = playerIndex;
-				data.controllerDataIncluded = autoAdvance;
+				data.valueIncluded = typeToRecord;
+
+				switch(typeToRecord) {
+					case TasValueToRecord::NONE:
+						break;
+					case TasValueToRecord::ALL:
+						break;
+					case TasValueToRecord::CONTROLLER:
+						data.controllerData = *controllers[playerIndex]->getControllerData();
+						break;
+					case TasValueToRecord::KEYBOARD_MOUSE:
+							data.extraData = 
+							dataProcessingInstance->setExtraDataKeyboardForAutoRun(data.extraData);
+							dataProcessingInstance->runFrame(true, true, true);
+						break;
+					case TasValueToRecord::TOUCHSCREEN:
+							dataProcessingInstance->setExtraDataTouchForAutoRun(data.extraData);
+							dataProcessingInstance->runFrame(true, true, true);
+						break;
+				}
+
 				if(autoAdvance) {
-					data.controllerData = *controllers[0]->getControllerData();
 				}
 			})
 
@@ -900,19 +923,19 @@ void MainLoop::matchFirstControllerToTASController(uint8_t player) {
 #endif
 }
 
-void MainLoop::disableSixAxisModifying() {
+void MainLoop::recordAllSixAxis() {
 	if(saltynxcontrollerToRecord != 0) {
 		setMemoryType(saltynxcontrollerToRecord, nn::hid::NpadIdType::None);
 	}
 }
 
-void MainLoop::setSixAxisControllerRecord(int32_t controller) {
+void MainLoop::setSixAxisRecord(int32_t controller) {
 	if(saltynxcontrollerToRecord != 0) {
 		setMemoryType(saltynxcontrollerToRecord, controller);
 	}
 }
 
-void MainLoop::disableKeyboardTouchModifying() {
+void MainLoop::recordAllKeyboardTouch() {
 	if(saltynxrecordScreenOrKeyboard != 0) {
 		setMemoryType(saltynxrecordScreenOrKeyboard, (uint16_t)0);
 	}

@@ -51,6 +51,7 @@ enum TasValueToRecord : uint8_t {
 	CONTROLLER,
 	KEYBOARD_MOUSE,
 	TOUCHSCREEN,
+	ALL,
 	NUM_OF_TYPES,
 };
 

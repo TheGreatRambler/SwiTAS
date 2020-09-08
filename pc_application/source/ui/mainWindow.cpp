@@ -205,13 +205,30 @@ void MainWindow::handleNetworkQueues() {
 				file.Write(data.buf.data(), data.buf.size());
 				file.Close();
 			}
+			
 			if(dataProcessingInstance->getNumOfFramesInSavestateHook(data.savestateHookNum, data.playerIndex) == data.frame) {
 				dataProcessingInstance->addFrameHere();
 			}
-			if(data.controllerDataIncluded) {
-				dataProcessingInstance->setControllerDataForAutoRun(data.controllerData);
-				dataProcessingInstance->runFrame(true, true, true);
-			}
+
+switch(data.valueIncluded) {
+	case TasValueToRecord::NONE:
+		break;
+	case TasValueToRecord::CONTROLLER:
+			dataProcessingInstance->setControllerDataForAutoRun(data.controllerData);
+			dataProcessingInstance->runFrame(true, true, true);
+		break;
+	case TasValueToRecord::KEYBOARD_MOUSE:
+			dataProcessingInstance->setExtraDataKeyboardForAutoRun(data.extraData);
+			dataProcessingInstance->runFrame(true, true, true);
+		break;
+	case TasValueToRecord::TOUCHSCREEN:
+			dataProcessingInstance->setExtraDataTouchForAutoRun(data.extraData);
+			dataProcessingInstance->runFrame(true, true, true);
+		break;
+	case TasValueToRecord::NUM_OF_TYPES:
+		break;
+}
+
 			if(sideUI->getAutoRunActive()) {
 				autoFrameAdvanceTimer->StartOnce(sideUI->getAutoRunDelay());
 			}

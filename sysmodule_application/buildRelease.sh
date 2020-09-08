@@ -8,7 +8,7 @@
 #mkdir release-dll
 #rm switas_dll-64bit.zip
 #
-#cp buildYuzu/* release-dll
+#cp build_yuzu/* release-dll
 #
 #strip -s release-dll/libswitas.dll
 #
@@ -24,16 +24,3 @@ zip -r ../switas_sysmodule.zip *
 cd ../
 
 rm -r switch
-
-# make clean
-# make yuzu -B BUILD=release ARCH=32
-#
-# mkdir release-dll
-# rm switasdll-32bit.zip
-#
-# cp buildYuzu/* release-dll
-#
-# strip -s release-dll/libswitas.dll
-#
-# zip -r switasdll-32bit.zip release-dll
-# rm -r release-dll

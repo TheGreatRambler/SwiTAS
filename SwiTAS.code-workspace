@@ -1,6 +1,5 @@
 {
-	"folders": [
-		{
+	"folders": [{
 			"path": "."
 		},
 		{
@@ -13,7 +12,7 @@
 			"path": "shared_network_code"
 		},
 		{
-			"path": "..\\yuzu"
+			"path": "../yuzu"
 		}
 	],
 	"settings": {

@@ -214,9 +214,9 @@ private:
 	void setControllerNumber(uint8_t numOfControllers);
 	uint8_t getNumControllers();
 
-	void disableSixAxisModifying();
-	void setSixAxisControllerRecord(int32_t controller);
-	void disableKeyboardTouchModifying();
+	void recordAllSixAxis();
+	void setSixAxisRecord(int32_t controller);
+	void recordAllKeyboardTouch();
 	void setKeyboardRecord();
 	void setTouchRecord();
 	void getSixAxisState(int32_t controller, ControllerData* state);
@@ -225,6 +225,11 @@ private:
 	void setTouchState(TouchAndKeyboardData* state);
 	void getKeyboardMouseState(TouchAndKeyboardData* state);
 	void setKeyboardMouseState(TouchAndKeyboardData* state);
+
+	void recordAll() {
+		recordAllSixAxis();
+		recordAllKeyboardTouch();
+	}
 
 	uint8_t finalTasShouldRun;
 	void runFinalTas(std::vector<std::string> scriptPaths);
