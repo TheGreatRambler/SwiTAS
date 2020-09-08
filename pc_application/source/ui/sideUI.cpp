@@ -476,7 +476,7 @@ void SideUI::sendAutoRunData() {
 	if(autoRunActive) {
 		TasValueToRecord chosenValue = (TasValueToRecord)valueToRecord->GetCurrentSelection();
 		if(chosenValue != TasValueToRecord::NONE) {
-			inputData->sendAutoAdvance(autoRunWithFramebuffer->GetValue(), chosenValue);
+			inputData->sendAutoAdvance(autoRunWithFramebuffer->GetValue(), chosenValue, false);
 		} else {
 			inputData->runFrame(false, false, autoRunWithFramebuffer->GetValue());
 		}

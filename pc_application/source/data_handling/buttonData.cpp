@@ -384,7 +384,7 @@ std::string ButtonData::framesToText(DataProcessing* dataProcessing, FrameNum st
 				}
 
 				std::vector<std::string> buttonParts;
-				for(uint8_t btn = 0; btn < Btn::BUTTONS_SIZE; btn++) {
+				for(uint8_t btn = 0; btn < (uint8_t)Btn::BUTTONS_SIZE; btn++) {
 					Btn button = (Btn)btn;
 					uint8_t isSelected;
 					if(playerIndex == -1) {

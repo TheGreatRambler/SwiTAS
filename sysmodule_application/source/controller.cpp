@@ -76,7 +76,7 @@ ControllerHandler::ControllerHandler(std::shared_ptr<CommunicateWithNetwork> net
 		stateLeftJoycon.joysticks[JOYSTICK_RIGHT].dx = controllerData.RS_X;
 		stateLeftJoycon.joysticks[JOYSTICK_RIGHT].dy = controllerData.RS_Y;
 		for(auto const& button : btnToHidKeys) {
-			if(GET_BIT(controllerData.buttons, button.first)) {
+			if(GET_BIT(controllerData.buttons, (uint8_t)button.first)) {
 				stateLeftJoycon.buttons |= button.second;
 			}
 		}
@@ -105,9 +105,9 @@ ControllerHandler::ControllerHandler(std::shared_ptr<CommunicateWithNetwork> net
 		for(auto const& button : btnToHidKeys) {
 #ifdef __SWITCH__
 			if(stateLeftJoycon.buttons & button.second) {
-				SET_BIT(newControllerData->buttons, true, button.first);
+				SET_BIT(newControllerData->buttons, true, (uint8_t)button.first);
 			} else {
-				SET_BIT(newControllerData->buttons, false, button.first);
+				SET_BIT(newControllerData->buttons, false, (uint8_t)button.first);
 			}
 #endif
 		}

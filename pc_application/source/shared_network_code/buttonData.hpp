@@ -17,7 +17,7 @@
 
 // Buttons enum (coencides with the index of the bit in the input struct)
 // Also used to identify the button everywhere else in the program
-enum Btn : uint8_t {
+enum class Btn : uint8_t {
 	A,
 	B,
 	X,
@@ -41,17 +41,18 @@ enum Btn : uint8_t {
 	BUTTONS_SIZE,
 };
 
-enum FrameState : uint8_t {
+enum class FrameState : uint8_t {
 	RAN,
 	SAVESTATE,
 };
 
-enum TasValueToRecord : uint8_t {
+enum class TasValueToRecord : uint8_t {
 	NONE,
 	CONTROLLER,
 	KEYBOARD_MOUSE,
 	TOUCHSCREEN,
-	NUM_OF_VALUES,
+	ALL,
+	NUM_OF_TYPES,
 };
 
 // Controller data that will be packed into the array and will be recieved from
@@ -133,14 +134,14 @@ struct TouchAndKeyboardData : public zpp::serializer::polymorphic {
 	int32_t touchY2           = 0;
 	uint8_t numberOfTouches   = 0;
 	int32_t keyboardModifiers = 0;
-	uint32_t keyboardKeys[8];
-	int32_t mouseX          = 0;
-	int32_t mouseY          = 0;
-	int32_t mouseVelocityX  = 0;
-	int32_t mouseVelocityY  = 0;
-	int32_t scrollVelocityX = 0;
-	int32_t scrollVelocityY = 0;
-	int32_t mouseButtons    = 0;
+	uint32_t keyboardKeys[8]  = { 0 };
+	int32_t mouseX            = 0;
+	int32_t mouseY            = 0;
+	int32_t mouseVelocityX    = 0;
+	int32_t mouseVelocityY    = 0;
+	int32_t scrollVelocityX   = 0;
+	int32_t scrollVelocityY   = 0;
+	int32_t mouseButtons      = 0;
 
 	friend zpp::serializer::access;
 	template <typename Archive, typename Self> static void serialize(Archive& archive, Self& self) {

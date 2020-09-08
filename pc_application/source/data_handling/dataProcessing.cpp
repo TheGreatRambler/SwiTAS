@@ -136,37 +136,57 @@ void DataProcessing::triggerCurrentFrameChanges() {
 	}
 }
 
-void DataProcessing::sendAutoAdvance(uint8_t includeFramebuffer, TasValueToRecord valueToRecord) {
-	std::shared_ptr<TouchAndKeyboardData> extraDatas = getControllerDataExtra(playerIndex, currentSavestateHook, viewingBranchIndex, currentRunFrame);
-	
+void DataProcessing::sendAutoAdvance(uint8_t includeFramebuffer, TasValueToRecord valueToRecord, uint8_t incrementFrame) {
+	std::shared_ptr<TouchAndKeyboardData> extraDatas = getControllerDataExtra(currentSavestateHook, viewingBranchIndex, currentRunFrame);
+
 	for(uint8_t playerIndex = 0; playerIndex < allPlayers.size(); playerIndex++) {
 		// Set inputs of all other players correctly but not the current one
-		if(playerIndex != viewingPlayerIndex) {
+		// Unless the controller is not being recorded, in that case add it
+		if(playerIndex != viewingPlayerIndex || valueToRecord != TasValueToRecord::CONTROLLER) {
 			std::shared_ptr<ControllerData> controllerDatas = getControllerData(playerIndex, currentSavestateHook, viewingBranchIndex, currentRunFrame);
 
 			ADD_TO_QUEUE(SendFrameData, networkInstance, {
-				data.controllerData     = *controllerDatas;
-				data.frame              = currentRunFrame;
-				data.savestateHookNum   = currentSavestateHook;
-				data.branchIndex        = viewingBranchIndex;
-				data.playerIndex        = playerIndex;
-				data.incrementFrame     = false;
-				data.includeFramebuffer = includeFramebuffer;
-				data.isAutoRun          = false;
-				data.typeToRecord       = valueToRecord;
+				data.controllerData = *controllerDatas;
+				data.incrementFrame = false;
+				data.typeToRecord   = TasValueToRecord::NONE;
+				data.valueIncluded  = TasValueToRecord::CONTROLLER;
 			})
 		}
 	}
 
+	if(valueToRecord != TasValueToRecord::KEYBOARD_MOUSE) {
+		std::shared_ptr<TouchAndKeyboardData> sendData = std::make_shared<TouchAndKeyboardData>();
+		buttonData->transferOnlyKeyboard(*extraDatas, sendData);
+
+		ADD_TO_QUEUE(SendFrameData, networkInstance, {
+			data.extraData      = *sendData;
+			data.incrementFrame = false;
+			data.typeToRecord   = TasValueToRecord::NONE;
+			data.valueIncluded  = TasValueToRecord::KEYBOARD_MOUSE;
+		})
+	}
+
+	if(valueToRecord != TasValueToRecord::TOUCHSCREEN) {
+		std::shared_ptr<TouchAndKeyboardData> sendData = std::make_shared<TouchAndKeyboardData>();
+		buttonData->transferOnlyTouch(*extraDatas, sendData);
+
+		ADD_TO_QUEUE(SendFrameData, networkInstance, {
+			data.extraData      = *sendData;
+			data.incrementFrame = false;
+			data.typeToRecord   = TasValueToRecord::NONE;
+			data.valueIncluded  = TasValueToRecord::TOUCHSCREEN;
+		})
+	}
+
+	// Actually trigger the increment
 	ADD_TO_QUEUE(SendFrameData, networkInstance, {
-		data.extraData          = *extraDatas;
-		data.frame              = currentFrame + 1;
+		data.frame              = currentRunFrame + 1;
 		data.savestateHookNum   = currentSavestateHook;
 		data.branchIndex        = viewingBranchIndex;
 		data.playerIndex        = viewingPlayerIndex;
-		data.incrementFrame     = false;
+		data.incrementFrame     = incrementFrame;
 		data.includeFramebuffer = includeFramebuffer;
-		data.isAutoRun          = true;
+		data.typeToRecord       = valueToRecord;
 	})
 }
 
@@ -230,7 +250,7 @@ int DataProcessing::OnGetItemColumnImage(long row, long column) const {
 		if(on) {
 			// Return index of on image
 			// Interleaved means it looks like this
-			res = button * 2;
+			res = (uint8_t)button * 2;
 		} else {
 			// I'm trying something, don't return an image if off
 			// res = button * 2 + 1;
@@ -250,11 +270,8 @@ wxString DataProcessing::OnGetItemText(long row, long column) const {
 		// Fallback for every other column
 		return "";
 	}
-	// This function shouldn't receive any other column
 }
 
-// EXCUSE ME, WUT TODO
-// Why can't I call a const method from a const method hmmm
 wxItemAttr* DataProcessing::OnGetItemAttr(long item) const {
 	return itemAttributes.at(getFramestateInfo(item));
 }
@@ -265,24 +282,24 @@ void DataProcessing::setItemAttributes() {
 	wxItemAttr* itemAttribute;
 
 	// Default is nothing
-	SET_BIT(state, false, FrameState::RAN);
+	SET_BIT(state, false, (uint8_t)FrameState::RAN);
 	itemAttribute = new wxItemAttr();
 	// itemAttribute->SetBackgroundColour(wxColor((*mainSettings)["ui"]["frameViewerColors"]["notRan"].GetString()));
 	itemAttribute->SetBackgroundColour(GetBackgroundColour());
 	itemAttributes[state] = itemAttribute;
 
-	SET_BIT(state, true, FrameState::RAN);
+	SET_BIT(state, true, (uint8_t)FrameState::RAN);
 	itemAttribute = new wxItemAttr();
 	itemAttribute->SetBackgroundColour(wxColor((*mainSettings)["ui"]["frameViewerColors"]["ran"].GetString()));
 	itemAttributes[state] = itemAttribute;
 	SET_BIT(state, false, FrameState::RAN);
 
-	SET_BIT(state, true, FrameState::SAVESTATE);
+	SET_BIT(state, true, (uint8_t)FrameState::SAVESTATE);
 	itemAttribute = new wxItemAttr();
 	itemAttribute->SetBackgroundColour(wxColor((*mainSettings)["ui"]["frameViewerColors"]["savestate"].GetString()));
 	itemAttributes[state] = itemAttribute;
 	// SavestateHook takes precedence in the case where both are present
-	SET_BIT(state, true, FrameState::RAN);
+	SET_BIT(state, true, (uint8_t)FrameState::RAN);
 	itemAttributes[state] = itemAttribute;
 }
 
@@ -477,8 +494,10 @@ void DataProcessing::onMergeIntoMainBranch(wxCommandEvent& event) {
 	if(firstSelectedItem != wxNOT_FOUND) {
 		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
 		for(FrameNum i = firstSelectedItem; i <= lastSelectedItem; i++) {
-			// Transfer directly
-			buttonData->transferControllerData(*(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->at(i)), allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[0]->at(i), false);
+			// Transfer directly to first branch
+			buttonData->transferControllerData(*getInputsList()->at(i), allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[0]->at(i), false);
+			// Include keyboard and touch
+			buttonData->transferExtraData(*getInputsExtraList()->at(i), allExtraFrameData[currentSavestateHook]->at(0)->at(i), false);
 		}
 	}
 	// It's up to the user to remove the frames in the other branch if they want
@@ -521,7 +540,7 @@ void DataProcessing::createSavestateHere() {
 	// Add one savestate hook at this frame
 	savestates[currentFrame] = std::make_shared<Savestate>();
 	// Set the style of this frame
-	SET_BIT(currentData->frameState, true, FrameState::SAVESTATE);
+	SET_BIT(currentData->frameState, true, (uint8_t)FrameState::SAVESTATE);
 	// Refresh the item for it to take effect
 	RefreshItem(currentFrame);
 }
@@ -562,29 +581,7 @@ void DataProcessing::runFrame(uint8_t forAutoFrame, uint8_t updateFramebuffer, u
 
 		if(currentRunFrame < getFramesSize()) {
 			if(!forAutoFrame) {
-				// Send to switch to run for each player
-				for(uint8_t playerIndex = 0; playerIndex < allPlayers.size(); playerIndex++) {
-					std::shared_ptr<ControllerData> controllerDatas = getControllerData(playerIndex, currentSavestateHook, viewingBranchIndex, currentRunFrame);
-					ADD_TO_QUEUE(SendFrameData, networkInstance, {
-						data.controllerData     = *controllerDatas;
-						data.frame              = currentRunFrame;
-						data.savestateHookNum   = currentSavestateHook;
-						data.branchIndex        = viewingBranchIndex;
-						data.playerIndex        = playerIndex;
-						data.incrementFrame     = false;
-						data.includeFramebuffer = includeFramebuffer;
-						data.isAutoRun          = false;
-					})
-				}
-				ADD_TO_QUEUE(SendFrameData, networkInstance, {
-					data.frame              = currentRunFrame;
-					data.savestateHookNum   = currentSavestateHook;
-					data.branchIndex        = viewingBranchIndex;
-					data.playerIndex        = viewingPlayerIndex;
-					data.incrementFrame     = true;
-					data.includeFramebuffer = includeFramebuffer;
-					data.isAutoRun          = false;
-				})
+				sendAutoAdvance(includeFramebuffer, TasValueToRecord::NONE, true);
 			}
 		}
 	}
@@ -884,7 +881,7 @@ void DataProcessing::triggerNumberValuesJoystick(ControllerNumberValues joystick
 
 // New FANCY methods
 void DataProcessing::modifyButton(FrameNum frame, Btn button, uint8_t isPressed) {
-	SET_BIT(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->at(frame)->buttons, isPressed, button);
+	SET_BIT(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->at(frame)->buttons, isPressed, (uint8_t)button);
 
 	invalidateRun(frame);
 
@@ -1636,11 +1633,11 @@ uint8_t DataProcessing::getMouseButtonCurrent(nn::hid::MouseButton key) const {
 }
 
 uint8_t DataProcessing::getButton(FrameNum frame, Btn button) const {
-	return GET_BIT(getInputsList()->at(frame)->buttons, button);
+	return GET_BIT(getInputsList()->at(frame)->buttons, (uint8_t)button);
 }
 
 uint8_t DataProcessing::getButtonSpecific(FrameNum frame, Btn button, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
-	return GET_BIT(getControllerData(player, savestateHookNum, branch, frame)->buttons, button);
+	return GET_BIT(getControllerData(player, savestateHookNum, branch, frame)->buttons, (uint8_t)button);
 }
 
 uint8_t DataProcessing::getButtonCurrent(Btn button) const {
@@ -1653,14 +1650,14 @@ void DataProcessing::setControllerDataForAutoRun(ControllerData controllerData) 
 }
 
 void DataProcessing::setExtraDataKeyboardForAutoRun(TouchAndKeyboardData extraData) {
-	buttonData->transferOnlyKeyboard(extraData, getInputsExtraList()->at(currentFrame), false);
+	buttonData->transferOnlyKeyboard(extraData, getInputsExtraList()->at(currentFrame));
 	modifyCurrentFrameViews(currentFrame);
 }
 
-	void DataProcessing::setExtraDataTouchForAutoRun(TouchAndKeyboardData extraData) {
-buttonData->transferOnlyTouch(extraData, getInputsExtraList()->at(currentFrame), false);
+void DataProcessing::setExtraDataTouchForAutoRun(TouchAndKeyboardData extraData) {
+	buttonData->transferOnlyTouch(extraData, getInputsExtraList()->at(currentFrame));
 	modifyCurrentFrameViews(currentFrame);
-	}
+}
 
 int16_t DataProcessing::getNumberValueCurrentJoystick(ControllerNumberValues joystickId) const {
 	return getNumberValuesJoystick(currentFrame, joystickId);
@@ -1688,7 +1685,7 @@ void DataProcessing::modifyCurrentFrameViews(FrameNum frame) {
 }
 
 void DataProcessing::setFramestateInfo(FrameNum frame, FrameState id, uint8_t state) {
-	SET_BIT(getInputsList()->at(frame)->frameState, state, id);
+	SET_BIT(getInputsList()->at(frame)->frameState, state, (uint8_t)id);
 
 	if(IsVisible(frame)) {
 		RefreshItem(frame);
@@ -1701,16 +1698,16 @@ void DataProcessing::setFramestateInfoSpecific(FrameNum frame, FrameState id, ui
 	if(savestateHookNum == currentSavestateHook && player == viewingPlayerIndex) {
 		setFramestateInfo(frame, id, state);
 	} else {
-		SET_BIT(getControllerData(player, savestateHookNum, branch, frame)->frameState, state, id);
+		SET_BIT(getControllerData(player, savestateHookNum, branch, frame)->frameState, state, (uint8_t)id);
 	}
 }
 
 uint8_t DataProcessing::getFramestateInfo(FrameNum frame, FrameState id) const {
-	return GET_BIT(getInputsList()->at(frame)->frameState, id);
+	return GET_BIT(getInputsList()->at(frame)->frameState, (uint8_t)id);
 }
 
 uint8_t DataProcessing::getFramestateInfoSpecific(FrameNum frame, FrameState id, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
-	return GET_BIT(getControllerData(player, savestateHookNum, branch, frame)->frameState, id);
+	return GET_BIT(getControllerData(player, savestateHookNum, branch, frame)->frameState, (uint8_t)id);
 }
 
 // Without the id, just return the whole hog

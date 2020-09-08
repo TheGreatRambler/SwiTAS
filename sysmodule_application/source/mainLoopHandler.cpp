@@ -253,34 +253,45 @@ void MainLoop::mainLoopHandler() {
 void MainLoop::handleNetworkUpdates() {
 	CHECK_QUEUE(networkInstance, SendFrameData, {
 		if(data.incrementFrame) {
-			runSingleFrame(true, data.includeFramebuffer, TasValueToRecord::ALL, data.frame, data.savestateHookNum, data.branchIndex, data.playerIndex);
+			listenAll();
+			runSingleFrame(true, data.includeFramebuffer, TasValueToRecord::NONE, data.frame, data.savestateHookNum, data.branchIndex, data.playerIndex);
 		} else if(data.typeToRecord != TasValueToRecord::NONE) {
-
-			switch(typeToRecord) {
-					case TasValueToRecord::NONE:
-						break;
-					case TasValueToRecord::ALL:
-						recordAll();
-						break;
-					case TasValueToRecord::CONTROLLER:
-						matchFirstControllerToTASController(data.playerIndex);
-						setSixAxisRecord(playerIndex);
-						break;
-					case TasValueToRecord::KEYBOARD_MOUSE:
-						setKeyboardRecord();
-						break;
-					case TasValueToRecord::TOUCHSCREEN:
-						setTouchRecord();
-						break;
-				}
+			switch(data.typeToRecord) {
+			case TasValueToRecord::NONE:
+				break;
+			case TasValueToRecord::ALL:
+				// Essentially means no data is set
+				recordAll();
+				break;
+			case TasValueToRecord::CONTROLLER:
+				setSixAxisListen();
+				matchFirstControllerToTASController(data.playerIndex);
+				break;
+			case TasValueToRecord::KEYBOARD_MOUSE:
+				setKeyboardRecord();
+				break;
+			case TasValueToRecord::TOUCHSCREEN:
+				setTouchRecord();
+				break;
+			}
 
 			runSingleFrame(true, data.includeFramebuffer, data.typeToRecord, data.frame, data.savestateHookNum, data.branchIndex, data.playerIndex);
 		} else {
-			controllers[data.playerIndex]->setFrame(data.controllerData);
-			setSixAxisState(data.playerIndex, &data.controllerData);
-			// This needs to be handled differently
-			setTouchState();
-			setKeyboardMouseState();
+			switch(data.valueIncluded) {
+			case TasValueToRecord::NONE:
+			case TasValueToRecord::ALL:
+				break;
+			case TasValueToRecord::CONTROLLER:
+				controllers[data.playerIndex]->setFrame(data.controllerData);
+				setSixAxisState(data.playerIndex, &data.controllerData);
+				break;
+			case TasValueToRecord::KEYBOARD_MOUSE:
+				setKeyboardMouseState(&data.extraData);
+				break;
+			case TasValueToRecord::TOUCHSCREEN:
+				setTouchState(&data.extraData);
+				break;
+			}
 		}
 	})
 
@@ -539,6 +550,11 @@ void MainLoop::setControllerNumber(uint8_t numOfControllers) {
 	for(uint8_t i = 0; i < numOfControllers; i++) {
 #ifdef __SWITCH__
 		controllers.push_back(std::make_unique<ControllerHandler>(networkInstance, (HidControllerID)getNumControllers()));
+		// Going to assume this contr
+		HidControllerID lastControllerId = (HidControllerID)getLastController();
+		lastControllerType               = hidGetControllerType(lastControllerId);
+		hidGetSixAxisSensorHandles(&externalControllerSixAxisHandle, lastControllerType == TYPE_JOYCON_PAIR ? 2 : 1, lastControllerId, lastControllerType);
+		hidStartSixAxisSensor(externalControllerSixAxisHandle);
 #endif
 #ifdef YUZU
 		controllers.push_back(std::make_unique<ControllerHandler>(networkInstance, yuzuSyscalls));
@@ -690,33 +706,27 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 				// if(includeFramebuffer) {
 				//	data.dhash = dhash;
 				//}
-				data.fromFrameAdvance       = linkedWithFrameAdvance;
-				data.frame                  = frame;
-				data.savestateHookNum       = savestateHookNum;
-				data.branchIndex            = branchIndex;
-				data.playerIndex            = playerIndex;
-				data.valueIncluded = typeToRecord;
+				data.fromFrameAdvance = linkedWithFrameAdvance;
+				data.frame            = frame;
+				data.savestateHookNum = savestateHookNum;
+				data.branchIndex      = branchIndex;
+				data.playerIndex      = playerIndex;
+				data.valueIncluded    = typeToRecord;
 
 				switch(typeToRecord) {
-					case TasValueToRecord::NONE:
-						break;
-					case TasValueToRecord::ALL:
-						break;
-					case TasValueToRecord::CONTROLLER:
-						data.controllerData = *controllers[playerIndex]->getControllerData();
-						break;
-					case TasValueToRecord::KEYBOARD_MOUSE:
-							data.extraData = 
-							dataProcessingInstance->setExtraDataKeyboardForAutoRun(data.extraData);
-							dataProcessingInstance->runFrame(true, true, true);
-						break;
-					case TasValueToRecord::TOUCHSCREEN:
-							dataProcessingInstance->setExtraDataTouchForAutoRun(data.extraData);
-							dataProcessingInstance->runFrame(true, true, true);
-						break;
-				}
-
-				if(autoAdvance) {
+				case TasValueToRecord::NONE:
+				case TasValueToRecord::ALL:
+					break;
+				case TasValueToRecord::CONTROLLER:
+					data.controllerData = *controllers[playerIndex]->getControllerData();
+					getSixAxisState(playerIndex, &data.controllerData);
+					break;
+				case TasValueToRecord::KEYBOARD_MOUSE:
+					getKeyboardMouseState(&data.extraData);
+					break;
+				case TasValueToRecord::TOUCHSCREEN:
+					getTouchState(&data.extraData);
+					break;
 				}
 			})
 
@@ -813,7 +823,7 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 				})
 			}
 		} else {
-			LOGD << "Internet not connected, not sending framebuffer";
+			LOGD << "Internet not connected, not sending extra data";
 		}
 	}
 }
@@ -895,7 +905,7 @@ void MainLoop::matchFirstControllerToTASController(uint8_t player) {
 	if(getNumControllers() > controllers.size() && controllers.size() != 0) {
 		hidScanInput();
 		// This should get the first non-TAS controller
-		HidControllerID id = (HidControllerID)((int)controllers.size());
+		HidControllerID id = (HidControllerID)getLastController();
 
 		u64 buttons = hidKeysHeld(id) & 65535;
 		JoystickPosition left;
@@ -904,6 +914,79 @@ void MainLoop::matchFirstControllerToTASController(uint8_t player) {
 		hidJoystickRead(&right, id, JOYSTICK_RIGHT);
 
 		controllers[player]->setFrame(buttons, left.dx, left.dy, right.dx, right.dy);
+
+		if(lastControllerType == TYPE_JOYCON_PAIR) {
+			SixAxisSensorValues vals[2];
+			hidSixAxisSensorValuesRead(vals, id, 2);
+
+			ControllerData data;
+
+			// Manually convert the libnx values to the sdk values
+			data.ACCEL_X_LEFT       = vals[0].accelerometer.x;
+			data.ACCEL_Y_LEFT       = vals[0].accelerometer.y;
+			data.ACCEL_Z_LEFT       = vals[0].accelerometer.z;
+			data.GYRO_X_LEFT        = vals[0].gyroscope.x;
+			data.GYRO_Y_LEFT        = vals[0].gyroscope.y;
+			data.GYRO_Z_LEFT        = vals[0].gyroscope.z;
+			data.ANGLE_X_LEFT       = vals[0].unk.x;
+			data.ANGLE_Y_LEFT       = vals[0].unk.y;
+			data.ANGLE_Z_LEFT       = vals[0].unk.z;
+			data.ACCEL_X_RIGHT      = vals[1].accelerometer.x;
+			data.ACCEL_Y_RIGHT      = vals[1].accelerometer.y;
+			data.ACCEL_Z_RIGHT      = vals[1].accelerometer.z;
+			data.GYRO_X_RIGHT       = vals[1].gyroscope.x;
+			data.GYRO_Y_RIGHT       = vals[1].gyroscope.y;
+			data.GYRO_Z_RIGHT       = vals[1].gyroscope.z;
+			data.ANGLE_X_RIGHT      = vals[1].unk.x;
+			data.ANGLE_Y_RIGHT      = vals[1].unk.y;
+			data.ANGLE_Z_RIGHT      = vals[1].unk.z;
+			data.DIRECTION_XX_LEFT  = vals[0].orientation[0].x;
+			data.DIRECTION_XY_LEFT  = vals[0].orientation[0].y;
+			data.DIRECTION_XZ_LEFT  = vals[0].orientation[0].z;
+			data.DIRECTION_YX_LEFT  = vals[0].orientation[1].x;
+			data.DIRECTION_YY_LEFT  = vals[0].orientation[1].y;
+			data.DIRECTION_YZ_LEFT  = vals[0].orientation[1].z;
+			data.DIRECTION_ZX_LEFT  = vals[0].orientation[2].x;
+			data.DIRECTION_ZY_LEFT  = vals[0].orientation[2].y;
+			data.DIRECTION_ZZ_LEFT  = vals[0].orientation[2].z;
+			data.DIRECTION_XX_RIGHT = vals[1].orientation[0].x;
+			data.DIRECTION_XY_RIGHT = vals[1].orientation[0].y;
+			data.DIRECTION_XZ_RIGHT = vals[1].orientation[0].z;
+			data.DIRECTION_YX_RIGHT = vals[1].orientation[1].x;
+			data.DIRECTION_YY_RIGHT = vals[1].orientation[1].y;
+			data.DIRECTION_YZ_RIGHT = vals[1].orientation[1].z;
+			data.DIRECTION_ZX_RIGHT = vals[1].orientation[2].x;
+			data.DIRECTION_ZY_RIGHT = vals[1].orientation[2].y;
+			data.DIRECTION_ZZ_RIGHT = vals[1].orientation[2].z;
+
+			setSixAxisState(player, &data);
+		} else {
+			SixAxisSensorValues val;
+			hidSixAxisSensorValuesRead(&val, id, 1);
+
+			ControllerData data;
+
+			data.ACCEL_X_LEFT      = val.accelerometer.x;
+			data.ACCEL_Y_LEFT      = val.accelerometer.y;
+			data.ACCEL_Z_LEFT      = val.accelerometer.z;
+			data.GYRO_X_LEFT       = val.gyroscope.x;
+			data.GYRO_Y_LEFT       = val.gyroscope.y;
+			data.GYRO_Z_LEFT       = val.gyroscope.z;
+			data.ANGLE_X_LEFT      = val.unk.x;
+			data.ANGLE_Y_LEFT      = val.unk.y;
+			data.ANGLE_Z_LEFT      = val.unk.z;
+			data.DIRECTION_XX_LEFT = val.orientation[0].x;
+			data.DIRECTION_XY_LEFT = val.orientation[0].y;
+			data.DIRECTION_XZ_LEFT = val.orientation[0].z;
+			data.DIRECTION_YX_LEFT = val.orientation[1].x;
+			data.DIRECTION_YY_LEFT = val.orientation[1].y;
+			data.DIRECTION_YZ_LEFT = val.orientation[1].z;
+			data.DIRECTION_ZX_LEFT = val.orientation[2].x;
+			data.DIRECTION_ZY_LEFT = val.orientation[2].y;
+			data.DIRECTION_ZZ_LEFT = val.orientation[2].z;
+
+			setSixAxisState(player, &data);
+		}
 	}
 #endif
 #ifdef YUZU
@@ -935,21 +1018,33 @@ void MainLoop::setSixAxisRecord(int32_t controller) {
 	}
 }
 
+void MainLoop::setSixAxisListen() {
+	if(saltynxcontrollerToRecord != 0) {
+		setMemoryType(saltynxcontrollerToRecord, nn::hid::NpadIdType::Set_All);
+	}
+}
+
 void MainLoop::recordAllKeyboardTouch() {
 	if(saltynxrecordScreenOrKeyboard != 0) {
-		setMemoryType(saltynxrecordScreenOrKeyboard, (uint16_t)0);
+		setMemoryType<uint8_t>(saltynxrecordScreenOrKeyboard, 0);
+	}
+}
+
+void MainLoop::listenAllKeyboardTouch() {
+	if(saltynxrecordScreenOrKeyboard != 0) {
+		setMemoryType<uint8_t>(saltynxrecordScreenOrKeyboard, 3);
 	}
 }
 
 void MainLoop::setKeyboardRecord() {
 	if(saltynxrecordScreenOrKeyboard != 0) {
-		setMemoryType(saltynxrecordScreenOrKeyboard, (uint16_t)2);
+		setMemoryType<uint8_t>(saltynxrecordScreenOrKeyboard, 2);
 	}
 }
 
 void MainLoop::setTouchRecord() {
 	if(saltynxrecordScreenOrKeyboard != 0) {
-		setMemoryType(saltynxrecordScreenOrKeyboard, (uint8_t)1);
+		setMemoryType<uint8_t>(saltynxrecordScreenOrKeyboard, 1);
 	}
 }
 
@@ -1107,6 +1202,8 @@ MainLoop::~MainLoop() {
 	LOGD << "Exiting app";
 	rc = hiddbgReleaseHdlsWorkBuffer();
 	hiddbgExit();
+
+	hidStopSixAxisSensor(externalControllerSixAxisHandle);
 
 	viCloseDisplay(&disp);
 

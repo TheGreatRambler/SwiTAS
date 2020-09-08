@@ -2,6 +2,7 @@ SwiTAS.elf
 SwiTAS.npdm
 SwiTAS-PC.nso
 SwiTAS-PC.nsp
+SwiTAS_SaltyPlugin.elf
 build
 .DS_Store
 release

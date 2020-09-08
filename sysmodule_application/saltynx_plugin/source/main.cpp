@@ -58,6 +58,7 @@ uint64_t touchScreenLastAccessTime = ticksToNanoseconds(_ZN2nn2os13GetSystemTick
 
 // Whether to record the touchscreen or the keyboard (and mouse)
 // Zero means record both, 1 means touchscreen, 2 means keyboard and mouse
+// 3 means both are set by the code
 uint8_t recordScreenOrKeyboard = 0;
 
 int32_t touchScreenBacklogSize                                                              = 0;

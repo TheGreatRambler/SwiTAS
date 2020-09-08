@@ -67,6 +67,9 @@ private:
 	uint64_t heapBase;
 	uint64_t mainBase;
 
+	uint32_t externalControllerSixAxisHandle;
+	HidControllerType lastControllerType;
+
 	std::unordered_map<std::string, FILE*> runFinalTasFileHandles;
 
 	SerializeProtocol serializeProtocol;
@@ -213,10 +216,15 @@ private:
 	// controllers. Otherwise, it sets the number of hid:dbg controllers
 	void setControllerNumber(uint8_t numOfControllers);
 	uint8_t getNumControllers();
+	uint8_t getLastController() {
+		return controllers.size();
+	}
 
 	void recordAllSixAxis();
 	void setSixAxisRecord(int32_t controller);
+	void setSixAxisListen();
 	void recordAllKeyboardTouch();
+	void listenAllKeyboardTouch();
 	void setKeyboardRecord();
 	void setTouchRecord();
 	void getSixAxisState(int32_t controller, ControllerData* state);
@@ -230,6 +238,13 @@ private:
 		recordAllSixAxis();
 		recordAllKeyboardTouch();
 	}
+
+	void listenAll() {
+		setSixAxisListen();
+		listenAllKeyboardTouch();
+	}
+
+	void setAll() { }
 
 	uint8_t finalTasShouldRun;
 	void runFinalTas(std::vector<std::string> scriptPaths);

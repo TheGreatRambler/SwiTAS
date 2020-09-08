@@ -156,7 +156,7 @@ public:
 	void setBranchInfoCallback(std::function<void(uint16_t, uint16_t, bool)> callback);
 	void triggerCurrentFrameChanges();
 
-	void sendAutoAdvance(uint8_t includeFramebuffer, TasValueToRecord valueToRecord);
+	void sendAutoAdvance(uint8_t includeFramebuffer, TasValueToRecord valueToRecord, uint8_t incrementFrame);
 
 	std::string getExportedCurrentPlayer();
 	void importFromFile(wxFileName importTarget);

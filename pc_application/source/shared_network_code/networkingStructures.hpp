@@ -21,7 +21,7 @@
 	};
 // clang-format on
 
-enum DataFlag : uint8_t {
+enum class DataFlag : uint8_t {
 	SendFrameData,
 	RecieveGameFramebuffer,
 	RecieveGameInfo,
@@ -42,7 +42,7 @@ enum DataFlag : uint8_t {
 	NUM_OF_FLAGS,
 };
 
-enum RecieveInfo : uint8_t {
+enum class RecieveInfo : uint8_t {
 	RUN_FRAME_DONE,
 	FRAMEBUFFER_DONE,
 	APPLICATION_DISCONNECTED,
@@ -52,7 +52,7 @@ enum RecieveInfo : uint8_t {
 	IS_HOMEBREW,
 };
 
-enum SendInfo : uint8_t {
+enum class SendInfo : uint8_t {
 	GET_FRAMEBUFFER,
 	GET_GAME_INFO,
 	START_TAS_MODE,
@@ -70,7 +70,7 @@ enum SendInfo : uint8_t {
 };
 
 // This is used by the switch to determine size, a vector is always send back enyway
-enum MemoryRegionTypes : uint8_t {
+enum class MemoryRegionTypes : uint8_t {
 	Bit8 = 0,
 	Bit16,
 	Bit32,
@@ -249,7 +249,8 @@ namespace Protocol {
 		uint8_t incrementFrame;
 		uint8_t includeFramebuffer;
 		TasValueToRecord typeToRecord;
-	, self.controllerData, self.extraData, self.frame, self.playerIndex, self.incrementFrame, self.branchIndex, self.savestateHookNum, self.includeFramebuffer, self.isAutoRun)
+		TasValueToRecord valueIncluded;
+	, self.controllerData, self.extraData, self.frame, self.playerIndex, self.incrementFrame, self.branchIndex, self.savestateHookNum, self.includeFramebuffer, self.typeToRecord, self.valueIncluded)
 
 	// Recieve all of the game's framebuffer
 	DEFINE_STRUCT(RecieveGameFramebuffer,
@@ -263,7 +264,7 @@ namespace Protocol {
 		TasValueToRecord valueIncluded;
 		ControllerData controllerData;
 		TouchAndKeyboardData extraData;
-	, self.buf, self.fromFrameAdvance, self.frame, self.savestateHookNum, self.branchIndex, self.playerIndex, self.controllerDataIncluded, self.controllerData)
+	, self.buf, self.fromFrameAdvance, self.frame, self.savestateHookNum, self.branchIndex, self.playerIndex, self.valueIncluded, self.controllerData, self.extraData)
 
 	// Recieve a ton of game and user info
 	DEFINE_STRUCT(RecieveGameInfo,

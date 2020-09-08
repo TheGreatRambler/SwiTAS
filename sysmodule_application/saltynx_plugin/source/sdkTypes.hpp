@@ -62,8 +62,8 @@ namespace nn {
 		typedef uint32_t ConsoleSixAxisSensorHandle;
 
 		// Both positive and negative
-		const float AccelerometerMax             = 7.0f;
-		const float AngularVelocityMax           = 5.0f;
+		const float AccelerometerMax   = 7.0f;
+		const float AngularVelocityMax = 5.0f;
 		// Angle is unbounded, but 1 is equal to one full rotation
 		const int32_t SixAxisSensorStateCountMax = 16;
 		const int32_t TouchStateCountMax         = 16;
@@ -333,6 +333,8 @@ namespace nn {
 			Player8  = 7,
 			Unknown  = 16,
 			Handheld = 32,
+			// Added by me to set all
+			Set_All = 33,
 		};
 
 		struct SixAxisSensorState {
