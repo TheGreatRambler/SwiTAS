@@ -1,7 +1,7 @@
 #include "projectHandler.hpp"
 
 ProjectSettingsWindow::ProjectSettingsWindow(wxFrame* parentFrame, std::shared_ptr<ProjectHandler> projHandler, rapidjson::Document* settings, std::shared_ptr<CommunicateWithNetwork> network)
-	: wxFrame(parent, wxID_ANY, "TAS Settings", wxDefaultPosition, wxSize(600, 400), wxDEFAULT_FRAME_STYLE | wxFRAME_FLOAT_ON_PARENT) {
+	: wxFrame(parentFrame, wxID_ANY, "TAS Settings", wxDefaultPosition, wxSize(600, 400), wxDEFAULT_FRAME_STYLE | wxFRAME_FLOAT_ON_PARENT) {
 	// Start hidden
 	Hide();
 
@@ -11,12 +11,12 @@ ProjectSettingsWindow::ProjectSettingsWindow(wxFrame* parentFrame, std::shared_p
 
 	mainSizer = new wxBoxSizer(wxVERTICAL);
 
-	gameNameSizer    = new wxBoxSizer(xHORIZONTAL);
+	gameNameSizer    = new wxBoxSizer(wxHORIZONTAL);
 	gameTitleIdEntry = new wxTextCtrl(this, wxID_ANY, projectHandler->getTitleId(), wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER | wxTE_CENTRE);
 
-	gameTitleIdEntry->Bind(wxEVT_TEXT_ENTER, &VideoComparisonViewer::displayVideoFormats, this);
+	gameTitleIdEntry->Bind(wxEVT_TEXT_ENTER, &ProjectSettingsWindow::onTitleIdEntry, this);
 
-	gameName = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTRE);
+	gameName = new wxStaticText(this, wxID_ANY, wxEmptyString);
 	if(projectHandler->getTitleId() != wxEmptyString) {
 		gameName->SetLabelText(projectHandler->getGameInfoFromTitleId(projectHandler->getTitleId())->GetAttribute("name"));
 	}
@@ -24,8 +24,8 @@ ProjectSettingsWindow::ProjectSettingsWindow(wxFrame* parentFrame, std::shared_p
 	gameNameSizer->Add(getLabel("Title ID/Program ID"), 0, wxEXPAND);
 	gameNameSizer->Add(gameTitleIdEntry, 0, wxEXPAND);
 
-	isMobileSizer = new wxBoxSizer(xHORIZONTAL);
-	isMobile      = new wxCheckBox(parent, wxID_ANY);
+	isMobileSizer = new wxBoxSizer(wxHORIZONTAL);
+	isMobile      = new wxCheckBox(this, wxID_ANY, wxEmptyString);
 
 	isMobile->SetValue(projectHandler->getDocked());
 
@@ -48,7 +48,7 @@ ProjectSettingsWindow::ProjectSettingsWindow(wxFrame* parentFrame, std::shared_p
 }
 
 void ProjectSettingsWindow::onTitleIdEntry(wxCommandEvent& event) {
-	wxString newTitleId = urlInput->GetLineText(0).ToStdString();
+	wxString newTitleId = gameTitleIdEntry->GetLineText(0).ToStdString();
 
 	wxXmlNode* info = projectHandler->getGameInfoFromTitleId(newTitleId);
 
@@ -56,7 +56,7 @@ void ProjectSettingsWindow::onTitleIdEntry(wxCommandEvent& event) {
 		projectHandler->setTitleId(newTitleId);
 		gameName->SetLabelText(projectHandler->getGameInfoFromTitleId(newTitleId)->GetAttribute("name"));
 	} else {
-		urlInput->SetLabelText(projectHandler->getTitleId());
+		gameTitleIdEntry->SetLabelText(projectHandler->getTitleId());
 
 		wxMessageDialog errorDialog(this, "Title ID Not Found", "That Title ID was not found in the database", wxOK | wxICON_ERROR);
 		errorDialog.ShowModal();
@@ -95,7 +95,7 @@ ProjectHandler::ProjectHandler(wxFrame* parent, DataProcessing* dataProcessingIn
 														"}");
 	}
 
-	gameDatabaseXML.Load(wxString.FromUTF8(HELPERS::resolvePath("NSWreleases.xml")));
+	gameDatabaseXML.Load(wxString::FromUTF8(HELPERS::resolvePath("NSWreleases.xml")));
 
 	dataProcessing->setSelectedFrameCallbackVideoViewer(std::bind(&ProjectHandler::updateVideoComparisonViewers, this, std::placeholders::_1));
 }

@@ -105,10 +105,17 @@ private:
 
 	wxBoxSizer* mainKeyboardSizer;
 
+	wxTextCtrl* keyboardKeys;
+	wxTextCtrl* keyboardModifiers;
+	wxTextCtrl* mouseButtons;
+
 	void motionValueChanged(wxSpinDoubleEvent& event);
 	void touchValueChanged(wxSpinEvent& event);
 	void numOfTouchesChanged(wxSpinEvent& event);
 	void mouseValueChanged(wxSpinEvent& event);
+	void keyboardKeysChanged(wxCommandEvent& event);
+	void keyboardModifiersChanged(wxCommandEvent& event);
+	void mouseButtonsChanged(wxCommandEvent& event);
 
 	void onClose(wxCloseEvent& event);
 

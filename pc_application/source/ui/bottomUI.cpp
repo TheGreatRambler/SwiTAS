@@ -298,6 +298,12 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 	scrollVelocityXCtrl->SetToolTip("Set mouse scroll velocity X");
 	scrollVelocityYCtrl->SetToolTip("Set mouse scroll velocity X");
 
+	mainKeyboardSizer = new wxBoxSizer(wxVERTICAL);
+
+	keyboardKeys      = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER | wxTE_CENTRE);
+	keyboardModifiers = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER | wxTE_CENTRE);
+	mouseButtons      = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER | wxTE_CENTRE);
+
 	mainMouseSizer->Add(mouseXCtrl, 0, wxEXPAND);
 	mainMouseSizer->Add(mouseYCtrl, 0, wxEXPAND);
 	mainMouseSizer->Add(mouseVelocityXCtrl, 0, wxEXPAND);
@@ -489,6 +495,18 @@ void ExtraInputMethods::mouseValueChanged(wxSpinEvent& event) {
 		inputInstance->triggerExtraValue(ExtraValues::SCROLL_VELOCITY_Y, (int32_t)widget->GetValue());
 	}
 }
+
+void ExtraInputMethods::keyboardKeysChanged(wxCommandEvent& event) {
+
+}
+
+	void ExtraInputMethods::keyboardModifiersChanged(wxCommandEvent& event) {
+
+	}
+	
+	void ExtraInputMethods::mouseButtonsChanged(wxCommandEvent& event) {
+
+	}
 
 void ExtraInputMethods::onClose(wxCloseEvent& event) {
 	Show(false);

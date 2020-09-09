@@ -75,7 +75,7 @@ private:
 
 	wxBoxSizer* gameNameSizer;
 	wxTextCtrl* gameTitleIdEntry;
-	wxTextCtrl* gameName;
+	wxStaticText* gameName;
 
 	wxBoxSizer* isMobileSizer;
 	wxCheckBox* isMobile;

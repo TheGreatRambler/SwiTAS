@@ -70,6 +70,18 @@ void ButtonData::setupButtonMapping(rapidjson::Document* mainSettings) {
 
 		buttonMapping[chosenButton] = thisButtonInfo;
 	}
+
+	for(auto const& keyboardKey : stringToKeyboardKey) {
+		keyboardKeyToString[keyboardKey.second] = keyboardKey.first;
+	}
+
+	for(auto const& keyboardModifier : stringToKeyboardModifier) {
+		keyboardModifierToString[keyboardModifier.second] = keyboardModifier.first;
+	}
+
+	for(auto const& mouseButton : stringToMouseButton) {
+		mouseButtonToString[mouseButton.second] = mouseButton.first;
+	}
 }
 
 FrameNum ButtonData::textToFrames(DataProcessing* dataProcessing, std::string text, FrameNum startLoc, bool insertPaste, bool placePaste) {
@@ -653,3 +665,30 @@ bool ButtonData::isEmptyExtraData(std::shared_ptr<TouchAndKeyboardData> data) {
 		(data->mouseButtons      == emptyData.mouseButtons);
 	// clang-format on
 }
+
+bool ButtonData::applyKeyboardKeysString(std::shared_ptr<TouchAndKeyboardData> data, std::string str) { 
+	if(str != "NONE") {
+			for(std::string keyName : HELPERS::splitString(str, ';')) {
+				if (stringToKeyboardKey.count(keyName) == 1) {
+
+				} else {
+					return false;
+				}
+				if(scriptNameToButton.count(buttonName)) {
+					dataProcessing->modifyButton(thisDataIndex, scriptNameToButton[buttonName], true);
+				}
+			}
+		} else {
+			return true;
+		}
+}
+
+bool ButtonData::applyKeyboardModifiersString(std::shared_ptr<TouchAndKeyboardData> data, std::string str) { }
+
+bool ButtonData::applyMouseButtonsString(std::shared_ptr<TouchAndKeyboardData> data, std::string str) { }
+
+std::string ButtonData::getKeyboardKeysString(std::shared_ptr<TouchAndKeyboardData> data) { }
+
+std::string ButtonData::getKeyboardModifiersString(std::shared_ptr<TouchAndKeyboardData> data) { }
+
+std::string ButtonData::getMouseButtonsString(std::shared_ptr<TouchAndKeyboardData> data) { }
