@@ -59,6 +59,7 @@ private:
 	wxLogWindow* logWindow;
 	// Main debug command window
 	DebugWindow* debugWindow;
+	ProjectSettingsWindow* projectSettingsWindow;
 
 	// Menubar
 	wxMenuBar* menuBar;
@@ -74,6 +75,7 @@ private:
 	wxWindowID runFinalTasID;
 	wxWindowID requestGameInfoID;
 	wxWindowID toggleExtraInputMethodsID;
+	wxWindowID toggleProjectSettingsWindowID;
 
 	void handlePreviousWindowTransform();
 

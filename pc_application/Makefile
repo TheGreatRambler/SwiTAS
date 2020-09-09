@@ -23,7 +23,7 @@ endif
 CFLAGS := -std=c11
 
 # C++ flags
-CXXFLAGS := -std=gnu++17 $(shell wx-config --cxxflags base,core,net) $(shell pkg-config --cflags ffms2 libzstd) -I./include
+CXXFLAGS := -std=gnu++17 $(shell wx-config --cxxflags base,core,net,xml) $(shell pkg-config --cflags ffms2 libzstd) -I./include
 
 # C/C++ flags
 CPPFLAGS := -Wall -Wno-maybe-uninitialized -Wno-sign-compare -Wswitch-enum -DCLIENT_IMP
@@ -43,7 +43,7 @@ endif
 
 # Linker flags (-lpthread needed for threads)
 # Includes some neccessary linker flags for win32-darkmode (will add in the future)
-LDFLAGS := $(shell wx-config --libs base,core,net) $(shell pkg-config --libs ffms2 libzstd) -lpthread
+LDFLAGS := $(shell wx-config --libs base,core,net,xml) $(shell pkg-config --libs ffms2 libzstd) -lpthread
 ifeq ($(UNAME),Msys)
 	# Needed for sockets on windows
 	LDFLAGS += -lws2_32

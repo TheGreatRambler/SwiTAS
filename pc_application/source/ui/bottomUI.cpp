@@ -310,6 +310,8 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 	mainSizer->Add(mainTouchSizer, 0);
 	mainSizer->Add(mainMouseSizer, 0);
 
+	Bind(wxEVT_CLOSE_WINDOW, ExtraInputMethods::onClose, this);
+
 	SetSizer(mainSizer);
 	mainSizer->SetSizeHints(this);
 	Layout();

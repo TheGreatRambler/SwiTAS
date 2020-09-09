@@ -38,6 +38,7 @@
 #include <rapidjson/stringbuffer.h>
 #include <unordered_map>
 #include <wx/dir.h>
+#include <wx/xml/xml.h>
 #include <wx/dirdlg.h>
 #include <cstring>
 #include <wx/filename.h>
@@ -61,10 +62,44 @@
 #include "../ui/videoComparisonViewer.hpp"
 #include "dataProcessing.hpp"
 
+class ProjectSettingsWindow : public wxFrame {
+private:
+	// Just in case we need to listen for values
+	const uint8_t NETWORK_CALLBACK_ID = 5;
+
+	std::shared_ptr<ProjectHandler> projectHandler;
+	rapidjson::Document* mainSettings;
+	std::shared_ptr<CommunicateWithNetwork> networkInstance;
+
+	wxBoxSizer* mainSizer;
+
+	wxBoxSizer* gameNameSizer;
+	wxTextCtrl* gameTitleIdEntry;
+	wxTextCtrl* gameName;
+
+	wxBoxSizer* isMobileSizer;
+	wxCheckBox* isMobile;
+
+	wxTextCtrl* getLabel(wxString name) {
+		return new wxTextCtrl(this, wxID_ANY, name, wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTRE);
+	}
+
+	void onTitleIdEntry(wxCommandEvent& event);
+	void onChangeDocked(wxCommandEvent& event);
+
+	void onClose(wxCloseEvent& event);
+
+public:
+	ProjectSettingsWindow(wxFrame* parentFrame, std::shared_ptr<ProjectHandler> projHandler, rapidjson::Document* settings, std::shared_ptr<CommunicateWithNetwork> network);
+};
+
 class ProjectHandler {
 private:
 	DataProcessing* dataProcessing;
 	wxFrame* parentFrame;
+
+	// XML parser for game database
+	wxXmlDocument gameDatabaseXML;
 
 	wxFileName projectDir;
 	SerializeProtocol serializeProtocol;
@@ -84,6 +119,9 @@ private:
 	// Main settings variable
 	rapidjson::Document* mainSettings;
 	rapidjson::Document recentSettings;
+
+	wxString titleID = wxEmptyString;
+	uint8_t isMobile = false;
 
 	std::vector<std::shared_ptr<VideoEntry>> videoComparisonEntries;
 	wxMenu* videoComparisonEntriesMenu;
@@ -115,8 +153,31 @@ public:
 		return wxFileName::DirName(projectDir.GetPathWithSep());
 	}
 
+	wxXmlNode* getGameInfoFromTitleId(wxString titleId) {
+		wxXmlNode* child = gameDatabaseXML.GetRoot()->GetNext()->GetChildren();
+		while(child) {
+			wxString id = child->GetAttribute("titleid");
+
+			if(id == titleId) {
+				return child;
+			}
+
+			child = child->GetNext();
+		}
+
+		return NULL;
+	}
+
 	std::string getLastEnteredFtpPath() {
 		return lastEnteredFtpPath;
+	}
+
+	void setTitleId(wxString titleId) {
+		titleID = titleId;
+	}
+
+	wxString getTitleId() {
+		return titleID;
 	}
 
 	void setLastEnteredFtpPath(std::string path) {
@@ -140,6 +201,14 @@ public:
 
 	void setProjectWasLoaded(bool wasLoaded) {
 		projectWasLoaded = wasLoaded;
+	}
+
+	uint8_t getDocked() {
+		return isMobile;
+	}
+
+	void setDocked(uint8_t val) {
+		isMobile = val;
 	}
 
 	void removeRecentProject(int index) {

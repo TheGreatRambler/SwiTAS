@@ -96,7 +96,8 @@ void MainWindow::onStart() {
 	wxLog::SetTimestamp(wxS("%Y-%m-%d %H:%M: %S"));
 	wxLog::SetActiveTarget(logWindow);
 
-	debugWindow = new DebugWindow(this, networkInstance);
+	debugWindow           = new DebugWindow(this, networkInstance);
+	projectSettingsWindow = new ProjectSettingsWindow(this, projectHandler, &mainSettings, networkInstance);
 
 	ProjectHandlerWindow projectHandlerWindow(this, projectHandler, &mainSettings);
 
@@ -205,29 +206,29 @@ void MainWindow::handleNetworkQueues() {
 				file.Write(data.buf.data(), data.buf.size());
 				file.Close();
 			}
-			
+
 			if(dataProcessingInstance->getNumOfFramesInSavestateHook(data.savestateHookNum, data.playerIndex) == data.frame) {
 				dataProcessingInstance->addFrameHere();
 			}
 
-switch(data.valueIncluded) {
-	case TasValueToRecord::NONE:
-		break;
-	case TasValueToRecord::CONTROLLER:
-			dataProcessingInstance->setControllerDataForAutoRun(data.controllerData);
-			dataProcessingInstance->runFrame(true, true, true);
-		break;
-	case TasValueToRecord::KEYBOARD_MOUSE:
-			dataProcessingInstance->setExtraDataKeyboardForAutoRun(data.extraData);
-			dataProcessingInstance->runFrame(true, true, true);
-		break;
-	case TasValueToRecord::TOUCHSCREEN:
-			dataProcessingInstance->setExtraDataTouchForAutoRun(data.extraData);
-			dataProcessingInstance->runFrame(true, true, true);
-		break;
-	case TasValueToRecord::NUM_OF_TYPES:
-		break;
-}
+			switch(data.valueIncluded) {
+			case TasValueToRecord::NONE:
+				break;
+			case TasValueToRecord::CONTROLLER:
+				dataProcessingInstance->setControllerDataForAutoRun(data.controllerData);
+				dataProcessingInstance->runFrame(true, true, true);
+				break;
+			case TasValueToRecord::KEYBOARD_MOUSE:
+				dataProcessingInstance->setExtraDataKeyboardForAutoRun(data.extraData);
+				dataProcessingInstance->runFrame(true, true, true);
+				break;
+			case TasValueToRecord::TOUCHSCREEN:
+				dataProcessingInstance->setExtraDataTouchForAutoRun(data.extraData);
+				dataProcessingInstance->runFrame(true, true, true);
+				break;
+			case TasValueToRecord::NUM_OF_TYPES:
+				break;
+			}
 
 			if(sideUI->getAutoRunActive()) {
 				autoFrameAdvanceTimer->StartOnce(sideUI->getAutoRunDelay());
@@ -236,13 +237,11 @@ switch(data.valueIncluded) {
 		}
 	})
 
+	// clang-format off
 	ADD_NETWORK_CALLBACK(RecieveGameInfo, {
-											  // Has to be handled differently now
-											  /*
-											  wxMessageDialog gameInfoDialog(this, wxString::FromUTF8(data.infoJson), "Game Info", wxOK | wxICON_INFORMATION);
-											  gameInfoDialog.ShowModal();
-											  */
-										  })
+		projectHandler->setTitleId(wxString::Format("%016" wxLongLongFmtSpec, data.applicationProgramId).MakeUpper());
+	})
+	// clang-format on
 
 	/*
 	ADD_NETWORK_CALLBACK(RecieveFlag, {
@@ -271,24 +270,26 @@ void MainWindow::addMenuBar() {
 
 	wxMenu* fileMenu = new wxMenu();
 
-	selectIPID          = NewControlId();
-	exportAsText        = NewControlId();
-	importAsText        = NewControlId();
-	saveProject         = NewControlId();
-	setNameID           = NewControlId();
-	toggleLoggingID     = NewControlId();
-	toggleDebugMenuID   = NewControlId();
-	openGameCorruptorID = NewControlId();
-	runFinalTasID       = NewControlId();
-	requestGameInfoID   = NewControlId();
-	toggleExtraInputMethodsID = NewControlId();
+	selectIPID                    = NewControlId();
+	exportAsText                  = NewControlId();
+	importAsText                  = NewControlId();
+	saveProject                   = NewControlId();
+	setNameID                     = NewControlId();
+	toggleLoggingID               = NewControlId();
+	toggleDebugMenuID             = NewControlId();
+	openGameCorruptorID           = NewControlId();
+	runFinalTasID                 = NewControlId();
+	requestGameInfoID             = NewControlId();
+	toggleExtraInputMethodsID     = NewControlId();
+	toggleProjectSettingsWindowID = NewControlId();
 
 	fileMenu->Append(saveProject, "Save Project\tCtrl+S");
 	fileMenu->Append(exportAsText, "Export To Text Format\tCtrl+Alt+E");
 	fileMenu->Append(importAsText, "Import From Text Format\tCtrl+Alt+I");
 	fileMenu->Append(setNameID, "Set Name\tCtrl+Alt+N");
 	fileMenu->Append(runFinalTasID, "Run Final TAS\tCtrl+R");
-	//fileMenu->Append(requestGameInfoID, "Request Game Info\tCtrl+Shift+I");
+	fileMenu->Append(toggleProjectSettingsWindowID, "Toggle Project Settings\tCtrl+R");
+	// fileMenu->Append(requestGameInfoID, "Request Game Info\tCtrl+Shift+I");
 
 	// Add joystick submenu
 	fileMenu->AppendSubMenu(bottomUI->getJoystickMenu(), "&List Joysticks\tCtrl+G");
@@ -301,7 +302,7 @@ void MainWindow::addMenuBar() {
 	fileMenu->Append(selectIPID, "Set Switch IP\tCtrl+I");
 
 	fileMenu->AppendSeparator();
-	
+
 	fileMenu->Append(toggleLoggingID, "Toggle Logging\tCtrl+Shift+L");
 	fileMenu->Append(toggleDebugMenuID, "Toggle Debug Menu\tCtrl+D");
 	fileMenu->Append(toggleExtraInputMethodsID, "Toggle Extra Input Methods Window\tCtrl+E");
@@ -389,6 +390,8 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 			}
 		} else if(id == toggleExtraInputMethodsID) {
 			bottomUI->toggleExtraInputMethodsWindow();
+		} else if(id == toggleProjectSettingsWindowID) {
+			projectSettingsWindow->Show(!projectSettingsWindow->IsShown());
 		}
 	}
 }

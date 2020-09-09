@@ -9,6 +9,7 @@ cp bin/* release/bin
 strip -s release/bin/switas.exe
 
 cp switas_settings.json release
+cp NSWreleases.xml release
 
 rm -rf release/share
 mkdir -p release/share

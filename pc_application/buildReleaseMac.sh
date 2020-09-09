@@ -7,6 +7,7 @@ cp bin/switas switas_mac.app/Contents/MacOS
 strip -s switas_mac.app/Contents/MacOS/switas
 
 cp switas_settings.json switas_mac.app/Contents
+cp NSWreleases.xml switas_mac.app/Contents
 
 rm -rf switas_mac.app/Contents/share
 mkdir -p switas_mac.app/Contents/share

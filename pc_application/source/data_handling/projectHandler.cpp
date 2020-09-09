@@ -1,5 +1,78 @@
 #include "projectHandler.hpp"
 
+ProjectSettingsWindow::ProjectSettingsWindow(wxFrame* parentFrame, std::shared_ptr<ProjectHandler> projHandler, rapidjson::Document* settings, std::shared_ptr<CommunicateWithNetwork> network)
+	: wxFrame(parent, wxID_ANY, "TAS Settings", wxDefaultPosition, wxSize(600, 400), wxDEFAULT_FRAME_STYLE | wxFRAME_FLOAT_ON_PARENT) {
+	// Start hidden
+	Hide();
+
+	projectHandler  = projHandler;
+	mainSettings    = settings;
+	networkInstance = network;
+
+	mainSizer = new wxBoxSizer(wxVERTICAL);
+
+	gameNameSizer    = new wxBoxSizer(xHORIZONTAL);
+	gameTitleIdEntry = new wxTextCtrl(this, wxID_ANY, projectHandler->getTitleId(), wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER | wxTE_CENTRE);
+
+	gameTitleIdEntry->Bind(wxEVT_TEXT_ENTER, &VideoComparisonViewer::displayVideoFormats, this);
+
+	gameName = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTRE);
+	if(projectHandler->getTitleId() != wxEmptyString) {
+		gameName->SetLabelText(projectHandler->getGameInfoFromTitleId(projectHandler->getTitleId())->GetAttribute("name"));
+	}
+
+	gameNameSizer->Add(getLabel("Title ID/Program ID"), 0, wxEXPAND);
+	gameNameSizer->Add(gameTitleIdEntry, 0, wxEXPAND);
+
+	isMobileSizer = new wxBoxSizer(xHORIZONTAL);
+	isMobile      = new wxCheckBox(parent, wxID_ANY);
+
+	isMobile->SetValue(projectHandler->getDocked());
+
+	isMobileSizer->Add(getLabel("Force Game To Mobile"), 0, wxEXPAND);
+	isMobileSizer->Add(isMobile, 0, wxEXPAND);
+
+	mainSizer->Add(gameNameSizer, 0);
+	mainSizer->Add(gameName, 0, wxEXPAND);
+	mainSizer->Add(isMobileSizer, 0);
+
+	Bind(wxEVT_CLOSE_WINDOW, ProjectSettingsWindow::onClose, this);
+
+	SetSizer(mainSizer);
+	mainSizer->SetSizeHints(this);
+	Layout();
+	Fit();
+	Center(wxBOTH);
+
+	Layout();
+}
+
+void ProjectSettingsWindow::onTitleIdEntry(wxCommandEvent& event) {
+	wxString newTitleId = urlInput->GetLineText(0).ToStdString();
+
+	wxXmlNode* info = projectHandler->getGameInfoFromTitleId(newTitleId);
+
+	if(info != NULL) {
+		projectHandler->setTitleId(newTitleId);
+		gameName->SetLabelText(projectHandler->getGameInfoFromTitleId(newTitleId)->GetAttribute("name"));
+	} else {
+		urlInput->SetLabelText(projectHandler->getTitleId());
+
+		wxMessageDialog errorDialog(this, "Title ID Not Found", "That Title ID was not found in the database", wxOK | wxICON_ERROR);
+		errorDialog.ShowModal();
+	}
+}
+
+void ProjectSettingsWindow::onChangeDocked(wxCommandEvent& event) {
+	projectHandler->setDocked(isMobile->GetValue());
+
+	// TODO send value to switch
+}
+
+void ProjectSettingsWindow::onClose(wxCloseEvent& event) {
+	Show(false);
+}
+
 ProjectHandler::ProjectHandler(wxFrame* parent, DataProcessing* dataProcessingInstance, rapidjson::Document* settings) {
 	dataProcessing = dataProcessingInstance;
 	mainSettings   = settings;
@@ -21,6 +94,8 @@ ProjectHandler::ProjectHandler(wxFrame* parent, DataProcessing* dataProcessingIn
 														"	'recentVideos': []"
 														"}");
 	}
+
+	gameDatabaseXML.Load(wxString.FromUTF8(HELPERS::resolvePath("NSWreleases.xml")));
 
 	dataProcessing->setSelectedFrameCallbackVideoViewer(std::bind(&ProjectHandler::updateVideoComparisonViewers, this, std::placeholders::_1));
 }
@@ -202,10 +277,10 @@ void ProjectHandler::loadProject() {
 	dataProcessing->sendPlayerNum();
 	dataProcessing->scrollToSpecific(jsonSettings["currentPlayer"].GetUint(), jsonSettings["currentSavestateBlock"].GetUint(), jsonSettings["currentBranch"].GetUint(), jsonSettings["currentFrame"].GetUint64());
 
-	// imageExportIndex = jsonSettings["currentImageExportIndex"].GetUint();
-	rerecordCount = jsonSettings["currentRerecordCount"].GetUint();
-
+	rerecordCount      = jsonSettings["currentRerecordCount"].GetUint();
 	lastEnteredFtpPath = std::string(jsonSettings["defaultFtpPathForExport"].GetString());
+	titleID            = wxString::FromUTF8(jsonSettings["titleId"].GetString());
+	isMobile           = jsonSettings["isMobile"].GetBool();
 
 	for(auto const& videoEntryJson : jsonSettings["videos"].GetArray()) {
 		std::shared_ptr<VideoEntry> videoEntry = std::make_shared<VideoEntry>();
@@ -456,36 +531,20 @@ void ProjectHandler::saveProject() {
 		settingsJSON.AddMember("players", playersJSON, settingsJSON.GetAllocator());
 		settingsJSON.AddMember("extraFrameData", extraFrameDataJSON, settingsJSON.GetAllocator());
 
-		rapidjson::Value lastPlayerIndex;
-		lastPlayerIndex.SetUint(dataProcessing->getCurrentPlayer());
-
-		rapidjson::Value lastSavestateHookIndex;
-		lastSavestateHookIndex.SetUint(dataProcessing->getCurrentSavestateHook());
-
-		rapidjson::Value lastExportImageIndex;
-		// It's now ignored
-		lastExportImageIndex.SetUint(0);
-
-		rapidjson::Value lastRerecordCount;
-		lastRerecordCount.SetUint(rerecordCount);
-
-		rapidjson::Value lastBranch;
-		lastBranch.SetUint64(dataProcessing->getCurrentBranch());
-
-		rapidjson::Value lastFrame;
-		lastFrame.SetUint64(dataProcessing->getCurrentFrame());
-
-		settingsJSON.AddMember("currentPlayer", lastPlayerIndex, settingsJSON.GetAllocator());
-		settingsJSON.AddMember("currentSavestateBlock", lastSavestateHookIndex, settingsJSON.GetAllocator());
-		settingsJSON.AddMember("currentBranch", lastBranch, settingsJSON.GetAllocator());
-		settingsJSON.AddMember("currentFrame", lastFrame, settingsJSON.GetAllocator());
-		settingsJSON.AddMember("currentImageExportIndex", lastExportImageIndex, settingsJSON.GetAllocator());
-		settingsJSON.AddMember("currentRerecordCount", lastRerecordCount, settingsJSON.GetAllocator());
-
 		rapidjson::Value defaultFtpPathForExport;
 		defaultFtpPathForExport.SetString(lastEnteredFtpPath.c_str(), lastEnteredFtpPath.size(), settingsJSON.GetAllocator());
 
+		rapidjson::Value titleIdElement;
+		titleIdElement.SetString(titleID.c_str(), titleID.size(), settingsJSON.GetAllocator());
+
+		settingsJSON.AddMember("currentPlayer", rapidjson::Value((uint64_t)dataProcessing->getCurrentPlayer()), settingsJSON.GetAllocator());
+		settingsJSON.AddMember("currentSavestateBlock", rapidjson::Value((uint64_t)dataProcessing->getCurrentSavestateHook()), settingsJSON.GetAllocator());
+		settingsJSON.AddMember("currentBranch", rapidjson::Value((uint64_t)dataProcessing->getCurrentBranch()), settingsJSON.GetAllocator());
+		settingsJSON.AddMember("currentFrame", rapidjson::Value((uint64_t)dataProcessing->getCurrentFrame()), settingsJSON.GetAllocator());
+		settingsJSON.AddMember("currentRerecordCount", rapidjson::Value((uint64_t)rerecordCount), settingsJSON.GetAllocator());
 		settingsJSON.AddMember("defaultFtpPathForExport", defaultFtpPathForExport, settingsJSON.GetAllocator());
+		settingsJSON.AddMember("titleId", titleIdElement, settingsJSON.GetAllocator());
+		settingsJSON.AddMember("isMobile", rapidjson::Value((bool)isMobile), settingsJSON.GetAllocator());
 
 		rapidjson::Value recentVideoEntries(rapidjson::kArrayType);
 		for(auto const& videoEntry : videoComparisonEntries) {

@@ -7,6 +7,7 @@ cp bin/switas switas_debian/usr/bin
 strip -s switas_debian/usr/bin/switas
 
 cp switas_settings.json switas_debian/etc/switas
+cp NSWreleases.xml switas_debian/etc/switas
 
 rm -rf switas_debian/usr/share/switas
 mkdir -p switas_debian/usr/share/switas
