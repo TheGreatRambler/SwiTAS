@@ -1,0 +1,9 @@
+windowsBin
+linuxBin
+bin
+shared_network_code
+compile_commands.json
+switas_recent.json
+*.snap
+*.zip
+*.deb

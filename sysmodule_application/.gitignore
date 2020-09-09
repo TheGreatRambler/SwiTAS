@@ -7,3 +7,14 @@ build
 .DS_Store
 release
 compile_commands.json
+SwiTAS.elf
+SwiTAS.npdm
+SwiTAS.nso
+SwiTAS.nsp
+build_yuzu
+build_sysmodule
+shared_network_code
+release
+*.zip
+upload.sh
+saltynx_plugin/build

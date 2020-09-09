@@ -292,7 +292,7 @@ void DataProcessing::setItemAttributes() {
 	itemAttribute = new wxItemAttr();
 	itemAttribute->SetBackgroundColour(wxColor((*mainSettings)["ui"]["frameViewerColors"]["ran"].GetString()));
 	itemAttributes[state] = itemAttribute;
-	SET_BIT(state, false, FrameState::RAN);
+	SET_BIT(state, false, (uint8_t)FrameState::RAN);
 
 	SET_BIT(state, true, (uint8_t)FrameState::SAVESTATE);
 	itemAttribute = new wxItemAttr();

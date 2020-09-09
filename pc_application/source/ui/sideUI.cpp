@@ -186,12 +186,12 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 
 	autoRunWithFramebuffer = new wxCheckBox(parentFrame, wxID_ANY, "Include Screenshot");
 
-	typeChoices[TasValueToRecord::NONE]           = "Record None";
-	typeChoices[TasValueToRecord::CONTROLLER]     = "Record Controller";
-	typeChoices[TasValueToRecord::KEYBOARD_MOUSE] = "Record Keyboard/Mouse";
-	typeChoices[TasValueToRecord::TOUCHSCREEN]    = "Record Touchscreen";
+	typeChoices[(uint8_t)TasValueToRecord::NONE]           = "Record None";
+	typeChoices[(uint8_t)TasValueToRecord::CONTROLLER]     = "Record Controller";
+	typeChoices[(uint8_t)TasValueToRecord::KEYBOARD_MOUSE] = "Record Keyboard/Mouse";
+	typeChoices[(uint8_t)TasValueToRecord::TOUCHSCREEN]    = "Record Touchscreen";
 
-	valueToRecord = new wxChoice(parentFrame, wxID_ANY, wxDefaultPosition, wxDefaultSize, TasValueToRecord::NUM_OF_TYPES, typeChoices);
+	valueToRecord = new wxChoice(parentFrame, wxID_ANY, wxDefaultPosition, wxDefaultSize, (uint8_t)TasValueToRecord::NUM_OF_TYPES, typeChoices);
 	valueToRecord->SetSelection(0);
 
 	autoRunWithFramebuffer->SetValue(true);

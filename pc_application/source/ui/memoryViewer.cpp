@@ -72,17 +72,17 @@ MemoryViewer::MemoryViewer(wxFrame* parent, std::shared_ptr<ProjectHandler> proj
 	unsignedCheckbox = new wxCheckBox(this, wxID_ANY, "Unsigned");
 	unsignedCheckbox->SetValue(true);
 
-	typeChoices[MemoryRegionTypes::Bit8]        = "8 Bit Number";
-	typeChoices[MemoryRegionTypes::Bit16]       = "16 Bit Number / Short";
-	typeChoices[MemoryRegionTypes::Bit32]       = "32 Bit Number / Int";
-	typeChoices[MemoryRegionTypes::Bit64]       = "64 Bit Number / Long";
-	typeChoices[MemoryRegionTypes::Float]       = "Float";
-	typeChoices[MemoryRegionTypes::Double]      = "Double";
-	typeChoices[MemoryRegionTypes::Bool]        = "Bool";
-	typeChoices[MemoryRegionTypes::CharPointer] = "Char String";
-	typeChoices[MemoryRegionTypes::ByteArray]   = "Byte Array";
+	typeChoices[(uint8_t)MemoryRegionTypes::Bit8]        = "8 Bit Number";
+	typeChoices[(uint8_t)MemoryRegionTypes::Bit16]       = "16 Bit Number / Short";
+	typeChoices[(uint8_t)MemoryRegionTypes::Bit32]       = "32 Bit Number / Int";
+	typeChoices[(uint8_t)MemoryRegionTypes::Bit64]       = "64 Bit Number / Long";
+	typeChoices[(uint8_t)MemoryRegionTypes::Float]       = "Float";
+	typeChoices[(uint8_t)MemoryRegionTypes::Double]      = "Double";
+	typeChoices[(uint8_t)MemoryRegionTypes::Bool]        = "Bool";
+	typeChoices[(uint8_t)MemoryRegionTypes::CharPointer] = "Char String";
+	typeChoices[(uint8_t)MemoryRegionTypes::ByteArray]   = "Byte Array";
 
-	typeSelection = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, MemoryRegionTypes::NUM_OF_TYPES, typeChoices);
+	typeSelection = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, (uint8_t)MemoryRegionTypes::NUM_OF_TYPES, typeChoices);
 	typeSelection->SetSelection(0);
 
 	pointerPath = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_CENTRE);
@@ -164,7 +164,7 @@ void MemoryViewer::selectedItemChanged(wxListEvent& event) {
 	MemoryItemInfo& info = infos[event.GetIndex()];
 
 	unsignedCheckbox->SetValue(info.isUnsigned);
-	typeSelection->SetSelection(info.type);
+	typeSelection->SetSelection((uint8_t)info.type);
 	itemSize->SetValue(info.size);
 	saveToFile->SetValue(info.saveToFile);
 	filePath->SetPath(info.filePath);
@@ -187,7 +187,7 @@ void MemoryViewer::onUpdateEntry(wxCommandEvent& event) {
 		mapFile(info);
 
 		itemsList->SetItem(selectedItem, 0, info.pointerPath);
-		itemsList->SetItem(selectedItem, 1, typeChoices[info.type]);
+		itemsList->SetItem(selectedItem, 1, typeChoices[(uint8_t)info.type]);
 
 		sendUpdatedEntries();
 	}
@@ -208,7 +208,7 @@ void MemoryViewer::onAddEntry(wxCommandEvent& event) {
 	infos.push_back(std::move(info));
 
 	long itemIndex = itemsList->InsertItem(0, info.pointerPath);
-	itemsList->SetItem(itemIndex, 1, typeChoices[info.type]);
+	itemsList->SetItem(itemIndex, 1, typeChoices[(uint8_t)info.type]);
 	// 3rd column stays empty
 
 	sendUpdatedEntries();

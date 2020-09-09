@@ -60,7 +60,7 @@ private:
 
 	long currentItemSelection = 0;
 
-	wxString typeChoices[MemoryRegionTypes::NUM_OF_TYPES];
+	wxString typeChoices[(uint8_t)MemoryRegionTypes::NUM_OF_TYPES];
 
 	std::shared_ptr<ProjectHandler> projectHandler;
 	std::shared_ptr<CommunicateWithNetwork> networkInterface;

@@ -1036,7 +1036,7 @@ void BottomUI::onJoystickSelect(wxCommandEvent& event) {
 				} else {
 					// It's extended
 					// Go beyond the end of Btn
-					joyButtonToSwitch[index] = stringToButtonExtended[inputParts[0]] + Btn::BUTTONS_SIZE;
+					joyButtonToSwitch[index] = stringToButtonExtended[inputParts[0]] + (uint8_t)Btn::BUTTONS_SIZE;
 				}
 			} else if(firstChar == 'h') {
 				// This is a hat, usually pov
@@ -1064,7 +1064,7 @@ void BottomUI::onJoystickSelect(wxCommandEvent& event) {
 				} else {
 					// It's extended
 					// Go beyond the end of Btn
-					povToSwitch[index] = stringToButtonExtended[inputParts[0]] + Btn::BUTTONS_SIZE;
+					povToSwitch[index] = stringToButtonExtended[inputParts[0]] + (uint8_t)Btn::BUTTONS_SIZE;
 				}
 			} else if(firstChar == 'a') {
 				// This is an axis
@@ -1196,7 +1196,7 @@ void BottomUI::listenToJoystick() {
 			if(povToSwitch.count(povValue)) {
 				int switchID = povToSwitch[povValue];
 				if(povLastState != povValue) {
-					if(switchID < Btn::BUTTONS_SIZE) {
+					if(switchID < (uint8_t)Btn::BUTTONS_SIZE) {
 						// Normal button
 						// Won't check for axis, too scared
 						Btn button = (Btn)switchID;

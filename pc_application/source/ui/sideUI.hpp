@@ -78,7 +78,7 @@ private:
 	wxBitmapButton* autoFrameEnd;
 	wxSpinCtrl* autoRunFramesPerSecond;
 
-	wxString typeChoices[TasValueToRecord::NUM_OF_TYPES];
+	wxString typeChoices[(uint8_t)TasValueToRecord::NUM_OF_TYPES];
 
 	wxCheckBox* autoRunWithFramebuffer;
 	wxChoice* valueToRecord;
