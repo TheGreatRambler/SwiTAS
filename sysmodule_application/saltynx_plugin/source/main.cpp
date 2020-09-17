@@ -70,6 +70,9 @@ nn::hid::KeyboardState keyboardStateBacklog[nn::hid::KeyboardStateCountMax] = { 
 int32_t mouseBacklogSize                                           = 0;
 nn::hid::MouseState mouseStateBacklog[nn::hid::MouseStateCountMax] = { 0 };
 
+// 0 for handheld mode, 1 for docked
+uint8_t performanceMode = 1;
+
 // ONLY values we will TAS
 /*
 	nn::util::Float3 acceleration;
@@ -415,6 +418,14 @@ uintptr_t nvnBootstrapLoader_1(const char* nvnName) {
 	return ptrret;
 }
 
+uint32_t GetPerformanceMode() {
+	return performanceMode;
+}
+
+uint8_t GetOperationMode() {
+	return performanceMode;
+}
+
 void writePointerToFile(void* ptr, FILE* file) {
 	SaltySDCore_fwrite(&ptr, sizeof(ptr), 1, file);
 }
@@ -466,6 +477,15 @@ int main(int argc, char* argv[]) {
 
 	SaltySDCore_fclose(offsets);
 
+	if(SaltySDCore_fopen("/SaltySD/flags/handheld.flag", "r")) {
+		performanceMode = 0;
+	} else if(SaltySDCore_fopen("/SaltySD/flags/docked.flag", "r")) {
+		performanceMode = 1;
+	} else {
+		// Default to docked
+		performanceMode = 1;
+	}
+
 	// clang-format off
 	SaltySDCore_ReplaceImport(
 		"_ZN2nn3hid22GetSixAxisSensorHandleEPNS0_26ConsoleSixAxisSensorHandleE",
@@ -501,6 +521,9 @@ int main(int argc, char* argv[]) {
 	SaltySDCore_ReplaceImport("nvnBootstrapLoader", (void*)nvnBootstrapLoader_1);
 	SaltySDCore_ReplaceImport("eglSwapBuffers", (void*)eglSwap);
 	SaltySDCore_ReplaceImport("vkQueuePresentKHR", (void*)vulkanSwap);
+
+	SaltySDCore_ReplaceImport("_ZN2nn2oe18GetPerformanceModeEv", (void*)GetPerformanceMode);
+	SaltySDCore_ReplaceImport("_ZN2nn2oe16GetOperationModeEv", (void*)GetOperationMode);
 
 	writeToLog("Injection finished\n");
 }

@@ -60,6 +60,9 @@ extern int32_t _ZN2nn3hid17GetKeyboardStatesEPNS0_13KeyboardStateEi(nn::hid::Key
 extern void _ZN2nn3hid13GetMouseStateEPNS0_10MouseStateE(nn::hid::MouseState* state) LINKABLE;
 // nn::hid::GetMouseStates
 extern int32_t _ZN2nn3hid14GetMouseStatesEPNS0_10MouseStateEi(nn::hid::MouseState* outStates, int32_t count) LINKABLE;
+// OS functions
+extern uint32_t _ZN2nn2oe18GetPerformanceModeEv() LINKABLE;
+extern uint8_t _ZN2nn2oe16GetOperationModeEv() LINKABLE;
 }
 
 u32 __nx_applet_type = AppletType_None;

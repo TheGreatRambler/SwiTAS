@@ -233,6 +233,8 @@ private:
 	void setTouchState(TouchAndKeyboardData* state);
 	void getKeyboardMouseState(TouchAndKeyboardData* state);
 	void setKeyboardMouseState(TouchAndKeyboardData* state);
+	void setDockedMode();
+	void setHandheldMode();
 
 	void recordAll() {
 		recordAllSixAxis();
@@ -244,7 +246,7 @@ private:
 		listenAllKeyboardTouch();
 	}
 
-	void setAll() { }
+	void setAll() {}
 
 	uint8_t finalTasShouldRun;
 	void runFinalTas(std::vector<std::string> scriptPaths);

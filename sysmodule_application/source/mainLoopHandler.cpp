@@ -1197,6 +1197,26 @@ void MainLoop::setKeyboardMouseState(TouchAndKeyboardData* state) {
 	setMemoryType(saltynxmouseState, mouseSensorState);
 }
 
+void MainLoop::setPerformanceMode(uint8_t isDocked) {
+	setMemoryType<uint8_t>(saltynxrecordScreenOrKeyboard, 2);
+}
+
+void MainLoop::setDockedMode() {
+// Requires reboot
+#ifdef __SWITCH__
+	open("/SaltySD/flags/docked.flag", O_RDWR | O_CREAT, S_IRUSR | S_IRGRP | S_IROTH);
+	remove("/SaltySD/flags/handheld.flag");
+#endif
+}
+
+void MainLoop::setHandheldMode() {
+// Requires reboot
+#ifdef __SWITCH__
+	open("/SaltySD/flags/handheld.flag", O_RDWR | O_CREAT, S_IRUSR | S_IRGRP | S_IROTH);
+	remove("/SaltySD/flags/docked.flag");
+#endif
+}
+
 MainLoop::~MainLoop() {
 #ifdef __SWITCH__
 	LOGD << "Exiting app";
