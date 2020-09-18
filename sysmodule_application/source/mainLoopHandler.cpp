@@ -390,7 +390,7 @@ void MainLoop::handleNetworkUpdates() {
 	// clang-format off
 	CHECK_QUEUE(networkInstance, SendStartFinalTas, {
 		finalTasShouldRun = true;
-		runFinalTas(data.scriptPaths);
+		runFinalTas(data.controllerDataPaths, data.extraDataPath);
 	})
 	// clang-format on
 
@@ -568,7 +568,9 @@ void MainLoop::setControllerNumber(uint8_t numOfControllers) {
 	// Now, user is required to reconnect any controllers manually
 }
 
-void MainLoop::runFinalTas(std::vector<std::string> scriptPaths) {
+void MainLoop::runFinalTas(std::vector<std::string> scriptPaths, std::string extraDataPath) {
+	listenAll();
+
 	std::vector<FILE*> files;
 	for(auto const& path : scriptPaths) {
 #ifdef __SWITCH__
@@ -576,6 +578,15 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths) {
 #endif
 		files.push_back(fopen(path.c_str(), "rb"));
 	}
+
+	for(auto const& controller : controllers) {
+		controller->clearState();
+		controller->setInput();
+	}
+
+	clearExtraData();
+
+	FILE* extraDataFile = fopen(extraDataPath.c_str(), "rb");
 
 	uint8_t filesSize = files.size();
 
@@ -600,7 +611,7 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths) {
 				uint8_t controllerSize;
 				HELPERS::readFullFileData(files[player], &controllerSize, sizeof(controllerSize));
 
-				if(controllerSize == 255) {
+				if(controllerSize == 0) {
 					// Skip handling controller data and clear existing buttons
 					controllers[player]->clearState();
 					controllers[player]->setInput();
@@ -616,6 +627,25 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths) {
 
 					LOGD << "Run final TAS frame: " << (int)controllerSize;
 				}
+			}
+
+			uint8_t extraDataSize;
+			HELPERS::readFullFileData(extraDataFile, &extraDataSize, sizeof(extraDataSize));
+
+			if(extraDataSize == 0) {
+				// Skip handling controller data and clear existing buttons
+				clearExtraData LOGD << "Empty frame";
+			} else {
+				uint8_t extraDataBuf[extraDataSize];
+				HELPERS::readFullFileData(extraDataFile, extraDataBuf, extraDataSize);
+
+				TouchAndKeyboardData data;
+				serializeProtocol.binaryToData<TouchAndKeyboardData>(data, extraDataBuf, extraDataSize);
+
+				setTouchState(&data);
+				setKeyboardMouseState(&data);
+
+				LOGD << "Run final TAS frame: " << (int)extraDataSize;
 			}
 		}
 
@@ -660,6 +690,8 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths) {
 	for(auto const& file : files) {
 		fclose(file);
 	}
+
+	fclose(extraDataFile);
 }
 
 void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, TasValueToRecord typeToRecord, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex) {

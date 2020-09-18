@@ -282,7 +282,8 @@ namespace Protocol {
 
 	// Needs to have number of controllers set right, TODO
 	DEFINE_STRUCT(SendStartFinalTas,
-		std::vector<std::string> scriptPaths;
+		std::vector<std::string> controllerDataPaths;
+		std::string extraDataPath;
 	, self.scriptPaths)
 
 	DEFINE_STRUCT(SendFinalTasChunk,

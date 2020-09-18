@@ -246,10 +246,16 @@ private:
 		listenAllKeyboardTouch();
 	}
 
-	void setAll() { }
+	void clearExtraData() {
+		TouchAndKeyboardData empty;
+		setTouchState(&empty);
+		setKeyboardMouseState(&empty);
+	}
+
+	void setAll() {}
 
 	uint8_t finalTasShouldRun;
-	void runFinalTas(std::vector<std::string> scriptPaths);
+	void runFinalTas(std::vector<std::string> scriptPaths, std::string extraDataPath);
 
 	uint8_t checkSleep();
 	uint8_t checkAwaken();

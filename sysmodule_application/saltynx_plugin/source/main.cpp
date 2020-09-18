@@ -477,10 +477,13 @@ int main(int argc, char* argv[]) {
 
 	SaltySDCore_fclose(offsets);
 
-	if(SaltySDCore_fopen("/SaltySD/flags/handheld.flag", "r")) {
+	FILE* f;
+	if(f = SaltySDCore_fopen("/SaltySD/flags/handheld.flag", "r")) {
 		performanceMode = 0;
-	} else if(SaltySDCore_fopen("/SaltySD/flags/docked.flag", "r")) {
+		SaltySDCore_fclose(f);
+	} else if(f = SaltySDCore_fopen("/SaltySD/flags/docked.flag", "r")) {
 		performanceMode = 1;
+		SaltySDCore_fclose(f);
 	} else {
 		// Default to docked
 		performanceMode = 1;

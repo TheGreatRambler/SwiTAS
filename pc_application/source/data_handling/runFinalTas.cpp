@@ -60,7 +60,8 @@ void TasRunner::onStartTasHomebrewPressed(wxCommandEvent& event) {
 		if(networkInstance->isConnected()) {
 			consoleLog->AppendText("Starting homebrew run final TAS\n");
 			// Build a large binary blob with all the data
-			AllPlayers& allPlayers = dataProcessing->getAllPlayers();
+			AllPlayers& allPlayers                     = dataProcessing->getAllPlayers();
+			ExtraFrameDataContainer& allExtraFrameData = dataProcessing->getAllExtraFrameData();
 			// Create a different file for each player
 
 			uint8_t playerIndex = 0;
@@ -88,7 +89,7 @@ void TasRunner::onStartTasHomebrewPressed(wxCommandEvent& event) {
 					uint64_t frameDelay = player->at(hook)->runFinalTasDelayFrames;
 					for(uint64_t i = 0; i < frameDelay; i++) {
 						// A size of 0 means no frame
-						uint8_t noFrameHere = 255;
+						uint8_t noFrameHere = 0;
 						dataToSend.insert(dataToSend.end(), &noFrameHere, &noFrameHere + sizeof(noFrameHere));
 					}
 					auto& mainBranch    = *(player->at(hook)->inputs[0]);
@@ -105,7 +106,7 @@ void TasRunner::onStartTasHomebrewPressed(wxCommandEvent& event) {
 
 						if(frame != 0 && (frame % 60 == 0 || frame == (branchSize - 1))) {
 							float progress = ((float)frame / branchSize) * 100.0;
-							consoleLog->AppendText(wxString::Format("Progress serializing frames: %.5f%% %lu/%lu, in savestate %u player %u\n", progress, frame, branchSize, hook, playerIndex));
+							consoleLog->AppendText(wxString::Format("Progress serializing controller data: %.5f%% %lu/%lu, in savestate %u player %u\n", progress, frame, branchSize, hook, playerIndex));
 						}
 
 						if(dataToSend.size() > 1000 || frame == (branchSize - 1)) {
@@ -117,7 +118,7 @@ void TasRunner::onStartTasHomebrewPressed(wxCommandEvent& event) {
 								data.contents  = dataToSend;
 							})
 
-							consoleLog->AppendText(wxString::Format("Sent data %zu bytes long", dataToSend.size()));
+							consoleLog->AppendText(wxString::Format("Sent controller data %zu bytes long", dataToSend.size()));
 
 							dataToSend.clear();
 						}
@@ -135,12 +136,74 @@ void TasRunner::onStartTasHomebrewPressed(wxCommandEvent& event) {
 				playerIndex++;
 			}
 
+			std::string extraDataPath = "/switas-script-extra-temp.bin";
+
+			ADD_TO_QUEUE(SendFinalTasChunk, networkInstance, {
+				data.openFile  = true;
+				data.closeFile = false;
+				data.path      = extraDataPath;
+			})
+
+			std::vector<uint8_t> dataToSend;
+			dataToSend.clear();
+
+			uint64_t frameDelay = allPlayers[0]->at(hook)->runFinalTasDelayFrames;
+
+			FrameNum frame = 0;
+			for(SavestateBlockNum hook = firstHook; hook <= lastHook; hook++) {
+				for(uint64_t i = 0; i < frameDelay; i++) {
+					// A size of 0 means no frame
+					uint8_t noFrameHere = 0;
+					dataToSend.insert(dataToSend.end(), &noFrameHere, &noFrameHere + sizeof(noFrameHere));
+				}
+				auto& mainBranch    = *(allExtraFrameData[hook]->at(0));
+				FrameNum branchSize = mainBranch.size();
+				for(auto const& extraData : mainBranch) {
+					// Continually write the savestate hook data in one unbroken stream
+					uint8_t* data;
+					uint32_t dataSize;
+					serializeProtocol.dataToBinary<TouchAndKeyboardData>(*extraData, &data, &dataSize);
+					uint8_t sizeToPrint = (uint8_t)dataSize;
+					// Probably endian issues
+					dataToSend.insert(dataToSend.end(), &sizeToPrint, &sizeToPrint + sizeof(sizeToPrint));
+					dataToSend.insert(dataToSend.end(), data, data + dataSize);
+
+					if(frame != 0 && (frame % 60 == 0 || frame == (branchSize - 1))) {
+						float progress = ((float)frame / branchSize) * 100.0;
+						consoleLog->AppendText(wxString::Format("Progress serializing extra data: %.5f%% %lu/%lu, in savestate %u player %u\n", progress, frame, branchSize, hook, playerIndex));
+					}
+
+					if(dataToSend.size() > 1000 || frame == (branchSize - 1)) {
+						// Dump the data
+						ADD_TO_QUEUE(SendFinalTasChunk, networkInstance, {
+							data.openFile  = false;
+							data.closeFile = false;
+							data.path      = path;
+							data.contents  = dataToSend;
+						})
+
+						consoleLog->AppendText(wxString::Format("Sent extra data %zu bytes long", dataToSend.size()));
+
+						dataToSend.clear();
+					}
+
+					frame++;
+				}
+			}
+
+			ADD_TO_QUEUE(SendFinalTasChunk, networkInstance, {
+				data.openFile  = false;
+				data.closeFile = true;
+				data.path      = path;
+			})
+
 			consoleLog->Show(false);
 			Layout();
 
 			// clang-format off
 			ADD_TO_QUEUE(SendStartFinalTas, networkInstance, {
-				data.scriptPaths = scriptPaths;
+				data.controllerDataPaths = scriptPaths;
+				data.extraDataPath = extraDataPath;
 			})
 			// clang-format on
 		} else {
