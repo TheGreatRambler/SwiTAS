@@ -147,10 +147,9 @@ void TasRunner::onStartTasHomebrewPressed(wxCommandEvent& event) {
 			std::vector<uint8_t> dataToSend;
 			dataToSend.clear();
 
-			uint64_t frameDelay = allPlayers[0]->at(hook)->runFinalTasDelayFrames;
-
 			FrameNum frame = 0;
 			for(SavestateBlockNum hook = firstHook; hook <= lastHook; hook++) {
+				uint64_t frameDelay = allPlayers[0]->at(hook)->runFinalTasDelayFrames;
 				for(uint64_t i = 0; i < frameDelay; i++) {
 					// A size of 0 means no frame
 					uint8_t noFrameHere = 0;
@@ -178,7 +177,7 @@ void TasRunner::onStartTasHomebrewPressed(wxCommandEvent& event) {
 						ADD_TO_QUEUE(SendFinalTasChunk, networkInstance, {
 							data.openFile  = false;
 							data.closeFile = false;
-							data.path      = path;
+							data.path      = extraDataPath;
 							data.contents  = dataToSend;
 						})
 
@@ -194,7 +193,7 @@ void TasRunner::onStartTasHomebrewPressed(wxCommandEvent& event) {
 			ADD_TO_QUEUE(SendFinalTasChunk, networkInstance, {
 				data.openFile  = false;
 				data.closeFile = true;
-				data.path      = path;
+				data.path      = extraDataPath;
 			})
 
 			consoleLog->Show(false);

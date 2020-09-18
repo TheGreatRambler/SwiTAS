@@ -1563,6 +1563,14 @@ uint8_t DataProcessing::getKeyboardButtonCurrent(nn::hid::KeyboardKey key) const
 	return getKeyboardButton(currentFrame, key);
 }
 
+void DataProcessing::clearAllKeyboardButtons(FrameNum frame) {
+	memset(getInputsExtraList()->at(frame)->keyboardKeys, 0, sizeof(getInputsExtraList()->at(frame)->keyboardKeys));
+
+	invalidateRun(frame);
+	modifyCurrentFrameViews(frame);
+	RefreshItem(frame);
+}
+
 void DataProcessing::triggerKeyboardModifier(nn::hid::KeyboardModifier key, uint8_t state) {
 	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if(firstSelectedItem != wxNOT_FOUND) {
@@ -1595,6 +1603,14 @@ uint8_t DataProcessing::getKeyboardModifierSpecific(FrameNum frame, nn::hid::Key
 
 uint8_t DataProcessing::getKeyboardModifierCurrent(nn::hid::KeyboardModifier key) const {
 	return getKeyboardModifier(currentFrame, key);
+}
+
+void DataProcessing::clearAllKeyboardModifiers(FrameNum frame) {
+	getInputsExtraList()->at(frame)->keyboardModifiers = 0;
+
+	invalidateRun(frame);
+	modifyCurrentFrameViews(frame);
+	RefreshItem(frame);
 }
 
 void DataProcessing::triggerMouseButton(nn::hid::MouseButton key, uint8_t state) {
@@ -1630,6 +1646,14 @@ uint8_t DataProcessing::getMouseButtonSpecific(FrameNum frame, nn::hid::MouseBut
 
 uint8_t DataProcessing::getMouseButtonCurrent(nn::hid::MouseButton key) const {
 	return getMouseButton(currentFrame, key);
+}
+
+void DataProcessing::clearAllMouseButtons(FrameNum frame) {
+	getInputsExtraList()->at(frame)->mouseButtons = 0;
+
+	invalidateRun(frame);
+	modifyCurrentFrameViews(frame);
+	RefreshItem(frame);
 }
 
 uint8_t DataProcessing::getButton(FrameNum frame, Btn button) const {

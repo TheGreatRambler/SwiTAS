@@ -266,10 +266,6 @@ public:
 	bool isEmptyControllerData(std::shared_ptr<ControllerData> data);
 	bool isEmptyExtraData(std::shared_ptr<TouchAndKeyboardData> data);
 
-	bool applyKeyboardKeysString(DataProcessing* dataProcessing, std::shared_ptr<TouchAndKeyboardData> data, std::string str);
-	bool applyKeyboardModifiersString(DataProcessing* dataProcessing, std::shared_ptr<TouchAndKeyboardData> data, std::string str);
-	bool applyMouseButtonsString(DataProcessing* dataProcessing, std::shared_ptr<TouchAndKeyboardData> data, std::string str);
-
 	std::string getKeyboardKeysString(std::shared_ptr<TouchAndKeyboardData> data);
 	std::string getKeyboardModifiersString(std::shared_ptr<TouchAndKeyboardData> data);
 	std::string getMouseButtonsString(std::shared_ptr<TouchAndKeyboardData> data);

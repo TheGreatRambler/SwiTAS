@@ -353,6 +353,57 @@ FrameNum ButtonData::textToFrames(DataProcessing* dataProcessing, std::string te
 		} else {
 			continue;
 		}
+
+		currentIndexInParts++;
+		if(parts.size() == currentIndexInParts)
+			continue;
+
+		if(!placePaste) {
+			// Clear the buttons if no place paste
+			dataProcessing->clearAllKeyboardButtons(thisDataIndex);
+		}
+
+		// Deal with buttons
+		// Can be no buttons at all
+		if(parts[currentIndexInParts] != "NONE") {
+			for(std::string keyboardKeyName : HELPERS::splitString(parts[currentIndexInParts], ';')) {
+				if(stringToKeyboardKey.count(keyboardKeyName)) {
+					dataProcessing->setKeyboardButton(thisDataIndex, stringToKeyboardKey[keyboardKeyName], true);
+				}
+			}
+		}
+
+		currentIndexInParts++;
+		if(parts.size() == currentIndexInParts)
+			continue;
+
+		if(!placePaste) {
+			dataProcessing->clearAllKeyboardModifiers(thisDataIndex);
+		}
+
+		if(parts[currentIndexInParts] != "NONE") {
+			for(std::string keyboardModifierName : HELPERS::splitString(parts[currentIndexInParts], ';')) {
+				if(stringToKeyboardModifier.count(keyboardModifierName)) {
+					dataProcessing->setKeyboardModifier(thisDataIndex, stringToKeyboardModifier[keyboardModifierName], true);
+				}
+			}
+		}
+
+		currentIndexInParts++;
+		if(parts.size() == currentIndexInParts)
+			continue;
+
+		if(!placePaste) {
+			dataProcessing->clearAllMouseButtons(thisDataIndex);
+		}
+
+		if(parts[currentIndexInParts] != "NONE") {
+			for(std::string mouseButtonName : HELPERS::splitString(parts[currentIndexInParts], ';')) {
+				if(stringToMouseButton.count(mouseButtonName)) {
+					dataProcessing->setMouseButton(thisDataIndex, stringToMouseButton[mouseButtonName], true);
+				}
+			}
+		}
 	}
 
 	return lastReadFrame;
@@ -481,6 +532,10 @@ std::string ButtonData::framesToText(DataProcessing* dataProcessing, FrameNum st
 					";" + std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::DIRECTION_ZY_RIGHT, j, branch, realPlayer)) + \
 					";" + std::to_string(dataProcessing->getNumberValuesSpecificMotion(i, CNV::DIRECTION_ZZ_RIGHT, j, branch, realPlayer)));
 				// clang-format on
+
+				parts.push_back(getKeyboardKeysString(dataProcessing->getControllerDataExtra(j, branch, i)));
+				parts.push_back(getKeyboardModifiersString(dataProcessing->getControllerDataExtra(j, branch, i)));
+				parts.push_back(getMouseButtonsString(dataProcessing->getControllerDataExtra(j, branch, i)));
 
 				textVector.push_back(HELPERS::joinString(parts, " "));
 			}
@@ -664,43 +719,6 @@ bool ButtonData::isEmptyExtraData(std::shared_ptr<TouchAndKeyboardData> data) {
 		(data->scrollVelocityY   == emptyData.scrollVelocityY) &&
 		(data->mouseButtons      == emptyData.mouseButtons);
 	// clang-format on
-}
-
-bool ButtonData::applyKeyboardKeysString(DataProcessing* dataProcessing, std::shared_ptr<TouchAndKeyboardData> data, std::string str) {
-	memset(data->keyboardKeys, 0, sizeof(data->keyboardKeys));
-	if(str != "NONE") {
-		for(std::string keyName : HELPERS::splitString(str, ';')) {
-			if(stringToKeyboardKey.count(keyName) == 1) {
-				SET_KEYBOARD_HELD(data->keyboardKeys, (int32_t)stringToKeyboardKey[keyName], 1);
-			}
-		}
-	}
-}
-
-bool ButtonData::applyKeyboardModifiersString(DataProcessing* dataProcessing, std::shared_ptr<TouchAndKeyboardData> data, std::string str) {
-	data->keyboardModifiers = 0;
-	if(str != "NONE") {
-		for(std::string keyName : HELPERS::splitString(str, ';')) {
-			if(stringToKeyboardModifier.count(keyName)) {
-				data->keyboardModifiers |= (uint8_t)stringToKeyboardModifier[keyName];
-			} else {
-				data->keyboardModifiers &= ~((uint8_t)stringToKeyboardModifier[keyName]);
-			}
-		}
-	}
-}
-
-bool ButtonData::applyMouseButtonsString(DataProcessing* dataProcessing, std::shared_ptr<TouchAndKeyboardData> data, std::string str) {
-	if(str != "NONE") {
-		data->mouseButtons = 0;
-		for(std::string keyName : HELPERS::splitString(str, ';')) {
-			if(stringToMouseButton.count(keyName)) {
-				data->mouseButtons |= (uint8_t)stringToMouseButton[keyName];
-			} else {
-				data->mouseButtons &= ~((uint8_t)stringToMouseButton[keyName]);
-			}
-		}
-	}
 }
 
 std::string ButtonData::getKeyboardKeysString(std::shared_ptr<TouchAndKeyboardData> data) {

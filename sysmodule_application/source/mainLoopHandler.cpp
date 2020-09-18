@@ -634,7 +634,8 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths, std::string ext
 
 			if(extraDataSize == 0) {
 				// Skip handling controller data and clear existing buttons
-				clearExtraData LOGD << "Empty frame";
+				clearExtraData();
+				LOGD << "Empty frame";
 			} else {
 				uint8_t extraDataBuf[extraDataSize];
 				HELPERS::readFullFileData(extraDataFile, extraDataBuf, extraDataSize);
