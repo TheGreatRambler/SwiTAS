@@ -62,37 +62,6 @@
 #include "../ui/videoComparisonViewer.hpp"
 #include "dataProcessing.hpp"
 
-class ProjectSettingsWindow : public wxFrame {
-private:
-	// Just in case we need to listen for values
-	const uint8_t NETWORK_CALLBACK_ID = 5;
-
-	std::shared_ptr<ProjectHandler> projectHandler;
-	rapidjson::Document* mainSettings;
-	std::shared_ptr<CommunicateWithNetwork> networkInstance;
-
-	wxBoxSizer* mainSizer;
-
-	wxBoxSizer* gameNameSizer;
-	wxTextCtrl* gameTitleIdEntry;
-	wxStaticText* gameName;
-
-	wxBoxSizer* isMobileSizer;
-	wxCheckBox* isMobile;
-
-	wxTextCtrl* getLabel(wxString name) {
-		return new wxTextCtrl(this, wxID_ANY, name, wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTRE);
-	}
-
-	void onTitleIdEntry(wxCommandEvent& event);
-	void onChangeDocked(wxCommandEvent& event);
-
-	void onClose(wxCloseEvent& event);
-
-public:
-	ProjectSettingsWindow(wxFrame* parentFrame, std::shared_ptr<ProjectHandler> projHandler, rapidjson::Document* settings, std::shared_ptr<CommunicateWithNetwork> network);
-};
-
 class ProjectHandler {
 private:
 	DataProcessing* dataProcessing;
@@ -237,6 +206,37 @@ public:
 
 	// Just a random large number, apparently can't be larger than 76
 	static constexpr int videoComparisonEntriesMenuIDBase = 35;
+};
+
+class ProjectSettingsWindow : public wxFrame {
+private:
+	// Just in case we need to listen for values
+	const uint8_t NETWORK_CALLBACK_ID = 5;
+
+	std::shared_ptr<ProjectHandler> projectHandler;
+	rapidjson::Document* mainSettings;
+	std::shared_ptr<CommunicateWithNetwork> networkInstance;
+
+	wxBoxSizer* mainSizer;
+
+	wxBoxSizer* gameNameSizer;
+	wxTextCtrl* gameTitleIdEntry;
+	wxStaticText* gameName;
+
+	wxBoxSizer* isMobileSizer;
+	wxCheckBox* isMobile;
+
+	wxTextCtrl* getLabel(wxString name) {
+		return new wxTextCtrl(this, wxID_ANY, name, wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTRE);
+	}
+
+	void onTitleIdEntry(wxCommandEvent& event);
+	void onChangeDocked(wxCommandEvent& event);
+
+	void onClose(wxCloseEvent& event);
+
+public:
+	ProjectSettingsWindow(wxFrame* parentFrame, std::shared_ptr<ProjectHandler> projHandler, rapidjson::Document* settings, std::shared_ptr<CommunicateWithNetwork> network);
 };
 
 class NetworkCallbackHandler {

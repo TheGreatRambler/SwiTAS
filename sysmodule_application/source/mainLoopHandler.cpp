@@ -1197,10 +1197,6 @@ void MainLoop::setKeyboardMouseState(TouchAndKeyboardData* state) {
 	setMemoryType(saltynxmouseState, mouseSensorState);
 }
 
-void MainLoop::setPerformanceMode(uint8_t isDocked) {
-	setMemoryType<uint8_t>(saltynxrecordScreenOrKeyboard, 2);
-}
-
 void MainLoop::setDockedMode() {
 // Requires reboot
 #ifdef __SWITCH__

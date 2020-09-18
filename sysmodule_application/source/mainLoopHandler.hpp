@@ -246,7 +246,7 @@ private:
 		listenAllKeyboardTouch();
 	}
 
-	void setAll() {}
+	void setAll() { }
 
 	uint8_t finalTasShouldRun;
 	void runFinalTas(std::vector<std::string> scriptPaths);

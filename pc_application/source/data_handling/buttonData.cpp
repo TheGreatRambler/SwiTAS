@@ -666,29 +666,72 @@ bool ButtonData::isEmptyExtraData(std::shared_ptr<TouchAndKeyboardData> data) {
 	// clang-format on
 }
 
-bool ButtonData::applyKeyboardKeysString(std::shared_ptr<TouchAndKeyboardData> data, std::string str) { 
+bool ButtonData::applyKeyboardKeysString(DataProcessing* dataProcessing, std::shared_ptr<TouchAndKeyboardData> data, std::string str) {
+	memset(data->keyboardKeys, 0, sizeof(data->keyboardKeys));
 	if(str != "NONE") {
-			for(std::string keyName : HELPERS::splitString(str, ';')) {
-				if (stringToKeyboardKey.count(keyName) == 1) {
-
-				} else {
-					return false;
-				}
-				if(scriptNameToButton.count(buttonName)) {
-					dataProcessing->modifyButton(thisDataIndex, scriptNameToButton[buttonName], true);
-				}
+		for(std::string keyName : HELPERS::splitString(str, ';')) {
+			if(stringToKeyboardKey.count(keyName) == 1) {
+				SET_KEYBOARD_HELD(data->keyboardKeys, (int32_t)stringToKeyboardKey[keyName], 1);
 			}
-		} else {
-			return true;
 		}
+	}
 }
 
-bool ButtonData::applyKeyboardModifiersString(std::shared_ptr<TouchAndKeyboardData> data, std::string str) { }
+bool ButtonData::applyKeyboardModifiersString(DataProcessing* dataProcessing, std::shared_ptr<TouchAndKeyboardData> data, std::string str) {
+	data->keyboardModifiers = 0;
+	if(str != "NONE") {
+		for(std::string keyName : HELPERS::splitString(str, ';')) {
+			if(stringToKeyboardModifier.count(keyName)) {
+				data->keyboardModifiers |= (uint8_t)stringToKeyboardModifier[keyName];
+			} else {
+				data->keyboardModifiers &= ~((uint8_t)stringToKeyboardModifier[keyName]);
+			}
+		}
+	}
+}
 
-bool ButtonData::applyMouseButtonsString(std::shared_ptr<TouchAndKeyboardData> data, std::string str) { }
+bool ButtonData::applyMouseButtonsString(DataProcessing* dataProcessing, std::shared_ptr<TouchAndKeyboardData> data, std::string str) {
+	if(str != "NONE") {
+		data->mouseButtons = 0;
+		for(std::string keyName : HELPERS::splitString(str, ';')) {
+			if(stringToMouseButton.count(keyName)) {
+				data->mouseButtons |= (uint8_t)stringToMouseButton[keyName];
+			} else {
+				data->mouseButtons &= ~((uint8_t)stringToMouseButton[keyName]);
+			}
+		}
+	}
+}
 
-std::string ButtonData::getKeyboardKeysString(std::shared_ptr<TouchAndKeyboardData> data) { }
+std::string ButtonData::getKeyboardKeysString(std::shared_ptr<TouchAndKeyboardData> data) {
+	std::vector<std::string> keys;
+	for(auto const& key : stringToKeyboardModifier) {
+		bool isHeld = IS_KEYBOARD_HELD(data->keyboardKeys, (int32_t)key.second);
+		if(isHeld) {
+			keys.push_back(key.first);
+		}
+	}
+	return HELPERS::joinString(keys, ";");
+}
 
-std::string ButtonData::getKeyboardModifiersString(std::shared_ptr<TouchAndKeyboardData> data) { }
+std::string ButtonData::getKeyboardModifiersString(std::shared_ptr<TouchAndKeyboardData> data) {
+	std::vector<std::string> keys;
+	for(auto const& key : stringToKeyboardModifier) {
+		bool isHeld = data->keyboardModifiers & (uint8_t)key.second;
+		if(isHeld) {
+			keys.push_back(key.first);
+		}
+	}
+	return HELPERS::joinString(keys, ";");
+}
 
-std::string ButtonData::getMouseButtonsString(std::shared_ptr<TouchAndKeyboardData> data) { }
+std::string ButtonData::getMouseButtonsString(std::shared_ptr<TouchAndKeyboardData> data) {
+	std::vector<std::string> keys;
+	for(auto const& key : stringToMouseButton) {
+		bool isHeld = data->mouseButtons & (uint8_t)key.second;
+		if(isHeld) {
+			keys.push_back(key.first);
+		}
+	}
+	return HELPERS::joinString(keys, ";");
+}
