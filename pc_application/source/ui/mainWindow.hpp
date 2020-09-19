@@ -21,6 +21,7 @@
 #include "../helpers.hpp"
 #include "bottomUI.hpp"
 #include "debugWindow.hpp"
+#include "memoryViewer.hpp"
 #include "scriptExporter.hpp"
 #include "sideUI.hpp"
 
@@ -60,6 +61,7 @@ private:
 	// Main debug command window
 	DebugWindow* debugWindow;
 	ProjectSettingsWindow* projectSettingsWindow;
+	MemoryViewer* memoryViewerWindow;
 
 	// Menubar
 	wxMenuBar* menuBar;
@@ -76,6 +78,7 @@ private:
 	wxWindowID requestGameInfoID;
 	wxWindowID toggleExtraInputMethodsID;
 	wxWindowID toggleProjectSettingsWindowID;
+	wxWindowID toggleMemoryViewID;
 
 	void handlePreviousWindowTransform();
 

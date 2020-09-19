@@ -63,6 +63,8 @@ void MemorySectionViewer::onMouseMove(wxMouseEvent& event) {
 
 MemoryViewer::MemoryViewer(wxFrame* parent, std::shared_ptr<ProjectHandler> proj, std::shared_ptr<CommunicateWithNetwork> networkImp)
 	: wxFrame(parent, wxID_ANY, "Memory Viewer", wxDefaultPosition, wxSize(300, 200), wxDEFAULT_FRAME_STYLE | wxFRAME_FLOAT_ON_PARENT) {
+	Hide();
+
 	projectHandler   = proj;
 	networkInterface = networkImp;
 
@@ -158,6 +160,41 @@ void MemoryViewer::onIdle(wxIdleEvent& event) {
 
 void MemoryViewer::onClose(wxCloseEvent& event) {
 	REMOVE_NETWORK_CALLBACK(RecieveMemoryRegion)
+}
+
+void MemoryViewer::addFromVector(std::vector<MemoryItemInfo> vec) {
+	for(auto const& info : vec) {
+		mapFile(info);
+
+		infos.push_back(std::move(info));
+
+		long itemIndex = itemsList->InsertItem(0, info.pointerPath);
+		itemsList->SetItem(itemIndex, 1, typeChoices[(uint8_t)info.type]);
+	}
+
+	sendUpdatedEntries();
+}
+std::vector<MemoryItemInfo> MemoryViewer::getVector() {
+	return infos;
+}
+
+void MemoryViewer::mapFile(MemoryItemInfo& info) {
+	if(info.saveToFile) {
+		wxRemoveFile(info.filePath);
+
+		wxFile theFile;
+		// Allow reading and writing by all users
+		theFile.Create(info.filePath, true, wxS_DEFAULT);
+		// Triggers sparse file creation to get the file created at the right size
+		// https://stackoverflow.com/questions/7896035/c-make-a-file-of-a-specific-size
+		theFile.Seek(info.size - 1);
+		theFile.Write("", 1);
+		theFile.Close();
+
+		// Map this file as memory
+		// https://github.com/mandreyel/mio
+		info.mmap = mio::make_mmap_sink(info.filePath.ToStdString(), 0, mio::map_entire_file, errorCode);
+	}
 }
 
 void MemoryViewer::selectedItemChanged(wxListEvent& event) {

@@ -98,6 +98,7 @@ void MainWindow::onStart() {
 
 	debugWindow           = new DebugWindow(this, networkInstance);
 	projectSettingsWindow = new ProjectSettingsWindow(this, projectHandler, &mainSettings, networkInstance);
+	memoryViewerWindow    = new MemoryViewer(this, projectHandler, networkInstance);
 
 	ProjectHandlerWindow projectHandlerWindow(this, projectHandler, &mainSettings);
 
@@ -282,6 +283,7 @@ void MainWindow::addMenuBar() {
 	requestGameInfoID             = NewControlId();
 	toggleExtraInputMethodsID     = NewControlId();
 	toggleProjectSettingsWindowID = NewControlId();
+	toggleMemoryViewID            = NewControlId();
 
 	fileMenu->Append(saveProject, "Save Project\tCtrl+S");
 	fileMenu->Append(exportAsText, "Export To Text Format\tCtrl+Alt+E");
@@ -289,6 +291,7 @@ void MainWindow::addMenuBar() {
 	fileMenu->Append(setNameID, "Set Name\tCtrl+Alt+N");
 	fileMenu->Append(runFinalTasID, "Run Final TAS\tCtrl+R");
 	fileMenu->Append(toggleProjectSettingsWindowID, "Toggle Project Settings\tCtrl+R");
+	fileMenu->Append(toggleMemoryViewID, "Toggle Memory Viewer\tCtrl+M");
 	// fileMenu->Append(requestGameInfoID, "Request Game Info\tCtrl+Shift+I");
 
 	// Add joystick submenu
@@ -392,6 +395,8 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 			bottomUI->toggleExtraInputMethodsWindow();
 		} else if(id == toggleProjectSettingsWindowID) {
 			projectSettingsWindow->Show(!projectSettingsWindow->IsShown());
+		} else if(id == toggleMemoryViewID) {
+			memoryViewerWindow->Show(!memoryViewerWindow->IsShown());
 		}
 	}
 }

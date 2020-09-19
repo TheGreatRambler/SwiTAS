@@ -18,7 +18,6 @@
 #include "buttonConstants.hpp"
 #include "dataProcessing.hpp"
 
-// Forward declare to allow headers to include each other
 class DataProcessing;
 
 class ButtonData {
