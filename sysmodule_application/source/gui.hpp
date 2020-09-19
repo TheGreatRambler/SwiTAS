@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <cwctype>
 #include <memory>
+#include <plog/Log.h>
 #include <string>
 #include <unordered_map>
 
@@ -18,7 +19,6 @@ extern "C" {
 #include "helpers.hpp"
 
 #ifdef __SWITCH__
-#include <plog/Log.h>
 #include <switch.h>
 #endif
 

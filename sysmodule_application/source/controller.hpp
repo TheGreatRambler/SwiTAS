@@ -1,9 +1,9 @@
 #pragma once
 
 #include <memory>
+#include <plog/Log.h>
 
 #ifdef __SWITCH__
-#include <plog/Log.h>
 #include <switch.h>
 #endif
 

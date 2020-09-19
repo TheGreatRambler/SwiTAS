@@ -7,11 +7,11 @@
 #include <cstring>
 #include <iterator>
 #include <memory>
+#include <plog/Log.h>
 #include <string>
 #include <vector>
 
 #ifdef __SWITCH__
-#include <plog/Log.h>
 #include <switch.h>
 #endif
 

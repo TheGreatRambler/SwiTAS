@@ -2,11 +2,11 @@
 #include <cstdlib>
 #include <cstring>
 #include <map>
+#include <plog/Log.h>
 #include <string>
 #include <vector>
 
 #ifdef __SWITCH__
-#include <plog/Log.h>
 #include <switch.h>
 #endif
 
@@ -185,6 +185,11 @@ int main(int argc, char* argv[]) {
 // https://stackoverflow.com/a/13256146/9329945
 // http://anadoxin.org/blog/control-over-symbol-exports-in-mingw-linker.html
 #ifdef YUZU
+std::string logPath = HELPERS::getExecutableDir() + "/SwiTAS_log.txt";
+remove(logPath.c_str());
+plog::init(plog::debug, logPath.c_str());
+LOGD << "Started logging";
+
 MainLoop mainLoop;
 
 DLL_EXPORT void startPlugin(void* wrapperInstance) {

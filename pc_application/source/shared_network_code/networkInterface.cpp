@@ -59,7 +59,7 @@ bool CommunicateWithNetwork::sendData(void* data, uint32_t sizeToSend) {
 }
 
 void CommunicateWithNetwork::handleFatalError() {
-#ifdef __SWITCH__
+#ifdef SERVER_IMP
 	LOGD << "Network fataled";
 #endif
 #ifdef CLIENT_IMP
@@ -230,7 +230,7 @@ bool CommunicateWithNetwork::handleSocketError(const char* extraMessage) {
 		// clang-format on
 		return false;
 	} else {
-#ifdef __SWITCH__
+#ifdef SERVER_IMP
 		LOGD << std::string(networkConnection->DescribeError(e)) << " " << std::string(extraMessage);
 #endif
 #ifdef CLIENT_IMP

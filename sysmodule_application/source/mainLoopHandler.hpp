@@ -23,10 +23,10 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <plog/Log.h>
 
 #ifdef __SWITCH__
 #include "../saltynx_plugin/source/sdkTypes.hpp"
-#include <plog/Log.h>
 #include <switch.h>
 #endif
 
@@ -252,7 +252,7 @@ private:
 		setKeyboardMouseState(&empty);
 	}
 
-	void setAll() {}
+	void setAll() { }
 
 	uint8_t finalTasShouldRun;
 	void runFinalTas(std::vector<std::string> scriptPaths, std::string extraDataPath);

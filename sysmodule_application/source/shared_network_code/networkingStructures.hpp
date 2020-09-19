@@ -31,6 +31,7 @@ enum class DataFlag : uint8_t {
 	SendTrackMemoryRegion,
 	SendSetNumControllers,
 	SendAddMemoryRegion,
+	SendModifyMemoryRegion,
 	SendStartFinalTas,
 	RecieveMemoryRegion,
 	RecieveLogging,
@@ -309,6 +310,11 @@ namespace Protocol {
 		uint8_t u;
 		uint64_t dataSize;
 	, self.pointerDefinition, self.type, self.clearAllRegions, self.u, self.dataSize)
+
+	DEFINE_STRUCT(SendModifyMemoryRegion,
+		std::string pointerDefinition;
+		std::vector<uint8_t> memory;
+	, self.pointerDefinition, self.memory)
 
 	DEFINE_STRUCT(SendSetNumControllers,
 		uint8_t size;

@@ -1,7 +1,20 @@
 #pragma once
 
 #include <cstdio>
+#include <cstdlib>
 #include <string>
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
+#ifdef __APPLE__
+#include <mach-o/dyld.h>
+#endif
+
+#ifdef __linux__
+#include <unistd.h>
+#endif
 
 #ifdef __SWITCH__
 #include <switch.h>
@@ -16,4 +29,6 @@ namespace HELPERS {
 
 	// https://stackoverflow.com/questions/2896600/how-to-replace-all-occurrences-of-a-character-in-string
 	std::string ReplaceAll(std::string str, const std::string& from, const std::string& to);
+
+	std::string getExecutableDir();
 }

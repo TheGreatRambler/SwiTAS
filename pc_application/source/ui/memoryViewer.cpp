@@ -163,7 +163,7 @@ void MemoryViewer::onClose(wxCloseEvent& event) {
 }
 
 void MemoryViewer::addFromVector(std::vector<MemoryItemInfo> vec) {
-	for(auto const& info : vec) {
+	for(auto& info : vec) {
 		mapFile(info);
 
 		infos.push_back(std::move(info));
@@ -174,7 +174,8 @@ void MemoryViewer::addFromVector(std::vector<MemoryItemInfo> vec) {
 
 	sendUpdatedEntries();
 }
-std::vector<MemoryItemInfo> MemoryViewer::getVector() {
+
+std::vector<MemoryItemInfo>& MemoryViewer::getVector() {
 	return infos;
 }
 

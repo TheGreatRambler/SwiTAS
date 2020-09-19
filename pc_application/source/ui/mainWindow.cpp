@@ -40,6 +40,7 @@ MainWindow::MainWindow()
 			SEND_QUEUE_DATA(SendTrackMemoryRegion)
 			SEND_QUEUE_DATA(SendSetNumControllers)
 			SEND_QUEUE_DATA(SendAddMemoryRegion)
+			SEND_QUEUE_DATA(SendModifyMemoryRegion)
 			SEND_QUEUE_DATA(SendStartFinalTas)
 			SEND_QUEUE_DATA(SendFinalTasChunk)
 		},

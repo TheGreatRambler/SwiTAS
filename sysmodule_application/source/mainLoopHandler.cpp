@@ -21,6 +21,7 @@ MainLoop::MainLoop() {
 			RECIEVE_QUEUE_DATA(SendTrackMemoryRegion)
 			RECIEVE_QUEUE_DATA(SendSetNumControllers)
 			RECIEVE_QUEUE_DATA(SendAddMemoryRegion)
+			RECIEVE_QUEUE_DATA(SendModifyMemoryRegion)
 			RECIEVE_QUEUE_DATA(SendStartFinalTas)
 			RECIEVE_QUEUE_DATA(SendFinalTasChunk)
 		});
@@ -189,9 +190,7 @@ void MainLoop::mainLoopHandler() {
 			// I believe this means that there is no application running
 			// If there was just an application open, let the PC know
 			if(applicationOpened) {
-#ifdef __SWITCH__
 				LOGD << "Application closed";
-#endif
 				// clang-format off
 				ADD_TO_QUEUE(RecieveFlag, networkInstance, {
 					data.actFlag = RecieveInfo::APPLICATION_DISCONNECTED;
@@ -204,16 +203,12 @@ void MainLoop::mainLoopHandler() {
 
 	if(networkInstance->isConnected()) {
 		if(!internetConnected) {
-#ifdef __SWITCH__
 			LOGD << "Internet connected";
-#endif
 			internetConnected = true;
 		}
 	} else {
 		if(internetConnected) {
-#ifdef __SWITCH__
 			LOGD << "Internet disconnected";
-#endif
 			internetConnected = false;
 
 			// Force unpause to not get user stuck if network cuts out
@@ -366,9 +361,7 @@ void MainLoop::handleNetworkUpdates() {
 
 	// clang-format off
 	CHECK_QUEUE(networkInstance, SendSetNumControllers, {
-		#ifdef __SWITCH__
 		LOGD << "Set controller number";
-		#endif
 		setControllerNumber(data.size);
 	})
 	// clang-format on
@@ -447,10 +440,7 @@ void MainLoop::sendGameInfo() {
 				data.memoryInfo.push_back(memoryInfo);
 			}
 #endif
-
-#ifdef __SWITCH__
 			LOGD << "Game info sent";
-#endif
 		})
 	}
 }
@@ -573,9 +563,7 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths, std::string ext
 
 	std::vector<FILE*> files;
 	for(auto const& path : scriptPaths) {
-#ifdef __SWITCH__
 		LOGD << "Open script at: " << path;
-#endif
 		files.push_back(fopen(path.c_str(), "rb"));
 	}
 

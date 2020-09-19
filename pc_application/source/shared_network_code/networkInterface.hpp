@@ -74,7 +74,7 @@
 #include <unistd.h>
 #include <unordered_map>
 
-#ifdef __SWITCH__
+#ifdef SERVER_IMP
 #include <plog/Log.h>
 #endif
 
@@ -160,6 +160,7 @@ public:
 	ADD_QUEUE(SendSetNumControllers)
 	ADD_QUEUE(RecieveMemoryRegion)
 	ADD_QUEUE(SendAddMemoryRegion)
+	ADD_QUEUE(SendModifyMemoryRegion)
 	ADD_QUEUE(SendStartFinalTas)
 	ADD_QUEUE(SendFinalTasChunk)
 

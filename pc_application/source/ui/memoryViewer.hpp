@@ -94,7 +94,7 @@ private:
 	void onClose(wxCloseEvent& event);
 
 	void addFromVector(std::vector<MemoryItemInfo> vec);
-	std::vector<MemoryItemInfo> getVector();
+	std::vector<MemoryItemInfo>& getVector();
 
 	void sendUpdatedEntries();
 
