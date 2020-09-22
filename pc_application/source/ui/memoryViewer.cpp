@@ -136,7 +136,15 @@ MemoryViewer::MemoryViewer(wxFrame* parent, std::shared_ptr<ProjectHandler> proj
 			std::copy(data.memory.begin(), data.memory.end(), info.mmap.begin());
 			info.mmap.sync(errorCode);
 		}
+
+		// If this is the current index
+		long selectedItem = itemsList->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+		if(selectedItem != wxNOT_FOUND) {
+			updateAtIndex(selectedItem);
+		}
 	})
+
+	fileSystemWatcher.Bind(wxEVT_FSWATCHER, &MemoryViewer::fileChangesDetected, this);
 
 	SetSizer(mainSizer);
 	mainSizer->SetSizeHints(this);
@@ -192,14 +200,20 @@ void MemoryViewer::mapFile(MemoryItemInfo& info) {
 		theFile.Write("", 1);
 		theFile.Close();
 
+		fileSystemWatcher.Add(wxFileName(info.filePath));
+
 		// Map this file as memory
 		// https://github.com/mandreyel/mio
-		info.mmap = mio::make_mmap_sink(info.filePath.ToStdString(), 0, mio::map_entire_file, errorCode);
+		info.mmap = mio::make_umap_sink(info.filePath.ToStdString(), 0, mio::map_entire_file, errorCode);
 	}
 }
 
 void MemoryViewer::selectedItemChanged(wxListEvent& event) {
-	MemoryItemInfo& info = infos[event.GetIndex()];
+	updateAtIndex(event.GetIndex());
+}
+
+void MemoryViewer::updateAtIndex(long index) {
+	MemoryItemInfo& info = infos[index];
 
 	unsignedCheckbox->SetValue(info.isUnsigned);
 	typeSelection->SetSelection((uint8_t)info.type);
@@ -258,9 +272,42 @@ void MemoryViewer::onRemoveEntry(wxCommandEvent& event) {
 		itemsList->DeleteItem(selectedItem);
 		itemsList->Refresh();
 
+		// Remove if present
+		fileSystemWatcher.Remove(wxFileName(infos[selectedItem].filePath));
+
 		infos.erase(infos.begin() + selectedItem);
 
 		sendUpdatedEntries();
+	}
+}
+
+void MemoryViewer::fileChangesDetected(wxFileSystemWatcherEvent& event) {
+	for(auto& info : infos) {
+		if(info.filePath == event.GetPath().GetFullPath()) {
+			// This is the right entry
+			int changeReason = event.GetChangeType();
+			if(changeReason == wxFSW_EVENT_DELETE) {
+				info.saveToFile   = false;
+				info.filePath     = "";
+				long selectedItem = itemsList->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+				if(selectedItem != wxNOT_FOUND) {
+					updateAtIndex(selectedItem);
+				}
+			} else if(changeReason == wxFSW_EVENT_MODIFY) {
+				// TODO send to switch
+				ADD_TO_QUEUE(SendModifyMemoryRegion, networkInterface, {
+					data.pointerDefinition = info.pointerPath.ToStdString();
+					std::copy(info.mmap.begin(), info.mmap.end(), data.memory.begin());
+				})
+			} else if(changeReason == wxFSW_EVENT_RENAME) {
+				info.filePath     = event.GetNewPath().GetFullPath();
+				long selectedItem = itemsList->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+				if(selectedItem != wxNOT_FOUND) {
+					updateAtIndex(selectedItem);
+				}
+			}
+			return;
+		}
 	}
 }
 

@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <vector>
 #include <wx/filepicker.h>
+#include <wx/fswatcher.h>
 #include <wx/wfstream.h>
 #include <wx/wx.h>
 
@@ -22,7 +23,7 @@ struct MemoryItemInfo {
 	uint8_t saveToFile;
 	wxString filePath;
 	wxString pointerPath;
-	mio::mmap_sink mmap;
+	mio::ummap_sink mmap;
 };
 
 class MemorySectionViewer : public DrawingCanvas {
@@ -67,6 +68,8 @@ private:
 
 	std::vector<MemoryItemInfo> infos;
 
+	wxFileSystemWatcher fileSystemWatcher;
+
 	std::error_code errorCode;
 
 	wxCheckBox* unsignedCheckbox;
@@ -101,6 +104,9 @@ private:
 	void mapFile(MemoryItemInfo& info);
 
 	void selectedItemChanged(wxListEvent& event);
+	void updateAtIndex(long index);
+
+	void fileChangesDetected(wxFileSystemWatcherEvent& event);
 
 public:
 	MemoryViewer(wxFrame* parent, std::shared_ptr<ProjectHandler> proj, std::shared_ptr<CommunicateWithNetwork> networkImp);
