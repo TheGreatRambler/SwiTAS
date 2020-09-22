@@ -982,6 +982,7 @@ void MainLoop::matchFirstControllerToTASController(uint8_t player) {
 
 			setSixAxisState(player, &data);
 		} else {
+			// Trying to emulate dual joycons with procons means we have this
 			SixAxisSensorValues val;
 			hidSixAxisSensorValuesRead(&val, id, 1);
 
@@ -1028,51 +1029,70 @@ void MainLoop::matchFirstControllerToTASController(uint8_t player) {
 }
 
 void MainLoop::recordAllSixAxis() {
+#ifdef __SWITCH__
 	if(saltynxcontrollerToRecord != 0) {
 		setMemoryType(saltynxcontrollerToRecord, nn::hid::NpadIdType::None);
 	}
+#endif
 }
 
 void MainLoop::setSixAxisRecord(int32_t controller) {
+#ifdef __SWITCH__
 	if(saltynxcontrollerToRecord != 0) {
 		setMemoryType(saltynxcontrollerToRecord, controller);
 	}
+#endif
 }
 
 void MainLoop::setSixAxisListen() {
+#ifdef __SWITCH__
 	if(saltynxcontrollerToRecord != 0) {
 		setMemoryType(saltynxcontrollerToRecord, nn::hid::NpadIdType::Set_All);
 	}
+#endif
 }
 
 void MainLoop::recordAllKeyboardTouch() {
+#ifdef __SWITCH__
 	if(saltynxrecordScreenOrKeyboard != 0) {
 		setMemoryType<uint8_t>(saltynxrecordScreenOrKeyboard, 0);
 	}
+#endif
 }
 
 void MainLoop::listenAllKeyboardTouch() {
+#ifdef __SWITCH__
 	if(saltynxrecordScreenOrKeyboard != 0) {
 		setMemoryType<uint8_t>(saltynxrecordScreenOrKeyboard, 3);
 	}
+#endif
 }
 
 void MainLoop::setKeyboardRecord() {
+#ifdef __SWITCH__
 	if(saltynxrecordScreenOrKeyboard != 0) {
 		setMemoryType<uint8_t>(saltynxrecordScreenOrKeyboard, 2);
 	}
+#endif
 }
 
 void MainLoop::setTouchRecord() {
+#ifdef __SWITCH__
 	if(saltynxrecordScreenOrKeyboard != 0) {
 		setMemoryType<uint8_t>(saltynxrecordScreenOrKeyboard, 1);
 	}
+#endif
 }
 
 void MainLoop::getSixAxisState(int32_t controller, ControllerData* state) {
-	size_t offset                                = sizeof(nn::hid::SixAxisSensorState) * nn::hid::SixAxisSensorStateCountMax * controller;
-	nn::hid::SixAxisSensorState sensorStateLeft  = getMemoryType<nn::hid::SixAxisSensorState>(saltynxsixAxisStateLeftJoyconBacklog + offset);
-	nn::hid::SixAxisSensorState sensorStateRight = getMemoryType<nn::hid::SixAxisSensorState>(saltynxsixAxisStateRightJoyconBacklog + offset);
+	nn::hid::SixAxisSensorState sensorStateLeft;
+	nn::hid::SixAxisSensorState sensorStateRight;
+
+#ifdef __SWITCH__
+	size_t offset    = sizeof(nn::hid::SixAxisSensorState) * nn::hid::SixAxisSensorStateCountMax * controller;
+	sensorStateLeft  = getMemoryType<nn::hid::SixAxisSensorState>(saltynxsixAxisStateLeftJoyconBacklog + offset);
+	sensorStateRight = getMemoryType<nn::hid::SixAxisSensorState>(saltynxsixAxisStateRightJoyconBacklog + offset);
+#endif
 
 	state->ACCEL_X_LEFT       = sensorStateLeft.acceleration.x;
 	state->ACCEL_Y_LEFT       = sensorStateLeft.acceleration.y;
@@ -1153,14 +1173,20 @@ void MainLoop::setSixAxisState(int32_t controller, ControllerData* state) {
 	sensorStateRight.direction.z.y     = state->DIRECTION_ZY_RIGHT;
 	sensorStateRight.direction.z.z     = state->DIRECTION_ZZ_RIGHT;
 
+#ifdef __SWITCH__
 	// Set to correct player
 	size_t offset = sizeof(nn::hid::SixAxisSensorState) * controller;
 	setMemoryType(saltynxsixAxisStateLeftJoycon + offset, sensorStateLeft);
 	setMemoryType(saltynxsixAxisStateRightJoycon + offset, sensorStateRight);
+#endif
 }
 
 void MainLoop::getTouchState(TouchAndKeyboardData* state) {
-	nn::hid::TouchScreenState16Touch touchSensorState = getMemoryType<nn::hid::TouchScreenState16Touch>(saltynxtouchScreenStateBacklog);
+	nn::hid::TouchScreenState16Touch touchSensorState;
+
+#ifdef __SWITCH__
+	touchSensorState = getMemoryType<nn::hid::TouchScreenState16Touch>(saltynxtouchScreenStateBacklog);
+#endif
 
 	// Can't go over 2
 	if(touchSensorState.count > 2)
@@ -1182,12 +1208,19 @@ void MainLoop::setTouchState(TouchAndKeyboardData* state) {
 	touchSensorState.touches[1].y = state->touchY2;
 	touchSensorState.count        = state->numberOfTouches;
 
+#ifdef __SWITCH__
 	setMemoryType(saltynxtouchscreenState, touchSensorState);
+#endif
 }
 
 void MainLoop::getKeyboardMouseState(TouchAndKeyboardData* state) {
-	nn::hid::KeyboardState keyboardSensorState = getMemoryType<nn::hid::KeyboardState>(saltynxkeyboardStateBacklog);
-	nn::hid::MouseState mouseSensorState       = getMemoryType<nn::hid::MouseState>(saltynxmouseStateBacklog);
+	nn::hid::KeyboardState keyboardSensorState;
+	nn::hid::MouseState mouseSensorState;
+
+#ifdef __SWITCH__
+	keyboardSensorState = getMemoryType<nn::hid::KeyboardState>(saltynxkeyboardStateBacklog);
+	mouseSensorState    = getMemoryType<nn::hid::MouseState>(saltynxmouseStateBacklog);
+#endif
 
 	memcpy(state->keyboardKeys, keyboardSensorState.keys, sizeof(state->keyboardKeys));
 	state->keyboardModifiers = keyboardSensorState.modifiers;
@@ -1214,8 +1247,10 @@ void MainLoop::setKeyboardMouseState(TouchAndKeyboardData* state) {
 	mouseSensorState.scrollVelocityY = state->scrollVelocityY;
 	mouseSensorState.buttons         = state->mouseButtons;
 
+#ifdef __SWITCH__
 	setMemoryType(saltynxkeyboardState, keyboardSensorState);
 	setMemoryType(saltynxmouseState, mouseSensorState);
+#endif
 }
 
 void MainLoop::setDockedMode() {
@@ -1235,8 +1270,9 @@ void MainLoop::setHandheldMode() {
 }
 
 MainLoop::~MainLoop() {
-#ifdef __SWITCH__
 	LOGD << "Exiting app";
+
+#ifdef __SWITCH__
 	rc = hiddbgReleaseHdlsWorkBuffer();
 	hiddbgExit();
 

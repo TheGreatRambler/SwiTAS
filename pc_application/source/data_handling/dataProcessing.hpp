@@ -143,8 +143,6 @@ private:
 	void onMergeIntoMainBranch(wxCommandEvent& event);
 
 public:
-	static const int LIST_CTRL_ID = 1000;
-
 	// All blocks loaded in by projectManager
 	DataProcessing(rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, std::shared_ptr<CommunicateWithNetwork> communicateWithNetwork, wxWindow* parent);
 

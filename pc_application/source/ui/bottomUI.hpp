@@ -14,6 +14,7 @@
 #include <wx/display.h>
 #include <wx/grid.h>
 #include <wx/joystick.h>
+#include <wx/listbox.h>
 #include <wx/spinctrl.h>
 #include <wx/wx.h>
 
@@ -105,9 +106,9 @@ private:
 
 	wxBoxSizer* mainKeyboardSizer;
 
-	wxTextCtrl* keyboardKeys;
-	wxTextCtrl* keyboardModifiers;
-	wxTextCtrl* mouseButtons;
+	wxListBox * keyboardKeys;
+	wxListBox * keyboardModifiers;
+	wxListBox * mouseButtons;
 
 	void motionValueChanged(wxSpinDoubleEvent& event);
 	void touchValueChanged(wxSpinEvent& event);

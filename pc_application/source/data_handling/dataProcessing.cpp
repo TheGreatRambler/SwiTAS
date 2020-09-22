@@ -2,7 +2,7 @@
 #include "buttonData.hpp"
 
 DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, std::shared_ptr<CommunicateWithNetwork> communicateWithNetwork, wxWindow* parent)
-	: wxListCtrl(parent, DataProcessing::LIST_CTRL_ID, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_VIRTUAL | wxLC_HRULES) {
+	: wxListCtrl(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_VIRTUAL | wxLC_HRULES) {
 
 	// All savestate hook blocks
 	// Start with default, will get cleared later
@@ -92,14 +92,14 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	Bind(wxEVT_MENU, &DataProcessing::onFrameAdvance, this, frameAdvanceID);
 	Bind(wxEVT_MENU, &DataProcessing::onAddSavestate, this, savestateID);
 	Bind(wxEVT_MENU, &DataProcessing::onMergeIntoMainBranch, this, mergeIntoMainBranchID);
+
+	Bind(wxEVT_LIST_CACHE_HINT, &DataProcessing::onCacheHint, this);
+	Bind(wxEVT_LIST_ITEM_SELECTED, &DataProcessing::onSelect, this);
+	Bind(wxEVT_LIST_ITEM_ACTIVATED, &DataProcessing::onActivate, this);
 }
 
 // clang-format off
 BEGIN_EVENT_TABLE(DataProcessing, wxListCtrl)
-	EVT_LIST_CACHE_HINT(DataProcessing::LIST_CTRL_ID, DataProcessing::onCacheHint)
-	EVT_LIST_ITEM_SELECTED(DataProcessing::LIST_CTRL_ID, DataProcessing::onSelect)
-	// This is activated via double click
-	EVT_LIST_ITEM_ACTIVATED(DataProcessing::LIST_CTRL_ID, DataProcessing::onActivate)
 	EVT_CONTEXT_MENU(DataProcessing::onRightClick)
 	EVT_ERASE_BACKGROUND(DataProcessing::OnEraseBackground)
 	EVT_DROP_FILES(DataProcessing::onDropFiles)

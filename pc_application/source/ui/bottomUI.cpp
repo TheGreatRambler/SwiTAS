@@ -13,6 +13,9 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 	accelLeftSizer           = new wxBoxSizer(wxHORIZONTAL);
 	angularVelocityLeftSizer = new wxBoxSizer(wxHORIZONTAL);
 	angleLeftSizer           = new wxBoxSizer(wxHORIZONTAL);
+	directionXLeftSizer      = new wxBoxSizer(wxHORIZONTAL);
+	directionYLeftSizer      = new wxBoxSizer(wxHORIZONTAL);
+	directionZLeftSizer      = new wxBoxSizer(wxHORIZONTAL);
 
 	accelXLeftCtrl           = new wxSpinCtrlDouble(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -7.0, 7.0, 0.0);
 	accelYLeftCtrl           = new wxSpinCtrlDouble(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -7.0, 7.0, 0.0);
@@ -121,6 +124,9 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 	accelRightSizer           = new wxBoxSizer(wxHORIZONTAL);
 	angularVelocityRightSizer = new wxBoxSizer(wxHORIZONTAL);
 	angleRightSizer           = new wxBoxSizer(wxHORIZONTAL);
+	directionXRightSizer      = new wxBoxSizer(wxHORIZONTAL);
+	directionYRightSizer      = new wxBoxSizer(wxHORIZONTAL);
+	directionZRightSizer      = new wxBoxSizer(wxHORIZONTAL);
 
 	accelXRightCtrl           = new wxSpinCtrlDouble(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -7.0, 7.0, 0.0);
 	accelYRightCtrl           = new wxSpinCtrlDouble(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -7.0, 7.0, 0.0);
@@ -300,9 +306,10 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 
 	mainKeyboardSizer = new wxBoxSizer(wxVERTICAL);
 
-	keyboardKeys      = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER | wxTE_CENTRE);
-	keyboardModifiers = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER | wxTE_CENTRE);
-	mouseButtons      = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER | wxTE_CENTRE);
+	// TODO convert into listbox correctly
+	keyboardKeys      = new wxListBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER | wxTE_CENTRE);
+	keyboardModifiers = new wxListBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER | wxTE_CENTRE);
+	mouseButtons      = new wxListBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER | wxTE_CENTRE);
 
 	mainMouseSizer->Add(mouseXCtrl, 0, wxEXPAND);
 	mainMouseSizer->Add(mouseYCtrl, 0, wxEXPAND);
@@ -496,17 +503,11 @@ void ExtraInputMethods::mouseValueChanged(wxSpinEvent& event) {
 	}
 }
 
-void ExtraInputMethods::keyboardKeysChanged(wxCommandEvent& event) {
+void ExtraInputMethods::keyboardKeysChanged(wxCommandEvent& event) { }
 
-}
+void ExtraInputMethods::keyboardModifiersChanged(wxCommandEvent& event) { }
 
-	void ExtraInputMethods::keyboardModifiersChanged(wxCommandEvent& event) {
-
-	}
-	
-	void ExtraInputMethods::mouseButtonsChanged(wxCommandEvent& event) {
-
-	}
+void ExtraInputMethods::mouseButtonsChanged(wxCommandEvent& event) { }
 
 void ExtraInputMethods::onClose(wxCloseEvent& event) {
 	Show(false);

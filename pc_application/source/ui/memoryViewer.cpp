@@ -137,11 +137,7 @@ MemoryViewer::MemoryViewer(wxFrame* parent, std::shared_ptr<ProjectHandler> proj
 			info.mmap.sync(errorCode);
 		}
 
-		// If this is the current index
-		long selectedItem = itemsList->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-		if(selectedItem != wxNOT_FOUND) {
-			updateAtIndex(selectedItem);
-		}
+		updateAtIndex(currentItemSelection);
 	})
 
 	fileSystemWatcher.Bind(wxEVT_FSWATCHER, &MemoryViewer::fileChangesDetected, this);
@@ -204,12 +200,13 @@ void MemoryViewer::mapFile(MemoryItemInfo& info) {
 
 		// Map this file as memory
 		// https://github.com/mandreyel/mio
-		info.mmap = mio::make_umap_sink(info.filePath.ToStdString(), 0, mio::map_entire_file, errorCode);
+		info.mmap = mio::make_mmap_sink(info.filePath.ToStdString(), 0, mio::map_entire_file, errorCode);
 	}
 }
 
 void MemoryViewer::selectedItemChanged(wxListEvent& event) {
-	updateAtIndex(event.GetIndex());
+	currentItemSelection = event.GetIndex();
+	updateAtIndex(currentItemSelection);
 }
 
 void MemoryViewer::updateAtIndex(long index) {
@@ -287,12 +284,9 @@ void MemoryViewer::fileChangesDetected(wxFileSystemWatcherEvent& event) {
 			// This is the right entry
 			int changeReason = event.GetChangeType();
 			if(changeReason == wxFSW_EVENT_DELETE) {
-				info.saveToFile   = false;
-				info.filePath     = "";
-				long selectedItem = itemsList->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-				if(selectedItem != wxNOT_FOUND) {
-					updateAtIndex(selectedItem);
-				}
+				info.saveToFile = false;
+				info.filePath   = "";
+				updateAtIndex(currentItemSelection);
 			} else if(changeReason == wxFSW_EVENT_MODIFY) {
 				// TODO send to switch
 				ADD_TO_QUEUE(SendModifyMemoryRegion, networkInterface, {
@@ -300,11 +294,8 @@ void MemoryViewer::fileChangesDetected(wxFileSystemWatcherEvent& event) {
 					std::copy(info.mmap.begin(), info.mmap.end(), data.memory.begin());
 				})
 			} else if(changeReason == wxFSW_EVENT_RENAME) {
-				info.filePath     = event.GetNewPath().GetFullPath();
-				long selectedItem = itemsList->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-				if(selectedItem != wxNOT_FOUND) {
-					updateAtIndex(selectedItem);
-				}
+				info.filePath = event.GetNewPath().GetFullPath();
+				updateAtIndex(currentItemSelection);
 			}
 			return;
 		}
