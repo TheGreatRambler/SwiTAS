@@ -1,14 +1,13 @@
 #pragma once
 
 #include <cstdint>
+#include <fstream>
+#include <iostream>
 #include <memory>
-#include <mio.hpp>
-#include <system_error>
 #include <unordered_map>
 #include <vector>
 #include <wx/filepicker.h>
 #include <wx/fswatcher.h>
-#include <wx/wfstream.h>
 #include <wx/wx.h>
 
 #include "../data_handling/projectHandler.hpp"
@@ -23,7 +22,6 @@ struct MemoryItemInfo {
 	uint8_t saveToFile;
 	wxString filePath;
 	wxString pointerPath;
-	mio::ummap_sink mmap;
 };
 
 class MemorySectionViewer : public DrawingCanvas {
@@ -69,8 +67,6 @@ private:
 	std::vector<MemoryItemInfo> infos;
 
 	wxFileSystemWatcher fileSystemWatcher;
-
-	std::error_code errorCode;
 
 	wxCheckBox* unsignedCheckbox;
 	// Doesn't apply because the switch is little endian

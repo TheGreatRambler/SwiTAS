@@ -133,8 +133,9 @@ MemoryViewer::MemoryViewer(wxFrame* parent, std::shared_ptr<ProjectHandler> proj
 		}
 
 		if(info.saveToFile) {
-			std::copy(data.memory.begin(), data.memory.end(), info.mmap.begin());
-			info.mmap.sync(errorCode);
+			std::ofstream file(info.filePath.ToStdString(), std::ios::out | std::ios::binary);
+			file.write((const char*)data.memory.data(), data.memory.size());
+			file.close();
 		}
 
 		updateAtIndex(currentItemSelection);
@@ -187,20 +188,14 @@ void MemoryViewer::mapFile(MemoryItemInfo& info) {
 	if(info.saveToFile) {
 		wxRemoveFile(info.filePath);
 
-		wxFile theFile;
-		// Allow reading and writing by all users
-		theFile.Create(info.filePath, true, wxS_DEFAULT);
+		std::ofstream file(info.filePath.ToStdString(), std::ios::out | std::ios::binary);
 		// Triggers sparse file creation to get the file created at the right size
 		// https://stackoverflow.com/questions/7896035/c-make-a-file-of-a-specific-size
-		theFile.Seek(info.size - 1);
-		theFile.Write("", 1);
-		theFile.Close();
+		file.seekp(info.size - 1);
+		file.write("", 1);
+		file.close();
 
 		fileSystemWatcher.Add(wxFileName(info.filePath));
-
-		// Map this file as memory
-		// https://github.com/mandreyel/mio
-		info.mmap = mio::make_mmap_sink(info.filePath.ToStdString(), 0, mio::map_entire_file, errorCode);
 	}
 }
 
@@ -291,7 +286,9 @@ void MemoryViewer::fileChangesDetected(wxFileSystemWatcherEvent& event) {
 				// TODO send to switch
 				ADD_TO_QUEUE(SendModifyMemoryRegion, networkInterface, {
 					data.pointerDefinition = info.pointerPath.ToStdString();
-					std::copy(info.mmap.begin(), info.mmap.end(), data.memory.begin());
+					std::ifstream file(info.filePath.ToStdString(), std::ios::out | std::ios::binary);
+					std::copy(std::istream_iterator<uint8_t>(file), std::istream_iterator<uint8_t>(), std::back_inserter(data.memory));
+					file.close();
 				})
 			} else if(changeReason == wxFSW_EVENT_RENAME) {
 				info.filePath = event.GetNewPath().GetFullPath();
