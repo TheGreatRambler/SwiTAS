@@ -27,6 +27,7 @@
 class ExtraInputMethods : public wxFrame {
 private:
 	DataProcessing* inputInstance;
+	std::shared_ptr<ButtonData> buttonData;
 
 	wxBoxSizer* mainSizer;
 
@@ -106,9 +107,13 @@ private:
 
 	wxBoxSizer* mainKeyboardSizer;
 
-	wxListBox * keyboardKeys;
-	wxListBox * keyboardModifiers;
-	wxListBox * mouseButtons;
+	wxListBox* keyboardKeys;
+	wxListBox* keyboardModifiers;
+	wxListBox* mouseButtons;
+
+	wxArrayString lastKeyboardKeys;
+	wxArrayString lastKeyboardModifiers;
+	wxArrayString lastMouseButtons;
 
 	void motionValueChanged(wxSpinDoubleEvent& event);
 	void touchValueChanged(wxSpinEvent& event);
@@ -121,7 +126,7 @@ private:
 	void onClose(wxCloseEvent& event);
 
 public:
-	ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input);
+	ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input, std::shared_ptr<ButtonData> data);
 
 	void updateAllValues();
 };

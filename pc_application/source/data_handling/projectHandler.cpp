@@ -657,7 +657,8 @@ void ProjectHandler::newProjectWasCreated() {
 
 bool ProjectHandler::promptForUpdate() {
 	// Returns true if an update is installed
-	if(wxPlatformInfo::GetOperatingSystemId() != wxOS_UNIX) {
+	// Unix is installed differentlys
+	if(wxPlatformInfo::Get().GetOperatingSystemId() != wxOS_UNIX) {
 		const wxString releaseUrl = "https://api.github.com/repos/thegreatrambler/switas/releases/latest";
 		wxURL url(releaseUrl);
 		if(url.GetError() == wxURL_NOERR) {
@@ -675,18 +676,20 @@ bool ProjectHandler::promptForUpdate() {
 					int res = installDialog.ShowModal();
 					if(res == wxID_YES) {
 						// Install the update, closes the app entirely
-
-						// Windows is index 0
 						int currentIndex         = 0;
 						uint8_t haveIndex        = false;
-						wxOperatingSystemId osId = wxPlatformInfo::GetOperatingSystemId();
-						for(auto const& releaseType : releaseInfo["assets"]) {
+						wxOperatingSystemId osId = wxPlatformInfo::Get().GetOperatingSystemId();
+						for(auto const& releaseType : releaseInfo["assets"].GetArray()) {
 							switch(osId) {
 							case wxOS_WINDOWS:
-								if(releaseType["name"].GetString() == "switas-windows-64bit.zip")
+								if(strcmp(releaseType["name"].GetString(), "switas-windows-64bit.zip") == 0)
 									break;
 							case wxOS_MAC:
-								if(releaseType["name"].GetString() == "switas-mac-64bit.app.zip")
+								if(strcmp(releaseType["name"].GetString(), "switas-mac-64bit.app.zip") == 0)
+									break;
+								break;
+							case wxOS_UNIX:
+								if(strcmp(releaseType["name"].GetString(), "switas-debian-64bit.deb") == 0)
 									break;
 								break;
 							}
@@ -700,56 +703,60 @@ bool ProjectHandler::promptForUpdate() {
 							wxInputStream* updateIn = url.GetInputStream();
 
 							if(updateIn && updateIn->IsOk()) {
-								wxZipEntry* entry;
+								if(osId == wxOS_UNIX) {
+									// Update deb through standard means, todo
+								} else {
+									wxZipEntry* entry;
 
-								// Dont take control of the pointer
-								wxZipInputStream zip(*updateIn);
-								while(entry = zip.GetNextEntry(), entry != NULL) {
-									// The name is its relative path within the archive
-									wxFileName filename(entry->GetName());
+									// Dont take control of the pointer
+									wxZipInputStream zip(*updateIn);
+									while(entry = zip.GetNextEntry(), entry != NULL) {
+										// The name is its relative path within the archive
+										wxFileName filename(entry->GetName());
 
-									// Only handle files
-									if(!filename.IsDir()) {
-										wxFileName relativeToExecutable(wxStandardPaths::Get().GetExecutablePath());
-										// Go one folder back
-										relativeToExecutable.RemoveDir(relativeToExecutable.GetDirCount() - 1);
-										// Remove first folder, it's 'release', hope path is relative
-										filename.RemoveDir(0);
+										// Only handle files
+										if(!filename.IsDir()) {
+											wxFileName relativeToExecutable(wxStandardPaths::Get().GetExecutablePath());
+											// Go one folder back
+											relativeToExecutable.RemoveDir(relativeToExecutable.GetDirCount() - 1);
+											// Remove first folder, it's 'release', hope path is relative
+											filename.RemoveDir(0);
 
-										wxFileName newFilename(relativeToExecutable.GetPathWithSep() + filename.GetFullPath());
-										newFilename.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+											wxFileName newFilename(relativeToExecutable.GetPathWithSep() + filename.GetFullPath());
+											newFilename.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
 
-										// Cant set executable directly, replace differently
-										if(newFilename.GetExt() == "exe" || newFilename.GetExt() == "dll") {
-											// Rename existing files
-											wxFileName modifiedName = wxFileName(newFilename);
-											modifiedName.SetName(newFilename.GetName() + "_tempupdateartifact");
-											wxRenameFile(newFilename.GetFullPath(), modifiedName.GetFullPath());
+											// Cant set executable directly, replace differently
+											if(newFilename.GetExt() == "exe" || newFilename.GetExt() == "dll") {
+												// Rename existing files
+												wxFileName modifiedName = wxFileName(newFilename);
+												modifiedName.SetName(newFilename.GetName() + "_tempupdateartifact");
+												wxRenameFile(newFilename.GetFullPath(), modifiedName.GetFullPath());
+											}
+
+											if(newFilename.GetName() == "switas_recent" && newFilename.GetExt() == "json") {
+												// Ignored
+												delete entry;
+												continue;
+											}
+
+											zip.OpenEntry(*entry);
+
+											// Write binary might not work, I dunno
+											wxFFileOutputStream file(newFilename.GetFullPath(), "wb");
+
+											if(!file) {
+												// File not created
+												delete entry;
+												continue;
+											}
+
+											zip.Read(file);
+
+											file.Close();
 										}
 
-										if(newFilename.GetName() == "switas_recent" && newFilename.GetExt() == "json") {
-											// Ignored
-											delete entry;
-											continue;
-										}
-
-										zip.OpenEntry(*entry);
-
-										// Write binary might not work, I dunno
-										wxFFileOutputStream file(newFilename.GetFullPath(), "wb");
-
-										if(!file) {
-											// File not created
-											delete entry;
-											continue;
-										}
-
-										zip.Read(file);
-
-										file.Close();
+										delete entry;
 									}
-
-									delete entry;
 								}
 							}
 							delete updateIn;

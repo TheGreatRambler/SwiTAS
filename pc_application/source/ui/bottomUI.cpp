@@ -1,8 +1,9 @@
 #include "bottomUI.hpp"
 
-ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input)
+ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input, std::shared_ptr<ButtonData> data)
 	: wxFrame(parentFrame, wxID_ANY, "Motion and Touch Editor", wxDefaultPosition, wxSize(800, 400), wxDEFAULT_FRAME_STYLE | wxFRAME_FLOAT_ON_PARENT) {
 	inputInstance = input;
+	buttonData    = data;
 
 	// Start hidden
 	Hide();
@@ -307,9 +308,25 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 	mainKeyboardSizer = new wxBoxSizer(wxVERTICAL);
 
 	// TODO convert into listbox correctly
-	keyboardKeys      = new wxListBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER | wxTE_CENTRE);
-	keyboardModifiers = new wxListBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER | wxTE_CENTRE);
-	mouseButtons      = new wxListBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER | wxTE_CENTRE);
+	keyboardKeys      = new wxListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_MULTIPLE);
+	keyboardModifiers = new wxListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_MULTIPLE);
+	mouseButtons      = new wxListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_MULTIPLE);
+
+	for(auto const& keyboardKey : buttonData->stringToKeyboardKey) {
+		keyboardKeys->Append(wxString::FromUTF8(keyboardKey.first));
+	}
+
+	for(auto const& keyboardModifier : buttonData->stringToKeyboardModifier) {
+		keyboardModifiers->Append(wxString::FromUTF8(keyboardModifier.first));
+	}
+
+	for(auto const& mouseButton : buttonData->stringToMouseButton) {
+		mouseButtons->Append(wxString::FromUTF8(mouseButton.first));
+	}
+
+	keyboardKeys->Bind(wxEVT_LISTBOX, &ExtraInputMethods::keyboardKeysChanged, this);
+	keyboardModifiers->Bind(wxEVT_LISTBOX, &ExtraInputMethods::keyboardModifiersChanged, this);
+	mouseButtons->Bind(wxEVT_LISTBOX, &ExtraInputMethods::mouseButtonsChanged, this);
 
 	mainMouseSizer->Add(mouseXCtrl, 0, wxEXPAND);
 	mainMouseSizer->Add(mouseYCtrl, 0, wxEXPAND);
@@ -503,11 +520,72 @@ void ExtraInputMethods::mouseValueChanged(wxSpinEvent& event) {
 	}
 }
 
-void ExtraInputMethods::keyboardKeysChanged(wxCommandEvent& event) { }
+void ExtraInputMethods::keyboardKeysChanged(wxCommandEvent& event) {
+	// Have to do this because wxWidgets doesn't report deselections
+	wxArrayString selections = keyboardKeys->GetStrings();
+	for(auto const& thisSelection : selections) {
+		std::string keyString = thisSelection.ToStdString();
+		if(lastKeyboardKeys.Index(keyString) == wxNOT_FOUND) {
+			// This key wasn't selected before but now is, trigger it
+			nn::hid::KeyboardKey key = buttonData->stringToKeyboardKey[keyString];
+			inputInstance->triggerKeyboardButton(key, true);
+		}
+	}
+	for(auto const& lastSelection : lastKeyboardKeys) {
+		std::string keyString = lastSelection.ToStdString();
+		if(selections.Index(keyString) == wxNOT_FOUND) {
+			// This key was selected before but now is not, deselect it
+			nn::hid::KeyboardKey key = buttonData->stringToKeyboardKey[keyString];
+			inputInstance->triggerKeyboardButton(key, false);
+		}
+	}
 
-void ExtraInputMethods::keyboardModifiersChanged(wxCommandEvent& event) { }
+	lastKeyboardKeys = selections;
+}
 
-void ExtraInputMethods::mouseButtonsChanged(wxCommandEvent& event) { }
+void ExtraInputMethods::keyboardModifiersChanged(wxCommandEvent& event) {
+	wxArrayString selections = keyboardModifiers->GetStrings();
+	for(auto const& thisSelection : selections) {
+		std::string keyString = thisSelection.ToStdString();
+		if(lastKeyboardModifiers.Index(keyString) == wxNOT_FOUND) {
+			// This key wasn't selected before but now is, trigger it
+			nn::hid::KeyboardModifier key = buttonData->stringToKeyboardModifier[keyString];
+			inputInstance->triggerKeyboardModifier(key, true);
+		}
+	}
+	for(auto const& lastSelection : lastKeyboardModifiers) {
+		std::string keyString = lastSelection.ToStdString();
+		if(selections.Index(keyString) == wxNOT_FOUND) {
+			// This key was selected before but now is not, deselect it
+			nn::hid::KeyboardModifier key = buttonData->stringToKeyboardModifier[keyString];
+			inputInstance->triggerKeyboardModifier(key, false);
+		}
+	}
+
+	lastKeyboardModifiers = selections;
+}
+
+void ExtraInputMethods::mouseButtonsChanged(wxCommandEvent& event) {
+	wxArrayString selections = mouseButtons->GetStrings();
+	for(auto const& thisSelection : selections) {
+		std::string buttonString = thisSelection.ToStdString();
+		if(lastMouseButtons.Index(buttonString) == wxNOT_FOUND) {
+			// This key wasn't selected before but now is, trigger it
+			nn::hid::MouseButton button = buttonData->stringToMouseButton[buttonString];
+			inputInstance->triggerMouseButton(button, true);
+		}
+	}
+	for(auto const& lastSelection : lastMouseButtons) {
+		std::string buttonString = lastSelection.ToStdString();
+		if(selections.Index(buttonString) == wxNOT_FOUND) {
+			// This key was selected before but now is not, deselect it
+			nn::hid::MouseButton button = buttonData->stringToMouseButton[buttonString];
+			inputInstance->triggerMouseButton(button, false);
+		}
+	}
+
+	lastMouseButtons = selections;
+}
 
 void ExtraInputMethods::onClose(wxCloseEvent& event) {
 	Show(false);
@@ -888,7 +966,7 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 	rightJoystickDrawer->getLockButton()->SetToolTip("Set current value of right gamepad joystick to frame");
 
 	// Not shown by default
-	extraInputMethodsWindow = new ExtraInputMethods(parentFrame, inputInstance);
+	extraInputMethodsWindow = new ExtraInputMethods(parentFrame, inputInstance, buttonData);
 	extraInputMethodsWindow->Hide();
 
 	wxSize gridSize;

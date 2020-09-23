@@ -216,25 +216,22 @@ void MemoryViewer::updateAtIndex(long index) {
 }
 
 void MemoryViewer::onUpdateEntry(wxCommandEvent& event) {
-	long selectedItem = itemsList->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-	if(selectedItem != wxNOT_FOUND) {
-		// An item is selected and now it can be updated
-		MemoryItemInfo& info = infos[selectedItem];
+	// An item is selected and now it can be updated
+	MemoryItemInfo& info = infos[currentItemSelection];
 
-		info.isUnsigned  = unsignedCheckbox->GetValue();
-		info.type        = (MemoryRegionTypes)typeSelection->GetCurrentSelection();
-		info.size        = itemSize->GetValue();
-		info.saveToFile  = saveToFile->GetValue();
-		info.filePath    = filePath->GetPath();
-		info.pointerPath = pointerPath->GetLineText(0);
+	info.isUnsigned  = unsignedCheckbox->GetValue();
+	info.type        = (MemoryRegionTypes)typeSelection->GetCurrentSelection();
+	info.size        = itemSize->GetValue();
+	info.saveToFile  = saveToFile->GetValue();
+	info.filePath    = filePath->GetPath();
+	info.pointerPath = pointerPath->GetLineText(0);
 
-		mapFile(info);
+	mapFile(info);
 
-		itemsList->SetItem(selectedItem, 0, info.pointerPath);
-		itemsList->SetItem(selectedItem, 1, typeChoices[(uint8_t)info.type]);
+	itemsList->SetItem(currentItemSelection, 0, info.pointerPath);
+	itemsList->SetItem(currentItemSelection, 1, typeChoices[(uint8_t)info.type]);
 
-		sendUpdatedEntries();
-	}
+	sendUpdatedEntries();
 }
 
 void MemoryViewer::onAddEntry(wxCommandEvent& event) {
@@ -259,18 +256,15 @@ void MemoryViewer::onAddEntry(wxCommandEvent& event) {
 }
 
 void MemoryViewer::onRemoveEntry(wxCommandEvent& event) {
-	long selectedItem = itemsList->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-	if(selectedItem != wxNOT_FOUND) {
-		itemsList->DeleteItem(selectedItem);
-		itemsList->Refresh();
+	itemsList->DeleteItem(currentItemSelection);
+	itemsList->Refresh();
 
-		// Remove if present
-		fileSystemWatcher.Remove(wxFileName(infos[selectedItem].filePath));
+	// Remove if present
+	fileSystemWatcher.Remove(wxFileName(infos[currentItemSelection].filePath));
 
-		infos.erase(infos.begin() + selectedItem);
+	infos.erase(infos.begin() + currentItemSelection);
 
-		sendUpdatedEntries();
-	}
+	sendUpdatedEntries();
 }
 
 void MemoryViewer::fileChangesDetected(wxFileSystemWatcherEvent& event) {
