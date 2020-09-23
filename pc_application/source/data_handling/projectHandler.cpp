@@ -655,88 +655,113 @@ void ProjectHandler::newProjectWasCreated() {
 	dataProcessing->sendPlayerNum();
 }
 
-void ProjectHandler::promptForUpdate() {
-	const wxString releaseUrl = "https://api.github.com/repos/thegreatrambler/switas/releases/latest";
-	wxURL url(releaseUrl);
-	if(url.GetError() == wxURL_NOERR) {
-		wxString jsonData;
-		wxInputStream* in = url.GetInputStream();
+bool ProjectHandler::promptForUpdate() {
+	// Returns true if an update is installed
+	if(wxPlatformInfo::GetOperatingSystemId() != wxOS_UNIX) {
+		const wxString releaseUrl = "https://api.github.com/repos/thegreatrambler/switas/releases/latest";
+		wxURL url(releaseUrl);
+		if(url.GetError() == wxURL_NOERR) {
+			wxString jsonData;
+			wxInputStream* in = url.GetInputStream();
 
-		if(in && in->IsOk()) {
-			wxStringOutputStream jsonStream(&jsonData);
-			in->Read(jsonStream);
+			if(in && in->IsOk()) {
+				wxStringOutputStream jsonStream(&jsonData);
+				in->Read(jsonStream);
 
-			rapidjson::Document releaseInfo = HELPERS::getSettingsFromString(jsonData.ToStdString());
-			if(strcmp((*mainSettings)["version"].GetString(), releaseInfo["tag_name"].GetString()) != 0) {
-				// The release on Github does not match this version, prompt to download
-				wxMessageDialog installDialog(parentFrame, wxString::Format("A new release is available for download:\n\n%s", wxString::FromUTF8(releaseInfo["body"].GetString())), "Install new update", wxYES_NO | wxCANCEL | wxNO_DEFAULT | wxICON_QUESTION);
-				int res = installDialog.ShowModal();
-				if(res == wxID_YES) {
-					// Install the update, closes the app entirely
+				rapidjson::Document releaseInfo = HELPERS::getSettingsFromString(jsonData.ToStdString());
+				if(strcmp((*mainSettings)["version"].GetString(), releaseInfo["tag_name"].GetString()) != 0) {
+					// The release on Github does not match this version, prompt to download
+					wxMessageDialog installDialog(parentFrame, wxString::Format("A new release is available for download:\n\n%s", wxString::FromUTF8(releaseInfo["body"].GetString())), "Install new update", wxYES_NO | wxCANCEL | wxNO_DEFAULT | wxICON_QUESTION);
+					int res = installDialog.ShowModal();
+					if(res == wxID_YES) {
+						// Install the update, closes the app entirely
 
-					// Windows is index 0
-					int releaseIndex = 0;
-					wxURL updateUrl(wxString::FromUTF8(releaseInfo["assets"][releaseIndex]["browser_download_url"].GetString()));
-					if(updateUrl.GetError() == wxURL_NOERR) {
-						wxInputStream* updateIn = url.GetInputStream();
-
-						if(updateIn && updateIn->IsOk()) {
-							wxZipEntry* entry;
-
-							// Dont take control of the pointer
-							wxZipInputStream zip(*updateIn);
-							while(entry = zip.GetNextEntry(), entry != NULL) {
-								// The name is its relative path within the archive
-								wxFileName filename(entry->GetName());
-
-								// Only handle files
-								if(!filename.IsDir()) {
-									wxFileName relativeToExecutable(wxStandardPaths::Get().GetExecutablePath());
-									// Go one folder back
-									relativeToExecutable.RemoveDir(relativeToExecutable.GetDirCount() - 1);
-									// Remove first folder, it's 'release', hope path is relative
-									filename.RemoveDir(0);
-
-									wxFileName newFilename(relativeToExecutable.GetPathWithSep() + filename.GetFullPath());
-									newFilename.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
-
-									// Cant set executable directly, replace differently
-									if(newFilename.GetName() == "switas") {
-										newFilename.SetName("switas_temp");
-									}
-
-									if(newFilename.GetName() == "switas_recent" && newFilename.GetExt() == "json") {
-										// Ignored
-										delete entry;
-										continue;
-									}
-
-									zip.OpenEntry(*entry);
-
-									// Write binary might not work, I dunno
-									wxFFileOutputStream file(relativeToExecutable.GetFullPath(), "wb");
-
-									if(!file) {
-										// File not created
-										delete entry;
-										continue;
-									}
-
-									zip.Read(file);
-
-									file.Close();
-								}
-
-								delete entry;
+						// Windows is index 0
+						int currentIndex         = 0;
+						uint8_t haveIndex        = false;
+						wxOperatingSystemId osId = wxPlatformInfo::GetOperatingSystemId();
+						for(auto const& releaseType : releaseInfo["assets"]) {
+							switch(osId) {
+							case wxOS_WINDOWS:
+								if(releaseType["name"].GetString() == "switas-windows-64bit.zip")
+									break;
+							case wxOS_MAC:
+								if(releaseType["name"].GetString() == "switas-mac-64bit.app.zip")
+									break;
+								break;
 							}
+							if(haveIndex)
+								break;
+							currentIndex++;
 						}
-						delete updateIn;
+
+						wxURL updateUrl(wxString::FromUTF8(releaseInfo["assets"][currentIndex]["browser_download_url"].GetString()));
+						if(updateUrl.GetError() == wxURL_NOERR) {
+							wxInputStream* updateIn = url.GetInputStream();
+
+							if(updateIn && updateIn->IsOk()) {
+								wxZipEntry* entry;
+
+								// Dont take control of the pointer
+								wxZipInputStream zip(*updateIn);
+								while(entry = zip.GetNextEntry(), entry != NULL) {
+									// The name is its relative path within the archive
+									wxFileName filename(entry->GetName());
+
+									// Only handle files
+									if(!filename.IsDir()) {
+										wxFileName relativeToExecutable(wxStandardPaths::Get().GetExecutablePath());
+										// Go one folder back
+										relativeToExecutable.RemoveDir(relativeToExecutable.GetDirCount() - 1);
+										// Remove first folder, it's 'release', hope path is relative
+										filename.RemoveDir(0);
+
+										wxFileName newFilename(relativeToExecutable.GetPathWithSep() + filename.GetFullPath());
+										newFilename.Mkdir(wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+
+										// Cant set executable directly, replace differently
+										if(newFilename.GetExt() == "exe" || newFilename.GetExt() == "dll") {
+											// Rename existing files
+											wxFileName modifiedName = wxFileName(newFilename);
+											modifiedName.SetName(newFilename.GetName() + "_tempupdateartifact");
+											wxRenameFile(newFilename.GetFullPath(), modifiedName.GetFullPath());
+										}
+
+										if(newFilename.GetName() == "switas_recent" && newFilename.GetExt() == "json") {
+											// Ignored
+											delete entry;
+											continue;
+										}
+
+										zip.OpenEntry(*entry);
+
+										// Write binary might not work, I dunno
+										wxFFileOutputStream file(newFilename.GetFullPath(), "wb");
+
+										if(!file) {
+											// File not created
+											delete entry;
+											continue;
+										}
+
+										zip.Read(file);
+
+										file.Close();
+									}
+
+									delete entry;
+								}
+							}
+							delete updateIn;
+						}
+						return true;
 					}
 				}
 			}
+			delete in;
 		}
-		delete in;
 	}
+	return false;
 }
 
 void ProjectHandler::openUpVideoComparisonViewer(int index) {

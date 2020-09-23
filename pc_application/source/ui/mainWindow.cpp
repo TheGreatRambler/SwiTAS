@@ -93,6 +93,11 @@ MainWindow::MainWindow()
 }
 
 void MainWindow::onStart() {
+	// First, check for updates amd close if they are installed
+	if(projectHandler->promptForUpdate()) {
+		Close(true);
+	}
+
 	logWindow = new wxLogWindow(this, "Logger", false, false);
 	wxLog::SetTimestamp(wxS("%Y-%m-%d %H:%M: %S"));
 	wxLog::SetActiveTarget(logWindow);

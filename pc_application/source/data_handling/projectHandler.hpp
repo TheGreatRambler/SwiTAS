@@ -114,7 +114,7 @@ public:
 	void loadProject();
 	void saveProject();
 
-	void promptForUpdate();
+	bool promptForUpdate();
 
 	void newProjectWasCreated();
 
