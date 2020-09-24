@@ -1049,6 +1049,8 @@ void DataProcessing::setNumberValuesMotion(FrameNum frame, ControllerNumberValue
 		getInputsList()->at(frame)->DIRECTION_ZX_RIGHT = value;
 	case ControllerNumberValues::DIRECTION_ZY_RIGHT:
 		getInputsList()->at(frame)->DIRECTION_ZY_RIGHT = value;
+	case ControllerNumberValues::DIRECTION_ZZ_RIGHT:
+		getInputsList()->at(frame)->DIRECTION_ZZ_RIGHT = value;
 	case ControllerNumberValues::LEFT_X:
 	case ControllerNumberValues::LEFT_Y:
 	case ControllerNumberValues::RIGHT_X:
@@ -1204,6 +1206,9 @@ float DataProcessing::getNumberValuesMotion(FrameNum frame, ControllerNumberValu
 		return getInputsList()->at(frame)->DIRECTION_ZX_RIGHT;
 	case ControllerNumberValues::DIRECTION_ZY_RIGHT:
 		return getInputsList()->at(frame)->DIRECTION_ZY_RIGHT;
+	case ControllerNumberValues::DIRECTION_ZZ_RIGHT:
+		return getInputsList()->at(frame)->DIRECTION_ZZ_RIGHT;
+
 	case ControllerNumberValues::LEFT_X:
 	case ControllerNumberValues::LEFT_Y:
 	case ControllerNumberValues::RIGHT_X:
@@ -1356,6 +1361,8 @@ float DataProcessing::getNumberValuesSpecificMotion(FrameNum frame, ControllerNu
 		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_ZX_RIGHT;
 	case ControllerNumberValues::DIRECTION_ZY_RIGHT:
 		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_ZY_RIGHT;
+	case ControllerNumberValues::DIRECTION_ZZ_RIGHT:
+		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_ZZ_RIGHT;
 	case ControllerNumberValues::LEFT_X:
 	case ControllerNumberValues::LEFT_Y:
 	case ControllerNumberValues::RIGHT_X:

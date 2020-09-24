@@ -856,6 +856,7 @@ ProjectHandlerWindow::ProjectHandlerWindow(wxFrame* parent, std::shared_ptr<Proj
 	wxImage splashImage(wxString::FromUTF8(splashScreenPath));
 	DrawingCanvasBitmap* splashScreen = new DrawingCanvasBitmap(this, splashImage.GetSize());
 	splashScreen->setBitmap(new wxBitmap(splashImage));
+	splashScreen->setBackgroundColor(*wxWHITE);
 
 	mainSizer->Add(splashScreen, 0, wxSHAPED | wxALIGN_CENTER_HORIZONTAL);
 	mainSizer->Add(projectList, 0, wxEXPAND | wxALL);
