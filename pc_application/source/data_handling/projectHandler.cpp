@@ -36,7 +36,7 @@ ProjectSettingsWindow::ProjectSettingsWindow(wxFrame* parentFrame, std::shared_p
 	mainSizer->Add(gameName, 0, wxEXPAND);
 	mainSizer->Add(isMobileSizer, 0);
 
-	Bind(wxEVT_CLOSE_WINDOW, ProjectSettingsWindow::onClose, this);
+	Bind(wxEVT_CLOSE_WINDOW, &ProjectSettingsWindow::onClose, this);
 
 	SetSizer(mainSizer);
 	mainSizer->SetSizeHints(this);
@@ -225,6 +225,7 @@ void ProjectHandler::loadProject() {
 
 					fclose(fin);
 					ZSTD_DCtx_reset(dctx, ZSTD_reset_session_only);
+					ZSTD
 
 					uint8_t* bufferPointer = (uint8_t*)memoryBuffer.GetData();
 					std::size_t bufferSize = memoryBuffer.GetDataLen();
