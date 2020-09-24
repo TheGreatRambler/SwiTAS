@@ -72,7 +72,7 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 
 	entries[5].Set(wxACCEL_CTRL, (int)'=', addFrameID, editMenu.Append(addFrameID, wxT("Add Frame\tCtrl+Plus")));
 	entries[6].Set(wxACCEL_CTRL | wxACCEL_SHIFT, (int)'=', add10FramesID, editMenu.Append(add10FramesID, wxT("Add 10 Frames\tCtrl+Plus")));
-	entries[7].Set(wxACCEL_CTRL, (int)'-', removeFrameID, editMenu.Append(removeFrameID, wxT("Remove Frame\tCtrl+Minus")));
+	entries[7].Set(0, WXK_DELETE, removeFrameID, editMenu.Append(removeFrameID, wxT("Remove Frame\tDelete")));
 	entries[8].Set(wxACCEL_CTRL, WXK_RIGHT, frameAdvanceID, editMenu.Append(frameAdvanceID, wxT("Frame Advance\tCtrl+Right")));
 	entries[9].Set(wxACCEL_CTRL, (int)'H', savestateID, editMenu.Append(savestateID, wxT("Add Savestate\tCtrl+H")));
 	entries[10].Set(wxACCEL_CTRL, (int)'M', mergeIntoMainBranchID, editMenu.Append(mergeIntoMainBranchID, wxT("Merge Frames into Main Branch\tCtrl+M")));
@@ -903,55 +903,19 @@ void DataProcessing::clearAllButtons(FrameNum frame) {
 }
 
 void DataProcessing::setNumberValuesJoystick(FrameNum frame, ControllerNumberValues joystickId, int16_t value) {
+	auto& frameData = getInputsList()->at(frame);
 	switch(joystickId) {
 	case ControllerNumberValues::LEFT_X:
-		getInputsList()->at(frame)->LS_X = value;
+		frameData->LS_X = value;
 		break;
 	case ControllerNumberValues::LEFT_Y:
-		getInputsList()->at(frame)->LS_Y = value;
+		frameData->LS_Y = value;
 		break;
 	case ControllerNumberValues::RIGHT_X:
-		getInputsList()->at(frame)->RS_X = value;
+		frameData->RS_X = value;
 		break;
 	case ControllerNumberValues::RIGHT_Y:
-		getInputsList()->at(frame)->RS_Y = value;
-		break;
-	case ControllerNumberValues::ACCEL_X_LEFT:
-	case ControllerNumberValues::ACCEL_Y_LEFT:
-	case ControllerNumberValues::ACCEL_Z_LEFT:
-	case ControllerNumberValues::GYRO_X_LEFT:
-	case ControllerNumberValues::GYRO_Y_LEFT:
-	case ControllerNumberValues::GYRO_Z_LEFT:
-	case ControllerNumberValues::ANGLE_X_LEFT:
-	case ControllerNumberValues::ANGLE_Y_LEFT:
-	case ControllerNumberValues::ANGLE_Z_LEFT:
-	case ControllerNumberValues::ACCEL_X_RIGHT:
-	case ControllerNumberValues::ACCEL_Y_RIGHT:
-	case ControllerNumberValues::ACCEL_Z_RIGHT:
-	case ControllerNumberValues::GYRO_X_RIGHT:
-	case ControllerNumberValues::GYRO_Y_RIGHT:
-	case ControllerNumberValues::GYRO_Z_RIGHT:
-	case ControllerNumberValues::ANGLE_X_RIGHT:
-	case ControllerNumberValues::ANGLE_Y_RIGHT:
-	case ControllerNumberValues::ANGLE_Z_RIGHT:
-	case ControllerNumberValues::DIRECTION_XX_LEFT:
-	case ControllerNumberValues::DIRECTION_XY_LEFT:
-	case ControllerNumberValues::DIRECTION_XZ_LEFT:
-	case ControllerNumberValues::DIRECTION_YX_LEFT:
-	case ControllerNumberValues::DIRECTION_YY_LEFT:
-	case ControllerNumberValues::DIRECTION_YZ_LEFT:
-	case ControllerNumberValues::DIRECTION_ZX_LEFT:
-	case ControllerNumberValues::DIRECTION_ZY_LEFT:
-	case ControllerNumberValues::DIRECTION_ZZ_LEFT:
-	case ControllerNumberValues::DIRECTION_XX_RIGHT:
-	case ControllerNumberValues::DIRECTION_XY_RIGHT:
-	case ControllerNumberValues::DIRECTION_XZ_RIGHT:
-	case ControllerNumberValues::DIRECTION_YX_RIGHT:
-	case ControllerNumberValues::DIRECTION_YY_RIGHT:
-	case ControllerNumberValues::DIRECTION_YZ_RIGHT:
-	case ControllerNumberValues::DIRECTION_ZX_RIGHT:
-	case ControllerNumberValues::DIRECTION_ZY_RIGHT:
-	case ControllerNumberValues::DIRECTION_ZZ_RIGHT:
+		frameData->RS_Y = value;
 		break;
 	}
 
@@ -960,101 +924,115 @@ void DataProcessing::setNumberValuesJoystick(FrameNum frame, ControllerNumberVal
 }
 
 void DataProcessing::setNumberValuesMotion(FrameNum frame, ControllerNumberValues joystickId, float value) {
+	auto& frameData = getInputsList()->at(frame);
 	switch(joystickId) {
 	case ControllerNumberValues::ACCEL_X_LEFT:
-		getInputsList()->at(frame)->ACCEL_X_LEFT = value;
+		frameData->ACCEL_X_LEFT = value;
 		break;
 	case ControllerNumberValues::ACCEL_Y_LEFT:
-		getInputsList()->at(frame)->ACCEL_Y_LEFT = value;
+		frameData->ACCEL_Y_LEFT = value;
 		break;
 	case ControllerNumberValues::ACCEL_Z_LEFT:
-		getInputsList()->at(frame)->ACCEL_Z_LEFT = value;
+		frameData->ACCEL_Z_LEFT = value;
 		break;
 	case ControllerNumberValues::GYRO_X_LEFT:
-		getInputsList()->at(frame)->GYRO_X_LEFT = value;
+		frameData->GYRO_X_LEFT = value;
 		break;
 	case ControllerNumberValues::GYRO_Y_LEFT:
-		getInputsList()->at(frame)->GYRO_Y_LEFT = value;
+		frameData->GYRO_Y_LEFT = value;
 		break;
 	case ControllerNumberValues::GYRO_Z_LEFT:
-		getInputsList()->at(frame)->GYRO_Z_LEFT = value;
+		frameData->GYRO_Z_LEFT = value;
 		break;
 	case ControllerNumberValues::ANGLE_X_LEFT:
-		getInputsList()->at(frame)->ANGLE_X_LEFT = value;
+		frameData->ANGLE_X_LEFT = value;
 		break;
 	case ControllerNumberValues::ANGLE_Y_LEFT:
-		getInputsList()->at(frame)->ANGLE_Y_LEFT = value;
+		frameData->ANGLE_Y_LEFT = value;
 		break;
 	case ControllerNumberValues::ANGLE_Z_LEFT:
-		getInputsList()->at(frame)->ANGLE_Z_LEFT = value;
+		frameData->ANGLE_Z_LEFT = value;
 		break;
 	case ControllerNumberValues::ACCEL_X_RIGHT:
-		getInputsList()->at(frame)->ACCEL_X_RIGHT = value;
+		frameData->ACCEL_X_RIGHT = value;
 		break;
 	case ControllerNumberValues::ACCEL_Y_RIGHT:
-		getInputsList()->at(frame)->ACCEL_Y_RIGHT = value;
+		frameData->ACCEL_Y_RIGHT = value;
 		break;
 	case ControllerNumberValues::ACCEL_Z_RIGHT:
-		getInputsList()->at(frame)->ACCEL_Z_RIGHT = value;
+		frameData->ACCEL_Z_RIGHT = value;
 		break;
 	case ControllerNumberValues::GYRO_X_RIGHT:
-		getInputsList()->at(frame)->GYRO_X_RIGHT = value;
+		frameData->GYRO_X_RIGHT = value;
 		break;
 	case ControllerNumberValues::GYRO_Y_RIGHT:
-		getInputsList()->at(frame)->GYRO_Y_RIGHT = value;
+		frameData->GYRO_Y_RIGHT = value;
 		break;
 	case ControllerNumberValues::GYRO_Z_RIGHT:
-		getInputsList()->at(frame)->GYRO_Z_RIGHT = value;
+		frameData->GYRO_Z_RIGHT = value;
 		break;
 	case ControllerNumberValues::ANGLE_X_RIGHT:
-		getInputsList()->at(frame)->ANGLE_X_RIGHT = value;
+		frameData->ANGLE_X_RIGHT = value;
 		break;
 	case ControllerNumberValues::ANGLE_Y_RIGHT:
-		getInputsList()->at(frame)->ANGLE_Y_RIGHT = value;
+		frameData->ANGLE_Y_RIGHT = value;
 		break;
 	case ControllerNumberValues::ANGLE_Z_RIGHT:
-		getInputsList()->at(frame)->ANGLE_Z_RIGHT = value;
+		frameData->ANGLE_Z_RIGHT = value;
 		break;
 	case ControllerNumberValues::DIRECTION_XX_LEFT:
-		getInputsList()->at(frame)->DIRECTION_XX_LEFT = value;
+		frameData->DIRECTION_XX_LEFT = value;
+		break;
 	case ControllerNumberValues::DIRECTION_XY_LEFT:
-		getInputsList()->at(frame)->DIRECTION_XY_LEFT = value;
+		frameData->DIRECTION_XY_LEFT = value;
+		break;
 	case ControllerNumberValues::DIRECTION_XZ_LEFT:
-		getInputsList()->at(frame)->DIRECTION_XZ_LEFT = value;
+		frameData->DIRECTION_XZ_LEFT = value;
+		break;
 	case ControllerNumberValues::DIRECTION_YX_LEFT:
-		getInputsList()->at(frame)->DIRECTION_YX_LEFT = value;
+		frameData->DIRECTION_YX_LEFT = value;
+		break;
 	case ControllerNumberValues::DIRECTION_YY_LEFT:
-		getInputsList()->at(frame)->DIRECTION_YY_LEFT = value;
+		frameData->DIRECTION_YY_LEFT = value;
+		break;
 	case ControllerNumberValues::DIRECTION_YZ_LEFT:
-		getInputsList()->at(frame)->DIRECTION_YZ_LEFT = value;
+		frameData->DIRECTION_YZ_LEFT = value;
+		break;
 	case ControllerNumberValues::DIRECTION_ZX_LEFT:
-		getInputsList()->at(frame)->DIRECTION_ZX_LEFT = value;
+		frameData->DIRECTION_ZX_LEFT = value;
+		break;
 	case ControllerNumberValues::DIRECTION_ZY_LEFT:
-		getInputsList()->at(frame)->DIRECTION_ZY_LEFT = value;
+		frameData->DIRECTION_ZY_LEFT = value;
+		break;
 	case ControllerNumberValues::DIRECTION_ZZ_LEFT:
-		getInputsList()->at(frame)->DIRECTION_ZZ_LEFT = value;
+		frameData->DIRECTION_ZZ_LEFT = value;
+		break;
 	case ControllerNumberValues::DIRECTION_XX_RIGHT:
-		getInputsList()->at(frame)->DIRECTION_XX_RIGHT = value;
+		frameData->DIRECTION_XX_RIGHT = value;
+		break;
 	case ControllerNumberValues::DIRECTION_XY_RIGHT:
-		getInputsList()->at(frame)->DIRECTION_XY_RIGHT = value;
+		frameData->DIRECTION_XY_RIGHT = value;
+		break;
 	case ControllerNumberValues::DIRECTION_XZ_RIGHT:
-		getInputsList()->at(frame)->DIRECTION_XZ_RIGHT = value;
+		frameData->DIRECTION_XZ_RIGHT = value;
+		break;
 	case ControllerNumberValues::DIRECTION_YX_RIGHT:
-		getInputsList()->at(frame)->DIRECTION_YX_RIGHT = value;
+		frameData->DIRECTION_YX_RIGHT = value;
+		break;
 	case ControllerNumberValues::DIRECTION_YY_RIGHT:
-		getInputsList()->at(frame)->DIRECTION_YY_RIGHT = value;
+		frameData->DIRECTION_YY_RIGHT = value;
+		break;
 	case ControllerNumberValues::DIRECTION_YZ_RIGHT:
-		getInputsList()->at(frame)->DIRECTION_YZ_RIGHT = value;
+		frameData->DIRECTION_YZ_RIGHT = value;
+		break;
 	case ControllerNumberValues::DIRECTION_ZX_RIGHT:
-		getInputsList()->at(frame)->DIRECTION_ZX_RIGHT = value;
+		frameData->DIRECTION_ZX_RIGHT = value;
+		break;
 	case ControllerNumberValues::DIRECTION_ZY_RIGHT:
-		getInputsList()->at(frame)->DIRECTION_ZY_RIGHT = value;
+		frameData->DIRECTION_ZY_RIGHT = value;
+		break;
 	case ControllerNumberValues::DIRECTION_ZZ_RIGHT:
-		getInputsList()->at(frame)->DIRECTION_ZZ_RIGHT = value;
-	case ControllerNumberValues::LEFT_X:
-	case ControllerNumberValues::LEFT_Y:
-	case ControllerNumberValues::RIGHT_X:
-	case ControllerNumberValues::RIGHT_Y:
+		frameData->DIRECTION_ZZ_RIGHT = value;
 		break;
 	}
 
@@ -1063,310 +1041,268 @@ void DataProcessing::setNumberValuesMotion(FrameNum frame, ControllerNumberValue
 }
 
 int16_t DataProcessing::getNumberValuesJoystick(FrameNum frame, ControllerNumberValues joystickId) const {
+	auto& frameData = getInputsList()->at(frame);
 	switch(joystickId) {
 	case ControllerNumberValues::LEFT_X:
-		return getInputsList()->at(frame)->LS_X;
+		return frameData->LS_X;
 		break;
 	case ControllerNumberValues::LEFT_Y:
-		return getInputsList()->at(frame)->LS_Y;
+		return frameData->LS_Y;
 		break;
 	case ControllerNumberValues::RIGHT_X:
-		return getInputsList()->at(frame)->RS_X;
+		return frameData->RS_X;
 		break;
 	case ControllerNumberValues::RIGHT_Y:
-		return getInputsList()->at(frame)->RS_Y;
-		break;
-	case ControllerNumberValues::ACCEL_X_LEFT:
-	case ControllerNumberValues::ACCEL_Y_LEFT:
-	case ControllerNumberValues::ACCEL_Z_LEFT:
-	case ControllerNumberValues::GYRO_X_LEFT:
-	case ControllerNumberValues::GYRO_Y_LEFT:
-	case ControllerNumberValues::GYRO_Z_LEFT:
-	case ControllerNumberValues::ANGLE_X_LEFT:
-	case ControllerNumberValues::ANGLE_Y_LEFT:
-	case ControllerNumberValues::ANGLE_Z_LEFT:
-	case ControllerNumberValues::ACCEL_X_RIGHT:
-	case ControllerNumberValues::ACCEL_Y_RIGHT:
-	case ControllerNumberValues::ACCEL_Z_RIGHT:
-	case ControllerNumberValues::GYRO_X_RIGHT:
-	case ControllerNumberValues::GYRO_Y_RIGHT:
-	case ControllerNumberValues::GYRO_Z_RIGHT:
-	case ControllerNumberValues::ANGLE_X_RIGHT:
-	case ControllerNumberValues::ANGLE_Y_RIGHT:
-	case ControllerNumberValues::ANGLE_Z_RIGHT:
-	case ControllerNumberValues::DIRECTION_XX_LEFT:
-	case ControllerNumberValues::DIRECTION_XY_LEFT:
-	case ControllerNumberValues::DIRECTION_XZ_LEFT:
-	case ControllerNumberValues::DIRECTION_YX_LEFT:
-	case ControllerNumberValues::DIRECTION_YY_LEFT:
-	case ControllerNumberValues::DIRECTION_YZ_LEFT:
-	case ControllerNumberValues::DIRECTION_ZX_LEFT:
-	case ControllerNumberValues::DIRECTION_ZY_LEFT:
-	case ControllerNumberValues::DIRECTION_ZZ_LEFT:
-	case ControllerNumberValues::DIRECTION_XX_RIGHT:
-	case ControllerNumberValues::DIRECTION_XY_RIGHT:
-	case ControllerNumberValues::DIRECTION_XZ_RIGHT:
-	case ControllerNumberValues::DIRECTION_YX_RIGHT:
-	case ControllerNumberValues::DIRECTION_YY_RIGHT:
-	case ControllerNumberValues::DIRECTION_YZ_RIGHT:
-	case ControllerNumberValues::DIRECTION_ZX_RIGHT:
-	case ControllerNumberValues::DIRECTION_ZY_RIGHT:
-	case ControllerNumberValues::DIRECTION_ZZ_RIGHT:
+		return frameData->RS_Y;
 		break;
 	}
+	return 0;
 }
 
 float DataProcessing::getNumberValuesMotion(FrameNum frame, ControllerNumberValues joystickId) const {
+	auto& frameData = getInputsList()->at(frame);
 	switch(joystickId) {
 	case ControllerNumberValues::ACCEL_X_LEFT:
-		return getInputsList()->at(frame)->ACCEL_X_LEFT;
+		return frameData->ACCEL_X_LEFT;
 		break;
 	case ControllerNumberValues::ACCEL_Y_LEFT:
-		return getInputsList()->at(frame)->ACCEL_Y_LEFT;
+		return frameData->ACCEL_Y_LEFT;
 		break;
 	case ControllerNumberValues::ACCEL_Z_LEFT:
-		return getInputsList()->at(frame)->ACCEL_Z_LEFT;
+		return frameData->ACCEL_Z_LEFT;
 		break;
 	case ControllerNumberValues::GYRO_X_LEFT:
-		return getInputsList()->at(frame)->GYRO_X_LEFT;
+		return frameData->GYRO_X_LEFT;
 		break;
 	case ControllerNumberValues::GYRO_Y_LEFT:
-		return getInputsList()->at(frame)->GYRO_Y_LEFT;
+		return frameData->GYRO_Y_LEFT;
 		break;
 	case ControllerNumberValues::GYRO_Z_LEFT:
-		return getInputsList()->at(frame)->GYRO_Z_LEFT;
+		return frameData->GYRO_Z_LEFT;
 		break;
 	case ControllerNumberValues::ANGLE_X_LEFT:
-		return getInputsList()->at(frame)->ANGLE_X_LEFT;
+		return frameData->ANGLE_X_LEFT;
 		break;
 	case ControllerNumberValues::ANGLE_Y_LEFT:
-		return getInputsList()->at(frame)->ANGLE_Y_LEFT;
+		return frameData->ANGLE_Y_LEFT;
 		break;
 	case ControllerNumberValues::ANGLE_Z_LEFT:
-		return getInputsList()->at(frame)->ANGLE_Z_LEFT;
+		return frameData->ANGLE_Z_LEFT;
 		break;
 	case ControllerNumberValues::ACCEL_X_RIGHT:
-		return getInputsList()->at(frame)->ACCEL_X_RIGHT;
+		return frameData->ACCEL_X_RIGHT;
 		break;
 	case ControllerNumberValues::ACCEL_Y_RIGHT:
-		return getInputsList()->at(frame)->ACCEL_Y_RIGHT;
+		return frameData->ACCEL_Y_RIGHT;
 		break;
 	case ControllerNumberValues::ACCEL_Z_RIGHT:
-		return getInputsList()->at(frame)->ACCEL_Z_RIGHT;
+		return frameData->ACCEL_Z_RIGHT;
 		break;
 	case ControllerNumberValues::GYRO_X_RIGHT:
-		return getInputsList()->at(frame)->GYRO_X_RIGHT;
+		return frameData->GYRO_X_RIGHT;
 		break;
 	case ControllerNumberValues::GYRO_Y_RIGHT:
-		return getInputsList()->at(frame)->GYRO_Y_RIGHT;
+		return frameData->GYRO_Y_RIGHT;
 		break;
 	case ControllerNumberValues::GYRO_Z_RIGHT:
-		return getInputsList()->at(frame)->GYRO_Z_RIGHT;
+		return frameData->GYRO_Z_RIGHT;
 		break;
 	case ControllerNumberValues::ANGLE_X_RIGHT:
-		return getInputsList()->at(frame)->ANGLE_X_RIGHT;
+		return frameData->ANGLE_X_RIGHT;
 		break;
 	case ControllerNumberValues::ANGLE_Y_RIGHT:
-		return getInputsList()->at(frame)->ANGLE_Y_RIGHT;
+		return frameData->ANGLE_Y_RIGHT;
 		break;
 	case ControllerNumberValues::ANGLE_Z_RIGHT:
-		return getInputsList()->at(frame)->ANGLE_Z_RIGHT;
+		return frameData->ANGLE_Z_RIGHT;
 		break;
 	case ControllerNumberValues::DIRECTION_XX_LEFT:
-		return getInputsList()->at(frame)->DIRECTION_XX_LEFT;
+		return frameData->DIRECTION_XX_LEFT;
+		break;
 	case ControllerNumberValues::DIRECTION_XY_LEFT:
-		return getInputsList()->at(frame)->DIRECTION_XY_LEFT;
+		return frameData->DIRECTION_XY_LEFT;
+		break;
 	case ControllerNumberValues::DIRECTION_XZ_LEFT:
-		return getInputsList()->at(frame)->DIRECTION_XZ_LEFT;
+		return frameData->DIRECTION_XZ_LEFT;
+		break;
 	case ControllerNumberValues::DIRECTION_YX_LEFT:
-		return getInputsList()->at(frame)->DIRECTION_YX_LEFT;
+		return frameData->DIRECTION_YX_LEFT;
+		break;
 	case ControllerNumberValues::DIRECTION_YY_LEFT:
-		return getInputsList()->at(frame)->DIRECTION_YY_LEFT;
+		return frameData->DIRECTION_YY_LEFT;
+		break;
 	case ControllerNumberValues::DIRECTION_YZ_LEFT:
-		return getInputsList()->at(frame)->DIRECTION_YZ_LEFT;
+		return frameData->DIRECTION_YZ_LEFT;
+		break;
 	case ControllerNumberValues::DIRECTION_ZX_LEFT:
-		return getInputsList()->at(frame)->DIRECTION_ZX_LEFT;
+		return frameData->DIRECTION_ZX_LEFT;
+		break;
 	case ControllerNumberValues::DIRECTION_ZY_LEFT:
-		return getInputsList()->at(frame)->DIRECTION_ZY_LEFT;
+		return frameData->DIRECTION_ZY_LEFT;
+		break;
 	case ControllerNumberValues::DIRECTION_ZZ_LEFT:
-		return getInputsList()->at(frame)->DIRECTION_ZZ_LEFT;
+		return frameData->DIRECTION_ZZ_LEFT;
+		break;
 	case ControllerNumberValues::DIRECTION_XX_RIGHT:
-		return getInputsList()->at(frame)->DIRECTION_XX_RIGHT;
+		return frameData->DIRECTION_XX_RIGHT;
+		break;
 	case ControllerNumberValues::DIRECTION_XY_RIGHT:
-		return getInputsList()->at(frame)->DIRECTION_XY_RIGHT;
+		return frameData->DIRECTION_XY_RIGHT;
+		break;
 	case ControllerNumberValues::DIRECTION_XZ_RIGHT:
-		return getInputsList()->at(frame)->DIRECTION_XZ_RIGHT;
+		return frameData->DIRECTION_XZ_RIGHT;
+		break;
 	case ControllerNumberValues::DIRECTION_YX_RIGHT:
-		return getInputsList()->at(frame)->DIRECTION_YX_RIGHT;
+		return frameData->DIRECTION_YX_RIGHT;
+		break;
 	case ControllerNumberValues::DIRECTION_YY_RIGHT:
-		return getInputsList()->at(frame)->DIRECTION_YY_RIGHT;
+		return frameData->DIRECTION_YY_RIGHT;
+		break;
 	case ControllerNumberValues::DIRECTION_YZ_RIGHT:
-		return getInputsList()->at(frame)->DIRECTION_YZ_RIGHT;
+		return frameData->DIRECTION_YZ_RIGHT;
+		break;
 	case ControllerNumberValues::DIRECTION_ZX_RIGHT:
-		return getInputsList()->at(frame)->DIRECTION_ZX_RIGHT;
+		return frameData->DIRECTION_ZX_RIGHT;
+		break;
 	case ControllerNumberValues::DIRECTION_ZY_RIGHT:
-		return getInputsList()->at(frame)->DIRECTION_ZY_RIGHT;
+		return frameData->DIRECTION_ZY_RIGHT;
+		break;
 	case ControllerNumberValues::DIRECTION_ZZ_RIGHT:
-		return getInputsList()->at(frame)->DIRECTION_ZZ_RIGHT;
-
-	case ControllerNumberValues::LEFT_X:
-	case ControllerNumberValues::LEFT_Y:
-	case ControllerNumberValues::RIGHT_X:
-	case ControllerNumberValues::RIGHT_Y:
+		return frameData->DIRECTION_ZZ_RIGHT;
 		break;
 	}
+	return 0;
 }
 
 int16_t DataProcessing::getNumberValuesSpecificJoystick(FrameNum frame, ControllerNumberValues joystickId, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
+	auto const& frameData = getControllerData(player, savestateHookNum, branch, frame);
 	switch(joystickId) {
 	case ControllerNumberValues::LEFT_X:
-		return getControllerData(player, savestateHookNum, branch, frame)->LS_X;
+		return frameData->LS_X;
 		break;
 	case ControllerNumberValues::LEFT_Y:
-		return getControllerData(player, savestateHookNum, branch, frame)->LS_Y;
+		return frameData->LS_Y;
 		break;
 	case ControllerNumberValues::RIGHT_X:
-		return getControllerData(player, savestateHookNum, branch, frame)->RS_X;
+		return frameData->RS_X;
 		break;
 	case ControllerNumberValues::RIGHT_Y:
-		return getControllerData(player, savestateHookNum, branch, frame)->RS_Y;
-		break;
-	case ControllerNumberValues::ACCEL_X_LEFT:
-	case ControllerNumberValues::ACCEL_Y_LEFT:
-	case ControllerNumberValues::ACCEL_Z_LEFT:
-	case ControllerNumberValues::GYRO_X_LEFT:
-	case ControllerNumberValues::GYRO_Y_LEFT:
-	case ControllerNumberValues::GYRO_Z_LEFT:
-	case ControllerNumberValues::ANGLE_X_LEFT:
-	case ControllerNumberValues::ANGLE_Y_LEFT:
-	case ControllerNumberValues::ANGLE_Z_LEFT:
-	case ControllerNumberValues::ACCEL_X_RIGHT:
-	case ControllerNumberValues::ACCEL_Y_RIGHT:
-	case ControllerNumberValues::ACCEL_Z_RIGHT:
-	case ControllerNumberValues::GYRO_X_RIGHT:
-	case ControllerNumberValues::GYRO_Y_RIGHT:
-	case ControllerNumberValues::GYRO_Z_RIGHT:
-	case ControllerNumberValues::ANGLE_X_RIGHT:
-	case ControllerNumberValues::ANGLE_Y_RIGHT:
-	case ControllerNumberValues::ANGLE_Z_RIGHT:
-	case ControllerNumberValues::DIRECTION_XX_LEFT:
-	case ControllerNumberValues::DIRECTION_XY_LEFT:
-	case ControllerNumberValues::DIRECTION_XZ_LEFT:
-	case ControllerNumberValues::DIRECTION_YX_LEFT:
-	case ControllerNumberValues::DIRECTION_YY_LEFT:
-	case ControllerNumberValues::DIRECTION_YZ_LEFT:
-	case ControllerNumberValues::DIRECTION_ZX_LEFT:
-	case ControllerNumberValues::DIRECTION_ZY_LEFT:
-	case ControllerNumberValues::DIRECTION_ZZ_LEFT:
-	case ControllerNumberValues::DIRECTION_XX_RIGHT:
-	case ControllerNumberValues::DIRECTION_XY_RIGHT:
-	case ControllerNumberValues::DIRECTION_XZ_RIGHT:
-	case ControllerNumberValues::DIRECTION_YX_RIGHT:
-	case ControllerNumberValues::DIRECTION_YY_RIGHT:
-	case ControllerNumberValues::DIRECTION_YZ_RIGHT:
-	case ControllerNumberValues::DIRECTION_ZX_RIGHT:
-	case ControllerNumberValues::DIRECTION_ZY_RIGHT:
-	case ControllerNumberValues::DIRECTION_ZZ_RIGHT:
+		return frameData->RS_Y;
 		break;
 	}
+	return 0;
 }
 
 float DataProcessing::getNumberValuesSpecificMotion(FrameNum frame, ControllerNumberValues joystickId, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
+	auto const& frameData = getControllerData(player, savestateHookNum, branch, frame);
 	switch(joystickId) {
 	case ControllerNumberValues::ACCEL_X_LEFT:
-		return getControllerData(player, savestateHookNum, branch, frame)->ACCEL_X_LEFT;
+		return frameData->ACCEL_X_LEFT;
 		break;
 	case ControllerNumberValues::ACCEL_Y_LEFT:
-		return getControllerData(player, savestateHookNum, branch, frame)->ACCEL_Y_LEFT;
+		return frameData->ACCEL_Y_LEFT;
 		break;
 	case ControllerNumberValues::ACCEL_Z_LEFT:
-		return getControllerData(player, savestateHookNum, branch, frame)->ACCEL_Z_LEFT;
+		return frameData->ACCEL_Z_LEFT;
 		break;
 	case ControllerNumberValues::GYRO_X_LEFT:
-		return getControllerData(player, savestateHookNum, branch, frame)->GYRO_X_LEFT;
+		return frameData->GYRO_X_LEFT;
 		break;
 	case ControllerNumberValues::GYRO_Y_LEFT:
-		return getControllerData(player, savestateHookNum, branch, frame)->GYRO_Y_LEFT;
+		return frameData->GYRO_Y_LEFT;
 		break;
 	case ControllerNumberValues::GYRO_Z_LEFT:
-		return getControllerData(player, savestateHookNum, branch, frame)->GYRO_Z_LEFT;
+		return frameData->GYRO_Z_LEFT;
 		break;
 	case ControllerNumberValues::ANGLE_X_LEFT:
-		return getControllerData(player, savestateHookNum, branch, frame)->ANGLE_X_LEFT;
+		return frameData->ANGLE_X_LEFT;
 		break;
 	case ControllerNumberValues::ANGLE_Y_LEFT:
-		return getControllerData(player, savestateHookNum, branch, frame)->ANGLE_Y_LEFT;
+		return frameData->ANGLE_Y_LEFT;
 		break;
 	case ControllerNumberValues::ANGLE_Z_LEFT:
-		return getControllerData(player, savestateHookNum, branch, frame)->ANGLE_Z_LEFT;
+		return frameData->ANGLE_Z_LEFT;
 		break;
 	case ControllerNumberValues::ACCEL_X_RIGHT:
-		return getControllerData(player, savestateHookNum, branch, frame)->ACCEL_X_RIGHT;
+		return frameData->ACCEL_X_RIGHT;
 		break;
 	case ControllerNumberValues::ACCEL_Y_RIGHT:
-		return getControllerData(player, savestateHookNum, branch, frame)->ACCEL_Y_RIGHT;
+		return frameData->ACCEL_Y_RIGHT;
 		break;
 	case ControllerNumberValues::ACCEL_Z_RIGHT:
-		return getControllerData(player, savestateHookNum, branch, frame)->ACCEL_Z_RIGHT;
+		return frameData->ACCEL_Z_RIGHT;
 		break;
 	case ControllerNumberValues::GYRO_X_RIGHT:
-		return getControllerData(player, savestateHookNum, branch, frame)->GYRO_X_RIGHT;
+		return frameData->GYRO_X_RIGHT;
 		break;
 	case ControllerNumberValues::GYRO_Y_RIGHT:
-		return getControllerData(player, savestateHookNum, branch, frame)->GYRO_Y_RIGHT;
+		return frameData->GYRO_Y_RIGHT;
 		break;
 	case ControllerNumberValues::GYRO_Z_RIGHT:
-		return getControllerData(player, savestateHookNum, branch, frame)->GYRO_Z_RIGHT;
+		return frameData->GYRO_Z_RIGHT;
 		break;
 	case ControllerNumberValues::ANGLE_X_RIGHT:
-		return getControllerData(player, savestateHookNum, branch, frame)->ANGLE_X_RIGHT;
+		return frameData->ANGLE_X_RIGHT;
 		break;
 	case ControllerNumberValues::ANGLE_Y_RIGHT:
-		return getControllerData(player, savestateHookNum, branch, frame)->ANGLE_Y_RIGHT;
+		return frameData->ANGLE_Y_RIGHT;
 		break;
 	case ControllerNumberValues::ANGLE_Z_RIGHT:
-		return getControllerData(player, savestateHookNum, branch, frame)->ANGLE_Z_RIGHT;
+		return frameData->ANGLE_Z_RIGHT;
 		break;
 	case ControllerNumberValues::DIRECTION_XX_LEFT:
-		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_XX_LEFT;
+		return frameData->DIRECTION_XX_LEFT;
+		break;
 	case ControllerNumberValues::DIRECTION_XY_LEFT:
-		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_XY_LEFT;
+		return frameData->DIRECTION_XY_LEFT;
+		break;
 	case ControllerNumberValues::DIRECTION_XZ_LEFT:
-		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_XZ_LEFT;
+		return frameData->DIRECTION_XZ_LEFT;
+		break;
 	case ControllerNumberValues::DIRECTION_YX_LEFT:
-		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_YX_LEFT;
+		return frameData->DIRECTION_YX_LEFT;
+		break;
 	case ControllerNumberValues::DIRECTION_YY_LEFT:
-		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_YY_LEFT;
+		return frameData->DIRECTION_YY_LEFT;
+		break;
 	case ControllerNumberValues::DIRECTION_YZ_LEFT:
-		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_YZ_LEFT;
+		return frameData->DIRECTION_YZ_LEFT;
+		break;
 	case ControllerNumberValues::DIRECTION_ZX_LEFT:
-		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_ZX_LEFT;
+		return frameData->DIRECTION_ZX_LEFT;
+		break;
 	case ControllerNumberValues::DIRECTION_ZY_LEFT:
-		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_ZY_LEFT;
+		return frameData->DIRECTION_ZY_LEFT;
+		break;
 	case ControllerNumberValues::DIRECTION_ZZ_LEFT:
-		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_ZZ_LEFT;
+		return frameData->DIRECTION_ZZ_LEFT;
+		break;
 	case ControllerNumberValues::DIRECTION_XX_RIGHT:
-		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_XX_RIGHT;
+		return frameData->DIRECTION_XX_RIGHT;
+		break;
 	case ControllerNumberValues::DIRECTION_XY_RIGHT:
-		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_XY_RIGHT;
+		return frameData->DIRECTION_XY_RIGHT;
+		break;
 	case ControllerNumberValues::DIRECTION_XZ_RIGHT:
-		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_XZ_RIGHT;
+		return frameData->DIRECTION_XZ_RIGHT;
+		break;
 	case ControllerNumberValues::DIRECTION_YX_RIGHT:
-		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_YX_RIGHT;
+		return frameData->DIRECTION_YX_RIGHT;
+		break;
 	case ControllerNumberValues::DIRECTION_YY_RIGHT:
-		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_YY_RIGHT;
+		return frameData->DIRECTION_YY_RIGHT;
+		break;
 	case ControllerNumberValues::DIRECTION_YZ_RIGHT:
-		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_YZ_RIGHT;
+		return frameData->DIRECTION_YZ_RIGHT;
+		break;
 	case ControllerNumberValues::DIRECTION_ZX_RIGHT:
-		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_ZX_RIGHT;
+		return frameData->DIRECTION_ZX_RIGHT;
+		break;
 	case ControllerNumberValues::DIRECTION_ZY_RIGHT:
-		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_ZY_RIGHT;
+		return frameData->DIRECTION_ZY_RIGHT;
+		break;
 	case ControllerNumberValues::DIRECTION_ZZ_RIGHT:
-		return getControllerData(player, savestateHookNum, branch, frame)->DIRECTION_ZZ_RIGHT;
-	case ControllerNumberValues::LEFT_X:
-	case ControllerNumberValues::LEFT_Y:
-	case ControllerNumberValues::RIGHT_X:
-	case ControllerNumberValues::RIGHT_Y:
+		return frameData->DIRECTION_ZZ_RIGHT;
 		break;
 	}
 }
@@ -1427,36 +1363,37 @@ void DataProcessing::triggerExtraValue(ExtraValues extraValue, int32_t value) {
 }
 
 void DataProcessing::setExtraValue(FrameNum frame, ExtraValues extraValue, int32_t value) {
+	auto& frameData = getInputsExtraList()->at(frame);
 	switch(extraValue) {
 	case TOUCH_X_1:
-		getInputsExtraList()->at(frame)->touchX1 = value;
+		frameData->touchX1 = value;
 		break;
 	case TOUCH_Y_1:
-		getInputsExtraList()->at(frame)->touchY1 = value;
+		frameData->touchY1 = value;
 		break;
 	case TOUCH_X_2:
-		getInputsExtraList()->at(frame)->touchX2 = value;
+		frameData->touchX2 = value;
 		break;
 	case TOUCH_Y_2:
-		getInputsExtraList()->at(frame)->touchY2 = value;
+		frameData->touchY2 = value;
 		break;
 	case MOUSE_X:
-		getInputsExtraList()->at(frame)->mouseX = value;
+		frameData->mouseX = value;
 		break;
 	case MOUSE_Y:
-		getInputsExtraList()->at(frame)->mouseY = value;
+		frameData->mouseY = value;
 		break;
 	case MOUSE_VELOCITY_X:
-		getInputsExtraList()->at(frame)->mouseVelocityX = value;
+		frameData->mouseVelocityX = value;
 		break;
 	case MOUSE_VELOCITY_Y:
-		getInputsExtraList()->at(frame)->mouseVelocityY = value;
+		frameData->mouseVelocityY = value;
 		break;
 	case SCROLL_VELOCITY_X:
-		getInputsExtraList()->at(frame)->scrollVelocityX = value;
+		frameData->scrollVelocityX = value;
 		break;
 	case SCROLL_VELOCITY_Y:
-		getInputsExtraList()->at(frame)->scrollVelocityY = value;
+		frameData->scrollVelocityY = value;
 		break;
 	}
 
@@ -1467,38 +1404,40 @@ void DataProcessing::setExtraValue(FrameNum frame, ExtraValues extraValue, int32
 }
 
 int32_t DataProcessing::getExtraValue(FrameNum frame, ExtraValues extraValue) const {
+	auto const& frameData = getInputsExtraList()->at(frame);
 	switch(extraValue) {
 	case TOUCH_X_1:
-		return getInputsExtraList()->at(frame)->touchX1;
+		return frameData->touchX1;
 		break;
 	case TOUCH_Y_1:
-		return getInputsExtraList()->at(frame)->touchY1;
+		return frameData->touchY1;
 		break;
 	case TOUCH_X_2:
-		return getInputsExtraList()->at(frame)->touchX2;
+		return frameData->touchX2;
 		break;
 	case TOUCH_Y_2:
-		return getInputsExtraList()->at(frame)->touchY2;
+		return frameData->touchY2;
 		break;
 	case MOUSE_X:
-		return getInputsExtraList()->at(frame)->mouseX;
+		return frameData->mouseX;
 		break;
 	case MOUSE_Y:
-		return getInputsExtraList()->at(frame)->mouseY;
+		return frameData->mouseY;
 		break;
 	case MOUSE_VELOCITY_X:
-		return getInputsExtraList()->at(frame)->mouseVelocityX;
+		return frameData->mouseVelocityX;
 		break;
 	case MOUSE_VELOCITY_Y:
-		return getInputsExtraList()->at(frame)->mouseVelocityY;
+		return frameData->mouseVelocityY;
 		break;
 	case SCROLL_VELOCITY_X:
-		return getInputsExtraList()->at(frame)->scrollVelocityX;
+		return frameData->scrollVelocityX;
 		break;
 	case SCROLL_VELOCITY_Y:
-		return getInputsExtraList()->at(frame)->scrollVelocityY;
+		return frameData->scrollVelocityY;
 		break;
 	}
+	return 0;
 }
 
 int32_t DataProcessing::getExtraValueSpecific(FrameNum frame, ExtraValues extraValue, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
@@ -1534,6 +1473,7 @@ int32_t DataProcessing::getExtraValueSpecific(FrameNum frame, ExtraValues extraV
 		return getControllerDataExtra(savestateHookNum, branch, frame)->scrollVelocityY;
 		break;
 	}
+	return 0;
 }
 
 int32_t DataProcessing::getExtraValueCurrent(ExtraValues extraValue) const {
@@ -1571,7 +1511,8 @@ uint8_t DataProcessing::getKeyboardButtonCurrent(nn::hid::KeyboardKey key) const
 }
 
 void DataProcessing::clearAllKeyboardButtons(FrameNum frame) {
-	memset(getInputsExtraList()->at(frame)->keyboardKeys, 0, sizeof(getInputsExtraList()->at(frame)->keyboardKeys));
+	auto& keyboardKeys = getInputsExtraList()->at(frame)->keyboardKeys;
+	memset(keyboardKeys, 0, sizeof(keyboardKeys));
 
 	invalidateRun(frame);
 	modifyCurrentFrameViews(frame);
@@ -1589,10 +1530,11 @@ void DataProcessing::triggerKeyboardModifier(nn::hid::KeyboardModifier key, uint
 }
 
 void DataProcessing::setKeyboardModifier(FrameNum frame, nn::hid::KeyboardModifier key, uint8_t state) {
+	auto& frameData = getInputsExtraList()->at(frame);
 	if(state) {
-		getInputsExtraList()->at(frame)->keyboardModifiers |= (int32_t)key;
+		frameData->keyboardModifiers |= (int32_t)key;
 	} else {
-		getInputsExtraList()->at(frame)->keyboardModifiers &= ~(int32_t)key;
+		frameData->keyboardModifiers &= ~(int32_t)key;
 	}
 
 	invalidateRun(frame);
@@ -1631,10 +1573,11 @@ void DataProcessing::triggerMouseButton(nn::hid::MouseButton key, uint8_t state)
 }
 
 void DataProcessing::setMouseButton(FrameNum frame, nn::hid::MouseButton key, uint8_t state) {
+	auto& frameData = getInputsExtraList()->at(frame);
 	if(state) {
-		getInputsExtraList()->at(frame)->mouseButtons |= (int32_t)key;
+		frameData->mouseButtons |= (int32_t)key;
 	} else {
-		getInputsExtraList()->at(frame)->mouseButtons &= ~(int32_t)key;
+		frameData->mouseButtons &= ~(int32_t)key;
 	}
 
 	invalidateRun(frame);
@@ -1747,8 +1690,9 @@ uint8_t DataProcessing::getFramestateInfo(FrameNum frame) const {
 }
 
 void DataProcessing::invalidateRun(FrameNum frame) {
+	FrameNum size = getInputsList()->size();
 	while(true) {
-		if(frame == getInputsList()->size() || !getFramestateInfo(frame, FrameState::RAN)) {
+		if(frame == size || !getFramestateInfo(frame, FrameState::RAN)) {
 			// Refresh all these items
 			// I don't care if it's way off the page, I think wxWidgets handles for this
 			Refresh();
@@ -1767,20 +1711,26 @@ void DataProcessing::invalidateRun(FrameNum frame) {
 }
 
 void DataProcessing::invalidateRunSpecific(FrameNum frame, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) {
-	auto& list       = allPlayers[player]->at(savestateHookNum)->inputs[branch];
-	std::size_t size = list->size();
+	auto& list    = allPlayers[player]->at(savestateHookNum)->inputs[branch];
+	FrameNum size = list->size();
+	// TODO make this work with extra data too
 	while(true) {
 		if(frame == size || !getFramestateInfoSpecific(frame, FrameState::RAN, savestateHookNum, branch, player)) {
 			// Refresh all these items
 			// I don't care if it's way off the page, I think wxWidgets handles for this
 			Refresh();
 			break;
-		} else {
-			// Set bit
-			setFramestateInfoSpecific(frame, FrameState::RAN, false, savestateHookNum, branch, player);
-			setFramestateInfoSpecific(frame, FrameState::SAVESTATE, false, savestateHookNum, branch, player);
-			frame++;
 		}
+		// Set bit
+		setFramestateInfoSpecific(frame, FrameState::RAN, false, savestateHookNum, branch, player);
+		// setFramestateInfoSpecific(frame, FrameState::SAVESTATE, false, savestateHookNum, branch, player);
+		// Also delete framebuffer from filesystem if neccessary
+		wxFileName framebufferFileName = getFramebufferPath(player, savestateHookNum, branch, frame);
+		if(framebufferFileName.FileExists()) {
+			// Delete file from filesystem
+			wxRemoveFile(framebufferFileName.GetFullPath());
+		}
+		frame++;
 	}
 }
 
@@ -1807,6 +1757,24 @@ void DataProcessing::addFrame(FrameNum afterFrame) {
 		}
 
 		playerIndex++;
+	}
+
+	BranchNum branchIndex = 0;
+
+	for(auto& branch : *allExtraFrameData[currentSavestateHook]) {
+		std::shared_ptr<TouchAndKeyboardData> newExtraData = std::make_shared<TouchAndKeyboardData>();
+
+		if(branch->size() == 0) {
+			branch->push_back(newExtraData);
+		} else {
+			auto begin = branch->begin();
+			branch->insert(begin + afterFrame + 1, newExtraData);
+		}
+
+		// Invalidate run for the data immidiently after this frame
+		// invalidateRunSpecific(afterFrame + 1, currentSavestateHook, branchIndex, playerIndex);
+
+		branchIndex++;
 	}
 
 	// Because of the usability of virtual list controls, just update the length
@@ -1842,6 +1810,17 @@ void DataProcessing::removeFrames(FrameNum start, FrameNum end) {
 			}
 
 			playerIndex++;
+		}
+
+		BranchNum branchIndex = 0;
+		for(auto& branch : *allExtraFrameData[currentSavestateHook]) {
+			auto beginning = branch->begin();
+			branch->erase(beginning + start, beginning + end + 1);
+
+			// Invalidate run for the data immidiently after this frame
+			// invalidateRunSpecific(start, currentSavestateHook, branchIndex, playerIndex);
+
+			branchIndex++;
 		}
 
 		// Because of the usability of virtual list controls, just update the length

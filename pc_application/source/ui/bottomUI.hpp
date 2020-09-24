@@ -31,13 +31,15 @@ private:
 
 	wxBoxSizer* mainSizer;
 
-	wxBoxSizer* motionLeftSizer;
-	wxBoxSizer* accelLeftSizer;
-	wxBoxSizer* angularVelocityLeftSizer;
-	wxBoxSizer* angleLeftSizer;
-	wxBoxSizer* directionXLeftSizer;
-	wxBoxSizer* directionYLeftSizer;
-	wxBoxSizer* directionZLeftSizer;
+	uint8_t lastWasVisible = false;
+
+	wxStaticBoxSizer* motionLeftSizer;
+	wxStaticBoxSizer* accelLeftSizer;
+	wxStaticBoxSizer* angularVelocityLeftSizer;
+	wxStaticBoxSizer* angleLeftSizer;
+	wxStaticBoxSizer* directionXLeftSizer;
+	wxStaticBoxSizer* directionYLeftSizer;
+	wxStaticBoxSizer* directionZLeftSizer;
 
 	wxSpinCtrlDouble* accelXLeftCtrl;
 	wxSpinCtrlDouble* accelYLeftCtrl;
@@ -58,13 +60,13 @@ private:
 	wxSpinCtrlDouble* directionZYLeftCtrl;
 	wxSpinCtrlDouble* directionZZLeftCtrl;
 
-	wxBoxSizer* motionRightSizer;
-	wxBoxSizer* accelRightSizer;
-	wxBoxSizer* angularVelocityRightSizer;
-	wxBoxSizer* angleRightSizer;
-	wxBoxSizer* directionXRightSizer;
-	wxBoxSizer* directionYRightSizer;
-	wxBoxSizer* directionZRightSizer;
+	wxStaticBoxSizer* motionRightSizer;
+	wxStaticBoxSizer* accelRightSizer;
+	wxStaticBoxSizer* angularVelocityRightSizer;
+	wxStaticBoxSizer* angleRightSizer;
+	wxStaticBoxSizer* directionXRightSizer;
+	wxStaticBoxSizer* directionYRightSizer;
+	wxStaticBoxSizer* directionZRightSizer;
 
 	wxSpinCtrlDouble* accelXRightCtrl;
 	wxSpinCtrlDouble* accelYRightCtrl;
@@ -85,10 +87,10 @@ private:
 	wxSpinCtrlDouble* directionZYRightCtrl;
 	wxSpinCtrlDouble* directionZZRightCtrl;
 
-	wxBoxSizer* firstTouchSizer;
-	wxBoxSizer* secondTouchSizer;
+	wxStaticBoxSizer* firstTouchSizer;
+	wxStaticBoxSizer* secondTouchSizer;
 	wxBoxSizer* touchesSizer;
-	wxBoxSizer* mainTouchSizer;
+	wxStaticBoxSizer* mainTouchSizer;
 
 	wxSpinCtrl* touchX1Ctrl;
 	wxSpinCtrl* touchY1Ctrl;
@@ -96,7 +98,7 @@ private:
 	wxSpinCtrl* touchY2Ctrl;
 	wxSpinCtrl* numberOfTouchesCtrl;
 
-	wxBoxSizer* mainMouseSizer;
+	wxStaticBoxSizer* mainMouseSizer;
 
 	wxSpinCtrl* mouseXCtrl;
 	wxSpinCtrl* mouseYCtrl;
@@ -105,7 +107,13 @@ private:
 	wxSpinCtrl* scrollVelocityXCtrl;
 	wxSpinCtrl* scrollVelocityYCtrl;
 
-	wxBoxSizer* mainKeyboardSizer;
+	wxStaticBoxSizer* mainKeyboardKeysSizer;
+	wxStaticBoxSizer* mainKeyboardModifiersSizer;
+	wxStaticBoxSizer* mainMouseButtonsSizer;
+
+	wxStaticBoxSizer* keyboardKeysSizer;
+	wxStaticBoxSizer* keyboardModifiersSizer;
+	wxStaticBoxSizer* mouseButtonsSizer;
 
 	wxListBox* keyboardKeys;
 	wxListBox* keyboardModifiers;
@@ -313,6 +321,7 @@ public:
 
 	void toggleExtraInputMethodsWindow() {
 		extraInputMethodsWindow->Show(!extraInputMethodsWindow->IsShown());
+		refreshDataViews(true);
 	}
 
 	void listenToJoystick();

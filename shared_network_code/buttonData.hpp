@@ -147,7 +147,7 @@ struct TouchAndKeyboardData : public zpp::serializer::polymorphic {
 	template <typename Archive, typename Self> static void serialize(Archive& archive, Self& self) {
 		// clang-format off
 			archive(self.touchX1, self.touchY1, self.touchX2, self.touchY2,
-				self.keyboardModifiers, self.numberOfTouches,
+				self.numberOfTouches, self.keyboardModifiers,
 				self.keyboardKeys, self.mouseX, self.mouseY, self.mouseVelocityX,
 				self.mouseVelocityY, self.scrollVelocityX, self.scrollVelocityY,
 				self.mouseButtons);

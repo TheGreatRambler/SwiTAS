@@ -104,6 +104,8 @@ void TasRunner::onStartTasHomebrewPressed(wxCommandEvent& event) {
 						dataToSend.insert(dataToSend.end(), &sizeToPrint, &sizeToPrint + sizeof(sizeToPrint));
 						dataToSend.insert(dataToSend.end(), data, data + dataSize);
 
+						free(data);
+
 						if(frame != 0 && (frame % 60 == 0 || frame == (branchSize - 1))) {
 							float progress = ((float)frame / branchSize) * 100.0;
 							consoleLog->AppendText(wxString::Format("Progress serializing controller data: %.5f%% %lu/%lu, in savestate %u player %u\n", progress, frame, branchSize, hook, playerIndex));
@@ -166,6 +168,8 @@ void TasRunner::onStartTasHomebrewPressed(wxCommandEvent& event) {
 					// Probably endian issues
 					dataToSend.insert(dataToSend.end(), &sizeToPrint, &sizeToPrint + sizeof(sizeToPrint));
 					dataToSend.insert(dataToSend.end(), data, data + dataSize);
+
+					free(data);
 
 					if(frame != 0 && (frame % 60 == 0 || frame == (branchSize - 1))) {
 						float progress = ((float)frame / branchSize) * 100.0;

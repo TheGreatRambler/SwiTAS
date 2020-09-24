@@ -225,7 +225,6 @@ void ProjectHandler::loadProject() {
 
 					fclose(fin);
 					ZSTD_DCtx_reset(dctx, ZSTD_reset_session_only);
-					ZSTD
 
 					uint8_t* bufferPointer = (uint8_t*)memoryBuffer.GetData();
 					std::size_t bufferSize = memoryBuffer.GetDataLen();
@@ -362,6 +361,8 @@ void ProjectHandler::saveProject() {
 						memcpy(&input[0], &sizeToPrint, sizeof(sizeToPrint));
 						memcpy(&input[sizeof(sizeToPrint)], data, dataSize);
 
+						free(data);
+
 						ZSTD_inBuffer inputBuffer = { input, inputSize, 0 };
 
 						int finished;
@@ -375,8 +376,9 @@ void ProjectHandler::saveProject() {
 						} while(!finished);
 					}
 
-					ZSTD_CCtx_reset(cctx, ZSTD_reset_session_only);
 					inputsFileStream.Close();
+
+					ZSTD_CCtx_reset(cctx, ZSTD_reset_session_only);
 
 					rapidjson::Value branchJSON(rapidjson::kObjectType);
 					inputsFilename.MakeRelativeTo(getProjectStart().GetFullPath());
@@ -486,6 +488,8 @@ void ProjectHandler::saveProject() {
 
 					memcpy(&input[0], &sizeToPrint, sizeof(sizeToPrint));
 					memcpy(&input[sizeof(sizeToPrint)], data, dataSize);
+
+					free(data);
 
 					ZSTD_inBuffer inputBuffer = { input, inputSize, 0 };
 

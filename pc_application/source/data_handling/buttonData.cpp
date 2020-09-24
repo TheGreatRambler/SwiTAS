@@ -729,7 +729,11 @@ std::string ButtonData::getKeyboardKeysString(std::shared_ptr<TouchAndKeyboardDa
 			keys.push_back(key.first);
 		}
 	}
-	return HELPERS::joinString(keys, ";");
+	if(keys.size() == 0) {
+		return "NONE";
+	} else {
+		return HELPERS::joinString(keys, ";");
+	}
 }
 
 std::string ButtonData::getKeyboardModifiersString(std::shared_ptr<TouchAndKeyboardData> data) {
@@ -740,7 +744,11 @@ std::string ButtonData::getKeyboardModifiersString(std::shared_ptr<TouchAndKeybo
 			keys.push_back(key.first);
 		}
 	}
-	return HELPERS::joinString(keys, ";");
+	if(keys.size() == 0) {
+		return "NONE";
+	} else {
+		return HELPERS::joinString(keys, ";");
+	}
 }
 
 std::string ButtonData::getMouseButtonsString(std::shared_ptr<TouchAndKeyboardData> data) {
@@ -751,5 +759,9 @@ std::string ButtonData::getMouseButtonsString(std::shared_ptr<TouchAndKeyboardDa
 			keys.push_back(key.first);
 		}
 	}
-	return HELPERS::joinString(keys, ";");
+	if(keys.size() == 0) {
+		return "NONE";
+	} else {
+		return HELPERS::joinString(keys, ";");
+	}
 }
