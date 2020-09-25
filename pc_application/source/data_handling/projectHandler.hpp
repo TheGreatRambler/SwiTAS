@@ -83,6 +83,7 @@ private:
 	// For file exporting
 	std::string lastEnteredFtpPath;
 
+const wxString temporaryUpdateFilesSuffix = "_tempupdatefiles";
 	static constexpr int compressionLevel = 7;
 
 	// Main settings variable
