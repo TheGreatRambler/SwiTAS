@@ -97,7 +97,8 @@
 			"*.ipp": "cpp",
 			"*.hpp11": "cpp",
 			"future": "cpp",
-			"*.tli": "cpp"
+			"*.tli": "cpp",
+			"hash_set": "cpp"
 		},
 		"cSpell.enabled": false
 	}

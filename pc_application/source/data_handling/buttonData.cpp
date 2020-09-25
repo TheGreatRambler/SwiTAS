@@ -613,8 +613,8 @@ void ButtonData::transferExtraData(TouchAndKeyboardData src, std::shared_ptr<Tou
 		dest->keyboardKeys[7] |= src.keyboardKeys[7];
 	} else {
 		// Just replace
-		dest->keyboardModifiers == src.keyboardModifiers;
-		dest->mouseButtons == src.mouseButtons;
+		dest->keyboardModifiers = src.keyboardModifiers;
+		dest->mouseButtons      = src.mouseButtons;
 		memcpy(dest->keyboardKeys, src.keyboardKeys, 8);
 	}
 
@@ -632,8 +632,8 @@ void ButtonData::transferExtraData(TouchAndKeyboardData src, std::shared_ptr<Tou
 }
 
 void ButtonData::transferOnlyKeyboard(TouchAndKeyboardData src, std::shared_ptr<TouchAndKeyboardData> dest) {
-	dest->keyboardModifiers == src.keyboardModifiers;
-	dest->mouseButtons == src.mouseButtons;
+	dest->keyboardModifiers = src.keyboardModifiers;
+	dest->mouseButtons      = src.mouseButtons;
 	memcpy(dest->keyboardKeys, src.keyboardKeys, 8);
 	dest->mouseX          = src.mouseX;
 	dest->mouseY          = src.mouseY;
