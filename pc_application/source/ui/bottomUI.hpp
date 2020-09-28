@@ -7,6 +7,7 @@
 #include <memory>
 #include <rapidjson/document.h>
 #include <unistd.h>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 #include <wx/checkbox.h>
@@ -119,17 +120,21 @@ private:
 	wxListBox* keyboardModifiers;
 	wxListBox* mouseButtons;
 
-	wxArrayString lastKeyboardKeys;
-	wxArrayString lastKeyboardModifiers;
-	wxArrayString lastMouseButtons;
+	std::unordered_map<int, nn::hid::KeyboardKey> keyboardKeyIndices;
+	std::unordered_map<int, nn::hid::KeyboardModifier> keyboardModifierIndices;
+	std::unordered_map<int, nn::hid::MouseButton> mouseButtonIndices;
+
+	std::unordered_map<nn::hid::KeyboardKey, int> keyboardKeyIndicesReverse;
+	std::unordered_map<nn::hid::KeyboardModifier, int> keyboardModifierIndicesReverse;
+	std::unordered_map<nn::hid::MouseButton, int> mouseButtonIndicesReverse;
 
 	void motionValueChanged(wxSpinDoubleEvent& event);
 	void touchValueChanged(wxSpinEvent& event);
 	void numOfTouchesChanged(wxSpinEvent& event);
 	void mouseValueChanged(wxSpinEvent& event);
-	void keyboardKeysChanged(wxCommandEvent& event);
-	void keyboardModifiersChanged(wxCommandEvent& event);
-	void mouseButtonsChanged(wxCommandEvent& event);
+	void keyboardKeysChanged(wxMouseEvent& event);
+	void keyboardModifiersChanged(wxMouseEvent& event);
+	void mouseButtonsChanged(wxMouseEvent& event);
 
 	void onClose(wxCloseEvent& event);
 

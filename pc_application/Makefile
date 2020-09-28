@@ -26,7 +26,7 @@ CFLAGS := -std=c11
 CXXFLAGS := -std=gnu++17 $(shell wx-config --cxxflags base,core,net,xml) $(shell pkg-config --cflags ffms2 libzstd) -I./include
 
 # C/C++ flags
-CPPFLAGS := -Wall -Wno-maybe-uninitialized -Wno-sign-compare -Wno-switch-enum -Wno-switch -DCLIENT_IMP
+CPPFLAGS := -Wall -Wno-maybe-uninitialized -Wno-sign-compare -Wno-switch-enum -Wno-switch -Wno-deprecated-declarations -DCLIENT_IMP
 
 ifeq ($(BUILD),release)
 	# "Release" build - optimization, and no debug symbols

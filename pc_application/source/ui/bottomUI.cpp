@@ -316,20 +316,29 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 	mouseButtons      = new wxListBox(mouseButtonsSizer->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_MULTIPLE);
 
 	for(auto const& keyboardKey : buttonData->stringToKeyboardKey) {
-		keyboardKeys->Append(wxString::FromUTF8(keyboardKey.first));
+		wxString name                                 = wxString::FromUTF8(keyboardKey.first);
+		keyboardKeyIndices[keyboardKeys->GetCount()]  = keyboardKey.second;
+		keyboardKeyIndicesReverse[keyboardKey.second] = keyboardKeys->GetCount();
+		keyboardKeys->Append(name);
 	}
 
 	for(auto const& keyboardModifier : buttonData->stringToKeyboardModifier) {
-		keyboardModifiers->Append(wxString::FromUTF8(keyboardModifier.first));
+		wxString name                                           = wxString::FromUTF8(keyboardModifier.first);
+		keyboardModifierIndices[keyboardModifiers->GetCount()]  = keyboardModifier.second;
+		keyboardModifierIndicesReverse[keyboardModifier.second] = keyboardModifiers->GetCount();
+		keyboardModifiers->Append(name);
 	}
 
 	for(auto const& mouseButton : buttonData->stringToMouseButton) {
-		mouseButtons->Append(wxString::FromUTF8(mouseButton.first));
+		wxString name                                 = wxString::FromUTF8(mouseButton.first);
+		mouseButtonIndices[mouseButtons->GetCount()]  = mouseButton.second;
+		mouseButtonIndicesReverse[mouseButton.second] = mouseButtons->GetCount();
+		mouseButtons->Append(name);
 	}
 
-	keyboardKeys->Bind(wxEVT_LISTBOX, &ExtraInputMethods::keyboardKeysChanged, this);
-	keyboardModifiers->Bind(wxEVT_LISTBOX, &ExtraInputMethods::keyboardModifiersChanged, this);
-	mouseButtons->Bind(wxEVT_LISTBOX, &ExtraInputMethods::mouseButtonsChanged, this);
+	keyboardKeys->Bind(wxEVT_LEFT_UP, &ExtraInputMethods::keyboardKeysChanged, this);
+	keyboardModifiers->Bind(wxEVT_LEFT_UP, &ExtraInputMethods::keyboardModifiersChanged, this);
+	mouseButtons->Bind(wxEVT_LEFT_UP, &ExtraInputMethods::mouseButtonsChanged, this);
 
 	keyboardKeysSizer->Add(keyboardKeys, 1, wxEXPAND);
 	keyboardModifiersSizer->Add(keyboardModifiers, 1, wxEXPAND);
@@ -499,51 +508,47 @@ void ExtraInputMethods::updateAllValues() {
 		scrollVelocityXCtrl->SetValue(inputInstance->getExtraValueCurrent(ExtraValues::SCROLL_VELOCITY_X));
 		scrollVelocityYCtrl->SetValue(inputInstance->getExtraValueCurrent(ExtraValues::SCROLL_VELOCITY_Y));
 
-		keyboardKeys->Freeze();
-		keyboardModifiers->Freeze();
-		mouseButtons->Freeze();
-
-		// Deselect all existing
-		wxArrayInt keyboardKeySelections;
-		keyboardKeys->GetSelections(keyboardKeySelections);
-		for(auto& key : keyboardKeySelections) {
-			keyboardKeys->Deselect(key);
-		}
-
-		wxArrayInt keyboardModifierSelections;
-		keyboardModifiers->GetSelections(keyboardModifierSelections);
-		for(auto& key : keyboardModifierSelections) {
-			keyboardModifiers->Deselect(key);
-		}
-
-		wxArrayInt mouseButtonSelections;
-		mouseButtons->GetSelections(mouseButtonSelections);
-		for(auto& key : mouseButtonSelections) {
-			mouseButtons->Deselect(key);
-		}
-
-		// Select all correct inputs
+		int topKeyboardKeyItem = keyboardKeys->GetTopItem();
 		for(auto const& key : buttonData->stringToKeyboardKey) {
-			if(inputInstance->getKeyboardButtonCurrent(key.second)) {
-				keyboardKeys->Select(keyboardKeys->FindString(key.first, true));
+			uint8_t pressed = inputInstance->getKeyboardButtonCurrent(key.second);
+			int index       = keyboardKeyIndicesReverse[key.second];
+			if(keyboardKeys->IsSelected(index) != pressed) {
+				if(pressed) {
+					keyboardKeys->Select(index);
+				} else {
+					keyboardKeys->Deselect(index);
+				}
 			}
 		}
+		keyboardKeys->SetFirstItem(topKeyboardKeyItem);
 
+		int topKeyboardModifierItem = keyboardModifiers->GetTopItem();
 		for(auto const& modifier : buttonData->stringToKeyboardModifier) {
-			if(inputInstance->getKeyboardModifierCurrent(modifier.second)) {
-				keyboardModifiers->Select(keyboardModifiers->FindString(modifier.first, true));
+			uint8_t pressed = inputInstance->getKeyboardModifierCurrent(modifier.second);
+			int index       = keyboardModifierIndicesReverse[modifier.second];
+			if(keyboardModifiers->IsSelected(index) != pressed) {
+				if(pressed) {
+					keyboardModifiers->Select(index);
+				} else {
+					keyboardModifiers->Deselect(index);
+				}
 			}
 		}
+		keyboardModifiers->SetFirstItem(topKeyboardModifierItem);
 
+		int topMousebuttonItem = mouseButtons->GetTopItem();
 		for(auto const& button : buttonData->stringToMouseButton) {
-			if(inputInstance->getMouseButtonCurrent(button.second)) {
-				mouseButtons->Select(mouseButtons->FindString(button.first, true));
+			uint8_t pressed = inputInstance->getMouseButtonCurrent(button.second);
+			int index       = mouseButtonIndicesReverse[button.second];
+			if(mouseButtons->IsSelected(index) != pressed) {
+				if(pressed) {
+					mouseButtons->Select(index);
+				} else {
+					mouseButtons->Deselect(index);
+				}
 			}
 		}
-
-		keyboardKeys->Thaw();
-		keyboardModifiers->Thaw();
-		mouseButtons->Thaw();
+		mouseButtons->SetFirstItem(topMousebuttonItem);
 	}
 
 	lastWasVisible = isVisible;
@@ -583,89 +588,25 @@ void ExtraInputMethods::mouseValueChanged(wxSpinEvent& event) {
 	}
 }
 
-void ExtraInputMethods::keyboardKeysChanged(wxCommandEvent& event) {
-	// Have to do this because wxWidgets doesn't report deselections
-	wxArrayInt selectionsIndex;
-	wxArrayString selections;
-	keyboardKeys->GetSelections(selectionsIndex);
-	for(auto& key : selectionsIndex) {
-		selections.Add(keyboardKeys->GetString(key));
-	}
-
-	for(auto const& thisSelection : selections) {
-		std::string keyString = thisSelection.ToStdString();
-		if(lastKeyboardKeys.Index(keyString) == wxNOT_FOUND) {
-			// This key wasn't selected before but now is, trigger it
-			nn::hid::KeyboardKey key = buttonData->stringToKeyboardKey[keyString];
-			inputInstance->triggerKeyboardButton(key, true);
-		}
-	}
-	for(auto const& lastSelection : lastKeyboardKeys) {
-		std::string keyString = lastSelection.ToStdString();
-		if(selections.Index(keyString) == wxNOT_FOUND) {
-			// This key was selected before but now is not, deselect it
-			nn::hid::KeyboardKey key = buttonData->stringToKeyboardKey[keyString];
-			inputInstance->triggerKeyboardButton(key, false);
-		}
-	}
-
-	lastKeyboardKeys = selections;
+void ExtraInputMethods::keyboardKeysChanged(wxMouseEvent& event) {
+	int index                = keyboardKeys->HitTest(event.GetPosition());
+	nn::hid::KeyboardKey key = keyboardKeyIndices[index];
+	inputInstance->triggerKeyboardButton(key);
+	event.Skip();
 }
 
-void ExtraInputMethods::keyboardModifiersChanged(wxCommandEvent& event) {
-	wxArrayInt selectionsIndex;
-	wxArrayString selections;
-	keyboardModifiers->GetSelections(selectionsIndex);
-	for(auto& key : selectionsIndex) {
-		selections.Add(keyboardModifiers->GetString(key));
-	}
-
-	for(auto const& thisSelection : selections) {
-		std::string keyString = thisSelection.ToStdString();
-		if(lastKeyboardModifiers.Index(keyString) == wxNOT_FOUND) {
-			// This key wasn't selected before but now is, trigger it
-			nn::hid::KeyboardModifier key = buttonData->stringToKeyboardModifier[keyString];
-			inputInstance->triggerKeyboardModifier(key, true);
-		}
-	}
-	for(auto const& lastSelection : lastKeyboardModifiers) {
-		std::string keyString = lastSelection.ToStdString();
-		if(selections.Index(keyString) == wxNOT_FOUND) {
-			// This key was selected before but now is not, deselect it
-			nn::hid::KeyboardModifier key = buttonData->stringToKeyboardModifier[keyString];
-			inputInstance->triggerKeyboardModifier(key, false);
-		}
-	}
-
-	lastKeyboardModifiers = selections;
+void ExtraInputMethods::keyboardModifiersChanged(wxMouseEvent& event) {
+	int index                          = keyboardModifiers->HitTest(event.GetPosition());
+	nn::hid::KeyboardModifier modifier = keyboardModifierIndices[index];
+	inputInstance->triggerKeyboardModifier(modifier);
+	event.Skip();
 }
 
-void ExtraInputMethods::mouseButtonsChanged(wxCommandEvent& event) {
-	wxArrayInt selectionsIndex;
-	wxArrayString selections;
-	mouseButtons->GetSelections(selectionsIndex);
-	for(auto& key : selectionsIndex) {
-		selections.Add(mouseButtons->GetString(key));
-	}
-
-	for(auto const& thisSelection : selections) {
-		std::string buttonString = thisSelection.ToStdString();
-		if(lastMouseButtons.Index(buttonString) == wxNOT_FOUND) {
-			// This key wasn't selected before but now is, trigger it
-			nn::hid::MouseButton button = buttonData->stringToMouseButton[buttonString];
-			inputInstance->triggerMouseButton(button, true);
-		}
-	}
-	for(auto const& lastSelection : lastMouseButtons) {
-		std::string buttonString = lastSelection.ToStdString();
-		if(selections.Index(buttonString) == wxNOT_FOUND) {
-			// This key was selected before but now is not, deselect it
-			nn::hid::MouseButton button = buttonData->stringToMouseButton[buttonString];
-			inputInstance->triggerMouseButton(button, false);
-		}
-	}
-
-	lastMouseButtons = selections;
+void ExtraInputMethods::mouseButtonsChanged(wxMouseEvent& event) {
+	int index                   = mouseButtons->HitTest(event.GetPosition());
+	nn::hid::MouseButton button = mouseButtonIndices[index];
+	inputInstance->triggerMouseButton(button);
+	event.Skip();
 }
 
 void ExtraInputMethods::onClose(wxCloseEvent& event) {

@@ -1480,10 +1480,11 @@ int32_t DataProcessing::getExtraValueCurrent(ExtraValues extraValue) const {
 	return getExtraValue(currentFrame, extraValue);
 }
 
-void DataProcessing::triggerKeyboardButton(nn::hid::KeyboardKey key, uint8_t state) {
+void DataProcessing::triggerKeyboardButton(nn::hid::KeyboardKey key) {
 	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if(firstSelectedItem != wxNOT_FOUND) {
 		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
+		uint8_t state         = !getKeyboardButton(currentFrame, key);
 		for(FrameNum i = firstSelectedItem; i <= lastSelectedItem; i++) {
 			setKeyboardButton(i, key, state);
 		}
@@ -1519,10 +1520,11 @@ void DataProcessing::clearAllKeyboardButtons(FrameNum frame) {
 	RefreshItem(frame);
 }
 
-void DataProcessing::triggerKeyboardModifier(nn::hid::KeyboardModifier key, uint8_t state) {
+void DataProcessing::triggerKeyboardModifier(nn::hid::KeyboardModifier key) {
 	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if(firstSelectedItem != wxNOT_FOUND) {
 		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
+		uint8_t state         = !getKeyboardModifier(currentFrame, key);
 		for(FrameNum i = firstSelectedItem; i <= lastSelectedItem; i++) {
 			setKeyboardModifier(i, key, state);
 		}
@@ -1562,10 +1564,11 @@ void DataProcessing::clearAllKeyboardModifiers(FrameNum frame) {
 	RefreshItem(frame);
 }
 
-void DataProcessing::triggerMouseButton(nn::hid::MouseButton key, uint8_t state) {
+void DataProcessing::triggerMouseButton(nn::hid::MouseButton key) {
 	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if(firstSelectedItem != wxNOT_FOUND) {
 		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
+		uint8_t state         = !getMouseButton(currentFrame, key);
 		for(FrameNum i = firstSelectedItem; i <= lastSelectedItem; i++) {
 			setMouseButton(i, key, state);
 		}
