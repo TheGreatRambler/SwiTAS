@@ -134,7 +134,7 @@ struct TouchAndKeyboardData : public zpp::serializer::polymorphic {
 	int32_t touchY2           = 0;
 	uint8_t numberOfTouches   = 0;
 	int32_t keyboardModifiers = 0;
-	uint32_t keyboardKeys[8]  = { 0 };
+	int32_t keyboardKeys[8]  = { 0 };
 	int32_t mouseX            = 0;
 	int32_t mouseY            = 0;
 	int32_t mouseVelocityX    = 0;

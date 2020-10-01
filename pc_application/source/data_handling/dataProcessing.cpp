@@ -1499,8 +1499,11 @@ void DataProcessing::setKeyboardButton(FrameNum frame, nn::hid::KeyboardKey key,
 	RefreshItem(frame);
 	modifyCurrentFrameViews(frame);
 }
+
 uint8_t DataProcessing::getKeyboardButton(FrameNum frame, nn::hid::KeyboardKey key) const {
-	return IS_KEYBOARD_HELD(getInputsExtraList()->at(frame)->keyboardKeys, (int32_t)key);
+	auto const& keys = getInputsExtraList()->at(frame)->keyboardKeys;
+	uint8_t isHeld   = IS_KEYBOARD_HELD(keys, (int32_t)key);
+	return isHeld;
 }
 
 uint8_t DataProcessing::getKeyboardButtonSpecific(FrameNum frame, nn::hid::KeyboardKey key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {

@@ -508,47 +508,35 @@ void ExtraInputMethods::updateAllValues() {
 		scrollVelocityXCtrl->SetValue(inputInstance->getExtraValueCurrent(ExtraValues::SCROLL_VELOCITY_X));
 		scrollVelocityYCtrl->SetValue(inputInstance->getExtraValueCurrent(ExtraValues::SCROLL_VELOCITY_Y));
 
-		int topKeyboardKeyItem = keyboardKeys->GetTopItem();
 		for(auto const& key : buttonData->stringToKeyboardKey) {
-			uint8_t pressed = inputInstance->getKeyboardButtonCurrent(key.second);
-			int index       = keyboardKeyIndicesReverse[key.second];
-			if(keyboardKeys->IsSelected(index) != pressed) {
-				if(pressed) {
-					keyboardKeys->Select(index);
-				} else {
-					keyboardKeys->Deselect(index);
-				}
+			bool pressed = inputInstance->getKeyboardButtonCurrent(key.second);
+			int index    = keyboardKeyIndicesReverse[key.second];
+			if(pressed) {
+				keyboardKeys->Select(index);
+			} else {
+				keyboardKeys->Deselect(index);
 			}
 		}
-		keyboardKeys->SetFirstItem(topKeyboardKeyItem);
 
-		int topKeyboardModifierItem = keyboardModifiers->GetTopItem();
 		for(auto const& modifier : buttonData->stringToKeyboardModifier) {
-			uint8_t pressed = inputInstance->getKeyboardModifierCurrent(modifier.second);
-			int index       = keyboardModifierIndicesReverse[modifier.second];
-			if(keyboardModifiers->IsSelected(index) != pressed) {
-				if(pressed) {
-					keyboardModifiers->Select(index);
-				} else {
-					keyboardModifiers->Deselect(index);
-				}
+			bool pressed = inputInstance->getKeyboardModifierCurrent(modifier.second);
+			int index    = keyboardModifierIndicesReverse[modifier.second];
+			if(pressed) {
+				keyboardModifiers->Select(index);
+			} else {
+				keyboardModifiers->Deselect(index);
 			}
 		}
-		keyboardModifiers->SetFirstItem(topKeyboardModifierItem);
 
-		int topMousebuttonItem = mouseButtons->GetTopItem();
 		for(auto const& button : buttonData->stringToMouseButton) {
-			uint8_t pressed = inputInstance->getMouseButtonCurrent(button.second);
-			int index       = mouseButtonIndicesReverse[button.second];
-			if(mouseButtons->IsSelected(index) != pressed) {
-				if(pressed) {
-					mouseButtons->Select(index);
-				} else {
-					mouseButtons->Deselect(index);
-				}
+			bool pressed = inputInstance->getMouseButtonCurrent(button.second);
+			int index    = mouseButtonIndicesReverse[button.second];
+			if(pressed) {
+				mouseButtons->Select(index);
+			} else {
+				mouseButtons->Deselect(index);
 			}
 		}
-		mouseButtons->SetFirstItem(topMousebuttonItem);
 	}
 
 	lastWasVisible = isVisible;
