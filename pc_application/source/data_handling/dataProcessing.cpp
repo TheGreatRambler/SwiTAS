@@ -21,7 +21,7 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	// https://docs.wxwidgets.org/3.0/classwx_colour.html#a08e9f56265647b8b5e1349b76eb728e3
 	maskColor.Set((*mainSettings)["iconTransparent"].GetString());
 	// This is cool, so set it
-	EnableAlternateRowColours(true);
+	//EnableAlternateRowColours(true);
 	// Resize images based on the settings file
 	int imageIconWidth  = (*mainSettings)["inputsList"]["imageWidth"].GetInt();
 	int imageIconHeight = (*mainSettings)["inputsList"]["imageHeight"].GetInt();

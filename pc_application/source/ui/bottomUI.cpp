@@ -311,34 +311,47 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 	keyboardModifiersSizer = new wxStaticBoxSizer(wxVERTICAL, this, "Keyboard Modifiers");
 	mouseButtonsSizer      = new wxStaticBoxSizer(wxVERTICAL, this, "Mouse Buttons");
 
-	keyboardKeys      = new wxListBox(keyboardKeysSizer->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_MULTIPLE);
-	keyboardModifiers = new wxListBox(keyboardModifiersSizer->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_MULTIPLE);
-	mouseButtons      = new wxListBox(mouseButtonsSizer->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_MULTIPLE);
+	keyboardKeys      = new wxListCtrl(keyboardKeysSizer->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_NO_HEADER);
+	keyboardModifiers = new wxListCtrl(keyboardModifiersSizer->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_NO_HEADER);
+	mouseButtons      = new wxListCtrl(mouseButtonsSizer->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_NO_HEADER);
+
+	keyboardKeys->AppendColumn("", wxLIST_FORMAT_CENTER, wxLIST_AUTOSIZE);
+	keyboardModifiers->AppendColumn("", wxLIST_FORMAT_CENTER, wxLIST_AUTOSIZE);
+	mouseButtons->AppendColumn("", wxLIST_FORMAT_CENTER, wxLIST_AUTOSIZE);
 
 	for(auto const& keyboardKey : buttonData->stringToKeyboardKey) {
 		wxString name                                 = wxString::FromUTF8(keyboardKey.first);
 		keyboardKeyIndices[keyboardKeys->GetCount()]  = keyboardKey.second;
 		keyboardKeyIndicesReverse[keyboardKey.second] = keyboardKeys->GetCount();
-		keyboardKeys->Append(name);
+
+		wxListItem item;
+		item.SetText(name);
+		keyboardKeys->InsertItem(item);
 	}
 
 	for(auto const& keyboardModifier : buttonData->stringToKeyboardModifier) {
 		wxString name                                           = wxString::FromUTF8(keyboardModifier.first);
 		keyboardModifierIndices[keyboardModifiers->GetCount()]  = keyboardModifier.second;
 		keyboardModifierIndicesReverse[keyboardModifier.second] = keyboardModifiers->GetCount();
-		keyboardModifiers->Append(name);
+
+		wxListItem item;
+		item.SetText(name);
+		keyboardModifiers->InsertItem(item);
 	}
 
 	for(auto const& mouseButton : buttonData->stringToMouseButton) {
 		wxString name                                 = wxString::FromUTF8(mouseButton.first);
 		mouseButtonIndices[mouseButtons->GetCount()]  = mouseButton.second;
 		mouseButtonIndicesReverse[mouseButton.second] = mouseButtons->GetCount();
-		mouseButtons->Append(name);
+
+		wxListItem item;
+		item.SetText(name);
+		mouseButtons->InsertItem(item);
 	}
 
-	keyboardKeys->Bind(wxEVT_LEFT_UP, &ExtraInputMethods::keyboardKeysChanged, this);
-	keyboardModifiers->Bind(wxEVT_LEFT_UP, &ExtraInputMethods::keyboardModifiersChanged, this);
-	mouseButtons->Bind(wxEVT_LEFT_UP, &ExtraInputMethods::mouseButtonsChanged, this);
+	keyboardKeys->Bind(wxEVT_LIST_ITEM_SELECTED, &ExtraInputMethods::keyboardKeysChanged, this);
+	keyboardModifiers->Bind(wxEVT_LIST_ITEM_SELECTED, &ExtraInputMethods::keyboardModifiersChanged, this);
+	mouseButtons->Bind(wxEVT_LIST_ITEM_SELECTED, &ExtraInputMethods::mouseButtonsChanged, this);
 
 	keyboardKeysSizer->Add(keyboardKeys, 1, wxEXPAND);
 	keyboardModifiersSizer->Add(keyboardModifiers, 1, wxEXPAND);
@@ -512,9 +525,9 @@ void ExtraInputMethods::updateAllValues() {
 			bool pressed = inputInstance->getKeyboardButtonCurrent(key.second);
 			int index    = keyboardKeyIndicesReverse[key.second];
 			if(pressed) {
-				keyboardKeys->Select(index);
+				keyboardKeys->SetItemBackgroundColour(index, *wxBLUE);
 			} else {
-				keyboardKeys->Deselect(index);
+				keyboardKeys->SetItemBackgroundColour(index, *wxWHITE);
 			}
 		}
 
@@ -522,9 +535,9 @@ void ExtraInputMethods::updateAllValues() {
 			bool pressed = inputInstance->getKeyboardModifierCurrent(modifier.second);
 			int index    = keyboardModifierIndicesReverse[modifier.second];
 			if(pressed) {
-				keyboardModifiers->Select(index);
+				keyboardModifiers->SetItemBackgroundColour(index, *wxBLUE);
 			} else {
-				keyboardModifiers->Deselect(index);
+				keyboardModifiers->SetItemBackgroundColour(index, *wxWHITE);
 			}
 		}
 
@@ -532,9 +545,9 @@ void ExtraInputMethods::updateAllValues() {
 			bool pressed = inputInstance->getMouseButtonCurrent(button.second);
 			int index    = mouseButtonIndicesReverse[button.second];
 			if(pressed) {
-				mouseButtons->Select(index);
+				mouseButtons->SetItemBackgroundColour(index, *wxBLUE);
 			} else {
-				mouseButtons->Deselect(index);
+				mouseButtons->SetItemBackgroundColour(index, *wxWHITE);
 			}
 		}
 	}
@@ -576,25 +589,22 @@ void ExtraInputMethods::mouseValueChanged(wxSpinEvent& event) {
 	}
 }
 
-void ExtraInputMethods::keyboardKeysChanged(wxMouseEvent& event) {
-	int index                = keyboardKeys->HitTest(event.GetPosition());
+void ExtraInputMethods::keyboardKeysChanged(wxListEvent& event) {
+	int index                = event.GetIndex();
 	nn::hid::KeyboardKey key = keyboardKeyIndices[index];
 	inputInstance->triggerKeyboardButton(key);
-	event.Skip();
 }
 
-void ExtraInputMethods::keyboardModifiersChanged(wxMouseEvent& event) {
-	int index                          = keyboardModifiers->HitTest(event.GetPosition());
+void ExtraInputMethods::keyboardModifiersChanged(wxListEvent& event) {
+	int index                          = event.GetIndex();
 	nn::hid::KeyboardModifier modifier = keyboardModifierIndices[index];
 	inputInstance->triggerKeyboardModifier(modifier);
-	event.Skip();
 }
 
-void ExtraInputMethods::mouseButtonsChanged(wxMouseEvent& event) {
-	int index                   = mouseButtons->HitTest(event.GetPosition());
+void ExtraInputMethods::mouseButtonsChanged(wxListEvent& event) {
+	int index                   = event.GetIndex();
 	nn::hid::MouseButton button = mouseButtonIndices[index];
 	inputInstance->triggerMouseButton(button);
-	event.Skip();
 }
 
 void ExtraInputMethods::onClose(wxCloseEvent& event) {

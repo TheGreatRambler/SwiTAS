@@ -116,9 +116,9 @@ private:
 	wxStaticBoxSizer* keyboardModifiersSizer;
 	wxStaticBoxSizer* mouseButtonsSizer;
 
-	wxListBox* keyboardKeys;
-	wxListBox* keyboardModifiers;
-	wxListBox* mouseButtons;
+	wxListCtrl* keyboardKeys;
+	wxListCtrl* keyboardModifiers;
+	wxListCtrl* mouseButtons;
 
 	std::unordered_map<int, nn::hid::KeyboardKey> keyboardKeyIndices;
 	std::unordered_map<int, nn::hid::KeyboardModifier> keyboardModifierIndices;
@@ -132,9 +132,9 @@ private:
 	void touchValueChanged(wxSpinEvent& event);
 	void numOfTouchesChanged(wxSpinEvent& event);
 	void mouseValueChanged(wxSpinEvent& event);
-	void keyboardKeysChanged(wxMouseEvent& event);
-	void keyboardModifiersChanged(wxMouseEvent& event);
-	void mouseButtonsChanged(wxMouseEvent& event);
+	void keyboardKeysChanged(wxListEvent& event);
+	void keyboardModifiersChanged(wxListEvent& event);
+	void mouseButtonsChanged(wxListEvent& event);
 
 	void onClose(wxCloseEvent& event);
 
