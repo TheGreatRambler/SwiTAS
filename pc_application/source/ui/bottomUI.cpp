@@ -320,33 +320,33 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 	mouseButtons->AppendColumn("", wxLIST_FORMAT_CENTER, wxLIST_AUTOSIZE);
 
 	for(auto const& keyboardKey : buttonData->stringToKeyboardKey) {
-		wxString name                                 = wxString::FromUTF8(keyboardKey.first);
-		keyboardKeyIndices[keyboardKeys->GetCount()]  = keyboardKey.second;
-		keyboardKeyIndicesReverse[keyboardKey.second] = keyboardKeys->GetCount();
+		wxString name = wxString::FromUTF8(keyboardKey.first);
+		int index     = keyboardKeys->GetItemCount();
 
-		wxListItem item;
-		item.SetText(name);
-		keyboardKeys->InsertItem(item);
+		keyboardKeyIndices[index]                     = keyboardKey.second;
+		keyboardKeyIndicesReverse[keyboardKey.second] = index;
+
+		keyboardKeys->InsertItem(index, name);
 	}
 
 	for(auto const& keyboardModifier : buttonData->stringToKeyboardModifier) {
-		wxString name                                           = wxString::FromUTF8(keyboardModifier.first);
-		keyboardModifierIndices[keyboardModifiers->GetCount()]  = keyboardModifier.second;
-		keyboardModifierIndicesReverse[keyboardModifier.second] = keyboardModifiers->GetCount();
+		wxString name = wxString::FromUTF8(keyboardModifier.first);
+		int index     = keyboardModifiers->GetItemCount();
 
-		wxListItem item;
-		item.SetText(name);
-		keyboardModifiers->InsertItem(item);
+		keyboardModifierIndices[index]                          = keyboardModifier.second;
+		keyboardModifierIndicesReverse[keyboardModifier.second] = index;
+
+		keyboardModifiers->InsertItem(index, name);
 	}
 
 	for(auto const& mouseButton : buttonData->stringToMouseButton) {
-		wxString name                                 = wxString::FromUTF8(mouseButton.first);
-		mouseButtonIndices[mouseButtons->GetCount()]  = mouseButton.second;
-		mouseButtonIndicesReverse[mouseButton.second] = mouseButtons->GetCount();
+		wxString name = wxString::FromUTF8(mouseButton.first);
+		int index     = mouseButtons->GetItemCount();
 
-		wxListItem item;
-		item.SetText(name);
-		mouseButtons->InsertItem(item);
+		mouseButtonIndices[index]                     = mouseButton.second;
+		mouseButtonIndicesReverse[mouseButton.second] = index;
+
+		mouseButtons->InsertItem(index, name);
 	}
 
 	keyboardKeys->Bind(wxEVT_LIST_ITEM_SELECTED, &ExtraInputMethods::keyboardKeysChanged, this);
@@ -525,7 +525,7 @@ void ExtraInputMethods::updateAllValues() {
 			bool pressed = inputInstance->getKeyboardButtonCurrent(key.second);
 			int index    = keyboardKeyIndicesReverse[key.second];
 			if(pressed) {
-				keyboardKeys->SetItemBackgroundColour(index, *wxBLUE);
+				keyboardKeys->SetItemBackgroundColour(index, *wxLIGHT_GREY);
 			} else {
 				keyboardKeys->SetItemBackgroundColour(index, *wxWHITE);
 			}
@@ -535,7 +535,7 @@ void ExtraInputMethods::updateAllValues() {
 			bool pressed = inputInstance->getKeyboardModifierCurrent(modifier.second);
 			int index    = keyboardModifierIndicesReverse[modifier.second];
 			if(pressed) {
-				keyboardModifiers->SetItemBackgroundColour(index, *wxBLUE);
+				keyboardModifiers->SetItemBackgroundColour(index, *wxLIGHT_GREY);
 			} else {
 				keyboardModifiers->SetItemBackgroundColour(index, *wxWHITE);
 			}
@@ -545,7 +545,7 @@ void ExtraInputMethods::updateAllValues() {
 			bool pressed = inputInstance->getMouseButtonCurrent(button.second);
 			int index    = mouseButtonIndicesReverse[button.second];
 			if(pressed) {
-				mouseButtons->SetItemBackgroundColour(index, *wxBLUE);
+				mouseButtons->SetItemBackgroundColour(index, *wxLIGHT_GREY);
 			} else {
 				mouseButtons->SetItemBackgroundColour(index, *wxWHITE);
 			}

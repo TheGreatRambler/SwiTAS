@@ -21,7 +21,7 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	// https://docs.wxwidgets.org/3.0/classwx_colour.html#a08e9f56265647b8b5e1349b76eb728e3
 	maskColor.Set((*mainSettings)["iconTransparent"].GetString());
 	// This is cool, so set it
-	//EnableAlternateRowColours(true);
+	// EnableAlternateRowColours(true);
 	// Resize images based on the settings file
 	int imageIconWidth  = (*mainSettings)["inputsList"]["imageWidth"].GetInt();
 	int imageIconHeight = (*mainSettings)["inputsList"]["imageHeight"].GetInt();
@@ -1539,7 +1539,7 @@ void DataProcessing::setKeyboardModifier(FrameNum frame, nn::hid::KeyboardModifi
 	if(state) {
 		frameData->keyboardModifiers |= (int32_t)key;
 	} else {
-		frameData->keyboardModifiers &= ~(int32_t)key;
+		frameData->keyboardModifiers &= ~((int32_t)key);
 	}
 
 	invalidateRun(frame);
@@ -1583,7 +1583,7 @@ void DataProcessing::setMouseButton(FrameNum frame, nn::hid::MouseButton key, ui
 	if(state) {
 		frameData->mouseButtons |= (int32_t)key;
 	} else {
-		frameData->mouseButtons &= ~(int32_t)key;
+		frameData->mouseButtons &= ~((int32_t)key);
 	}
 
 	invalidateRun(frame);
