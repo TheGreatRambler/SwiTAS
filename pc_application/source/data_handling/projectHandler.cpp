@@ -126,7 +126,7 @@ void ProjectHandler::loadProject() {
 		auto branchesArray = savestate["branches"].GetArray();
 
 		// Not actually a savestate hook, just the vector of branches
-		std::shared_ptr<std::vector<std::shared_ptr<std::vector<ExtraFrameData>>>> savestateHook = std::make_shared<std::vector<std::shared_ptr<std::vector<ExtraFrameData>>>>();
+		auto savestateHook = std::make_shared<std::vector<std::shared_ptr<std::vector<ExtraFrameData>>>>();
 
 		for(auto const& branch : branchesArray) {
 			wxString path = projectDir.GetPathWithSep() + wxString::FromUTF8(branch["filename"].GetString());

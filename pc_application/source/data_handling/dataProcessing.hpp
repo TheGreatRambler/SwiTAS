@@ -357,23 +357,23 @@ public:
 
 	void triggerKeyboardButton(nn::hid::KeyboardKey key);
 	void setKeyboardButton(FrameNum frame, nn::hid::KeyboardKey key, uint8_t state);
-	uint8_t getKeyboardButton(FrameNum frame, nn::hid::KeyboardKey key) const;
-	uint8_t getKeyboardButtonSpecific(FrameNum frame, nn::hid::KeyboardKey key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
-	uint8_t getKeyboardButtonCurrent(nn::hid::KeyboardKey key) const;
+	int32_t getKeyboardButton(FrameNum frame, nn::hid::KeyboardKey key) const;
+	int32_t getKeyboardButtonSpecific(FrameNum frame, nn::hid::KeyboardKey key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
+	int32_t getKeyboardButtonCurrent(nn::hid::KeyboardKey key) const;
 	void clearAllKeyboardButtons(FrameNum frame);
 
 	void triggerKeyboardModifier(nn::hid::KeyboardModifier key);
 	void setKeyboardModifier(FrameNum frame, nn::hid::KeyboardModifier key, uint8_t state);
-	uint8_t getKeyboardModifier(FrameNum frame, nn::hid::KeyboardModifier key) const;
-	uint8_t getKeyboardModifierSpecific(FrameNum frame, nn::hid::KeyboardModifier key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
-	uint8_t getKeyboardModifierCurrent(nn::hid::KeyboardModifier key) const;
+	int32_t getKeyboardModifier(FrameNum frame, nn::hid::KeyboardModifier key) const;
+	int32_t getKeyboardModifierSpecific(FrameNum frame, nn::hid::KeyboardModifier key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
+	int32_t getKeyboardModifierCurrent(nn::hid::KeyboardModifier key) const;
 	void clearAllKeyboardModifiers(FrameNum frame);
 
 	void triggerMouseButton(nn::hid::MouseButton key);
 	void setMouseButton(FrameNum frame, nn::hid::MouseButton key, uint8_t state);
-	uint8_t getMouseButton(FrameNum frame, nn::hid::MouseButton key) const;
-	uint8_t getMouseButtonSpecific(FrameNum frame, nn::hid::MouseButton key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
-	uint8_t getMouseButtonCurrent(nn::hid::MouseButton key) const;
+	int32_t getMouseButton(FrameNum frame, nn::hid::MouseButton key) const;
+	int32_t getMouseButtonSpecific(FrameNum frame, nn::hid::MouseButton key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const;
+	int32_t getMouseButtonCurrent(nn::hid::MouseButton key) const;
 	void clearAllMouseButtons(FrameNum frame);
 
 	// Updates how the current frame looks on the UI

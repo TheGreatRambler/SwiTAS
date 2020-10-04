@@ -1500,17 +1500,17 @@ void DataProcessing::setKeyboardButton(FrameNum frame, nn::hid::KeyboardKey key,
 	modifyCurrentFrameViews(frame);
 }
 
-uint8_t DataProcessing::getKeyboardButton(FrameNum frame, nn::hid::KeyboardKey key) const {
+int32_t DataProcessing::getKeyboardButton(FrameNum frame, nn::hid::KeyboardKey key) const {
 	auto const& keys = getInputsExtraList()->at(frame)->keyboardKeys;
-	uint8_t isHeld   = IS_KEYBOARD_HELD(keys, (int32_t)key);
+	int32_t isHeld   = IS_KEYBOARD_HELD(keys, (int32_t)key);
 	return isHeld;
 }
 
-uint8_t DataProcessing::getKeyboardButtonSpecific(FrameNum frame, nn::hid::KeyboardKey key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
+int32_t DataProcessing::getKeyboardButtonSpecific(FrameNum frame, nn::hid::KeyboardKey key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
 	return IS_KEYBOARD_HELD(getControllerDataExtra(savestateHookNum, branch, frame)->keyboardKeys, (int32_t)key);
 }
 
-uint8_t DataProcessing::getKeyboardButtonCurrent(nn::hid::KeyboardKey key) const {
+int32_t DataProcessing::getKeyboardButtonCurrent(nn::hid::KeyboardKey key) const {
 	return getKeyboardButton(currentFrame, key);
 }
 
@@ -1548,14 +1548,14 @@ void DataProcessing::setKeyboardModifier(FrameNum frame, nn::hid::KeyboardModifi
 	modifyCurrentFrameViews(frame);
 }
 
-uint8_t DataProcessing::getKeyboardModifier(FrameNum frame, nn::hid::KeyboardModifier key) const {
+int32_t DataProcessing::getKeyboardModifier(FrameNum frame, nn::hid::KeyboardModifier key) const {
 	return getInputsExtraList()->at(frame)->keyboardModifiers & (int32_t)key;
 }
-uint8_t DataProcessing::getKeyboardModifierSpecific(FrameNum frame, nn::hid::KeyboardModifier key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
+int32_t DataProcessing::getKeyboardModifierSpecific(FrameNum frame, nn::hid::KeyboardModifier key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
 	return getControllerDataExtra(savestateHookNum, branch, frame)->keyboardModifiers & (int32_t)key;
 }
 
-uint8_t DataProcessing::getKeyboardModifierCurrent(nn::hid::KeyboardModifier key) const {
+int32_t DataProcessing::getKeyboardModifierCurrent(nn::hid::KeyboardModifier key) const {
 	return getKeyboardModifier(currentFrame, key);
 }
 
@@ -1592,15 +1592,15 @@ void DataProcessing::setMouseButton(FrameNum frame, nn::hid::MouseButton key, ui
 	modifyCurrentFrameViews(frame);
 }
 
-uint8_t DataProcessing::getMouseButton(FrameNum frame, nn::hid::MouseButton key) const {
+int32_t DataProcessing::getMouseButton(FrameNum frame, nn::hid::MouseButton key) const {
 	return getInputsExtraList()->at(frame)->mouseButtons & (int32_t)key;
 }
 
-uint8_t DataProcessing::getMouseButtonSpecific(FrameNum frame, nn::hid::MouseButton key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
+int32_t DataProcessing::getMouseButtonSpecific(FrameNum frame, nn::hid::MouseButton key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
 	return getControllerDataExtra(savestateHookNum, branch, frame)->mouseButtons & (int32_t)key;
 }
 
-uint8_t DataProcessing::getMouseButtonCurrent(nn::hid::MouseButton key) const {
+int32_t DataProcessing::getMouseButtonCurrent(nn::hid::MouseButton key) const {
 	return getMouseButton(currentFrame, key);
 }
 

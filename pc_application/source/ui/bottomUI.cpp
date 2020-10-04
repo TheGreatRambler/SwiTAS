@@ -593,18 +593,21 @@ void ExtraInputMethods::keyboardKeysChanged(wxListEvent& event) {
 	int index                = event.GetIndex();
 	nn::hid::KeyboardKey key = keyboardKeyIndices[index];
 	inputInstance->triggerKeyboardButton(key);
+	keyboardKeys->SetItemState(index, 0, wxLIST_MASK_STATE);
 }
 
 void ExtraInputMethods::keyboardModifiersChanged(wxListEvent& event) {
 	int index                          = event.GetIndex();
 	nn::hid::KeyboardModifier modifier = keyboardModifierIndices[index];
 	inputInstance->triggerKeyboardModifier(modifier);
+	keyboardModifiers->SetItemState(index, 0, wxLIST_MASK_STATE);
 }
 
 void ExtraInputMethods::mouseButtonsChanged(wxListEvent& event) {
 	int index                   = event.GetIndex();
 	nn::hid::MouseButton button = mouseButtonIndices[index];
 	inputInstance->triggerMouseButton(button);
+	mouseButtons->SetItemState(index, 0, wxLIST_MASK_STATE);
 }
 
 void ExtraInputMethods::onClose(wxCloseEvent& event) {
