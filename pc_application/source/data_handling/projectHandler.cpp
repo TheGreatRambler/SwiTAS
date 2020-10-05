@@ -184,8 +184,6 @@ void ProjectHandler::loadProject() {
 		savestateHookIndex++;
 	}
 
-	dataProcessing->setAllExtraData(extraFrameDatas);
-
 	auto playersArray = jsonSettings["players"].GetArray();
 	AllPlayers players(playersArray.Size());
 
@@ -273,6 +271,7 @@ void ProjectHandler::loadProject() {
 	ZSTD_freeDCtx(dctx);
 
 	// Set dataProcessing
+	dataProcessing->setAllExtraData(extraFrameDatas);
 	dataProcessing->setAllPlayers(players);
 	dataProcessing->sendPlayerNum();
 	dataProcessing->scrollToSpecific(jsonSettings["currentPlayer"].GetUint(), jsonSettings["currentSavestateBlock"].GetUint(), jsonSettings["currentBranch"].GetUint(), jsonSettings["currentFrame"].GetUint64());

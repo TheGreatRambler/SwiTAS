@@ -168,7 +168,10 @@ public:
 	}
 
 	void setAllExtraData(ExtraFrameDataContainer extraFrameData) {
-		allExtraFrameData = extraFrameData;
+		allExtraFrameData.clear();
+		for(auto& branch : extraFrameData) {
+			allExtraFrameData.push_back(branch);
+		}
 	}
 
 	void setAllPlayers(AllPlayers players) {

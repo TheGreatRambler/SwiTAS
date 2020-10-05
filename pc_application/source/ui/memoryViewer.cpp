@@ -141,6 +141,7 @@ MemoryViewer::MemoryViewer(wxFrame* parent, std::shared_ptr<ProjectHandler> proj
 		updateAtIndex(currentItemSelection);
 	})
 
+	fileSystemWatcher.SetOwner(this);
 	fileSystemWatcher.Bind(wxEVT_FSWATCHER, &MemoryViewer::fileChangesDetected, this);
 
 	SetSizer(mainSizer);
