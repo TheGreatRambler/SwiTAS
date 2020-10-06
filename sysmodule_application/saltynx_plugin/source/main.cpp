@@ -22,7 +22,7 @@ uint64_t ticksToNanoseconds(uint64_t tick) {
 // Print log info
 uint8_t dumpDebugInfo = true;
 // This needs to be set to spoof, turned off for testing
-uint8_t recordInputs = false;
+uint8_t recordInputs = true;
 
 uint8_t frameHasPassed = false;
 
@@ -239,7 +239,6 @@ int32_t GetSixAxisSensorHandles2(nn::hid::SixAxisSensorHandle* handles, int32_t 
 		}
 	}
 
-	// Simply passthrough if need be
 	return _ZN2nn3hid23GetSixAxisSensorHandlesEPNS0_19SixAxisSensorHandleEiRKjNS_4util10BitFlagSetILi32ENS0_12NpadStyleTagEEE(handles, numOfHandles, id, npadStyleBitflags);
 }
 

@@ -311,13 +311,13 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 	keyboardModifiersSizer = new wxStaticBoxSizer(wxVERTICAL, this, "Keyboard Modifiers");
 	mouseButtonsSizer      = new wxStaticBoxSizer(wxVERTICAL, this, "Mouse Buttons");
 
-	keyboardKeys      = new wxListCtrl(keyboardKeysSizer->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_NO_HEADER);
-	keyboardModifiers = new wxListCtrl(keyboardModifiersSizer->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_NO_HEADER);
-	mouseButtons      = new wxListCtrl(mouseButtonsSizer->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_NO_HEADER);
+	keyboardKeys      = new wxListCtrl(keyboardKeysSizer->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_NO_HEADER | wxLC_SINGLE_SEL);
+	keyboardModifiers = new wxListCtrl(keyboardModifiersSizer->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_NO_HEADER | wxLC_SINGLE_SEL);
+	mouseButtons      = new wxListCtrl(mouseButtonsSizer->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_NO_HEADER | wxLC_SINGLE_SEL);
 
-	keyboardKeys->AppendColumn("", wxLIST_FORMAT_CENTER, wxLIST_AUTOSIZE);
-	keyboardModifiers->AppendColumn("", wxLIST_FORMAT_CENTER, wxLIST_AUTOSIZE);
-	mouseButtons->AppendColumn("", wxLIST_FORMAT_CENTER, wxLIST_AUTOSIZE);
+	keyboardKeys->AppendColumn("", wxLIST_FORMAT_CENTER);
+	keyboardModifiers->AppendColumn("", wxLIST_FORMAT_CENTER);
+	mouseButtons->AppendColumn("", wxLIST_FORMAT_CENTER);
 
 	for(auto const& keyboardKey : buttonData->stringToKeyboardKey) {
 		wxString name = wxString::FromUTF8(keyboardKey.first);
@@ -353,9 +353,9 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 	keyboardModifiers->Bind(wxEVT_LIST_ITEM_SELECTED, &ExtraInputMethods::keyboardModifiersChanged, this);
 	mouseButtons->Bind(wxEVT_LIST_ITEM_SELECTED, &ExtraInputMethods::mouseButtonsChanged, this);
 
-	keyboardKeysSizer->Add(keyboardKeys, 1, wxEXPAND);
-	keyboardModifiersSizer->Add(keyboardModifiers, 1, wxEXPAND);
-	mouseButtonsSizer->Add(mouseButtons, 1, wxEXPAND);
+	keyboardKeysSizer->Add(keyboardKeys, 0);
+	keyboardModifiersSizer->Add(keyboardModifiers, 0);
+	mouseButtonsSizer->Add(mouseButtons, 0);
 
 	mainMouseSizer->Add(mouseXCtrl, 0, wxEXPAND);
 	mainMouseSizer->Add(mouseYCtrl, 0, wxEXPAND);
@@ -370,9 +370,9 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 	mainSizer->Add(motionLeftSizer, 0, wxEXPAND);
 	mainSizer->Add(motionRightSizer, 0, wxEXPAND);
 	mainSizer->Add(touchAndMouseSizer, 0, wxEXPAND);
-	mainSizer->Add(keyboardKeysSizer, 0, wxEXPAND);
-	mainSizer->Add(keyboardModifiersSizer, 0, wxEXPAND);
-	mainSizer->Add(mouseButtonsSizer, 0, wxEXPAND);
+	mainSizer->Add(keyboardKeysSizer, 0, wxEXPAND | wxALL);
+	mainSizer->Add(keyboardModifiersSizer, 0, wxEXPAND | wxALL);
+	mainSizer->Add(mouseButtonsSizer, 0, wxEXPAND | wxALL);
 
 	Bind(wxEVT_CLOSE_WINDOW, &ExtraInputMethods::onClose, this);
 
@@ -594,6 +594,7 @@ void ExtraInputMethods::keyboardKeysChanged(wxListEvent& event) {
 	nn::hid::KeyboardKey key = keyboardKeyIndices[index];
 	inputInstance->triggerKeyboardButton(key);
 	keyboardKeys->SetItemState(index, 0, wxLIST_MASK_STATE);
+	Refresh();
 }
 
 void ExtraInputMethods::keyboardModifiersChanged(wxListEvent& event) {
@@ -601,6 +602,7 @@ void ExtraInputMethods::keyboardModifiersChanged(wxListEvent& event) {
 	nn::hid::KeyboardModifier modifier = keyboardModifierIndices[index];
 	inputInstance->triggerKeyboardModifier(modifier);
 	keyboardModifiers->SetItemState(index, 0, wxLIST_MASK_STATE);
+	Refresh();
 }
 
 void ExtraInputMethods::mouseButtonsChanged(wxListEvent& event) {
@@ -608,6 +610,7 @@ void ExtraInputMethods::mouseButtonsChanged(wxListEvent& event) {
 	nn::hid::MouseButton button = mouseButtonIndices[index];
 	inputInstance->triggerMouseButton(button);
 	mouseButtons->SetItemState(index, 0, wxLIST_MASK_STATE);
+	Refresh();
 }
 
 void ExtraInputMethods::onClose(wxCloseEvent& event) {

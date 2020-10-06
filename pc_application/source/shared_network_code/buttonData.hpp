@@ -47,10 +47,10 @@ enum class FrameState : uint8_t {
 };
 
 enum class TasValueToRecord : uint8_t {
-	NONE,
 	CONTROLLER,
 	KEYBOARD_MOUSE,
 	TOUCHSCREEN,
+	NONE,
 	ALL,
 	NUM_OF_TYPES,
 };

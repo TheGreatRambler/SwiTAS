@@ -703,7 +703,6 @@ void MainLoop::clearEveryController() {
 void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, TasValueToRecord typeToRecord, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex) {
 	if(!isPaused) {
 #ifdef __SWITCH__
-		LOGD << "Pausing";
 		rc = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
 		if(R_FAILED(rc))
 			fatalThrow(rc);
@@ -857,7 +856,6 @@ void MainLoop::waitForVsync() {
 			fatalThrow(rc);
 		// svcSleepThread(1000000 * 1);
 	} else {
-		LOGD << "Wait for vsync";
 		while(true) {
 			uint8_t frame = getMemoryType<uint8_t>(saltynxframeHasPassed);
 
@@ -928,7 +926,7 @@ void MainLoop::matchFirstControllerToTASController(uint8_t player) {
 		// This should get the first non-TAS controller
 		HidControllerID id = (HidControllerID)getLastController();
 
-		u64 buttons = hidKeysHeld(id) & 65535;
+		uint64_t buttons = hidKeysHeld(id) & 65535;
 		JoystickPosition left;
 		JoystickPosition right;
 		hidJoystickRead(&left, id, JOYSTICK_LEFT);
@@ -1087,6 +1085,8 @@ void MainLoop::setTouchRecord() {
 void MainLoop::getSixAxisState(int32_t controller, ControllerData* state) {
 	nn::hid::SixAxisSensorState sensorStateLeft;
 	nn::hid::SixAxisSensorState sensorStateRight;
+
+	LOGD << "Getting six axis state";
 
 #ifdef __SWITCH__
 	size_t offset    = sizeof(nn::hid::SixAxisSensorState) * nn::hid::SixAxisSensorStateCountMax * controller;

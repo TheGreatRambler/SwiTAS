@@ -397,7 +397,7 @@ public:
 	void addFrameHere();
 	void removeFrames(FrameNum start, FrameNum end);
 
-	std::size_t getFramesSize() const;
+	size_t getFramesSize() const;
 
 	~DataProcessing();
 

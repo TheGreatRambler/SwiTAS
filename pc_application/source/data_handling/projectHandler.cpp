@@ -129,38 +129,35 @@ void ProjectHandler::loadProject() {
 		auto savestateHook = std::make_shared<std::vector<std::shared_ptr<std::vector<ExtraFrameData>>>>();
 
 		for(auto const& branch : branchesArray) {
-			wxString path = projectDir.GetPathWithSep() + wxString::FromUTF8(branch["filename"].GetString());
-			if(wxFileName(path).FileExists()) {
+			wxFileName path = wxFileName(projectDir.GetPathWithSep() + wxString::FromUTF8(branch["filename"].GetString()));
+			if(path.FileExists()) {
 				wxMemoryBuffer memoryBuffer;
-				FILE* fin = fopen(path.c_str(), "rb");
+				FILE* fin = fopen(path.GetFullPath().c_str(), "rb");
 
 				// https://github.com/facebook/zstd/blob/dev/examples/streaming_decompression.c
-				size_t const toRead = decompressBuffInSize;
-				size_t read;
-				size_t lastRet = 0;
-				int isEmpty    = 1;
-				while((read = fread(decompressBuffIn, toRead, 1, fin))) {
-					isEmpty             = 0;
+				while(true) {
+					size_t read         = fread(decompressBuffIn, 1, decompressBuffInSize, fin);
 					ZSTD_inBuffer input = { decompressBuffIn, read, 0 };
 					while(input.pos < input.size) {
 						ZSTD_outBuffer output = { decompressBuffOut, decompressBuffOutSize, 0 };
-						size_t const ret      = ZSTD_decompressStream(dctx, &output, &input);
+						ZSTD_decompressStream(dctx, &output, &input);
 						memoryBuffer.AppendData(decompressBuffOut, output.pos);
-						lastRet = ret;
 					}
+					if(feof(fin))
+						break;
 				}
 
 				fclose(fin);
 				ZSTD_DCtx_reset(dctx, ZSTD_reset_session_only);
 
 				uint8_t* bufferPointer = (uint8_t*)memoryBuffer.GetData();
-				std::size_t bufferSize = memoryBuffer.GetDataLen();
+				size_t bufferSize      = memoryBuffer.GetDataLen();
 
 				ExtraBranchData inputs = std::make_shared<std::vector<std::shared_ptr<TouchAndKeyboardData>>>();
 
 				// Loop through each part and unserialize it
 				// This is 0% endian safe :)
-				std::size_t sizeRead = 0;
+				size_t sizeRead = 0;
 				while(sizeRead != bufferSize) {
 					// Find the size part first
 					uint8_t sizeOfControllerData = bufferPointer[sizeRead];
@@ -200,25 +197,22 @@ void ProjectHandler::loadProject() {
 			std::shared_ptr<SavestateHook> savestateHook = std::make_shared<SavestateHook>();
 
 			for(auto const& branch : branchesArray) {
-				wxString path = projectDir.GetPathWithSep() + wxString::FromUTF8(branch["filename"].GetString());
-				if(wxFileName(path).FileExists()) {
+				wxFileName path = wxFileName(projectDir.GetPathWithSep() + wxString::FromUTF8(branch["filename"].GetString()));
+				if(path.FileExists()) {
 					wxMemoryBuffer memoryBuffer;
-					FILE* fin = fopen(path.c_str(), "rb");
+					FILE* fin = fopen(path.GetFullPath().c_str(), "rb");
 
 					// https://github.com/facebook/zstd/blob/dev/examples/streaming_decompression.c
-					size_t const toRead = decompressBuffInSize;
-					size_t read;
-					size_t lastRet = 0;
-					int isEmpty    = 1;
-					while((read = fread(decompressBuffIn, toRead, 1, fin))) {
-						isEmpty             = 0;
+					while(true) {
+						size_t read         = fread(decompressBuffIn, 1, decompressBuffInSize, fin);
 						ZSTD_inBuffer input = { decompressBuffIn, read, 0 };
 						while(input.pos < input.size) {
 							ZSTD_outBuffer output = { decompressBuffOut, decompressBuffOutSize, 0 };
-							size_t const ret      = ZSTD_decompressStream(dctx, &output, &input);
+							ZSTD_decompressStream(dctx, &output, &input);
 							memoryBuffer.AppendData(decompressBuffOut, output.pos);
-							lastRet = ret;
 						}
+						if(feof(fin))
+							break;
 					}
 
 					fclose(fin);

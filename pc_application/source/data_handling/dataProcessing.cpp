@@ -248,12 +248,8 @@ int DataProcessing::OnGetItemColumnImage(long row, long column) const {
 		bool on    = getButton(row, button);
 		int res;
 		if(on) {
-			// Return index of on image
-			// Interleaved means it looks like this
 			res = (uint8_t)button * 2;
 		} else {
-			// I'm trying something, don't return an image if off
-			// res = button * 2 + 1;
 			res = -1;
 		}
 
@@ -418,7 +414,6 @@ void DataProcessing::onCut(wxCommandEvent& event) {
 }
 
 void DataProcessing::onPaste(wxCommandEvent& event) {
-
 	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if(firstSelectedItem != wxNOT_FOUND) {
 		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
@@ -442,6 +437,8 @@ void DataProcessing::onPaste(wxCommandEvent& event) {
 				setCurrentFrame(firstSelectedItem + sizeOfPaste - 1);
 				Thaw();
 				Refresh();
+
+				modifyCurrentFrameViews(currentFrame);
 			}
 		}
 	}
@@ -1841,7 +1838,7 @@ void DataProcessing::removeFrames(FrameNum start, FrameNum end) {
 	}
 }
 
-std::size_t DataProcessing::getFramesSize() const {
+size_t DataProcessing::getFramesSize() const {
 	return getInputsList()->size();
 }
 

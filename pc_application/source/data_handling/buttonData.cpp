@@ -723,7 +723,7 @@ bool ButtonData::isEmptyExtraData(std::shared_ptr<TouchAndKeyboardData> data) {
 
 std::string ButtonData::getKeyboardKeysString(std::shared_ptr<TouchAndKeyboardData> data) {
 	std::vector<std::string> keys;
-	for(auto const& key : stringToKeyboardModifier) {
+	for(auto const& key : stringToKeyboardKey) {
 		bool isHeld = IS_KEYBOARD_HELD(data->keyboardKeys, (int32_t)key.second);
 		if(isHeld) {
 			keys.push_back(key.first);

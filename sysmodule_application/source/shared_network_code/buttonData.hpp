@@ -2,13 +2,13 @@
 
 #define SET_BIT(number, bit, loc) (number) ^= (-(unsigned long)(bit) ^ (number)) & (1UL << (loc))
 #define GET_BIT(number, loc) ((number) >> (loc)) & 1U
-#define IS_KEYBOARD_HELD(data, key) data[key / 32] & (1 << (key % 32));
+#define IS_KEYBOARD_HELD(data, key) data[key / 32] & (1ULL << (key % 32));
 // clang-format off
 #define SET_KEYBOARD_HELD(data, key, state) \
 	if(state) { \
-		data[key / 32] |= (1 << (key % 32)); \
+		data[key / 32] |= (1ULL << (key % 32)); \
 	} else { \
-		data[key / 32] &= ~(1 << (key % 32)); \
+		data[key / 32] &= ~(1ULL << (key % 32)); \
 	}
 // clang-format on
 
@@ -47,10 +47,10 @@ enum class FrameState : uint8_t {
 };
 
 enum class TasValueToRecord : uint8_t {
-	NONE,
 	CONTROLLER,
 	KEYBOARD_MOUSE,
 	TOUCHSCREEN,
+	NONE,
 	ALL,
 	NUM_OF_TYPES,
 };
@@ -134,7 +134,7 @@ struct TouchAndKeyboardData : public zpp::serializer::polymorphic {
 	int32_t touchY2           = 0;
 	uint8_t numberOfTouches   = 0;
 	int32_t keyboardModifiers = 0;
-	uint32_t keyboardKeys[8]  = { 0 };
+	int32_t keyboardKeys[8]   = { 0 };
 	int32_t mouseX            = 0;
 	int32_t mouseY            = 0;
 	int32_t mouseVelocityX    = 0;
@@ -147,7 +147,7 @@ struct TouchAndKeyboardData : public zpp::serializer::polymorphic {
 	template <typename Archive, typename Self> static void serialize(Archive& archive, Self& self) {
 		// clang-format off
 			archive(self.touchX1, self.touchY1, self.touchX2, self.touchY2,
-				self.keyboardModifiers, self.numberOfTouches,
+				self.numberOfTouches, self.keyboardModifiers,
 				self.keyboardKeys, self.mouseX, self.mouseY, self.mouseVelocityX,
 				self.mouseVelocityY, self.scrollVelocityX, self.scrollVelocityY,
 				self.mouseButtons);
