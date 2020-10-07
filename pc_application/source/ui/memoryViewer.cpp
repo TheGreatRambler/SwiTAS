@@ -261,11 +261,160 @@ void MemoryViewer::onRemoveEntry(wxCommandEvent& event) {
 	itemsList->Refresh();
 
 	// Remove if present
-	fileSystemWatcher.Remove(wxFileName(infos[currentItemSelection].filePath));
+	wxString path = infos[currentItemSelection].filePath;
+	if(path != wxEmptyString) {
+		fileSystemWatcher.Remove(wxFileName(path));
+	}
 
 	infos.erase(infos.begin() + currentItemSelection);
 
 	sendUpdatedEntries();
+}
+
+void MemoryViewer::beginLabelEdit(wxListEvent& event) {
+	// Only allow editing of values themselves
+	MemoryRegionTypes type = infos[event.GetIndex()].type;
+	if(event.GetColumn() == 2 && type != MemoryRegionTypes::ByteArray) {
+		event.Allow();
+	} else {
+		event.Veto();
+	}
+}
+
+void MemoryViewer::finishLabelEdit(wxListEvent& event) {
+	size_t index           = event.GetIndex();
+	std::string newLabel   = event.GetLabel().ToStdString();
+	const char* endStr     = newLabel.c_str() + newLabel.size();
+	MemoryRegionTypes type = infos[index].type;
+	uint8_t isUnsigned     = infos[index].isUnsigned;
+	char* readEnd          = NULL;
+
+	errno = 0;
+	std::vector<uint8_t> resultingMem;
+
+	switch(type) {
+	case MemoryRegionTypes::Bit8:
+		resultingMem.resize(sizeof(uint8_t));
+		long res = strtol(newLabel.c_str(), &readEnd, 0);
+		if(readEnd != endStr || errno == ERANGE) {
+			event.Veto();
+			return;
+		}
+		if(isUnsigned) {
+			if(res < 0 || res > UINT8_MAX) {
+				event.Veto();
+				return;
+			}
+			memcpy(resultingMem.data(), &res, resultingMem.size());
+		} else {
+			if(res < INT8_MIN || res > INT8_MAX) {
+				event.Veto();
+				return;
+			}
+			memcpy(resultingMem.data(), &res, resultingMem.size());
+		}
+		break;
+	case MemoryRegionTypes::Bit16:
+		resultingMem.resize(sizeof(uint16_t));
+		long res = strtol(newLabel.c_str(), &readEnd, 0);
+		if(readEnd != endStr || errno == ERANGE) {
+			event.Veto();
+			return;
+		}
+		if(isUnsigned) {
+			if(res < 0 || res > UINT16_MAX) {
+				event.Veto();
+				return;
+			}
+			memcpy(resultingMem.data(), &res, resultingMem.size());
+		} else {
+			if(res < INT16_MIN || res > INT16_MAX) {
+				event.Veto();
+				return;
+			}
+			memcpy(resultingMem.data(), &res, resultingMem.size());
+		}
+		break;
+	case MemoryRegionTypes::Bit32:
+		resultingMem.resize(sizeof(uint32_t));
+		long res = strtol(newLabel.c_str(), &readEnd, 0);
+		if(readEnd != endStr || errno == ERANGE) {
+			event.Veto();
+			return;
+		}
+		if(isUnsigned) {
+			if(res < 0 || res > UINT32_MAX) {
+				event.Veto();
+				return;
+			}
+			memcpy(resultingMem.data(), &res, resultingMem.size());
+		} else {
+			if(res < INT32_MIN || res > INT32_MAX) {
+				event.Veto();
+				return;
+			}
+			memcpy(resultingMem.data(), &res, resultingMem.size());
+		}
+		break;
+	case MemoryRegionTypes::Bit64:
+		resultingMem.resize(sizeof(uint64_t));
+		if(isUnsigned) {
+			uint64_t res = strtoul(newLabel.c_str(), &readEnd, 0);
+			if(readEnd != endStr || errno == ERANGE) {
+				event.Veto();
+				return;
+			}
+			memcpy(resultingMem.data(), &res, resultingMem.size());
+		} else {
+			int64_t res = strtol(newLabel.c_str(), &readEnd, 0);
+			if(readEnd != endStr || errno == ERANGE) {
+				event.Veto();
+				return;
+			}
+			memcpy(resultingMem.data(), &res, resultingMem.size());
+		}
+		break;
+	case MemoryRegionTypes::Float:
+		resultingMem.resize(sizeof(float));
+		float res = strtof(newLabel.c_str(), &readEnd);
+		if(readEnd != endStr || errno == ERANGE) {
+			event.Veto();
+			return;
+		}
+		memcpy(resultingMem.data(), &res, resultingMem.size());
+		break;
+	case MemoryRegionTypes::Double:
+		resultingMem.resize(sizeof(double));
+		double res = strtod(newLabel.c_str(), &readEnd);
+		if(readEnd != endStr || errno == ERANGE) {
+			event.Veto();
+			return;
+		}
+		memcpy(resultingMem.data(), &res, resultingMem.size());
+		break;
+	case MemoryRegionTypes::Bool:
+		resultingMem.resize(sizeof(bool));
+		bool res;
+		if(newLabel == "false" || newLabel == "0") {
+			res = false;
+		} else if(newLabel == "true" || newLabel == "1") {
+			res = true;
+		} else {
+			event.Veto();
+			return;
+		}
+		memcpy(resultingMem.data(), &res, resultingMem.size());
+		break;
+	case MemoryRegionTypes::CharPointer:
+		resultingMem.resize(newLabel.size());
+		memcpy(resultingMem.data(), newLabel.c_str(), newLabel.size());
+		break;
+	}
+
+	ADD_TO_QUEUE(SendModifyMemoryRegion, networkInterface, {
+		data.pointerDefinition = infos[index].pointerPath.ToStdString();
+		data.memory            = resultingMem;
+	})
 }
 
 void MemoryViewer::fileChangesDetected(wxFileSystemWatcherEvent& event) {

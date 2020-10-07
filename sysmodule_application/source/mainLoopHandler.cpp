@@ -1256,16 +1256,18 @@ void MainLoop::setKeyboardMouseState(TouchAndKeyboardData* state) {
 void MainLoop::setDockedMode() {
 // Requires reboot
 #ifdef __SWITCH__
-	open("/SaltySD/flags/docked.flag", O_RDWR | O_CREAT, S_IRUSR | S_IRGRP | S_IROTH);
+	FILE* fd = fopen("/SaltySD/flags/docked.flag", "w");
 	remove("/SaltySD/flags/handheld.flag");
+	fclose(fd);
 #endif
 }
 
 void MainLoop::setHandheldMode() {
 // Requires reboot
 #ifdef __SWITCH__
-	open("/SaltySD/flags/handheld.flag", O_RDWR | O_CREAT, S_IRUSR | S_IRGRP | S_IROTH);
+	FILE* fd = fopen("/SaltySD/flags/handheld.flag", "w");
 	remove("/SaltySD/flags/docked.flag");
+	fclose(fd);
 #endif
 }
 

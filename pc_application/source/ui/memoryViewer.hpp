@@ -1,6 +1,8 @@
 #pragma once
 
+#include <climits>
 #include <cstdint>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -16,12 +18,12 @@
 #include "drawingCanvas.hpp"
 
 struct MemoryItemInfo {
-	uint8_t isUnsigned;
+	uint8_t isUnsigned = false;
 	MemoryRegionTypes type;
-	uint16_t size;
-	uint8_t saveToFile;
-	wxString filePath;
-	wxString pointerPath;
+	uint16_t size        = 0;
+	uint8_t saveToFile   = false;
+	wxString filePath    = "";
+	wxString pointerPath = "";
 };
 
 class MemorySectionViewer : public DrawingCanvas {
@@ -101,6 +103,8 @@ private:
 
 	void selectedItemChanged(wxListEvent& event);
 	void updateAtIndex(long index);
+	void beginLabelEdit(wxListEvent& event);
+	void finishLabelEdit(wxListEvent& event);
 
 	void fileChangesDetected(wxFileSystemWatcherEvent& event);
 
