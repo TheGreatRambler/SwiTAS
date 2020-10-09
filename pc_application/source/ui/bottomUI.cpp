@@ -370,9 +370,9 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 	mainSizer->Add(motionLeftSizer, 0, wxEXPAND);
 	mainSizer->Add(motionRightSizer, 0, wxEXPAND);
 	mainSizer->Add(touchAndMouseSizer, 0, wxEXPAND);
-	mainSizer->Add(keyboardKeysSizer, 0, wxEXPAND | wxALL);
-	mainSizer->Add(keyboardModifiersSizer, 0, wxEXPAND | wxALL);
-	mainSizer->Add(mouseButtonsSizer, 0, wxEXPAND | wxALL);
+	mainSizer->Add(keyboardKeysSizer, 0);
+	mainSizer->Add(keyboardModifiersSizer, 0);
+	mainSizer->Add(mouseButtonsSizer, 0);
 
 	Bind(wxEVT_CLOSE_WINDOW, &ExtraInputMethods::onClose, this);
 

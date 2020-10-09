@@ -293,7 +293,7 @@ void MemoryViewer::finishLabelEdit(wxListEvent& event) {
 	std::vector<uint8_t> resultingMem;
 
 	switch(type) {
-	case MemoryRegionTypes::Bit8:
+	case MemoryRegionTypes::Bit8: {
 		resultingMem.resize(sizeof(uint8_t));
 		long res = strtol(newLabel.c_str(), &readEnd, 0);
 		if(readEnd != endStr || errno == ERANGE) {
@@ -313,8 +313,8 @@ void MemoryViewer::finishLabelEdit(wxListEvent& event) {
 			}
 			memcpy(resultingMem.data(), &res, resultingMem.size());
 		}
-		break;
-	case MemoryRegionTypes::Bit16:
+	} break;
+	case MemoryRegionTypes::Bit16: {
 		resultingMem.resize(sizeof(uint16_t));
 		long res = strtol(newLabel.c_str(), &readEnd, 0);
 		if(readEnd != endStr || errno == ERANGE) {
@@ -334,8 +334,8 @@ void MemoryViewer::finishLabelEdit(wxListEvent& event) {
 			}
 			memcpy(resultingMem.data(), &res, resultingMem.size());
 		}
-		break;
-	case MemoryRegionTypes::Bit32:
+	} break;
+	case MemoryRegionTypes::Bit32: {
 		resultingMem.resize(sizeof(uint32_t));
 		long res = strtol(newLabel.c_str(), &readEnd, 0);
 		if(readEnd != endStr || errno == ERANGE) {
@@ -355,8 +355,8 @@ void MemoryViewer::finishLabelEdit(wxListEvent& event) {
 			}
 			memcpy(resultingMem.data(), &res, resultingMem.size());
 		}
-		break;
-	case MemoryRegionTypes::Bit64:
+	} break;
+	case MemoryRegionTypes::Bit64: {
 		resultingMem.resize(sizeof(uint64_t));
 		if(isUnsigned) {
 			uint64_t res = strtoul(newLabel.c_str(), &readEnd, 0);
@@ -373,8 +373,8 @@ void MemoryViewer::finishLabelEdit(wxListEvent& event) {
 			}
 			memcpy(resultingMem.data(), &res, resultingMem.size());
 		}
-		break;
-	case MemoryRegionTypes::Float:
+	} break;
+	case MemoryRegionTypes::Float: {
 		resultingMem.resize(sizeof(float));
 		float res = strtof(newLabel.c_str(), &readEnd);
 		if(readEnd != endStr || errno == ERANGE) {
@@ -382,8 +382,8 @@ void MemoryViewer::finishLabelEdit(wxListEvent& event) {
 			return;
 		}
 		memcpy(resultingMem.data(), &res, resultingMem.size());
-		break;
-	case MemoryRegionTypes::Double:
+	} break;
+	case MemoryRegionTypes::Double: {
 		resultingMem.resize(sizeof(double));
 		double res = strtod(newLabel.c_str(), &readEnd);
 		if(readEnd != endStr || errno == ERANGE) {
@@ -391,8 +391,8 @@ void MemoryViewer::finishLabelEdit(wxListEvent& event) {
 			return;
 		}
 		memcpy(resultingMem.data(), &res, resultingMem.size());
-		break;
-	case MemoryRegionTypes::Bool:
+	} break;
+	case MemoryRegionTypes::Bool: {
 		resultingMem.resize(sizeof(bool));
 		bool res;
 		if(newLabel == "false" || newLabel == "0") {
@@ -404,11 +404,11 @@ void MemoryViewer::finishLabelEdit(wxListEvent& event) {
 			return;
 		}
 		memcpy(resultingMem.data(), &res, resultingMem.size());
-		break;
-	case MemoryRegionTypes::CharPointer:
+	} break;
+	case MemoryRegionTypes::CharPointer: {
 		resultingMem.resize(newLabel.size());
 		memcpy(resultingMem.data(), newLabel.c_str(), newLabel.size());
-		break;
+	} break;
 	}
 
 	ADD_TO_QUEUE(SendModifyMemoryRegion, networkInterface, {

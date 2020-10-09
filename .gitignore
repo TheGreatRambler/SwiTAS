@@ -1,2 +1,4 @@
 .gitpod.yml
 pc_application/switas_recent.json
+*.elf
+*.nsp
