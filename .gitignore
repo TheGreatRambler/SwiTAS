@@ -2,3 +2,4 @@
 pc_application/switas_recent.json
 *.elf
 *.nsp
+sysmodule_application/switch/atmosphere/contents/4200000000000BAC/exefs.nsp

@@ -222,9 +222,15 @@ void MainLoop::mainLoopHandler() {
 		// Handle SaltyNX output
 		uint16_t logOutputSize = getMemoryType<uint16_t>(saltynxlogStringIndex);
 		if(logOutputSize != 0) {
-			std::vector<unsigned char> logData = getMemory(saltynxlogString, logOutputSize);
+			std::vector<uint8_t> logData = getMemory(saltynxlogString, logOutputSize);
+			// Push null charactor onto the end
+			logData.push_back('\0');
 
-			LOGD << std::string((char*)logData.data(), logOutputSize);
+			char* token = strtok((char*)logData.data(), "\n");
+			while(token != NULL) {
+				LOGD << token;
+				token = strtok(NULL, "\n");
+			}
 
 			setMemoryType(saltynxlogStringIndex, (uint16_t)0);
 		}
@@ -248,9 +254,11 @@ void MainLoop::mainLoopHandler() {
 void MainLoop::handleNetworkUpdates() {
 	CHECK_QUEUE(networkInstance, SendFrameData, {
 		if(data.incrementFrame) {
+			LOGD << "Incrementing without any recording";
 			listenAll();
 			runSingleFrame(true, data.includeFramebuffer, TasValueToRecord::NONE, data.frame, data.savestateHookNum, data.branchIndex, data.playerIndex);
 		} else if(data.typeToRecord != TasValueToRecord::NONE) {
+			LOGD << "Have type to record, will be incrementing frame now";
 			switch(data.typeToRecord) {
 			case TasValueToRecord::NONE:
 				break;
@@ -272,6 +280,7 @@ void MainLoop::handleNetworkUpdates() {
 
 			runSingleFrame(true, data.includeFramebuffer, data.typeToRecord, data.frame, data.savestateHookNum, data.branchIndex, data.playerIndex);
 		} else {
+			LOGD << "Have type to set, will not be incrementing";
 			switch(data.valueIncluded) {
 			case TasValueToRecord::NONE:
 			case TasValueToRecord::ALL:
@@ -406,8 +415,7 @@ void MainLoop::sendGameInfo() {
 			accountGetProfile(&profile, uid);
 			accountProfileGet(&profile, &userdata, &profileBase);
 
-			// If it uses all charactors, (ie has no NULL char), may need to get more smart
-			data.userNickname = std::string(profileBase.nickname);
+			data.userNickname = std::string(profileBase.nickname, strnlen(profileBase.nickname, 0x20));
 #endif
 
 			// I don't know how to handle this for Yuzu, so ignore for now
