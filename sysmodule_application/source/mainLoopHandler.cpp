@@ -232,7 +232,7 @@ void MainLoop::mainLoopHandler() {
 				token = strtok(NULL, "\n");
 			}
 
-			setMemoryType(saltynxlogStringIndex, (uint16_t)0);
+			setMemoryType<uint16_t>(saltynxlogStringIndex, 0);
 		}
 	}
 
@@ -286,7 +286,9 @@ void MainLoop::handleNetworkUpdates() {
 			case TasValueToRecord::ALL:
 				break;
 			case TasValueToRecord::CONTROLLER:
+				LOGD << "Set controller data";
 				controllers[data.playerIndex]->setFrame(data.controllerData);
+				LOGD << "Set six axis";
 				setSixAxisState(data.playerIndex, &data.controllerData);
 				break;
 			case TasValueToRecord::KEYBOARD_MOUSE:
@@ -869,7 +871,7 @@ void MainLoop::waitForVsync() {
 
 			if(frame) {
 				// Clear the variable so we can wait for it again
-				setMemoryType(saltynxframeHasPassed, (uint8_t) false);
+				setMemoryType<uint8_t>(saltynxframeHasPassed, false);
 				return;
 			} else {
 				svcSleepThread(1000000 * 3);
@@ -942,6 +944,9 @@ void MainLoop::matchFirstControllerToTASController(uint8_t player) {
 
 		controllers[player]->setFrame(buttons, left.dx, left.dy, right.dx, right.dy);
 
+		// In order for the six axis state to be understood, need to have all
+		// Other controllers listen in
+		setSixAxisRecord(id);
 		if(lastControllerType == TYPE_JOYCON_PAIR) {
 			SixAxisSensorValues vals[2];
 			hidSixAxisSensorValuesRead(vals, id, 2);
