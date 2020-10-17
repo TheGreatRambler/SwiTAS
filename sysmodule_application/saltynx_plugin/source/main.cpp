@@ -35,8 +35,9 @@ int32_t lastControllerId;
 
 // This is the controller that needs to record, all other controllers get their state
 // From the exposed sensor states
-// If -1, every controller records
-int32_t controllerToRecord = (int32_t)nn::hid::NpadIdType::None;
+// If -1, np controller records (all accept input)
+// If -2, every controller records (none accept input)
+int32_t controllerToRecord = -2;
 
 nn::hid::SixAxisSensorHandle sixAxisHandlesLeftJoycon[8]  = { 0 };
 nn::hid::SixAxisSensorHandle sixAxisHandlesRightJoycon[8] = { 0 };
@@ -250,7 +251,7 @@ void GetSixAxisSensorState(nn::hid::SixAxisSensorState* state, const nn::hid::Si
 			if(sixAxisHandlesLeftJoycon[i] == handle) {
 				_ZN2nn3hid21GetSixAxisSensorStateEPNS0_18SixAxisSensorStateERKNS0_19SixAxisSensorHandleE(state, handle);
 
-				if(controllerToRecord != i && controllerToRecord != -1) {
+				if((controllerToRecord != -2) && controllerToRecord == -1 || controllerToRecord != i) {
 					fixMotionState(&sixAxisStateLeftJoycon[i], state);
 					memcpy(state, &sixAxisStateLeftJoycon[i], sizeof(nn::hid::SixAxisSensorState));
 				}
@@ -267,7 +268,7 @@ void GetSixAxisSensorState(nn::hid::SixAxisSensorState* state, const nn::hid::Si
 			if(sixAxisHandlesRightJoycon[i] == handle) {
 				_ZN2nn3hid21GetSixAxisSensorStateEPNS0_18SixAxisSensorStateERKNS0_19SixAxisSensorHandleE(state, handle);
 
-				if(controllerToRecord != i && controllerToRecord != -1) {
+				if((controllerToRecord != -2) && controllerToRecord == -1 || controllerToRecord != i) {
 					fixMotionState(&sixAxisStateRightJoycon[i], state);
 					memcpy(state, &sixAxisStateRightJoycon[i], sizeof(nn::hid::SixAxisSensorState));
 				}

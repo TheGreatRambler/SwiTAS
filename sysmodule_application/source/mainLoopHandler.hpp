@@ -91,12 +91,12 @@ private:
 	uint64_t saltynxframeHasPassed                 = 0;
 	uint64_t saltynxlogStringIndex                 = 0;
 	uint64_t saltynxlogString                      = 0;
-	uint64_t saltynxcontrollerToRecord             = 0;
+	uint64_t saltynxcontrollerTospoof              = 0;
 	uint64_t saltynxsixAxisStateLeftJoycon         = 0;
 	uint64_t saltynxsixAxisStateRightJoycon        = 0;
 	uint64_t saltynxsixAxisStateLeftJoyconBacklog  = 0;
 	uint64_t saltynxsixAxisStateRightJoyconBacklog = 0;
-	uint64_t saltynxrecordScreenOrKeyboard         = 0;
+	uint64_t saltynxspoofScreenOrKeyboard          = 0;
 	uint64_t saltynxtouchscreenState               = 0;
 	uint64_t saltynxtouchScreenStateBacklog        = 0;
 	uint64_t saltynxkeyboardState                  = 0;
@@ -179,7 +179,7 @@ private:
 		return std::to_string(*(T*)bytes.data());
 	}
 
-	void pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, TasValueToRecord typeToRecord, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex);
+	void pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, TasValueTospoof typeTospoof, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex);
 
 	void waitForVsync();
 
@@ -199,7 +199,7 @@ private:
 	}
 
 	// This assumes that the app is paused
-	void runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, TasValueToRecord typeToRecord, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex);
+	void runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, TasValueTospoof typeTospoof, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex);
 
 	void clearEveryController();
 
@@ -220,13 +220,13 @@ private:
 		return controllers.size();
 	}
 
-	void recordAllSixAxis();
-	void setSixAxisRecord(int32_t controller);
+	void spoofAllSixAxis();
+	void setSixAxisSpoof(int32_t controller);
 	void setSixAxisListen();
-	void recordAllKeyboardTouch();
+	void spoofAllKeyboardTouch();
 	void listenAllKeyboardTouch();
-	void setKeyboardRecord();
-	void setTouchRecord();
+	void setKeyboardSpoof();
+	void setTouchSpoof();
 	void getSixAxisState(int32_t controller, ControllerData* state);
 	void setSixAxisState(int32_t controller, ControllerData* state);
 	void getTouchState(TouchAndKeyboardData* state);
@@ -236,9 +236,9 @@ private:
 	void setDockedMode();
 	void setHandheldMode();
 
-	void recordAll() {
-		recordAllSixAxis();
-		recordAllKeyboardTouch();
+	void spoofAll() {
+		spoofAllSixAxis();
+		spoofAllKeyboardTouch();
 	}
 
 	void listenAll() {
@@ -252,7 +252,7 @@ private:
 		setKeyboardMouseState(&empty);
 	}
 
-	void setAll() { }
+	void setAll() {}
 
 	uint8_t finalTasShouldRun;
 	void runFinalTas(std::vector<std::string> scriptPaths, std::string extraDataPath);
