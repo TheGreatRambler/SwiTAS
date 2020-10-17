@@ -197,7 +197,7 @@ DLL_EXPORT void startPlugin(void* wrapperInstance) {
 }
 
 // Possibly pass delta
-DLL_EXPORT void handleMainLoop() {
+DLL_EXPORT void onMainLoop() {
 	mainLoop.mainLoopHandler();
 }
 
