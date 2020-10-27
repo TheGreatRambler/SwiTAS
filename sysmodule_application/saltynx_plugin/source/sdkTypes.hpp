@@ -333,8 +333,6 @@ namespace nn {
 			Player8  = 7,
 			Unknown  = 16,
 			Handheld = 32,
-			// Added by me to set all
-			Set_All = 33,
 		};
 
 		struct SixAxisSensorState {

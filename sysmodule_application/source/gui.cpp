@@ -299,9 +299,9 @@ Gui::Gui(ViDisplay* disp) {
 		succeeded = R_SUCCEEDED(rc);
 #endif
 #ifdef YUZU
-		uint8_t* jpeg = yuzuSyscalls->function_emu_getscreenjpeg(yuzuSyscalls->getYuzuInstance(), &outSize);
+		uint8_t* jpeg =  yuzu_emu_getscreenjpeg(yuzuInstance, &outSize);
 		memcpy(savedJpegFramebuffer, jpeg, outSize);
-		yuzuSyscalls->function_meta_free(jpeg);
+		 yuzu_meta_free(jpeg);
 		succeeded = true;
 #endif
 

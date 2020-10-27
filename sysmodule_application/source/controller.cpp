@@ -63,7 +63,7 @@ ControllerHandler::ControllerHandler(std::shared_ptr<CommunicateWithNetwork> net
 #endif
 
 #ifdef YUZU
-		yuzuSyscalls->function_joypad_addjoypad(yuzuSyscalls->getYuzuInstance());
+		yuzu_joypad_addjoypad(yuzuInstance);
 #endif
 	}
 

@@ -51,11 +51,6 @@ MainLoop::MainLoop() {
 		fatalThrow(rc);
 
 #endif
-
-#ifdef YUZU
-	yuzuSyscalls = std::make_shared<Syscalls>();
-	screenshotHandler.setYuzuInstance(yuzuInstance);
-#endif
 }
 
 void MainLoop::mainLoopHandler() {
@@ -76,7 +71,7 @@ void MainLoop::mainLoopHandler() {
 		// Lifted from switchPresense-Rewritten
 		uint8_t succeeded = R_SUCCEEDED(rc);
 #else
-		uint8_t succeeded = yuzuSyscalls->function_emu_emulating(yuzuSyscalls->getYuzuInstance());
+		uint8_t succeeded = yuzu_emu_emulating(yuzuInstance);
 #endif
 
 		if(succeeded) {
@@ -109,7 +104,7 @@ void MainLoop::mainLoopHandler() {
 					fread(&saltynxsixAxisStateRightJoycon, sizeof(uint64_t), 1, offsets);
 					fread(&saltynxsixAxisStateLeftJoyconBacklog, sizeof(uint64_t), 1, offsets);
 					fread(&saltynxsixAxisStateRightJoyconBacklog, sizeof(uint64_t), 1, offsets);
-					fread(&saltynxrecordScreenOrKeyboard, sizeof(uint64_t), 1, offsets);
+					fread(&saltynxRecordScreenOrKeyboard, sizeof(uint64_t), 1, offsets);
 					fread(&saltynxtouchscreenState, sizeof(uint64_t), 1, offsets);
 					fread(&saltynxtouchScreenStateBacklog, sizeof(uint64_t), 1, offsets);
 					fread(&saltynxkeyboardState, sizeof(uint64_t), 1, offsets);
@@ -162,21 +157,21 @@ void MainLoop::mainLoopHandler() {
 			}
 #endif
 #ifdef YUZU
-			char* gameNamePointer = yuzuSyscalls->function_emu_romname(yuzuSyscalls->getYuzuInstance());
+			char* gameNamePointer = yuzu_emu_romname(yuzuInstance);
 			gameName              = std::string(gameNamePointer);
-			yuzuSyscalls->function_meta_free(gameNamePointer);
+			yuzu_meta_free(gameNamePointer);
 
-			applicationProgramId = yuzuSyscalls->function_emu_getprogramid(yuzuSyscalls->getYuzuInstance());
-			applicationProcessId = yuzuSyscalls->function_emu_getprocessid(yuzuSyscalls->getYuzuInstance());
+			applicationProgramId = yuzu_emu_getprogramid(yuzuInstance);
+			applicationProcessId = yuzu_emu_getprocessid(yuzuInstance);
 
 			// pauseApp(false, false, false, 0, 0, 0, 0);
 
-			heapBase = yuzuSyscalls->function_emu_getheapstart(yuzuSyscalls->getYuzuInstance());
-			mainBase = yuzuSyscalls->function_emu_getmainstart(yuzuSyscalls->getYuzuInstance());
+			heapBase = yuzu_emu_getheapstart(yuzuInstance);
+			mainBase = yuzu_emu_getmainstart(yuzuInstance);
 
 			// unpauseApp();
 
-			// yuzuSyscalls->function_emu_log(yuzuSyscalls->getYuzuInstance(), "Application opened");
+			//   yuzu_emu_log(yuzuInstance, "Application opened");
 
 			ADD_TO_QUEUE(RecieveApplicationConnected, networkInstance, {
 				data.applicationName      = gameName;
@@ -255,7 +250,7 @@ void MainLoop::handleNetworkUpdates() {
 	CHECK_QUEUE(networkInstance, SendFrameData, {
 		if(data.incrementFrame) {
 			LOGD << "Incrementing without any recording";
-			listenAll();
+			spoofAll();
 			runSingleFrame(true, data.includeFramebuffer, TasValueToRecord::NONE, data.frame, data.savestateHookNum, data.branchIndex, data.playerIndex);
 		} else if(data.typeToRecord != TasValueToRecord::NONE) {
 			LOGD << "Have type to record, will be incrementing frame now";
@@ -267,7 +262,7 @@ void MainLoop::handleNetworkUpdates() {
 				recordAll();
 				break;
 			case TasValueToRecord::CONTROLLER:
-				setSixAxisListen();
+				setSixAxisRecord(data.playerIndex);
 				matchFirstControllerToTASController(data.playerIndex);
 				break;
 			case TasValueToRecord::KEYBOARD_MOUSE:
@@ -529,7 +524,7 @@ uint8_t MainLoop::getNumControllers() {
 	return num;
 #endif
 #ifdef YUZU
-	return yuzuSyscalls->function_joypad_getnumjoypads(yuzuSyscalls->getYuzuInstance());
+	return yuzu_joypad_getnumjoypads(yuzuInstance);
 #endif
 }
 
@@ -545,7 +540,7 @@ void MainLoop::setControllerNumber(uint8_t numOfControllers) {
 	svcSleepThread((int64_t)1000000 * 3000);
 #endif
 #ifdef YUZU
-	yuzuSyscalls->function_joypad_setnumjoypads(yuzuSyscalls->getYuzuInstance(), 0);
+	yuzu_joypad_setnumjoypads(yuzuInstance, 0);
 #endif
 	for(uint8_t i = 0; i < numOfControllers; i++) {
 #ifdef __SWITCH__
@@ -569,7 +564,7 @@ void MainLoop::setControllerNumber(uint8_t numOfControllers) {
 }
 
 void MainLoop::runFinalTas(std::vector<std::string> scriptPaths, std::string extraDataPath) {
-	listenAll();
+	spoofAll();
 
 	std::vector<FILE*> files;
 	for(auto const& path : scriptPaths) {
@@ -719,7 +714,7 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 		isPaused = true;
 #endif
 #ifdef YUZU
-		yuzuSyscalls->function_emu_pause(yuzuSyscalls->getYuzuInstance());
+		yuzu_emu_pause(yuzuInstance);
 #endif
 
 		if(networkInstance->isConnected()) {
@@ -880,7 +875,7 @@ void MainLoop::waitForVsync() {
 	}
 #endif
 #ifdef YUZU
-	yuzuSyscalls->function_emu_frameadvance(yuzuSyscalls->getYuzuInstance());
+	yuzu_emu_frameadvance(yuzuInstance);
 #endif
 }
 
@@ -945,7 +940,7 @@ void MainLoop::matchFirstControllerToTASController(uint8_t player) {
 		controllers[player]->setFrame(buttons, left.dx, left.dy, right.dx, right.dy);
 
 		// In order for the six axis state to be understood, need to have all
-		// Other controllers listen in
+		// Other controllers spoof in
 		setSixAxisRecord(id);
 		if(lastControllerType == TYPE_JOYCON_PAIR) {
 			SixAxisSensorValues vals[2];
@@ -1027,12 +1022,12 @@ void MainLoop::matchFirstControllerToTASController(uint8_t player) {
 		// This should get the first non-TAS controller
 		uint8_t controllerIndex = (uint8_t)controllers.size();
 
-		uint64_t buttons = yuzuSyscalls->function_joypad_read(yuzuSyscalls->getYuzuInstance(), controllerIndex);
+		uint64_t buttons = yuzu_joypad_read(yuzuInstance, controllerIndex);
 
-		int32_t leftX  = yuzuSyscalls->function_joypad_readjoystick(yuzuSyscalls->getYuzuInstance(), controllerIndex, YuzuJoystickType::LeftX);
-		int32_t leftY  = yuzuSyscalls->function_joypad_readjoystick(yuzuSyscalls->getYuzuInstance(), controllerIndex, YuzuJoystickType::LeftY);
-		int32_t rightX = yuzuSyscalls->function_joypad_readjoystick(yuzuSyscalls->getYuzuInstance(), controllerIndex, YuzuJoystickType::RightX);
-		int32_t rightY = yuzuSyscalls->function_joypad_readjoystick(yuzuSyscalls->getYuzuInstance(), controllerIndex, YuzuJoystickType::RightY);
+		int32_t leftX  = yuzu_joypad_readjoystick(yuzuInstance, controllerIndex, YuzuJoystickType::LeftX);
+		int32_t leftY  = yuzu_joypad_readjoystick(yuzuInstance, controllerIndex, YuzuJoystickType::LeftY);
+		int32_t rightX = yuzu_joypad_readjoystick(yuzuInstance, controllerIndex, YuzuJoystickType::RightX);
+		int32_t rightY = yuzu_joypad_readjoystick(yuzuInstance, controllerIndex, YuzuJoystickType::RightY);
 
 		controllers[player]->setFrame(buttons, leftX, leftY, rightX, rightY);
 	}
@@ -1040,11 +1035,7 @@ void MainLoop::matchFirstControllerToTASController(uint8_t player) {
 }
 
 void MainLoop::recordAllSixAxis() {
-#ifdef __SWITCH__
-	if(saltynxcontrollerToRecord != 0) {
-		setMemoryType(saltynxcontrollerToRecord, nn::hid::NpadIdType::None);
-	}
-#endif
+	setSixAxisRecord(-2);
 }
 
 void MainLoop::setSixAxisRecord(int32_t controller) {
@@ -1055,42 +1046,38 @@ void MainLoop::setSixAxisRecord(int32_t controller) {
 #endif
 }
 
-void MainLoop::setSixAxisListen() {
+void MainLoop::setSixAxisSpoof() {
+	setSixAxisRecord(-1);
+}
+
+void MainLoop::spoofAllKeyboardTouch() {
 #ifdef __SWITCH__
-	if(saltynxcontrollerToRecord != 0) {
-		setMemoryType(saltynxcontrollerToRecord, nn::hid::NpadIdType::Set_All);
+	if(saltynxRecordScreenOrKeyboard != 0) {
+		setMemoryType<uint8_t>(saltynxRecordScreenOrKeyboard, 3);
 	}
 #endif
 }
 
 void MainLoop::recordAllKeyboardTouch() {
 #ifdef __SWITCH__
-	if(saltynxrecordScreenOrKeyboard != 0) {
-		setMemoryType<uint8_t>(saltynxrecordScreenOrKeyboard, 0);
-	}
-#endif
-}
-
-void MainLoop::listenAllKeyboardTouch() {
-#ifdef __SWITCH__
-	if(saltynxrecordScreenOrKeyboard != 0) {
-		setMemoryType<uint8_t>(saltynxrecordScreenOrKeyboard, 3);
+	if(saltynxRecordScreenOrKeyboard != 0) {
+		setMemoryType<uint8_t>(saltynxRecordScreenOrKeyboard, 0);
 	}
 #endif
 }
 
 void MainLoop::setKeyboardRecord() {
 #ifdef __SWITCH__
-	if(saltynxrecordScreenOrKeyboard != 0) {
-		setMemoryType<uint8_t>(saltynxrecordScreenOrKeyboard, 2);
+	if(saltynxRecordScreenOrKeyboard != 0) {
+		setMemoryType<uint8_t>(saltynxRecordScreenOrKeyboard, 2);
 	}
 #endif
 }
 
 void MainLoop::setTouchRecord() {
 #ifdef __SWITCH__
-	if(saltynxrecordScreenOrKeyboard != 0) {
-		setMemoryType<uint8_t>(saltynxrecordScreenOrKeyboard, 1);
+	if(saltynxRecordScreenOrKeyboard != 0) {
+		setMemoryType<uint8_t>(saltynxRecordScreenOrKeyboard, 1);
 	}
 #endif
 }

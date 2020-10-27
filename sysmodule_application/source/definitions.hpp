@@ -342,14 +342,12 @@ namespace PluginDefinitions {
 		DirectionZZ,
 	};
 
-	typedef void(meta_setup_plugin)(void*);
+	typedef void(meta_setup_plugin)();
 	typedef void(meta_handle_main_loop)();
-	typedef void(meta_add_function)(void*);
 	typedef uint64_t(meta_getplugininterfaceversion)();
 	typedef void(meta_handle_close)();
 
 	typedef void(meta_free)(void*);
-	typedef void(emu_speedmode)(void* ctx, const char* mode);
 	typedef void(emu_frameadvance)(void* ctx);
 	typedef void(emu_pause)(void* ctx);
 	typedef void(emu_unpause)(void* ctx);

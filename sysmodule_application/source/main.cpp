@@ -192,75 +192,14 @@ LOGD << "Started logging";
 
 MainLoop mainLoop;
 
-DLL_EXPORT void startPlugin(void* wrapperInstance) {
-	mainLoop.getYuzuSyscalls()->setYuzuInstance(wrapperInstance);
-}
+DLL_EXPORT void startPlugin() { }
 
 // Possibly pass delta
 DLL_EXPORT void onMainLoop() {
 	mainLoop.mainLoopHandler();
 }
 
-// clang-format off
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), meta_free)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), emu_speedmode)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), emu_frameadvance)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), emu_pause)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), emu_unpause)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), emu_framecount)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), emu_fps)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), emu_emulating)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), emu_romname)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), emu_getprogramid)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), emu_getprocessid)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), emu_getheapstart)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), emu_getheapsize)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), emu_getmainstart)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), emu_getmainsize)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), emu_getstackstart)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), emu_getstacksize)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), emu_log)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), memory_readbyterange)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), memory_writebyterange)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), debugger_getclockticks)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), debugger_getcputicks)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), joypad_read)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), joypad_set)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), joypad_readjoystick)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), joypad_setjoystick)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), joypad_readsixaxis)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), joypad_setsixaxis)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), joypad_enablejoypad)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), joypad_removealljoypads)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), joypad_setjoypadtype)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), joypad_isjoypadconnected)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), input_requeststateupdate)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), input_enablekeyboard)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), input_enablemouse)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), input_enabletouchscreen)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), input_iskeypressed)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), input_setkeypressed)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), input_iskeymodifierpressed)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), input_setkeymodifierpressed)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), input_ismousepressed)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), input_setmousepressed)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), input_getnumtouches)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), input_setnumtouches)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), joypad_readtouch)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), joypad_settouch)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), joypad_movemouse)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), joypad_readmouse)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), input_enableoutsideinput)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), gui_getwidth)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), gui_getheight)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), gui_clearscreen)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), gui_render)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), gui_drawpixel)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), gui_savescreenshotas)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), gui_drawimage)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), gui_popup)
-DLL_EXPORT SET_YUZU_FUNC(mainLoop.getYuzuSyscalls(), gui_savescreenshotmemory)
-
-DLL_EXPORT uint64_t get_plugin_interface_version() { return PLUGIN_INTERFACE_VERSION; }
-// clang-format on
+DLL_EXPORT uint64_t get_plugin_interface_version() {
+	return PLUGIN_INTERFACE_VERSION;
+}
 #endif

@@ -1,6 +1,6 @@
 #include "screenshotHandler.hpp"
 
-ScreenshotHandler::ScreenshotHandler() {}
+ScreenshotHandler::ScreenshotHandler() { }
 
 void ScreenshotHandler::writeFramebuffer(std::vector<uint8_t>& buf, std::string& dhash) {
 	buf.resize(JPEG_BUF_SIZE);
@@ -12,9 +12,9 @@ void ScreenshotHandler::writeFramebuffer(std::vector<uint8_t>& buf, std::string&
 	succeeded = R_SUCCEEDED(rc);
 #endif
 #ifdef YUZU
-	uint8_t* jpeg = yuzuSyscalls->function_emu_getscreenjpeg(yuzuSyscalls->getYuzuInstance(), &outSize);
+	uint8_t* jpeg =  yuzu_emu_getscreenjpeg(yuzuInstance, &outSize);
 	memcpy(buf.data(), jpeg, outSize);
-	yuzuSyscalls->function_meta_free(jpeg);
+	 yuzu_meta_free(jpeg);
 	succeeded = true;
 #endif
 
@@ -94,4 +94,4 @@ void ScreenshotHandler::readFullScreenshotStream(uint8_t* buf, uint64_t size, ui
 }
 #endif
 
-ScreenshotHandler::~ScreenshotHandler() {}
+ScreenshotHandler::~ScreenshotHandler() { }

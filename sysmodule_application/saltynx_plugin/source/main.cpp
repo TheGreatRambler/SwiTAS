@@ -35,7 +35,7 @@ int32_t lastControllerId;
 
 // This is the controller that needs to record, all other controllers get their state
 // From the exposed sensor states
-// If -1, np controller records (all accept input)
+// If -1, no controller records (all accept input)
 // If -2, every controller records (none accept input)
 int32_t controllerToRecord = -2;
 

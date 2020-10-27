@@ -13,22 +13,17 @@
 // clang-format on
 
 // clang-format off
-#define YUZU_FUNC(func) \
-	func* function_##func = nullptr; \
-	void set_##func(func* function) { \
-		function_##func = function; \
-	}
+#ifdef __SWITCH__
+	#define YUZU_FUNC(func)
+#else
+	#ifdef _WIN32
+		#define YUZU_FUNC(func) \
+			extern "C" __declspec(dllexport) func* yuzu_##func;
+	#else
+		#define YUZU_FUNC(func) \
+			extern "C" __attribute__((visibility("default"))) func* yuzu_##func;
+	#endif
+#endif
 // clang-format on
-// The calling has to be done manually
-
-// clang-format off
-#define SET_YUZU_FUNC(class, func) void yuzupluginset_##func(func* function) { \
-		class->set_##func(function); \
-	}
-// clang-format on
-
-// http://www.fceux.com/web/help/fceux.html?LuaFunctionsList.html
-// Bools become uint8_t due to portability issues
-// Everu function is preceded by a pointer to the Yuzu context
 
 #include "definitions.hpp"

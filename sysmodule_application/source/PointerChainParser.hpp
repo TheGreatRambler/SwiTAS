@@ -431,7 +431,7 @@ namespace calculator {
 				svcReadDebugProcessMemory(&newAddr, applicationDebug, parseExpr(), sizeof(uint64_t));
 #endif
 #ifdef YUZU
-				yuzuSyscalls->function_rom_readbytes(yuzuSyscalls->getYuzuInstance(), &newAddr, parseExpr(), sizeof(uint64_t));
+				yuzu_rom_readbytes(yuzuInstance, &newAddr, parseExpr(), sizeof(uint64_t));
 #endif
 
 				val = newAddr;

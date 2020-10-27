@@ -91,22 +91,18 @@ private:
 	uint64_t saltynxframeHasPassed                 = 0;
 	uint64_t saltynxlogStringIndex                 = 0;
 	uint64_t saltynxlogString                      = 0;
-	uint64_t saltynxcontrollerTospoof              = 0;
+	uint64_t saltynxcontrollerToRecord             = 0;
 	uint64_t saltynxsixAxisStateLeftJoycon         = 0;
 	uint64_t saltynxsixAxisStateRightJoycon        = 0;
 	uint64_t saltynxsixAxisStateLeftJoyconBacklog  = 0;
 	uint64_t saltynxsixAxisStateRightJoyconBacklog = 0;
-	uint64_t saltynxspoofScreenOrKeyboard          = 0;
+	uint64_t saltynxRecordScreenOrKeyboard         = 0;
 	uint64_t saltynxtouchscreenState               = 0;
 	uint64_t saltynxtouchScreenStateBacklog        = 0;
 	uint64_t saltynxkeyboardState                  = 0;
 	uint64_t saltynxkeyboardStateBacklog           = 0;
 	uint64_t saltynxmouseState                     = 0;
 	uint64_t saltynxmouseStateBacklog              = 0;
-#endif
-
-#ifdef YUZU
-	std::shared_ptr<Syscalls> yuzuSyscalls;
 #endif
 
 #ifdef __SWITCH__
@@ -141,7 +137,7 @@ private:
 		ACCESS_MEMORY_SAFE({ svcReadDebugProcessMemory(region.data(), applicationDebug, addr, size); })
 #endif
 #ifdef YUZU
-		yuzuSyscalls->function_rom_readbytes(yuzuSyscalls->getYuzuInstance(), region.data(), addr, size);
+		yuzu_rom_readbytes(yuzuInstance, region.data(), addr, size);
 #endif
 		return region;
 	}
@@ -151,7 +147,7 @@ private:
 		ACCESS_MEMORY_SAFE({ svcWriteDebugProcessMemory(applicationDebug, item.data(), addr, item.size()); })
 #endif
 #ifdef YUZU
-		yuzuSyscalls->function_rom_writebytes(yuzuSyscalls->getYuzuInstance(), addr, item.data(), item.size());
+		yuzu_rom_writebytes(yuzuInstance, addr, item.data(), item.size());
 #endif
 	}
 
@@ -161,7 +157,7 @@ private:
 		ACCESS_MEMORY_SAFE({ svcReadDebugProcessMemory(&item, applicationDebug, addr, sizeof(T)); })
 #endif
 #ifdef YUZU
-		yuzuSyscalls->function_rom_readbytes(yuzuSyscalls->getYuzuInstance(), &item, addr, sizeof(T));
+		yuzu_rom_readbytes(yuzuInstance, &item, addr, sizeof(T));
 #endif
 		return item;
 	}
@@ -171,7 +167,7 @@ private:
 		ACCESS_MEMORY_SAFE({ svcWriteDebugProcessMemory(applicationDebug, &item, addr, sizeof(T)); })
 #endif
 #ifdef YUZU
-		yuzuSyscalls->function_rom_writebytes(yuzuSyscalls->getYuzuInstance(), addr, &item, sizeof(T));
+		yuzu_rom_writebytes(yuzuInstance, addr, &item, sizeof(T));
 #endif
 	}
 
@@ -179,7 +175,7 @@ private:
 		return std::to_string(*(T*)bytes.data());
 	}
 
-	void pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, TasValueTospoof typeTospoof, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex);
+	void pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, TasValueToRecord typeTospoof, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex);
 
 	void waitForVsync();
 
@@ -193,13 +189,13 @@ private:
 			isPaused = false;
 #endif
 #ifdef YUZU
-			yuzuSyscalls->function_emu_unpause(yuzuSyscalls->getYuzuInstance());
+			yuzu_emu_unpause(yuzuInstance);
 #endif
 		}
 	}
 
 	// This assumes that the app is paused
-	void runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, TasValueTospoof typeTospoof, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex);
+	void runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, TasValueToRecord typeTospoof, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex);
 
 	void clearEveryController();
 
@@ -220,13 +216,13 @@ private:
 		return controllers.size();
 	}
 
-	void spoofAllSixAxis();
-	void setSixAxisSpoof(int32_t controller);
-	void setSixAxisListen();
+	void setSixAxisRecord(int32_t controller);
+	void setSixAxisSpoof();
+	void recordAllSixAxis();
 	void spoofAllKeyboardTouch();
-	void listenAllKeyboardTouch();
-	void setKeyboardSpoof();
-	void setTouchSpoof();
+	void recordAllKeyboardTouch();
+	void setKeyboardRecord();
+	void setTouchRecord();
 	void getSixAxisState(int32_t controller, ControllerData* state);
 	void setSixAxisState(int32_t controller, ControllerData* state);
 	void getTouchState(TouchAndKeyboardData* state);
@@ -237,13 +233,13 @@ private:
 	void setHandheldMode();
 
 	void spoofAll() {
-		spoofAllSixAxis();
+		setSixAxisSpoof();
 		spoofAllKeyboardTouch();
 	}
 
-	void listenAll() {
-		setSixAxisListen();
-		listenAllKeyboardTouch();
+	void recordAll() {
+		recordAllSixAxis();
+		recordAllKeyboardTouch();
 	}
 
 	void clearExtraData() {
@@ -252,7 +248,7 @@ private:
 		setKeyboardMouseState(&empty);
 	}
 
-	void setAll() {}
+	void setAll() { }
 
 	uint8_t finalTasShouldRun;
 	void runFinalTas(std::vector<std::string> scriptPaths, std::string extraDataPath);

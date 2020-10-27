@@ -24,10 +24,6 @@ private:
 	const uint8_t dhashWidth  = 80;
 	const uint8_t dhashHeight = 45;
 
-#ifdef YUZU
-	std::shared_ptr<Syscalls> yuzuInstance;
-#endif
-
 #ifdef __SWITCH__
 	Result rc;
 #endif
@@ -38,12 +34,6 @@ private:
 
 public:
 	ScreenshotHandler();
-
-#ifdef YUZU
-	void setYuzuInstance(std::shared_ptr<Syscalls> yuzu) {
-		yuzuInstance = yuzu;
-	}
-#endif
 
 	void writeFramebuffer(std::vector<uint8_t>& buf, std::string& dhash);
 
