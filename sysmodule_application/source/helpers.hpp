@@ -5,6 +5,7 @@
 #include <string>
 
 #ifdef _WIN32
+#include <shlwapi.h>
 #include <windows.h>
 #endif
 

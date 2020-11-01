@@ -12,9 +12,9 @@ void ScreenshotHandler::writeFramebuffer(std::vector<uint8_t>& buf, std::string&
 	succeeded = R_SUCCEEDED(rc);
 #endif
 #ifdef YUZU
-	uint8_t* jpeg =  yuzu_emu_getscreenjpeg(yuzuInstance, &outSize);
+	uint8_t* jpeg = yuzu_gui_savescreenshotmemory(yuzuInstance, &outSize, "JPEG");
 	memcpy(buf.data(), jpeg, outSize);
-	 yuzu_meta_free(jpeg);
+	yuzu_meta_free(jpeg);
 	succeeded = true;
 #endif
 

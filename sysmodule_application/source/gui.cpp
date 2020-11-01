@@ -7,8 +7,7 @@ Gui::Gui(ViDisplay* disp) {
 #endif
 
 #ifdef YUZU
-	Gui::Gui(std::shared_ptr<Syscalls> yuzu) {
-		yuzuSyscalls = yuzu;
+	Gui::Gui() {
 #endif
 
 #ifdef __SWITCH__
@@ -116,10 +115,10 @@ Gui::Gui(ViDisplay* disp) {
 		LOGD << "Get offset of extended font";
 		fontBuffer = reinterpret_cast<u8*>(extFontData.address);
 		stbtt_InitFont(&extNintendoFont, fontBuffer, stbtt_GetFontOffsetForIndex(fontBuffer, 0));
-#endif
 
 		LOGD << "Allocate saved JPEG framebuffer";
 		savedJpegFramebuffer = (uint8_t*)malloc(JPEG_BUF_SIZE);
+#endif
 
 		LOGD << "Set up fbg";
 		fbg = fbg_customSetup(FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT, 4, false, false, (void*)this, &Gui::framebufferDraw, NULL, NULL, NULL);
@@ -133,18 +132,20 @@ Gui::Gui(ViDisplay* disp) {
 			// return NULL;
 		}
 
+		// TODO get font
+
 #ifdef __SWITCH__
 		std::string rootImagePath = controllerOverlayDirectory + "/";
 #endif
 
 		// Set every button to its image
 		for(auto const& imageName : btnOverlayImageNames) {
-			controllerImages[imageName.first] = fbg_loadPNG(fbg, (rootImagePath + imageName.second).c_str());
+			controllerImages[imageName.first] = fbg_loadPNG(fbg, (controllerOverlayDirectory + imageName.second).c_str());
 		}
 
-		blankControllerImage = fbg_loadPNG(fbg, (rootImagePath + blankControllerImageName).c_str());
-		leftStickImage       = fbg_loadPNG(fbg, (rootImagePath + leftStickImageName).c_str());
-		rightStickImage      = fbg_loadPNG(fbg, (rootImagePath + rightStickImageName).c_str());
+		blankControllerImage = fbg_loadPNG(fbg, (controllerOverlayDirectory + blankControllerImageName).c_str());
+		leftStickImage       = fbg_loadPNG(fbg, (controllerOverlayDirectory + leftStickImageName).c_str());
+		rightStickImage      = fbg_loadPNG(fbg, (controllerOverlayDirectory + rightStickImageName).c_str());
 	}
 
 	void Gui::startFrame() {
@@ -198,18 +199,18 @@ Gui::Gui(ViDisplay* disp) {
 
 	void Gui::drawText(uint32_t x, uint32_t y, float size, std::string text) {
 		// Color not passed, need to use fbg_fill() beforehand
-		const char* string = text.c_str();
-		uint32_t currentX  = x;
-		uint32_t currentY  = y;
+		std::u32string string(text.begin(), text.end());
+		size_t currentIndex = 0;
+		size_t stringSize   = string.size();
+		uint32_t currentX   = x;
+		uint32_t currentY   = y;
 
-		do {
-			uint32_t currentCharacter;
-			ssize_t codepointWidth = decode_utf8(&currentCharacter, (uint8_t*)string);
-
-			if(codepointWidth <= 0)
+		while(true) {
+			if(currentIndex == stringSize)
 				break;
 
-			string += codepointWidth;
+			uint32_t currentCharacter = string[currentIndex];
+			currentIndex++;
 
 			stbtt_fontinfo* currentFont = fontForGlyph(currentCharacter);
 			float currentFontSize       = stbtt_ScaleForPixelHeight(currentFont, size);
@@ -243,8 +244,8 @@ Gui::Gui(ViDisplay* disp) {
 					}
 				}
 
-				for(u32 bmpY = 0; bmpY < height; bmpY++) {
-					for(u32 bmpX = 0; bmpX < width; bmpX++) {
+				for(uint32_t bmpY = 0; bmpY < height; bmpY++) {
+					for(uint32_t bmpX = 0; bmpX < width; bmpX++) {
 						_fbg_rgb tmpColor;
 
 						tmpColor.r = currentColor.r;
@@ -263,31 +264,29 @@ Gui::Gui(ViDisplay* disp) {
 				}
 			}
 
-			currentX += static_cast<u32>(x * currentFontSize);
-		} while(*string != '\0');
+			currentX += x * currentFontSize;
+		}
 	}
 
-	void Gui::drawControllerOverlay(HiddbgHdlsState & state, float scale, uint32_t x, uint32_t y) {
+	void Gui::drawControllerOverlay(std::shared_ptr<ControllerData> state, float scale, uint32_t x, uint32_t y) {
 		fbg_imageScale(fbg, blankControllerImage, x, y, scale, scale);
 
 		for(auto const& button : btnToHidKeys) {
-#ifdef __SWITCH__
-			if(state.buttons & button.second) {
+			if(GET_BIT(state->buttons, (uint8_t)button.first)) {
 				fbg_imageScale(fbg, controllerImages[button.first], x, y, scale, scale);
 			}
-#endif
 		}
 
-		int32_t deltaXLeft = (state.joysticks[JOYSTICK_LEFT].dx / joystickRangeConstant) * scale;
-		int32_t deltaYLeft = (state.joysticks[JOYSTICK_LEFT].dy / joystickRangeConstant) * scale;
+		int32_t deltaXLeft = (state->LS_X / joystickRangeConstant) * scale;
+		int32_t deltaYLeft = (state->LS_Y / joystickRangeConstant) * scale;
 		fbg_imageScale(fbg, leftStickImage, x + deltaXLeft, y + deltaYLeft, scale, scale);
 
-		int32_t deltaXRight = (state.joysticks[JOYSTICK_RIGHT].dx / joystickRangeConstant) * scale;
-		int32_t deltaYRight = (state.joysticks[JOYSTICK_RIGHT].dy / joystickRangeConstant) * scale;
+		int32_t deltaXRight = (state->RS_X / joystickRangeConstant) * scale;
+		int32_t deltaYRight = (state->RS_Y / joystickRangeConstant) * scale;
 		fbg_imageScale(fbg, rightStickImage, x + deltaXRight, y + deltaYRight, scale, scale);
 	}
 
-	void Gui::drawControllerOverlay(uint8_t playerIndex, HiddbgHdlsState & state) {
+	void Gui::drawControllerOverlay(uint8_t playerIndex, std::shared_ptr<ControllerData> state) {
 		drawControllerOverlay(state, 1.0f, playerIndex * blankControllerImage->width, FRAMEBUFFER_HEIGHT - blankControllerImage->height);
 	}
 
@@ -297,19 +296,22 @@ Gui::Gui(ViDisplay* disp) {
 #ifdef __SWITCH__
 		rc        = capsscCaptureJpegScreenShot(&outSize, savedJpegFramebuffer, JPEG_BUF_SIZE, ViLayerStack::ViLayerStack_ApplicationForDebug, 100000000);
 		succeeded = R_SUCCEEDED(rc);
-#endif
-#ifdef YUZU
-		uint8_t* jpeg =  yuzu_emu_getscreenjpeg(yuzuInstance, &outSize);
-		memcpy(savedJpegFramebuffer, jpeg, outSize);
-		 yuzu_meta_free(jpeg);
-		succeeded = true;
-#endif
 
 		if(succeeded) {
 			FILE* jpegFile = fopen(path.c_str(), "wb+");
 			fwrite(savedJpegFramebuffer, outSize, 1, jpegFile);
 			fclose(jpegFile);
 		}
+#endif
+#ifdef YUZU
+		uint8_t* jpeg = yuzu_gui_savescreenshotmemory(yuzuInstance, &outSize, "JPEG");
+
+		FILE* jpegFile = fopen(path.c_str(), "wb+");
+		fwrite(jpeg, outSize, 1, jpegFile);
+		fclose(jpegFile);
+
+		yuzu_meta_free(jpeg);
+#endif
 	}
 
 	Gui::~Gui() {
@@ -328,8 +330,6 @@ Gui::Gui(ViDisplay* disp) {
 			// Clean the font cache
 			free(charactor.second);
 		}
-
-		free(savedJpegFramebuffer);
 
 #ifdef __SWITCH__
 		free(savedJpegFramebuffer);

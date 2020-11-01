@@ -214,6 +214,7 @@ void MainLoop::mainLoopHandler() {
 	if(applicationOpened) {
 		// handle network updates always, they are stored in the queue regardless of the internet
 		handleNetworkUpdates();
+#ifdef __SWITCH__
 		// Handle SaltyNX output
 		uint16_t logOutputSize = getMemoryType<uint16_t>(saltynxlogStringIndex);
 		if(logOutputSize != 0) {
@@ -229,6 +230,7 @@ void MainLoop::mainLoopHandler() {
 
 			setMemoryType<uint16_t>(saltynxlogStringIndex, 0);
 		}
+#endif
 	}
 
 	// Match first controller inputs as often as possible
@@ -457,7 +459,7 @@ void MainLoop::updateGui() {
 			gui = std::make_shared<Gui>(&disp);
 #endif
 #ifdef YUZU
-			gui = std::make_shared<Gui>(yuzuSyscalls);
+			gui = std::make_shared<Gui>();
 #endif
 		}
 
@@ -465,7 +467,7 @@ void MainLoop::updateGui() {
 
 		if(printControllerOverlay) {
 			for(uint8_t controllerIndex = 0; controllerIndex < controllers.size(); controllerIndex++) {
-				gui->drawControllerOverlay(controllerIndex, controllers[controllerIndex]->getInput());
+				gui->drawControllerOverlay(controllerIndex, controllers[controllerIndex]->getControllerData());
 			}
 		}
 
@@ -511,21 +513,25 @@ char* MainLoop::getAppName(u64 application_id) {
 #endif
 
 uint8_t MainLoop::getNumControllers() {
-#ifdef __SWITCH__
 	uint8_t num = 0;
 
+#ifdef __SWITCH__
 	hidScanInput();
+#endif
 	for(int i = 0; i < 10; i++) {
+#ifdef __SWITCH__
 		if(hidIsControllerConnected((HidControllerID)i)) {
 			num++;
 		}
+#endif
+#ifdef YUZU
+		if(yuzu_joypad_isjoypadconnected(yuzuInstance, (PluginDefinitions::ControllerNumber)i)) {
+			num++;
+		}
+#endif
 	}
 
 	return num;
-#endif
-#ifdef YUZU
-	return yuzu_joypad_getnumjoypads(yuzuInstance);
-#endif
 }
 
 void MainLoop::setControllerNumber(uint8_t numOfControllers) {
@@ -540,11 +546,11 @@ void MainLoop::setControllerNumber(uint8_t numOfControllers) {
 	svcSleepThread((int64_t)1000000 * 3000);
 #endif
 #ifdef YUZU
-	yuzu_joypad_setnumjoypads(yuzuInstance, 0);
+	yuzu_joypad_removealljoypads(yuzuInstance);
 #endif
 	for(uint8_t i = 0; i < numOfControllers; i++) {
+		controllers.push_back(std::make_unique<ControllerHandler>(networkInstance, getNumControllers()));
 #ifdef __SWITCH__
-		controllers.push_back(std::make_unique<ControllerHandler>(networkInstance, (HidControllerID)getNumControllers()));
 		// Going to assume this contr
 		HidControllerID lastControllerId = (HidControllerID)getLastController();
 		lastControllerType               = hidGetControllerType(lastControllerId);
@@ -552,7 +558,7 @@ void MainLoop::setControllerNumber(uint8_t numOfControllers) {
 		hidStartSixAxisSensor(externalControllerSixAxisHandle);
 #endif
 #ifdef YUZU
-		controllers.push_back(std::make_unique<ControllerHandler>(networkInstance, yuzuSyscalls));
+		lastControllerType = yuzu_joypad_getjoypadtype(yuzuInstance, (PluginDefinitions::ControllerNumber)getLastController());
 #endif
 	}
 	// clang-format off
@@ -777,7 +783,7 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 					uint64_t addr = calculator::eval<uint64_t>(revisedExpression, applicationDebug);
 #endif
 #ifdef YUZU
-					uint64_t addr = calculator::eval<uint64_t>(revisedExpression, yuzuSyscalls);
+					uint64_t addr = calculator::eval<uint64_t>(revisedExpression);
 #endif
 					uint8_t isUnsigned = currentMemoryRegions[i].u;
 
@@ -1020,14 +1026,15 @@ void MainLoop::matchFirstControllerToTASController(uint8_t player) {
 #ifdef YUZU
 	if(getNumControllers() > controllers.size() && controllers.size() != 0) {
 		// This should get the first non-TAS controller
-		uint8_t controllerIndex = (uint8_t)controllers.size();
+		PluginDefinitions::ControllerNumber controllerIndex = (PluginDefinitions::ControllerNumber)controllers.size();
 
 		uint64_t buttons = yuzu_joypad_read(yuzuInstance, controllerIndex);
 
-		int32_t leftX  = yuzu_joypad_readjoystick(yuzuInstance, controllerIndex, YuzuJoystickType::LeftX);
-		int32_t leftY  = yuzu_joypad_readjoystick(yuzuInstance, controllerIndex, YuzuJoystickType::LeftY);
-		int32_t rightX = yuzu_joypad_readjoystick(yuzuInstance, controllerIndex, YuzuJoystickType::RightX);
-		int32_t rightY = yuzu_joypad_readjoystick(yuzuInstance, controllerIndex, YuzuJoystickType::RightY);
+		using JT       = PluginDefinitions::YuzuJoystickType;
+		int32_t leftX  = yuzu_joypad_readjoystick(yuzuInstance, controllerIndex, JT::LeftX);
+		int32_t leftY  = yuzu_joypad_readjoystick(yuzuInstance, controllerIndex, JT::LeftY);
+		int32_t rightX = yuzu_joypad_readjoystick(yuzuInstance, controllerIndex, JT::RightX);
+		int32_t rightY = yuzu_joypad_readjoystick(yuzuInstance, controllerIndex, JT::RightY);
 
 		controllers[player]->setFrame(buttons, leftX, leftY, rightX, rightY);
 	}

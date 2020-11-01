@@ -26,14 +26,19 @@
 #include <plog/Log.h>
 
 #ifdef __SWITCH__
-#include "../saltynx_plugin/source/sdkTypes.hpp"
+#include <arpa/inet.h>
 #include <switch.h>
+#endif
+
+#ifdef _WIN32
+#include <winsock2.h>
 #endif
 
 #ifdef YUZU
 #include "yuzuSyscalls.hpp"
 #endif
 
+#include "../saltynx_plugin/source/sdkTypes.hpp"
 #include "PointerChainParser.hpp"
 #include "controller.hpp"
 #include "gui.hpp"
@@ -68,7 +73,14 @@ private:
 	uint64_t mainBase;
 
 	uint32_t externalControllerSixAxisHandle;
+
+#ifdef __SWITCH__
 	HidControllerType lastControllerType;
+#endif
+
+#ifdef YUZU
+	PluginDefinitions::ControllerType lastControllerType;
+#endif
 
 	std::unordered_map<std::string, FILE*> runFinalTasFileHandles;
 
@@ -84,9 +96,6 @@ private:
 	PscPmModule sleepModule;
 
 	const char* saltyPluginPath = "/SaltySD/SwiTAS_SaltyPlugin_Offsets.hex";
-
-	uint64_t lastNanoseconds = 0;
-	int lastFrameAttempt     = 0;
 
 	uint64_t saltynxframeHasPassed                 = 0;
 	uint64_t saltynxlogStringIndex                 = 0;
@@ -104,6 +113,9 @@ private:
 	uint64_t saltynxmouseState                     = 0;
 	uint64_t saltynxmouseStateBacklog              = 0;
 #endif
+
+	uint64_t lastNanoseconds = 0;
+	int lastFrameAttempt     = 0;
 
 #ifdef __SWITCH__
 	Event vsyncEvent;
@@ -137,7 +149,7 @@ private:
 		ACCESS_MEMORY_SAFE({ svcReadDebugProcessMemory(region.data(), applicationDebug, addr, size); })
 #endif
 #ifdef YUZU
-		yuzu_rom_readbytes(yuzuInstance, region.data(), addr, size);
+		yuzu_memory_readbyterange(yuzuInstance, addr, region.data(), size);
 #endif
 		return region;
 	}
@@ -147,7 +159,7 @@ private:
 		ACCESS_MEMORY_SAFE({ svcWriteDebugProcessMemory(applicationDebug, item.data(), addr, item.size()); })
 #endif
 #ifdef YUZU
-		yuzu_rom_writebytes(yuzuInstance, addr, item.data(), item.size());
+		yuzu_memory_writebyterange(yuzuInstance, addr, item.data(), item.size());
 #endif
 	}
 
@@ -157,7 +169,7 @@ private:
 		ACCESS_MEMORY_SAFE({ svcReadDebugProcessMemory(&item, applicationDebug, addr, sizeof(T)); })
 #endif
 #ifdef YUZU
-		yuzu_rom_readbytes(yuzuInstance, &item, addr, sizeof(T));
+		yuzu_rom_readbytes(yuzuInstance, addr, &item, sizeof(T));
 #endif
 		return item;
 	}
@@ -258,12 +270,6 @@ private:
 
 public:
 	MainLoop();
-
-#ifdef YUZU
-	std::shared_ptr<Syscalls> getYuzuSyscalls() {
-		return yuzuSyscalls;
-	}
-#endif
 
 	void mainLoopHandler();
 

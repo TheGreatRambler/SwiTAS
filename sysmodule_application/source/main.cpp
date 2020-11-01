@@ -185,18 +185,25 @@ int main(int argc, char* argv[]) {
 // https://stackoverflow.com/a/13256146/9329945
 // http://anadoxin.org/blog/control-over-symbol-exports-in-mingw-linker.html
 #ifdef YUZU
-std::string logPath = HELPERS::getExecutableDir() + "/SwiTAS_log.txt";
-remove(logPath.c_str());
-plog::init(plog::debug, logPath.c_str());
-LOGD << "Started logging";
+MainLoop* mainLoop;
 
-MainLoop mainLoop;
+DLL_EXPORT void startPlugin() {
+	mainLoop = new MainLoop();
 
-DLL_EXPORT void startPlugin() { }
+	std::string logPath = HELPERS::getExecutableDir() + "/SwiTAS_log.txt";
+
+	remove(logPath.c_str());
+	plog::init(plog::debug, logPath.c_str());
+	LOGD << "Started logging";
+}
 
 // Possibly pass delta
 DLL_EXPORT void onMainLoop() {
-	mainLoop.mainLoopHandler();
+	mainLoop->mainLoopHandler();
+}
+
+DLL_EXPORT void onClose() {
+	delete mainLoop;
 }
 
 DLL_EXPORT uint64_t get_plugin_interface_version() {

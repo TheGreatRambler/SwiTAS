@@ -132,12 +132,6 @@ namespace calculator {
 		}
 #endif
 
-#ifdef YUZU
-		void setYuzuSyscalls(std::shared_ptr<Syscalls> yuzu) {
-			yuzuSyscalls = yuzu;
-		}
-#endif
-
 	private:
 		enum {
 			OPERATOR_NULL,
@@ -193,10 +187,6 @@ namespace calculator {
 #ifdef __SWITCH__
 		// Debug handle for memory reading
 		Handle applicationDebug;
-#endif
-
-#ifdef YUZU
-		std::shared_ptr<Syscalls> yuzuSyscalls;
 #endif
 
 		/// Exponentiation by squaring, x^n.
@@ -431,7 +421,7 @@ namespace calculator {
 				svcReadDebugProcessMemory(&newAddr, applicationDebug, parseExpr(), sizeof(uint64_t));
 #endif
 #ifdef YUZU
-				yuzu_rom_readbytes(yuzuInstance, &newAddr, parseExpr(), sizeof(uint64_t));
+				yuzu_memory_readbyterange(yuzuInstance, parseExpr(), (uint8_t*)&newAddr, sizeof(uint64_t));
 #endif
 
 				val = newAddr;
@@ -504,9 +494,8 @@ namespace calculator {
 #endif
 
 #ifdef YUZU
-	template <typename T> inline T eval(const std::string& expression, std::shared_ptr<Syscalls> yuzu) {
+	template <typename T> inline T eval(const std::string& expression) {
 		ExpressionParser<T> parser;
-		parser.setYuzuSyscalls(yuzu);
 		return parser.eval(expression);
 	}
 #endif
@@ -520,9 +509,8 @@ namespace calculator {
 #endif
 
 #ifdef YUZU
-	template <typename T> inline T eval(char c, std::shared_ptr<Syscalls> yuzu) {
+	template <typename T> inline T eval(char c) {
 		ExpressionParser<T> parser;
-		parser.setYuzuSyscalls(yuzu);
 		return parser.eval(c);
 	}
 #endif

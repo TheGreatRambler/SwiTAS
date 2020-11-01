@@ -1,5 +1,6 @@
 {
-	"configurations": [{
+	"configurations": [
+		{
 			"name": "Linux",
 			"includePath": [
 				"${workspaceFolder}/include/**",
@@ -13,7 +14,7 @@
 				"/opt/devkitpro/portlibs/switch/include/**"
 			],
 			"defines": [
-				"__SWITCH__",
+				"YUZU",
 				"SERVER_IMP"
 			],
 			"compilerPath": "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc",
@@ -35,7 +36,7 @@
 				"C:/msys2/opt/devkitpro/portlibs/switch/include/**"
 			],
 			"defines": [
-				"__SWITCH__",
+				"YUZU",
 				"SERVER_IMP"
 			],
 			"compilerPath": "C:/msys2/opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc",

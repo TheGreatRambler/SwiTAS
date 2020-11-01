@@ -383,6 +383,7 @@ namespace PluginDefinitions {
 	typedef void(joypad_enablejoypad)(void* ctx, ControllerNumber player, uint8_t enable);
 	typedef void(joypad_removealljoypads)(void* ctx);
 	typedef void(joypad_setjoypadtype)(void* ctx, ControllerNumber player, ControllerType type);
+	typedef ControllerType(joypad_getjoypadtype)(void* ctx, ControllerNumber player);
 	typedef uint8_t(joypad_isjoypadconnected)(void* ctx, ControllerNumber player);
 	typedef void(input_requeststateupdate)(void* ctx);
 	typedef void(input_enablekeyboard)(void* ctx, uint8_t enable);
@@ -409,5 +410,5 @@ namespace PluginDefinitions {
 	typedef bool(gui_savescreenshotas)(void* ctx, const char* path);
 	typedef void(gui_drawimage)(void* ctx, int32_t dx, int32_t dy, const char* path, int32_t sx, int32_t sy, int32_t sw, int32_t sh);
 	typedef void(gui_popup)(void* ctx, const char* title, const char* message, const char* type);
-	typedef uint8_t*(gui_savescreenshotmemory)(void* ctx, uint64_t* size);
+	typedef uint8_t*(gui_savescreenshotmemory)(void* ctx, uint64_t* size, const char* format);
 } // namespace PluginDefinitions

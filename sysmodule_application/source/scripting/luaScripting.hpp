@@ -19,20 +19,10 @@ private:
 
 	std::string luaPath;
 
-#ifdef YUZU
-	std::shared_ptr<Syscalls> yuzuSyscalls;
-#endif
-
 	void registerLuaFuncs();
 
 public:
 	LuaScripting();
-
-#ifdef YUZU
-	void setYuzuSyscalls(std::shared_ptr<Syscalls> syscalls) {
-		yuzuSyscalls = syscalls;
-	}
-#endif
 	// Called on init
 	void loadScript(std::string path);
 

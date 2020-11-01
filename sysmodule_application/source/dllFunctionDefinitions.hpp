@@ -18,10 +18,10 @@
 #else
 	#ifdef _WIN32
 		#define YUZU_FUNC(func) \
-			extern "C" __declspec(dllexport) func* yuzu_##func;
+			extern "C" __declspec(dllexport) PluginDefinitions::func* yuzu_##func __attribute__((weak));
 	#else
 		#define YUZU_FUNC(func) \
-			extern "C" __attribute__((visibility("default"))) func* yuzu_##func;
+			extern "C" __attribute__((visibility("default"))) PluginDefinitions::func* yuzu_##func __attribute__((weak));
 	#endif
 #endif
 // clang-format on

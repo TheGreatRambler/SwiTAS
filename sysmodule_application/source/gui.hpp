@@ -5,13 +5,14 @@
 #include <cstdint>
 #include <cstdio>
 #include <cwctype>
+#include <locale>
 #include <memory>
 #include <plog/Log.h>
 #include <string>
 #include <unordered_map>
 
 extern "C" {
-#include <fbgraphics.h>
+#include <fbg/fbgraphics.h>
 #include <stb_truetype.h>
 }
 
@@ -45,6 +46,9 @@ private:
 #ifdef __SWITCH__
 	const std::string controllerOverlayDirectory = "/switas/controllerOverlay";
 #endif
+#ifdef YUZU
+	const std::string controllerOverlayDirectory = "";
+#endif
 
 	const std::string blankControllerImageName = "blank.png";
 	const std::string leftStickImageName       = "leftstick.png";
@@ -62,13 +66,9 @@ private:
 	Framebuffer framebuf;
 	// Error handling for everything
 	Result rc;
-#endif
 
 	// Current pointer to the graphics data
 	uint8_t* savedJpegFramebuffer;
-
-#ifdef YUZU
-	std::shared_ptr<Syscalls> yuzuSyscalls;
 #endif
 
 	_fbg* fbg;
@@ -82,12 +82,8 @@ private:
 
 	uint8_t wasJustDrawnTo = false;
 
-#ifdef __SWITCH__
 	stbtt_fontinfo stdNintendoFont;
 	stbtt_fontinfo extNintendoFont;
-#else
-	stbtt_fontinfo stdFont;
-#endif
 
 #ifdef __SWITCH__
 	static u32 getPixelOffset(u32 x, u32 y) {
@@ -120,7 +116,7 @@ public:
 #endif
 
 #ifdef YUZU
-	Gui(std::shared_ptr<Syscalls> yuzu);
+	Gui();
 #endif
 
 	void startFrame();
@@ -146,8 +142,8 @@ public:
 		return wasJustDrawnTo;
 	}
 
-	void drawControllerOverlay(HiddbgHdlsState& state, float scale, uint32_t x, uint32_t y);
-	void drawControllerOverlay(uint8_t playerIndex, HiddbgHdlsState& state);
+	void drawControllerOverlay(std::shared_ptr<ControllerData> state, float scale, uint32_t x, uint32_t y);
+	void drawControllerOverlay(uint8_t playerIndex, std::shared_ptr<ControllerData> state);
 
 	void drawText(uint32_t x, uint32_t y, float size, std::string text);
 

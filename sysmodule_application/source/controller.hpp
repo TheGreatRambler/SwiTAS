@@ -32,20 +32,11 @@ private:
 
 	std::shared_ptr<CommunicateWithNetwork> networkInstance;
 
-#ifdef YUZU
-	std::shared_ptr<Syscalls> yuzuSyscalls;
-#endif
-
 public:
-#ifdef YUZU
-	ControllerHandler(std::shared_ptr<CommunicateWithNetwork> networkImp, std::shared_ptr<Syscalls> syscalls);
-#endif
-#ifdef __SWITCH__
-	ControllerHandler(std::shared_ptr<CommunicateWithNetwork> networkImp, HidControllerID startingID);
-#endif
+	ControllerHandler(std::shared_ptr<CommunicateWithNetwork> networkImp, uint8_t startingID);
 
 	void setFrame(ControllerData& controllerData);
-	void setFrame(u64 buttons, int32_t leftX, int32_t leftY, int32_t rightX, int32_t rightY);
+	void setFrame(uint64_t buttons, int32_t leftX, int32_t leftY, int32_t rightX, int32_t rightY);
 
 	void clearState() {
 #ifdef __SWITCH__
@@ -64,10 +55,6 @@ public:
 			fatalThrow(rc);
 		}
 #endif
-	}
-
-	HiddbgHdlsState& getInput() {
-		return stateLeftJoycon;
 	}
 
 	std::shared_ptr<ControllerData> getControllerData();
