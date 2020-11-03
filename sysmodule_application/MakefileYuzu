@@ -44,8 +44,7 @@ endif
 # Linker flags
 LDFLAGS := -lpthread -shared -Wl,-rpath,$$ORIGIN
 ifeq ($(UNAME),Msys)
-	# Needed for sockets on windows
-	LDFLAGS += -lws2_32
+	LDFLAGS += -lws2_32 -lshlwapi
 endif
 
 ifeq ($(ARCH),32)
@@ -91,9 +90,9 @@ $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
 	# Add my own
 	$(CXX) $(DLLFLAGS) $(OBJS) -o $@ $(LDFLAGS)
 	# Add custom DLLs
-	cp -a custom_dlls/. $(BUILD_DIR)
+	# cp -a custom_dlls/. $(BUILD_DIR)
 	# Copy required DLLs to folder, not copying the ones that are custom
-	ldd $(BUILD_DIR)/$(TARGET_EXEC) | grep '\/mingw.*\.dll' -o | xargs -I{} cp -n "{}" $(BUILD_DIR)
+	# ldd $(BUILD_DIR)/$(TARGET_EXEC) | grep '\/mingw.*\.dll' -o | xargs -I{} cp -n "{}" $(BUILD_DIR)
 else
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
 	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
