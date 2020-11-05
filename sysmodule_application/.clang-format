@@ -28,4 +28,4 @@ SpacesInSquareBrackets: "false"
 Standard: Cpp11
 TabWidth: "4"
 UseTab: ForContinuationAndIndentation
-ColumnLimit: "400"
+ColumnLimit: "80"

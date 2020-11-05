@@ -30,6 +30,12 @@ private:
 	Result rc;
 #endif
 
+#ifdef YUZU
+	PluginDefinitions::ControllerNumber id;
+#endif
+
+	uint8_t controllerStartingID;
+
 	std::shared_ptr<CommunicateWithNetwork> networkInstance;
 
 public:
@@ -46,6 +52,10 @@ public:
 		stateLeftJoycon.joysticks[JOYSTICK_RIGHT].dx = 0;
 		stateLeftJoycon.joysticks[JOYSTICK_RIGHT].dy = 0;
 #endif
+
+#ifdef YUZU
+		yuzu_joypad_set(yuzuInstance, id, 0);
+#endif
 	}
 
 	void setInput() {
@@ -55,6 +65,7 @@ public:
 			fatalThrow(rc);
 		}
 #endif
+		// Not needed on Yuzu
 	}
 
 	std::shared_ptr<ControllerData> getControllerData();

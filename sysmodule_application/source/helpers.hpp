@@ -21,6 +21,11 @@
 #include <switch.h>
 #endif
 
+#ifdef YUZU
+#include <array>
+#include <memory>
+#endif
+
 namespace HELPERS {
 	void getMemUsage(uint64_t* memAvaliable, uint64_t* memUsed);
 
@@ -32,4 +37,9 @@ namespace HELPERS {
 	std::string ReplaceAll(std::string str, const std::string& from, const std::string& to);
 
 	std::string getExecutableDir();
+
+// Only used for Yuzu
+#ifdef YUZU
+	std::string exec(const char* cmd);
+#endif
 }

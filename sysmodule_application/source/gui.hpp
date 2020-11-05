@@ -43,12 +43,7 @@ struct Color {
 
 class Gui {
 private:
-#ifdef __SWITCH__
-	const std::string controllerOverlayDirectory = "/switas/controllerOverlay";
-#endif
-#ifdef YUZU
-	const std::string controllerOverlayDirectory = "";
-#endif
+	std::string controllerOverlayDirectory;
 
 	const std::string blankControllerImageName = "blank.png";
 	const std::string leftStickImageName       = "leftstick.png";
@@ -123,7 +118,13 @@ public:
 	void endFrame();
 
 	void clearFrame() {
+#ifdef __SWITCH__
 		startFrame();
+#endif
+
+#ifdef YUZU
+		yuzu_gui_clearscreen(yuzuInstance);
+#endif
 		endFrame();
 		wasJustDrawnTo = false;
 	}

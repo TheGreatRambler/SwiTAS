@@ -40,7 +40,8 @@ MainLoop::MainLoop() {
 	LOGD << "Obtain sleep module";
 	// https://github.com/cathery/sys-con/blob/master/source/Sysmodule/source/psc_module.cpp
 	const u16 deps[1] = { PscPmModuleId_Fs };
-	rc                = pscmGetPmModule(&sleepModule, (PscPmModuleId)127, deps, sizeof(deps), true);
+	rc                = pscmGetPmModule(
+        &sleepModule, (PscPmModuleId)127, deps, sizeof(deps), true);
 	if(R_FAILED(rc))
 		fatalThrow(rc);
 
@@ -78,14 +79,17 @@ void MainLoop::mainLoopHandler() {
 // Application connected
 // Get application info
 #ifdef __SWITCH__
-			if(R_SUCCEEDED(pminfoGetProgramId(&applicationProgramId, applicationProcessId))) {
+			if(R_SUCCEEDED(pminfoGetProgramId(
+				   &applicationProgramId, applicationProcessId))) {
 				if(!applicationOpened) {
 					svcSleepThread((s64)1000000 * 1000);
 
 					// Check if this file exists first of all
-					LOGD << "Debug application at process: " << std::to_string(applicationProcessId);
+					LOGD << "Debug application at process: "
+						 << std::to_string(applicationProcessId);
 
-					rc = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
+					rc = svcDebugActiveProcess(
+						&applicationDebug, applicationProcessId);
 					if(R_FAILED(rc))
 						fatalThrow(rc);
 
@@ -99,18 +103,28 @@ void MainLoop::mainLoopHandler() {
 					fread(&saltynxframeHasPassed, sizeof(uint64_t), 1, offsets);
 					fread(&saltynxlogStringIndex, sizeof(uint64_t), 1, offsets);
 					fread(&saltynxlogString, sizeof(uint64_t), 1, offsets);
-					fread(&saltynxcontrollerToRecord, sizeof(uint64_t), 1, offsets);
-					fread(&saltynxsixAxisStateLeftJoycon, sizeof(uint64_t), 1, offsets);
-					fread(&saltynxsixAxisStateRightJoycon, sizeof(uint64_t), 1, offsets);
-					fread(&saltynxsixAxisStateLeftJoyconBacklog, sizeof(uint64_t), 1, offsets);
-					fread(&saltynxsixAxisStateRightJoyconBacklog, sizeof(uint64_t), 1, offsets);
-					fread(&saltynxRecordScreenOrKeyboard, sizeof(uint64_t), 1, offsets);
-					fread(&saltynxtouchscreenState, sizeof(uint64_t), 1, offsets);
-					fread(&saltynxtouchScreenStateBacklog, sizeof(uint64_t), 1, offsets);
+					fread(&saltynxcontrollerToRecord, sizeof(uint64_t), 1,
+						offsets);
+					fread(&saltynxsixAxisStateLeftJoycon, sizeof(uint64_t), 1,
+						offsets);
+					fread(&saltynxsixAxisStateRightJoycon, sizeof(uint64_t), 1,
+						offsets);
+					fread(&saltynxsixAxisStateLeftJoyconBacklog,
+						sizeof(uint64_t), 1, offsets);
+					fread(&saltynxsixAxisStateRightJoyconBacklog,
+						sizeof(uint64_t), 1, offsets);
+					fread(&saltynxRecordScreenOrKeyboard, sizeof(uint64_t), 1,
+						offsets);
+					fread(
+						&saltynxtouchscreenState, sizeof(uint64_t), 1, offsets);
+					fread(&saltynxtouchScreenStateBacklog, sizeof(uint64_t), 1,
+						offsets);
 					fread(&saltynxkeyboardState, sizeof(uint64_t), 1, offsets);
-					fread(&saltynxkeyboardStateBacklog, sizeof(uint64_t), 1, offsets);
+					fread(&saltynxkeyboardStateBacklog, sizeof(uint64_t), 1,
+						offsets);
 					fread(&saltynxmouseState, sizeof(uint64_t), 1, offsets);
-					fread(&saltynxmouseStateBacklog, sizeof(uint64_t), 1, offsets);
+					fread(&saltynxmouseStateBacklog, sizeof(uint64_t), 1,
+						offsets);
 
 					fclose(offsets);
 
@@ -120,7 +134,8 @@ void MainLoop::mainLoopHandler() {
 					do {
 						lastaddr = meminfo.addr;
 						u32 pageinfo;
-						svcQueryDebugProcessMemory(&meminfo, &pageinfo, applicationDebug, meminfo.addr + meminfo.size);
+						svcQueryDebugProcessMemory(&meminfo, &pageinfo,
+							applicationDebug, meminfo.addr + meminfo.size);
 						if((meminfo.type & MemType_Heap) == MemType_Heap) {
 							heapBase = meminfo.addr;
 							break;
@@ -130,7 +145,8 @@ void MainLoop::mainLoopHandler() {
 					// Obtain main start
 					LoaderModuleInfo proc_modules[2];
 					s32 numModules = 0;
-					Result rc      = ldrDmntGetProcessModuleInfo(applicationProcessId, proc_modules, 2, &numModules);
+					Result rc      = ldrDmntGetProcessModuleInfo(
+                        applicationProcessId, proc_modules, 2, &numModules);
 
 					LoaderModuleInfo* proc_module = 0;
 					if(numModules == 2) {
@@ -212,13 +228,15 @@ void MainLoop::mainLoopHandler() {
 	}
 
 	if(applicationOpened) {
-		// handle network updates always, they are stored in the queue regardless of the internet
+		// handle network updates always, they are stored in the queue
+		// regardless of the internet
 		handleNetworkUpdates();
 #ifdef __SWITCH__
 		// Handle SaltyNX output
 		uint16_t logOutputSize = getMemoryType<uint16_t>(saltynxlogStringIndex);
 		if(logOutputSize != 0) {
-			std::vector<uint8_t> logData = getMemory(saltynxlogString, logOutputSize);
+			std::vector<uint8_t> logData
+				= getMemory(saltynxlogString, logOutputSize);
 			// Push null charactor onto the end
 			logData.push_back('\0');
 
@@ -253,7 +271,9 @@ void MainLoop::handleNetworkUpdates() {
 		if(data.incrementFrame) {
 			LOGD << "Incrementing without any recording";
 			spoofAll();
-			runSingleFrame(true, data.includeFramebuffer, TasValueToRecord::NONE, data.frame, data.savestateHookNum, data.branchIndex, data.playerIndex);
+			runSingleFrame(true, data.includeFramebuffer,
+				TasValueToRecord::NONE, data.frame, data.savestateHookNum,
+				data.branchIndex, data.playerIndex);
 		} else if(data.typeToRecord != TasValueToRecord::NONE) {
 			LOGD << "Have type to record, will be incrementing frame now";
 			switch(data.typeToRecord) {
@@ -275,7 +295,9 @@ void MainLoop::handleNetworkUpdates() {
 				break;
 			}
 
-			runSingleFrame(true, data.includeFramebuffer, data.typeToRecord, data.frame, data.savestateHookNum, data.branchIndex, data.playerIndex);
+			runSingleFrame(true, data.includeFramebuffer, data.typeToRecord,
+				data.frame, data.savestateHookNum, data.branchIndex,
+				data.playerIndex);
 		} else {
 			LOGD << "Have type to set, will not be incrementing";
 			switch(data.valueIncluded) {
@@ -316,7 +338,8 @@ void MainLoop::handleNetworkUpdates() {
 		} else if(data.actFlag == SendInfo::GET_FRAMEBUFFER) {
 			if(applicationOpened) {
 				// For now, unsupported
-				// screenshotHandler.writeFramebuffer(networkInstance, 0, 0, 0, 0);
+				// screenshotHandler.writeFramebuffer(networkInstance, 0, 0, 0,
+				// 0);
 			}
 		} else if(data.actFlag == SendInfo::RUN_BLANK_FRAME) {
 			matchFirstControllerToTASController(0);
@@ -337,18 +360,12 @@ void MainLoop::handleNetworkUpdates() {
 			sendGameInfo();
 		} else if(data.actFlag == SendInfo::GET_IS_YUZU) {
 #ifdef __SWITCH__
-			// clang-format off
-			ADD_TO_QUEUE(RecieveFlag, networkInstance, {
-				data.actFlag = RecieveInfo::IS_HOMEBREW;
-			})
-// clang-format on
+			ADD_TO_QUEUE(RecieveFlag, networkInstance,
+				{ data.actFlag = RecieveInfo::IS_HOMEBREW; })
 #endif
 #ifdef YUZU
-			// clang-format off
-			ADD_TO_QUEUE(RecieveFlag, networkInstance, {
-				data.actFlag = RecieveInfo::IS_YUZU;
-			})
-// clang-format on
+			ADD_TO_QUEUE(RecieveFlag, networkInstance,
+				{ data.actFlag = RecieveInfo::IS_YUZU; })
 #endif
 		}
 	})
@@ -360,9 +377,11 @@ void MainLoop::handleNetworkUpdates() {
 		} else {
 			if(data.openFile) {
 				remove(data.path.c_str());
-				runFinalTasFileHandles[data.path] = fopen(data.path.c_str(), "wb");
+				runFinalTasFileHandles[data.path]
+					= fopen(data.path.c_str(), "wb");
 			} else {
-				fwrite(data.contents.data(), data.contents.size(), 1, runFinalTasFileHandles[data.path]);
+				fwrite(data.contents.data(), data.contents.size(), 1,
+					runFinalTasFileHandles[data.path]);
 			}
 		}
 	})
@@ -414,7 +433,8 @@ void MainLoop::sendGameInfo() {
 			accountGetProfile(&profile, uid);
 			accountProfileGet(&profile, &userdata, &profileBase);
 
-			data.userNickname = std::string(profileBase.nickname, strnlen(profileBase.nickname, 0x20));
+			data.userNickname = std::string(
+				profileBase.nickname, strnlen(profileBase.nickname, 0x20));
 #endif
 
 			// I don't know how to handle this for Yuzu, so ignore for now
@@ -426,7 +446,8 @@ void MainLoop::sendGameInfo() {
 
 				MemoryInfo info = { 0 };
 				uint32_t pageinfo;
-				rc = svcQueryDebugProcessMemory(&info, &pageinfo, applicationDebug, addr);
+				rc = svcQueryDebugProcessMemory(
+					&info, &pageinfo, applicationDebug, addr);
 
 				addr = info.addr + info.size;
 
@@ -466,8 +487,10 @@ void MainLoop::updateGui() {
 		gui->startFrame();
 
 		if(printControllerOverlay) {
-			for(uint8_t controllerIndex = 0; controllerIndex < controllers.size(); controllerIndex++) {
-				gui->drawControllerOverlay(controllerIndex, controllers[controllerIndex]->getControllerData());
+			for(uint8_t controllerIndex = 0;
+				controllerIndex < controllers.size(); controllerIndex++) {
+				gui->drawControllerOverlay(controllerIndex,
+					controllers[controllerIndex]->getControllerData());
 			}
 		}
 
@@ -502,8 +525,11 @@ char* MainLoop::getAppName(u64 application_id) {
 	size_t appControlDataSize                      = 0;
 	NacpLanguageEntry* languageEntry               = nullptr;
 
-	if(R_SUCCEEDED(nsGetApplicationControlData(NsApplicationControlSource_Storage, application_id, &appControlData, sizeof(NsApplicationControlData), &appControlDataSize))) {
-		if(R_SUCCEEDED(nacpGetLanguageEntry(&appControlData.nacp, &languageEntry))) {
+	if(R_SUCCEEDED(nsGetApplicationControlData(
+		   NsApplicationControlSource_Storage, application_id, &appControlData,
+		   sizeof(NsApplicationControlData), &appControlDataSize))) {
+		if(R_SUCCEEDED(
+			   nacpGetLanguageEntry(&appControlData.nacp, &languageEntry))) {
 			if(languageEntry != nullptr)
 				return languageEntry->name;
 		}
@@ -525,7 +551,8 @@ uint8_t MainLoop::getNumControllers() {
 		}
 #endif
 #ifdef YUZU
-		if(yuzu_joypad_isjoypadconnected(yuzuInstance, (PluginDefinitions::ControllerNumber)i)) {
+		if(yuzu_joypad_isjoypadconnected(
+			   yuzuInstance, (PluginDefinitions::ControllerNumber)i)) {
 			num++;
 		}
 #endif
@@ -549,16 +576,20 @@ void MainLoop::setControllerNumber(uint8_t numOfControllers) {
 	yuzu_joypad_removealljoypads(yuzuInstance);
 #endif
 	for(uint8_t i = 0; i < numOfControllers; i++) {
-		controllers.push_back(std::make_unique<ControllerHandler>(networkInstance, getNumControllers()));
+		controllers.push_back(std::make_unique<ControllerHandler>(
+			networkInstance, getNumControllers()));
 #ifdef __SWITCH__
 		// Going to assume this contr
 		HidControllerID lastControllerId = (HidControllerID)getLastController();
-		lastControllerType               = hidGetControllerType(lastControllerId);
-		hidGetSixAxisSensorHandles(&externalControllerSixAxisHandle, lastControllerType == TYPE_JOYCON_PAIR ? 2 : 1, lastControllerId, lastControllerType);
+		lastControllerType = hidGetControllerType(lastControllerId);
+		hidGetSixAxisSensorHandles(&externalControllerSixAxisHandle,
+			lastControllerType == TYPE_JOYCON_PAIR ? 2 : 1, lastControllerId,
+			lastControllerType);
 		hidStartSixAxisSensor(externalControllerSixAxisHandle);
 #endif
 #ifdef YUZU
-		lastControllerType = yuzu_joypad_getjoypadtype(yuzuInstance, (PluginDefinitions::ControllerNumber)getLastController());
+		lastControllerType = yuzu_joypad_getjoypadtype(yuzuInstance,
+			(PluginDefinitions::ControllerNumber)getLastController());
 #endif
 	}
 	// clang-format off
@@ -569,7 +600,8 @@ void MainLoop::setControllerNumber(uint8_t numOfControllers) {
 	// Now, user is required to reconnect any controllers manually
 }
 
-void MainLoop::runFinalTas(std::vector<std::string> scriptPaths, std::string extraDataPath) {
+void MainLoop::runFinalTas(
+	std::vector<std::string> scriptPaths, std::string extraDataPath) {
 	spoofAll();
 
 	std::vector<FILE*> files;
@@ -608,7 +640,8 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths, std::string ext
 				LOGD << "For player " << (int)player;
 				// Based on code in project handler without compression
 				uint8_t controllerSize;
-				HELPERS::readFullFileData(files[player], &controllerSize, sizeof(controllerSize));
+				HELPERS::readFullFileData(
+					files[player], &controllerSize, sizeof(controllerSize));
 
 				if(controllerSize == 0) {
 					// Skip handling controller data and clear existing buttons
@@ -617,10 +650,12 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths, std::string ext
 					LOGD << "Empty frame";
 				} else {
 					uint8_t controllerDataBuf[controllerSize];
-					HELPERS::readFullFileData(files[player], controllerDataBuf, controllerSize);
+					HELPERS::readFullFileData(
+						files[player], controllerDataBuf, controllerSize);
 
 					ControllerData data;
-					serializeProtocol.binaryToData<ControllerData>(data, controllerDataBuf, controllerSize);
+					serializeProtocol.binaryToData<ControllerData>(
+						data, controllerDataBuf, controllerSize);
 
 					controllers[player]->setFrame(data);
 
@@ -629,7 +664,8 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths, std::string ext
 			}
 
 			uint8_t extraDataSize;
-			HELPERS::readFullFileData(extraDataFile, &extraDataSize, sizeof(extraDataSize));
+			HELPERS::readFullFileData(
+				extraDataFile, &extraDataSize, sizeof(extraDataSize));
 
 			if(extraDataSize == 0) {
 				// Skip handling controller data and clear existing buttons
@@ -637,10 +673,12 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths, std::string ext
 				LOGD << "Empty frame";
 			} else {
 				uint8_t extraDataBuf[extraDataSize];
-				HELPERS::readFullFileData(extraDataFile, extraDataBuf, extraDataSize);
+				HELPERS::readFullFileData(
+					extraDataFile, extraDataBuf, extraDataSize);
 
 				TouchAndKeyboardData data;
-				serializeProtocol.binaryToData<TouchAndKeyboardData>(data, extraDataBuf, extraDataSize);
+				serializeProtocol.binaryToData<TouchAndKeyboardData>(
+					data, extraDataBuf, extraDataSize);
 
 				setTouchState(&data);
 				setKeyboardMouseState(&data);
@@ -694,13 +732,16 @@ void MainLoop::runFinalTas(std::vector<std::string> scriptPaths, std::string ext
 	fclose(extraDataFile);
 }
 
-void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, TasValueToRecord typeToRecord, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex) {
+void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance,
+	uint8_t includeFramebuffer, TasValueToRecord typeToRecord, uint32_t frame,
+	uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex) {
 	if(isPaused) {
 		unpauseApp();
 
 		waitForVsync();
 
-		pauseApp(linkedWithFrameAdvance, includeFramebuffer, typeToRecord, frame, savestateHookNum, branchIndex, playerIndex);
+		pauseApp(linkedWithFrameAdvance, includeFramebuffer, typeToRecord,
+			frame, savestateHookNum, branchIndex, playerIndex);
 	}
 }
 
@@ -711,7 +752,9 @@ void MainLoop::clearEveryController() {
 	}
 }
 
-void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, TasValueToRecord typeToRecord, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex) {
+void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance,
+	uint8_t includeFramebuffer, TasValueToRecord typeToRecord, uint32_t frame,
+	uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex) {
 	if(!isPaused) {
 #ifdef __SWITCH__
 		rc = svcDebugActiveProcess(&applicationDebug, applicationProcessId);
@@ -724,7 +767,6 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 #endif
 
 		if(networkInstance->isConnected()) {
-			// Framebuffers should not be stored in memory unless they will be sent over internet
 			std::vector<uint8_t> jpegBuf;
 			std::string dhash;
 
@@ -749,7 +791,8 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 				case TasValueToRecord::ALL:
 					break;
 				case TasValueToRecord::CONTROLLER:
-					data.controllerData = *controllers[playerIndex]->getControllerData();
+					data.controllerData
+						= *controllers[playerIndex]->getControllerData();
 					getSixAxisState(playerIndex, &data.controllerData);
 					break;
 				case TasValueToRecord::KEYBOARD_MOUSE:
@@ -763,15 +806,22 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 
 			std::vector<std::string> outputs;
 			for(uint16_t i = 0; i < currentMemoryRegions.size(); i++) {
-				std::string revisedExpression = currentMemoryRegions[i].pointerDefinition;
+				std::string revisedExpression
+					= currentMemoryRegions[i].pointerDefinition;
 
-				HELPERS::replaceInString(revisedExpression, "main", std::to_string(mainBase));
-				HELPERS::replaceInString(revisedExpression, "heap", std::to_string(heapBase));
+				HELPERS::replaceInString(
+					revisedExpression, "main", std::to_string(mainBase));
+				HELPERS::replaceInString(
+					revisedExpression, "heap", std::to_string(heapBase));
 
-				for(std::size_t outputIndex = 0; outputIndex < outputs.size(); outputIndex++) {
-					// For each already generated output, replace in the expression if needed
-					// Note, some values will absolutely cause an error
-					HELPERS::replaceInString(revisedExpression, "<" + std::to_string(outputIndex) + ">", outputs[outputIndex]);
+				for(std::size_t outputIndex = 0; outputIndex < outputs.size();
+					outputIndex++) {
+					// For each already generated output, replace in the
+					// expression if needed Note, some values will absolutely
+					// cause an error
+					HELPERS::replaceInString(revisedExpression,
+						"<" + std::to_string(outputIndex) + ">",
+						outputs[outputIndex]);
 				}
 
 				MemoryRegionTypes type = currentMemoryRegions[i].type;
@@ -780,10 +830,12 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 
 				try {
 #ifdef __SWITCH__
-					uint64_t addr = calculator::eval<uint64_t>(revisedExpression, applicationDebug);
+					uint64_t addr = calculator::eval<uint64_t>(
+						revisedExpression, applicationDebug);
 #endif
 #ifdef YUZU
-					uint64_t addr = calculator::eval<uint64_t>(revisedExpression);
+					uint64_t addr
+						= calculator::eval<uint64_t>(revisedExpression);
 #endif
 					uint8_t isUnsigned = currentMemoryRegions[i].u;
 
@@ -833,8 +885,9 @@ void MainLoop::pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuff
 						stringVersion = *(bool*)bytes.data() ? "true" : "false";
 						break;
 					case MemoryRegionTypes::CharPointer:
-						bytes         = getMemory(addr, currentMemoryRegions[i].size);
-						stringVersion = std::string((const char*)bytes.data(), bytes.size());
+						bytes = getMemory(addr, currentMemoryRegions[i].size);
+						stringVersion = std::string(
+							(const char*)bytes.data(), bytes.size());
 						break;
 					case MemoryRegionTypes::ByteArray:
 						bytes = getMemory(addr, currentMemoryRegions[i].size);
@@ -891,7 +944,8 @@ uint8_t MainLoop::checkSleep() {
 	if(R_SUCCEEDED(eventWait(&sleepModule.event, 1000000 * 1))) {
 		PscPmState pscState;
 		u32 out_flags;
-		if(R_SUCCEEDED(pscPmModuleGetRequest(&sleepModule, &pscState, &out_flags))) {
+		if(R_SUCCEEDED(
+			   pscPmModuleGetRequest(&sleepModule, &pscState, &out_flags))) {
 			pscPmModuleAcknowledge(&sleepModule, pscState);
 			switch(pscState) {
 			case PscPmState_Awake:
@@ -906,6 +960,7 @@ uint8_t MainLoop::checkSleep() {
 		}
 	}
 #endif
+	// No equivlent for Yuzu
 }
 uint8_t MainLoop::checkAwaken() {
 #ifdef __SWITCH__
@@ -913,7 +968,8 @@ uint8_t MainLoop::checkAwaken() {
 	if(R_SUCCEEDED(eventWait(&sleepModule.event, 1000000 * 1))) {
 		PscPmState pscState;
 		u32 out_flags;
-		if(R_SUCCEEDED(pscPmModuleGetRequest(&sleepModule, &pscState, &out_flags))) {
+		if(R_SUCCEEDED(
+			   pscPmModuleGetRequest(&sleepModule, &pscState, &out_flags))) {
 			pscPmModuleAcknowledge(&sleepModule, pscState);
 			switch(pscState) {
 			case PscPmState_Awake:
@@ -928,6 +984,7 @@ uint8_t MainLoop::checkAwaken() {
 		}
 	}
 #endif
+	// No equivlent for Yuzu
 }
 
 void MainLoop::matchFirstControllerToTASController(uint8_t player) {
@@ -943,7 +1000,8 @@ void MainLoop::matchFirstControllerToTASController(uint8_t player) {
 		hidJoystickRead(&left, id, JOYSTICK_LEFT);
 		hidJoystickRead(&right, id, JOYSTICK_RIGHT);
 
-		controllers[player]->setFrame(buttons, left.dx, left.dy, right.dx, right.dy);
+		controllers[player]->setFrame(
+			buttons, left.dx, left.dy, right.dx, right.dy);
 
 		// In order for the six axis state to be understood, need to have all
 		// Other controllers spoof in
@@ -1026,23 +1084,103 @@ void MainLoop::matchFirstControllerToTASController(uint8_t player) {
 #ifdef YUZU
 	if(getNumControllers() > controllers.size() && controllers.size() != 0) {
 		// This should get the first non-TAS controller
-		PluginDefinitions::ControllerNumber controllerIndex = (PluginDefinitions::ControllerNumber)controllers.size();
+		PluginDefinitions::ControllerNumber lastControllerIndex
+			= (PluginDefinitions::ControllerNumber)controllers.size();
 
-		uint64_t buttons = yuzu_joypad_read(yuzuInstance, controllerIndex);
+		uint64_t buttons = yuzu_joypad_read(yuzuInstance, lastControllerIndex);
 
-		using JT       = PluginDefinitions::YuzuJoystickType;
-		int32_t leftX  = yuzu_joypad_readjoystick(yuzuInstance, controllerIndex, JT::LeftX);
-		int32_t leftY  = yuzu_joypad_readjoystick(yuzuInstance, controllerIndex, JT::LeftY);
-		int32_t rightX = yuzu_joypad_readjoystick(yuzuInstance, controllerIndex, JT::RightX);
-		int32_t rightY = yuzu_joypad_readjoystick(yuzuInstance, controllerIndex, JT::RightY);
+		using JT      = PluginDefinitions::YuzuJoystickType;
+		int32_t leftX = yuzu_joypad_readjoystick(
+			yuzuInstance, lastControllerIndex, JT::LeftX);
+		int32_t leftY = yuzu_joypad_readjoystick(
+			yuzuInstance, lastControllerIndex, JT::LeftY);
+		int32_t rightX = yuzu_joypad_readjoystick(
+			yuzuInstance, lastControllerIndex, JT::RightX);
+		int32_t rightY = yuzu_joypad_readjoystick(
+			yuzuInstance, lastControllerIndex, JT::RightY);
 
 		controllers[player]->setFrame(buttons, leftX, leftY, rightX, rightY);
+
+		PluginDefinitions::ControllerNumber controllerIndex
+			= (PluginDefinitions::ControllerNumber)player;
+
+		using ST = PluginDefinitions::SixAxisMotionTypes;
+
+		yuzu_joypad_setsixaxis(yuzuInstance, controllerIndex, ST::AccelerationX,
+			yuzu_joypad_readsixaxis(
+				yuzuInstance, lastControllerIndex, ST::AccelerationX));
+		yuzu_joypad_setsixaxis(yuzuInstance, controllerIndex, ST::AccelerationY,
+			yuzu_joypad_readsixaxis(
+				yuzuInstance, lastControllerIndex, ST::AccelerationY));
+		yuzu_joypad_setsixaxis(yuzuInstance, controllerIndex, ST::AccelerationZ,
+			yuzu_joypad_readsixaxis(
+				yuzuInstance, lastControllerIndex, ST::AccelerationZ));
+
+		yuzu_joypad_setsixaxis(yuzuInstance, controllerIndex,
+			ST::AngularVelocityX,
+			yuzu_joypad_readsixaxis(
+				yuzuInstance, lastControllerIndex, ST::AngularVelocityX));
+		yuzu_joypad_setsixaxis(yuzuInstance, controllerIndex,
+			ST::AngularVelocityY,
+			yuzu_joypad_readsixaxis(
+				yuzuInstance, lastControllerIndex, ST::AngularVelocityY));
+		yuzu_joypad_setsixaxis(yuzuInstance, controllerIndex,
+			ST::AngularVelocityZ,
+			yuzu_joypad_readsixaxis(
+				yuzuInstance, lastControllerIndex, ST::AngularVelocityZ));
+
+		yuzu_joypad_setsixaxis(yuzuInstance, controllerIndex, ST::AngleX,
+			yuzu_joypad_readsixaxis(
+				yuzuInstance, lastControllerIndex, ST::AngleX));
+		yuzu_joypad_setsixaxis(yuzuInstance, controllerIndex, ST::AngleY,
+			yuzu_joypad_readsixaxis(
+				yuzuInstance, lastControllerIndex, ST::AngleY));
+		yuzu_joypad_setsixaxis(yuzuInstance, controllerIndex, ST::AngleZ,
+			yuzu_joypad_readsixaxis(
+				yuzuInstance, lastControllerIndex, ST::AngleZ));
+
+		yuzu_joypad_setsixaxis(yuzuInstance, controllerIndex, ST::DirectionXX,
+			yuzu_joypad_readsixaxis(
+				yuzuInstance, lastControllerIndex, ST::DirectionXX));
+		yuzu_joypad_setsixaxis(yuzuInstance, controllerIndex, ST::DirectionXY,
+			yuzu_joypad_readsixaxis(
+				yuzuInstance, lastControllerIndex, ST::DirectionXY));
+		yuzu_joypad_setsixaxis(yuzuInstance, controllerIndex, ST::DirectionXZ,
+			yuzu_joypad_readsixaxis(
+				yuzuInstance, lastControllerIndex, ST::DirectionXZ));
+
+		yuzu_joypad_setsixaxis(yuzuInstance, controllerIndex, ST::DirectionYX,
+			yuzu_joypad_readsixaxis(
+				yuzuInstance, lastControllerIndex, ST::DirectionYX));
+		yuzu_joypad_setsixaxis(yuzuInstance, controllerIndex, ST::DirectionYY,
+			yuzu_joypad_readsixaxis(
+				yuzuInstance, lastControllerIndex, ST::DirectionYY));
+		yuzu_joypad_setsixaxis(yuzuInstance, controllerIndex, ST::DirectionYZ,
+			yuzu_joypad_readsixaxis(
+				yuzuInstance, lastControllerIndex, ST::DirectionYZ));
+
+		yuzu_joypad_setsixaxis(yuzuInstance, controllerIndex, ST::DirectionZX,
+			yuzu_joypad_readsixaxis(
+				yuzuInstance, lastControllerIndex, ST::DirectionZX));
+		yuzu_joypad_setsixaxis(yuzuInstance, controllerIndex, ST::DirectionZY,
+			yuzu_joypad_readsixaxis(
+				yuzuInstance, lastControllerIndex, ST::DirectionZY));
+		yuzu_joypad_setsixaxis(yuzuInstance, controllerIndex, ST::DirectionZZ,
+			yuzu_joypad_readsixaxis(
+				yuzuInstance, lastControllerIndex, ST::DirectionZZ));
 	}
 #endif
 }
 
 void MainLoop::recordAllSixAxis() {
+#ifdef __SWITCH__
 	setSixAxisRecord(-2);
+#endif
+
+#ifdef YUZU
+	yuzu_input_enableoutsideinput(
+		yuzuInstance, PluginDefinitions::EnableInputType::AllControllers, true);
+#endif
 }
 
 void MainLoop::setSixAxisRecord(int32_t controller) {
@@ -1051,10 +1189,24 @@ void MainLoop::setSixAxisRecord(int32_t controller) {
 		setMemoryType(saltynxcontrollerToRecord, controller);
 	}
 #endif
+
+#ifdef YUZU
+	yuzu_input_enableoutsideinput(yuzuInstance,
+		PluginDefinitions::EnableInputType::AllControllers, false);
+	yuzu_input_enableoutsideinput(yuzuInstance,
+		(PluginDefinitions::EnableInputType)(controller + 1), true);
+#endif
 }
 
 void MainLoop::setSixAxisSpoof() {
+#ifdef __SWITCH__
 	setSixAxisRecord(-1);
+#endif
+
+#ifdef YUZU
+	yuzu_input_enableoutsideinput(yuzuInstance,
+		PluginDefinitions::EnableInputType::AllControllers, false);
+#endif
 }
 
 void MainLoop::spoofAllKeyboardTouch() {
@@ -1062,6 +1214,13 @@ void MainLoop::spoofAllKeyboardTouch() {
 	if(saltynxRecordScreenOrKeyboard != 0) {
 		setMemoryType<uint8_t>(saltynxRecordScreenOrKeyboard, 3);
 	}
+#endif
+
+#ifdef YUZU
+	yuzu_input_enableoutsideinput(yuzuInstance,
+		PluginDefinitions::EnableInputType::EnableKeyboard, false);
+	yuzu_input_enableoutsideinput(yuzuInstance,
+		PluginDefinitions::EnableInputType::EnableTouchscreen, false);
 #endif
 }
 
@@ -1071,6 +1230,13 @@ void MainLoop::recordAllKeyboardTouch() {
 		setMemoryType<uint8_t>(saltynxRecordScreenOrKeyboard, 0);
 	}
 #endif
+
+#ifdef YUZU
+	yuzu_input_enableoutsideinput(
+		yuzuInstance, PluginDefinitions::EnableInputType::EnableKeyboard, true);
+	yuzu_input_enableoutsideinput(yuzuInstance,
+		PluginDefinitions::EnableInputType::EnableTouchscreen, true);
+#endif
 }
 
 void MainLoop::setKeyboardRecord() {
@@ -1079,6 +1245,11 @@ void MainLoop::setKeyboardRecord() {
 		setMemoryType<uint8_t>(saltynxRecordScreenOrKeyboard, 2);
 	}
 #endif
+
+#ifdef YUZU
+	yuzu_input_enableoutsideinput(
+		yuzuInstance, PluginDefinitions::EnableInputType::EnableKeyboard, true);
+#endif
 }
 
 void MainLoop::setTouchRecord() {
@@ -1086,6 +1257,11 @@ void MainLoop::setTouchRecord() {
 	if(saltynxRecordScreenOrKeyboard != 0) {
 		setMemoryType<uint8_t>(saltynxRecordScreenOrKeyboard, 1);
 	}
+#endif
+
+#ifdef YUZU
+	yuzu_input_enableoutsideinput(yuzuInstance,
+		PluginDefinitions::EnableInputType::EnableTouchscreen, true);
 #endif
 }
 
@@ -1096,9 +1272,12 @@ void MainLoop::getSixAxisState(int32_t controller, ControllerData* state) {
 	LOGD << "Getting six axis state";
 
 #ifdef __SWITCH__
-	size_t offset    = sizeof(nn::hid::SixAxisSensorState) * nn::hid::SixAxisSensorStateCountMax * controller;
-	sensorStateLeft  = getMemoryType<nn::hid::SixAxisSensorState>(saltynxsixAxisStateLeftJoyconBacklog + offset);
-	sensorStateRight = getMemoryType<nn::hid::SixAxisSensorState>(saltynxsixAxisStateRightJoyconBacklog + offset);
+	size_t offset = sizeof(nn::hid::SixAxisSensorState)
+					* nn::hid::SixAxisSensorStateCountMax * controller;
+	sensorStateLeft = getMemoryType<nn::hid::SixAxisSensorState>(
+		saltynxsixAxisStateLeftJoyconBacklog + offset);
+	sensorStateRight = getMemoryType<nn::hid::SixAxisSensorState>(
+		saltynxsixAxisStateRightJoyconBacklog + offset);
 #endif
 
 	state->ACCEL_X_LEFT       = sensorStateLeft.acceleration.x;
@@ -1181,7 +1360,6 @@ void MainLoop::setSixAxisState(int32_t controller, ControllerData* state) {
 	sensorStateRight.direction.z.z     = state->DIRECTION_ZZ_RIGHT;
 
 #ifdef __SWITCH__
-	// Set to correct player
 	size_t offset = sizeof(nn::hid::SixAxisSensorState) * controller;
 	setMemoryType(saltynxsixAxisStateLeftJoycon + offset, sensorStateLeft);
 	setMemoryType(saltynxsixAxisStateRightJoycon + offset, sensorStateRight);
@@ -1192,7 +1370,8 @@ void MainLoop::getTouchState(TouchAndKeyboardData* state) {
 	nn::hid::TouchScreenState16Touch touchSensorState;
 
 #ifdef __SWITCH__
-	touchSensorState = getMemoryType<nn::hid::TouchScreenState16Touch>(saltynxtouchScreenStateBacklog);
+	touchSensorState = getMemoryType<nn::hid::TouchScreenState16Touch>(
+		saltynxtouchScreenStateBacklog);
 #endif
 
 	// Can't go over 2
@@ -1225,11 +1404,14 @@ void MainLoop::getKeyboardMouseState(TouchAndKeyboardData* state) {
 	nn::hid::MouseState mouseSensorState;
 
 #ifdef __SWITCH__
-	keyboardSensorState = getMemoryType<nn::hid::KeyboardState>(saltynxkeyboardStateBacklog);
-	mouseSensorState    = getMemoryType<nn::hid::MouseState>(saltynxmouseStateBacklog);
+	keyboardSensorState
+		= getMemoryType<nn::hid::KeyboardState>(saltynxkeyboardStateBacklog);
+	mouseSensorState
+		= getMemoryType<nn::hid::MouseState>(saltynxmouseStateBacklog);
 #endif
 
-	memcpy(state->keyboardKeys, keyboardSensorState.keys, sizeof(state->keyboardKeys));
+	memcpy(state->keyboardKeys, keyboardSensorState.keys,
+		sizeof(state->keyboardKeys));
 	state->keyboardModifiers = keyboardSensorState.modifiers;
 	state->mouseX            = mouseSensorState.x;
 	state->mouseY            = mouseSensorState.y;
@@ -1244,7 +1426,8 @@ void MainLoop::setKeyboardMouseState(TouchAndKeyboardData* state) {
 	nn::hid::KeyboardState keyboardSensorState;
 	nn::hid::MouseState mouseSensorState;
 
-	memcpy(keyboardSensorState.keys, state->keyboardKeys, sizeof(state->keyboardKeys));
+	memcpy(keyboardSensorState.keys, state->keyboardKeys,
+		sizeof(state->keyboardKeys));
 	keyboardSensorState.modifiers    = state->keyboardModifiers;
 	mouseSensorState.x               = state->mouseX;
 	mouseSensorState.y               = state->mouseY;

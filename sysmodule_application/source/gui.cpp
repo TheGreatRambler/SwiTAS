@@ -79,15 +79,6 @@ Gui::Gui(ViDisplay* disp) {
 			fatalThrow(rc);
 		}
 
-		// Make Framebuffer linear to make things easier
-		// Imma too dumb to figure out the raw format
-		// 4 bytes per pixel (outstride)
-		// rc = framebufferMakeLinear(&framebuf);
-		// if(R_FAILED(rc)) {
-		//	nwindowClose(&window);
-		//	fatalThrow(rc);
-		//}
-
 		static PlFontData stdFontData, extFontData;
 
 		// Nintendo's default font
@@ -100,7 +91,7 @@ Gui::Gui(ViDisplay* disp) {
 		}
 
 		LOGD << "Get offset of standard font";
-		u8* fontBuffer = reinterpret_cast<u8*>(stdFontData.address);
+		u8* fontBuffer = (uint8_t*)stdFontData.address;
 		stbtt_InitFont(&stdNintendoFont, fontBuffer, stbtt_GetFontOffsetForIndex(fontBuffer, 0));
 
 		// Nintendo's extended font containing a bunch of icons
@@ -113,11 +104,38 @@ Gui::Gui(ViDisplay* disp) {
 		}
 
 		LOGD << "Get offset of extended font";
-		fontBuffer = reinterpret_cast<u8*>(extFontData.address);
+		fontBuffer = (uint8_t*)extFontData.address;
 		stbtt_InitFont(&extNintendoFont, fontBuffer, stbtt_GetFontOffsetForIndex(fontBuffer, 0));
 
 		LOGD << "Allocate saved JPEG framebuffer";
 		savedJpegFramebuffer = (uint8_t*)malloc(JPEG_BUF_SIZE);
+#endif
+
+#ifdef YUZU
+		std::string chosenFontPath;
+#ifdef _WIN32
+		chosenFontPath = "C:/Windows/Fonts/courbd.ttf";
+#endif
+#ifdef __linux__
+		chosenFontPath = HELPERS::exec("fc-match --format=%{file} courier");
+#endif
+#ifdef __APPLE__
+		chosenFontPath = "/System/Library/Fonts/";
+#endif
+		stbtt_fontinfo font;
+
+		// https://stackoverflow.com/a/14002993/9329945
+		FILE* f = fopen(chosenFontPath.c_str(), "rb");
+		fseek(f, 0, SEEK_END);
+		long fsize = ftell(f);
+		fseek(f, 0, SEEK_SET);
+		uint8_t* fontBuf = (uint8_t*)malloc(fsize);
+		fread(fontBuf, 1, fsize, f);
+		fclose(f);
+
+		stbtt_InitFont(&font, fontBuf, stbtt_GetFontOffsetForIndex(fontBuf, 0));
+
+		free(fontBuf);
 #endif
 
 		LOGD << "Set up fbg";
@@ -132,20 +150,22 @@ Gui::Gui(ViDisplay* disp) {
 			// return NULL;
 		}
 
-		// TODO get font
-
 #ifdef __SWITCH__
-		std::string rootImagePath = controllerOverlayDirectory + "/";
+		controllerOverlayDirectory = "/switas/controllerOverlay";
+#endif
+
+#ifdef YUZU
+		controllerOverlayDirectory = HELPERS::getExecutableDir() + "/controllerOverlay";
 #endif
 
 		// Set every button to its image
 		for(auto const& imageName : btnOverlayImageNames) {
-			controllerImages[imageName.first] = fbg_loadPNG(fbg, (controllerOverlayDirectory + imageName.second).c_str());
+			controllerImages[imageName.first] = fbg_loadPNG(fbg, (controllerOverlayDirectory + "/" + imageName.second).c_str());
 		}
 
-		blankControllerImage = fbg_loadPNG(fbg, (controllerOverlayDirectory + blankControllerImageName).c_str());
-		leftStickImage       = fbg_loadPNG(fbg, (controllerOverlayDirectory + leftStickImageName).c_str());
-		rightStickImage      = fbg_loadPNG(fbg, (controllerOverlayDirectory + rightStickImageName).c_str());
+		blankControllerImage = fbg_loadPNG(fbg, (controllerOverlayDirectory + "/" + blankControllerImageName).c_str());
+		leftStickImage       = fbg_loadPNG(fbg, (controllerOverlayDirectory + "/" + leftStickImageName).c_str());
+		rightStickImage      = fbg_loadPNG(fbg, (controllerOverlayDirectory + "/" + rightStickImageName).c_str());
 	}
 
 	void Gui::startFrame() {
@@ -161,8 +181,13 @@ Gui::Gui(ViDisplay* disp) {
 		// Flush
 		fbg_draw(fbg);
 		// fbg_flip(fbg);
+
 #ifdef __SWITCH__
 		framebufferEnd(&framebuf);
+#endif
+
+#ifdef YUZU
+		yuzu_gui_render(yuzuInstance);
 #endif
 		wasJustDrawnTo = true;
 	}
@@ -192,6 +217,10 @@ Gui::Gui(ViDisplay* disp) {
 
 #ifdef __SWITCH__
 				buf[getPixelOffset(x, y)] = color;
+#endif
+
+#ifdef YUZU
+				yuzu_gui_drawpixel(yuzuInstance, x, y, color.r, color.g, color.b, color.a);
 #endif
 			}
 		}
