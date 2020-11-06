@@ -1106,6 +1106,8 @@ void MainLoop::matchFirstControllerToTASController(uint8_t player) {
 
 		using ST = PluginDefinitions::SixAxisMotionTypes;
 
+		// TODO support both dual joycons and procon
+
 		yuzu_joypad_setsixaxis(yuzuInstance, controllerIndex, ST::AccelerationX,
 			yuzu_joypad_readsixaxis(
 				yuzuInstance, lastControllerIndex, ST::AccelerationX));
@@ -1266,19 +1268,18 @@ void MainLoop::setTouchRecord() {
 }
 
 void MainLoop::getSixAxisState(int32_t controller, ControllerData* state) {
-	nn::hid::SixAxisSensorState sensorStateLeft;
-	nn::hid::SixAxisSensorState sensorStateRight;
-
 	LOGD << "Getting six axis state";
 
 #ifdef __SWITCH__
+	nn::hid::SixAxisSensorState sensorStateLeft;
+	nn::hid::SixAxisSensorState sensorStateRight;
+
 	size_t offset = sizeof(nn::hid::SixAxisSensorState)
 					* nn::hid::SixAxisSensorStateCountMax * controller;
 	sensorStateLeft = getMemoryType<nn::hid::SixAxisSensorState>(
 		saltynxsixAxisStateLeftJoyconBacklog + offset);
 	sensorStateRight = getMemoryType<nn::hid::SixAxisSensorState>(
 		saltynxsixAxisStateRightJoyconBacklog + offset);
-#endif
 
 	state->ACCEL_X_LEFT       = sensorStateLeft.acceleration.x;
 	state->ACCEL_Y_LEFT       = sensorStateLeft.acceleration.y;
@@ -1316,6 +1317,86 @@ void MainLoop::getSixAxisState(int32_t controller, ControllerData* state) {
 	state->DIRECTION_ZX_RIGHT = sensorStateRight.direction.z.x;
 	state->DIRECTION_ZY_RIGHT = sensorStateRight.direction.z.y;
 	state->DIRECTION_ZZ_RIGHT = sensorStateRight.direction.z.z;
+#endif
+
+#ifdef YUZU
+	PluginDefinitions::ControllerNumber index
+		= (PluginDefinitions::ControllerNumber)controller;
+	using ST = PluginDefinitions::SixAxisMotionTypes;
+
+	state->ACCEL_X_LEFT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->ACCEL_Y_LEFT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::accel);
+	state->ACCEL_Z_LEFT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->GYRO_X_LEFT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->GYRO_Y_LEFT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->GYRO_Z_LEFT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->ANGLE_X_LEFT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->ANGLE_Y_LEFT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->ANGLE_Z_LEFT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->ACCEL_X_RIGHT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->ACCEL_Y_RIGHT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->ACCEL_Z_RIGHT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->GYRO_X_RIGHT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->GYRO_Y_RIGHT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->GYRO_Z_RIGHT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->ANGLE_X_RIGHT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->ANGLE_Y_RIGHT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->ANGLE_Z_RIGHT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->DIRECTION_XX_LEFT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->DIRECTION_XY_LEFT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->DIRECTION_XZ_LEFT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->DIRECTION_YX_LEFT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->DIRECTION_YY_LEFT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->DIRECTION_YZ_LEFT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->DIRECTION_ZX_LEFT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->DIRECTION_ZY_LEFT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->DIRECTION_ZZ_LEFT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->DIRECTION_XX_RIGHT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->DIRECTION_XY_RIGHT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->DIRECTION_XZ_RIGHT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->DIRECTION_YX_RIGHT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->DIRECTION_YY_RIGHT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->DIRECTION_YZ_RIGHT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->DIRECTION_ZX_RIGHT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->DIRECTION_ZY_RIGHT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+	state->DIRECTION_ZZ_RIGHT
+		= yuzu_joypad_readsixaxis(yuzuInstance, index, ST::AccelerationX);
+#endif
 }
 
 void MainLoop::setSixAxisState(int32_t controller, ControllerData* state) {

@@ -370,45 +370,67 @@ namespace PluginDefinitions {
 	typedef uint64_t(emu_getstackstart)(void* ctx);
 	typedef uint64_t(emu_getstacksize)(void* ctx);
 	typedef void(emu_log)(void* ctx, const char* logmessage, LogLevel level);
-	typedef uint8_t(memory_readbyterange)(void* ctx, uint64_t address, uint8_t* bytes, uint64_t length);
-	typedef uint8_t(memory_writebyterange)(void* ctx, uint64_t address, uint8_t* bytes, uint64_t length);
+	typedef uint8_t(memory_readbyterange)(
+		void* ctx, uint64_t address, uint8_t* bytes, uint64_t length);
+	typedef uint8_t(memory_writebyterange)(
+		void* ctx, uint64_t address, uint8_t* bytes, uint64_t length);
 	typedef uint64_t(debugger_getclockticks)(void* ctx);
 	typedef uint64_t(debugger_getcputicks)(void* ctx);
 	typedef uint64_t(joypad_read)(void* ctx, ControllerNumber player);
-	typedef void(joypad_set)(void* ctx, ControllerNumber player, uint64_t input);
-	typedef int16_t(joypad_readjoystick)(void* ctx, ControllerNumber player, YuzuJoystickType type);
-	typedef void(joypad_setjoystick)(void* ctx, ControllerNumber player, YuzuJoystickType type, int16_t val);
-	typedef float(joypad_readsixaxis)(void* ctx, ControllerNumber player, SixAxisMotionTypes type);
-	typedef void(joypad_setsixaxis)(void* ctx, ControllerNumber player, SixAxisMotionTypes type, float val);
-	typedef void(joypad_enablejoypad)(void* ctx, ControllerNumber player, uint8_t enable);
+	typedef void(joypad_set)(
+		void* ctx, ControllerNumber player, uint64_t input);
+	typedef int16_t(joypad_readjoystick)(
+		void* ctx, ControllerNumber player, YuzuJoystickType type);
+	typedef void(joypad_setjoystick)(
+		void* ctx, ControllerNumber player, YuzuJoystickType type, int16_t val);
+	typedef float(joypad_readsixaxis)(void* ctx, ControllerNumber player,
+		SixAxisMotionTypes type, PluginDefinitions::ControllerType joycon_type);
+	typedef void(joypad_setsixaxis)(void* ctx, ControllerNumber player,
+		SixAxisMotionTypes type, PluginDefinitions::ControllerType joycon_type,
+		float val);
+	typedef void(joypad_enablejoypad)(
+		void* ctx, ControllerNumber player, uint8_t enable);
 	typedef void(joypad_removealljoypads)(void* ctx);
-	typedef void(joypad_setjoypadtype)(void* ctx, ControllerNumber player, ControllerType type);
-	typedef ControllerType(joypad_getjoypadtype)(void* ctx, ControllerNumber player);
-	typedef uint8_t(joypad_isjoypadconnected)(void* ctx, ControllerNumber player);
+	typedef void(joypad_setjoypadtype)(
+		void* ctx, ControllerNumber player, ControllerType type);
+	typedef ControllerType(joypad_getjoypadtype)(
+		void* ctx, ControllerNumber player);
+	typedef uint8_t(joypad_isjoypadconnected)(
+		void* ctx, ControllerNumber player);
 	typedef void(input_requeststateupdate)(void* ctx);
 	typedef void(input_enablekeyboard)(void* ctx, uint8_t enable);
 	typedef void(input_enablemouse)(void* ctx, uint8_t enable);
 	typedef void(input_enabletouchscreen)(void* ctx, uint8_t enable);
 	typedef uint8_t(input_iskeypressed)(void* ctx, KeyboardValues key);
-	typedef void(input_setkeypressed)(void* ctx, KeyboardValues key, uint8_t ispressed);
-	typedef uint8_t(input_iskeymodifierpressed)(void* ctx, KeyboardModifiers modifier);
-	typedef void(input_setkeymodifierpressed)(void* ctx, KeyboardModifiers modifier, uint8_t ispressed);
+	typedef void(input_setkeypressed)(
+		void* ctx, KeyboardValues key, uint8_t ispressed);
+	typedef uint8_t(input_iskeymodifierpressed)(
+		void* ctx, KeyboardModifiers modifier);
+	typedef void(input_setkeymodifierpressed)(
+		void* ctx, KeyboardModifiers modifier, uint8_t ispressed);
 	typedef uint8_t(input_ismousepressed)(void* ctx, MouseButton button);
-	typedef void(input_setmousepressed)(void* ctx, MouseButton button, uint8_t ispressed);
+	typedef void(input_setmousepressed)(
+		void* ctx, MouseButton button, uint8_t ispressed);
 	typedef uint8_t(input_getnumtouches)(void* ctx);
 	typedef void(input_setnumtouches)(void* ctx, uint8_t num);
 	typedef uint32_t(joypad_readtouch)(void* ctx, uint8_t idx, TouchTypes type);
-	typedef void(joypad_settouch)(void* ctx, uint8_t idx, TouchTypes type, uint32_t val);
+	typedef void(joypad_settouch)(
+		void* ctx, uint8_t idx, TouchTypes type, uint32_t val);
 	typedef void(joypad_movemouse)(void* ctx, MouseTypes type, int32_t val);
 	typedef int32_t(joypad_readmouse)(void* ctx, MouseTypes type);
-	typedef void(input_enableoutsideinput)(void* ctx, EnableInputType typetoenable, uint8_t enable);
+	typedef void(input_enableoutsideinput)(
+		void* ctx, EnableInputType typetoenable, uint8_t enable);
 	typedef uint32_t(gui_getwidth)(void* ctx);
 	typedef uint32_t(gui_getheight)(void* ctx);
 	typedef void(gui_clearscreen)(void* ctx);
 	typedef void(gui_render)(void* ctx);
-	typedef void(gui_drawpixel)(void* ctx, uint32_t x, uint32_t y, uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha);
+	typedef void(gui_drawpixel)(void* ctx, uint32_t x, uint32_t y, uint8_t red,
+		uint8_t green, uint8_t blue, uint8_t alpha);
 	typedef bool(gui_savescreenshotas)(void* ctx, const char* path);
-	typedef void(gui_drawimage)(void* ctx, int32_t dx, int32_t dy, const char* path, int32_t sx, int32_t sy, int32_t sw, int32_t sh);
-	typedef void(gui_popup)(void* ctx, const char* title, const char* message, const char* type);
-	typedef uint8_t*(gui_savescreenshotmemory)(void* ctx, uint64_t* size, const char* format);
+	typedef void(gui_drawimage)(void* ctx, int32_t dx, int32_t dy,
+		const char* path, int32_t sx, int32_t sy, int32_t sw, int32_t sh);
+	typedef void(gui_popup)(
+		void* ctx, const char* title, const char* message, const char* type);
+	typedef uint8_t*(gui_savescreenshotmemory)(
+		void* ctx, uint64_t* size, const char* format);
 } // namespace PluginDefinitions
