@@ -11,7 +11,7 @@
 #endif
 
 #ifdef YUZU
-#include "dllFunctionDefinitions.hpp"
+#include "yuzuSyscalls.hpp"
 #endif
 
 #include "controller.hpp"
@@ -188,13 +188,16 @@ int main(int argc, char* argv[]) {
 MainLoop* mainLoop;
 
 DLL_EXPORT void startPlugin() {
-	mainLoop = new MainLoop();
-
 	std::string logPath = HELPERS::getExecutableDir() + "/SwiTAS_log.txt";
 
 	remove(logPath.c_str());
 	plog::init(plog::debug, logPath.c_str());
 	LOGD << "Started logging";
+
+	yuzu_gui_popup(yuzuInstance, "Plugin open", "TAS tools started",
+		PluginDefinitions::PopupType::Information);
+
+	mainLoop = new MainLoop();
 }
 
 // Possibly pass delta

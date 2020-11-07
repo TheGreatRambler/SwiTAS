@@ -12,7 +12,7 @@
 #include <unordered_map>
 
 extern "C" {
-#include <fbg/fbgraphics.h>
+#include <fbgraphics.h>
 #include <stb_truetype.h>
 }
 
@@ -85,10 +85,13 @@ private:
 		// Swizzling pattern:
 		//    y6,y5,y4,y3,y2,y1,y0,x7,x6,x5,x4,x3,x2,x1,x0
 		// -> x7,x6,x5,y6,y5,y4,y3,x4,y2,y1,x3,y0,x2,x1,x0
-		// Bits x0-4 and y0-6 are from memory layout spec (see TRM 20.1.2 - Block Linear) and libnx hardcoded values
+		// Bits x0-4 and y0-6 are from memory layout spec (see TRM 20.1.2 -
+		// Block Linear) and libnx hardcoded values
 		constexpr u32 x_mask = (__builtin_ctz(FRAMEBUFFER_WIDTH) - 1) << 5;
-		const u32 swizzled_x = ((x & x_mask) * 128) + ((x & 0b00010000) * 8) + ((x & 0b00001000) * 2) + (x & 0b00000111);
-		const u32 swizzled_y = ((y & 0b1111000) * 32) + ((y & 0b0000110) * 16) + ((y & 0b0000001) * 8);
+		const u32 swizzled_x = ((x & x_mask) * 128) + ((x & 0b00010000) * 8)
+							   + ((x & 0b00001000) * 2) + (x & 0b00000111);
+		const u32 swizzled_y = ((y & 0b1111000) * 32) + ((y & 0b0000110) * 16)
+							   + ((y & 0b0000001) * 8);
 		return swizzled_x + swizzled_y;
 	}
 #endif
@@ -143,8 +146,10 @@ public:
 		return wasJustDrawnTo;
 	}
 
-	void drawControllerOverlay(std::shared_ptr<ControllerData> state, float scale, uint32_t x, uint32_t y);
-	void drawControllerOverlay(uint8_t playerIndex, std::shared_ptr<ControllerData> state);
+	void drawControllerOverlay(std::shared_ptr<ControllerData> state,
+		float scale, uint32_t x, uint32_t y);
+	void drawControllerOverlay(
+		uint8_t playerIndex, std::shared_ptr<ControllerData> state);
 
 	void drawText(uint32_t x, uint32_t y, float size, std::string text);
 

@@ -1,5 +1,6 @@
 #include "yuzuSyscalls.hpp"
 
+#ifdef YUZU
 void* yuzuInstance;
 
 YUZU_FUNC_DEFINE(meta_free)
@@ -46,11 +47,17 @@ YUZU_FUNC_DEFINE(input_ismousepressed)
 YUZU_FUNC_DEFINE(input_setmousepressed)
 YUZU_FUNC_DEFINE(input_getnumtouches)
 YUZU_FUNC_DEFINE(input_setnumtouches)
-YUZU_FUNC_DEFINE(joypad_readtouch)
-YUZU_FUNC_DEFINE(joypad_settouch)
-YUZU_FUNC_DEFINE(joypad_movemouse)
-YUZU_FUNC_DEFINE(joypad_readmouse)
+YUZU_FUNC_DEFINE(input_readtouch)
+YUZU_FUNC_DEFINE(input_settouch)
+YUZU_FUNC_DEFINE(input_movemouse)
+YUZU_FUNC_DEFINE(input_readmouse)
 YUZU_FUNC_DEFINE(input_enableoutsideinput)
+YUZU_FUNC_DEFINE(input_getkeyraw)
+YUZU_FUNC_DEFINE(input_getkeymodifierraw)
+YUZU_FUNC_DEFINE(input_getmouseraw)
+YUZU_FUNC_DEFINE(input_setkeyraw)
+YUZU_FUNC_DEFINE(input_setkeymodifierraw)
+YUZU_FUNC_DEFINE(input_setmouseraw)
 YUZU_FUNC_DEFINE(gui_getwidth)
 YUZU_FUNC_DEFINE(gui_getheight)
 YUZU_FUNC_DEFINE(gui_clearscreen)
@@ -60,3 +67,4 @@ YUZU_FUNC_DEFINE(gui_savescreenshotas)
 YUZU_FUNC_DEFINE(gui_drawimage)
 YUZU_FUNC_DEFINE(gui_popup)
 YUZU_FUNC_DEFINE(gui_savescreenshotmemory)
+#endif

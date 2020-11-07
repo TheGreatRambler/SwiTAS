@@ -342,6 +342,13 @@ namespace PluginDefinitions {
 		DirectionZZ,
 	};
 
+	enum PopupType : uint8_t {
+		NoIcon,
+		Information,
+		Warning,
+		Critical,
+	};
+
 	typedef void(meta_setup_plugin)();
 	typedef void(meta_handle_main_loop)();
 	typedef uint64_t(meta_getplugininterfaceversion)();
@@ -408,16 +415,22 @@ namespace PluginDefinitions {
 		void* ctx, KeyboardModifiers modifier);
 	typedef void(input_setkeymodifierpressed)(
 		void* ctx, KeyboardModifiers modifier, uint8_t ispressed);
+	typedef void(input_getkeyraw)(void* ctx, void* mem);
+	typedef int32_t(input_getkeymodifierraw)(void* ctx);
+	typedef int32_t(input_getmouseraw)(void* ctx);
+	typedef void(input_setkeyraw)(void* ctx, void* mem);
+	typedef void(input_setkeymodifierraw)(void* ctx, int32_t mem);
+	typedef void(input_setmouseraw)(void* ctx, int32_t mem);
 	typedef uint8_t(input_ismousepressed)(void* ctx, MouseButton button);
 	typedef void(input_setmousepressed)(
 		void* ctx, MouseButton button, uint8_t ispressed);
 	typedef uint8_t(input_getnumtouches)(void* ctx);
 	typedef void(input_setnumtouches)(void* ctx, uint8_t num);
-	typedef uint32_t(joypad_readtouch)(void* ctx, uint8_t idx, TouchTypes type);
-	typedef void(joypad_settouch)(
+	typedef uint32_t(input_readtouch)(void* ctx, uint8_t idx, TouchTypes type);
+	typedef void(input_settouch)(
 		void* ctx, uint8_t idx, TouchTypes type, uint32_t val);
-	typedef void(joypad_movemouse)(void* ctx, MouseTypes type, int32_t val);
-	typedef int32_t(joypad_readmouse)(void* ctx, MouseTypes type);
+	typedef void(input_movemouse)(void* ctx, MouseTypes type, int32_t val);
+	typedef int32_t(input_readmouse)(void* ctx, MouseTypes type);
 	typedef void(input_enableoutsideinput)(
 		void* ctx, EnableInputType typetoenable, uint8_t enable);
 	typedef uint32_t(gui_getwidth)(void* ctx);
@@ -430,7 +443,7 @@ namespace PluginDefinitions {
 	typedef void(gui_drawimage)(void* ctx, int32_t dx, int32_t dy,
 		const char* path, int32_t sx, int32_t sy, int32_t sw, int32_t sh);
 	typedef void(gui_popup)(
-		void* ctx, const char* title, const char* message, const char* type);
+		void* ctx, const char* title, const char* message, PopupType type);
 	typedef uint8_t*(gui_savescreenshotmemory)(
 		void* ctx, uint64_t* size, const char* format);
 } // namespace PluginDefinitions

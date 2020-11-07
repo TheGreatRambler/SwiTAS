@@ -72,7 +72,9 @@ private:
 	uint64_t heapBase;
 	uint64_t mainBase;
 
-	uint32_t externalControllerSixAxisHandle;
+	uint32_t externalControllerSixAxisHandle = 0;
+
+	uint8_t lastLastController = 0;
 
 #ifdef __SWITCH__
 	HidControllerType lastControllerType;
@@ -146,7 +148,10 @@ private:
 	std::vector<uint8_t> getMemory(uint64_t addr, uint64_t size) {
 		std::vector<uint8_t> region(size);
 #ifdef __SWITCH__
-		ACCESS_MEMORY_SAFE({ svcReadDebugProcessMemory(region.data(), applicationDebug, addr, size); })
+		ACCESS_MEMORY_SAFE({
+			svcReadDebugProcessMemory(
+				region.data(), applicationDebug, addr, size);
+		})
 #endif
 #ifdef YUZU
 		yuzu_memory_readbyterange(yuzuInstance, addr, region.data(), size);
@@ -156,17 +161,23 @@ private:
 
 	void setMemory(uint64_t addr, std::vector<uint8_t> item) {
 #ifdef __SWITCH__
-		ACCESS_MEMORY_SAFE({ svcWriteDebugProcessMemory(applicationDebug, item.data(), addr, item.size()); })
+		ACCESS_MEMORY_SAFE({
+			svcWriteDebugProcessMemory(
+				applicationDebug, item.data(), addr, item.size());
+		})
 #endif
 #ifdef YUZU
-		yuzu_memory_writebyterange(yuzuInstance, addr, item.data(), item.size());
+		yuzu_memory_writebyterange(
+			yuzuInstance, addr, item.data(), item.size());
 #endif
 	}
 
 	template <typename T> T getMemoryType(uint64_t addr) {
 		T item;
 #ifdef __SWITCH__
-		ACCESS_MEMORY_SAFE({ svcReadDebugProcessMemory(&item, applicationDebug, addr, sizeof(T)); })
+		ACCESS_MEMORY_SAFE({
+			svcReadDebugProcessMemory(&item, applicationDebug, addr, sizeof(T));
+		})
 #endif
 #ifdef YUZU
 		yuzu_rom_readbytes(yuzuInstance, addr, &item, sizeof(T));
@@ -176,18 +187,24 @@ private:
 
 	template <typename T> void setMemoryType(uint64_t addr, T item) {
 #ifdef __SWITCH__
-		ACCESS_MEMORY_SAFE({ svcWriteDebugProcessMemory(applicationDebug, &item, addr, sizeof(T)); })
+		ACCESS_MEMORY_SAFE({
+			svcWriteDebugProcessMemory(
+				applicationDebug, &item, addr, sizeof(T));
+		})
 #endif
 #ifdef YUZU
 		yuzu_rom_writebytes(yuzuInstance, addr, &item, sizeof(T));
 #endif
 	}
 
-	template <typename T> std::string memoryToString(std::vector<uint8_t>& bytes) {
+	template <typename T>
+	std::string memoryToString(std::vector<uint8_t>& bytes) {
 		return std::to_string(*(T*)bytes.data());
 	}
 
-	void pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, TasValueToRecord typeTospoof, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex);
+	void pauseApp(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer,
+		TasValueToRecord typeTospoof, uint32_t frame, uint16_t savestateHookNum,
+		uint32_t branchIndex, uint8_t playerIndex);
 
 	void waitForVsync();
 
@@ -207,7 +224,10 @@ private:
 	}
 
 	// This assumes that the app is paused
-	void runSingleFrame(uint8_t linkedWithFrameAdvance, uint8_t includeFramebuffer, TasValueToRecord typeTospoof, uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex);
+	void runSingleFrame(uint8_t linkedWithFrameAdvance,
+		uint8_t includeFramebuffer, TasValueToRecord typeTospoof,
+		uint32_t frame, uint16_t savestateHookNum, uint32_t branchIndex,
+		uint8_t playerIndex);
 
 	void clearEveryController();
 
@@ -263,7 +283,8 @@ private:
 	void setAll() { }
 
 	uint8_t finalTasShouldRun;
-	void runFinalTas(std::vector<std::string> scriptPaths, std::string extraDataPath);
+	void runFinalTas(
+		std::vector<std::string> scriptPaths, std::string extraDataPath);
 
 	uint8_t checkSleep();
 	uint8_t checkAwaken();
