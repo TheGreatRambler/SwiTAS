@@ -26,7 +26,7 @@ CFLAGS := -std=c11
 CXXFLAGS := -std=gnu++17
 
 # C/C++ flags
-CPPFLAGS := -I./include -I./source/third_party/lua-5.3.5 -I./source/third_party
+CPPFLAGS := -I./include -I./source/third_party/lua-5.3.5 -I./source/third_party/fbg
 CPPFLAGS += -Wall -Wno-maybe-uninitialized -D__BSD_VISIBLE -DSERVER_IMP -DYUZU -DWITHOUT_JPEG
 
 ifeq ($(BUILD),release)

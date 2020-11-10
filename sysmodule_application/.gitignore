@@ -18,3 +18,4 @@ release
 *.zip
 upload.sh
 saltynx_plugin/build
+exefs.nsp
