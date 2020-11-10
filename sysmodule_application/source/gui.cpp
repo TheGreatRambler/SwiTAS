@@ -71,9 +71,11 @@ Gui::Gui(ViDisplay* disp) {
 
 		// PIXEL_FORMAT_RGBA_8888  defined in LibNX (based on Android)
 		// Not PIXEL_FORMAT_RGBA_8888 in source, but I don't care
-		// Upscaling and downscaling will happen so that the Layer Size and the FB size match
+		// Upscaling and downscaling will happen so that the Layer Size and the
+		// FB size match
 		LOGD << "Create framebuffer from layer";
-		rc = framebufferCreate(&framebuf, &window, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT, PIXEL_FORMAT_RGBA_4444, 1);
+		rc = framebufferCreate(&framebuf, &window, FRAMEBUFFER_WIDTH,
+			FRAMEBUFFER_HEIGHT, PIXEL_FORMAT_RGBA_4444, 1);
 		if(R_FAILED(rc)) {
 			nwindowClose(&window);
 			fatalThrow(rc);
@@ -92,7 +94,8 @@ Gui::Gui(ViDisplay* disp) {
 
 		LOGD << "Get offset of standard font";
 		u8* fontBuffer = (uint8_t*)stdFontData.address;
-		stbtt_InitFont(&stdNintendoFont, fontBuffer, stbtt_GetFontOffsetForIndex(fontBuffer, 0));
+		stbtt_InitFont(&stdNintendoFont, fontBuffer,
+			stbtt_GetFontOffsetForIndex(fontBuffer, 0));
 
 		// Nintendo's extended font containing a bunch of icons
 		LOGD << "Get extended font";
@@ -105,7 +108,8 @@ Gui::Gui(ViDisplay* disp) {
 
 		LOGD << "Get offset of extended font";
 		fontBuffer = (uint8_t*)extFontData.address;
-		stbtt_InitFont(&extNintendoFont, fontBuffer, stbtt_GetFontOffsetForIndex(fontBuffer, 0));
+		stbtt_InitFont(&extNintendoFont, fontBuffer,
+			stbtt_GetFontOffsetForIndex(fontBuffer, 0));
 
 		LOGD << "Allocate saved JPEG framebuffer";
 		savedJpegFramebuffer = (uint8_t*)malloc(JPEG_BUF_SIZE);
@@ -120,7 +124,7 @@ Gui::Gui(ViDisplay* disp) {
 		chosenFontPath = HELPERS::exec("fc-match --format=%{file} courier");
 #endif
 #ifdef __APPLE__
-		chosenFontPath = "/System/Library/Fonts/";
+		chosenFontPath = "/System/Library/Fonts/Courier New Bold.ttf";
 #endif
 		stbtt_fontinfo font;
 
@@ -139,7 +143,8 @@ Gui::Gui(ViDisplay* disp) {
 #endif
 
 		LOGD << "Set up fbg";
-		fbg = fbg_customSetup(FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT, 4, false, false, (void*)this, &Gui::framebufferDraw, NULL, NULL, NULL);
+		fbg = fbg_customSetup(FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT, 4, false,
+			false, (void*)this, &Gui::framebufferDraw, NULL, NULL, NULL);
 		if(!fbg) {
 			// return NULL;
 		}
@@ -155,17 +160,23 @@ Gui::Gui(ViDisplay* disp) {
 #endif
 
 #ifdef YUZU
-		controllerOverlayDirectory = HELPERS::getExecutableDir() + "/controllerOverlay";
+		controllerOverlayDirectory
+			= HELPERS::getExecutableDir() + "/controllerOverlay";
 #endif
 
 		// Set every button to its image
 		for(auto const& imageName : btnOverlayImageNames) {
-			controllerImages[imageName.first] = fbg_loadPNG(fbg, (controllerOverlayDirectory + "/" + imageName.second).c_str());
+			controllerImages[imageName.first] = fbg_loadPNG(fbg,
+				(controllerOverlayDirectory + "/" + imageName.second).c_str());
 		}
 
-		blankControllerImage = fbg_loadPNG(fbg, (controllerOverlayDirectory + "/" + blankControllerImageName).c_str());
-		leftStickImage       = fbg_loadPNG(fbg, (controllerOverlayDirectory + "/" + leftStickImageName).c_str());
-		rightStickImage      = fbg_loadPNG(fbg, (controllerOverlayDirectory + "/" + rightStickImageName).c_str());
+		blankControllerImage = fbg_loadPNG(
+			fbg, (controllerOverlayDirectory + "/" + blankControllerImageName)
+					 .c_str());
+		leftStickImage  = fbg_loadPNG(fbg,
+            (controllerOverlayDirectory + "/" + leftStickImageName).c_str());
+		rightStickImage = fbg_loadPNG(fbg,
+			(controllerOverlayDirectory + "/" + rightStickImageName).c_str());
 	}
 
 	void Gui::startFrame() {
@@ -220,7 +231,8 @@ Gui::Gui(ViDisplay* disp) {
 #endif
 
 #ifdef YUZU
-				yuzu_gui_drawpixel(yuzuInstance, x, y, color.r, color.g, color.b, color.a);
+				yuzu_gui_drawpixel(
+					yuzuInstance, x, y, color.r, color.g, color.b, color.a);
 #endif
 			}
 		}
@@ -242,7 +254,8 @@ Gui::Gui(ViDisplay* disp) {
 			currentIndex++;
 
 			stbtt_fontinfo* currentFont = fontForGlyph(currentCharacter);
-			float currentFontSize       = stbtt_ScaleForPixelHeight(currentFont, size);
+			float currentFontSize
+				= stbtt_ScaleForPixelHeight(currentFont, size);
 
 			if(currentCharacter == '\n') {
 				currentX = x;
@@ -252,7 +265,9 @@ Gui::Gui(ViDisplay* disp) {
 			}
 
 			int bounds[4] = { 0 };
-			stbtt_GetCodepointBitmapBoxSubpixel(currentFont, currentCharacter, currentFontSize, currentFontSize, 0, 0, &bounds[0], &bounds[1], &bounds[2], &bounds[3]);
+			stbtt_GetCodepointBitmapBoxSubpixel(currentFont, currentCharacter,
+				currentFontSize, currentFontSize, 0, 0, &bounds[0], &bounds[1],
+				&bounds[2], &bounds[3]);
 
 			int32_t x = 0, y = 0;
 			stbtt_GetCodepointHMetrics(currentFont, currentCharacter, &x, &y);
@@ -264,7 +279,8 @@ Gui::Gui(ViDisplay* disp) {
 				if(fontCache.count(currentCharacter)) {
 					glyphBmp = fontCache[currentCharacter];
 				} else {
-					glyphBmp = stbtt_GetCodepointBitmap(currentFont, size, size, currentCharacter, &width, &height, nullptr, nullptr);
+					glyphBmp = stbtt_GetCodepointBitmap(currentFont, size, size,
+						currentCharacter, &width, &height, nullptr, nullptr);
 					// If glyph does not exist in the font, pass over this char
 					if(glyphBmp == nullptr)
 						continue;
@@ -282,9 +298,12 @@ Gui::Gui(ViDisplay* disp) {
 						tmpColor.b = currentColor.b;
 						tmpColor.a = currentColor.a;
 
-						tmpColor.a = (glyphBmp[width * bmpY + bmpX] >> 4) * (float(tmpColor.a) / 0xF);
+						tmpColor.a = (glyphBmp[width * bmpY + bmpX] >> 4)
+									 * (float(tmpColor.a) / 0xF);
 
-						fbg_pixela(fbg, currentX + bounds[0] + bmpX, currentY + bounds[1] + bmpY, tmpColor.r, tmpColor.g, tmpColor.b, tmpColor.a);
+						fbg_pixela(fbg, currentX + bounds[0] + bmpX,
+							currentY + bounds[1] + bmpY, tmpColor.r, tmpColor.g,
+							tmpColor.b, tmpColor.a);
 					}
 				}
 
@@ -297,33 +316,42 @@ Gui::Gui(ViDisplay* disp) {
 		}
 	}
 
-	void Gui::drawControllerOverlay(std::shared_ptr<ControllerData> state, float scale, uint32_t x, uint32_t y) {
+	void Gui::drawControllerOverlay(std::shared_ptr<ControllerData> state,
+		float scale, uint32_t x, uint32_t y) {
 		fbg_imageScale(fbg, blankControllerImage, x, y, scale, scale);
 
 		for(auto const& button : btnToHidKeys) {
 			if(GET_BIT(state->buttons, (uint8_t)button.first)) {
-				fbg_imageScale(fbg, controllerImages[button.first], x, y, scale, scale);
+				fbg_imageScale(
+					fbg, controllerImages[button.first], x, y, scale, scale);
 			}
 		}
 
 		int32_t deltaXLeft = (state->LS_X / joystickRangeConstant) * scale;
 		int32_t deltaYLeft = (state->LS_Y / joystickRangeConstant) * scale;
-		fbg_imageScale(fbg, leftStickImage, x + deltaXLeft, y + deltaYLeft, scale, scale);
+		fbg_imageScale(
+			fbg, leftStickImage, x + deltaXLeft, y + deltaYLeft, scale, scale);
 
 		int32_t deltaXRight = (state->RS_X / joystickRangeConstant) * scale;
 		int32_t deltaYRight = (state->RS_Y / joystickRangeConstant) * scale;
-		fbg_imageScale(fbg, rightStickImage, x + deltaXRight, y + deltaYRight, scale, scale);
+		fbg_imageScale(fbg, rightStickImage, x + deltaXRight, y + deltaYRight,
+			scale, scale);
 	}
 
-	void Gui::drawControllerOverlay(uint8_t playerIndex, std::shared_ptr<ControllerData> state) {
-		drawControllerOverlay(state, 1.0f, playerIndex * blankControllerImage->width, FRAMEBUFFER_HEIGHT - blankControllerImage->height);
+	void Gui::drawControllerOverlay(
+		uint8_t playerIndex, std::shared_ptr<ControllerData> state) {
+		drawControllerOverlay(state, 1.0f,
+			playerIndex * blankControllerImage->width,
+			FRAMEBUFFER_HEIGHT - blankControllerImage->height);
 	}
 
 	void Gui::takeScreenshot(std::string path) {
 		uint8_t succeeded;
 		uint64_t outSize;
 #ifdef __SWITCH__
-		rc        = capsscCaptureJpegScreenShot(&outSize, savedJpegFramebuffer, JPEG_BUF_SIZE, ViLayerStack::ViLayerStack_ApplicationForDebug, 100000000);
+		rc        = capsscCaptureJpegScreenShot(&outSize, savedJpegFramebuffer,
+            JPEG_BUF_SIZE, ViLayerStack::ViLayerStack_ApplicationForDebug,
+            100000000);
 		succeeded = R_SUCCEEDED(rc);
 
 		if(succeeded) {
@@ -333,7 +361,8 @@ Gui::Gui(ViDisplay* disp) {
 		}
 #endif
 #ifdef YUZU
-		uint8_t* jpeg = yuzu_gui_savescreenshotmemory(yuzuInstance, &outSize, "JPEG");
+		uint8_t* jpeg
+			= yuzu_gui_savescreenshotmemory(yuzuInstance, &outSize, "JPEG");
 
 		FILE* jpegFile = fopen(path.c_str(), "wb+");
 		fwrite(jpeg, outSize, 1, jpegFile);
