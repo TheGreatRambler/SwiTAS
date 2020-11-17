@@ -187,7 +187,7 @@ int main(int argc, char* argv[]) {
 #ifdef YUZU
 MainLoop* mainLoop;
 
-DLL_EXPORT void startPlugin() {
+DLL_EXPORT void start() {
 	std::string logPath = HELPERS::getExecutableDir() + "/SwiTAS_log.txt";
 
 	remove(logPath.c_str());
@@ -201,11 +201,11 @@ DLL_EXPORT void startPlugin() {
 }
 
 // Possibly pass delta
-DLL_EXPORT void onMainLoop() {
+DLL_EXPORT void on_main_loop() {
 	mainLoop->mainLoopHandler();
 }
 
-DLL_EXPORT void onClose() {
+DLL_EXPORT void on_close() {
 	delete mainLoop;
 }
 
