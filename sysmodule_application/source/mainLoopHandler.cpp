@@ -286,6 +286,13 @@ void MainLoop::mainLoopHandler() {
 	svcSleepThread((s64)1000000 * 5);
 #endif
 
+#ifdef YUZU
+	// If not paused, wait a frame in order to not block Yuzu
+	if(!isPaused) {
+		yuzu_emu_frameadvance(yuzuInstance);
+	}
+#endif
+
 	// I dunno how often to update this honestly
 	updateGui();
 }
@@ -747,12 +754,18 @@ void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance,
 	uint8_t includeFramebuffer, TasValueToRecord typeToRecord, uint32_t frame,
 	uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex) {
 	if(isPaused) {
+		yuzu_gui_popup(yuzuInstance, "TAS Tool", "Frame advance started",
+			PluginDefinitions::PopupType::Information);
+
 		unpauseApp();
 
 		waitForVsync();
 
 		pauseApp(linkedWithFrameAdvance, includeFramebuffer, typeToRecord,
 			frame, savestateHookNum, branchIndex, playerIndex);
+
+		yuzu_gui_popup(yuzuInstance, "TAS Tool", "Frame advance finished",
+			PluginDefinitions::PopupType::Information);
 	}
 }
 

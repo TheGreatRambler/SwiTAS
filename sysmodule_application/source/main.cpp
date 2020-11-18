@@ -194,7 +194,7 @@ DLL_EXPORT void start() {
 	plog::init(plog::debug, logPath.c_str());
 	LOGD << "Started logging";
 
-	yuzu_gui_popup(yuzuInstance, "Plugin open", "TAS tools started",
+	yuzu_gui_popup(yuzuInstance, "TAS Tool", "TAS tools started",
 		PluginDefinitions::PopupType::Information);
 
 	mainLoop = new MainLoop();
