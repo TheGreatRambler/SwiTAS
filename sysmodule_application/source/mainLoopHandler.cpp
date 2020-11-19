@@ -754,8 +754,10 @@ void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance,
 	uint8_t includeFramebuffer, TasValueToRecord typeToRecord, uint32_t frame,
 	uint16_t savestateHookNum, uint32_t branchIndex, uint8_t playerIndex) {
 	if(isPaused) {
+#ifdef YUZU
 		yuzu_gui_popup(yuzuInstance, "TAS Tool", "Frame advance started",
 			PluginDefinitions::PopupType::Information);
+#endif
 
 		unpauseApp();
 
@@ -764,8 +766,10 @@ void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance,
 		pauseApp(linkedWithFrameAdvance, includeFramebuffer, typeToRecord,
 			frame, savestateHookNum, branchIndex, playerIndex);
 
+#ifdef YUZU
 		yuzu_gui_popup(yuzuInstance, "TAS Tool", "Frame advance finished",
 			PluginDefinitions::PopupType::Information);
+#endif
 	}
 }
 
