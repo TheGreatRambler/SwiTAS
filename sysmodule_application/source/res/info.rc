@@ -11,7 +11,7 @@ BEGIN
 			VALUE "FileVersion", "3.0.0"
 			VALUE "InternalName", "switas"
 			VALUE "LegalCopyright", "TheGreatRambler"
-			VALUE "OriginalFilename", "libswitas.dll"
+			VALUE "OriginalFilename", "plugin_libswitas.dll"
 			VALUE "ProductName", "SwiTAS"
 			VALUE "ProductVersion", "3.0.0"
 		END

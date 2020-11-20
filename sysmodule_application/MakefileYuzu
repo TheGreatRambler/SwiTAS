@@ -1,9 +1,9 @@
 UNAME := $(shell uname -o)
 
 ifeq ($(UNAME),Msys)
-	TARGET_EXEC ?= libswitas.dll
+	TARGET_EXEC ?= plugin_libswitas.dll
 else
-	TARGET_EXEC ?= libswitas.so
+	TARGET_EXEC ?= plugin_libswitas.so
 endif
 
 BUILD_DIR ?= ./build_yuzu
