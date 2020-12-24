@@ -82,14 +82,6 @@ nn::hid::MouseState mouseStateBacklog[nn::hid::MouseStateCountMax] = { 0 };
 SaltyNXCommTypes::PerformanceType performanceMode
 	= SaltyNXCommTypes::PerformanceType::Docked;
 
-// ONLY values we will TAS
-/*
-	nn::util::Float3 acceleration;
-	nn::util::Float3 angularVelocity;
-	nn::util::Float3 angle;
-*/
-// All these values are floats
-
 void writeToLog(const char* str) {
 	uint16_t stringLength = strlen(str);
 	if(logStringIndex + stringLength < sizeof(logString)) {
@@ -215,32 +207,23 @@ void fixMouseState(nn::hid::MouseState* dest, nn::hid::MouseState* orig) {
 	dest->attributes |= (int32_t)nn::hid::MouseAttribute::IsConnected;
 }
 
-// Motion spoofing
-
-/* nn::hid::GetSixAxisSensorHandle(nn::hid::ConsoleSixAxisSensorHandle*) */
 void GetSixAxisSensorHandle1(nn::hid::ConsoleSixAxisSensorHandle* handle) {
 	_ZN2nn3hid22GetSixAxisSensorHandleEPNS0_26ConsoleSixAxisSensorHandleE(
 		handle);
 }
 
-/* nn::hid::GetSixAxisSensorHandle(nn::hid::SixAxisSensorHandle*,
- * nn::hid::BasicXpadId) */
 void GetSixAxisSensorHandle2(
 	nn::hid::SixAxisSensorHandle* handle, nn::hid::BasicXpadId param_2) {
 	_ZN2nn3hid22GetSixAxisSensorHandleEPNS0_19SixAxisSensorHandleENS0_11BasicXpadIdE(
 		handle, param_2);
 }
 
-/* nn::hid::GetSixAxisSensorHandles(nn::hid::SixAxisSensorHandle*,
-   nn::hid::SixAxisSensorHandle*, nn::hid::JoyXpadId) */
 void GetSixAxisSensorHandles1(nn::hid::SixAxisSensorHandle* handle1,
 	nn::hid::SixAxisSensorHandle* handle2, nn::hid::JoyXpadId param_3) {
 	_ZN2nn3hid23GetSixAxisSensorHandlesEPNS0_19SixAxisSensorHandleES2_NS0_9JoyXpadIdE(
 		handle1, handle2, param_3);
 }
 
-/* nn::hid::GetSixAxisSensorHandles(nn::hid::SixAxisSensorHandle*, int, unsigned
-   int const&, nn::util::BitFlagSet<32, nn::hid::NpadStyleTag>) */
 int32_t GetSixAxisSensorHandles2(nn::hid::SixAxisSensorHandle* handles,
 	int32_t numOfHandles, const nn::hid::NpadIdType& id,
 	int32_t npadStyleBitflags) {
@@ -273,9 +256,6 @@ int32_t GetSixAxisSensorHandles2(nn::hid::SixAxisSensorHandle* handles,
 		handles, numOfHandles, id, npadStyleBitflags);
 }
 
-/* nn::hid::GetSixAxisSensorState(nn::hid::SixAxisSensorState*,
- * nn::hid::SixAxisSensorHandle const&)
- */
 void GetSixAxisSensorState(nn::hid::SixAxisSensorState* state,
 	const nn::hid::SixAxisSensorHandle& handle) {
 	if(recordInputs) {
@@ -370,17 +350,12 @@ void GetSixAxisSensorState(nn::hid::SixAxisSensorState* state,
 		state, handle);
 }
 
-/* nn::hid::GetSixAxisSensorStates(nn::hid::SixAxisSensorState*, int,
- * nn::hid::BasicXpadId const&)
- */
 int32_t GetSixAxisSensorStates1(nn::hid::SixAxisSensorState* outStates,
 	int32_t count, const nn::hid::BasicXpadId& handle) {
 	return _ZN2nn3hid22GetSixAxisSensorStatesEPNS0_18SixAxisSensorStateEiRKNS0_11BasicXpadIdE(
 		outStates, count, handle);
 }
 
-/* nn::hid::GetSixAxisSensorStates(nn::hid::SixAxisSensorState*, int,
-   nn::hid::SixAxisSensorHandle const&) */
 int32_t GetSixAxisSensorStates2(nn::hid::SixAxisSensorState* outStates,
 	int32_t count, const nn::hid::SixAxisSensorHandle& handle) {
 	if(recordInputs) {
@@ -417,15 +392,12 @@ int32_t GetSixAxisSensorStates2(nn::hid::SixAxisSensorState* outStates,
 		outStates, count, handle);
 }
 
-/* nn::hid::IsSixAxisSensorAtRest(nn::hid::SixAxisSensorHandle const&) */
 int32_t IsSixAxisSensorAtRest(const nn::hid::SixAxisSensorHandle& param_1) {
 	return false;
 	// return
 	// _ZN2nn3hid21IsSixAxisSensorAtRestERKNS0_19SixAxisSensorHandleE(param_1);
 }
 
-// Touch screen spoofing
-// void nn::hid::GetTouchScreenState (TouchScreenState< N > *pOutValue)
 void GetTouchScreenState1Touch(nn::hid::TouchScreenState1Touch* state) {
 	if(recordInputs) {
 		_ZN2nn3hid19GetTouchScreenStateILm1EEEvPNS0_16TouchScreenStateIXT_EEE(
@@ -442,38 +414,11 @@ void GetTouchScreenState1Touch(nn::hid::TouchScreenState1Touch* state) {
 		} else {
 			moveTouchBacklog(state, 1);
 		}
-
 		return;
 	}
 
 	_ZN2nn3hid19GetTouchScreenStateILm1EEEvPNS0_16TouchScreenStateIXT_EEE(
 		state);
-	/*
-		if(canWriteToLog()) {
-			if(state->count == 1) {
-				nn::hid::TouchState& touchState = state->touches[0];
-
-				// clang-format off
-					std::string diagInfo =
-						"count: " + std::to_string(state->count) + "\n" +
-						"samplingNumber: " +
-	   std::to_string(state->samplingNumber) + "\n" + "attributes: " +
-	   std::to_string(touchState.attributes) + "\n" + "deltaTimeNanoSeconds: " +
-	   std::to_string(touchState.deltaTimeNanoSeconds) + "\n" + "diameterX: " +
-	   std::to_string(touchState.diameterX) + "\n" + "diameterY: " +
-	   std::to_string(touchState.diameterY) + "\n" + "touchIndex: " +
-	   std::to_string(touchState.touchIndex) + "\n" + "rotationAngle: " +
-	   std::to_string(touchState.rotationAngle) + "\n" + "x: " +
-	   std::to_string(touchState.x) + "\n" + "y: " +
-	   std::to_string(touchState.y) + "\n";
-				// clang-format on
-
-				writeToLog(diagInfo.c_str());
-			} else {
-				writeToLog("Not a suitable amount of touches");
-			}
-		}
-	*/
 }
 
 void GetKeyboardState(nn::hid::KeyboardState* state) {
@@ -488,21 +433,17 @@ void GetKeyboardState(nn::hid::KeyboardState* state) {
 			moveKeyboardBacklog(&keyboardState);
 			memcpy(state, &keyboardStateBacklog,
 				sizeof(nn::hid::SixAxisSensorState));
-
-			writeToLog("Recieved six axis");
 		} else {
 			moveKeyboardBacklog(state);
 		}
+		return;
 	}
 
 	_ZN2nn3hid16GetKeyboardStateEPNS0_13KeyboardStateE(state);
 }
 
-/* nn::hid::GetSixAxisSensorStates(nn::hid::SixAxisSensorState*, int,
-   nn::hid::SixAxisSensorHandle const&) */
 int32_t GetKeyboardStates(nn::hid::KeyboardState* outStates, int32_t count) {
 	if(recordInputs) {
-		// Get state as normal to advance the backlog
 		nn::hid::KeyboardState dummyState;
 		GetKeyboardState(&dummyState);
 
@@ -514,6 +455,40 @@ int32_t GetKeyboardStates(nn::hid::KeyboardState* outStates, int32_t count) {
 
 	return _ZN2nn3hid17GetKeyboardStatesEPNS0_13KeyboardStateEi(
 		outStates, count);
+}
+
+void GetMouseState(nn::hid::MouseState* state) {
+	if(recordInputs) {
+		_ZN2nn3hid13GetMouseStateEPNS0_10MouseStateE(state);
+
+		if(recordScreenOrKeyboard
+				== SaltyNXCommTypes::ThingToRecord::Neither_Touch_Nor_Key
+			|| recordScreenOrKeyboard
+				   == SaltyNXCommTypes::ThingToRecord::Touch) {
+			fixMouseState(&mouseState, state);
+			moveMouseBacklog(&mouseState);
+			memcpy(state, &mouseStateBacklog, sizeof(nn::hid::MouseState));
+		} else {
+			moveMouseBacklog(state);
+		}
+		return;
+	}
+
+	_ZN2nn3hid13GetMouseStateEPNS0_10MouseStateE(state);
+}
+
+int32_t GetMouseStates(nn::hid::MouseState* outStates, int32_t count) {
+	if(recordInputs) {
+		nn::hid::MouseState dummyState;
+		GetMouseState(&dummyState);
+
+		int32_t backlogSize = max(count, mouseBacklogSize);
+		memcpy(outStates, &mouseStateBacklog,
+			sizeof(nn::hid::MouseState) * backlogSize);
+		return backlogSize;
+	}
+
+	return _ZN2nn3hid14GetMouseStatesEPNS0_10MouseStateEi(outStates, count);
 }
 
 uintptr_t ptr_nvnDeviceGetProcAddress;
@@ -623,13 +598,15 @@ int main(int argc, char* argv[]) {
 
 	SaltySDCore_fclose(offsets);
 
-	FILE* f;
-	if(f = SaltySDCore_fopen("/SaltySD/flags/handheld.flag", "r")) {
+	FILE* performanceFile;
+	if(performanceFile
+		= SaltySDCore_fopen("/SaltySD/flags/handheld.flag", "r")) {
 		performanceMode = SaltyNXCommTypes::PerformanceType::Handheld;
-		SaltySDCore_fclose(f);
-	} else if(f = SaltySDCore_fopen("/SaltySD/flags/docked.flag", "r")) {
+		SaltySDCore_fclose(performanceFile);
+	} else if(performanceFile
+			  = SaltySDCore_fopen("/SaltySD/flags/docked.flag", "r")) {
 		performanceMode = SaltyNXCommTypes::PerformanceType::Docked;
-		SaltySDCore_fclose(f);
+		SaltySDCore_fclose(performanceFile);
 	} else {
 		// Default to docked
 		performanceMode = SaltyNXCommTypes::PerformanceType::Docked;
@@ -663,6 +640,18 @@ int main(int argc, char* argv[]) {
 	SaltySDCore_ReplaceImport(
 		"_ZN2nn3hid19GetTouchScreenStateILm1EEEvPNS0_16TouchScreenStateIXT_EEE",
 		(void*) &GetTouchScreenState1Touch);
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid16GetKeyboardStateEPNS0_13KeyboardStateE",
+		(void*) &GetKeyboardState);
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid17GetKeyboardStatesEPNS0_13KeyboardStateEi",
+		(void*) &GetKeyboardStates);
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid13GetMouseStateEPNS0_10MouseStateE",
+		(void*) &GetMouseState);
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid14GetMouseStatesEPNS0_10MouseStateEi",
+		(void*) &GetMouseStates);
 	// clang-format on
 
 	addr_nvnGetProcAddress = (uint64_t)&nvnGetProcAddress;

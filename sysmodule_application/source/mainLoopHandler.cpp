@@ -1357,7 +1357,9 @@ void MainLoop::setSixAxisSpoof() {
 void MainLoop::spoofAllKeyboardTouch() {
 #ifdef __SWITCH__
 	if(saltynxRecordScreenOrKeyboard != 0) {
-		setMemoryType<uint8_t>(saltynxRecordScreenOrKeyboard, 3);
+		setMemoryType<SaltyNXCommTypes::ThingToRecord>(
+			saltynxRecordScreenOrKeyboard,
+			SaltyNXCommTypes::ThingToRecord::Neither_Touch_Nor_Key);
 	}
 #endif
 
@@ -1372,7 +1374,9 @@ void MainLoop::spoofAllKeyboardTouch() {
 void MainLoop::recordAllKeyboardTouch() {
 #ifdef __SWITCH__
 	if(saltynxRecordScreenOrKeyboard != 0) {
-		setMemoryType<uint8_t>(saltynxRecordScreenOrKeyboard, 0);
+		setMemoryType<SaltyNXCommTypes::ThingToRecord>(
+			saltynxRecordScreenOrKeyboard,
+			SaltyNXCommTypes::ThingToRecord::Both_Touch_And_Key);
 	}
 #endif
 
@@ -1387,7 +1391,9 @@ void MainLoop::recordAllKeyboardTouch() {
 void MainLoop::setKeyboardRecord() {
 #ifdef __SWITCH__
 	if(saltynxRecordScreenOrKeyboard != 0) {
-		setMemoryType<uint8_t>(saltynxRecordScreenOrKeyboard, 2);
+		setMemoryType<SaltyNXCommTypes::ThingToRecord>(
+			saltynxRecordScreenOrKeyboard,
+			SaltyNXCommTypes::ThingToRecord::Key);
 	}
 #endif
 
@@ -1400,7 +1406,9 @@ void MainLoop::setKeyboardRecord() {
 void MainLoop::setTouchRecord() {
 #ifdef __SWITCH__
 	if(saltynxRecordScreenOrKeyboard != 0) {
-		setMemoryType<uint8_t>(saltynxRecordScreenOrKeyboard, 1);
+		setMemoryType<SaltyNXCommTypes::ThingToRecord>(
+			saltynxRecordScreenOrKeyboard,
+			SaltyNXCommTypes::ThingToRecord::Touch);
 	}
 #endif
 
