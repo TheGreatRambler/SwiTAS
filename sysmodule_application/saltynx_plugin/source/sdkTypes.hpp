@@ -49,7 +49,8 @@ namespace nn {
 			float z;
 		};
 
-		template <typename T> inline constexpr T AlignUp(T value, uint64_t align) {
+		template <typename T>
+		inline constexpr T AlignUp(T value, uint64_t align) {
 			const auto inv_mask = align - 1;
 			return static_cast<T>((value + inv_mask) & ~inv_mask);
 		};
@@ -392,5 +393,19 @@ namespace nn {
 			int32_t scrollVelocityY;
 			int32_t buttons;
 		};
+	};
+};
+
+namespace SaltyNXCommTypes {
+	enum PerformanceType : uint8_t {
+		Handheld,
+		Docked,
+	};
+
+	enum ThingToRecord : uint8_t {
+		Both_Touch_And_Key,
+		Touch,
+		Key,
+		Neither_Touch_Nor_Key,
 	};
 };

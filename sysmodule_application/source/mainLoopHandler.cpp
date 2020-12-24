@@ -1105,6 +1105,25 @@ void MainLoop::matchFirstControllerToTASController(uint8_t player) {
 			data.DIRECTION_ZY_LEFT = val.orientation[2].y;
 			data.DIRECTION_ZZ_LEFT = val.orientation[2].z;
 
+			data.ACCEL_X_RIGHT      = val.accelerometer.x;
+			data.ACCEL_Y_RIGHT      = val.accelerometer.y;
+			data.ACCEL_Z_RIGHT      = val.accelerometer.z;
+			data.GYRO_X_RIGHT       = val.gyroscope.x;
+			data.GYRO_Y_RIGHT       = val.gyroscope.y;
+			data.GYRO_Z_RIGHT       = val.gyroscope.z;
+			data.ANGLE_X_RIGHT      = val.unk.x;
+			data.ANGLE_Y_RIGHT      = val.unk.y;
+			data.ANGLE_Z_RIGHT      = val.unk.z;
+			data.DIRECTION_XX_RIGHT = val.orientation[0].x;
+			data.DIRECTION_XY_RIGHT = val.orientation[0].y;
+			data.DIRECTION_XZ_RIGHT = val.orientation[0].z;
+			data.DIRECTION_YX_RIGHT = val.orientation[1].x;
+			data.DIRECTION_YY_RIGHT = val.orientation[1].y;
+			data.DIRECTION_YZ_RIGHT = val.orientation[1].z;
+			data.DIRECTION_ZX_RIGHT = val.orientation[2].x;
+			data.DIRECTION_ZY_RIGHT = val.orientation[2].y;
+			data.DIRECTION_ZZ_RIGHT = val.orientation[2].z;
+
 			setSixAxisState(player, &data);
 		}
 	}
