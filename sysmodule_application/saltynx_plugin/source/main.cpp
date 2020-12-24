@@ -327,13 +327,14 @@ void GetSixAxisSensorState(nn::hid::SixAxisSensorState* state,
 				if((controllerToRecord != -2) && controllerToRecord == -1
 					|| controllerToRecord != i) {
 					fixMotionState(&sixAxisStateLeftJoycon[i], state);
+					moveLeftBacklog(i, &sixAxisStateLeftJoycon[i]);
 					memcpy(state, &sixAxisStateLeftJoycon[i],
 						sizeof(nn::hid::SixAxisSensorState));
 
 					writeToLog("Recieved six axis");
+				} else {
+					moveLeftBacklog(i, state);
 				}
-
-				moveLeftBacklog(i, state);
 
 				wasJustLeft          = true;
 				wasJustTASController = true;
@@ -349,11 +350,12 @@ void GetSixAxisSensorState(nn::hid::SixAxisSensorState* state,
 				if((controllerToRecord != -2) && controllerToRecord == -1
 					|| controllerToRecord != i) {
 					fixMotionState(&sixAxisStateRightJoycon[i], state);
+					moveRightBacklog(i, &sixAxisStateRightJoycon[i]);
 					memcpy(state, &sixAxisStateRightJoycon[i],
 						sizeof(nn::hid::SixAxisSensorState));
+				} else {
+					moveRightBacklog(i, state);
 				}
-
-				moveRightBacklog(i, state);
 
 				wasJustLeft          = false;
 				wasJustTASController = true;
@@ -434,11 +436,12 @@ void GetTouchScreenState1Touch(nn::hid::TouchScreenState1Touch* state) {
 			|| recordScreenOrKeyboard == SaltyNXCommTypes::ThingToRecord::Key) {
 			// Fix state and send to game
 			fixTouchState(&touchscreenState, state, 1);
+			moveTouchBacklog(&touchscreenState, 1);
 			memcpy(state, &touchscreenState,
 				sizeof(nn::hid::TouchScreenState1Touch));
+		} else {
+			moveTouchBacklog(state, 1);
 		}
-
-		moveTouchBacklog(state, 1);
 
 		return;
 	}
@@ -475,18 +478,19 @@ void GetTouchScreenState1Touch(nn::hid::TouchScreenState1Touch* state) {
 
 void GetKeyboardState(nn::hid::KeyboardState* state) {
 	if(recordInputs) {
-		for(int32_t i = 0; i < 8; i++) {
-			_ZN2nn3hid16GetKeyboardStateEPNS0_13KeyboardStateE(state);
+		_ZN2nn3hid16GetKeyboardStateEPNS0_13KeyboardStateE(state);
 
-			if((controllerToRecord != -2) && controllerToRecord == -1
-				|| controllerToRecord != i) {
-				fixKeyboardState(&keyboardStateBacklog[i], state);
-				memcpy(state, &keyboardStateBacklog[i],
-					sizeof(nn::hid::SixAxisSensorState));
+		if(recordScreenOrKeyboard
+				== SaltyNXCommTypes::ThingToRecord::Neither_Touch_Nor_Key
+			|| recordScreenOrKeyboard
+				   == SaltyNXCommTypes::ThingToRecord::Touch) {
+			fixKeyboardState(&keyboardState, state);
+			moveKeyboardBacklog(&keyboardState);
+			memcpy(state, &keyboardStateBacklog,
+				sizeof(nn::hid::SixAxisSensorState));
 
-				writeToLog("Recieved six axis");
-			}
-
+			writeToLog("Recieved six axis");
+		} else {
 			moveKeyboardBacklog(state);
 		}
 	}
@@ -503,7 +507,7 @@ int32_t GetKeyboardStates(nn::hid::KeyboardState* outStates, int32_t count) {
 		GetKeyboardState(&dummyState);
 
 		int32_t backlogSize = max(count, keyboardBacklogSize);
-		memcpy(outStates, &keyboardStateBacklog[0],
+		memcpy(outStates, &keyboardStateBacklog,
 			sizeof(nn::hid::KeyboardState) * backlogSize);
 		return backlogSize;
 	}
