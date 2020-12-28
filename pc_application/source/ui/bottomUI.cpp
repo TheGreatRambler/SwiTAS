@@ -1,7 +1,10 @@
 #include "bottomUI.hpp"
 
-ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input, std::shared_ptr<ButtonData> data)
-	: wxFrame(parentFrame, wxID_ANY, "Motion and Touch Editor", wxDefaultPosition, wxSize(800, 400), wxDEFAULT_FRAME_STYLE | wxFRAME_FLOAT_ON_PARENT) {
+ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame,
+	DataProcessing* input, std::shared_ptr<ButtonData> data)
+	: wxFrame(parentFrame, wxID_ANY, "Motion and Touch Editor",
+		wxDefaultPosition, wxSize(800, 400),
+		wxDEFAULT_FRAME_STYLE | wxFRAME_FLOAT_ON_PARENT) {
 	inputInstance = input;
 	buttonData    = data;
 
@@ -10,32 +13,75 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 
 	mainSizer = new wxBoxSizer(wxHORIZONTAL);
 
-	motionLeftSizer          = new wxStaticBoxSizer(wxVERTICAL, this, "Left Joycon Motion");
-	accelLeftSizer           = new wxStaticBoxSizer(wxHORIZONTAL, motionLeftSizer->GetStaticBox(), "Acceleration");
-	angularVelocityLeftSizer = new wxStaticBoxSizer(wxHORIZONTAL, motionLeftSizer->GetStaticBox(), "Angular Velocity");
-	angleLeftSizer           = new wxStaticBoxSizer(wxHORIZONTAL, motionLeftSizer->GetStaticBox(), "Angle");
-	directionXLeftSizer      = new wxStaticBoxSizer(wxHORIZONTAL, motionLeftSizer->GetStaticBox(), "Acceleration");
-	directionYLeftSizer      = new wxStaticBoxSizer(wxHORIZONTAL, motionLeftSizer->GetStaticBox(), "Angular Velocity");
-	directionZLeftSizer      = new wxStaticBoxSizer(wxHORIZONTAL, motionLeftSizer->GetStaticBox(), "Angle");
+	motionLeftSizer
+		= new wxStaticBoxSizer(wxVERTICAL, this, "Left Joycon Motion");
+	accelLeftSizer = new wxStaticBoxSizer(
+		wxHORIZONTAL, motionLeftSizer->GetStaticBox(), "Acceleration");
+	angularVelocityLeftSizer = new wxStaticBoxSizer(
+		wxHORIZONTAL, motionLeftSizer->GetStaticBox(), "Angular Velocity");
+	angleLeftSizer = new wxStaticBoxSizer(
+		wxHORIZONTAL, motionLeftSizer->GetStaticBox(), "Angle");
+	directionXLeftSizer = new wxStaticBoxSizer(
+		wxHORIZONTAL, motionLeftSizer->GetStaticBox(), "Direction X");
+	directionYLeftSizer = new wxStaticBoxSizer(
+		wxHORIZONTAL, motionLeftSizer->GetStaticBox(), "Direction Y");
+	directionZLeftSizer = new wxStaticBoxSizer(
+		wxHORIZONTAL, motionLeftSizer->GetStaticBox(), "Direction Z");
 
-	accelXLeftCtrl           = new wxSpinCtrlDouble(accelLeftSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -7.0, 7.0, 0.0);
-	accelYLeftCtrl           = new wxSpinCtrlDouble(accelLeftSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -7.0, 7.0, 0.0);
-	accelZLeftCtrl           = new wxSpinCtrlDouble(accelLeftSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -7.0, 7.0, -1.0);
-	angularVelocityXLeftCtrl = new wxSpinCtrlDouble(angularVelocityLeftSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -5.0, 5.0, 0.0);
-	angularVelocityYLeftCtrl = new wxSpinCtrlDouble(angularVelocityLeftSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -5.0, 5.0, 0.0);
-	angularVelocityZLeftCtrl = new wxSpinCtrlDouble(angularVelocityLeftSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -5.0, 5.0, 0.0);
-	angleXLeftCtrl           = new wxSpinCtrlDouble(angleLeftSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -1.0, 1.0, 0.0);
-	angleYLeftCtrl           = new wxSpinCtrlDouble(angleLeftSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -1.0, 1.0, 0.0);
-	angleZLeftCtrl           = new wxSpinCtrlDouble(angleLeftSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -1.0, 1.0, 0.0);
-	directionXXLeftCtrl      = new wxSpinCtrlDouble(directionXLeftSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 1.0);
-	directionXYLeftCtrl      = new wxSpinCtrlDouble(directionXLeftSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 0.0);
-	directionXZLeftCtrl      = new wxSpinCtrlDouble(directionXLeftSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 0.0);
-	directionYXLeftCtrl      = new wxSpinCtrlDouble(directionYLeftSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 0.0);
-	directionYYLeftCtrl      = new wxSpinCtrlDouble(directionYLeftSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 1.0);
-	directionYZLeftCtrl      = new wxSpinCtrlDouble(directionYLeftSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 0.0);
-	directionZXLeftCtrl      = new wxSpinCtrlDouble(directionZLeftSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 0.0);
-	directionZYLeftCtrl      = new wxSpinCtrlDouble(directionZLeftSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 0.0);
-	directionZZLeftCtrl      = new wxSpinCtrlDouble(directionZLeftSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 1.0);
+	accelXLeftCtrl = new wxSpinCtrlDouble(accelLeftSizer->GetStaticBox(),
+		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+		wxSP_ARROW_KEYS, -7.0, 7.0, 0.0);
+	accelYLeftCtrl = new wxSpinCtrlDouble(accelLeftSizer->GetStaticBox(),
+		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+		wxSP_ARROW_KEYS, -7.0, 7.0, 0.0);
+	accelZLeftCtrl = new wxSpinCtrlDouble(accelLeftSizer->GetStaticBox(),
+		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+		wxSP_ARROW_KEYS, -7.0, 7.0, -1.0);
+	angularVelocityXLeftCtrl = new wxSpinCtrlDouble(
+		angularVelocityLeftSizer->GetStaticBox(), wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -5.0, 5.0, 0.0);
+	angularVelocityYLeftCtrl = new wxSpinCtrlDouble(
+		angularVelocityLeftSizer->GetStaticBox(), wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -5.0, 5.0, 0.0);
+	angularVelocityZLeftCtrl = new wxSpinCtrlDouble(
+		angularVelocityLeftSizer->GetStaticBox(), wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -5.0, 5.0, 0.0);
+	angleXLeftCtrl      = new wxSpinCtrlDouble(angleLeftSizer->GetStaticBox(),
+        wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+        wxSP_ARROW_KEYS, -1.0, 1.0, 0.0);
+	angleYLeftCtrl      = new wxSpinCtrlDouble(angleLeftSizer->GetStaticBox(),
+        wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+        wxSP_ARROW_KEYS, -1.0, 1.0, 0.0);
+	angleZLeftCtrl      = new wxSpinCtrlDouble(angleLeftSizer->GetStaticBox(),
+        wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+        wxSP_ARROW_KEYS, -1.0, 1.0, 0.0);
+	directionXXLeftCtrl = new wxSpinCtrlDouble(
+		directionXLeftSizer->GetStaticBox(), wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 1.0);
+	directionXYLeftCtrl = new wxSpinCtrlDouble(
+		directionXLeftSizer->GetStaticBox(), wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 0.0);
+	directionXZLeftCtrl = new wxSpinCtrlDouble(
+		directionXLeftSizer->GetStaticBox(), wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 0.0);
+	directionYXLeftCtrl = new wxSpinCtrlDouble(
+		directionYLeftSizer->GetStaticBox(), wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 0.0);
+	directionYYLeftCtrl = new wxSpinCtrlDouble(
+		directionYLeftSizer->GetStaticBox(), wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 1.0);
+	directionYZLeftCtrl = new wxSpinCtrlDouble(
+		directionYLeftSizer->GetStaticBox(), wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 0.0);
+	directionZXLeftCtrl = new wxSpinCtrlDouble(
+		directionZLeftSizer->GetStaticBox(), wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 0.0);
+	directionZYLeftCtrl = new wxSpinCtrlDouble(
+		directionZLeftSizer->GetStaticBox(), wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 0.0);
+	directionZZLeftCtrl = new wxSpinCtrlDouble(
+		directionZLeftSizer->GetStaticBox(), wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 1.0);
 
 	// Only those values representable as a float are counted
 	accelXLeftCtrl->SetDigits(FLT_DIG);
@@ -57,43 +103,73 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 	directionZYLeftCtrl->SetDigits(FLT_DIG);
 	directionZZLeftCtrl->SetDigits(FLT_DIG);
 
-	accelXLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	accelYLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	accelZLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	angularVelocityXLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	angularVelocityYLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	angularVelocityZLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	angleXLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	angleYLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	angleZLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	directionXXLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	directionXYLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	directionXZLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	directionYXLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	directionYYLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	directionYZLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	directionZXLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	directionZYLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	directionZZLeftCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	accelXLeftCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	accelYLeftCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	accelZLeftCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	angularVelocityXLeftCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	angularVelocityYLeftCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	angularVelocityZLeftCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	angleXLeftCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	angleYLeftCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	angleZLeftCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	directionXXLeftCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	directionXYLeftCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	directionXZLeftCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	directionYXLeftCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	directionYYLeftCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	directionYZLeftCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	directionZXLeftCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	directionZYLeftCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	directionZZLeftCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
 
 	accelXLeftCtrl->SetToolTip("Set acceleration X value for left joycon");
 	accelYLeftCtrl->SetToolTip("Set acceleration Y value for left joycon");
 	accelZLeftCtrl->SetToolTip("Set acceleration Z value for left joycon");
-	angularVelocityXLeftCtrl->SetToolTip("Set angular velocity X value for left joycon");
-	angularVelocityYLeftCtrl->SetToolTip("Set angular velocity Y value for left joycon");
-	angularVelocityZLeftCtrl->SetToolTip("Set angular velocity Z value for left joycon");
+	angularVelocityXLeftCtrl->SetToolTip(
+		"Set angular velocity X value for left joycon");
+	angularVelocityYLeftCtrl->SetToolTip(
+		"Set angular velocity Y value for left joycon");
+	angularVelocityZLeftCtrl->SetToolTip(
+		"Set angular velocity Z value for left joycon");
 	angleXLeftCtrl->SetToolTip("Set angle X value for left joycon");
 	angleYLeftCtrl->SetToolTip("Set angle Y value for left joycon");
 	angleZLeftCtrl->SetToolTip("Set angle Z value for left joycon");
-	directionXXLeftCtrl->SetToolTip("Set direction quaternion value XX for left joycon");
-	directionXYLeftCtrl->SetToolTip("Set direction quaternion value XY for left joycon");
-	directionXZLeftCtrl->SetToolTip("Set direction quaternion value XZ for left joycon");
-	directionYXLeftCtrl->SetToolTip("Set direction quaternion value YX for left joycon");
-	directionYYLeftCtrl->SetToolTip("Set direction quaternion value YY for left joycon");
-	directionYZLeftCtrl->SetToolTip("Set direction quaternion value YZ for left joycon");
-	directionZXLeftCtrl->SetToolTip("Set direction quaternion value ZX for left joycon");
-	directionZYLeftCtrl->SetToolTip("Set direction quaternion value ZY for left joycon");
-	directionZZLeftCtrl->SetToolTip("Set direction quaternion value ZZ for left joycon");
+	directionXXLeftCtrl->SetToolTip(
+		"Set direction quaternion value XX for left joycon");
+	directionXYLeftCtrl->SetToolTip(
+		"Set direction quaternion value XY for left joycon");
+	directionXZLeftCtrl->SetToolTip(
+		"Set direction quaternion value XZ for left joycon");
+	directionYXLeftCtrl->SetToolTip(
+		"Set direction quaternion value YX for left joycon");
+	directionYYLeftCtrl->SetToolTip(
+		"Set direction quaternion value YY for left joycon");
+	directionYZLeftCtrl->SetToolTip(
+		"Set direction quaternion value YZ for left joycon");
+	directionZXLeftCtrl->SetToolTip(
+		"Set direction quaternion value ZX for left joycon");
+	directionZYLeftCtrl->SetToolTip(
+		"Set direction quaternion value ZY for left joycon");
+	directionZZLeftCtrl->SetToolTip(
+		"Set direction quaternion value ZZ for left joycon");
 
 	accelLeftSizer->Add(accelXLeftCtrl, 0, wxEXPAND);
 	accelLeftSizer->Add(accelYLeftCtrl, 0, wxEXPAND);
@@ -121,32 +197,75 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 	motionLeftSizer->Add(directionYLeftSizer, 1, wxEXPAND);
 	motionLeftSizer->Add(directionZLeftSizer, 1, wxEXPAND);
 
-	motionRightSizer          = new wxStaticBoxSizer(wxVERTICAL, this, "Right Joycon Motion");
-	accelRightSizer           = new wxStaticBoxSizer(wxHORIZONTAL, motionRightSizer->GetStaticBox(), "Acceleration");
-	angularVelocityRightSizer = new wxStaticBoxSizer(wxHORIZONTAL, motionRightSizer->GetStaticBox(), "Angular Velocity");
-	angleRightSizer           = new wxStaticBoxSizer(wxHORIZONTAL, motionRightSizer->GetStaticBox(), "Angle");
-	directionXRightSizer      = new wxStaticBoxSizer(wxHORIZONTAL, motionRightSizer->GetStaticBox(), "Acceleration");
-	directionYRightSizer      = new wxStaticBoxSizer(wxHORIZONTAL, motionRightSizer->GetStaticBox(), "Angular Velocity");
-	directionZRightSizer      = new wxStaticBoxSizer(wxHORIZONTAL, motionRightSizer->GetStaticBox(), "Angle");
+	motionRightSizer
+		= new wxStaticBoxSizer(wxVERTICAL, this, "Right Joycon Motion");
+	accelRightSizer = new wxStaticBoxSizer(
+		wxHORIZONTAL, motionRightSizer->GetStaticBox(), "Acceleration");
+	angularVelocityRightSizer = new wxStaticBoxSizer(
+		wxHORIZONTAL, motionRightSizer->GetStaticBox(), "Angular Velocity");
+	angleRightSizer = new wxStaticBoxSizer(
+		wxHORIZONTAL, motionRightSizer->GetStaticBox(), "Angle");
+	directionXRightSizer = new wxStaticBoxSizer(
+		wxHORIZONTAL, motionRightSizer->GetStaticBox(), "Direction X");
+	directionYRightSizer = new wxStaticBoxSizer(
+		wxHORIZONTAL, motionRightSizer->GetStaticBox(), "Direction Y");
+	directionZRightSizer = new wxStaticBoxSizer(
+		wxHORIZONTAL, motionRightSizer->GetStaticBox(), "Direction Z");
 
-	accelXRightCtrl           = new wxSpinCtrlDouble(accelRightSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -7.0, 7.0, 0.0);
-	accelYRightCtrl           = new wxSpinCtrlDouble(accelRightSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -7.0, 7.0, 0.0);
-	accelZRightCtrl           = new wxSpinCtrlDouble(accelRightSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -7.0, 7.0, -1.0);
-	angularVelocityXRightCtrl = new wxSpinCtrlDouble(angularVelocityRightSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -5.0, 5.0, 0.0);
-	angularVelocityYRightCtrl = new wxSpinCtrlDouble(angularVelocityRightSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -5.0, 5.0, 0.0);
-	angularVelocityZRightCtrl = new wxSpinCtrlDouble(angularVelocityRightSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -5.0, 5.0, 0.0);
-	angleXRightCtrl           = new wxSpinCtrlDouble(angleRightSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -1.0, 1.0, 0.0);
-	angleYRightCtrl           = new wxSpinCtrlDouble(angleRightSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -1.0, 1.0, 0.0);
-	angleZRightCtrl           = new wxSpinCtrlDouble(angleRightSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -1.0, 1.0, 0.0);
-	directionXXRightCtrl      = new wxSpinCtrlDouble(directionXRightSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 1.0);
-	directionXYRightCtrl      = new wxSpinCtrlDouble(directionXRightSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 0.0);
-	directionXZRightCtrl      = new wxSpinCtrlDouble(directionXRightSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 0.0);
-	directionYXRightCtrl      = new wxSpinCtrlDouble(directionYRightSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 0.0);
-	directionYYRightCtrl      = new wxSpinCtrlDouble(directionYRightSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 1.0);
-	directionYZRightCtrl      = new wxSpinCtrlDouble(directionYRightSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 0.0);
-	directionZXRightCtrl      = new wxSpinCtrlDouble(directionZRightSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 0.0);
-	directionZYRightCtrl      = new wxSpinCtrlDouble(directionZRightSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 0.0);
-	directionZZRightCtrl      = new wxSpinCtrlDouble(directionZRightSizer->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 1.0);
+	accelXRightCtrl = new wxSpinCtrlDouble(accelRightSizer->GetStaticBox(),
+		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+		wxSP_ARROW_KEYS, -7.0, 7.0, 0.0);
+	accelYRightCtrl = new wxSpinCtrlDouble(accelRightSizer->GetStaticBox(),
+		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+		wxSP_ARROW_KEYS, -7.0, 7.0, 0.0);
+	accelZRightCtrl = new wxSpinCtrlDouble(accelRightSizer->GetStaticBox(),
+		wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+		wxSP_ARROW_KEYS, -7.0, 7.0, -1.0);
+	angularVelocityXRightCtrl = new wxSpinCtrlDouble(
+		angularVelocityRightSizer->GetStaticBox(), wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -5.0, 5.0, 0.0);
+	angularVelocityYRightCtrl = new wxSpinCtrlDouble(
+		angularVelocityRightSizer->GetStaticBox(), wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -5.0, 5.0, 0.0);
+	angularVelocityZRightCtrl = new wxSpinCtrlDouble(
+		angularVelocityRightSizer->GetStaticBox(), wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -5.0, 5.0, 0.0);
+	angleXRightCtrl      = new wxSpinCtrlDouble(angleRightSizer->GetStaticBox(),
+        wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+        wxSP_ARROW_KEYS, -1.0, 1.0, 0.0);
+	angleYRightCtrl      = new wxSpinCtrlDouble(angleRightSizer->GetStaticBox(),
+        wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+        wxSP_ARROW_KEYS, -1.0, 1.0, 0.0);
+	angleZRightCtrl      = new wxSpinCtrlDouble(angleRightSizer->GetStaticBox(),
+        wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+        wxSP_ARROW_KEYS, -1.0, 1.0, 0.0);
+	directionXXRightCtrl = new wxSpinCtrlDouble(
+		directionXRightSizer->GetStaticBox(), wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 1.0);
+	directionXYRightCtrl = new wxSpinCtrlDouble(
+		directionXRightSizer->GetStaticBox(), wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 0.0);
+	directionXZRightCtrl = new wxSpinCtrlDouble(
+		directionXRightSizer->GetStaticBox(), wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 0.0);
+	directionYXRightCtrl = new wxSpinCtrlDouble(
+		directionYRightSizer->GetStaticBox(), wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 0.0);
+	directionYYRightCtrl = new wxSpinCtrlDouble(
+		directionYRightSizer->GetStaticBox(), wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 1.0);
+	directionYZRightCtrl = new wxSpinCtrlDouble(
+		directionYRightSizer->GetStaticBox(), wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 0.0);
+	directionZXRightCtrl = new wxSpinCtrlDouble(
+		directionZRightSizer->GetStaticBox(), wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 0.0);
+	directionZYRightCtrl = new wxSpinCtrlDouble(
+		directionZRightSizer->GetStaticBox(), wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 0.0);
+	directionZZRightCtrl = new wxSpinCtrlDouble(
+		directionZRightSizer->GetStaticBox(), wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 1.0, 1.0);
 
 	// Only those values representable as a float are counted
 	accelXRightCtrl->SetDigits(FLT_DIG);
@@ -168,43 +287,73 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 	directionZYRightCtrl->SetDigits(FLT_DIG);
 	directionZZRightCtrl->SetDigits(FLT_DIG);
 
-	accelXRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	accelYRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	accelZRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	angularVelocityXRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	angularVelocityYRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	angularVelocityZRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	angleXRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	angleYRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	angleZRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	directionXXRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	directionXYRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	directionXZRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	directionYXRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	directionYYRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	directionYZRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	directionZXRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	directionZYRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
-	directionZZRightCtrl->Bind(wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	accelXRightCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	accelYRightCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	accelZRightCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	angularVelocityXRightCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	angularVelocityYRightCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	angularVelocityZRightCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	angleXRightCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	angleYRightCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	angleZRightCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	directionXXRightCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	directionXYRightCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	directionXZRightCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	directionYXRightCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	directionYYRightCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	directionYZRightCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	directionZXRightCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	directionZYRightCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
+	directionZZRightCtrl->Bind(
+		wxEVT_SPINCTRLDOUBLE, &ExtraInputMethods::motionValueChanged, this);
 
 	accelXRightCtrl->SetToolTip("Set acceleration X value for right joycon");
 	accelYRightCtrl->SetToolTip("Set acceleration Y value for right joycon");
 	accelZRightCtrl->SetToolTip("Set acceleration Z value for right joycon");
-	angularVelocityXRightCtrl->SetToolTip("Set angular velocity X value for right joycon");
-	angularVelocityYRightCtrl->SetToolTip("Set angular velocity Y value for right joycon");
-	angularVelocityZRightCtrl->SetToolTip("Set angular velocity Z value for right joycon");
+	angularVelocityXRightCtrl->SetToolTip(
+		"Set angular velocity X value for right joycon");
+	angularVelocityYRightCtrl->SetToolTip(
+		"Set angular velocity Y value for right joycon");
+	angularVelocityZRightCtrl->SetToolTip(
+		"Set angular velocity Z value for right joycon");
 	angleXRightCtrl->SetToolTip("Set angle X value for right joycon");
 	angleYRightCtrl->SetToolTip("Set angle Y value for right joycon");
 	angleZRightCtrl->SetToolTip("Set angle Z value for right joycon");
-	directionXXRightCtrl->SetToolTip("Set direction quaternion value XX for right joycon");
-	directionXYRightCtrl->SetToolTip("Set direction quaternion value XY for right joycon");
-	directionXZRightCtrl->SetToolTip("Set direction quaternion value XZ for right joycon");
-	directionYXRightCtrl->SetToolTip("Set direction quaternion value YX for right joycon");
-	directionYYRightCtrl->SetToolTip("Set direction quaternion value YY for right joycon");
-	directionYZRightCtrl->SetToolTip("Set direction quaternion value YZ for right joycon");
-	directionZXRightCtrl->SetToolTip("Set direction quaternion value ZX for right joycon");
-	directionZYRightCtrl->SetToolTip("Set direction quaternion value ZY for right joycon");
-	directionZZRightCtrl->SetToolTip("Set direction quaternion value ZZ for right joycon");
+	directionXXRightCtrl->SetToolTip(
+		"Set direction quaternion value XX for right joycon");
+	directionXYRightCtrl->SetToolTip(
+		"Set direction quaternion value XY for right joycon");
+	directionXZRightCtrl->SetToolTip(
+		"Set direction quaternion value XZ for right joycon");
+	directionYXRightCtrl->SetToolTip(
+		"Set direction quaternion value YX for right joycon");
+	directionYYRightCtrl->SetToolTip(
+		"Set direction quaternion value YY for right joycon");
+	directionYZRightCtrl->SetToolTip(
+		"Set direction quaternion value YZ for right joycon");
+	directionZXRightCtrl->SetToolTip(
+		"Set direction quaternion value ZX for right joycon");
+	directionZYRightCtrl->SetToolTip(
+		"Set direction quaternion value ZY for right joycon");
+	directionZZRightCtrl->SetToolTip(
+		"Set direction quaternion value ZZ for right joycon");
 
 	accelRightSizer->Add(accelXRightCtrl, 0, wxEXPAND);
 	accelRightSizer->Add(accelYRightCtrl, 0, wxEXPAND);
@@ -234,10 +383,12 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 
 	wxBoxSizer* touchAndMouseSizer = new wxBoxSizer(wxVERTICAL);
 
-	mainTouchSizer   = new wxStaticBoxSizer(wxVERTICAL, this, "Touchscreen");
-	firstTouchSizer  = new wxStaticBoxSizer(wxVERTICAL, mainTouchSizer->GetStaticBox(), "First Touch");
-	secondTouchSizer = new wxStaticBoxSizer(wxVERTICAL, mainTouchSizer->GetStaticBox(), "Second Touch");
-	touchesSizer     = new wxBoxSizer(wxHORIZONTAL);
+	mainTouchSizer  = new wxStaticBoxSizer(wxVERTICAL, this, "Touchscreen");
+	firstTouchSizer = new wxStaticBoxSizer(
+		wxVERTICAL, mainTouchSizer->GetStaticBox(), "First Touch");
+	secondTouchSizer = new wxStaticBoxSizer(
+		wxVERTICAL, mainTouchSizer->GetStaticBox(), "Second Touch");
+	touchesSizer = new wxBoxSizer(wxHORIZONTAL);
 
 	// clang-format off
 	touchX1Ctrl = new wxSpinCtrl(firstTouchSizer->GetStaticBox(), wxID_ANY, wxEmptyString,
@@ -252,17 +403,23 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 2, 0);
 	// clang-format on
 
-	touchX1Ctrl->Bind(wxEVT_SPINCTRL, &ExtraInputMethods::touchValueChanged, this);
-	touchY1Ctrl->Bind(wxEVT_SPINCTRL, &ExtraInputMethods::touchValueChanged, this);
-	touchX2Ctrl->Bind(wxEVT_SPINCTRL, &ExtraInputMethods::touchValueChanged, this);
-	touchY2Ctrl->Bind(wxEVT_SPINCTRL, &ExtraInputMethods::touchValueChanged, this);
-	numberOfTouchesCtrl->Bind(wxEVT_SPINCTRL, &ExtraInputMethods::numOfTouchesChanged, this);
+	touchX1Ctrl->Bind(
+		wxEVT_SPINCTRL, &ExtraInputMethods::touchValueChanged, this);
+	touchY1Ctrl->Bind(
+		wxEVT_SPINCTRL, &ExtraInputMethods::touchValueChanged, this);
+	touchX2Ctrl->Bind(
+		wxEVT_SPINCTRL, &ExtraInputMethods::touchValueChanged, this);
+	touchY2Ctrl->Bind(
+		wxEVT_SPINCTRL, &ExtraInputMethods::touchValueChanged, this);
+	numberOfTouchesCtrl->Bind(
+		wxEVT_SPINCTRL, &ExtraInputMethods::numOfTouchesChanged, this);
 
 	touchX1Ctrl->SetToolTip("Set coordinate X for touch #1");
 	touchY1Ctrl->SetToolTip("Set coordinate Y for touch #1");
 	touchX2Ctrl->SetToolTip("Set coordinate X for touch #2");
 	touchY2Ctrl->SetToolTip("Set coordinate Y for touch #2");
-	numberOfTouchesCtrl->SetToolTip("Set number of touches to be sent to the game");
+	numberOfTouchesCtrl->SetToolTip(
+		"Set number of touches to be sent to the game");
 
 	firstTouchSizer->Add(touchX1Ctrl, 0, wxEXPAND);
 	firstTouchSizer->Add(touchY1Ctrl, 0, wxEXPAND);
@@ -293,12 +450,18 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 		wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0);
 	// clang-format on
 
-	mouseXCtrl->Bind(wxEVT_SPINCTRL, &ExtraInputMethods::mouseValueChanged, this);
-	mouseYCtrl->Bind(wxEVT_SPINCTRL, &ExtraInputMethods::mouseValueChanged, this);
-	mouseVelocityXCtrl->Bind(wxEVT_SPINCTRL, &ExtraInputMethods::mouseValueChanged, this);
-	mouseVelocityYCtrl->Bind(wxEVT_SPINCTRL, &ExtraInputMethods::mouseValueChanged, this);
-	scrollVelocityXCtrl->Bind(wxEVT_SPINCTRL, &ExtraInputMethods::mouseValueChanged, this);
-	scrollVelocityYCtrl->Bind(wxEVT_SPINCTRL, &ExtraInputMethods::mouseValueChanged, this);
+	mouseXCtrl->Bind(
+		wxEVT_SPINCTRL, &ExtraInputMethods::mouseValueChanged, this);
+	mouseYCtrl->Bind(
+		wxEVT_SPINCTRL, &ExtraInputMethods::mouseValueChanged, this);
+	mouseVelocityXCtrl->Bind(
+		wxEVT_SPINCTRL, &ExtraInputMethods::mouseValueChanged, this);
+	mouseVelocityYCtrl->Bind(
+		wxEVT_SPINCTRL, &ExtraInputMethods::mouseValueChanged, this);
+	scrollVelocityXCtrl->Bind(
+		wxEVT_SPINCTRL, &ExtraInputMethods::mouseValueChanged, this);
+	scrollVelocityYCtrl->Bind(
+		wxEVT_SPINCTRL, &ExtraInputMethods::mouseValueChanged, this);
 
 	mouseXCtrl->SetToolTip("Set mouse coordinate X");
 	mouseYCtrl->SetToolTip("Set mouse coordinate Y");
@@ -307,13 +470,20 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 	scrollVelocityXCtrl->SetToolTip("Set mouse scroll velocity X");
 	scrollVelocityYCtrl->SetToolTip("Set mouse scroll velocity X");
 
-	keyboardKeysSizer      = new wxStaticBoxSizer(wxVERTICAL, this, "Keyboard Keys");
-	keyboardModifiersSizer = new wxStaticBoxSizer(wxVERTICAL, this, "Keyboard Modifiers");
-	mouseButtonsSizer      = new wxStaticBoxSizer(wxVERTICAL, this, "Mouse Buttons");
+	keyboardKeysSizer = new wxStaticBoxSizer(wxVERTICAL, this, "Keyboard Keys");
+	keyboardModifiersSizer
+		= new wxStaticBoxSizer(wxVERTICAL, this, "Keyboard Modifiers");
+	mouseButtonsSizer = new wxStaticBoxSizer(wxVERTICAL, this, "Mouse Buttons");
 
-	keyboardKeys      = new wxListCtrl(keyboardKeysSizer->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_NO_HEADER | wxLC_SINGLE_SEL);
-	keyboardModifiers = new wxListCtrl(keyboardModifiersSizer->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_NO_HEADER | wxLC_SINGLE_SEL);
-	mouseButtons      = new wxListCtrl(mouseButtonsSizer->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_NO_HEADER | wxLC_SINGLE_SEL);
+	keyboardKeys = new wxListCtrl(keyboardKeysSizer->GetStaticBox(), wxID_ANY,
+		wxDefaultPosition, wxDefaultSize,
+		wxLC_REPORT | wxLC_NO_HEADER | wxLC_SINGLE_SEL);
+	keyboardModifiers = new wxListCtrl(keyboardModifiersSizer->GetStaticBox(),
+		wxID_ANY, wxDefaultPosition, wxDefaultSize,
+		wxLC_REPORT | wxLC_NO_HEADER | wxLC_SINGLE_SEL);
+	mouseButtons = new wxListCtrl(mouseButtonsSizer->GetStaticBox(), wxID_ANY,
+		wxDefaultPosition, wxDefaultSize,
+		wxLC_REPORT | wxLC_NO_HEADER | wxLC_SINGLE_SEL);
 
 	keyboardKeys->AppendColumn("", wxLIST_FORMAT_CENTER);
 	keyboardModifiers->AppendColumn("", wxLIST_FORMAT_CENTER);
@@ -333,7 +503,7 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 		wxString name = wxString::FromUTF8(keyboardModifier.first);
 		int index     = keyboardModifiers->GetItemCount();
 
-		keyboardModifierIndices[index]                          = keyboardModifier.second;
+		keyboardModifierIndices[index] = keyboardModifier.second;
 		keyboardModifierIndicesReverse[keyboardModifier.second] = index;
 
 		keyboardModifiers->InsertItem(index, name);
@@ -349,9 +519,12 @@ ExtraInputMethods::ExtraInputMethods(wxFrame* parentFrame, DataProcessing* input
 		mouseButtons->InsertItem(index, name);
 	}
 
-	keyboardKeys->Bind(wxEVT_LIST_ITEM_SELECTED, &ExtraInputMethods::keyboardKeysChanged, this);
-	keyboardModifiers->Bind(wxEVT_LIST_ITEM_SELECTED, &ExtraInputMethods::keyboardModifiersChanged, this);
-	mouseButtons->Bind(wxEVT_LIST_ITEM_SELECTED, &ExtraInputMethods::mouseButtonsChanged, this);
+	keyboardKeys->Bind(wxEVT_LIST_ITEM_SELECTED,
+		&ExtraInputMethods::keyboardKeysChanged, this);
+	keyboardModifiers->Bind(wxEVT_LIST_ITEM_SELECTED,
+		&ExtraInputMethods::keyboardModifiersChanged, this);
+	mouseButtons->Bind(wxEVT_LIST_ITEM_SELECTED,
+		&ExtraInputMethods::mouseButtonsChanged, this);
 
 	keyboardKeysSizer->Add(keyboardKeys, 0);
 	keyboardModifiersSizer->Add(keyboardModifiers, 0);
@@ -391,77 +564,113 @@ void ExtraInputMethods::motionValueChanged(wxSpinDoubleEvent& event) {
 	// TODO use unordered_map here
 	wxSpinCtrlDouble* widget = (wxSpinCtrlDouble*)event.GetEventObject();
 	if(widget == accelXLeftCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::ACCEL_X_LEFT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::ACCEL_X_LEFT, (float)widget->GetValue());
 	} else if(widget == accelYLeftCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::ACCEL_Y_LEFT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::ACCEL_Y_LEFT, (float)widget->GetValue());
 	} else if(widget == accelZLeftCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::ACCEL_Z_LEFT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::ACCEL_Z_LEFT, (float)widget->GetValue());
 	} else if(widget == angularVelocityXLeftCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::GYRO_X_LEFT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::GYRO_X_LEFT, (float)widget->GetValue());
 	} else if(widget == angularVelocityYLeftCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::GYRO_Y_LEFT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::GYRO_Y_LEFT, (float)widget->GetValue());
 	} else if(widget == angularVelocityZLeftCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::GYRO_Z_LEFT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::GYRO_Z_LEFT, (float)widget->GetValue());
 	} else if(widget == angleXLeftCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::ANGLE_X_LEFT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::ANGLE_X_LEFT, (float)widget->GetValue());
 	} else if(widget == angleXLeftCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::ANGLE_Y_LEFT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::ANGLE_Y_LEFT, (float)widget->GetValue());
 	} else if(widget == angleXLeftCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::ANGLE_Z_LEFT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::ANGLE_Z_LEFT, (float)widget->GetValue());
 	} else if(widget == directionXXLeftCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::DIRECTION_XX_LEFT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::DIRECTION_XX_LEFT, (float)widget->GetValue());
 	} else if(widget == directionXYLeftCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::DIRECTION_XY_LEFT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::DIRECTION_XY_LEFT, (float)widget->GetValue());
 	} else if(widget == directionXZLeftCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::DIRECTION_XZ_LEFT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::DIRECTION_XZ_LEFT, (float)widget->GetValue());
 	} else if(widget == directionYXLeftCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::DIRECTION_YX_LEFT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::DIRECTION_YX_LEFT, (float)widget->GetValue());
 	} else if(widget == directionYYLeftCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::DIRECTION_YY_LEFT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::DIRECTION_YY_LEFT, (float)widget->GetValue());
 	} else if(widget == directionYZLeftCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::DIRECTION_YZ_LEFT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::DIRECTION_YZ_LEFT, (float)widget->GetValue());
 	} else if(widget == directionZXLeftCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::DIRECTION_ZX_LEFT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::DIRECTION_ZX_LEFT, (float)widget->GetValue());
 	} else if(widget == directionZYLeftCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::DIRECTION_ZY_LEFT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::DIRECTION_ZY_LEFT, (float)widget->GetValue());
 	} else if(widget == directionZZLeftCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::DIRECTION_ZZ_LEFT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::DIRECTION_ZZ_LEFT, (float)widget->GetValue());
 	} else if(widget == accelXRightCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::ACCEL_X_RIGHT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::ACCEL_X_RIGHT, (float)widget->GetValue());
 	} else if(widget == accelYRightCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::ACCEL_Y_RIGHT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::ACCEL_Y_RIGHT, (float)widget->GetValue());
 	} else if(widget == accelZRightCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::ACCEL_Z_RIGHT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::ACCEL_Z_RIGHT, (float)widget->GetValue());
 	} else if(widget == angularVelocityXRightCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::GYRO_X_RIGHT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::GYRO_X_RIGHT, (float)widget->GetValue());
 	} else if(widget == angularVelocityYRightCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::GYRO_Y_RIGHT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::GYRO_Y_RIGHT, (float)widget->GetValue());
 	} else if(widget == angularVelocityZRightCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::GYRO_Z_RIGHT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::GYRO_Z_RIGHT, (float)widget->GetValue());
 	} else if(widget == angleXRightCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::ANGLE_X_RIGHT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::ANGLE_X_RIGHT, (float)widget->GetValue());
 	} else if(widget == angleXRightCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::ANGLE_Y_RIGHT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::ANGLE_Y_RIGHT, (float)widget->GetValue());
 	} else if(widget == angleXRightCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::ANGLE_Z_RIGHT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::ANGLE_Z_RIGHT, (float)widget->GetValue());
 	} else if(widget == directionXXRightCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::DIRECTION_XX_RIGHT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::DIRECTION_XX_RIGHT, (float)widget->GetValue());
 	} else if(widget == directionXYRightCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::DIRECTION_XY_RIGHT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::DIRECTION_XY_RIGHT, (float)widget->GetValue());
 	} else if(widget == directionXZRightCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::DIRECTION_XZ_RIGHT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::DIRECTION_XZ_RIGHT, (float)widget->GetValue());
 	} else if(widget == directionYXRightCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::DIRECTION_YX_RIGHT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::DIRECTION_YX_RIGHT, (float)widget->GetValue());
 	} else if(widget == directionYYRightCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::DIRECTION_YY_RIGHT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::DIRECTION_YY_RIGHT, (float)widget->GetValue());
 	} else if(widget == directionYZRightCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::DIRECTION_YZ_RIGHT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::DIRECTION_YZ_RIGHT, (float)widget->GetValue());
 	} else if(widget == directionZXRightCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::DIRECTION_ZX_RIGHT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::DIRECTION_ZX_RIGHT, (float)widget->GetValue());
 	} else if(widget == directionZYRightCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::DIRECTION_ZY_RIGHT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::DIRECTION_ZY_RIGHT, (float)widget->GetValue());
 	} else if(widget == directionZZRightCtrl) {
-		inputInstance->triggerNumberValuesMotion(CNV::DIRECTION_ZZ_RIGHT, (float)widget->GetValue());
+		inputInstance->triggerNumberValuesMotion(
+			CNV::DIRECTION_ZZ_RIGHT, (float)widget->GetValue());
 	}
 }
 
@@ -470,56 +679,112 @@ void ExtraInputMethods::updateAllValues() {
 
 	uint8_t isVisible = IsVisible();
 	if(isVisible || !lastWasVisible) {
-		accelXLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::ACCEL_X_LEFT));
-		accelYLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::ACCEL_Y_LEFT));
-		accelZLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::ACCEL_Z_LEFT));
-		angularVelocityXLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::GYRO_X_LEFT));
-		angularVelocityYLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::GYRO_Y_LEFT));
-		angularVelocityZLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::GYRO_Z_LEFT));
-		angleXLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::ANGLE_X_LEFT));
-		angleXLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::ANGLE_Y_LEFT));
-		angleXLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::ANGLE_Z_LEFT));
-		directionXXLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::DIRECTION_XX_LEFT));
-		directionXYLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::DIRECTION_XY_LEFT));
-		directionXZLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::DIRECTION_XZ_LEFT));
-		directionYXLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::DIRECTION_YX_LEFT));
-		directionYYLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::DIRECTION_YY_LEFT));
-		directionYZLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::DIRECTION_YZ_LEFT));
-		directionZXLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::DIRECTION_ZX_LEFT));
-		directionZYLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::DIRECTION_ZY_LEFT));
-		directionZZLeftCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::DIRECTION_ZZ_LEFT));
+		accelXLeftCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(CNV::ACCEL_X_LEFT));
+		accelYLeftCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(CNV::ACCEL_Y_LEFT));
+		accelZLeftCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(CNV::ACCEL_Z_LEFT));
+		angularVelocityXLeftCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(CNV::GYRO_X_LEFT));
+		angularVelocityYLeftCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(CNV::GYRO_Y_LEFT));
+		angularVelocityZLeftCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(CNV::GYRO_Z_LEFT));
+		angleXLeftCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(CNV::ANGLE_X_LEFT));
+		angleXLeftCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(CNV::ANGLE_Y_LEFT));
+		angleXLeftCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(CNV::ANGLE_Z_LEFT));
+		directionXXLeftCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(CNV::DIRECTION_XX_LEFT));
+		directionXYLeftCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(CNV::DIRECTION_XY_LEFT));
+		directionXZLeftCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(CNV::DIRECTION_XZ_LEFT));
+		directionYXLeftCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(CNV::DIRECTION_YX_LEFT));
+		directionYYLeftCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(CNV::DIRECTION_YY_LEFT));
+		directionYZLeftCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(CNV::DIRECTION_YZ_LEFT));
+		directionZXLeftCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(CNV::DIRECTION_ZX_LEFT));
+		directionZYLeftCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(CNV::DIRECTION_ZY_LEFT));
+		directionZZLeftCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(CNV::DIRECTION_ZZ_LEFT));
 
-		accelXRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::ACCEL_X_RIGHT));
-		accelYRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::ACCEL_Y_RIGHT));
-		accelZRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::ACCEL_Z_RIGHT));
-		angularVelocityXRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::GYRO_X_RIGHT));
-		angularVelocityYRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::GYRO_Y_RIGHT));
-		angularVelocityZRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::GYRO_Z_RIGHT));
-		angleXRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::ANGLE_X_RIGHT));
-		angleXRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::ANGLE_Y_RIGHT));
-		angleXRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::ANGLE_Z_RIGHT));
-		directionXXRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::DIRECTION_XX_RIGHT));
-		directionXYRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::DIRECTION_XY_RIGHT));
-		directionXZRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::DIRECTION_XZ_RIGHT));
-		directionYXRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::DIRECTION_YX_RIGHT));
-		directionYYRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::DIRECTION_YY_RIGHT));
-		directionYZRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::DIRECTION_YZ_RIGHT));
-		directionZXRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::DIRECTION_ZX_RIGHT));
-		directionZYRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::DIRECTION_ZY_RIGHT));
-		directionZZRightCtrl->SetValue(inputInstance->getNumberValueCurrentMotion(CNV::DIRECTION_ZZ_RIGHT));
+		accelXRightCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(CNV::ACCEL_X_RIGHT));
+		accelYRightCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(CNV::ACCEL_Y_RIGHT));
+		accelZRightCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(CNV::ACCEL_Z_RIGHT));
+		angularVelocityXRightCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(CNV::GYRO_X_RIGHT));
+		angularVelocityYRightCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(CNV::GYRO_Y_RIGHT));
+		angularVelocityZRightCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(CNV::GYRO_Z_RIGHT));
+		angleXRightCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(CNV::ANGLE_X_RIGHT));
+		angleXRightCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(CNV::ANGLE_Y_RIGHT));
+		angleXRightCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(CNV::ANGLE_Z_RIGHT));
+		directionXXRightCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(
+				CNV::DIRECTION_XX_RIGHT));
+		directionXYRightCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(
+				CNV::DIRECTION_XY_RIGHT));
+		directionXZRightCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(
+				CNV::DIRECTION_XZ_RIGHT));
+		directionYXRightCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(
+				CNV::DIRECTION_YX_RIGHT));
+		directionYYRightCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(
+				CNV::DIRECTION_YY_RIGHT));
+		directionYZRightCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(
+				CNV::DIRECTION_YZ_RIGHT));
+		directionZXRightCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(
+				CNV::DIRECTION_ZX_RIGHT));
+		directionZYRightCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(
+				CNV::DIRECTION_ZY_RIGHT));
+		directionZZRightCtrl->SetValue(
+			inputInstance->getNumberValueCurrentMotion(
+				CNV::DIRECTION_ZZ_RIGHT));
 
-		touchX1Ctrl->SetValue(inputInstance->getExtraValueCurrent(ExtraValues::TOUCH_X_1));
-		touchY1Ctrl->SetValue(inputInstance->getExtraValueCurrent(ExtraValues::TOUCH_Y_1));
-		touchX2Ctrl->SetValue(inputInstance->getExtraValueCurrent(ExtraValues::TOUCH_X_2));
-		touchY2Ctrl->SetValue(inputInstance->getExtraValueCurrent(ExtraValues::TOUCH_Y_2));
-		numberOfTouchesCtrl->SetValue(inputInstance->getNumberOfTouchesCurrent());
+		touchX1Ctrl->SetValue(
+			inputInstance->getExtraValueCurrent(ExtraValues::TOUCH_X_1));
+		touchY1Ctrl->SetValue(
+			inputInstance->getExtraValueCurrent(ExtraValues::TOUCH_Y_1));
+		touchX2Ctrl->SetValue(
+			inputInstance->getExtraValueCurrent(ExtraValues::TOUCH_X_2));
+		touchY2Ctrl->SetValue(
+			inputInstance->getExtraValueCurrent(ExtraValues::TOUCH_Y_2));
+		numberOfTouchesCtrl->SetValue(
+			inputInstance->getNumberOfTouchesCurrent());
 
-		mouseXCtrl->SetValue(inputInstance->getExtraValueCurrent(ExtraValues::MOUSE_X));
-		mouseYCtrl->SetValue(inputInstance->getExtraValueCurrent(ExtraValues::MOUSE_Y));
-		mouseVelocityXCtrl->SetValue(inputInstance->getExtraValueCurrent(ExtraValues::MOUSE_VELOCITY_X));
-		mouseVelocityYCtrl->SetValue(inputInstance->getExtraValueCurrent(ExtraValues::MOUSE_VELOCITY_Y));
-		scrollVelocityXCtrl->SetValue(inputInstance->getExtraValueCurrent(ExtraValues::SCROLL_VELOCITY_X));
-		scrollVelocityYCtrl->SetValue(inputInstance->getExtraValueCurrent(ExtraValues::SCROLL_VELOCITY_Y));
+		mouseXCtrl->SetValue(
+			inputInstance->getExtraValueCurrent(ExtraValues::MOUSE_X));
+		mouseYCtrl->SetValue(
+			inputInstance->getExtraValueCurrent(ExtraValues::MOUSE_Y));
+		mouseVelocityXCtrl->SetValue(
+			inputInstance->getExtraValueCurrent(ExtraValues::MOUSE_VELOCITY_X));
+		mouseVelocityYCtrl->SetValue(
+			inputInstance->getExtraValueCurrent(ExtraValues::MOUSE_VELOCITY_Y));
+		scrollVelocityXCtrl->SetValue(inputInstance->getExtraValueCurrent(
+			ExtraValues::SCROLL_VELOCITY_X));
+		scrollVelocityYCtrl->SetValue(inputInstance->getExtraValueCurrent(
+			ExtraValues::SCROLL_VELOCITY_Y));
 
 		for(auto const& key : buttonData->stringToKeyboardKey) {
 			bool pressed = inputInstance->getKeyboardButtonCurrent(key.second);
@@ -532,10 +797,12 @@ void ExtraInputMethods::updateAllValues() {
 		}
 
 		for(auto const& modifier : buttonData->stringToKeyboardModifier) {
-			bool pressed = inputInstance->getKeyboardModifierCurrent(modifier.second);
-			int index    = keyboardModifierIndicesReverse[modifier.second];
+			bool pressed
+				= inputInstance->getKeyboardModifierCurrent(modifier.second);
+			int index = keyboardModifierIndicesReverse[modifier.second];
 			if(pressed) {
-				keyboardModifiers->SetItemBackgroundColour(index, *wxLIGHT_GREY);
+				keyboardModifiers->SetItemBackgroundColour(
+					index, *wxLIGHT_GREY);
 			} else {
 				keyboardModifiers->SetItemBackgroundColour(index, *wxWHITE);
 			}
@@ -558,34 +825,45 @@ void ExtraInputMethods::updateAllValues() {
 void ExtraInputMethods::touchValueChanged(wxSpinEvent& event) {
 	wxSpinCtrl* widget = (wxSpinCtrl*)event.GetEventObject();
 	if(widget == touchX1Ctrl) {
-		inputInstance->triggerExtraValue(ExtraValues::TOUCH_X_1, (int32_t)widget->GetValue());
+		inputInstance->triggerExtraValue(
+			ExtraValues::TOUCH_X_1, (int32_t)widget->GetValue());
 	} else if(widget == touchY1Ctrl) {
-		inputInstance->triggerExtraValue(ExtraValues::TOUCH_Y_1, (int32_t)widget->GetValue());
+		inputInstance->triggerExtraValue(
+			ExtraValues::TOUCH_Y_1, (int32_t)widget->GetValue());
 	} else if(widget == touchX2Ctrl) {
-		inputInstance->triggerExtraValue(ExtraValues::TOUCH_X_2, (int32_t)widget->GetValue());
+		inputInstance->triggerExtraValue(
+			ExtraValues::TOUCH_X_2, (int32_t)widget->GetValue());
 	} else if(widget == touchY2Ctrl) {
-		inputInstance->triggerExtraValue(ExtraValues::TOUCH_Y_2, (int32_t)widget->GetValue());
+		inputInstance->triggerExtraValue(
+			ExtraValues::TOUCH_Y_2, (int32_t)widget->GetValue());
 	}
 }
 
 void ExtraInputMethods::numOfTouchesChanged(wxSpinEvent& event) {
-	inputInstance->triggerNumberOfTouches((uint8_t)numberOfTouchesCtrl->GetValue());
+	inputInstance->triggerNumberOfTouches(
+		(uint8_t)numberOfTouchesCtrl->GetValue());
 }
 
 void ExtraInputMethods::mouseValueChanged(wxSpinEvent& event) {
 	wxSpinCtrl* widget = (wxSpinCtrl*)event.GetEventObject();
 	if(widget == mouseXCtrl) {
-		inputInstance->triggerExtraValue(ExtraValues::MOUSE_X, (int32_t)widget->GetValue());
+		inputInstance->triggerExtraValue(
+			ExtraValues::MOUSE_X, (int32_t)widget->GetValue());
 	} else if(widget == mouseYCtrl) {
-		inputInstance->triggerExtraValue(ExtraValues::MOUSE_Y, (int32_t)widget->GetValue());
+		inputInstance->triggerExtraValue(
+			ExtraValues::MOUSE_Y, (int32_t)widget->GetValue());
 	} else if(widget == mouseVelocityXCtrl) {
-		inputInstance->triggerExtraValue(ExtraValues::MOUSE_VELOCITY_X, (int32_t)widget->GetValue());
+		inputInstance->triggerExtraValue(
+			ExtraValues::MOUSE_VELOCITY_X, (int32_t)widget->GetValue());
 	} else if(widget == mouseVelocityYCtrl) {
-		inputInstance->triggerExtraValue(ExtraValues::MOUSE_VELOCITY_Y, (int32_t)widget->GetValue());
+		inputInstance->triggerExtraValue(
+			ExtraValues::MOUSE_VELOCITY_Y, (int32_t)widget->GetValue());
 	} else if(widget == scrollVelocityXCtrl) {
-		inputInstance->triggerExtraValue(ExtraValues::SCROLL_VELOCITY_X, (int32_t)widget->GetValue());
+		inputInstance->triggerExtraValue(
+			ExtraValues::SCROLL_VELOCITY_X, (int32_t)widget->GetValue());
 	} else if(widget == scrollVelocityYCtrl) {
-		inputInstance->triggerExtraValue(ExtraValues::SCROLL_VELOCITY_Y, (int32_t)widget->GetValue());
+		inputInstance->triggerExtraValue(
+			ExtraValues::SCROLL_VELOCITY_Y, (int32_t)widget->GetValue());
 	}
 }
 
@@ -617,7 +895,8 @@ void ExtraInputMethods::onClose(wxCloseEvent& event) {
 	Show(false);
 }
 
-ButtonGrid::ButtonGrid(wxFrame* parent, wxSize requiredSize, std::shared_ptr<ButtonData> data, DataProcessing* inputs)
+ButtonGrid::ButtonGrid(wxFrame* parent, wxSize requiredSize,
+	std::shared_ptr<ButtonData> data, DataProcessing* inputs)
 	: DrawingCanvas(parent, requiredSize) {
 	SetDoubleBuffered(false);
 
@@ -693,7 +972,8 @@ void FrameViewerCanvas::draw(wxDC& dc) {
 	int height;
 	GetSize(&width, &height);
 	// Set scaling for the image to render without wxImage
-	dc.SetUserScale((double)width / defaultBackground->GetWidth(), (double)height / defaultBackground->GetHeight());
+	dc.SetUserScale((double)width / defaultBackground->GetWidth(),
+		(double)height / defaultBackground->GetHeight());
 	if(primary && !secondary) {
 		dc.DrawBitmap(*primary, 0, 0, false);
 	} else if(primary && secondary) {
@@ -723,7 +1003,8 @@ void FrameViewerCanvas::setSecondaryBitmap(wxBitmap* secondaryBitmap) {
 	secondary = secondaryBitmap;
 }
 
-JoystickCanvas::JoystickCanvas(rapidjson::Document* settings, wxFrame* parent, DataProcessing* inputData, uint8_t leftJoy)
+JoystickCanvas::JoystickCanvas(rapidjson::Document* settings, wxFrame* parent,
+	DataProcessing* inputData, uint8_t leftJoy)
 	: DrawingCanvas(parent, wxSize(150, 150)) {
 	// Should be a decent size
 	isLeftJoystick = leftJoy;
@@ -733,8 +1014,10 @@ JoystickCanvas::JoystickCanvas(rapidjson::Document* settings, wxFrame* parent, D
 	setBackgroundColor(HELPERS::getDefaultWindowBackground());
 
 	// Create widgets
-	xInput                     = new wxSpinCtrl(parent, wxID_ANY, "x", wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
-	yInput                     = new wxSpinCtrl(parent, wxID_ANY, "y", wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
+	xInput = new wxSpinCtrl(parent, wxID_ANY, "x", wxDefaultPosition,
+		wxDefaultSize, wxTE_PROCESS_ENTER);
+	yInput = new wxSpinCtrl(parent, wxID_ANY, "y", wxDefaultPosition,
+		wxDefaultSize, wxTE_PROCESS_ENTER);
 	canGoOutsideCircleCheckbox = new wxCheckBox(parent, wxID_ANY, "Clamp");
 
 	if(leftJoy) {
@@ -745,12 +1028,16 @@ JoystickCanvas::JoystickCanvas(rapidjson::Document* settings, wxFrame* parent, D
 		yInput->SetToolTip("Edit Y value for right joystick");
 	}
 
-	canGoOutsideCircleCheckbox->SetToolTip("Lock joystick value to within circle");
+	canGoOutsideCircleCheckbox->SetToolTip(
+		"Lock joystick value to within circle");
 
-	lockButton = HELPERS::getBitmapButton(parent, mainSettings, "joystickLockButton");
+	lockButton
+		= HELPERS::getBitmapButton(parent, mainSettings, "joystickLockButton");
 
-	xInput->Bind(wxEVT_COMMAND_SPINCTRL_UPDATED, &JoystickCanvas::xValueSet, this);
-	yInput->Bind(wxEVT_COMMAND_SPINCTRL_UPDATED, &JoystickCanvas::yValueSet, this);
+	xInput->Bind(
+		wxEVT_COMMAND_SPINCTRL_UPDATED, &JoystickCanvas::xValueSet, this);
+	yInput->Bind(
+		wxEVT_COMMAND_SPINCTRL_UPDATED, &JoystickCanvas::yValueSet, this);
 
 	Bind(wxEVT_LEFT_DOWN, &JoystickCanvas::onMouseClick, this);
 	Bind(wxEVT_MOTION, &JoystickCanvas::onMouseDrag, this);
@@ -786,18 +1073,24 @@ void JoystickCanvas::draw(wxDC& dc) {
 	int16_t joyY;
 
 	if(isLeftJoystick) {
-		joyX = inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::LEFT_X);
-		joyY = inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::LEFT_Y);
+		joyX = inputInstance->getNumberValueCurrentJoystick(
+			ControllerNumberValues::LEFT_X);
+		joyY = inputInstance->getNumberValueCurrentJoystick(
+			ControllerNumberValues::LEFT_Y);
 	} else {
-		joyX = inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::RIGHT_X);
-		joyY = inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::RIGHT_Y);
+		joyX = inputInstance->getNumberValueCurrentJoystick(
+			ControllerNumberValues::RIGHT_X);
+		joyY = inputInstance->getNumberValueCurrentJoystick(
+			ControllerNumberValues::RIGHT_Y);
 	}
 
 	// Flip the height to resemble the coordinate system
 	joyY *= -1;
 
-	int renderJoyX = ((float)joyX / ButtonData::axisMax) * approximateMiddle.x + approximateMiddle.x;
-	int renderJoyY = ((float)joyY / ButtonData::axisMax) * approximateMiddle.y + approximateMiddle.y;
+	int renderJoyX = ((float)joyX / ButtonData::axisMax) * approximateMiddle.x
+					 + approximateMiddle.x;
+	int renderJoyY = ((float)joyY / ButtonData::axisMax) * approximateMiddle.y
+					 + approximateMiddle.y;
 
 	int middleCircleRadius = std::floor((float)width / 20);
 
@@ -811,14 +1104,19 @@ void JoystickCanvas::draw(wxDC& dc) {
 		wxPoint joystickBarPoints[4];
 
 		// Calculate the angle once and then mirror to use twice
-		float barDrawingAngle = HELPERS::normalizeRadian(joyAngle + (M_PI / 2.0f));
-		int offsetX           = middleCircleRadius * std::cos(barDrawingAngle);
-		int offsetY           = middleCircleRadius * std::sin(barDrawingAngle);
+		float barDrawingAngle
+			= HELPERS::normalizeRadian(joyAngle + (M_PI / 2.0f));
+		int offsetX = middleCircleRadius * std::cos(barDrawingAngle);
+		int offsetY = middleCircleRadius * std::sin(barDrawingAngle);
 
-		joystickBarPoints[0] = wxPoint(approximateMiddle.x + offsetX, approximateMiddle.y + offsetY);
-		joystickBarPoints[1] = wxPoint(renderJoyX + offsetX, renderJoyY + offsetY);
-		joystickBarPoints[2] = wxPoint(renderJoyX - offsetX, renderJoyY - offsetY);
-		joystickBarPoints[3] = wxPoint(approximateMiddle.y - offsetX, approximateMiddle.y - offsetY);
+		joystickBarPoints[0] = wxPoint(
+			approximateMiddle.x + offsetX, approximateMiddle.y + offsetY);
+		joystickBarPoints[1]
+			= wxPoint(renderJoyX + offsetX, renderJoyY + offsetY);
+		joystickBarPoints[2]
+			= wxPoint(renderJoyX - offsetX, renderJoyY - offsetY);
+		joystickBarPoints[3] = wxPoint(
+			approximateMiddle.y - offsetX, approximateMiddle.y - offsetY);
 
 		dc.DrawPolygon(4, joystickBarPoints);
 	}
@@ -832,11 +1130,15 @@ void JoystickCanvas::draw(wxDC& dc) {
 
 	// Show the actual value underneath
 	if(isLeftJoystick) {
-		xInput->SetValue(inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::LEFT_X));
-		yInput->SetValue(inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::LEFT_Y));
+		xInput->SetValue(inputInstance->getNumberValueCurrentJoystick(
+			ControllerNumberValues::LEFT_X));
+		yInput->SetValue(inputInstance->getNumberValueCurrentJoystick(
+			ControllerNumberValues::LEFT_Y));
 	} else {
-		xInput->SetValue(inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::RIGHT_X));
-		yInput->SetValue(inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::RIGHT_Y));
+		xInput->SetValue(inputInstance->getNumberValueCurrentJoystick(
+			ControllerNumberValues::RIGHT_X));
+		yInput->SetValue(inputInstance->getNumberValueCurrentJoystick(
+			ControllerNumberValues::RIGHT_Y));
 	}
 }
 
@@ -845,11 +1147,15 @@ void JoystickCanvas::correctForCircleLock() {
 		int x;
 		int y;
 		if(isLeftJoystick) {
-			x = inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::LEFT_X);
-			y = inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::LEFT_Y);
+			x = inputInstance->getNumberValueCurrentJoystick(
+				ControllerNumberValues::LEFT_X);
+			y = inputInstance->getNumberValueCurrentJoystick(
+				ControllerNumberValues::LEFT_Y);
 		} else {
-			x = inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::RIGHT_X);
-			y = inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::RIGHT_Y);
+			x = inputInstance->getNumberValueCurrentJoystick(
+				ControllerNumberValues::RIGHT_X);
+			y = inputInstance->getNumberValueCurrentJoystick(
+				ControllerNumberValues::RIGHT_Y);
 		}
 
 		// This corrects for circle lock if the checkbox is set
@@ -862,11 +1168,15 @@ void JoystickCanvas::correctForCircleLock() {
 		}
 
 		if(isLeftJoystick) {
-			inputInstance->triggerNumberValuesJoystick(ControllerNumberValues::LEFT_X, x);
-			inputInstance->triggerNumberValuesJoystick(ControllerNumberValues::LEFT_Y, y);
+			inputInstance->triggerNumberValuesJoystick(
+				ControllerNumberValues::LEFT_X, x);
+			inputInstance->triggerNumberValuesJoystick(
+				ControllerNumberValues::LEFT_Y, y);
 		} else {
-			inputInstance->triggerNumberValuesJoystick(ControllerNumberValues::RIGHT_X, x);
-			inputInstance->triggerNumberValuesJoystick(ControllerNumberValues::RIGHT_Y, y);
+			inputInstance->triggerNumberValuesJoystick(
+				ControllerNumberValues::RIGHT_X, x);
+			inputInstance->triggerNumberValuesJoystick(
+				ControllerNumberValues::RIGHT_Y, y);
 		}
 	}
 }
@@ -878,17 +1188,25 @@ void JoystickCanvas::onMouseClick(wxMouseEvent& event) {
 		int height;
 		GetSize(&width, &height);
 
-		int16_t scaledX = ((float)loc.x / width) * ButtonData::axisMax * 2 - ButtonData::axisMax;
+		int16_t scaledX = ((float)loc.x / width) * ButtonData::axisMax * 2
+						  - ButtonData::axisMax;
 		// Y is flipped
-		int16_t scaledY = (((float)loc.y / height) * ButtonData::axisMax * 2 - ButtonData::axisMax) * -1;
+		int16_t scaledY = (((float)loc.y / height) * ButtonData::axisMax * 2
+							  - ButtonData::axisMax)
+						  * -1;
 
-		// Mutiply by twice the radius and then subtract the radius to get the middle
+		// Mutiply by twice the radius and then subtract the radius to get the
+		// middle
 		if(isLeftJoystick) {
-			inputInstance->triggerNumberValuesJoystick(ControllerNumberValues::LEFT_X, scaledX);
-			inputInstance->triggerNumberValuesJoystick(ControllerNumberValues::LEFT_Y, scaledY);
+			inputInstance->triggerNumberValuesJoystick(
+				ControllerNumberValues::LEFT_X, scaledX);
+			inputInstance->triggerNumberValuesJoystick(
+				ControllerNumberValues::LEFT_Y, scaledY);
 		} else {
-			inputInstance->triggerNumberValuesJoystick(ControllerNumberValues::RIGHT_X, scaledX);
-			inputInstance->triggerNumberValuesJoystick(ControllerNumberValues::RIGHT_Y, scaledY);
+			inputInstance->triggerNumberValuesJoystick(
+				ControllerNumberValues::RIGHT_X, scaledX);
+			inputInstance->triggerNumberValuesJoystick(
+				ControllerNumberValues::RIGHT_Y, scaledY);
 		}
 
 		correctForCircleLock();
@@ -919,9 +1237,11 @@ void JoystickCanvas::xValueSet(wxSpinEvent& event) {
 	setXValue(position);
 
 	if(isLeftJoystick) {
-		event.SetPosition(inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::LEFT_X));
+		event.SetPosition(inputInstance->getNumberValueCurrentJoystick(
+			ControllerNumberValues::LEFT_X));
 	} else {
-		event.SetPosition(inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::RIGHT_X));
+		event.SetPosition(inputInstance->getNumberValueCurrentJoystick(
+			ControllerNumberValues::RIGHT_X));
 	}
 }
 
@@ -938,18 +1258,22 @@ void JoystickCanvas::yValueSet(wxSpinEvent& event) {
 	setYValue(position);
 
 	if(isLeftJoystick) {
-		event.SetPosition(inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::LEFT_Y));
+		event.SetPosition(inputInstance->getNumberValueCurrentJoystick(
+			ControllerNumberValues::LEFT_Y));
 	} else {
-		event.SetPosition(inputInstance->getNumberValueCurrentJoystick(ControllerNumberValues::RIGHT_Y));
+		event.SetPosition(inputInstance->getNumberValueCurrentJoystick(
+			ControllerNumberValues::RIGHT_Y));
 	}
 }
 
 void JoystickCanvas::setXValue(int16_t x) {
 	if(isLeftJoystick) {
-		inputInstance->triggerNumberValuesJoystick(ControllerNumberValues::LEFT_X, x);
+		inputInstance->triggerNumberValuesJoystick(
+			ControllerNumberValues::LEFT_X, x);
 		correctForCircleLock();
 	} else {
-		inputInstance->triggerNumberValuesJoystick(ControllerNumberValues::RIGHT_X, x);
+		inputInstance->triggerNumberValuesJoystick(
+			ControllerNumberValues::RIGHT_X, x);
 		correctForCircleLock();
 	}
 	Refresh();
@@ -957,16 +1281,20 @@ void JoystickCanvas::setXValue(int16_t x) {
 
 void JoystickCanvas::setYValue(int16_t y) {
 	if(isLeftJoystick) {
-		inputInstance->triggerNumberValuesJoystick(ControllerNumberValues::LEFT_Y, y);
+		inputInstance->triggerNumberValuesJoystick(
+			ControllerNumberValues::LEFT_Y, y);
 		correctForCircleLock();
 	} else {
-		inputInstance->triggerNumberValuesJoystick(ControllerNumberValues::RIGHT_Y, y);
+		inputInstance->triggerNumberValuesJoystick(
+			ControllerNumberValues::RIGHT_Y, y);
 		correctForCircleLock();
 	}
 	Refresh();
 }
 
-BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid, DataProcessing* input, std::shared_ptr<ProjectHandler> projHandler) {
+BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings,
+	std::shared_ptr<ButtonData> buttons, wxBoxSizer* theGrid,
+	DataProcessing* input, std::shared_ptr<ProjectHandler> projHandler) {
 	// TODO set up joysticks
 	buttonData     = buttons;
 	mainSettings   = settings;
@@ -979,38 +1307,55 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 	mainSizer          = new wxBoxSizer(wxVERTICAL);
 	horizontalBoxSizer = new wxBoxSizer(wxHORIZONTAL);
 
-	leftJoystickDrawer  = new JoystickCanvas(settings, parentFrame, inputInstance, true);
-	rightJoystickDrawer = new JoystickCanvas(settings, parentFrame, inputInstance, false);
+	leftJoystickDrawer
+		= new JoystickCanvas(settings, parentFrame, inputInstance, true);
+	rightJoystickDrawer
+		= new JoystickCanvas(settings, parentFrame, inputInstance, false);
 
 	leftJoystickDrawer->SetToolTip("Edit left joystick value");
 	rightJoystickDrawer->SetToolTip("Edit right joystick value");
 
-	leftJoystickDrawer->getLockButton()->Bind(wxEVT_BUTTON, &BottomUI::onLeftJoystickLock, this);
-	rightJoystickDrawer->getLockButton()->Bind(wxEVT_BUTTON, &BottomUI::onRightJoystickLock, this);
+	leftJoystickDrawer->getLockButton()->Bind(
+		wxEVT_BUTTON, &BottomUI::onLeftJoystickLock, this);
+	rightJoystickDrawer->getLockButton()->Bind(
+		wxEVT_BUTTON, &BottomUI::onRightJoystickLock, this);
 
-	leftJoystickDrawer->getLockButton()->SetToolTip("Set current value of left gamepad joystick to frame");
-	rightJoystickDrawer->getLockButton()->SetToolTip("Set current value of right gamepad joystick to frame");
+	leftJoystickDrawer->getLockButton()->SetToolTip(
+		"Set current value of left gamepad joystick to frame");
+	rightJoystickDrawer->getLockButton()->SetToolTip(
+		"Set current value of right gamepad joystick to frame");
 
 	// Not shown by default
-	extraInputMethodsWindow = new ExtraInputMethods(parentFrame, inputInstance, buttonData);
+	extraInputMethodsWindow
+		= new ExtraInputMethods(parentFrame, inputInstance, buttonData);
 	extraInputMethodsWindow->Hide();
 
 	wxSize gridSize;
 	// Just to get a rough estimate
-	int w = ButtonData::KeyWidth * buttonData->buttonMapping[Btn::A]->resizedGridOffBitmap->GetWidth();
-	int h = ButtonData::KeyHeight * buttonData->buttonMapping[Btn::A]->resizedGridOffBitmap->GetHeight();
+	int w
+		= ButtonData::KeyWidth
+		  * buttonData->buttonMapping[Btn::A]->resizedGridOffBitmap->GetWidth();
+	int h = ButtonData::KeyHeight
+			* buttonData->buttonMapping[Btn::A]
+				  ->resizedGridOffBitmap->GetHeight();
 	gridSize.SetWidth(w);
 	gridSize.SetHeight(h);
 
-	buttonGrid = new ButtonGrid(parentFrame, gridSize, buttonData, inputInstance);
+	buttonGrid
+		= new ButtonGrid(parentFrame, gridSize, buttonData, inputInstance);
 
 	buttonGrid->SetToolTip("Toggle buttons for frames with mouse");
 
-	frameViewerCanvas = new FrameViewerCanvas(parentFrame, new wxBitmap(HELPERS::resolvePath((*mainSettings)["videoViewerDefaultImage"].GetString()), wxBITMAP_TYPE_JPEG));
+	frameViewerCanvas = new FrameViewerCanvas(parentFrame,
+		new wxBitmap(
+			HELPERS::resolvePath(
+				(*mainSettings)["videoViewerDefaultImage"].GetString()),
+			wxBITMAP_TYPE_JPEG));
 
 	frameViewerCanvas->SetToolTip("View current frame's screenshot");
 
-	inputInstance->setInputCallback(std::bind(&BottomUI::refreshDataViews, this, std::placeholders::_1));
+	inputInstance->setInputCallback(
+		std::bind(&BottomUI::refreshDataViews, this, std::placeholders::_1));
 
 	// Add the joystick submenu
 	joystickSubMenu = new wxMenu();
@@ -1021,12 +1366,14 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 	// These take up much less space than the grid
 	horizontalBoxSizer->Add(leftJoystickDrawer->getSizer(), 0);
 	horizontalBoxSizer->Add(rightJoystickDrawer->getSizer(), 0);
-	horizontalBoxSizer->Add(buttonGrid, 0, wxSHAPED | wxEXPAND | wxALIGN_CENTER_VERTICAL);
+	horizontalBoxSizer->Add(
+		buttonGrid, 0, wxSHAPED | wxEXPAND | wxALIGN_CENTER_VERTICAL);
 
 	frameViewerCanvas->SetMinSize(wxSize(0, 0));
 
 	// Proportion HAS to be zero here, it's a requirment
-	mainSizer->Add(frameViewerCanvas, 0, wxSHAPED | wxEXPAND | wxALIGN_CENTER_HORIZONTAL);
+	mainSizer->Add(
+		frameViewerCanvas, 0, wxSHAPED | wxEXPAND | wxALIGN_CENTER_HORIZONTAL);
 	mainSizer->Add(horizontalBoxSizer, 0, wxEXPAND | wxALL);
 
 	theGrid->Add(mainSizer, 1, wxEXPAND | wxALL);
@@ -1035,14 +1382,17 @@ BottomUI::BottomUI(wxFrame* parentFrame, rapidjson::Document* settings, std::sha
 
 	screenshotExportID = wxNewId();
 
-	entries[0].Set(wxACCEL_CTRL, (int)'E', screenshotExportID, editMenu.Append(screenshotExportID, wxT("Export Screenshot\tCtrl+E")));
+	entries[0].Set(wxACCEL_CTRL, (int)'E', screenshotExportID,
+		editMenu.Append(screenshotExportID, wxT("Export Screenshot\tCtrl+E")));
 
 	wxAcceleratorTable accel(11, entries);
 	frameViewerCanvas->SetAcceleratorTable(accel);
 
-	frameViewerCanvas->Bind(wxEVT_CONTEXT_MENU, &BottomUI::onFrameViewerRightClick, this);
+	frameViewerCanvas->Bind(
+		wxEVT_CONTEXT_MENU, &BottomUI::onFrameViewerRightClick, this);
 
-	frameViewerCanvas->Bind(wxEVT_MENU, &BottomUI::exportImageView, this, screenshotExportID);
+	frameViewerCanvas->Bind(
+		wxEVT_MENU, &BottomUI::exportImageView, this, screenshotExportID);
 }
 
 void BottomUI::refreshDataViews(uint8_t refreshFramebuffer) {
@@ -1056,9 +1406,11 @@ void BottomUI::refreshDataViews(uint8_t refreshFramebuffer) {
 
 	if(refreshFramebuffer) {
 		// Check to see if framebuffer is avaliable to draw
-		wxFileName framebufferFileName = inputInstance->getFramebufferPathForCurrentFramebuf();
+		wxFileName framebufferFileName
+			= inputInstance->getFramebufferPathForCurrentFramebuf();
 		if(framebufferFileName.FileExists()) {
-			wxImage framebuf(framebufferFileName.GetFullPath(), wxBITMAP_TYPE_JPEG);
+			wxImage framebuf(
+				framebufferFileName.GetFullPath(), wxBITMAP_TYPE_JPEG);
 			frameViewerCanvas->setPrimaryBitmap(new wxBitmap(framebuf));
 		} else {
 			// Go back to default
@@ -1068,18 +1420,21 @@ void BottomUI::refreshDataViews(uint8_t refreshFramebuffer) {
 }
 
 void BottomUI::recieveGameFramebuffer(std::vector<uint8_t> jpegBuffer) {
-	frameViewerCanvas->setPrimaryBitmap(new wxBitmap(HELPERS::getImageFromJPEGData(jpegBuffer)));
+	frameViewerCanvas->setPrimaryBitmap(
+		new wxBitmap(HELPERS::getImageFromJPEGData(jpegBuffer)));
 }
 
 void BottomUI::onFrameViewerRightClick(wxContextMenuEvent& event) {
-	const wxPoint mousePosition = frameViewerCanvas->ScreenToClient(event.GetPosition());
+	const wxPoint mousePosition
+		= frameViewerCanvas->ScreenToClient(event.GetPosition());
 
 	frameViewerCanvas->PopupMenu(&editMenu, mousePosition);
 }
 
 void BottomUI::exportImageView(wxCommandEvent& event) {
 	// https://forums.wxwidgets.org/viewtopic.php?p=32313#32313
-	// Save a screenshot of the frame view if the user wants to do something with it
+	// Save a screenshot of the frame view if the user wants to do something
+	// with it
 
 	wxClientDC dcWindow(frameViewerCanvas);
 
@@ -1100,7 +1455,8 @@ void BottomUI::exportImageView(wxCommandEvent& event) {
 
 	uint32_t exportIndex = 0;
 	while(true) {
-		imageLocation.SetName(wxString::Format("exported_image_%hu", exportIndex));
+		imageLocation.SetName(
+			wxString::Format("exported_image_%hu", exportIndex));
 
 		if(!imageLocation.FileExists()) {
 			break;
@@ -1140,38 +1496,44 @@ void BottomUI::onJoystickSelect(wxCommandEvent& event) {
 		std::string joyMapping;
 		// Check if exists and use default if not
 		if((*mainSettings)["joystickMappings"].HasMember(hexString)) {
-			joyMapping = (*mainSettings)["joystickMappings"][hexString].GetString();
+			joyMapping
+				= (*mainSettings)["joystickMappings"][hexString].GetString();
 		} else {
-			// This default is for the pro controller connected to pc without drivers
-			joyMapping = (*mainSettings)["joystickMappings"]["0x45E,0x28E"].GetString();
+			// This default is for the pro controller connected to pc without
+			// drivers
+			joyMapping = (*mainSettings)["joystickMappings"]["0x45E,0x28E"]
+							 .GetString();
 		}
 		// Break it apart and do things
 		std::vector<std::string> parts = HELPERS::splitString(joyMapping, ',');
 		for(auto const& part : parts) {
-			std::vector<std::string> inputParts = HELPERS::splitString(part, ':');
-			char firstChar                      = inputParts[1].front();
+			std::vector<std::string> inputParts
+				= HELPERS::splitString(part, ':');
+			char firstChar = inputParts[1].front();
 			int index;
 			if(firstChar == 'b') {
 				// It adds one for some reason, ask SDL
-				index = strtol(inputParts[1].erase(0, 1).c_str(), nullptr, 10) - 1;
+				index = strtol(inputParts[1].erase(0, 1).c_str(), nullptr, 10)
+						- 1;
 				// This is a button
 				if(buttonData->stringToButton.count(inputParts[0])) {
 					// It's a normal button
-					joyButtonToSwitch[index] = (int)buttonData->stringToButton[inputParts[0]];
+					joyButtonToSwitch[index]
+						= (int)buttonData->stringToButton[inputParts[0]];
 				} else {
 					// It's extended
 					// Go beyond the end of Btn
-					joyButtonToSwitch[index] = stringToButtonExtended[inputParts[0]] + (uint8_t)Btn::BUTTONS_SIZE;
+					joyButtonToSwitch[index]
+						= stringToButtonExtended[inputParts[0]]
+						  + (uint8_t)Btn::BUTTONS_SIZE;
 				}
 			} else if(firstChar == 'h') {
 				// This is a hat, usually pov
-				// Hat comprises of two parts, but basically ignore the first part
-				// Because there is usually just one hat
-				// The charactr is a bit weird, translate it
-				// #define 	SDL_HAT_UP   0x01
-				// #define 	SDL_HAT_RIGHT   0x02
-				// #define 	SDL_HAT_DOWN   0x04
-				// #define 	SDL_HAT_LEFT   0x08
+				// Hat comprises of two parts, but basically ignore the first
+				// part Because there is usually just one hat The charactr is a
+				// bit weird, translate it #define 	SDL_HAT_UP   0x01 #define
+				// SDL_HAT_RIGHT   0x02 #define 	SDL_HAT_DOWN   0x04 #define
+				// SDL_HAT_LEFT   0x08
 				char indexChar = inputParts[1].at(3);
 				if(indexChar == '1') {
 					index = 0;
@@ -1182,14 +1544,17 @@ void BottomUI::onJoystickSelect(wxCommandEvent& event) {
 				} else if(indexChar == '8') {
 					index = 3;
 				}
-				// wxWidgets just does this https://docs.wxwidgets.org/3.0/classwx_joystick.html#a10712042f8cbca788ef04e96eab375a4
+				// wxWidgets just does this
+				// https://docs.wxwidgets.org/3.0/classwx_joystick.html#a10712042f8cbca788ef04e96eab375a4
 				if(buttonData->stringToButton.count(inputParts[0])) {
 					// It's a normal button
-					povToSwitch[index] = (int)buttonData->stringToButton[inputParts[0]];
+					povToSwitch[index]
+						= (int)buttonData->stringToButton[inputParts[0]];
 				} else {
 					// It's extended
 					// Go beyond the end of Btn
-					povToSwitch[index] = stringToButtonExtended[inputParts[0]] + (uint8_t)Btn::BUTTONS_SIZE;
+					povToSwitch[index] = stringToButtonExtended[inputParts[0]]
+										 + (uint8_t)Btn::BUTTONS_SIZE;
 				}
 			} else if(firstChar == 'a') {
 				// This is an axis
@@ -1200,15 +1565,20 @@ void BottomUI::onJoystickSelect(wxCommandEvent& event) {
 				// This is a button
 				if(buttonData->stringToButton.count(inputParts[0])) {
 					// It's a normal button
-					// Add to axisButtons, as they are read continuously, unlike the other axis
-					axisButtonsToSwitch[index] = (int)buttonData->stringToButton[inputParts[0]];
+					// Add to axisButtons, as they are read continuously, unlike
+					// the other axis
+					axisButtonsToSwitch[index]
+						= (int)buttonData->stringToButton[inputParts[0]];
 				} else {
 					// It's extended
 					// Add each kind to a separate map
 					if(inputParts[0] == "LSX" || inputParts[0] == "LSY") {
-						leftStickAxis[index] = stringToButtonExtended[inputParts[0]];
-					} else if(inputParts[0] == "RSX" || inputParts[0] == "RSY") {
-						rightStickAxis[index] = stringToButtonExtended[inputParts[0]];
+						leftStickAxis[index]
+							= stringToButtonExtended[inputParts[0]];
+					} else if(inputParts[0] == "RSX"
+							  || inputParts[0] == "RSY") {
+						rightStickAxis[index]
+							= stringToButtonExtended[inputParts[0]];
 					}
 				}
 			}
@@ -1229,16 +1599,19 @@ void BottomUI::onJoystickMenuOpen(wxMenuEvent& event) {
 	int numOfConnectedJoysticks = wxJoystick::GetNumberJoysticks();
 	if(numOfConnectedJoysticks == 0) {
 		joysticksExist = false;
-		joystickSubMenu->Append(joystickSubmenuIDBase, "No Joysticks Connected");
+		joystickSubMenu->Append(
+			joystickSubmenuIDBase, "No Joysticks Connected");
 	} else {
 		joysticksExist = true;
 		for(int i = 0; i < numOfConnectedJoysticks; i++) {
 			// Briefly open it for info
-			// Not using wxJOYSTICK1 or wxJOYSTICK2, because that restricts me to two
+			// Not using wxJOYSTICK1 or wxJOYSTICK2, because that restricts me
+			// to two
 			wxJoystick* joy = new wxJoystick(i);
 			// wxString name   = joy->GetProductName();
 			wxString printString = getJoyHexString(joy);
-			// TODO for the name, use this https://forums.wxwidgets.org/viewtopic.php?f=1&t=46931&p=197440#p197459
+			// TODO for the name, use this
+			// https://forums.wxwidgets.org/viewtopic.php?f=1&t=46931&p=197440#p197459
 			joystickSubMenu->Append(i + joystickSubmenuIDBase, printString);
 			// Delete it because it doesn't need to be used right now
 			delete joy;
@@ -1249,7 +1622,8 @@ void BottomUI::onJoystickMenuOpen(wxMenuEvent& event) {
 wxString BottomUI::getJoyHexString(wxJoystick* joy) {
 	int manufacturerID = joy->GetManufacturerId();
 	int productID      = joy->GetProductId();
-	// Convert each to a hex string using sprintf, to save on bloat from stringstream
+	// Convert each to a hex string using sprintf, to save on bloat from
+	// stringstream
 	char buffer[10];
 	sprintf(buffer, "0x%X,0x%X", manufacturerID, productID);
 	return wxString(buffer);
@@ -1281,8 +1655,9 @@ void BottomUI::listenToJoystick() {
 			// Range should be from -32768 to +32768 or 0 to +65535
 			// Ranges should be the same for all axis
 			// Automatically floors
-			int axisMiddle = (currentJoy->GetXMin() + currentJoy->GetXMax()) / 2;
-			int axisValue  = currentJoy->GetPosition(i);
+			int axisMiddle
+				= (currentJoy->GetXMin() + currentJoy->GetXMax()) / 2;
+			int axisValue = currentJoy->GetPosition(i);
 
 			if(axisButtonsToSwitch.count(i)) {
 				int switchID = axisButtonsToSwitch[i];
@@ -1290,7 +1665,8 @@ void BottomUI::listenToJoystick() {
 				// Check RS and LS only because it's susceptible to this
 				if((Btn)switchID == Btn::ZL || (Btn)switchID == Btn::ZR) {
 					// Flip if needed
-					if(axisDirection[i] ? axisValue < axisMiddle : axisValue > axisMiddle) {
+					if(axisDirection[i] ? axisValue < axisMiddle
+										: axisValue > axisMiddle) {
 						// Trigger ZL
 						if(lastState[Btn::ZL] != true) {
 							inputInstance->triggerButton(Btn::ZL);
@@ -1298,7 +1674,8 @@ void BottomUI::listenToJoystick() {
 						}
 						// ZR is now off
 						lastState[Btn::ZR] = false;
-					} else if(axisDirection[i] ? axisValue > axisMiddle : axisValue < axisMiddle) {
+					} else if(axisDirection[i] ? axisValue > axisMiddle
+											   : axisValue < axisMiddle) {
 						// Trigger ZR
 						if(lastState[Btn::ZR] != true) {
 							inputInstance->triggerButton(Btn::ZR);
@@ -1346,7 +1723,9 @@ void BottomUI::onLeftJoystickLock(wxCommandEvent& event) {
 			int axisValue  = currentJoy->GetPosition(i);
 
 			// Normalize to 1, then multiply by the range
-			int16_t normalizedAxisValue = ((float)(axisValue - axisMiddle) / (float)(axisMax - axisMiddle)) * ButtonData::axisMax;
+			int16_t normalizedAxisValue = ((float)(axisValue - axisMiddle)
+											  / (float)(axisMax - axisMiddle))
+										  * ButtonData::axisMax;
 
 			// Flip if needed
 			if(!axisDirection[i]) {
@@ -1380,7 +1759,9 @@ void BottomUI::onRightJoystickLock(wxCommandEvent& event) {
 			int axisValue  = currentJoy->GetPosition(i);
 
 			// Normalize to 1, then multiply by the range
-			int16_t normalizedAxisValue = ((float)(axisValue - axisMiddle) / (float)(axisMax - axisMiddle)) * ButtonData::axisMax;
+			int16_t normalizedAxisValue = ((float)(axisValue - axisMiddle)
+											  / (float)(axisMax - axisMiddle))
+										  * ButtonData::axisMax;
 
 			// Flip if needed
 			if(!axisDirection[i]) {

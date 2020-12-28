@@ -34,8 +34,8 @@ uint8_t wasJustTASController;
 int32_t lastControllerId;
 
 // This is the controller that needs to record, all other controllers get their
-// state From the exposed sensor states If -1, no controller records (all accept
-// input) If -2, every controller records (none accept input)
+// state From the exposed sensor states. If -1, no controller records (all
+// accept input) If -2, every controller records (none accept input)
 int32_t controllerToRecord = -2;
 
 nn::hid::SixAxisSensorHandle sixAxisHandlesLeftJoycon[8]  = { 0 };
@@ -105,7 +105,7 @@ void moveLeftBacklog(int32_t i, nn::hid::SixAxisSensorState* state) {
 		leftJoyconBacklogSize++;
 	}
 
-	memcpy(&sixAxisStateLeftJoyconBacklog[i][0], state,
+	memcpy(sixAxisStateLeftJoyconBacklog[i], state,
 		sizeof(nn::hid::SixAxisSensorState));
 }
 
@@ -264,55 +264,72 @@ void GetSixAxisSensorState(nn::hid::SixAxisSensorState* state,
 				_ZN2nn3hid21GetSixAxisSensorStateEPNS0_18SixAxisSensorStateERKNS0_19SixAxisSensorHandleE(
 					state, handle);
 
-				writeToLog((
-					std::string("") + "state->acceleration.x: "
-					+ std::to_string(state->acceleration.x) + " "
-					+ "state->acceleration.y: "
-					+ std::to_string(state->acceleration.y) + " "
-					+ "state->acceleration.z: "
-					+ std::to_string(state->acceleration.z) + " "
-					+ "state->angle.x: " + std::to_string(state->angle.x) + " "
-					+ "state->angle.y: " + std::to_string(state->angle.y) + " "
-					+ "state->angle.z: " + std::to_string(state->angle.z) + " "
-					+ "state->angularVelocity.x: "
-					+ std::to_string(state->angularVelocity.x) + " "
-					+ "state->angularVelocity.y: "
-					+ std::to_string(state->angularVelocity.y) + " "
-					+ "state->angularVelocity.z: "
-					+ std::to_string(state->angularVelocity.z) + " "
-					+ "state->direction.x.x: "
-					+ std::to_string(state->direction.x.x) + " "
-					+ "state->direction.y.x: "
-					+ std::to_string(state->direction.y.x) + " "
-					+ "state->direction.z.x: "
-					+ std::to_string(state->direction.z.x) + " "
-					+ "state->direction.x.y: "
-					+ std::to_string(state->direction.x.y) + " "
-					+ "state->direction.y.y: "
-					+ std::to_string(state->direction.y.y) + " "
-					+ "state->direction.z.y: "
-					+ std::to_string(state->direction.z.y) + " "
-					+ "state->direction.x.z: "
-					+ std::to_string(state->direction.x.z) + " "
-					+ "state->direction.y.z: "
-					+ std::to_string(state->direction.y.z) + " "
-					+ "state->direction.z.z: "
-					+ std::to_string(state->direction.z.z) + " "
-					+ "state->attributes: " + std::to_string(state->attributes)
-					+ " " + "state->deltaTimeNanoSeconds: "
-					+ std::to_string(state->deltaTimeNanoSeconds) + " "
-					+ std::to_string(state->samplingNumber))
-							   .c_str());
+				/*
+								writeToLog((
+									std::string("") + "state->acceleration.x: "
+									+ std::to_string(state->acceleration.x) + "
+				   "
+									+ "state->acceleration.y: "
+									+ std::to_string(state->acceleration.y) + "
+				   "
+									+ "state->acceleration.z: "
+									+ std::to_string(state->acceleration.z) + "
+				   "
+									+ "state->angle.x: " +
+				   std::to_string(state->angle.x) + " "
+									+ "state->angle.y: " +
+				   std::to_string(state->angle.y) + " "
+									+ "state->angle.z: " +
+				   std::to_string(state->angle.z) + " "
+									+ "state->angularVelocity.x: "
+									+ std::to_string(state->angularVelocity.x) +
+				   " "
+									+ "state->angularVelocity.y: "
+									+ std::to_string(state->angularVelocity.y) +
+				   " "
+									+ "state->angularVelocity.z: "
+									+ std::to_string(state->angularVelocity.z) +
+				   " "
+									+ "state->direction.x.x: "
+									+ std::to_string(state->direction.x.x) + " "
+									+ "state->direction.y.x: "
+									+ std::to_string(state->direction.y.x) + " "
+									+ "state->direction.z.x: "
+									+ std::to_string(state->direction.z.x) + " "
+									+ "state->direction.x.y: "
+									+ std::to_string(state->direction.x.y) + " "
+									+ "state->direction.y.y: "
+									+ std::to_string(state->direction.y.y) + " "
+									+ "state->direction.z.y: "
+									+ std::to_string(state->direction.z.y) + " "
+									+ "state->direction.x.z: "
+									+ std::to_string(state->direction.x.z) + " "
+									+ "state->direction.y.z: "
+									+ std::to_string(state->direction.y.z) + " "
+									+ "state->direction.z.z: "
+									+ std::to_string(state->direction.z.z) + " "
+									+ "state->attributes: " +
+				   std::to_string(state->attributes)
+									+ " " + "state->deltaTimeNanoSeconds: "
+									+
+				   std::to_string(state->deltaTimeNanoSeconds) + " "
+									+ std::to_string(state->samplingNumber))
+											   .c_str());
+				*/
 
-				if((controllerToRecord != -2) && controllerToRecord == -1
-					|| controllerToRecord != i) {
+				if((controllerToRecord != -2)
+					&& (controllerToRecord == -1 || controllerToRecord != i)) {
+					// Fix incoming state
 					fixMotionState(&sixAxisStateLeftJoycon[i], state);
+					// Push the state onto the backlog
 					moveLeftBacklog(i, &sixAxisStateLeftJoycon[i]);
+					// Copy the state into the returning state
 					memcpy(state, &sixAxisStateLeftJoycon[i],
 						sizeof(nn::hid::SixAxisSensorState));
 
 					writeToLog("Recieved six axis");
 				} else {
+					// Just add to the backlog, nothing else
 					moveLeftBacklog(i, state);
 				}
 
@@ -327,8 +344,8 @@ void GetSixAxisSensorState(nn::hid::SixAxisSensorState* state,
 				_ZN2nn3hid21GetSixAxisSensorStateEPNS0_18SixAxisSensorStateERKNS0_19SixAxisSensorHandleE(
 					state, handle);
 
-				if((controllerToRecord != -2) && controllerToRecord == -1
-					|| controllerToRecord != i) {
+				if((controllerToRecord != -2)
+					&& (controllerToRecord == -1 || controllerToRecord != i)) {
 					fixMotionState(&sixAxisStateRightJoycon[i], state);
 					moveRightBacklog(i, &sixAxisStateRightJoycon[i]);
 					memcpy(state, &sixAxisStateRightJoycon[i],
@@ -370,13 +387,13 @@ int32_t GetSixAxisSensorStates2(nn::hid::SixAxisSensorState* outStates,
 			if(wasJustLeft) {
 				int32_t backlogSize = max(count, leftJoyconBacklogSize);
 				memcpy(outStates,
-					&sixAxisStateLeftJoyconBacklog[lastControllerId][0],
+					sixAxisStateLeftJoyconBacklog[lastControllerId],
 					sizeof(nn::hid::SixAxisSensorState) * backlogSize);
 				return backlogSize;
 			} else {
 				int32_t backlogSize = max(count, rightJoyconBacklogSize);
 				memcpy(outStates,
-					&sixAxisStateRightJoyconBacklog[lastControllerId][0],
+					sixAxisStateRightJoyconBacklog[lastControllerId],
 					sizeof(nn::hid::SixAxisSensorState) * backlogSize);
 				return backlogSize;
 			}

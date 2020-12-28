@@ -72,8 +72,6 @@ private:
 	uint64_t heapBase;
 	uint64_t mainBase;
 
-	uint32_t externalControllerSixAxisHandle = 0;
-
 	uint8_t lastLastController = 0;
 
 #ifdef __SWITCH__

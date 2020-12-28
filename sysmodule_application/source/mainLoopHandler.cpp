@@ -258,13 +258,6 @@ void MainLoop::mainLoopHandler() {
 			HidControllerID lastControllerId = (HidControllerID)controller;
 			HidControllerType lastControllerType
 				= hidGetControllerType(lastControllerId);
-			if(externalControllerSixAxisHandle != 0) {
-				hidStopSixAxisSensor(externalControllerSixAxisHandle);
-			}
-			hidGetSixAxisSensorHandles(&externalControllerSixAxisHandle,
-				lastControllerType == TYPE_JOYCON_PAIR ? 2 : 1,
-				lastControllerId, lastControllerType);
-			hidStartSixAxisSensor(externalControllerSixAxisHandle);
 #endif
 #ifdef YUZU
 			lastControllerType = yuzu_joypad_getjoypadtype(
@@ -1033,99 +1026,33 @@ void MainLoop::matchFirstControllerToTASController(uint8_t player) {
 
 		// In order for the six axis state to be understood, need to have all
 		// Other controllers spoof in
-		setSixAxisRecord(id);
-		if(lastControllerType == TYPE_JOYCON_PAIR) {
-			SixAxisSensorValues vals[2];
-			hidSixAxisSensorValuesRead(vals, id, 2);
 
-			ControllerData data;
+		ControllerData data;
+		getSixAxisState(id, &data);
 
-			// Manually convert the libnx values to the sdk values
-			data.ACCEL_X_LEFT       = vals[0].accelerometer.x;
-			data.ACCEL_Y_LEFT       = vals[0].accelerometer.y;
-			data.ACCEL_Z_LEFT       = vals[0].accelerometer.z;
-			data.GYRO_X_LEFT        = vals[0].gyroscope.x;
-			data.GYRO_Y_LEFT        = vals[0].gyroscope.y;
-			data.GYRO_Z_LEFT        = vals[0].gyroscope.z;
-			data.ANGLE_X_LEFT       = vals[0].unk.x;
-			data.ANGLE_Y_LEFT       = vals[0].unk.y;
-			data.ANGLE_Z_LEFT       = vals[0].unk.z;
-			data.ACCEL_X_RIGHT      = vals[1].accelerometer.x;
-			data.ACCEL_Y_RIGHT      = vals[1].accelerometer.y;
-			data.ACCEL_Z_RIGHT      = vals[1].accelerometer.z;
-			data.GYRO_X_RIGHT       = vals[1].gyroscope.x;
-			data.GYRO_Y_RIGHT       = vals[1].gyroscope.y;
-			data.GYRO_Z_RIGHT       = vals[1].gyroscope.z;
-			data.ANGLE_X_RIGHT      = vals[1].unk.x;
-			data.ANGLE_Y_RIGHT      = vals[1].unk.y;
-			data.ANGLE_Z_RIGHT      = vals[1].unk.z;
-			data.DIRECTION_XX_LEFT  = vals[0].orientation[0].x;
-			data.DIRECTION_XY_LEFT  = vals[0].orientation[0].y;
-			data.DIRECTION_XZ_LEFT  = vals[0].orientation[0].z;
-			data.DIRECTION_YX_LEFT  = vals[0].orientation[1].x;
-			data.DIRECTION_YY_LEFT  = vals[0].orientation[1].y;
-			data.DIRECTION_YZ_LEFT  = vals[0].orientation[1].z;
-			data.DIRECTION_ZX_LEFT  = vals[0].orientation[2].x;
-			data.DIRECTION_ZY_LEFT  = vals[0].orientation[2].y;
-			data.DIRECTION_ZZ_LEFT  = vals[0].orientation[2].z;
-			data.DIRECTION_XX_RIGHT = vals[1].orientation[0].x;
-			data.DIRECTION_XY_RIGHT = vals[1].orientation[0].y;
-			data.DIRECTION_XZ_RIGHT = vals[1].orientation[0].z;
-			data.DIRECTION_YX_RIGHT = vals[1].orientation[1].x;
-			data.DIRECTION_YY_RIGHT = vals[1].orientation[1].y;
-			data.DIRECTION_YZ_RIGHT = vals[1].orientation[1].z;
-			data.DIRECTION_ZX_RIGHT = vals[1].orientation[2].x;
-			data.DIRECTION_ZY_RIGHT = vals[1].orientation[2].y;
-			data.DIRECTION_ZZ_RIGHT = vals[1].orientation[2].z;
-
-			setSixAxisState(player, &data);
-		} else {
-			// Trying to emulate dual joycons with procons means we have this
-			SixAxisSensorValues val;
-			hidSixAxisSensorValuesRead(&val, id, 1);
-
-			ControllerData data;
-
-			data.ACCEL_X_LEFT      = val.accelerometer.x;
-			data.ACCEL_Y_LEFT      = val.accelerometer.y;
-			data.ACCEL_Z_LEFT      = val.accelerometer.z;
-			data.GYRO_X_LEFT       = val.gyroscope.x;
-			data.GYRO_Y_LEFT       = val.gyroscope.y;
-			data.GYRO_Z_LEFT       = val.gyroscope.z;
-			data.ANGLE_X_LEFT      = val.unk.x;
-			data.ANGLE_Y_LEFT      = val.unk.y;
-			data.ANGLE_Z_LEFT      = val.unk.z;
-			data.DIRECTION_XX_LEFT = val.orientation[0].x;
-			data.DIRECTION_XY_LEFT = val.orientation[0].y;
-			data.DIRECTION_XZ_LEFT = val.orientation[0].z;
-			data.DIRECTION_YX_LEFT = val.orientation[1].x;
-			data.DIRECTION_YY_LEFT = val.orientation[1].y;
-			data.DIRECTION_YZ_LEFT = val.orientation[1].z;
-			data.DIRECTION_ZX_LEFT = val.orientation[2].x;
-			data.DIRECTION_ZY_LEFT = val.orientation[2].y;
-			data.DIRECTION_ZZ_LEFT = val.orientation[2].z;
-
-			data.ACCEL_X_RIGHT      = val.accelerometer.x;
-			data.ACCEL_Y_RIGHT      = val.accelerometer.y;
-			data.ACCEL_Z_RIGHT      = val.accelerometer.z;
-			data.GYRO_X_RIGHT       = val.gyroscope.x;
-			data.GYRO_Y_RIGHT       = val.gyroscope.y;
-			data.GYRO_Z_RIGHT       = val.gyroscope.z;
-			data.ANGLE_X_RIGHT      = val.unk.x;
-			data.ANGLE_Y_RIGHT      = val.unk.y;
-			data.ANGLE_Z_RIGHT      = val.unk.z;
-			data.DIRECTION_XX_RIGHT = val.orientation[0].x;
-			data.DIRECTION_XY_RIGHT = val.orientation[0].y;
-			data.DIRECTION_XZ_RIGHT = val.orientation[0].z;
-			data.DIRECTION_YX_RIGHT = val.orientation[1].x;
-			data.DIRECTION_YY_RIGHT = val.orientation[1].y;
-			data.DIRECTION_YZ_RIGHT = val.orientation[1].z;
-			data.DIRECTION_ZX_RIGHT = val.orientation[2].x;
-			data.DIRECTION_ZY_RIGHT = val.orientation[2].y;
-			data.DIRECTION_ZZ_RIGHT = val.orientation[2].z;
-
-			setSixAxisState(player, &data);
+		if(lastControllerType != TYPE_JOYCON_PAIR) {
+			// Map left to right, as left is default
+			data.ACCEL_X_RIGHT      = data.ACCEL_X_LEFT;
+			data.ACCEL_Y_RIGHT      = data.ACCEL_Y_LEFT;
+			data.ACCEL_Z_RIGHT      = data.ACCEL_Z_LEFT;
+			data.GYRO_X_RIGHT       = data.GYRO_X_LEFT;
+			data.GYRO_Y_RIGHT       = data.GYRO_Y_LEFT;
+			data.GYRO_Z_RIGHT       = data.GYRO_Z_LEFT;
+			data.ANGLE_X_RIGHT      = data.ANGLE_X_LEFT;
+			data.ANGLE_Y_RIGHT      = data.ANGLE_Y_LEFT;
+			data.ANGLE_Z_RIGHT      = data.ANGLE_Z_LEFT;
+			data.DIRECTION_XX_RIGHT = data.DIRECTION_XX_LEFT;
+			data.DIRECTION_XY_RIGHT = data.DIRECTION_XY_LEFT;
+			data.DIRECTION_XZ_RIGHT = data.DIRECTION_XZ_LEFT;
+			data.DIRECTION_YX_RIGHT = data.DIRECTION_YX_LEFT;
+			data.DIRECTION_YY_RIGHT = data.DIRECTION_YY_LEFT;
+			data.DIRECTION_YZ_RIGHT = data.DIRECTION_YZ_LEFT;
+			data.DIRECTION_ZX_RIGHT = data.DIRECTION_ZX_LEFT;
+			data.DIRECTION_ZY_RIGHT = data.DIRECTION_ZY_LEFT;
+			data.DIRECTION_ZZ_RIGHT = data.DIRECTION_ZZ_LEFT;
 		}
+
+		setSixAxisState(player, &data);
 	}
 #endif
 #ifdef YUZU
