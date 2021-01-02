@@ -269,7 +269,7 @@ public:
 	void setCurrentFrame(FrameNum frameNum);
 
 	void createSavestateHere();
-	void runFrame(uint8_t forAutoFrame, uint8_t updateFramebuffer, uint8_t includeFramebuffer);
+	bool runFrame(uint8_t forAutoFrame, uint8_t updateFramebuffer, uint8_t includeFramebuffer);
 
 	uint8_t canRunAnotherFrame() {
 		if(currentRunFrame < allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->size() - 1) {

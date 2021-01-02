@@ -82,6 +82,9 @@ nn::hid::MouseState mouseStateBacklog[nn::hid::MouseStateCountMax] = { 0 };
 SaltyNXCommTypes::PerformanceType performanceMode
 	= SaltyNXCommTypes::PerformanceType::Docked;
 
+// Number of controllers the game should know exists
+int32_t numberOfTASControllers = -1;
+
 void writeToLog(const char* str) {
 	uint16_t stringLength = strlen(str);
 	if(logStringIndex + stringLength < sizeof(logString)) {
@@ -326,8 +329,6 @@ void GetSixAxisSensorState(nn::hid::SixAxisSensorState* state,
 					// Copy the state into the returning state
 					memcpy(state, &sixAxisStateLeftJoycon[i],
 						sizeof(nn::hid::SixAxisSensorState));
-
-					writeToLog("Recieved six axis");
 				} else {
 					// Just add to the backlog, nothing else
 					moveLeftBacklog(i, state);
@@ -508,6 +509,81 @@ int32_t GetMouseStates(nn::hid::MouseState* outStates, int32_t count) {
 	return _ZN2nn3hid14GetMouseStatesEPNS0_10MouseStateEi(outStates, count);
 }
 
+void GetNpadState1(void* state, const nn::hid::NpadIdType& id) {
+	if(numberOfTASControllers == -1 || (int32_t)id < numberOfTASControllers) {
+		_ZN2nn3hid12GetNpadStateEPNS0_16NpadFullKeyStateERKj(state, id);
+	}
+}
+
+void GetNpadState2(void* state, const nn::hid::NpadIdType& id) {
+	if(numberOfTASControllers == -1 || (int32_t)id < numberOfTASControllers) {
+		_ZN2nn3hid12GetNpadStateEPNS0_17NpadHandheldStateERKj(state, id);
+	}
+}
+
+void GetNpadState3(void* state, const nn::hid::NpadIdType& id) {
+	if(numberOfTASControllers == -1 || (int32_t)id < numberOfTASControllers) {
+		_ZN2nn3hid12GetNpadStateEPNS0_16NpadJoyDualStateERKj(state, id);
+	}
+}
+
+void GetNpadState4(void* state, const nn::hid::NpadIdType& id) {
+	if(numberOfTASControllers == -1 || (int32_t)id < numberOfTASControllers) {
+		_ZN2nn3hid12GetNpadStateEPNS0_16NpadJoyLeftStateERKj(state, id);
+	}
+}
+
+void GetNpadState5(void* state, const nn::hid::NpadIdType& id) {
+	if(numberOfTASControllers == -1 || (int32_t)id < numberOfTASControllers) {
+		_ZN2nn3hid12GetNpadStateEPNS0_17NpadJoyRightStateERKj(state, id);
+	}
+}
+
+uint64_t GetNpadStates1(
+	void* state, int32_t unk, const nn::hid::NpadIdType& id) {
+	if(numberOfTASControllers == -1 || (int32_t)id < numberOfTASControllers) {
+		return _ZN2nn3hid13GetNpadStatesEPNS0_16NpadFullKeyStateEiRKj(
+			state, unk, id);
+	}
+	return unk;
+}
+
+uint64_t GetNpadStates2(
+	void* state, int32_t unk, const nn::hid::NpadIdType& id) {
+	if(numberOfTASControllers == -1 || (int32_t)id < numberOfTASControllers) {
+		return _ZN2nn3hid13GetNpadStatesEPNS0_17NpadHandheldStateEiRKj(
+			state, unk, id);
+	}
+	return unk;
+}
+
+uint64_t GetNpadStates3(
+	void* state, int32_t unk, const nn::hid::NpadIdType& id) {
+	if(numberOfTASControllers == -1 || (int32_t)id < numberOfTASControllers) {
+		return _ZN2nn3hid13GetNpadStatesEPNS0_16NpadJoyDualStateEiRKj(
+			state, unk, id);
+	}
+	return unk;
+}
+
+uint64_t GetNpadStates4(
+	void* state, int32_t unk, const nn::hid::NpadIdType& id) {
+	if(numberOfTASControllers == -1 || (int32_t)id < numberOfTASControllers) {
+		return _ZN2nn3hid13GetNpadStatesEPNS0_16NpadJoyLeftStateEiRKj(
+			state, unk, id);
+	}
+	return unk;
+}
+
+uint64_t GetNpadStates5(
+	void* state, int32_t unk, const nn::hid::NpadIdType& id) {
+	if(numberOfTASControllers == -1 || (int32_t)id < numberOfTASControllers) {
+		return _ZN2nn3hid13GetNpadStatesEPNS0_17NpadJoyRightStateEiRKj(
+			state, unk, id);
+	}
+	return unk;
+}
+
 uintptr_t ptr_nvnDeviceGetProcAddress;
 uintptr_t ptr_nvnQueuePresentTexture;
 uintptr_t addr_nvnGetProcAddress;
@@ -613,6 +689,9 @@ int main(int argc, char* argv[]) {
 	// Recorded inputs of mouse
 	writePointerToFile(&mouseStateBacklog, offsets);
 
+	// Number of TAS controllers right now
+	writePointerToFile(&numberOfTASControllers, offsets);
+
 	SaltySDCore_fclose(offsets);
 
 	FILE* performanceFile;
@@ -629,47 +708,73 @@ int main(int argc, char* argv[]) {
 		performanceMode = SaltyNXCommTypes::PerformanceType::Docked;
 	}
 
-	// clang-format off
 	SaltySDCore_ReplaceImport(
 		"_ZN2nn3hid22GetSixAxisSensorHandleEPNS0_26ConsoleSixAxisSensorHandleE",
-		(void*) &GetSixAxisSensorHandle1);
+		(void*)&GetSixAxisSensorHandle1);
 	SaltySDCore_ReplaceImport(
 		"_ZN2nn3hid22GetSixAxisSensorHandleEPNS0_19SixAxisSensorHandleENS0_11BasicXpadIdE",
-		(void*) &GetSixAxisSensorHandle2);
+		(void*)&GetSixAxisSensorHandle2);
 	SaltySDCore_ReplaceImport(
 		"_ZN2nn3hid23GetSixAxisSensorHandlesEPNS0_19SixAxisSensorHandleES2_NS0_9JoyXpadIdE",
-		(void*) &GetSixAxisSensorHandles1);
+		(void*)&GetSixAxisSensorHandles1);
 	SaltySDCore_ReplaceImport(
 		"_ZN2nn3hid23GetSixAxisSensorHandlesEPNS0_19SixAxisSensorHandleEiRKjNS_4util10BitFlagSetILi32ENS0_12NpadStyleTagEEE",
-		(void*) &GetSixAxisSensorHandles2);
+		(void*)&GetSixAxisSensorHandles2);
 	SaltySDCore_ReplaceImport(
 		"_ZN2nn3hid21GetSixAxisSensorStateEPNS0_18SixAxisSensorStateERKNS0_19SixAxisSensorHandleE",
-		(void*) &GetSixAxisSensorState);
+		(void*)&GetSixAxisSensorState);
 	SaltySDCore_ReplaceImport(
 		"_ZN2nn3hid22GetSixAxisSensorStatesEPNS0_18SixAxisSensorStateEiRKNS0_11BasicXpadIdE",
-		(void*) &GetSixAxisSensorStates1);
+		(void*)&GetSixAxisSensorStates1);
 	SaltySDCore_ReplaceImport(
 		"_ZN2nn3hid22GetSixAxisSensorStatesEPNS0_18SixAxisSensorStateEiRKNS0_19SixAxisSensorHandleE",
-		(void*) &GetSixAxisSensorStates2);
+		(void*)&GetSixAxisSensorStates2);
 	SaltySDCore_ReplaceImport(
 		"_ZN2nn3hid21IsSixAxisSensorAtRestERKNS0_19SixAxisSensorHandleE",
-		(void*) &IsSixAxisSensorAtRest);
+		(void*)&IsSixAxisSensorAtRest);
 	SaltySDCore_ReplaceImport(
 		"_ZN2nn3hid19GetTouchScreenStateILm1EEEvPNS0_16TouchScreenStateIXT_EEE",
-		(void*) &GetTouchScreenState1Touch);
+		(void*)&GetTouchScreenState1Touch);
 	SaltySDCore_ReplaceImport(
 		"_ZN2nn3hid16GetKeyboardStateEPNS0_13KeyboardStateE",
-		(void*) &GetKeyboardState);
+		(void*)&GetKeyboardState);
 	SaltySDCore_ReplaceImport(
 		"_ZN2nn3hid17GetKeyboardStatesEPNS0_13KeyboardStateEi",
-		(void*) &GetKeyboardStates);
+		(void*)&GetKeyboardStates);
 	SaltySDCore_ReplaceImport(
-		"_ZN2nn3hid13GetMouseStateEPNS0_10MouseStateE",
-		(void*) &GetMouseState);
+		"_ZN2nn3hid13GetMouseStateEPNS0_10MouseStateE", (void*)&GetMouseState);
+	SaltySDCore_ReplaceImport("_ZN2nn3hid14GetMouseStatesEPNS0_10MouseStateEi",
+		(void*)&GetMouseStates);
 	SaltySDCore_ReplaceImport(
-		"_ZN2nn3hid14GetMouseStatesEPNS0_10MouseStateEi",
-		(void*) &GetMouseStates);
-	// clang-format on
+		"_ZN2nn3hid12GetNpadStateEPNS0_16NpadFullKeyStateERKj",
+		(void*)&GetNpadState1);
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid12GetNpadStateEPNS0_17NpadHandheldStateERKj",
+		(void*)&GetNpadState2);
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid12GetNpadStateEPNS0_16NpadJoyDualStateERKj",
+		(void*)&GetNpadState3);
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid12GetNpadStateEPNS0_16NpadJoyLeftStateERKj",
+		(void*)&GetNpadState4);
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid12GetNpadStateEPNS0_17NpadJoyRightStateERKj",
+		(void*)&GetNpadState5);
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid13GetNpadStatesEPNS0_16NpadFullKeyStateEiRKj",
+		(void*)&GetNpadStates1);
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid13GetNpadStatesEPNS0_17NpadHandheldStateEiRKj",
+		(void*)&GetNpadStates2);
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid13GetNpadStatesEPNS0_16NpadJoyDualStateEiRKj",
+		(void*)&GetNpadStates3);
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid13GetNpadStatesEPNS0_16NpadJoyLeftStateEiRKj",
+		(void*)&GetNpadStates4);
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid13GetNpadStatesEPNS0_17NpadJoyRightStateEiRKj",
+		(void*)&GetNpadStates5);
 
 	addr_nvnGetProcAddress = (uint64_t)&nvnGetProcAddress;
 	addr_nvnPresentTexture = (uint64_t)&nvnPresentTexture;

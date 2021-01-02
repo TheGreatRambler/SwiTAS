@@ -112,6 +112,7 @@ private:
 	uint64_t saltynxkeyboardStateBacklog           = 0;
 	uint64_t saltynxmouseState                     = 0;
 	uint64_t saltynxmouseStateBacklog              = 0;
+	uint64_t saltynxnumberOfTASControllers         = 0;
 #endif
 
 	uint64_t lastNanoseconds = 0;

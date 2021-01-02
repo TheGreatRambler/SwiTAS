@@ -74,6 +74,26 @@ extern int32_t _ZN2nn3hid14GetMouseStatesEPNS0_10MouseStateEi(
 	nn::hid::MouseState* outStates, int32_t count) LINKABLE;
 extern uint32_t _ZN2nn2oe18GetPerformanceModeEv() LINKABLE;
 extern uint8_t _ZN2nn2oe16GetOperationModeEv() LINKABLE;
+extern void _ZN2nn3hid12GetNpadStateEPNS0_16NpadFullKeyStateERKj(
+	void* state, const nn::hid::NpadIdType& id) LINKABLE;
+extern void _ZN2nn3hid12GetNpadStateEPNS0_17NpadHandheldStateERKj(
+	void* state, const nn::hid::NpadIdType& id) LINKABLE;
+extern void _ZN2nn3hid12GetNpadStateEPNS0_16NpadJoyDualStateERKj(
+	void* state, const nn::hid::NpadIdType& id) LINKABLE;
+extern void _ZN2nn3hid12GetNpadStateEPNS0_16NpadJoyLeftStateERKj(
+	void* state, const nn::hid::NpadIdType& id) LINKABLE;
+extern void _ZN2nn3hid12GetNpadStateEPNS0_17NpadJoyRightStateERKj(
+	void* state, const nn::hid::NpadIdType& id) LINKABLE;
+extern uint64_t _ZN2nn3hid13GetNpadStatesEPNS0_16NpadFullKeyStateEiRKj(
+	void* state, int32_t unk, const nn::hid::NpadIdType& id) LINKABLE;
+extern uint64_t _ZN2nn3hid13GetNpadStatesEPNS0_17NpadHandheldStateEiRKj(
+	void* state, int32_t unk, const nn::hid::NpadIdType& id) LINKABLE;
+extern uint64_t _ZN2nn3hid13GetNpadStatesEPNS0_16NpadJoyDualStateEiRKj(
+	void* state, int32_t unk, const nn::hid::NpadIdType& id) LINKABLE;
+extern uint64_t _ZN2nn3hid13GetNpadStatesEPNS0_16NpadJoyLeftStateEiRKj(
+	void* state, int32_t unk, const nn::hid::NpadIdType& id) LINKABLE;
+extern uint64_t _ZN2nn3hid13GetNpadStatesEPNS0_17NpadJoyRightStateEiRKj(
+	void* state, int32_t unk, const nn::hid::NpadIdType& id) LINKABLE;
 }
 
 u32 __nx_applet_type = AppletType_None;

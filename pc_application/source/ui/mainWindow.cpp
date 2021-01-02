@@ -3,7 +3,8 @@
 #include "mainWindow.hpp"
 
 MainWindow::MainWindow()
-	: wxFrame(NULL, wxID_ANY, "SwiTAS | Unnamed", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE | wxMAXIMIZE) {
+	: wxFrame(NULL, wxID_ANY, "SwiTAS | Unnamed", wxDefaultPosition,
+		wxDefaultSize, wxDEFAULT_FRAME_STYLE | wxMAXIMIZE) {
 	wxImage::AddHandler(new wxPNGHandler());
 	wxImage::AddHandler(new wxJPEGHandler());
 
@@ -14,11 +15,16 @@ MainWindow::MainWindow()
 	FFMS_Init(0, 0);
 
 	// Get the main settings
-	std::string settingsFilePath = HELPERS::getMainSettingsPath("switas_settings").GetFullPath().ToStdString();
-	mainSettings                 = HELPERS::getSettingsFile(settingsFilePath);
+	std::string settingsFilePath
+		= HELPERS::getMainSettingsPath("switas_settings")
+			  .GetFullPath()
+			  .ToStdString();
+	mainSettings = HELPERS::getSettingsFile(settingsFilePath);
 
 	wxIcon mainIcon;
-	mainIcon.LoadFile(HELPERS::resolvePath(mainSettings["programIcon"].GetString()), wxBITMAP_TYPE_PNG);
+	mainIcon.LoadFile(
+		HELPERS::resolvePath(mainSettings["programIcon"].GetString()),
+		wxBITMAP_TYPE_PNG);
 	SetIcon(mainIcon);
 
 	// https://forums.wxwidgets.org/viewtopic.php?t=28894
@@ -54,13 +60,18 @@ MainWindow::MainWindow()
 		});
 
 	// DataProcessing can now start with the networking instance
-	dataProcessingInstance = new DataProcessing(&mainSettings, buttonData, networkInstance, this);
+	dataProcessingInstance
+		= new DataProcessing(&mainSettings, buttonData, networkInstance, this);
 
-	projectHandler = std::make_shared<ProjectHandler>(this, dataProcessingInstance, &mainSettings);
+	projectHandler = std::make_shared<ProjectHandler>(
+		this, dataProcessingInstance, &mainSettings);
 
 	// UI instances
-	sideUI   = std::make_shared<SideUI>(this, &mainSettings, projectHandler, mainSizer, dataProcessingInstance, networkInstance, std::bind(&MainWindow::startedIncrementFrame, this));
-	bottomUI = std::make_shared<BottomUI>(this, &mainSettings, buttonData, mainSizer, dataProcessingInstance, projectHandler);
+	sideUI   = std::make_shared<SideUI>(this, &mainSettings, projectHandler,
+        mainSizer, dataProcessingInstance, networkInstance,
+        std::bind(&MainWindow::startedIncrementFrame, this));
+	bottomUI = std::make_shared<BottomUI>(this, &mainSettings, buttonData,
+		mainSizer, dataProcessingInstance, projectHandler);
 
 	autoFrameAdvanceTimer = new wxTimer(this);
 	autoFrameTimerID      = autoFrameAdvanceTimer->GetId();
@@ -103,15 +114,19 @@ void MainWindow::onStart() {
 	wxLog::SetActiveTarget(logWindow);
 
 	debugWindow           = new DebugWindow(this, networkInstance);
-	projectSettingsWindow = new ProjectSettingsWindow(this, projectHandler, &mainSettings, networkInstance);
-	memoryViewerWindow    = new MemoryViewer(this, projectHandler, networkInstance);
+	projectSettingsWindow = new ProjectSettingsWindow(
+		this, projectHandler, &mainSettings, networkInstance);
+	memoryViewerWindow
+		= new MemoryViewer(this, projectHandler, networkInstance);
 
-	ProjectHandlerWindow projectHandlerWindow(this, projectHandler, &mainSettings);
+	ProjectHandlerWindow projectHandlerWindow(
+		this, projectHandler, &mainSettings);
 
 	projectHandlerWindow.ShowModal();
 
 	if(projectHandlerWindow.wasDialogClosedForcefully()) {
-		// It was closed with X, terminate this window, and the entire application, as well
+		// It was closed with X, terminate this window, and the entire
+		// application, as well
 		projectHandler->setProjectWasLoaded(false);
 		Close(true);
 		return;
@@ -147,7 +162,9 @@ END_EVENT_TABLE()
 // Override default signal handler:
 void MainWindow::keyDownHandler(wxKeyEvent& event) {
 	// Only handle keybard input if control is not held down
-	if(event.ControlDown() || !dataProcessingInstance->handleKeyboardInput(event.GetUnicodeKey())) {
+	if(event.ControlDown()
+		|| !dataProcessingInstance->handleKeyboardInput(
+			event.GetUnicodeKey())) {
 		event.Skip();
 	}
 }
@@ -205,16 +222,21 @@ void MainWindow::handleNetworkQueues() {
 		if(framebufferIncluded) {
 			bottomUI->recieveGameFramebuffer(data.buf);
 		}
-		if(data.fromFrameAdvance == 1) {
+		if(data.fromFrameAdvance) {
 			sideUI->enableAdvance();
 			if(framebufferIncluded) {
-				wxFileName framebufferFileName = dataProcessingInstance->getFramebufferPath(data.playerIndex, data.savestateHookNum, data.branchIndex, data.frame);
+				wxFileName framebufferFileName
+					= dataProcessingInstance->getFramebufferPath(
+						data.playerIndex, data.savestateHookNum,
+						data.branchIndex, data.frame);
 				wxFile file(framebufferFileName.GetFullPath(), wxFile::write);
 				file.Write(data.buf.data(), data.buf.size());
 				file.Close();
 			}
 
-			if(dataProcessingInstance->getNumOfFramesInSavestateHook(data.savestateHookNum, data.playerIndex) == data.frame) {
+			if(dataProcessingInstance->getNumOfFramesInSavestateHook(
+				   data.savestateHookNum, data.playerIndex)
+				== data.frame) {
 				dataProcessingInstance->addFrameHere();
 			}
 
@@ -222,15 +244,18 @@ void MainWindow::handleNetworkQueues() {
 			case TasValueToRecord::NONE:
 				break;
 			case TasValueToRecord::CONTROLLER:
-				dataProcessingInstance->setControllerDataForAutoRun(data.controllerData);
+				dataProcessingInstance->setControllerDataForAutoRun(
+					data.controllerData);
 				dataProcessingInstance->runFrame(true, true, true);
 				break;
 			case TasValueToRecord::KEYBOARD_MOUSE:
-				dataProcessingInstance->setExtraDataKeyboardForAutoRun(data.extraData);
+				dataProcessingInstance->setExtraDataKeyboardForAutoRun(
+					data.extraData);
 				dataProcessingInstance->runFrame(true, true, true);
 				break;
 			case TasValueToRecord::TOUCHSCREEN:
-				dataProcessingInstance->setExtraDataTouchForAutoRun(data.extraData);
+				dataProcessingInstance->setExtraDataTouchForAutoRun(
+					data.extraData);
 				dataProcessingInstance->runFrame(true, true, true);
 				break;
 			case TasValueToRecord::NUM_OF_TYPES:
@@ -296,15 +321,19 @@ void MainWindow::addMenuBar() {
 	fileMenu->Append(importAsText, "Import From Text Format\tCtrl+Alt+I");
 	fileMenu->Append(setNameID, "Set Name\tCtrl+Alt+N");
 	fileMenu->Append(runFinalTasID, "Run Final TAS\tCtrl+R");
-	fileMenu->Append(toggleProjectSettingsWindowID, "Toggle Project Settings\tCtrl+R");
+	fileMenu->Append(
+		toggleProjectSettingsWindowID, "Toggle Project Settings\tCtrl+R");
 	fileMenu->Append(toggleMemoryViewID, "Toggle Memory Viewer\tCtrl+M");
 	// fileMenu->Append(requestGameInfoID, "Request Game Info\tCtrl+Shift+I");
 
 	// Add joystick submenu
-	fileMenu->AppendSubMenu(bottomUI->getJoystickMenu(), "&List Joysticks\tCtrl+G");
-	fileMenu->AppendSubMenu(projectHandler->getVideoSubmenu(), "List Recent Comparison Videos\tCtrl+Alt+L");
+	fileMenu->AppendSubMenu(
+		bottomUI->getJoystickMenu(), "&List Joysticks\tCtrl+G");
+	fileMenu->AppendSubMenu(projectHandler->getVideoSubmenu(),
+		"List Recent Comparison Videos\tCtrl+Alt+L");
 
-	projectHandler->getVideoSubmenu()->Bind(wxEVT_MENU_OPEN, &MainWindow::onRecentVideosMenuOpen, this);
+	projectHandler->getVideoSubmenu()->Bind(
+		wxEVT_MENU_OPEN, &MainWindow::onRecentVideosMenuOpen, this);
 
 	fileMenu->AppendSeparator();
 
@@ -314,7 +343,8 @@ void MainWindow::addMenuBar() {
 
 	fileMenu->Append(toggleLoggingID, "Toggle Logging\tCtrl+Shift+L");
 	fileMenu->Append(toggleDebugMenuID, "Toggle Debug Menu\tCtrl+D");
-	fileMenu->Append(toggleExtraInputMethodsID, "Toggle Extra Input Methods Window\tCtrl+E");
+	fileMenu->Append(
+		toggleExtraInputMethodsID, "Toggle Extra Input Methods Window\tCtrl+E");
 	// Not finished as of now
 	// fileMenu->Append(openGameCorruptorID, "Open Game Corruptor\tCtrl+B");
 
@@ -335,7 +365,8 @@ void MainWindow::addStatusBar() {
 void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 	wxWindowID id = commandEvent.GetId();
 	if(id >= projectHandler->videoComparisonEntriesMenuIDBase) {
-		projectHandler->openUpVideoComparisonViewer(id - projectHandler->videoComparisonEntriesMenuIDBase);
+		projectHandler->openUpVideoComparisonViewer(
+			id - projectHandler->videoComparisonEntriesMenuIDBase);
 	} else if(id >= bottomUI->joystickSubmenuIDBase) {
 		// Send straight to bottomUI
 		bottomUI->onJoystickSelect(commandEvent);
@@ -347,7 +378,9 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 			projectHandler->saveProject();
 		} else if(id == setNameID) {
 			// Name needs to be selected
-			wxString projectName = wxGetTextFromUser("Please set the new name of the project", "Set name", projectHandler->getProjectName());
+			wxString projectName
+				= wxGetTextFromUser("Please set the new name of the project",
+					"Set name", projectHandler->getProjectName());
 			if(!projectName.empty()) {
 				projectHandler->setProjectName(projectName.ToStdString());
 			}
@@ -360,22 +393,27 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 		} else if(id == openGameCorruptorID) {
 			Show(false);
 			sideUI->untether();
-			GameCorruptor gameCorruptor(this, &mainSettings, projectHandler, networkInstance);
+			GameCorruptor gameCorruptor(
+				this, &mainSettings, projectHandler, networkInstance);
 			gameCorruptor.ShowModal();
 			Show(true);
 		} else if(id == exportAsText) {
 			/*
 			wxFileName exportedText = projectHandler->getProjectStart();
-			exportedText.SetName(wxString::Format("player_%u_exported", dataProcessingInstance->getCurrentPlayer() + 1));
+			exportedText.SetName(wxString::Format("player_%u_exported",
+			dataProcessingInstance->getCurrentPlayer() + 1));
 			exportedText.SetExt("ssctf");
 			*/
 
 			// User sets their own name
-			ScriptExporter scriptExporter(this, projectHandler, dataProcessingInstance->getExportedCurrentPlayer());
+			ScriptExporter scriptExporter(this, projectHandler,
+				dataProcessingInstance->getExportedCurrentPlayer());
 			scriptExporter.ShowModal();
 
 		} else if(id == importAsText) {
-			wxFileDialog openFileDialog(this, _("Open Script file"), "", "", "Text files (*.txt)|*.txt|nx-TAS script files (*.ssctf)|*.ssctf", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+			wxFileDialog openFileDialog(this, _("Open Script file"), "", "",
+				"Text files (*.txt)|*.txt|nx-TAS script files (*.ssctf)|*.ssctf",
+				wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 
 			if(openFileDialog.ShowModal() == wxID_OK) {
 				wxFileName importPath(openFileDialog.GetPath());
@@ -386,7 +424,8 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 			// Open the run final TAS dialog and untether
 			sideUI->untether();
 
-			TasRunner tasRunner(this, networkInstance, &mainSettings, dataProcessingInstance);
+			TasRunner tasRunner(
+				this, networkInstance, &mainSettings, dataProcessingInstance);
 			tasRunner.ShowModal();
 		} else if(id == requestGameInfoID) {
 			if(networkInstance->isConnected()) {
@@ -410,28 +449,37 @@ void MainWindow::handleMenuBar(wxCommandEvent& commandEvent) {
 bool MainWindow::askForIP() {
 	if(!networkInstance->isConnected()) {
 		while(true) {
-			wxString ipAddress = wxGetTextFromUser("Please enter IP address of Nintendo Switch", "Server connect", wxEmptyString);
+			wxString ipAddress = wxGetTextFromUser(
+				"Please enter IP address of Nintendo Switch", "Server connect",
+				wxEmptyString);
 			if(!ipAddress.empty()) {
 				// IP address entered
-				if(networkInstance->attemptConnectionToServer(ipAddress.ToStdString())) {
+				if(networkInstance->attemptConnectionToServer(
+					   ipAddress.ToStdString())) {
 					// Make sure Switch is good
 					sideUI->handleUnexpectedControllerSize();
-					SetStatusText(ipAddress + ":" + std::to_string(SERVER_PORT), 0);
+					SetStatusText(
+						ipAddress + ":" + std::to_string(SERVER_PORT), 0);
 					Refresh();
 					return true;
 				} else {
-					wxMessageDialog addressInvalidDialog(this, wxString::Format("This IP address is invalid: %s", networkInstance->getLastErrorMessage().c_str()), "Invalid IP", wxOK | wxICON_ERROR);
+					wxMessageDialog addressInvalidDialog(this,
+						wxString::Format("This IP address is invalid: %s",
+							networkInstance->getLastErrorMessage().c_str()),
+						"Invalid IP", wxOK | wxICON_ERROR);
 					addressInvalidDialog.ShowModal();
 					// Run again
 					continue;
 				}
 			} else {
-				// If the IP is unentered (cancel button), just pronounce it untethered
+				// If the IP is unentered (cancel button), just pronounce it
+				// untethered
 				return false;
 			}
 		}
 	} else {
-		wxMessageDialog addressInvalidDialog(this, "The server is already running", "Server running", wxOK);
+		wxMessageDialog addressInvalidDialog(
+			this, "The server is already running", "Server running", wxOK);
 		addressInvalidDialog.ShowModal();
 	}
 }

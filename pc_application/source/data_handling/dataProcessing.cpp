@@ -1,8 +1,12 @@
 #include "dataProcessing.hpp"
 #include "buttonData.hpp"
 
-DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<ButtonData> buttons, std::shared_ptr<CommunicateWithNetwork> communicateWithNetwork, wxWindow* parent)
-	: wxListCtrl(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_VIRTUAL | wxLC_HRULES) {
+DataProcessing::DataProcessing(rapidjson::Document* settings,
+	std::shared_ptr<ButtonData> buttons,
+	std::shared_ptr<CommunicateWithNetwork> communicateWithNetwork,
+	wxWindow* parent)
+	: wxListCtrl(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+		wxLC_REPORT | wxLC_VIRTUAL | wxLC_HRULES) {
 
 	// All savestate hook blocks
 	// Start with default, will get cleared later
@@ -31,14 +35,19 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 
 	uint8_t i = 1;
 	for(auto const& button : buttonData->buttonMapping) {
-		InsertColumn(i, button.second->normalName, wxLIST_FORMAT_CENTER, wxLIST_AUTOSIZE);
+		InsertColumn(i, button.second->normalName, wxLIST_FORMAT_CENTER,
+			wxLIST_AUTOSIZE);
 		// Shouldn't be the exact width, it's a bit too small that way
 		SetColumnWidth(i, (int)(imageIconWidth * 1.5f));
 		buttonToColumn[button.first]               = i;
 		charToButton[button.second->toggleKeybind] = button.first;
 
-		imageList.Add(*const_cast<wxBitmap*>(button.second->resizedListOnBitmap), maskColor);
-		imageList.Add(*const_cast<wxBitmap*>(button.second->resizedListOffBitmap), maskColor);
+		imageList.Add(
+			*const_cast<wxBitmap*>(button.second->resizedListOnBitmap),
+			maskColor);
+		imageList.Add(
+			*const_cast<wxBitmap*>(button.second->resizedListOffBitmap),
+			maskColor);
 
 		i++;
 	}
@@ -64,18 +73,30 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	insertPaste = false;
 	placePaste  = false;
 
-	entries[0].Set(wxACCEL_CTRL, (int)'C', wxID_COPY, editMenu.Append(wxID_COPY, wxT("Copy\tCtrl+C")));
-	entries[1].Set(wxACCEL_CTRL, (int)'X', wxID_CUT, editMenu.Append(wxID_CUT, wxT("Cut\tCtrl+X")));
-	entries[2].Set(wxACCEL_CTRL, (int)'V', wxID_PASTE, editMenu.Append(wxID_PASTE, wxT("Paste\tCtrl+V")));
-	entries[3].Set(wxACCEL_CTRL | wxACCEL_SHIFT, (int)'V', pasteInsertID, editMenu.Append(pasteInsertID, wxT("Paste Insert\tCtrl+Shift+V")));
-	entries[4].Set(wxACCEL_CTRL | wxACCEL_ALT, (int)'V', pastePlaceID, editMenu.Append(pastePlaceID, wxT("Paste Place\tCtrl+Alt+V")));
+	entries[0].Set(wxACCEL_CTRL, (int)'C', wxID_COPY,
+		editMenu.Append(wxID_COPY, wxT("Copy\tCtrl+C")));
+	entries[1].Set(wxACCEL_CTRL, (int)'X', wxID_CUT,
+		editMenu.Append(wxID_CUT, wxT("Cut\tCtrl+X")));
+	entries[2].Set(wxACCEL_CTRL, (int)'V', wxID_PASTE,
+		editMenu.Append(wxID_PASTE, wxT("Paste\tCtrl+V")));
+	entries[3].Set(wxACCEL_CTRL | wxACCEL_SHIFT, (int)'V', pasteInsertID,
+		editMenu.Append(pasteInsertID, wxT("Paste Insert\tCtrl+Shift+V")));
+	entries[4].Set(wxACCEL_CTRL | wxACCEL_ALT, (int)'V', pastePlaceID,
+		editMenu.Append(pastePlaceID, wxT("Paste Place\tCtrl+Alt+V")));
 
-	entries[5].Set(wxACCEL_CTRL, (int)'=', addFrameID, editMenu.Append(addFrameID, wxT("Add Frame\tCtrl+Plus")));
-	entries[6].Set(wxACCEL_CTRL | wxACCEL_SHIFT, (int)'=', add10FramesID, editMenu.Append(add10FramesID, wxT("Add 10 Frames\tCtrl+Plus")));
-	entries[7].Set(0, WXK_DELETE, removeFrameID, editMenu.Append(removeFrameID, wxT("Remove Frame\tDelete")));
-	entries[8].Set(wxACCEL_CTRL, WXK_RIGHT, frameAdvanceID, editMenu.Append(frameAdvanceID, wxT("Frame Advance\tCtrl+Right")));
-	entries[9].Set(wxACCEL_CTRL, (int)'H', savestateID, editMenu.Append(savestateID, wxT("Add Savestate\tCtrl+H")));
-	entries[10].Set(wxACCEL_CTRL, (int)'M', mergeIntoMainBranchID, editMenu.Append(mergeIntoMainBranchID, wxT("Merge Frames into Main Branch\tCtrl+M")));
+	entries[5].Set(wxACCEL_CTRL, (int)'=', addFrameID,
+		editMenu.Append(addFrameID, wxT("Add Frame\tCtrl+Plus")));
+	entries[6].Set(wxACCEL_CTRL | wxACCEL_SHIFT, (int)'=', add10FramesID,
+		editMenu.Append(add10FramesID, wxT("Add 10 Frames\tCtrl+Plus")));
+	entries[7].Set(0, WXK_DELETE, removeFrameID,
+		editMenu.Append(removeFrameID, wxT("Remove Frame\tDelete")));
+	entries[8].Set(wxACCEL_CTRL, WXK_RIGHT, frameAdvanceID,
+		editMenu.Append(frameAdvanceID, wxT("Frame Advance\tCtrl+Right")));
+	entries[9].Set(wxACCEL_CTRL, (int)'H', savestateID,
+		editMenu.Append(savestateID, wxT("Add Savestate\tCtrl+H")));
+	entries[10].Set(wxACCEL_CTRL, (int)'M', mergeIntoMainBranchID,
+		editMenu.Append(mergeIntoMainBranchID,
+			wxT("Merge Frames into Main Branch\tCtrl+M")));
 
 	wxAcceleratorTable accel(11, entries);
 	SetAcceleratorTable(accel);
@@ -91,7 +112,8 @@ DataProcessing::DataProcessing(rapidjson::Document* settings, std::shared_ptr<Bu
 	Bind(wxEVT_MENU, &DataProcessing::onRemoveFrame, this, removeFrameID);
 	Bind(wxEVT_MENU, &DataProcessing::onFrameAdvance, this, frameAdvanceID);
 	Bind(wxEVT_MENU, &DataProcessing::onAddSavestate, this, savestateID);
-	Bind(wxEVT_MENU, &DataProcessing::onMergeIntoMainBranch, this, mergeIntoMainBranchID);
+	Bind(wxEVT_MENU, &DataProcessing::onMergeIntoMainBranch, this,
+		mergeIntoMainBranchID);
 
 	Bind(wxEVT_LIST_CACHE_HINT, &DataProcessing::onCacheHint, this);
 	Bind(wxEVT_LIST_ITEM_SELECTED, &DataProcessing::onSelect, this);
@@ -110,44 +132,57 @@ void DataProcessing::setInputCallback(std::function<void(uint8_t)> callback) {
 	inputCallback = callback;
 }
 
-void DataProcessing::setSelectedFrameCallbackVideoViewer(std::function<void(int)> callback) {
+void DataProcessing::setSelectedFrameCallbackVideoViewer(
+	std::function<void(int)> callback) {
 	selectedFrameCallbackVideoViewer = callback;
 }
 
-void DataProcessing::setViewableInputsCallback(std::function<void(FrameNum, FrameNum)> callback) {
+void DataProcessing::setViewableInputsCallback(
+	std::function<void(FrameNum, FrameNum)> callback) {
 	viewableInputsCallback = callback;
 }
 
-void DataProcessing::setChangingSelectedFrameCallback(std::function<void(FrameNum, FrameNum, FrameNum)> callback) {
+void DataProcessing::setChangingSelectedFrameCallback(
+	std::function<void(FrameNum, FrameNum, FrameNum)> callback) {
 	changingSelectedFrameCallback = callback;
 }
 
-void DataProcessing::setPlayerInfoCallback(std::function<void(uint8_t, uint8_t, bool)> callback) {
+void DataProcessing::setPlayerInfoCallback(
+	std::function<void(uint8_t, uint8_t, bool)> callback) {
 	playerInfoCallback = callback;
 }
 
-void DataProcessing::setBranchInfoCallback(std::function<void(uint16_t, uint16_t, bool)> callback) {
+void DataProcessing::setBranchInfoCallback(
+	std::function<void(uint16_t, uint16_t, bool)> callback) {
 	branchInfoCallback = callback;
 }
 
 void DataProcessing::triggerCurrentFrameChanges() {
 	if(changingSelectedFrameCallback) {
-		changingSelectedFrameCallback(currentFrame, currentRunFrame, currentImageFrame);
+		changingSelectedFrameCallback(
+			currentFrame, currentRunFrame, currentImageFrame);
 	}
 }
 
-void DataProcessing::sendAutoAdvance(uint8_t includeFramebuffer, TasValueToRecord valueToRecord, uint8_t incrementFrame) {
-	std::shared_ptr<TouchAndKeyboardData> extraDatas = getControllerDataExtra(currentSavestateHook, viewingBranchIndex, currentRunFrame);
+void DataProcessing::sendAutoAdvance(uint8_t includeFramebuffer,
+	TasValueToRecord valueToRecord, uint8_t incrementFrame) {
+	std::shared_ptr<TouchAndKeyboardData> extraDatas = getControllerDataExtra(
+		currentSavestateHook, viewingBranchIndex, currentRunFrame);
 
-	for(uint8_t playerIndex = 0; playerIndex < allPlayers.size(); playerIndex++) {
+	for(uint8_t playerIndex = 0; playerIndex < allPlayers.size();
+		playerIndex++) {
 		// Set inputs of all other players correctly but not the current one
 		// Unless the controller is not being recorded, in that case add it
-		if(playerIndex != viewingPlayerIndex || valueToRecord != TasValueToRecord::CONTROLLER) {
-			std::shared_ptr<ControllerData> controllerDatas = getControllerData(playerIndex, currentSavestateHook, viewingBranchIndex, currentRunFrame);
+		if(playerIndex != viewingPlayerIndex
+			|| valueToRecord != TasValueToRecord::CONTROLLER) {
+			std::shared_ptr<ControllerData> controllerDatas
+				= getControllerData(playerIndex, currentSavestateHook,
+					viewingBranchIndex, currentRunFrame);
 
 			ADD_TO_QUEUE(SendFrameData, networkInstance, {
 				data.controllerData = *controllerDatas;
 				data.incrementFrame = false;
+				data.playerIndex    = viewingPlayerIndex;
 				data.typeToRecord   = TasValueToRecord::NONE;
 				data.valueIncluded  = TasValueToRecord::CONTROLLER;
 			})
@@ -155,7 +190,8 @@ void DataProcessing::sendAutoAdvance(uint8_t includeFramebuffer, TasValueToRecor
 	}
 
 	if(valueToRecord != TasValueToRecord::KEYBOARD_MOUSE) {
-		std::shared_ptr<TouchAndKeyboardData> sendData = std::make_shared<TouchAndKeyboardData>();
+		std::shared_ptr<TouchAndKeyboardData> sendData
+			= std::make_shared<TouchAndKeyboardData>();
 		buttonData->transferOnlyKeyboard(*extraDatas, sendData);
 
 		ADD_TO_QUEUE(SendFrameData, networkInstance, {
@@ -167,7 +203,8 @@ void DataProcessing::sendAutoAdvance(uint8_t includeFramebuffer, TasValueToRecor
 	}
 
 	if(valueToRecord != TasValueToRecord::TOUCHSCREEN) {
-		std::shared_ptr<TouchAndKeyboardData> sendData = std::make_shared<TouchAndKeyboardData>();
+		std::shared_ptr<TouchAndKeyboardData> sendData
+			= std::make_shared<TouchAndKeyboardData>();
 		buttonData->transferOnlyTouch(*extraDatas, sendData);
 
 		ADD_TO_QUEUE(SendFrameData, networkInstance, {
@@ -195,9 +232,8 @@ std::string DataProcessing::getExportedCurrentPlayer() {
 	wxFile file(exportTarget.GetFullPath(), wxFile::write);
 
 	if(file.IsOpened()) {
-		std::string exported = buttonData->framesToText(this, 0, 0, viewingPlayerIndex);
-		file.Write(wxString::FromUTF8(exported));
-		file.Close();
+		std::string exported = buttonData->framesToText(this, 0, 0,
+	viewingPlayerIndex); file.Write(wxString::FromUTF8(exported)); file.Close();
 	}
 	*/
 
@@ -216,9 +252,14 @@ void DataProcessing::importFromFile(wxFileName importTarget) {
 
 		if(successful) {
 			Freeze();
-			FrameNum lastFrame = buttonData->textToFrames(this, fileContents.ToStdString(), 0, false, false);
+			FrameNum lastFrame = buttonData->textToFrames(
+				this, fileContents.ToStdString(), 0, false, false);
 			// Remove all frames after the data
-			removeFrames(lastFrame + 1, allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->size() - 1);
+			removeFrames(lastFrame + 1, allPlayers[viewingPlayerIndex]
+												->at(currentSavestateHook)
+												->inputs[viewingBranchIndex]
+												->size()
+											- 1);
 			Thaw();
 			setCurrentFrame(0);
 			Refresh();
@@ -286,13 +327,15 @@ void DataProcessing::setItemAttributes() {
 
 	SET_BIT(state, true, (uint8_t)FrameState::RAN);
 	itemAttribute = new wxItemAttr();
-	itemAttribute->SetBackgroundColour(wxColor((*mainSettings)["ui"]["frameViewerColors"]["ran"].GetString()));
+	itemAttribute->SetBackgroundColour(
+		wxColor((*mainSettings)["ui"]["frameViewerColors"]["ran"].GetString()));
 	itemAttributes[state] = itemAttribute;
 	SET_BIT(state, false, (uint8_t)FrameState::RAN);
 
 	SET_BIT(state, true, (uint8_t)FrameState::SAVESTATE);
 	itemAttribute = new wxItemAttr();
-	itemAttribute->SetBackgroundColour(wxColor((*mainSettings)["ui"]["frameViewerColors"]["savestate"].GetString()));
+	itemAttribute->SetBackgroundColour(wxColor(
+		(*mainSettings)["ui"]["frameViewerColors"]["savestate"].GetString()));
 	itemAttributes[state] = itemAttribute;
 	// SavestateHook takes precedence in the case where both are present
 	SET_BIT(state, true, (uint8_t)FrameState::RAN);
@@ -375,23 +418,32 @@ void DataProcessing::onCopy(wxCommandEvent& event) {
 	// First, try opening the clipboard
 	// https://docs.wxwidgets.org/3.0/classwx_clipboard.html#a6c56dbf02b1807ce61cac8134a534336
 	if(wxTheClipboard->Open()) {
-		long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+		long firstSelectedItem
+			= GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 		if(firstSelectedItem != wxNOT_FOUND) {
-			long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
+			long lastSelectedItem
+				= firstSelectedItem + GetSelectedItemCount() - 1;
 
 			// There is a selected item
-			if(currentFrame >= firstSelectedItem && currentFrame <= lastSelectedItem) {
+			if(currentFrame >= firstSelectedItem
+				&& currentFrame <= lastSelectedItem) {
 				// Add these items to the clipboard
-				wxTheClipboard->SetData(new wxTextDataObject(buttonData->framesToText(this, firstSelectedItem, lastSelectedItem, -1, viewingBranchIndex)));
+				wxTheClipboard->SetData(new wxTextDataObject(
+					buttonData->framesToText(this, firstSelectedItem,
+						lastSelectedItem, -1, viewingBranchIndex)));
 			} else {
 				// Deselect the others
-				for(FrameNum i = firstSelectedItem; i <= lastSelectedItem; i++) {
+				for(FrameNum i = firstSelectedItem; i <= lastSelectedItem;
+					i++) {
 					SetItemState(i, 0, wxLIST_STATE_SELECTED);
 				}
 				// Select just the one
-				SetItemState(currentFrame, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+				SetItemState(
+					currentFrame, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 
-				wxTheClipboard->SetData(new wxTextDataObject(buttonData->framesToText(this, currentFrame, currentFrame, -1, viewingBranchIndex)));
+				wxTheClipboard->SetData(
+					new wxTextDataObject(buttonData->framesToText(this,
+						currentFrame, currentFrame, -1, viewingBranchIndex)));
 
 				// See the new selection
 				RefreshItem(currentFrame);
@@ -406,7 +458,8 @@ void DataProcessing::onCut(wxCommandEvent& event) {
 	// Copy the elements, then delete
 	onCopy(event);
 	// Erase the frames
-	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	long firstSelectedItem
+		= GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if(firstSelectedItem != wxNOT_FOUND) {
 		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
 		removeFrames(firstSelectedItem, lastSelectedItem);
@@ -414,7 +467,8 @@ void DataProcessing::onCut(wxCommandEvent& event) {
 }
 
 void DataProcessing::onPaste(wxCommandEvent& event) {
-	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	long firstSelectedItem
+		= GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if(firstSelectedItem != wxNOT_FOUND) {
 		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
 
@@ -427,11 +481,14 @@ void DataProcessing::onPaste(wxCommandEvent& event) {
 				std::string clipboardText = data.GetText().ToStdString();
 
 				Freeze();
-				FrameNum lastItem    = buttonData->textToFrames(this, clipboardText, firstSelectedItem, insertPaste, placePaste);
+				FrameNum lastItem    = buttonData->textToFrames(this,
+                    clipboardText, firstSelectedItem, insertPaste, placePaste);
 				FrameNum sizeOfPaste = lastItem - firstSelectedItem + 1;
 				if(!insertPaste) {
-					for(long i = firstSelectedItem; i <= lastSelectedItem; i += sizeOfPaste) {
-						buttonData->textToFrames(this, clipboardText, i, insertPaste, placePaste);
+					for(long i = firstSelectedItem; i <= lastSelectedItem;
+						i += sizeOfPaste) {
+						buttonData->textToFrames(
+							this, clipboardText, i, insertPaste, placePaste);
 					}
 				}
 				setCurrentFrame(firstSelectedItem + sizeOfPaste - 1);
@@ -467,7 +524,8 @@ void DataProcessing::onAdd10Frames(wxCommandEvent& event) {
 }
 
 void DataProcessing::onRemoveFrame(wxCommandEvent& event) {
-	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	long firstSelectedItem
+		= GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if(firstSelectedItem != wxNOT_FOUND) {
 		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
 		removeFrames(firstSelectedItem, lastSelectedItem);
@@ -487,14 +545,21 @@ void DataProcessing::onAddSavestate(wxCommandEvent& event) {
 
 void DataProcessing::onMergeIntoMainBranch(wxCommandEvent& event) {
 	// Don't just convert into text format, merge by moving over frames
-	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	long firstSelectedItem
+		= GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if(firstSelectedItem != wxNOT_FOUND) {
 		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
 		for(FrameNum i = firstSelectedItem; i <= lastSelectedItem; i++) {
 			// Transfer directly to first branch
-			buttonData->transferControllerData(*getInputsList()->at(i), allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[0]->at(i), false);
+			buttonData->transferControllerData(*getInputsList()->at(i),
+				allPlayers[viewingPlayerIndex]
+					->at(currentSavestateHook)
+					->inputs[0]
+					->at(i),
+				false);
 			// Include keyboard and touch
-			buttonData->transferExtraData(*getInputsExtraList()->at(i), allExtraFrameData[currentSavestateHook]->at(0)->at(i), false);
+			buttonData->transferExtraData(*getInputsExtraList()->at(i),
+				allExtraFrameData[currentSavestateHook]->at(0)->at(i), false);
 		}
 	}
 	// It's up to the user to remove the frames in the other branch if they want
@@ -505,7 +570,10 @@ void DataProcessing::setCurrentFrame(FrameNum frameNum) {
 	if(frameNum < getFramesSize()) {
 		// Set the current frame to this frame
 		// Shared pointer so this can be done
-		currentData = allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->at(frameNum);
+		currentData = allPlayers[viewingPlayerIndex]
+						  ->at(currentSavestateHook)
+						  ->inputs[viewingBranchIndex]
+						  ->at(frameNum);
 		// Set the current frame to this number
 		// Focus to this specific row now
 		// This essentially scrolls to it
@@ -542,14 +610,28 @@ void DataProcessing::createSavestateHere() {
 	RefreshItem(currentFrame);
 }
 
-void DataProcessing::runFrame(uint8_t forAutoFrame, uint8_t updateFramebuffer, uint8_t includeFramebuffer) {
-	if(currentRunFrame < allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->size() - 1) {
-		// Technically, should handle for entering next savetstate hook block, but TODO
-		std::shared_ptr<ControllerData> controllerData = allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->at(currentRunFrame);
+bool DataProcessing::runFrame(uint8_t forAutoFrame, uint8_t updateFramebuffer,
+	uint8_t includeFramebuffer) {
+	if(currentRunFrame < allPlayers[viewingPlayerIndex]
+								 ->at(currentSavestateHook)
+								 ->inputs[viewingBranchIndex]
+								 ->size()
+							 - 1) {
+		// Technically, should handle for entering next savetstate hook block,
+		// but TODO
+		std::shared_ptr<ControllerData> controllerData
+			= allPlayers[viewingPlayerIndex]
+				  ->at(currentSavestateHook)
+				  ->inputs[viewingBranchIndex]
+				  ->at(currentRunFrame);
 
 		setFramestateInfo(currentRunFrame, FrameState::RAN, true);
 
-		uint8_t withinFrames = currentRunFrame < allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->size();
+		uint8_t withinFrames
+			= currentRunFrame < allPlayers[viewingPlayerIndex]
+									->at(currentSavestateHook)
+									->inputs[viewingBranchIndex]
+									->size();
 
 		// If possible, make current frame this frame
 		if(withinFrames) {
@@ -566,7 +648,8 @@ void DataProcessing::runFrame(uint8_t forAutoFrame, uint8_t updateFramebuffer, u
 
 		// Refresh the grid
 		if(changingSelectedFrameCallback) {
-			changingSelectedFrameCallback(currentFrame, currentRunFrame, currentImageFrame);
+			changingSelectedFrameCallback(
+				currentFrame, currentRunFrame, currentImageFrame);
 		}
 
 		if(inputCallback) {
@@ -578,8 +661,12 @@ void DataProcessing::runFrame(uint8_t forAutoFrame, uint8_t updateFramebuffer, u
 
 		if(currentRunFrame < getFramesSize()) {
 			if(!forAutoFrame) {
-				sendAutoAdvance(includeFramebuffer, TasValueToRecord::NONE, true);
+				sendAutoAdvance(
+					includeFramebuffer, TasValueToRecord::NONE, true);
 			}
+			return true;
+		} else {
+			return false;
 		}
 	}
 }
@@ -622,23 +709,33 @@ void DataProcessing::onCacheHint(wxListEvent& event) {
 	}
 }
 
-void DataProcessing::addNewSavestateHook(std::string dHash, wxBitmap* screenshot) {
+void DataProcessing::addNewSavestateHook(
+	std::string dHash, wxBitmap* screenshot) {
 	// Has to be done for every controller
 	for(uint8_t i = 0; i < allPlayers.size(); i++) {
-		std::shared_ptr<SavestateHook> savestateHook = std::make_shared<SavestateHook>();
-		savestateHook->dHash                         = dHash;
-		savestateHook->screenshot                    = screenshot;
-		savestateHook->runFinalTasDelayFrames        = 0;
+		std::shared_ptr<SavestateHook> savestateHook
+			= std::make_shared<SavestateHook>();
+		savestateHook->dHash                  = dHash;
+		savestateHook->screenshot             = screenshot;
+		savestateHook->runFinalTasDelayFrames = 0;
 		// Add a single branch for default
-		savestateHook->inputs.push_back(std::make_shared<std::vector<FrameData>>());
+		savestateHook->inputs.push_back(
+			std::make_shared<std::vector<FrameData>>());
 		allPlayers[i]->push_back(savestateHook);
 		// Add one controller data to the first branch
-		allPlayers[i]->at(allPlayers.size() - 1)->inputs[0]->push_back(std::make_shared<ControllerData>());
+		allPlayers[i]
+			->at(allPlayers.size() - 1)
+			->inputs[0]
+			->push_back(std::make_shared<ControllerData>());
 	}
 
-	std::shared_ptr<std::vector<std::shared_ptr<std::vector<ExtraFrameData>>>> thisHookExtraData = std::make_shared<std::vector<std::shared_ptr<std::vector<ExtraFrameData>>>>();
-	thisHookExtraData->push_back(std::make_shared<std::vector<ExtraFrameData>>());
-	thisHookExtraData->at(0)->push_back(std::make_shared<TouchAndKeyboardData>());
+	std::shared_ptr<std::vector<std::shared_ptr<std::vector<ExtraFrameData>>>>
+		thisHookExtraData = std::make_shared<
+			std::vector<std::shared_ptr<std::vector<ExtraFrameData>>>>();
+	thisHookExtraData->push_back(
+		std::make_shared<std::vector<ExtraFrameData>>());
+	thisHookExtraData->at(0)->push_back(
+		std::make_shared<TouchAndKeyboardData>());
 
 	allExtraFrameData.push_back(thisHookExtraData);
 
@@ -662,7 +759,8 @@ void DataProcessing::setSavestateHook(SavestateBlockNum index) {
 	modifyCurrentFrameViews(currentFrame);
 
 	if(changingSelectedFrameCallback) {
-		changingSelectedFrameCallback(currentFrame, currentRunFrame, currentImageFrame);
+		changingSelectedFrameCallback(
+			currentFrame, currentRunFrame, currentImageFrame);
 	}
 
 	Refresh();
@@ -670,21 +768,25 @@ void DataProcessing::setSavestateHook(SavestateBlockNum index) {
 
 void DataProcessing::removeSavestateHook(SavestateBlockNum index) {
 	if(allPlayers[viewingPlayerIndex]->size() > 1) {
-		allPlayers[viewingPlayerIndex]->erase(allPlayers[viewingPlayerIndex]->begin() + index);
+		allPlayers[viewingPlayerIndex]->erase(
+			allPlayers[viewingPlayerIndex]->begin() + index);
 		allExtraFrameData.erase(allExtraFrameData.begin() + index);
 		setSavestateHook(0);
 
 		// Move over all the framebuffer names
 		wxRemoveFile(getFramebufferPathForSavestateHook(index).GetFullPath());
-		HELPERS::popOffDirs(getFramebufferPath(0, index, 0, 0), 1).Rmdir(wxPATH_RMDIR_RECURSIVE);
+		HELPERS::popOffDirs(getFramebufferPath(0, index, 0, 0), 1)
+			.Rmdir(wxPATH_RMDIR_RECURSIVE);
 
 		// Rename all images following this hook
 		SavestateBlockNum temp1 = index;
 		while(true) {
 			temp1++;
-			wxFileName savestateHookFile = getFramebufferPathForSavestateHook(temp1);
+			wxFileName savestateHookFile
+				= getFramebufferPathForSavestateHook(temp1);
 			if(savestateHookFile.FileExists()) {
-				wxRenameFile(savestateHookFile.GetPath(), getFramebufferPathForSavestateHook(temp1).GetPath());
+				wxRenameFile(savestateHookFile.GetPath(),
+					getFramebufferPathForSavestateHook(temp1).GetPath());
 			} else {
 				// Have encountered last savestate hook, break loop
 				break;
@@ -695,9 +797,13 @@ void DataProcessing::removeSavestateHook(SavestateBlockNum index) {
 		SavestateBlockNum temp2 = index;
 		while(true) {
 			temp2++;
-			wxFileName savestateHookDir = HELPERS::popOffDirs(getFramebufferPath(0, temp2, 0, 0), 1);
+			wxFileName savestateHookDir
+				= HELPERS::popOffDirs(getFramebufferPath(0, temp2, 0, 0), 1);
 			if(savestateHookDir.DirExists()) {
-				wxRenameFile(savestateHookDir.GetPath(), HELPERS::popOffDirs(getFramebufferPath(0, temp2 - 1, 0, 0), 1).GetPath());
+				wxRenameFile(savestateHookDir.GetPath(),
+					HELPERS::popOffDirs(
+						getFramebufferPath(0, temp2 - 1, 0, 0), 1)
+						.GetPath());
 			} else {
 				// Have encountered last savestate hook, break loop
 				break;
@@ -708,26 +814,32 @@ void DataProcessing::removeSavestateHook(SavestateBlockNum index) {
 
 void DataProcessing::addNewPlayer() {
 	if(allPlayers.size() < 4) {
-		std::shared_ptr<std::vector<std::shared_ptr<SavestateHook>>> player = std::make_shared<std::vector<std::shared_ptr<SavestateHook>>>();
+		std::shared_ptr<std::vector<std::shared_ptr<SavestateHook>>> player
+			= std::make_shared<std::vector<std::shared_ptr<SavestateHook>>>();
 
 		if(allPlayers.size() != 0) {
 			sendPlayerNum();
-			// Match this player to the number of savestate hooks as the first player
+			// Match this player to the number of savestate hooks as the first
+			// player
 			for(auto const& hook : *allPlayers[0]) {
-				std::shared_ptr<SavestateHook> newSavestateHook = std::make_shared<SavestateHook>();
+				std::shared_ptr<SavestateHook> newSavestateHook
+					= std::make_shared<SavestateHook>();
 
 				// Has the same number of branches
 				for(FrameNum i = 0; i < hook->inputs.size(); i++) {
-					newSavestateHook->inputs.push_back(std::make_shared<std::vector<std::shared_ptr<ControllerData>>>());
+					newSavestateHook->inputs.push_back(std::make_shared<
+						std::vector<std::shared_ptr<ControllerData>>>());
 					// Each of those branches have the same number of inputs
 					for(FrameNum j = 0; j < hook->inputs[i]->size(); j++) {
 						// Create empty frames to add
-						newSavestateHook->inputs[i]->push_back(std::make_shared<ControllerData>());
+						newSavestateHook->inputs[i]->push_back(
+							std::make_shared<ControllerData>());
 					}
 				}
 
-				newSavestateHook->dHash                  = "";
-				newSavestateHook->screenshot             = HELPERS::getDefaultSavestateScreenshot();
+				newSavestateHook->dHash = "";
+				newSavestateHook->screenshot
+					= HELPERS::getDefaultSavestateScreenshot();
 				newSavestateHook->runFinalTasDelayFrames = 0;
 				player->push_back(newSavestateHook);
 			}
@@ -762,7 +874,8 @@ void DataProcessing::removePlayer(uint8_t playerIndex) {
 	}
 	sendPlayerNum();
 
-	// No framebuffer folders to remove because players dont have specific framebuffers
+	// No framebuffer folders to remove because players dont have specific
+	// framebuffers
 }
 
 void DataProcessing::removeThisPlayer() {
@@ -781,7 +894,8 @@ std::shared_ptr<ControllerData> DataProcessing::getFrame(FrameNum frame) const {
 	return getInputsList()->at(frame);
 }
 
-std::shared_ptr<TouchAndKeyboardData> DataProcessing::getFrameExtra(FrameNum frame) const {
+std::shared_ptr<TouchAndKeyboardData> DataProcessing::getFrameExtra(
+	FrameNum frame) const {
 	return getInputsExtraList()->at(frame);
 }
 
@@ -789,7 +903,8 @@ void DataProcessing::addNewBranch() {
 	// Only add to this player
 	for(auto& player : allPlayers) {
 		auto& list = player->at(currentSavestateHook)->inputs;
-		list.push_back(std::make_shared<std::vector<std::shared_ptr<ControllerData>>>());
+		list.push_back(
+			std::make_shared<std::vector<std::shared_ptr<ControllerData>>>());
 		uint16_t lastElement = list.size() - 1;
 		// Add number of frames as the first branch has
 		for(FrameNum j = 0; j < list[0]->size(); j++) {
@@ -797,18 +912,25 @@ void DataProcessing::addNewBranch() {
 		}
 	}
 	auto& extraFrameDataBranch = allExtraFrameData[currentSavestateHook];
-	extraFrameDataBranch->push_back(std::make_shared<std::vector<ExtraFrameData>>());
+	extraFrameDataBranch->push_back(
+		std::make_shared<std::vector<ExtraFrameData>>());
 	uint16_t lastElement = extraFrameDataBranch->size() - 1;
 	for(FrameNum j = 0; j < extraFrameDataBranch->at(0)->size(); j++) {
-		extraFrameDataBranch->at(lastElement)->push_back(std::make_shared<TouchAndKeyboardData>());
+		extraFrameDataBranch->at(lastElement)
+			->push_back(std::make_shared<TouchAndKeyboardData>());
 	}
-	setBranch(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs.size() - 1);
+	setBranch(
+		allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs.size()
+		- 1);
 }
 
 void DataProcessing::setBranch(uint16_t branchIndex) {
 	viewingBranchIndex = branchIndex;
-	currentBranchData  = allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex];
-	currentExtraData   = allExtraFrameData[currentSavestateHook]->at(viewingBranchIndex);
+	currentBranchData  = allPlayers[viewingPlayerIndex]
+							->at(currentSavestateHook)
+							->inputs[viewingBranchIndex];
+	currentExtraData
+		= allExtraFrameData[currentSavestateHook]->at(viewingBranchIndex);
 	if(branchInfoCallback) {
 		branchInfoCallback(getNumBranches(), branchIndex, true);
 	}
@@ -817,19 +939,34 @@ void DataProcessing::setBranch(uint16_t branchIndex) {
 }
 
 void DataProcessing::removeBranch(uint8_t branchIndex) {
-	if(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs.size() > 1) {
-		allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs.erase(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs.begin() + branchIndex);
-		allExtraFrameData[currentSavestateHook]->erase(allExtraFrameData[currentSavestateHook]->begin() + branchIndex);
-		setBranch(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs.size() - 1);
+	if(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs.size()
+		> 1) {
+		allPlayers[viewingPlayerIndex]
+			->at(currentSavestateHook)
+			->inputs.erase(allPlayers[viewingPlayerIndex]
+							   ->at(currentSavestateHook)
+							   ->inputs.begin()
+						   + branchIndex);
+		allExtraFrameData[currentSavestateHook]->erase(
+			allExtraFrameData[currentSavestateHook]->begin() + branchIndex);
+		setBranch(allPlayers[viewingPlayerIndex]
+					  ->at(currentSavestateHook)
+					  ->inputs.size()
+				  - 1);
 
-		getFramebufferPath(0, currentSavestateHook, branchIndex, 0).Rmdir(wxPATH_RMDIR_RECURSIVE);
+		getFramebufferPath(0, currentSavestateHook, branchIndex, 0)
+			.Rmdir(wxPATH_RMDIR_RECURSIVE);
 
 		// Rename all images in this branch
 		while(true) {
 			branchIndex++;
-			wxFileName branchFolder = getFramebufferPath(0, currentSavestateHook, branchIndex, 0);
+			wxFileName branchFolder
+				= getFramebufferPath(0, currentSavestateHook, branchIndex, 0);
 			if(branchFolder.DirExists()) {
-				wxRenameFile(branchFolder.GetPath(), getFramebufferPath(0, currentSavestateHook, branchIndex - 1, 0).GetPath());
+				wxRenameFile(branchFolder.GetPath(),
+					getFramebufferPath(
+						0, currentSavestateHook, branchIndex - 1, 0)
+						.GetPath());
 			} else {
 				// Have encountered last savestate hook, break loop
 				break;
@@ -842,7 +979,8 @@ void DataProcessing::removeThisBranch() {
 	removeBranch(viewingBranchIndex);
 }
 
-void DataProcessing::scrollToSpecific(uint8_t player, SavestateBlockNum savestateHookNum, BranchNum branch, FrameNum frame) {
+void DataProcessing::scrollToSpecific(uint8_t player,
+	SavestateBlockNum savestateHookNum, BranchNum branch, FrameNum frame) {
 	setPlayer(player);
 	setSavestateHook(savestateHookNum);
 	setCurrentFrame(frame);
@@ -851,7 +989,8 @@ void DataProcessing::scrollToSpecific(uint8_t player, SavestateBlockNum savestat
 
 void DataProcessing::triggerButton(Btn button) {
 	// Trigger button, can occur over range
-	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	long firstSelectedItem
+		= GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if(firstSelectedItem != wxNOT_FOUND) {
 		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
 		// Now, apply the button
@@ -864,21 +1003,30 @@ void DataProcessing::triggerButton(Btn button) {
 }
 
 // This includes joysticks, accel, gyro, etc...
-void DataProcessing::triggerNumberValuesJoystick(ControllerNumberValues joystickId, int16_t value) {
+void DataProcessing::triggerNumberValuesJoystick(
+	ControllerNumberValues joystickId, int16_t value) {
 	// Trigger joystick, can occur over range
-	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	long firstSelectedItem
+		= GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if(firstSelectedItem != wxNOT_FOUND) {
 		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
 		for(FrameNum i = firstSelectedItem; i <= lastSelectedItem; i++) {
 			setNumberValuesJoystick(i, joystickId, value);
-			// No refresh for now, as the joystick is not visible in the allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs
+			// No refresh for now, as the joystick is not visible in the
+			// allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs
 		}
 	}
 }
 
 // New FANCY methods
-void DataProcessing::modifyButton(FrameNum frame, Btn button, uint8_t isPressed) {
-	SET_BIT(allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs[viewingBranchIndex]->at(frame)->buttons, isPressed, (uint8_t)button);
+void DataProcessing::modifyButton(
+	FrameNum frame, Btn button, uint8_t isPressed) {
+	SET_BIT(allPlayers[viewingPlayerIndex]
+				->at(currentSavestateHook)
+				->inputs[viewingBranchIndex]
+				->at(frame)
+				->buttons,
+		isPressed, (uint8_t)button);
 
 	invalidateRun(frame);
 
@@ -899,7 +1047,8 @@ void DataProcessing::clearAllButtons(FrameNum frame) {
 	RefreshItem(frame);
 }
 
-void DataProcessing::setNumberValuesJoystick(FrameNum frame, ControllerNumberValues joystickId, int16_t value) {
+void DataProcessing::setNumberValuesJoystick(
+	FrameNum frame, ControllerNumberValues joystickId, int16_t value) {
 	auto& frameData = getInputsList()->at(frame);
 	switch(joystickId) {
 	case ControllerNumberValues::LEFT_X:
@@ -920,7 +1069,8 @@ void DataProcessing::setNumberValuesJoystick(FrameNum frame, ControllerNumberVal
 	invalidateRun(frame);
 }
 
-void DataProcessing::setNumberValuesMotion(FrameNum frame, ControllerNumberValues joystickId, float value) {
+void DataProcessing::setNumberValuesMotion(
+	FrameNum frame, ControllerNumberValues joystickId, float value) {
 	auto& frameData = getInputsList()->at(frame);
 	switch(joystickId) {
 	case ControllerNumberValues::ACCEL_X_LEFT:
@@ -1037,7 +1187,8 @@ void DataProcessing::setNumberValuesMotion(FrameNum frame, ControllerNumberValue
 	invalidateRun(frame);
 }
 
-int16_t DataProcessing::getNumberValuesJoystick(FrameNum frame, ControllerNumberValues joystickId) const {
+int16_t DataProcessing::getNumberValuesJoystick(
+	FrameNum frame, ControllerNumberValues joystickId) const {
 	auto& frameData = getInputsList()->at(frame);
 	switch(joystickId) {
 	case ControllerNumberValues::LEFT_X:
@@ -1056,7 +1207,8 @@ int16_t DataProcessing::getNumberValuesJoystick(FrameNum frame, ControllerNumber
 	return 0;
 }
 
-float DataProcessing::getNumberValuesMotion(FrameNum frame, ControllerNumberValues joystickId) const {
+float DataProcessing::getNumberValuesMotion(
+	FrameNum frame, ControllerNumberValues joystickId) const {
 	auto& frameData = getInputsList()->at(frame);
 	switch(joystickId) {
 	case ControllerNumberValues::ACCEL_X_LEFT:
@@ -1171,8 +1323,11 @@ float DataProcessing::getNumberValuesMotion(FrameNum frame, ControllerNumberValu
 	return 0;
 }
 
-int16_t DataProcessing::getNumberValuesSpecificJoystick(FrameNum frame, ControllerNumberValues joystickId, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
-	auto const& frameData = getControllerData(player, savestateHookNum, branch, frame);
+int16_t DataProcessing::getNumberValuesSpecificJoystick(FrameNum frame,
+	ControllerNumberValues joystickId, SavestateBlockNum savestateHookNum,
+	BranchNum branch, uint8_t player) const {
+	auto const& frameData
+		= getControllerData(player, savestateHookNum, branch, frame);
 	switch(joystickId) {
 	case ControllerNumberValues::LEFT_X:
 		return frameData->LS_X;
@@ -1190,8 +1345,11 @@ int16_t DataProcessing::getNumberValuesSpecificJoystick(FrameNum frame, Controll
 	return 0;
 }
 
-float DataProcessing::getNumberValuesSpecificMotion(FrameNum frame, ControllerNumberValues joystickId, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
-	auto const& frameData = getControllerData(player, savestateHookNum, branch, frame);
+float DataProcessing::getNumberValuesSpecificMotion(FrameNum frame,
+	ControllerNumberValues joystickId, SavestateBlockNum savestateHookNum,
+	BranchNum branch, uint8_t player) const {
+	auto const& frameData
+		= getControllerData(player, savestateHookNum, branch, frame);
 	switch(joystickId) {
 	case ControllerNumberValues::ACCEL_X_LEFT:
 		return frameData->ACCEL_X_LEFT;
@@ -1305,21 +1463,25 @@ float DataProcessing::getNumberValuesSpecificMotion(FrameNum frame, ControllerNu
 }
 
 // This includes joysticks, accel, gyro, etc...
-void DataProcessing::triggerNumberValuesMotion(ControllerNumberValues id, float value) {
+void DataProcessing::triggerNumberValuesMotion(
+	ControllerNumberValues id, float value) {
 	// Trigger joystick, can occur over range
-	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	long firstSelectedItem
+		= GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if(firstSelectedItem != wxNOT_FOUND) {
 		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
 		for(FrameNum i = firstSelectedItem; i <= lastSelectedItem; i++) {
 			setNumberValuesMotion(i, id, value);
-			// No refresh for now, as the joystick is not visible in the allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs
+			// No refresh for now, as the joystick is not visible in the
+			// allPlayers[viewingPlayerIndex]->at(currentSavestateHook)->inputs
 		}
 	}
 }
 
 void DataProcessing::triggerNumberOfTouches(uint8_t value) {
 	// Trigger button, can occur over range
-	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	long firstSelectedItem
+		= GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if(firstSelectedItem != wxNOT_FOUND) {
 		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
 		for(FrameNum i = firstSelectedItem; i <= lastSelectedItem; i++) {
@@ -1341,8 +1503,11 @@ uint8_t DataProcessing::getNumberOfTouches(FrameNum frame) const {
 	return getInputsExtraList()->at(frame)->numberOfTouches;
 }
 
-uint8_t DataProcessing::getNumberOfTouchesSpecific(FrameNum frame, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
-	return getControllerDataExtra(savestateHookNum, branch, frame)->numberOfTouches;
+uint8_t DataProcessing::getNumberOfTouchesSpecific(FrameNum frame,
+	SavestateBlockNum savestateHookNum, BranchNum branch,
+	uint8_t player) const {
+	return getControllerDataExtra(savestateHookNum, branch, frame)
+		->numberOfTouches;
 }
 
 uint8_t DataProcessing::getNumberOfTouchesCurrent() const {
@@ -1350,7 +1515,8 @@ uint8_t DataProcessing::getNumberOfTouchesCurrent() const {
 }
 
 void DataProcessing::triggerExtraValue(ExtraValues extraValue, int32_t value) {
-	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	long firstSelectedItem
+		= GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if(firstSelectedItem != wxNOT_FOUND) {
 		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
 		for(FrameNum i = firstSelectedItem; i <= lastSelectedItem; i++) {
@@ -1359,7 +1525,8 @@ void DataProcessing::triggerExtraValue(ExtraValues extraValue, int32_t value) {
 	}
 }
 
-void DataProcessing::setExtraValue(FrameNum frame, ExtraValues extraValue, int32_t value) {
+void DataProcessing::setExtraValue(
+	FrameNum frame, ExtraValues extraValue, int32_t value) {
 	auto& frameData = getInputsExtraList()->at(frame);
 	switch(extraValue) {
 	case TOUCH_X_1:
@@ -1400,7 +1567,8 @@ void DataProcessing::setExtraValue(FrameNum frame, ExtraValues extraValue, int32
 	modifyCurrentFrameViews(frame);
 }
 
-int32_t DataProcessing::getExtraValue(FrameNum frame, ExtraValues extraValue) const {
+int32_t DataProcessing::getExtraValue(
+	FrameNum frame, ExtraValues extraValue) const {
 	auto const& frameData = getInputsExtraList()->at(frame);
 	switch(extraValue) {
 	case TOUCH_X_1:
@@ -1437,7 +1605,9 @@ int32_t DataProcessing::getExtraValue(FrameNum frame, ExtraValues extraValue) co
 	return 0;
 }
 
-int32_t DataProcessing::getExtraValueSpecific(FrameNum frame, ExtraValues extraValue, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
+int32_t DataProcessing::getExtraValueSpecific(FrameNum frame,
+	ExtraValues extraValue, SavestateBlockNum savestateHookNum,
+	BranchNum branch, uint8_t player) const {
 	switch(extraValue) {
 	case TOUCH_X_1:
 		return getControllerDataExtra(savestateHookNum, branch, frame)->touchX1;
@@ -1458,16 +1628,20 @@ int32_t DataProcessing::getExtraValueSpecific(FrameNum frame, ExtraValues extraV
 		return getControllerDataExtra(savestateHookNum, branch, frame)->mouseY;
 		break;
 	case MOUSE_VELOCITY_X:
-		return getControllerDataExtra(savestateHookNum, branch, frame)->mouseVelocityX;
+		return getControllerDataExtra(savestateHookNum, branch, frame)
+			->mouseVelocityX;
 		break;
 	case MOUSE_VELOCITY_Y:
-		return getControllerDataExtra(savestateHookNum, branch, frame)->mouseVelocityY;
+		return getControllerDataExtra(savestateHookNum, branch, frame)
+			->mouseVelocityY;
 		break;
 	case SCROLL_VELOCITY_X:
-		return getControllerDataExtra(savestateHookNum, branch, frame)->scrollVelocityX;
+		return getControllerDataExtra(savestateHookNum, branch, frame)
+			->scrollVelocityX;
 		break;
 	case SCROLL_VELOCITY_Y:
-		return getControllerDataExtra(savestateHookNum, branch, frame)->scrollVelocityY;
+		return getControllerDataExtra(savestateHookNum, branch, frame)
+			->scrollVelocityY;
 		break;
 	}
 	return 0;
@@ -1478,7 +1652,8 @@ int32_t DataProcessing::getExtraValueCurrent(ExtraValues extraValue) const {
 }
 
 void DataProcessing::triggerKeyboardButton(nn::hid::KeyboardKey key) {
-	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	long firstSelectedItem
+		= GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if(firstSelectedItem != wxNOT_FOUND) {
 		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
 		uint8_t state         = !getKeyboardButton(currentFrame, key);
@@ -1488,8 +1663,10 @@ void DataProcessing::triggerKeyboardButton(nn::hid::KeyboardKey key) {
 	}
 }
 
-void DataProcessing::setKeyboardButton(FrameNum frame, nn::hid::KeyboardKey key, uint8_t state) {
-	SET_KEYBOARD_HELD(getInputsExtraList()->at(frame)->keyboardKeys, (int32_t)key, state);
+void DataProcessing::setKeyboardButton(
+	FrameNum frame, nn::hid::KeyboardKey key, uint8_t state) {
+	SET_KEYBOARD_HELD(
+		getInputsExtraList()->at(frame)->keyboardKeys, (int32_t)key, state);
 
 	invalidateRun(frame);
 
@@ -1497,17 +1674,23 @@ void DataProcessing::setKeyboardButton(FrameNum frame, nn::hid::KeyboardKey key,
 	modifyCurrentFrameViews(frame);
 }
 
-int32_t DataProcessing::getKeyboardButton(FrameNum frame, nn::hid::KeyboardKey key) const {
+int32_t DataProcessing::getKeyboardButton(
+	FrameNum frame, nn::hid::KeyboardKey key) const {
 	auto const& keys = getInputsExtraList()->at(frame)->keyboardKeys;
 	int32_t isHeld   = IS_KEYBOARD_HELD(keys, (int32_t)key);
 	return isHeld;
 }
 
-int32_t DataProcessing::getKeyboardButtonSpecific(FrameNum frame, nn::hid::KeyboardKey key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
-	return IS_KEYBOARD_HELD(getControllerDataExtra(savestateHookNum, branch, frame)->keyboardKeys, (int32_t)key);
+int32_t DataProcessing::getKeyboardButtonSpecific(FrameNum frame,
+	nn::hid::KeyboardKey key, SavestateBlockNum savestateHookNum,
+	BranchNum branch, uint8_t player) const {
+	return IS_KEYBOARD_HELD(
+		getControllerDataExtra(savestateHookNum, branch, frame)->keyboardKeys,
+		(int32_t)key);
 }
 
-int32_t DataProcessing::getKeyboardButtonCurrent(nn::hid::KeyboardKey key) const {
+int32_t DataProcessing::getKeyboardButtonCurrent(
+	nn::hid::KeyboardKey key) const {
 	return getKeyboardButton(currentFrame, key);
 }
 
@@ -1521,7 +1704,8 @@ void DataProcessing::clearAllKeyboardButtons(FrameNum frame) {
 }
 
 void DataProcessing::triggerKeyboardModifier(nn::hid::KeyboardModifier key) {
-	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	long firstSelectedItem
+		= GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if(firstSelectedItem != wxNOT_FOUND) {
 		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
 		uint8_t state         = !getKeyboardModifier(currentFrame, key);
@@ -1531,7 +1715,8 @@ void DataProcessing::triggerKeyboardModifier(nn::hid::KeyboardModifier key) {
 	}
 }
 
-void DataProcessing::setKeyboardModifier(FrameNum frame, nn::hid::KeyboardModifier key, uint8_t state) {
+void DataProcessing::setKeyboardModifier(
+	FrameNum frame, nn::hid::KeyboardModifier key, uint8_t state) {
 	auto& frameData = getInputsExtraList()->at(frame);
 	if(state) {
 		frameData->keyboardModifiers |= (int32_t)key;
@@ -1545,14 +1730,20 @@ void DataProcessing::setKeyboardModifier(FrameNum frame, nn::hid::KeyboardModifi
 	modifyCurrentFrameViews(frame);
 }
 
-int32_t DataProcessing::getKeyboardModifier(FrameNum frame, nn::hid::KeyboardModifier key) const {
+int32_t DataProcessing::getKeyboardModifier(
+	FrameNum frame, nn::hid::KeyboardModifier key) const {
 	return getInputsExtraList()->at(frame)->keyboardModifiers & (int32_t)key;
 }
-int32_t DataProcessing::getKeyboardModifierSpecific(FrameNum frame, nn::hid::KeyboardModifier key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
-	return getControllerDataExtra(savestateHookNum, branch, frame)->keyboardModifiers & (int32_t)key;
+int32_t DataProcessing::getKeyboardModifierSpecific(FrameNum frame,
+	nn::hid::KeyboardModifier key, SavestateBlockNum savestateHookNum,
+	BranchNum branch, uint8_t player) const {
+	return getControllerDataExtra(savestateHookNum, branch, frame)
+			   ->keyboardModifiers
+		   & (int32_t)key;
 }
 
-int32_t DataProcessing::getKeyboardModifierCurrent(nn::hid::KeyboardModifier key) const {
+int32_t DataProcessing::getKeyboardModifierCurrent(
+	nn::hid::KeyboardModifier key) const {
 	return getKeyboardModifier(currentFrame, key);
 }
 
@@ -1565,7 +1756,8 @@ void DataProcessing::clearAllKeyboardModifiers(FrameNum frame) {
 }
 
 void DataProcessing::triggerMouseButton(nn::hid::MouseButton key) {
-	long firstSelectedItem = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+	long firstSelectedItem
+		= GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 	if(firstSelectedItem != wxNOT_FOUND) {
 		long lastSelectedItem = firstSelectedItem + GetSelectedItemCount() - 1;
 		uint8_t state         = !getMouseButton(currentFrame, key);
@@ -1575,7 +1767,8 @@ void DataProcessing::triggerMouseButton(nn::hid::MouseButton key) {
 	}
 }
 
-void DataProcessing::setMouseButton(FrameNum frame, nn::hid::MouseButton key, uint8_t state) {
+void DataProcessing::setMouseButton(
+	FrameNum frame, nn::hid::MouseButton key, uint8_t state) {
 	auto& frameData = getInputsExtraList()->at(frame);
 	if(state) {
 		frameData->mouseButtons |= (int32_t)key;
@@ -1589,12 +1782,16 @@ void DataProcessing::setMouseButton(FrameNum frame, nn::hid::MouseButton key, ui
 	modifyCurrentFrameViews(frame);
 }
 
-int32_t DataProcessing::getMouseButton(FrameNum frame, nn::hid::MouseButton key) const {
+int32_t DataProcessing::getMouseButton(
+	FrameNum frame, nn::hid::MouseButton key) const {
 	return getInputsExtraList()->at(frame)->mouseButtons & (int32_t)key;
 }
 
-int32_t DataProcessing::getMouseButtonSpecific(FrameNum frame, nn::hid::MouseButton key, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
-	return getControllerDataExtra(savestateHookNum, branch, frame)->mouseButtons & (int32_t)key;
+int32_t DataProcessing::getMouseButtonSpecific(FrameNum frame,
+	nn::hid::MouseButton key, SavestateBlockNum savestateHookNum,
+	BranchNum branch, uint8_t player) const {
+	return getControllerDataExtra(savestateHookNum, branch, frame)->mouseButtons
+		   & (int32_t)key;
 }
 
 int32_t DataProcessing::getMouseButtonCurrent(nn::hid::MouseButton key) const {
@@ -1613,34 +1810,46 @@ uint8_t DataProcessing::getButton(FrameNum frame, Btn button) const {
 	return GET_BIT(getInputsList()->at(frame)->buttons, (uint8_t)button);
 }
 
-uint8_t DataProcessing::getButtonSpecific(FrameNum frame, Btn button, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
-	return GET_BIT(getControllerData(player, savestateHookNum, branch, frame)->buttons, (uint8_t)button);
+uint8_t DataProcessing::getButtonSpecific(FrameNum frame, Btn button,
+	SavestateBlockNum savestateHookNum, BranchNum branch,
+	uint8_t player) const {
+	return GET_BIT(
+		getControllerData(player, savestateHookNum, branch, frame)->buttons,
+		(uint8_t)button);
 }
 
 uint8_t DataProcessing::getButtonCurrent(Btn button) const {
 	return getButton(currentFrame, button);
 }
 
-void DataProcessing::setControllerDataForAutoRun(ControllerData controllerData) {
-	buttonData->transferControllerData(controllerData, getInputsList()->at(currentFrame), false);
+void DataProcessing::setControllerDataForAutoRun(
+	ControllerData controllerData) {
+	buttonData->transferControllerData(
+		controllerData, getInputsList()->at(currentFrame), false);
 	modifyCurrentFrameViews(currentFrame);
 }
 
-void DataProcessing::setExtraDataKeyboardForAutoRun(TouchAndKeyboardData extraData) {
-	buttonData->transferOnlyKeyboard(extraData, getInputsExtraList()->at(currentFrame));
+void DataProcessing::setExtraDataKeyboardForAutoRun(
+	TouchAndKeyboardData extraData) {
+	buttonData->transferOnlyKeyboard(
+		extraData, getInputsExtraList()->at(currentFrame));
 	modifyCurrentFrameViews(currentFrame);
 }
 
-void DataProcessing::setExtraDataTouchForAutoRun(TouchAndKeyboardData extraData) {
-	buttonData->transferOnlyTouch(extraData, getInputsExtraList()->at(currentFrame));
+void DataProcessing::setExtraDataTouchForAutoRun(
+	TouchAndKeyboardData extraData) {
+	buttonData->transferOnlyTouch(
+		extraData, getInputsExtraList()->at(currentFrame));
 	modifyCurrentFrameViews(currentFrame);
 }
 
-int16_t DataProcessing::getNumberValueCurrentJoystick(ControllerNumberValues joystickId) const {
+int16_t DataProcessing::getNumberValueCurrentJoystick(
+	ControllerNumberValues joystickId) const {
 	return getNumberValuesJoystick(currentFrame, joystickId);
 }
 
-float DataProcessing::getNumberValueCurrentMotion(ControllerNumberValues joystickId) const {
+float DataProcessing::getNumberValueCurrentMotion(
+	ControllerNumberValues joystickId) const {
 	return getNumberValuesMotion(currentFrame, joystickId);
 }
 
@@ -1653,7 +1862,8 @@ void DataProcessing::modifyCurrentFrameViews(FrameNum frame) {
 		RefreshItem(currentFrame);
 		// Refresh the grid
 		if(changingSelectedFrameCallback) {
-			changingSelectedFrameCallback(currentFrame, currentRunFrame, currentImageFrame);
+			changingSelectedFrameCallback(
+				currentFrame, currentRunFrame, currentImageFrame);
 		}
 		if(inputCallback) {
 			inputCallback(true);
@@ -1661,7 +1871,8 @@ void DataProcessing::modifyCurrentFrameViews(FrameNum frame) {
 	}
 }
 
-void DataProcessing::setFramestateInfo(FrameNum frame, FrameState id, uint8_t state) {
+void DataProcessing::setFramestateInfo(
+	FrameNum frame, FrameState id, uint8_t state) {
 	SET_BIT(getInputsList()->at(frame)->frameState, state, (uint8_t)id);
 
 	if(IsVisible(frame)) {
@@ -1671,11 +1882,16 @@ void DataProcessing::setFramestateInfo(FrameNum frame, FrameState id, uint8_t st
 	modifyCurrentFrameViews(frame);
 }
 
-void DataProcessing::setFramestateInfoSpecific(FrameNum frame, FrameState id, uint8_t state, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) {
-	if(savestateHookNum == currentSavestateHook && player == viewingPlayerIndex) {
+void DataProcessing::setFramestateInfoSpecific(FrameNum frame, FrameState id,
+	uint8_t state, SavestateBlockNum savestateHookNum, BranchNum branch,
+	uint8_t player) {
+	if(savestateHookNum == currentSavestateHook
+		&& player == viewingPlayerIndex) {
 		setFramestateInfo(frame, id, state);
 	} else {
-		SET_BIT(getControllerData(player, savestateHookNum, branch, frame)->frameState, state, (uint8_t)id);
+		SET_BIT(getControllerData(player, savestateHookNum, branch, frame)
+					->frameState,
+			state, (uint8_t)id);
 	}
 }
 
@@ -1683,8 +1899,12 @@ uint8_t DataProcessing::getFramestateInfo(FrameNum frame, FrameState id) const {
 	return GET_BIT(getInputsList()->at(frame)->frameState, (uint8_t)id);
 }
 
-uint8_t DataProcessing::getFramestateInfoSpecific(FrameNum frame, FrameState id, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) const {
-	return GET_BIT(getControllerData(player, savestateHookNum, branch, frame)->frameState, (uint8_t)id);
+uint8_t DataProcessing::getFramestateInfoSpecific(FrameNum frame, FrameState id,
+	SavestateBlockNum savestateHookNum, BranchNum branch,
+	uint8_t player) const {
+	return GET_BIT(
+		getControllerData(player, savestateHookNum, branch, frame)->frameState,
+		(uint8_t)id);
 }
 
 // Without the id, just return the whole hog
@@ -1697,14 +1917,16 @@ void DataProcessing::invalidateRun(FrameNum frame) {
 	while(true) {
 		if(frame == size || !getFramestateInfo(frame, FrameState::RAN)) {
 			// Refresh all these items
-			// I don't care if it's way off the page, I think wxWidgets handles for this
+			// I don't care if it's way off the page, I think wxWidgets handles
+			// for this
 			Refresh();
 			break;
 		}
 		// Set bit
 		setFramestateInfo(frame, FrameState::RAN, false);
 		// Also delete framebuffer from filesystem if neccessary
-		wxFileName framebufferFileName = getFramebufferPath(viewingPlayerIndex, currentSavestateHook, viewingBranchIndex, frame);
+		wxFileName framebufferFileName = getFramebufferPath(viewingPlayerIndex,
+			currentSavestateHook, viewingBranchIndex, frame);
 		if(framebufferFileName.FileExists()) {
 			// Delete file from filesystem
 			wxRemoveFile(framebufferFileName.GetFullPath());
@@ -1713,22 +1935,29 @@ void DataProcessing::invalidateRun(FrameNum frame) {
 	}
 }
 
-void DataProcessing::invalidateRunSpecific(FrameNum frame, SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) {
+void DataProcessing::invalidateRunSpecific(FrameNum frame,
+	SavestateBlockNum savestateHookNum, BranchNum branch, uint8_t player) {
 	auto& list    = allPlayers[player]->at(savestateHookNum)->inputs[branch];
 	FrameNum size = list->size();
 	// TODO make this work with extra data too
 	while(true) {
-		if(frame == size || !getFramestateInfoSpecific(frame, FrameState::RAN, savestateHookNum, branch, player)) {
+		if(frame == size
+			|| !getFramestateInfoSpecific(
+				frame, FrameState::RAN, savestateHookNum, branch, player)) {
 			// Refresh all these items
-			// I don't care if it's way off the page, I think wxWidgets handles for this
+			// I don't care if it's way off the page, I think wxWidgets handles
+			// for this
 			Refresh();
 			break;
 		}
 		// Set bit
-		setFramestateInfoSpecific(frame, FrameState::RAN, false, savestateHookNum, branch, player);
-		// setFramestateInfoSpecific(frame, FrameState::SAVESTATE, false, savestateHookNum, branch, player);
-		// Also delete framebuffer from filesystem if neccessary
-		wxFileName framebufferFileName = getFramebufferPath(player, savestateHookNum, branch, frame);
+		setFramestateInfoSpecific(
+			frame, FrameState::RAN, false, savestateHookNum, branch, player);
+		// setFramestateInfoSpecific(frame, FrameState::SAVESTATE, false,
+		// savestateHookNum, branch, player); Also delete framebuffer from
+		// filesystem if neccessary
+		wxFileName framebufferFileName
+			= getFramebufferPath(player, savestateHookNum, branch, frame);
 		if(framebufferFileName.FileExists()) {
 			// Delete file from filesystem
 			wxRemoveFile(framebufferFileName.GetFullPath());
@@ -1744,7 +1973,8 @@ void DataProcessing::addFrame(FrameNum afterFrame) {
 		BranchNum branchIndex = 0;
 
 		for(auto& branch : player->at(currentSavestateHook)->inputs) {
-			std::shared_ptr<ControllerData> newControllerData = std::make_shared<ControllerData>();
+			std::shared_ptr<ControllerData> newControllerData
+				= std::make_shared<ControllerData>();
 
 			if(branch->size() == 0) {
 				branch->push_back(newControllerData);
@@ -1754,7 +1984,8 @@ void DataProcessing::addFrame(FrameNum afterFrame) {
 			}
 
 			// Invalidate run for the data immidiently after this frame
-			invalidateRunSpecific(afterFrame + 1, currentSavestateHook, branchIndex, playerIndex);
+			invalidateRunSpecific(
+				afterFrame + 1, currentSavestateHook, branchIndex, playerIndex);
 
 			branchIndex++;
 		}
@@ -1765,7 +1996,8 @@ void DataProcessing::addFrame(FrameNum afterFrame) {
 	BranchNum branchIndex = 0;
 
 	for(auto& branch : *allExtraFrameData[currentSavestateHook]) {
-		std::shared_ptr<TouchAndKeyboardData> newExtraData = std::make_shared<TouchAndKeyboardData>();
+		std::shared_ptr<TouchAndKeyboardData> newExtraData
+			= std::make_shared<TouchAndKeyboardData>();
 
 		if(branch->size() == 0) {
 			branch->push_back(newExtraData);
@@ -1775,7 +2007,8 @@ void DataProcessing::addFrame(FrameNum afterFrame) {
 		}
 
 		// Invalidate run for the data immidiently after this frame
-		// invalidateRunSpecific(afterFrame + 1, currentSavestateHook, branchIndex, playerIndex);
+		// invalidateRunSpecific(afterFrame + 1, currentSavestateHook,
+		// branchIndex, playerIndex);
 
 		branchIndex++;
 	}
@@ -1785,7 +2018,8 @@ void DataProcessing::addFrame(FrameNum afterFrame) {
 
 	modifyCurrentFrameViews(afterFrame + 1);
 
-	// Be very careful about refreshing, serious lag can happen if it's done wrong
+	// Be very careful about refreshing, serious lag can happen if it's done
+	// wrong
 	if(IsVisible(afterFrame + 1)) {
 		Refresh();
 	}
@@ -1807,7 +2041,8 @@ void DataProcessing::removeFrames(FrameNum start, FrameNum end) {
 				branch->erase(beginning + start, beginning + end + 1);
 
 				// Invalidate run for the data immidiently after this frame
-				invalidateRunSpecific(start, currentSavestateHook, branchIndex, playerIndex);
+				invalidateRunSpecific(
+					start, currentSavestateHook, branchIndex, playerIndex);
 
 				branchIndex++;
 			}
@@ -1821,12 +2056,14 @@ void DataProcessing::removeFrames(FrameNum start, FrameNum end) {
 			branch->erase(beginning + start, beginning + end + 1);
 
 			// Invalidate run for the data immidiently after this frame
-			// invalidateRunSpecific(start, currentSavestateHook, branchIndex, playerIndex);
+			// invalidateRunSpecific(start, currentSavestateHook, branchIndex,
+			// playerIndex);
 
 			branchIndex++;
 		}
 
-		// Because of the usability of virtual list controls, just update the length
+		// Because of the usability of virtual list controls, just update the
+		// length
 		SetItemCount(getInputsList()->size());
 
 		if(currentFrame > (getFramesSize() - 1)) {

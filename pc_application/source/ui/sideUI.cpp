@@ -6,8 +6,11 @@ FrameCanvas::FrameCanvas(wxFrame* parent, DataProcessing* dataProcessing)
 	currentLast  = 0;
 	inputData    = dataProcessing;
 
-	inputData->setViewableInputsCallback(std::bind(&FrameCanvas::rangeUpdated, this, std::placeholders::_1, std::placeholders::_2));
-	inputData->setChangingSelectedFrameCallback(std::bind(&FrameCanvas::currentFrameUpdated, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	inputData->setViewableInputsCallback(std::bind(&FrameCanvas::rangeUpdated,
+		this, std::placeholders::_1, std::placeholders::_2));
+	inputData->setChangingSelectedFrameCallback(std::bind(
+		&FrameCanvas::currentFrameUpdated, this, std::placeholders::_1,
+		std::placeholders::_2, std::placeholders::_3));
 }
 
 void FrameCanvas::rangeUpdated(FrameNum first, FrameNum last) {
@@ -19,7 +22,8 @@ void FrameCanvas::rangeUpdated(FrameNum first, FrameNum last) {
 	}
 }
 
-void FrameCanvas::currentFrameUpdated(FrameNum frame, FrameNum runFrame, FrameNum imageFrame) {
+void FrameCanvas::currentFrameUpdated(
+	FrameNum frame, FrameNum runFrame, FrameNum imageFrame) {
 	currentFrame      = frame;
 	currentRunFrame   = runFrame;
 	currentImageFrame = imageFrame;
@@ -54,25 +58,32 @@ void FrameCanvas::draw(wxDC& dc) {
 		}
 
 		// Slight offset to make asthetically pleasing
-		dc.DrawRectangle(wxPoint(4, startY + itemHeight * i + 4), wxSize(width - 8, itemHeight - 4));
+		dc.DrawRectangle(wxPoint(4, startY + itemHeight * i + 4),
+			wxSize(width - 8, itemHeight - 4));
 
 		// Draw current run and image frame stuff
 		if(frame == currentRunFrame) {
 			// Draw green line
 			dc.SetPen(*wxGREEN_PEN);
 			dc.SetBrush(*wxGREEN_BRUSH);
-			dc.DrawRectangle(wxPoint(2, startY + itemHeight * i + 1), wxSize(halfWidth - 4, 2));
+			dc.DrawRectangle(wxPoint(2, startY + itemHeight * i + 1),
+				wxSize(halfWidth - 4, 2));
 		}
 		if(frame == currentImageFrame) {
 			// Draw orange line
 			dc.SetPen(*wxRED_PEN);
 			dc.SetBrush(*wxRED_BRUSH);
-			dc.DrawRectangle(wxPoint(halfWidth + 2, startY + itemHeight * i + 1), wxSize(halfWidth - 4, 2));
+			dc.DrawRectangle(
+				wxPoint(halfWidth + 2, startY + itemHeight * i + 1),
+				wxSize(halfWidth - 4, 2));
 		}
 	}
 };
 
-SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ProjectHandler> projHandler, wxBoxSizer* sizer, DataProcessing* input, std::shared_ptr<CommunicateWithNetwork> networkImp, std::function<void()> runFrameCallback) {
+SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings,
+	std::shared_ptr<ProjectHandler> projHandler, wxBoxSizer* sizer,
+	DataProcessing* input, std::shared_ptr<CommunicateWithNetwork> networkImp,
+	std::function<void()> runFrameCallback) {
 	mainSettings           = settings;
 	inputData              = input;
 	networkInterface       = networkImp;
@@ -95,15 +106,24 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	frameDrawer->SetToolTip("View selected frame");
 	inputData->SetToolTip("Edit frames");
 
-	addFrameButton            = HELPERS::getBitmapButton(parentFrame, mainSettings, "addFrameButton");
-	frameAdvanceButton        = HELPERS::getBitmapButton(parentFrame, mainSettings, "frameAdvanceButton");
-	savestateHookCreateButton = HELPERS::getBitmapButton(parentFrame, mainSettings, "savestateHookCreateButton");
-	savestateHookLoadButton   = HELPERS::getBitmapButton(parentFrame, mainSettings, "savestateHookLoadButton");
-	savestateHookModifyButton = HELPERS::getBitmapButton(parentFrame, mainSettings, "savestateHookModifyButton");
-	playerAddButton           = HELPERS::getBitmapButton(parentFrame, mainSettings, "playerAddButton");
-	playerRemoveButton        = HELPERS::getBitmapButton(parentFrame, mainSettings, "playerRemoveButton");
-	branchAddButton           = HELPERS::getBitmapButton(parentFrame, mainSettings, "branchAddButton");
-	branchRemoveButton        = HELPERS::getBitmapButton(parentFrame, mainSettings, "branchRemoveButton");
+	addFrameButton
+		= HELPERS::getBitmapButton(parentFrame, mainSettings, "addFrameButton");
+	frameAdvanceButton = HELPERS::getBitmapButton(
+		parentFrame, mainSettings, "frameAdvanceButton");
+	savestateHookCreateButton = HELPERS::getBitmapButton(
+		parentFrame, mainSettings, "savestateHookCreateButton");
+	savestateHookLoadButton = HELPERS::getBitmapButton(
+		parentFrame, mainSettings, "savestateHookLoadButton");
+	savestateHookModifyButton = HELPERS::getBitmapButton(
+		parentFrame, mainSettings, "savestateHookModifyButton");
+	playerAddButton = HELPERS::getBitmapButton(
+		parentFrame, mainSettings, "playerAddButton");
+	playerRemoveButton = HELPERS::getBitmapButton(
+		parentFrame, mainSettings, "playerRemoveButton");
+	branchAddButton = HELPERS::getBitmapButton(
+		parentFrame, mainSettings, "branchAddButton");
+	branchRemoveButton = HELPERS::getBitmapButton(
+		parentFrame, mainSettings, "branchRemoveButton");
 
 	addFrameButton->SetToolTip("Add frame");
 	frameAdvanceButton->SetToolTip("Advance frame");
@@ -115,18 +135,27 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	branchAddButton->SetToolTip("Add branch");
 	branchRemoveButton->SetToolTip("Remove current branch");
 
-	playerSelect = new wxComboBox(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_DROPDOWN | wxCB_READONLY);
-	inputData->setPlayerInfoCallback(std::bind(&SideUI::setPlayerInfo, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	playerSelect = new wxComboBox(parentFrame, wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, 0, NULL,
+		wxCB_DROPDOWN | wxCB_READONLY);
+	inputData->setPlayerInfoCallback(std::bind(&SideUI::setPlayerInfo, this,
+		std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	playerSelect->Bind(wxEVT_COMBOBOX, &SideUI::playerSelected, this);
 	playerSelect->SetToolTip("Set player");
 
-	branchSelect = new wxComboBox(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_DROPDOWN | wxCB_READONLY);
-	inputData->setBranchInfoCallback(std::bind(&SideUI::setBranchInfo, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	branchSelect = new wxComboBox(parentFrame, wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize, 0, NULL,
+		wxCB_DROPDOWN | wxCB_READONLY);
+	inputData->setBranchInfoCallback(std::bind(&SideUI::setBranchInfo, this,
+		std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	branchSelect->Bind(wxEVT_COMBOBOX, &SideUI::branchSelected, this);
 	branchSelect->SetToolTip("Set branch");
 
-	runFinalTasStartingDelay = new wxSpinCtrl(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10000, 0);
-	runFinalTasStartingDelay->SetToolTip("Delay in frames when running this block in real time");
+	runFinalTasStartingDelay
+		= new wxSpinCtrl(parentFrame, wxID_ANY, wxEmptyString,
+			wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10000, 0);
+	runFinalTasStartingDelay->SetToolTip(
+		"Delay in frames when running this block in real time");
 
 	// clang-format off
 	ADD_NETWORK_CALLBACK(RecieveFlag, {
@@ -138,14 +167,20 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 
 	// Button handlers
 	addFrameButton->Bind(wxEVT_BUTTON, &SideUI::onAddFramePressed, this);
-	frameAdvanceButton->Bind(wxEVT_BUTTON, &SideUI::onFrameAdvancePressed, this);
-	savestateHookCreateButton->Bind(wxEVT_BUTTON, &SideUI::onSavestateHookCreatePressed, this);
-	savestateHookLoadButton->Bind(wxEVT_BUTTON, &SideUI::onSavestateHookLoadPressed, this);
-	savestateHookModifyButton->Bind(wxEVT_BUTTON, &SideUI::onSavestateHookModifyPressed, this);
+	frameAdvanceButton->Bind(
+		wxEVT_BUTTON, &SideUI::onFrameAdvancePressed, this);
+	savestateHookCreateButton->Bind(
+		wxEVT_BUTTON, &SideUI::onSavestateHookCreatePressed, this);
+	savestateHookLoadButton->Bind(
+		wxEVT_BUTTON, &SideUI::onSavestateHookLoadPressed, this);
+	savestateHookModifyButton->Bind(
+		wxEVT_BUTTON, &SideUI::onSavestateHookModifyPressed, this);
 	playerAddButton->Bind(wxEVT_BUTTON, &SideUI::onPlayerAddPressed, this);
-	playerRemoveButton->Bind(wxEVT_BUTTON, &SideUI::onPlayerRemovePressed, this);
+	playerRemoveButton->Bind(
+		wxEVT_BUTTON, &SideUI::onPlayerRemovePressed, this);
 	branchAddButton->Bind(wxEVT_BUTTON, &SideUI::onBranchAddPressed, this);
-	branchRemoveButton->Bind(wxEVT_BUTTON, &SideUI::onBranchRemovePressed, this);
+	branchRemoveButton->Bind(
+		wxEVT_BUTTON, &SideUI::onBranchRemovePressed, this);
 
 	buttonSizer->Add(addFrameButton, 1);
 	buttonSizer->Add(frameAdvanceButton, 1);
@@ -170,8 +205,10 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	autoFrameSizer = new wxBoxSizer(wxHORIZONTAL);
 
 	// TODO add these images
-	autoFrameStart = HELPERS::getBitmapButton(parentFrame, mainSettings, "autoFrameAdvanceButton");
-	autoFrameEnd   = HELPERS::getBitmapButton(parentFrame, mainSettings, "pauseButton");
+	autoFrameStart = HELPERS::getBitmapButton(
+		parentFrame, mainSettings, "autoFrameAdvanceButton");
+	autoFrameEnd
+		= HELPERS::getBitmapButton(parentFrame, mainSettings, "pauseButton");
 
 	autoFrameStart->SetToolTip("Start auto frame advance");
 	autoFrameEnd->SetToolTip("Stop auto frame advance");
@@ -180,18 +217,25 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 	autoFrameEnd->Bind(wxEVT_BUTTON, &SideUI::onEndAutoFramePressed, this);
 
 	// Name is a misnomer
-	autoRunFramesPerSecond = new wxSpinCtrl(parentFrame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 5000, 200);
-	autoRunFramesPerSecond->SetToolTip("Delay in mlliseconds for automatically incrementing frame");
-	autoRunFramesPerSecond->Bind(wxEVT_SPINCTRL, &SideUI::finalTasFrameDelayChanged, this);
+	autoRunFramesPerSecond
+		= new wxSpinCtrl(parentFrame, wxID_ANY, wxEmptyString,
+			wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 5000, 200);
+	autoRunFramesPerSecond->SetToolTip(
+		"Delay in mlliseconds for automatically incrementing frame");
+	autoRunFramesPerSecond->Bind(
+		wxEVT_SPINCTRL, &SideUI::finalTasFrameDelayChanged, this);
 
-	autoRunWithFramebuffer = new wxCheckBox(parentFrame, wxID_ANY, "Include Screenshot");
+	autoRunWithFramebuffer
+		= new wxCheckBox(parentFrame, wxID_ANY, "Include Screenshot");
 
-	typeChoices[(uint8_t)TasValueToRecord::NONE]           = "Record None";
-	typeChoices[(uint8_t)TasValueToRecord::CONTROLLER]     = "Record Controller";
-	typeChoices[(uint8_t)TasValueToRecord::KEYBOARD_MOUSE] = "Record Keyboard/Mouse";
-	typeChoices[(uint8_t)TasValueToRecord::TOUCHSCREEN]    = "Record Touchscreen";
+	typeChoices[(uint8_t)TasValueToRecord::NONE]       = "Record None";
+	typeChoices[(uint8_t)TasValueToRecord::CONTROLLER] = "Record Controller";
+	typeChoices[(uint8_t)TasValueToRecord::KEYBOARD_MOUSE]
+		= "Record Keyboard/Mouse";
+	typeChoices[(uint8_t)TasValueToRecord::TOUCHSCREEN] = "Record Touchscreen";
 
-	valueToRecord = new wxChoice(parentFrame, wxID_ANY, wxDefaultPosition, wxDefaultSize, (uint8_t)TasValueToRecord::NUM_OF_TYPES, typeChoices);
+	valueToRecord = new wxChoice(parentFrame, wxID_ANY, wxDefaultPosition,
+		wxDefaultSize, (uint8_t)TasValueToRecord::NUM_OF_TYPES, typeChoices);
 	valueToRecord->SetSelection(0);
 
 	autoRunWithFramebuffer->SetValue(true);
@@ -212,7 +256,8 @@ SideUI::SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_
 }
 
 void SideUI::handleUnexpectedControllerSize() {
-	setPlayerInfo(inputData->getAllPlayers().size(), inputData->getCurrentPlayer(), true);
+	setPlayerInfo(
+		inputData->getAllPlayers().size(), inputData->getCurrentPlayer(), true);
 }
 
 void SideUI::setPlayerInfo(uint8_t size, uint8_t selected, bool force) {
@@ -227,11 +272,13 @@ void SideUI::setPlayerInfo(uint8_t size, uint8_t selected, bool force) {
 				data.size = size;
 			})
 			// clang-format on
-			// Now, user has to disconnect their controllers and don't allow continuing until done
+			// Now, user has to disconnect their controllers and don't allow
+			// continuing until done
 			while(true) {
 				wxMessageDialog removeControllersDialog(parent,
 					"Make sure you have a game open. If you have Joycons physically connected to the Switch, please remove them. Open the controller screen. If you have no controllers connected, press OK. Otherwise, open the Change Grip/Order Screen and then close it with your finger. You should see a number of Dual Joycons connect. Now, you can connect your own controllers if you would like. Do not press Change Grip/Order twice, you will have to restart both the SwiTAS sysmodule and the PC app.",
-					"Enter Change Grip/Order Screen", wxOK | wxICON_INFORMATION);
+					"Enter Change Grip/Order Screen",
+					wxOK | wxICON_INFORMATION);
 				removeControllersDialog.ShowModal();
 
 				PROCESS_NETWORK_CALLBACKS(networkInterface, RecieveFlag)
@@ -258,7 +305,8 @@ void SideUI::playerSelected(wxCommandEvent& event) {
 }
 
 void SideUI::finalTasFrameDelayChanged(wxSpinEvent& event) {
-	inputData->setFinalTasDelayForCurrentSavestateHook(runFinalTasStartingDelay->GetValue());
+	inputData->setFinalTasDelayForCurrentSavestateHook(
+		runFinalTasStartingDelay->GetValue());
 }
 
 void SideUI::setBranchInfo(uint8_t size, uint8_t selected, bool force) {
@@ -295,8 +343,11 @@ void SideUI::onFrameAdvancePressed(wxCommandEvent& event) {
 	// MUST be tethered
 	if(tethered) {
 		incrementFrameCallback();
-		inputData->runFrame(false, false, true);
-		disableAdvance();
+		if(inputData->runFrame(false, false, true)) {
+			disableAdvance();
+		} else {
+			wxLogMessage("Please add more frames in order to advance");
+		}
 	}
 }
 
@@ -319,11 +370,13 @@ void SideUI::onSavestateHookModifyPressed(wxCommandEvent& event) {
 	if(networkInterface->isConnected()) {
 		// Open create dialog but copy the properties
 		// Onto the current hook
-		SavestateSelection modifySavestateSelection(parent, mainSettings, projectHandler, false, networkInterface);
+		SavestateSelection modifySavestateSelection(
+			parent, mainSettings, projectHandler, false, networkInterface);
 		modifySavestateSelection.ShowModal();
 
 		if(modifySavestateSelection.getOperationSuccessful()) {
-			auto hook = inputData->getAllSavestateHookBlocks()[inputData->getCurrentSavestateHook()];
+			auto hook = inputData->getAllSavestateHookBlocks()
+							[inputData->getCurrentSavestateHook()];
 
 			if(hook->screenshot != nullptr) {
 				delete hook->screenshot;
@@ -334,7 +387,9 @@ void SideUI::onSavestateHookModifyPressed(wxCommandEvent& event) {
 
 			inputData->invalidateRun(0);
 
-			modifySavestateSelection.getNewScreenshot()->SaveFile(inputData->getFramebufferPathForCurrentFramebuf().GetFullPath(), wxBITMAP_TYPE_JPEG);
+			modifySavestateSelection.getNewScreenshot()->SaveFile(
+				inputData->getFramebufferPathForCurrentFramebuf().GetFullPath(),
+				wxBITMAP_TYPE_JPEG);
 
 			inputData->setSavestateHook(inputData->getCurrentSavestateHook());
 
@@ -369,11 +424,13 @@ bool SideUI::createSavestateHook() {
 	AllSavestateHookBlocks& blocks = inputData->getAllSavestateHookBlocks();
 	if(blocks.size() != 1 && blocks[0]->inputs[0]->size() != 1) {
 		// Not a new project, add the savestate hook before continuing
-		inputData->addNewSavestateHook("", HELPERS::getDefaultSavestateScreenshot());
+		inputData->addNewSavestateHook(
+			"", HELPERS::getDefaultSavestateScreenshot());
 	}
 	// Open up the savestate viewer
 	if(networkInterface->isConnected()) {
-		SavestateSelection savestateSelection(parent, mainSettings, projectHandler, false, networkInterface);
+		SavestateSelection savestateSelection(
+			parent, mainSettings, projectHandler, false, networkInterface);
 		savestateSelection.ShowModal();
 
 		if(savestateSelection.getOperationSuccessful()) {
@@ -381,12 +438,15 @@ bool SideUI::createSavestateHook() {
 				delete blocks[blocks.size() - 1]->screenshot;
 			}
 
-			blocks[blocks.size() - 1]->dHash      = savestateSelection.getNewDhash();
-			blocks[blocks.size() - 1]->screenshot = savestateSelection.getNewScreenshot();
+			blocks[blocks.size() - 1]->dHash = savestateSelection.getNewDhash();
+			blocks[blocks.size() - 1]->screenshot
+				= savestateSelection.getNewScreenshot();
 
 			runFinalTasStartingDelay->SetValue(0);
 
-			savestateSelection.getNewScreenshot()->SaveFile(inputData->getFramebufferPathForCurrentFramebuf().GetFullPath(), wxBITMAP_TYPE_JPEG);
+			savestateSelection.getNewScreenshot()->SaveFile(
+				inputData->getFramebufferPathForCurrentFramebuf().GetFullPath(),
+				wxBITMAP_TYPE_JPEG);
 
 			inputData->setSavestateHook(blocks.size() - 1);
 
@@ -407,7 +467,8 @@ bool SideUI::createSavestateHook() {
 
 bool SideUI::loadSavestateHook(int block) {
 	if(networkInterface->isConnected()) {
-		std::shared_ptr<SavestateHook> savestateHook = inputData->getAllSavestateHookBlocks()[block];
+		std::shared_ptr<SavestateHook> savestateHook
+			= inputData->getAllSavestateHookBlocks()[block];
 
 		if(savestateHook->dHash == "") {
 			// This is an empty savestate hook made without internet
@@ -417,8 +478,10 @@ bool SideUI::loadSavestateHook(int block) {
 			return true;
 		}
 
-		SavestateSelection savestateSelection(parent, mainSettings, projectHandler, true, networkInterface);
-		savestateSelection.setTargetFrame(savestateHook->screenshot, savestateHook->dHash);
+		SavestateSelection savestateSelection(
+			parent, mainSettings, projectHandler, true, networkInterface);
+		savestateSelection.setTargetFrame(
+			savestateHook->screenshot, savestateHook->dHash);
 
 		savestateSelection.ShowModal();
 
@@ -427,7 +490,8 @@ bool SideUI::loadSavestateHook(int block) {
 			inputData->setSavestateHook(block);
 			// inputData->sendPlayerNum();
 
-			runFinalTasStartingDelay->SetValue(inputData->getFinalTasDelayForCurrentSavestateHook());
+			runFinalTasStartingDelay->SetValue(
+				inputData->getFinalTasDelayForCurrentSavestateHook());
 
 			autoRunActive = false;
 
@@ -466,7 +530,8 @@ void SideUI::tether() {
 }
 
 void SideUI::onStartAutoFramePressed(wxCommandEvent& event) {
-	// autoTimer.Start(1000 / (float)autoRunFramesPerSecond->GetValue(), wxTIMER_CONTINUOUS);
+	// autoTimer.Start(1000 / (float)autoRunFramesPerSecond->GetValue(),
+	// wxTIMER_CONTINUOUS);
 	autoRunActive = true;
 	autoFrameStart->Disable();
 	sendAutoRunData();
@@ -474,11 +539,14 @@ void SideUI::onStartAutoFramePressed(wxCommandEvent& event) {
 
 void SideUI::sendAutoRunData() {
 	if(autoRunActive) {
-		TasValueToRecord chosenValue = (TasValueToRecord)valueToRecord->GetCurrentSelection();
+		TasValueToRecord chosenValue
+			= (TasValueToRecord)valueToRecord->GetCurrentSelection();
 		if(chosenValue != TasValueToRecord::NONE) {
-			inputData->sendAutoAdvance(autoRunWithFramebuffer->GetValue(), chosenValue, false);
+			inputData->sendAutoAdvance(
+				autoRunWithFramebuffer->GetValue(), chosenValue, false);
 		} else {
-			inputData->runFrame(false, false, autoRunWithFramebuffer->GetValue());
+			inputData->runFrame(
+				false, false, autoRunWithFramebuffer->GetValue());
 		}
 	}
 }
