@@ -343,11 +343,8 @@ void SideUI::onFrameAdvancePressed(wxCommandEvent& event) {
 	// MUST be tethered
 	if(tethered) {
 		incrementFrameCallback();
-		if(inputData->runFrame(false, false, true)) {
-			disableAdvance();
-		} else {
-			wxLogMessage("Please add more frames in order to advance");
-		}
+		inputData->runFrame(false, false, true);
+		disableAdvance();
 	}
 }
 

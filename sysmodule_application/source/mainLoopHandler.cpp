@@ -238,9 +238,7 @@ void MainLoop::mainLoopHandler() {
 		if(logOutputSize != 0) {
 			std::vector<uint8_t> logData
 				= getMemory(saltynxlogString, logOutputSize);
-			// Push null charactor onto the end
 			logData.push_back('\0');
-
 			char* token = strtok((char*)logData.data(), "\n");
 			while(token != NULL) {
 				LOGD << token;

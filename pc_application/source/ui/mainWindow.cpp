@@ -234,12 +234,6 @@ void MainWindow::handleNetworkQueues() {
 				file.Close();
 			}
 
-			if(dataProcessingInstance->getNumOfFramesInSavestateHook(
-				   data.savestateHookNum, data.playerIndex)
-				== data.frame) {
-				dataProcessingInstance->addFrameHere();
-			}
-
 			switch(data.valueIncluded) {
 			case TasValueToRecord::NONE:
 				break;

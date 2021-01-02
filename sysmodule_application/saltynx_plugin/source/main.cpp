@@ -439,6 +439,29 @@ void GetTouchScreenState1Touch(nn::hid::TouchScreenState1Touch* state) {
 		state);
 }
 
+void GetTouchScreenState5Touch(nn::hid::TouchScreenState5Touch* state) {
+	if(recordInputs) {
+		_ZN2nn3hid19GetTouchScreenStateILm5EEEvPNS0_16TouchScreenStateIXT_EEE(
+			state);
+
+		if(recordScreenOrKeyboard
+				== SaltyNXCommTypes::ThingToRecord::Neither_Touch_Nor_Key
+			|| recordScreenOrKeyboard == SaltyNXCommTypes::ThingToRecord::Key) {
+			// Fix state and send to game
+			fixTouchState(&touchscreenState, state, 5);
+			moveTouchBacklog(&touchscreenState, 5);
+			memcpy(state, &touchscreenState,
+				sizeof(nn::hid::TouchScreenState5Touch));
+		} else {
+			moveTouchBacklog(state, 5);
+		}
+		return;
+	}
+
+	_ZN2nn3hid19GetTouchScreenStateILm5EEEvPNS0_16TouchScreenStateIXT_EEE(
+		state);
+}
+
 void GetKeyboardState(nn::hid::KeyboardState* state) {
 	if(recordInputs) {
 		_ZN2nn3hid16GetKeyboardStateEPNS0_13KeyboardStateE(state);
@@ -736,6 +759,9 @@ int main(int argc, char* argv[]) {
 		"_ZN2nn3hid19GetTouchScreenStateILm1EEEvPNS0_16TouchScreenStateIXT_EEE",
 		(void*)&GetTouchScreenState1Touch);
 	SaltySDCore_ReplaceImport(
+		"_ZN2nn3hid19GetTouchScreenStateILm5EEEvPNS0_16TouchScreenStateIXT_EEE",
+		(void*)&GetTouchScreenState5Touch);
+	SaltySDCore_ReplaceImport(
 		"_ZN2nn3hid16GetKeyboardStateEPNS0_13KeyboardStateE",
 		(void*)&GetKeyboardState);
 	SaltySDCore_ReplaceImport(
@@ -775,6 +801,12 @@ int main(int argc, char* argv[]) {
 	SaltySDCore_ReplaceImport(
 		"_ZN2nn3hid13GetNpadStatesEPNS0_17NpadJoyRightStateEiRKj",
 		(void*)&GetNpadStates5);
+	/*
+SaltySDCore_ReplaceImport(
+	"_ZN2nn2oe18GetPerformanceModeEv", (void*)GetPerformanceMode);
+SaltySDCore_ReplaceImport(
+	"_ZN2nn2oe16GetOperationModeEv", (void*)GetOperationMode);
+	*/
 
 	addr_nvnGetProcAddress = (uint64_t)&nvnGetProcAddress;
 	addr_nvnPresentTexture = (uint64_t)&nvnPresentTexture;
@@ -782,11 +814,6 @@ int main(int argc, char* argv[]) {
 		"nvnBootstrapLoader", (void*)nvnBootstrapLoader_1);
 	SaltySDCore_ReplaceImport("eglSwapBuffers", (void*)eglSwap);
 	SaltySDCore_ReplaceImport("vkQueuePresentKHR", (void*)vulkanSwap);
-
-	SaltySDCore_ReplaceImport(
-		"_ZN2nn2oe18GetPerformanceModeEv", (void*)GetPerformanceMode);
-	SaltySDCore_ReplaceImport(
-		"_ZN2nn2oe16GetOperationModeEv", (void*)GetOperationMode);
 
 	writeToLog("Injection finished\n");
 }

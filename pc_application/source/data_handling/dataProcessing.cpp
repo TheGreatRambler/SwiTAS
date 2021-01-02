@@ -217,7 +217,7 @@ void DataProcessing::sendAutoAdvance(uint8_t includeFramebuffer,
 
 	// Actually trigger the increment
 	ADD_TO_QUEUE(SendFrameData, networkInstance, {
-		data.frame              = currentRunFrame + 1;
+		data.frame              = currentRunFrame;
 		data.savestateHookNum   = currentSavestateHook;
 		data.branchIndex        = viewingBranchIndex;
 		data.playerIndex        = viewingPlayerIndex;
@@ -633,11 +633,11 @@ bool DataProcessing::runFrame(uint8_t forAutoFrame, uint8_t updateFramebuffer,
 									->inputs[viewingBranchIndex]
 									->size();
 
-		// If possible, make current frame this frame
-		if(withinFrames) {
-			// Set to this frame
-			setCurrentFrame(currentRunFrame + 1);
+		if(!withinFrames) {
+			addFrame(currentRunFrame + 1);
 		}
+
+		setCurrentFrame(currentRunFrame + 1);
 
 		// Increment run frame
 		currentRunFrame++;
