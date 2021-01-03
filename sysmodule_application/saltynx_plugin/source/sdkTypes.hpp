@@ -384,14 +384,13 @@ namespace nn {
 
 		struct MouseState {
 			int64_t samplingNumber;
-			int64_t attributes;
+			int32_t attributes;
+			int32_t buttons;
+			int32_t deltaX;
+			int32_t deltaY;
+			int32_t wheelDelta;
 			int32_t x;
 			int32_t y;
-			int32_t velocityX;
-			int32_t velocityY;
-			int32_t scrollVelocityX;
-			int32_t scrollVelocityY;
-			int32_t buttons;
 		};
 	};
 };

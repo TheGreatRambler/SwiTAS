@@ -1,6 +1,7 @@
 #pragma once
 
-#define SET_BIT(number, bit, loc) (number) ^= (-(unsigned long)(bit) ^ (number)) & (1UL << (loc))
+#define SET_BIT(number, bit, loc)                                              \
+	(number) ^= (-(unsigned long)(bit) ^ (number)) & (1UL << (loc))
 #define GET_BIT(number, loc) ((number) >> (loc)) & 1U
 #define IS_KEYBOARD_HELD(data, key) data[key / 32] & (1ULL << (key % 32));
 // clang-format off
@@ -102,7 +103,8 @@ struct ControllerData : public zpp::serializer::polymorphic {
 	uint8_t frameState       = 0;
 
 	friend zpp::serializer::access;
-	template <typename Archive, typename Self> static void serialize(Archive& archive, Self& self) {
+	template <typename Archive, typename Self>
+	static void serialize(Archive& archive, Self& self) {
 		// clang-format off
 			archive(self.buttons,
 				self.LS_X, self.LS_Y, self.RS_X, self.RS_Y,
@@ -137,19 +139,19 @@ struct TouchAndKeyboardData : public zpp::serializer::polymorphic {
 	int32_t keyboardKeys[8]   = { 0 };
 	int32_t mouseX            = 0;
 	int32_t mouseY            = 0;
-	int32_t mouseVelocityX    = 0;
-	int32_t mouseVelocityY    = 0;
-	int32_t scrollVelocityX   = 0;
-	int32_t scrollVelocityY   = 0;
+	int32_t mouseDeltaX       = 0;
+	int32_t mouseDeltaY       = 0;
+	int32_t mouseWheelDelta   = 0;
 	int32_t mouseButtons      = 0;
 
 	friend zpp::serializer::access;
-	template <typename Archive, typename Self> static void serialize(Archive& archive, Self& self) {
+	template <typename Archive, typename Self>
+	static void serialize(Archive& archive, Self& self) {
 		// clang-format off
 			archive(self.touchX1, self.touchY1, self.touchX2, self.touchY2,
 				self.numberOfTouches, self.keyboardModifiers,
-				self.keyboardKeys, self.mouseX, self.mouseY, self.mouseVelocityX,
-				self.mouseVelocityY, self.scrollVelocityX, self.scrollVelocityY,
+				self.keyboardKeys, self.mouseX, self.mouseY, self.mouseDeltaX,
+				self.mouseDeltaY, self.mouseWheelDelta,
 				self.mouseButtons);
 		// clang-format on
 	}
@@ -161,15 +163,16 @@ struct TouchAndKeyboardData : public zpp::serializer::polymorphic {
 struct GameMemoryInfo {
 	uint64_t addr;            ///< Base address.
 	uint64_t size;            ///< Size.
-	uint32_t type;            ///< Memory type (see lower 8 bits of \ref MemoryState).
-	uint32_t attr;            ///< Memory attributes (see \ref MemoryAttribute).
-	uint32_t perm;            ///< Memory permissions (see \ref Permission).
-	uint32_t device_refcount; ///< Device reference count.
-	uint32_t ipc_refcount;    ///< IPC reference count.
-	uint32_t padding;         ///< Padding.
+	uint32_t type;            ///< Memory type (see lower 8 bits of \ref
+MemoryState). uint32_t attr;            ///< Memory attributes (see \ref
+MemoryAttribute). uint32_t perm;            ///< Memory permissions (see \ref
+Permission). uint32_t device_refcount; ///< Device reference count. uint32_t
+ipc_refcount;    ///< IPC reference count. uint32_t padding;         ///<
+Padding.
 
 	friend zpp::serializer::access;
-	template <typename Archive, typename Self> static void serialize(Archive& archive, Self& self) {
+	template <typename Archive, typename Self> static void serialize(Archive&
+archive, Self& self) {
 		// clang-format off
 			archive(self.addr, self.size, self.type,
 				self.attr, self.perm, self.device_refcount,

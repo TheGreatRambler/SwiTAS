@@ -1691,10 +1691,9 @@ void MainLoop::getKeyboardMouseState(TouchAndKeyboardData* state) {
 	state->keyboardModifiers = keyboardSensorState.modifiers;
 	state->mouseX            = mouseSensorState.x;
 	state->mouseY            = mouseSensorState.y;
-	state->mouseVelocityX    = mouseSensorState.velocityX;
-	state->mouseVelocityY    = mouseSensorState.velocityY;
-	state->scrollVelocityX   = mouseSensorState.scrollVelocityX;
-	state->scrollVelocityY   = mouseSensorState.scrollVelocityY;
+	state->mouseDeltaX       = mouseSensorState.deltaX;
+	state->mouseDeltaY       = mouseSensorState.deltaY;
+	state->mouseWheelDelta   = mouseSensorState.wheelDelta;
 	state->mouseButtons      = mouseSensorState.buttons;
 #endif
 
@@ -1726,14 +1725,13 @@ void MainLoop::setKeyboardMouseState(TouchAndKeyboardData* state) {
 
 	memcpy(keyboardSensorState.keys, state->keyboardKeys,
 		sizeof(state->keyboardKeys));
-	keyboardSensorState.modifiers    = state->keyboardModifiers;
-	mouseSensorState.x               = state->mouseX;
-	mouseSensorState.y               = state->mouseY;
-	mouseSensorState.velocityX       = state->mouseVelocityX;
-	mouseSensorState.velocityY       = state->mouseVelocityY;
-	mouseSensorState.scrollVelocityX = state->scrollVelocityX;
-	mouseSensorState.scrollVelocityY = state->scrollVelocityY;
-	mouseSensorState.buttons         = state->mouseButtons;
+	keyboardSensorState.modifiers = state->keyboardModifiers;
+	mouseSensorState.x            = state->mouseX;
+	mouseSensorState.y            = state->mouseY;
+	mouseSensorState.deltaX       = state->mouseDeltaX;
+	mouseSensorState.deltaY       = state->mouseDeltaY;
+	mouseSensorState.wheelDelta   = state->mouseWheelDelta;
+	mouseSensorState.buttons      = state->mouseButtons;
 
 	setMemoryType(saltynxkeyboardState, keyboardSensorState);
 	setMemoryType(saltynxmouseState, mouseSensorState);

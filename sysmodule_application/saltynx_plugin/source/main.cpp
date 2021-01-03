@@ -801,12 +801,10 @@ int main(int argc, char* argv[]) {
 	SaltySDCore_ReplaceImport(
 		"_ZN2nn3hid13GetNpadStatesEPNS0_17NpadJoyRightStateEiRKj",
 		(void*)&GetNpadStates5);
-	/*
-SaltySDCore_ReplaceImport(
-	"_ZN2nn2oe18GetPerformanceModeEv", (void*)GetPerformanceMode);
-SaltySDCore_ReplaceImport(
-	"_ZN2nn2oe16GetOperationModeEv", (void*)GetOperationMode);
-	*/
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn2oe18GetPerformanceModeEv", (void*)GetPerformanceMode);
+	SaltySDCore_ReplaceImport(
+		"_ZN2nn2oe16GetOperationModeEv", (void*)GetOperationMode);
 
 	addr_nvnGetProcAddress = (uint64_t)&nvnGetProcAddress;
 	addr_nvnPresentTexture = (uint64_t)&nvnPresentTexture;

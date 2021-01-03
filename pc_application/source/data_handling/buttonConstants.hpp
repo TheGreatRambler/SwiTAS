@@ -58,7 +58,9 @@ struct Savestate {
 	uint32_t frame;
 };
 
-typedef std::vector<std::shared_ptr<std::vector<std::shared_ptr<ControllerData>>>> SavestateHookBlock;
+typedef std::vector<
+	std::shared_ptr<std::vector<std::shared_ptr<ControllerData>>>>
+	SavestateHookBlock;
 struct SavestateHook {
 	std::string dHash;
 	wxBitmap* screenshot;
@@ -116,8 +118,7 @@ enum ExtraValues : uint8_t {
 	TOUCH_Y_2,
 	MOUSE_X,
 	MOUSE_Y,
-	MOUSE_VELOCITY_X,
-	MOUSE_VELOCITY_Y,
-	SCROLL_VELOCITY_X,
-	SCROLL_VELOCITY_Y,
+	MOUSE_DELTA_X,
+	MOUSE_DELTA_Y,
+	MOUSE_SCROLL_DELTA,
 };

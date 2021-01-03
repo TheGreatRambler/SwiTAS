@@ -1547,17 +1547,14 @@ void DataProcessing::setExtraValue(
 	case MOUSE_Y:
 		frameData->mouseY = value;
 		break;
-	case MOUSE_VELOCITY_X:
-		frameData->mouseVelocityX = value;
+	case MOUSE_DELTA_X:
+		frameData->mouseDeltaX = value;
 		break;
-	case MOUSE_VELOCITY_Y:
-		frameData->mouseVelocityY = value;
+	case MOUSE_DELTA_Y:
+		frameData->mouseDeltaY = value;
 		break;
-	case SCROLL_VELOCITY_X:
-		frameData->scrollVelocityX = value;
-		break;
-	case SCROLL_VELOCITY_Y:
-		frameData->scrollVelocityY = value;
+	case MOUSE_SCROLL_DELTA:
+		frameData->mouseWheelDelta = value;
 		break;
 	}
 
@@ -1589,17 +1586,14 @@ int32_t DataProcessing::getExtraValue(
 	case MOUSE_Y:
 		return frameData->mouseY;
 		break;
-	case MOUSE_VELOCITY_X:
-		return frameData->mouseVelocityX;
+	case MOUSE_DELTA_X:
+		return frameData->mouseDeltaX;
 		break;
-	case MOUSE_VELOCITY_Y:
-		return frameData->mouseVelocityY;
+	case MOUSE_DELTA_Y:
+		return frameData->mouseDeltaY;
 		break;
-	case SCROLL_VELOCITY_X:
-		return frameData->scrollVelocityX;
-		break;
-	case SCROLL_VELOCITY_Y:
-		return frameData->scrollVelocityY;
+	case MOUSE_SCROLL_DELTA:
+		return frameData->mouseWheelDelta;
 		break;
 	}
 	return 0;
@@ -1627,21 +1621,18 @@ int32_t DataProcessing::getExtraValueSpecific(FrameNum frame,
 	case MOUSE_Y:
 		return getControllerDataExtra(savestateHookNum, branch, frame)->mouseY;
 		break;
-	case MOUSE_VELOCITY_X:
+	case MOUSE_DELTA_X:
 		return getControllerDataExtra(savestateHookNum, branch, frame)
-			->mouseVelocityX;
+			->mouseDeltaX;
 		break;
-	case MOUSE_VELOCITY_Y:
+	case MOUSE_DELTA_Y:
 		return getControllerDataExtra(savestateHookNum, branch, frame)
-			->mouseVelocityY;
+			->mouseDeltaY;
 		break;
-	case SCROLL_VELOCITY_X:
+	case MOUSE_SCROLL_DELTA:
 		return getControllerDataExtra(savestateHookNum, branch, frame)
-			->scrollVelocityX;
+			->mouseWheelDelta;
 		break;
-	case SCROLL_VELOCITY_Y:
-		return getControllerDataExtra(savestateHookNum, branch, frame)
-			->scrollVelocityY;
 		break;
 	}
 	return 0;
