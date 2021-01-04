@@ -85,6 +85,9 @@ SaltyNXCommTypes::PerformanceType performanceMode
 // Number of controllers the game should know exists
 int32_t numberOfTASControllers = -1;
 
+// While this is true, block for controller input
+uint8_t blockForControllerInput = false;
+
 void writeToLog(const char* str) {
 	uint16_t stringLength = strlen(str);
 	if(logStringIndex + stringLength < sizeof(logString)) {
@@ -262,6 +265,9 @@ int32_t GetSixAxisSensorHandles2(nn::hid::SixAxisSensorHandle* handles,
 void GetSixAxisSensorState(nn::hid::SixAxisSensorState* state,
 	const nn::hid::SixAxisSensorHandle& handle) {
 	if(recordInputs) {
+		while(blockForControllerInput)
+			;
+
 		for(int32_t i = 0; i < 8; i++) {
 			if(sixAxisHandlesLeftJoycon[i] == handle) {
 				_ZN2nn3hid21GetSixAxisSensorStateEPNS0_18SixAxisSensorStateERKNS0_19SixAxisSensorHandleE(
@@ -418,6 +424,9 @@ int32_t IsSixAxisSensorAtRest(const nn::hid::SixAxisSensorHandle& param_1) {
 
 void GetTouchScreenState1Touch(nn::hid::TouchScreenState1Touch* state) {
 	if(recordInputs) {
+		while(blockForControllerInput)
+			;
+
 		_ZN2nn3hid19GetTouchScreenStateILm1EEEvPNS0_16TouchScreenStateIXT_EEE(
 			state);
 
@@ -441,6 +450,9 @@ void GetTouchScreenState1Touch(nn::hid::TouchScreenState1Touch* state) {
 
 void GetTouchScreenState5Touch(nn::hid::TouchScreenState5Touch* state) {
 	if(recordInputs) {
+		while(blockForControllerInput)
+			;
+
 		_ZN2nn3hid19GetTouchScreenStateILm5EEEvPNS0_16TouchScreenStateIXT_EEE(
 			state);
 
@@ -464,6 +476,9 @@ void GetTouchScreenState5Touch(nn::hid::TouchScreenState5Touch* state) {
 
 void GetKeyboardState(nn::hid::KeyboardState* state) {
 	if(recordInputs) {
+		while(blockForControllerInput)
+			;
+
 		_ZN2nn3hid16GetKeyboardStateEPNS0_13KeyboardStateE(state);
 
 		if(recordScreenOrKeyboard
@@ -500,6 +515,9 @@ int32_t GetKeyboardStates(nn::hid::KeyboardState* outStates, int32_t count) {
 
 void GetMouseState(nn::hid::MouseState* state) {
 	if(recordInputs) {
+		while(blockForControllerInput)
+			;
+
 		_ZN2nn3hid13GetMouseStateEPNS0_10MouseStateE(state);
 
 		if(recordScreenOrKeyboard
@@ -533,30 +551,50 @@ int32_t GetMouseStates(nn::hid::MouseState* outStates, int32_t count) {
 }
 
 void GetNpadState1(void* state, const nn::hid::NpadIdType& id) {
+	if(recordInputs)
+		while(blockForControllerInput)
+			;
+
 	if(numberOfTASControllers == -1 || (int32_t)id < numberOfTASControllers) {
 		_ZN2nn3hid12GetNpadStateEPNS0_16NpadFullKeyStateERKj(state, id);
 	}
 }
 
 void GetNpadState2(void* state, const nn::hid::NpadIdType& id) {
+	if(recordInputs)
+		while(blockForControllerInput)
+			;
+
 	if(numberOfTASControllers == -1 || (int32_t)id < numberOfTASControllers) {
 		_ZN2nn3hid12GetNpadStateEPNS0_17NpadHandheldStateERKj(state, id);
 	}
 }
 
 void GetNpadState3(void* state, const nn::hid::NpadIdType& id) {
+	if(recordInputs)
+		while(blockForControllerInput)
+			;
+
 	if(numberOfTASControllers == -1 || (int32_t)id < numberOfTASControllers) {
 		_ZN2nn3hid12GetNpadStateEPNS0_16NpadJoyDualStateERKj(state, id);
 	}
 }
 
 void GetNpadState4(void* state, const nn::hid::NpadIdType& id) {
+	if(recordInputs)
+		while(blockForControllerInput)
+			;
+
 	if(numberOfTASControllers == -1 || (int32_t)id < numberOfTASControllers) {
 		_ZN2nn3hid12GetNpadStateEPNS0_16NpadJoyLeftStateERKj(state, id);
 	}
 }
 
 void GetNpadState5(void* state, const nn::hid::NpadIdType& id) {
+	if(recordInputs)
+		while(blockForControllerInput)
+			;
+
 	if(numberOfTASControllers == -1 || (int32_t)id < numberOfTASControllers) {
 		_ZN2nn3hid12GetNpadStateEPNS0_17NpadJoyRightStateERKj(state, id);
 	}
@@ -564,6 +602,10 @@ void GetNpadState5(void* state, const nn::hid::NpadIdType& id) {
 
 uint64_t GetNpadStates1(
 	void* state, int32_t unk, const nn::hid::NpadIdType& id) {
+	if(recordInputs)
+		while(blockForControllerInput)
+			;
+
 	if(numberOfTASControllers == -1 || (int32_t)id < numberOfTASControllers) {
 		return _ZN2nn3hid13GetNpadStatesEPNS0_16NpadFullKeyStateEiRKj(
 			state, unk, id);
@@ -573,6 +615,10 @@ uint64_t GetNpadStates1(
 
 uint64_t GetNpadStates2(
 	void* state, int32_t unk, const nn::hid::NpadIdType& id) {
+	if(recordInputs)
+		while(blockForControllerInput)
+			;
+
 	if(numberOfTASControllers == -1 || (int32_t)id < numberOfTASControllers) {
 		return _ZN2nn3hid13GetNpadStatesEPNS0_17NpadHandheldStateEiRKj(
 			state, unk, id);
@@ -582,6 +628,10 @@ uint64_t GetNpadStates2(
 
 uint64_t GetNpadStates3(
 	void* state, int32_t unk, const nn::hid::NpadIdType& id) {
+	if(recordInputs)
+		while(blockForControllerInput)
+			;
+
 	if(numberOfTASControllers == -1 || (int32_t)id < numberOfTASControllers) {
 		return _ZN2nn3hid13GetNpadStatesEPNS0_16NpadJoyDualStateEiRKj(
 			state, unk, id);
@@ -591,6 +641,10 @@ uint64_t GetNpadStates3(
 
 uint64_t GetNpadStates4(
 	void* state, int32_t unk, const nn::hid::NpadIdType& id) {
+	if(recordInputs)
+		while(blockForControllerInput)
+			;
+
 	if(numberOfTASControllers == -1 || (int32_t)id < numberOfTASControllers) {
 		return _ZN2nn3hid13GetNpadStatesEPNS0_16NpadJoyLeftStateEiRKj(
 			state, unk, id);
@@ -600,6 +654,10 @@ uint64_t GetNpadStates4(
 
 uint64_t GetNpadStates5(
 	void* state, int32_t unk, const nn::hid::NpadIdType& id) {
+	if(recordInputs)
+		while(blockForControllerInput)
+			;
+
 	if(numberOfTASControllers == -1 || (int32_t)id < numberOfTASControllers) {
 		return _ZN2nn3hid13GetNpadStatesEPNS0_17NpadJoyRightStateEiRKj(
 			state, unk, id);
@@ -714,6 +772,9 @@ int main(int argc, char* argv[]) {
 
 	// Number of TAS controllers right now
 	writePointerToFile(&numberOfTASControllers, offsets);
+
+	// Flag to block for input
+	writePointerToFile(&blockForControllerInput, offsets);
 
 	SaltySDCore_fclose(offsets);
 

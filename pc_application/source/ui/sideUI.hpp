@@ -27,7 +27,8 @@ private:
 	wxRect firstRect;
 
 	void rangeUpdated(FrameNum first, FrameNum last);
-	void currentFrameUpdated(FrameNum frame, FrameNum runFrame, FrameNum imageFrame);
+	void currentFrameUpdated(
+		FrameNum frame, FrameNum runFrame, FrameNum imageFrame);
 
 public:
 	FrameCanvas(wxFrame* parent, DataProcessing* dataProcessing);
@@ -109,7 +110,11 @@ private:
 	void onEndAutoFramePressed(wxCommandEvent& event);
 
 public:
-	SideUI(wxFrame* parentFrame, rapidjson::Document* settings, std::shared_ptr<ProjectHandler> projHandler, wxBoxSizer* sizer, DataProcessing* input, std::shared_ptr<CommunicateWithNetwork> networkImp, std::function<void()> runFrameCallback);
+	SideUI(wxFrame* parentFrame, rapidjson::Document* settings,
+		std::shared_ptr<ProjectHandler> projHandler, wxBoxSizer* sizer,
+		DataProcessing* input,
+		std::shared_ptr<CommunicateWithNetwork> networkImp,
+		std::function<void()> runFrameCallback);
 
 	void onIdle(wxIdleEvent& event);
 

@@ -113,6 +113,7 @@ private:
 	uint64_t saltynxmouseState                     = 0;
 	uint64_t saltynxmouseStateBacklog              = 0;
 	uint64_t saltynxnumberOfTASControllers         = 0;
+	uint64_t saltynxblockForControllerInput        = 0;
 #endif
 
 	uint64_t lastNanoseconds = 0;
@@ -179,7 +180,7 @@ private:
 		})
 #endif
 #ifdef YUZU
-		yuzu_rom_readbytes(yuzuInstance, addr, &item, sizeof(T));
+		yuzu_memory_readbyterange(yuzuInstance, addr, &item, sizeof(T));
 #endif
 		return item;
 	}
@@ -192,7 +193,7 @@ private:
 		})
 #endif
 #ifdef YUZU
-		yuzu_rom_writebytes(yuzuInstance, addr, &item, sizeof(T));
+		yuzu_memory_writebyterange(yuzuInstance, addr, &item, sizeof(T));
 #endif
 	}
 

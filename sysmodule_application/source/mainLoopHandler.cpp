@@ -126,6 +126,8 @@ void MainLoop::mainLoopHandler() {
 						offsets);
 					fread(&saltynxnumberOfTASControllers, sizeof(uint64_t), 1,
 						offsets);
+					fread(&saltynxblockForControllerInput, sizeof(uint64_t), 1,
+						offsets);
 
 					fclose(offsets);
 
@@ -348,7 +350,7 @@ void MainLoop::handleNetworkUpdates() {
 			// User able to unpause it
 			if(applicationOpened && internetConnected) {
 				pauseApp(false, true, TasValueToRecord::ALL, 0, 0, 0, 0);
-				lastNanoseconds = 0;
+				runSingleFrame(false, true, TasValueToRecord::ALL, 0, 0, 0, 0);
 			}
 		} else if(data.actFlag == SendInfo::UNPAUSE_DEBUG) {
 			if(applicationOpened) {
@@ -369,8 +371,8 @@ void MainLoop::handleNetworkUpdates() {
 		} else if(data.actFlag == SendInfo::START_TAS_MODE) {
 			// pauseApp(false, true, false, 0, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::PAUSE) {
-			// waitForVsync();
 			pauseApp(false, true, TasValueToRecord::ALL, 0, 0, 0, 0);
+			runSingleFrame(false, true, TasValueToRecord::ALL, 0, 0, 0, 0);
 		} else if(data.actFlag == SendInfo::UNPAUSE) {
 			clearEveryController();
 			unpauseApp();
@@ -755,10 +757,22 @@ void MainLoop::runSingleFrame(uint8_t linkedWithFrameAdvance,
 
 		unpauseApp();
 
+#ifdef __SWITCH__
+		if(saltynxblockForControllerInput != 0) {
+			setMemoryType<uint8_t>(saltynxblockForControllerInput, true);
+		}
+#endif
+
 		waitForVsync();
 
 		pauseApp(linkedWithFrameAdvance, includeFramebuffer, typeToRecord,
 			frame, savestateHookNum, branchIndex, playerIndex);
+
+#ifdef __SWITCH__
+		if(saltynxblockForControllerInput != 0) {
+			setMemoryType<uint8_t>(saltynxblockForControllerInput, false);
+		}
+#endif
 
 #ifdef YUZU
 		// yuzu_gui_popup(yuzuInstance, "TAS Tool", "Frame advance finished",

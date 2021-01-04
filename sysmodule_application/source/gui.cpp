@@ -351,7 +351,7 @@ Gui::Gui(ViDisplay* disp) {
 #ifdef __SWITCH__
 		rc        = capsscCaptureJpegScreenShot(&outSize, savedJpegFramebuffer,
             JPEG_BUF_SIZE, ViLayerStack::ViLayerStack_ApplicationForDebug,
-            100000000);
+            INT64_MAX);
 		succeeded = R_SUCCEEDED(rc);
 
 		if(succeeded) {

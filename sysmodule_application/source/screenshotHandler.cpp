@@ -2,17 +2,20 @@
 
 ScreenshotHandler::ScreenshotHandler() { }
 
-void ScreenshotHandler::writeFramebuffer(std::vector<uint8_t>& buf, std::string& dhash) {
+void ScreenshotHandler::writeFramebuffer(
+	std::vector<uint8_t>& buf, std::string& dhash) {
 	buf.resize(JPEG_BUF_SIZE);
 	uint64_t outSize;
 	uint8_t succeeded = true;
 
 #ifdef __SWITCH__
-	rc        = capsscCaptureJpegScreenShot(&outSize, buf.data(), JPEG_BUF_SIZE, ViLayerStack::ViLayerStack_ApplicationForDebug, INT64_MAX);
+	rc        = capsscCaptureJpegScreenShot(&outSize, buf.data(), JPEG_BUF_SIZE,
+        ViLayerStack::ViLayerStack_ApplicationForDebug, INT64_MAX);
 	succeeded = R_SUCCEEDED(rc);
 #endif
 #ifdef YUZU
-	uint8_t* jpeg = yuzu_gui_savescreenshotmemory(yuzuInstance, &outSize, "JPEG");
+	uint8_t* jpeg
+		= yuzu_gui_savescreenshotmemory(yuzuInstance, &outSize, "JPEG");
 	memcpy(buf.data(), jpeg, outSize);
 	yuzu_meta_free(jpeg);
 	succeeded = true;
@@ -25,7 +28,8 @@ void ScreenshotHandler::writeFramebuffer(std::vector<uint8_t>& buf, std::string&
 	/*
 
 #ifdef __SWITCH__
-	capsscOpenRawScreenShotReadStream(&outSize, &outSize, &outSize, ViLayerStack::ViLayerStack_ApplicationForDebug, INT64_MAX);
+	capsscOpenRawScreenShotReadStream(&outSize, &outSize, &outSize,
+ViLayerStack::ViLayerStack_ApplicationForDebug, INT64_MAX);
 
 	const int dhashChunkWidth  = (1280 / dhashWidth);
 	const int dhashChunkHeight = (720 / dhashHeight);
@@ -45,8 +49,9 @@ void ScreenshotHandler::writeFramebuffer(std::vector<uint8_t>& buf, std::string&
 
 			for(uint8_t subRow = 0; subRow < dhashChunkHeight; subRow++) {
 				// Only read the RGB portions
-				uint64_t offset = (y * dhashChunkHeight) * (1280 * 4) + subRow * (1280 * 4) + (x * dhashChunkWidth * 4);
-				readFullScreenshotStream(tempPixelBuf, sizeof(tempPixelBuf), offset);
+				uint64_t offset = (y * dhashChunkHeight) * (1280 * 4) + subRow *
+(1280 * 4) + (x * dhashChunkWidth * 4); readFullScreenshotStream(tempPixelBuf,
+sizeof(tempPixelBuf), offset);
 
 				for(uint8_t i = 0; i < dhashChunkWidth; i++) {
 					allPixelsCombined += tempPixelBuf[i * 4];
@@ -55,8 +60,8 @@ void ScreenshotHandler::writeFramebuffer(std::vector<uint8_t>& buf, std::string&
 				}
 			}
 
-			double average = (double)allPixelsCombined / (dhashChunkHeight * (dhashChunkWidth * 3));
-			if(!haveSetRightPixel) {
+			double average = (double)allPixelsCombined / (dhashChunkHeight *
+(dhashChunkWidth * 3)); if(!haveSetRightPixel) {
 				// First pixel. set left
 				leftPixel         = average;
 				haveSetRightPixel = true;
@@ -83,12 +88,14 @@ void ScreenshotHandler::writeFramebuffer(std::vector<uint8_t>& buf, std::string&
 }
 
 #ifdef __SWITCH__
-void ScreenshotHandler::readFullScreenshotStream(uint8_t* buf, uint64_t size, uint64_t offset) {
+void ScreenshotHandler::readFullScreenshotStream(
+	uint8_t* buf, uint64_t size, uint64_t offset) {
 	uint64_t sizeActuallyRead = 0;
 
 	while(sizeActuallyRead != size) {
 		uint64_t bytesRead;
-		capsscReadRawScreenShotReadStream(&bytesRead, &buf[sizeActuallyRead], size - sizeActuallyRead, offset + sizeActuallyRead);
+		capsscReadRawScreenShotReadStream(&bytesRead, &buf[sizeActuallyRead],
+			size - sizeActuallyRead, offset + sizeActuallyRead);
 		sizeActuallyRead += bytesRead;
 	}
 }

@@ -119,7 +119,8 @@ private:
 	void onCommandDone(wxProcessEvent& event);
 
 	void printFfms2Error() {
-		consoleLog->AppendText(wxString::Format("FFMS2 error: %s\n", wxString(ffms2Errinfo.Buffer)));
+		consoleLog->AppendText(wxString::Format(
+			"FFMS2 error: %s\n", wxString(ffms2Errinfo.Buffer)));
 	}
 
 	void indexVideo();
@@ -149,7 +150,11 @@ private:
 	}
 
 public:
-	VideoComparisonViewer(wxFrame* parent, std::function<void(VideoComparisonViewer*)> callback, rapidjson::Document* settings, std::vector<std::shared_ptr<VideoEntry>>& entries, wxString projectDirectory);
+	VideoComparisonViewer(wxFrame* parent,
+		std::function<void(VideoComparisonViewer*)> callback,
+		rapidjson::Document* settings,
+		std::vector<std::shared_ptr<VideoEntry>>& entries,
+		wxString projectDirectory);
 
 	// Called when running a frame from the list thing
 	void seekRelative(int relativeFrame);
