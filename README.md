@@ -1,4 +1,6 @@
 # SwiTAS
+
+# This toolkit does not work on the most recent versions of Switch homebrew, go to alternatives like [tas-script](https://github.com/hamhub7/tas-script)
 A TAS toolkit for the Nintendo Switch. Usuable via hardware, homebrew and emulator. Join [the Discord](https://discord.gg/3zDmqpQ)!
 
 # [RELEASES HERE](https://github.com/TheGreatRambler/SwiTAS/releases)
